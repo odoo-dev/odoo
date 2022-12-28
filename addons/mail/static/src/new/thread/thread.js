@@ -2,7 +2,12 @@
 
 import { Component, onMounted, onWillStart, onWillUpdateProps, useRef } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
-import { useAutoScroll, useScrollSnapshot, useVisible } from "@mail/new/utils/hooks";
+import {
+    useAutoScroll,
+    useScrollPosition,
+    useScrollSnapshot,
+    useVisible,
+} from "@mail/new/utils/hooks";
 import { Message } from "./message";
 
 import { Transition } from "@web/core/transition";
@@ -24,17 +29,24 @@ export class Thread extends Component {
     setup() {
         this.messaging = useMessaging();
         if (!this.env.inChatter) {
-            useAutoScroll(
-                "messages",
-                () =>
-                    !this.props.messageHighlight ||
-                    !this.props.messageHighlight.highlightedMessageId
-            );
+            useAutoScroll("messages", () => {
+                if (
+                    this.props.messageHighlight &&
+                    this.props.messageHighlight.highlightedMessageId
+                ) {
+                    return false;
+                }
+                if (this.thread.scrollPosition.isSaved) {
+                    return false;
+                }
+                return true;
+            });
         }
         this.messagesRef = useRef("messages");
         this.pendingLoadMore = false;
         this.loadMoreState = useVisible("load-more", () => this.loadMore());
         this.oldestNonTransientMessageId = null;
+        this.scrollPosition = useScrollPosition("messages", this.thread.scrollPosition, "bottom");
         useScrollSnapshot("messages", {
             onWillPatch: () => {
                 return {
@@ -59,6 +71,7 @@ export class Thread extends Component {
         onMounted(() => {
             this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
             this.loadMore();
+            this.scrollPosition.restore();
         });
         onWillStart(() => this.requestMessages(this.props.localId));
         onWillUpdateProps((nextProps) => this.requestMessages(nextProps.localId));

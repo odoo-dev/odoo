@@ -81,7 +81,7 @@
             <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="placeholder" dropzoneRef="rootRef"/>
             <hr/>
         </t>
-        <div class="overflow-auto">
+        <div class="o-mail-chatter-scrollable overflow-auto" t-ref="scrollable">
             <t t-if="props.hasActivity and activities.length">
                 <t t-call="mail.activity_list"/>
             </t>

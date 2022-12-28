@@ -389,6 +389,59 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
         moveCursor(position) {
             model.start = model.end = position;
             ref.el.selectionStart = ref.el.selectionEnd = position;
-        }
+        },
     };
+}
+
+/**
+ * @param {string} refName
+ * @param {ScrollPosition} [model] Model to store saved position.
+ * @param {'bottom' | 'top'} [clearOn] Whether scroll
+ * position should be cleared when reaching bottom or top.
+ */
+export function useScrollPosition(refName, model, clearOn) {
+    const ref = useRef(refName);
+    const self = {
+        model,
+        restore() {
+            if (!self.model) {
+                return;
+            }
+            ref.el?.scrollTo({
+                left: self.model.left,
+                top: self.model.top,
+            });
+        },
+    };
+    function isScrolledToBottom() {
+        if (!ref.el) {
+            return false;
+        }
+        return Math.abs(ref.el.scrollTop + ref.el.clientHeight - ref.el.scrollHeight) < 1;
+    }
+
+    function onScrolled() {
+        if (!self.model) {
+            return;
+        }
+        if (
+            (clearOn === "bottom" && isScrolledToBottom()) ||
+            (clearOn === "top" && ref.el.scrollTop === 0)
+        ) {
+            return self.model.clear();
+        }
+        Object.assign(self.model, {
+            top: ref.el.scrollTop,
+            left: ref.el.scrollLeft,
+        });
+    }
+
+    onMounted(() => {
+        ref.el.addEventListener("scroll", onScrolled);
+    });
+
+    onWillUnmount(() => {
+        ref.el.removeEventListener("scroll", onScrolled);
+    });
+    return self;
 }

@@ -2,7 +2,11 @@
 
 import {
     afterNextRender,
+    click,
     dragenterFiles,
+    insertText,
+    isScrolledTo,
+    isScrolledToBottom,
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
@@ -30,7 +34,7 @@ QUnit.test("dragover files on thread with composer", async function (assert) {
         },
     });
     await openDiscuss();
-    await afterNextRender(() => dragenterFiles(document.querySelector(".o-mail-thread")));
+    await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-thread")));
     assert.containsOnce(target, ".o-dropzone");
 });
 
@@ -84,7 +88,7 @@ QUnit.test(
         assert.containsOnce(target, ".o-mail-message");
         assert.containsOnce(target, ".o-mail-message-subject");
         assert.strictEqual(
-            document.querySelector(".o-mail-message-subject").textContent,
+            target.querySelector(".o-mail-message-subject").textContent,
             "Subject: Salutations, voyageur"
         );
     }
@@ -133,7 +137,7 @@ QUnit.test("auto-scroll to bottom of thread on load", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsN(document.body, ".o-mail-message", 25);
+    assert.containsN(target, ".o-mail-message", 25);
     const $thread = $(target).find(".o-mail-thread");
     assert.strictEqual($thread[0].scrollTop, $thread[0].scrollHeight - $thread[0].clientHeight); // FIXME UI scaling might mess with this assertion
 });
@@ -181,3 +185,71 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-thread-date-separator");
     }
 );
+
+QUnit.test(
+    "scroll position is kept when navigating from one channel to another",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId_1 = pyEnv["mail.channel"].create({ name: "channel-1" });
+        const channelId_2 = pyEnv["mail.channel"].create({ name: "channel-2" });
+        // Fill both channels with random messages in order for the scrollbar to
+        // appear.
+        pyEnv["mail.message"].create(
+            Array(40)
+                .fill(0)
+                .map((_, index) => ({
+                    body: "Non Empty Body ".repeat(25),
+                    message_type: "comment",
+                    model: "mail.channel",
+                    res_id: index & 1 ? channelId_1 : channelId_2,
+                }))
+        );
+        const { openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId_1}`,
+                },
+            },
+        });
+        await openDiscuss();
+        const scrolltop_1 = target.querySelector(".o-mail-thread").scrollHeight / 2;
+        target.querySelector(".o-mail-thread").scrollTo({ top: scrolltop_1 });
+        await click(".o-mail-category-item:contains(channel-2)");
+        const scrolltop_2 = target.querySelector(".o-mail-thread").scrollHeight / 3;
+        target.querySelector(".o-mail-thread").scrollTo({ top: scrolltop_2 });
+        await click(".o-mail-category-item:contains(channel-1)");
+        assert.ok(isScrolledTo(target.querySelector(".o-mail-thread"), scrolltop_1));
+
+        await click(".o-mail-category-item:contains(channel-2)");
+        assert.ok(isScrolledTo(target.querySelector(".o-mail-thread"), scrolltop_2));
+    }
+);
+
+QUnit.test("thread is still scrolling after scrolling up then to bottom", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "channel-1" });
+    pyEnv["mail.message"].create(
+        Array(20)
+            .fill(0)
+            .map(() => ({
+                body: "Non Empty Body ".repeat(25),
+                message_type: "comment",
+                model: "mail.channel",
+                res_id: channelId,
+            }))
+    );
+    const { openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: `mail.channel_${channelId}`,
+            },
+        },
+    });
+    await openDiscuss();
+    const thread = target.querySelector(".o-mail-thread");
+    thread.scrollTo({ top: thread.scrollHeight / 2 });
+    thread.scrollTo({ top: thread.scrollHeight });
+    await insertText(".o-mail-composer-textarea", "123");
+    await click(".o-mail-composer-send-button");
+    assert.ok(isScrolledToBottom(thread));
+});
