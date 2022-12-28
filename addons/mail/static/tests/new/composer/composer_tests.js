@@ -4,6 +4,9 @@ import { makeDeferred } from "@mail/utils/deferred";
 import {
     afterNextRender,
     click,
+    createFile,
+    dragenterFiles,
+    dropFiles,
     insertText,
     start,
     startServer,
@@ -1113,3 +1116,48 @@ QUnit.test(
         assert.verifySteps([]);
     }
 );
+
+QUnit.test("composer: drop attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    const files = [
+        await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        }),
+        await createFile({
+            content: "hello, worlduh",
+            contentType: "text/plain",
+            name: "text2.txt",
+        }),
+    ];
+    assert.containsNone(target, ".o-dropzone");
+    assert.containsNone(target, ".o-mail-attachment-card");
+
+    await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-composer-textarea")));
+    assert.containsOnce(target, ".o-dropzone");
+    assert.containsNone(target, ".o-mail-attachment-card");
+
+    await afterNextRender(() => dropFiles(target.querySelector(".o-dropzone"), files));
+    assert.containsNone(target, ".o-dropzone");
+    assert.containsN(target, ".o-mail-attachment-card", 2);
+
+    await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-composer-textarea")));
+    await afterNextRender(async () =>
+        dropFiles(target.querySelector(".o-dropzone"), [
+            await createFile({
+                content: "hello, world",
+                contentType: "text/plain",
+                name: "text3.txt",
+            }),
+        ])
+    );
+    assert.containsN(document.body, ".o-mail-attachment-card", 3);
+});

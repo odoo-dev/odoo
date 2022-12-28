@@ -1,13 +1,6 @@
 /** @odoo-module **/
 
-import {
-    afterNextRender,
-    dragenterFiles,
-    dropFiles,
-    pasteFiles,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, pasteFiles, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -54,66 +47,6 @@ QUnit.module("mail", (hooks) => {
             assert.ok(
                 document.querySelector(`.o_ComposerView .o_AttachmentCard`),
                 "should have an attachment"
-            );
-        });
-
-        QUnit.skipRefactoring("composer: drop attachments", async function (assert) {
-            assert.expect(4);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const { openDiscuss } = await start({
-                discuss: {
-                    context: { active_id: mailChannelId1 },
-                },
-            });
-            await openDiscuss();
-            const files = [
-                await createFile({
-                    content: "hello, world",
-                    contentType: "text/plain",
-                    name: "text.txt",
-                }),
-                await createFile({
-                    content: "hello, worlduh",
-                    contentType: "text/plain",
-                    name: "text2.txt",
-                }),
-            ];
-            await afterNextRender(() => dragenterFiles(document.querySelector(".o_ComposerView")));
-            assert.ok(
-                document.querySelector(".o_ComposerView_dropZone"),
-                "should have a drop zone"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_ComposerView .o_AttachmentCard`).length,
-                0,
-                "should have no attachment before files are dropped"
-            );
-
-            await afterNextRender(() =>
-                dropFiles(document.querySelector(".o_ComposerView_dropZone"), files)
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_ComposerView .o_AttachmentCard`).length,
-                2,
-                "should have 2 attachments in the composer after files dropped"
-            );
-
-            await afterNextRender(() => dragenterFiles(document.querySelector(".o_ComposerView")));
-            await afterNextRender(async () =>
-                dropFiles(document.querySelector(".o_ComposerView_dropZone"), [
-                    await createFile({
-                        content: "hello, world",
-                        contentType: "text/plain",
-                        name: "text3.txt",
-                    }),
-                ])
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_ComposerView .o_AttachmentCard`).length,
-                3,
-                "should have 3 attachments in the box after files dropped"
             );
         });
 
