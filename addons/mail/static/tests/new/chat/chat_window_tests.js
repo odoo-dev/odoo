@@ -292,6 +292,24 @@ QUnit.test(
 );
 
 QUnit.test(
+    "Close emoji picker in chat window with ESCAPE does not also close the chat window",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create({
+            name: "general",
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId, is_minimized: true }],
+            ],
+        });
+        await start();
+        await click("i[aria-label='Emojis']");
+        await afterNextRender(() => triggerHotkey("Escape"));
+        assert.containsNone(target, ".o-mail-emoji-picker");
+        assert.containsOnce(target, ".o-mail-chat-window");
+    }
+);
+
+QUnit.test(
     "open 2 different chat windows: enough screen width [REQUIRE FOCUS]",
     async function (assert) {
         const pyEnv = await startServer();

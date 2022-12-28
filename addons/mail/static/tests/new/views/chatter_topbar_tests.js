@@ -86,3 +86,97 @@ QUnit.test("rendering with multiple partner followers", async function (assert) 
         "Eden Hazard"
     );
 });
+
+QUnit.test("log note toggling", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
+    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsNone(target, ".o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.hasClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer .o-mail-composer-textarea[placeholder='Log an internal note...']"
+    );
+
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsNone(target, ".o-mail-composer");
+});
+
+QUnit.test("send message toggling", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
+    assert.doesNotHaveClass(
+        $(target).find(".o-mail-chatter-topbar-send-message-button"),
+        "o-active"
+    );
+    assert.containsNone(target, ".o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.hasClass($(target).find(".o-mail-chatter-topbar-send-message-button"), "o-active");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer .o-mail-composer-textarea[placeholder='Send a message to followers...']"
+    );
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.doesNotHaveClass(
+        $(target).find(".o-mail-chatter-topbar-send-message-button"),
+        "o-active"
+    );
+    assert.containsNone(target, ".o-mail-composer");
+});
+
+QUnit.test("log note/send message switching", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
+    assert.doesNotHaveClass(
+        $(target).find(".o-mail-chatter-topbar-send-message-button"),
+        "o-active"
+    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
+    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsNone(target, ".o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.hasClass($(target).find(".o-mail-chatter-topbar-send-message-button"), "o-active");
+    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer .o-mail-composer-textarea[placeholder='Send a message to followers...']"
+    );
+
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.doesNotHaveClass(
+        $(target).find(".o-mail-chatter-topbar-send-message-button"),
+        "o-active"
+    );
+    assert.hasClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer .o-mail-composer-textarea[placeholder='Log an internal note...']"
+    );
+});

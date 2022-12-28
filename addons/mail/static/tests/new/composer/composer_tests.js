@@ -174,27 +174,24 @@ QUnit.test("add emoji replaces (keyboard) text selection", async function (asser
     assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "🤠");
 });
 
-QUnit.test(
-    "Cursor is positioned after emoji after adding it",
-    async function (assert) {
-        const pyEnv = await startServer();
-        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
-        const { click, insertText, openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-        });
-        await openDiscuss();
-        const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
-        await insertText(".o-mail-composer-textarea", "Blabla");
-        composerTextInputTextArea.setSelectionRange(2, 2);
-        await click("i[aria-label='Emojis']");
-        await click('.o-emoji[data-codepoints="🤠"]');
-        const expectedCursorPos = 2 + "🤠".length;
-        assert.strictEqual(composerTextInputTextArea.selectionStart, expectedCursorPos);
-        assert.strictEqual(composerTextInputTextArea.selectionEnd, expectedCursorPos);
-    }
-);
+QUnit.test("Cursor is positioned after emoji after adding it", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+    await insertText(".o-mail-composer-textarea", "Blabla");
+    composerTextInputTextArea.setSelectionRange(2, 2);
+    await click("i[aria-label='Emojis']");
+    await click('.o-emoji[data-codepoints="🤠"]');
+    const expectedCursorPos = 2 + "🤠".length;
+    assert.strictEqual(composerTextInputTextArea.selectionStart, expectedCursorPos);
+    assert.strictEqual(composerTextInputTextArea.selectionEnd, expectedCursorPos);
+});
 
 QUnit.test("selected text is not replaced after cancelling the selection", async function (assert) {
     const pyEnv = await startServer();
@@ -382,9 +379,7 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "@");
-    await afterNextRender(() =>
-        $(target).find(".o-composer-suggestion:contains(TestPartner)").click()
-    );
+    await click(".o-composer-suggestion:contains(TestPartner)");
     assert.strictEqual($(target).find(".o-mail-composer-textarea").val().trim(), "@TestPartner");
 });
 
@@ -704,6 +699,43 @@ QUnit.test("add an emoji after a canned response", async function (assert) {
     assert.strictEqual(
         target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "Hello! How are you? 😊"
+    );
+});
+
+QUnit.test("add an emoji after a partner mention", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "@");
+    await insertText(".o-mail-composer-textarea", "T");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "@TestPartner "
+    );
+
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "@TestPartner 😊"
     );
 });
 
