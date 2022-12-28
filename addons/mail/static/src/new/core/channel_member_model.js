@@ -10,6 +10,10 @@ import { createLocalId } from "./thread_model.create_local_id";
  * @property {number} threadId
  */
 export class ChannelMember {
+    partnerId;
+    threadId;
+    typingTimer;
+
     static insert(state, data) {
         let channelMember = state.channelMembers[data.id];
         if (!channelMember) {

@@ -18,35 +18,31 @@ export class Typing extends Component {
         size: "small",
         displayText: true,
     };
-    static props = ["channel_id", "size?", "displayText?"];
+    static props = ["channel", "size?", "displayText?"];
     static template = "mail.typing";
 
     setup() {
         this.messaging = useMessaging();
     }
 
-    get isTyping() {
-        return this.messaging.isTyping(this.props.channel_id);
-    }
-
     /** @returns {boolean|string} */
     get text() {
-        if (this.isTyping) {
-            const channelAreTyping = this.messaging.state.areTyping[this.props.channel_id];
-            if (channelAreTyping.length === 1) {
-                return sprintf(_t("%s is typing..."), channelAreTyping[0]);
+        if (this.props.channel.hasTypingMembers) {
+            const typingMembers = this.props.channel.typingMembers;
+            if (typingMembers.length === 1) {
+                return sprintf(_t("%s is typing..."), typingMembers[0].name);
             }
-            if (channelAreTyping.length === 2) {
+            if (typingMembers.length === 2) {
                 return sprintf(
                     _t("%s and %s are typing..."),
-                    channelAreTyping[0],
-                    channelAreTyping[1]
+                    typingMembers[0].name,
+                    typingMembers[1].name
                 );
             }
             return sprintf(
                 _t("%s, %s and more are typing..."),
-                channelAreTyping[0],
-                channelAreTyping[1]
+                typingMembers[0].name,
+                typingMembers[1].name
             );
         }
         return false;

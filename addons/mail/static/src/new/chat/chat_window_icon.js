@@ -28,10 +28,6 @@ export class ChatWindowIcon extends Component {
         return this.messaging.state.threads[this.props.threadLocalId];
     }
 
-    get isTyping() {
-        return this.messaging.isTyping(this.thread.id);
-    }
-
     get chatPartner() {
         return this.messaging.state.partners[this.thread.chatPartnerId];
     }

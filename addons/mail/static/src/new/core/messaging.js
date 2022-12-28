@@ -102,9 +102,6 @@ export class Messaging {
             get isSmall() {
                 return env.isSmall;
             },
-            /** @type Object<number, []> */
-            areTyping: {},
-            areTypingTimer: {},
             // base data
             user: {
                 partnerId: user.partnerId,
@@ -222,14 +219,10 @@ export class Messaging {
             this.state.discuss.inbox.counter = data.needaction_inbox_counter;
             this.state.internalUserGroupId = data.internalUserGroupId;
             this.state.discuss.starred.counter = data.starred_counter;
+            (data.shortcodes ?? []).forEach((code) => {
+                CannedResponse.insert(this.state, code);
+            });
             this.isReady.resolve();
-            this.initCannedResponses(data.shortcodes);
-        });
-    }
-
-    initCannedResponses(shortcodes = []) {
-        shortcodes.forEach((code) => {
-            CannedResponse.insert(this.state, code);
         });
     }
 
@@ -243,13 +236,6 @@ export class Messaging {
 
     get maxVisibleChatWindows() {
         return ChatWindow.maxVisibleChatWindows(this.state);
-    }
-
-    /**
-     * @param {number} channel_id
-     */
-    isTyping(channel_id) {
-        return Boolean(this.state.areTyping[channel_id]);
     }
 
     /**
@@ -723,37 +709,32 @@ export class Messaging {
                 }
                 case "mail.channel.member/typing_status": {
                     const isTyping = notif.payload.isTyping;
-                    const channel_id = notif.payload.channel.id;
-                    const name = notif.payload.persona.partner.name;
-                    if (notif.payload.persona.partner.id === this.state.user.partnerId) {
+                    const channel =
+                        this.state.threads[createLocalId("mail.channel", notif.payload.channel.id)];
+                    const member = ChannelMember.insert(this.state, {
+                        id: notif.payload.id,
+                        partnerId: notif.payload.persona.partner.id,
+                        threadId: channel.id,
+                    });
+                    Partner.insert(this.state, {
+                        id: notif.payload.persona.partner.id,
+                        name: notif.payload.persona.partner.name,
+                    });
+                    if (member.partner.id === this.state.user.partnerId) {
                         return;
                     }
-                    if (!this.state.areTyping[channel_id]) {
-                        this.state.areTyping[channel_id] = [];
-                        this.state.areTypingTimer[channel_id] = {};
-                    }
-                    const remove = () => {
-                        if (this.state.areTyping[channel_id]) {
-                            removeFromArray(this.state.areTyping[channel_id], name);
-                            if (this.state.areTyping[channel_id].length === 0) {
-                                delete this.state.areTyping[channel_id];
-                            }
-                        }
-                    };
                     if (isTyping) {
-                        if (!this.state.areTyping[channel_id].includes(name)) {
-                            this.state.areTyping[channel_id].push(name);
+                        if (!channel.typingMembers.includes(member)) {
+                            channel.typingMemberIds.push(member.id);
                         }
-                        if (this.state.areTypingTimer[channel_id][name]) {
-                            browser.clearTimeout(this.state.areTypingTimer[channel_id][name]);
+                        if (member.typingTimer) {
+                            browser.clearTimeout(member.typingTimer);
                         }
-                        this.state.areTypingTimer[channel_id] = {
-                            [name]: browser.setTimeout(() => {
-                                remove();
-                            }, OTHER_LONG_TYPING),
-                        };
+                        member.typingTimer = browser.setTimeout(() => {
+                            removeFromArray(channel.typingMemberIds, member.id);
+                        }, OTHER_LONG_TYPING);
                     } else {
-                        remove();
+                        removeFromArray(channel.typingMemberIds, member.id);
                     }
                     break;
                 }

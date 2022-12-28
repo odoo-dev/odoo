@@ -65,7 +65,7 @@
                     unlinkAttachment="attachmentUploader.unlink"
                     imagesHeight="50" />
                 <div t-if="thread and !compact" class="o-mail-composer-is-typing">
-                    <Typing channel_id="thread.id" size="'medium'" />
+                    <Typing channel="thread" size="'medium'" />
                 </div>
             </div>
         </div>

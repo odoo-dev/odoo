@@ -49,6 +49,7 @@ export class Thread {
     status = "new";
     /** @type {ScrollPosition} */
     scrollPosition = new ScrollPosition();
+    typingMemberIds = [];
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 
@@ -401,5 +402,13 @@ export class Thread {
 
     get unknownMembersCount() {
         return this.memberCount - this.channelMembers.length;
+    }
+
+    get hasTypingMembers() {
+        return this.typingMembers.length !== 0;
+    }
+
+    get typingMembers() {
+        return this.typingMemberIds.map((memberId) => this._state.channelMembers[memberId]);
     }
 }

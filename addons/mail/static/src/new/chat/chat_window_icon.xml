@@ -8,7 +8,7 @@
                 <div t-if="!thread.authorizedGroupFullName" class="fa fa-fw fa-globe" title="Public Channel"/>
             </t>
             <t t-elif="thread.type === 'chat' and chatPartner">
-                <Typing t-if="isTyping" channel_id="thread.id" size="props.size" displayText="false"/>
+                <Typing t-if="thread.hasTypingMembers" channel="thread" size="props.size" displayText="false"/>
                 <div t-elif="chatPartner.im_status === 'online'" class="o-mail-chatwindow-icon-online fa fa-fw fa-circle" title="Online"/>
                 <div t-elif="chatPartner.im_status === 'offline'" class="o-mail-chatwindow-icon-offline fa fa-fw fa-circle-o" title="Offline"/>
                 <div t-elif="chatPartner.im_status === 'away'" class="o-mail-chatwindow-icon-away fa fa-fw fa-circle text-warning" title="Away"/>
