@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.activity_menu" owl="1">
-    <Dropdown position="'bottom-end'" menuClass="'p-0'">
+    <Dropdown position="'bottom-end'" menuClass="'p-0'" beforeOpen.bind="onBeforeOpen">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-clock-o" role="img" aria-label="Activities"></i>
             <span t-if="messaging.state.activityCounter" class="badge"><t t-esc="messaging.state.activityCounter"/></span>
