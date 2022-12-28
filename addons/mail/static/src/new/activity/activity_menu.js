@@ -1,6 +1,8 @@
 /* @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { useMessaging } from "@mail/new/messaging_hook";
+
+import { Component } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
 
@@ -10,7 +12,7 @@ export class ActivityMenu extends Component {
     static template = "mail.activity_menu";
 
     setup() {
-        this.activity = useState(useService("mail.activity").state);
+        this.messaging = useMessaging();
         this.action = useService("action");
         this.userId = useService("user").userId;
     }

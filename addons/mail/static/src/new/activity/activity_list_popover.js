@@ -27,7 +27,7 @@ export class ActivityListPopover extends Component {
     }
 
     onClickAddActivityButton() {
-        this.env.services["mail.activity"]
+        this.env.services["mail.messaging"]
             .scheduleActivity(
                 this.props.resModel,
                 this.props.resId,

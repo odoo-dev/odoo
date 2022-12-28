@@ -14,7 +14,7 @@ import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/views/chatter").ActivityData} data
+ * @property {import("@mail/new/core/activity_model").Activity} data
  * @property {function} [onUpdate]
  * @extends {Component<Props, Env>}
  */
@@ -29,7 +29,6 @@ export class Activity extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.activity = useService("mail.activity");
         this.messaging = useService("mail.messaging");
         this.state = useState({
             showDetails: false,
@@ -97,7 +96,7 @@ export class Activity extends Component {
         this.state.showDetails = !this.state.showDetails;
     }
 
-    async markAsDone(ev) {
+    async onClickMarkAsDone(ev) {
         if (this.closePopover) {
             this.closePopover();
             this.closePopover = undefined;
@@ -117,19 +116,19 @@ export class Activity extends Component {
 
     async onFileUploaded(data) {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
-        await this.activity.markAsDone(this.props.data.id, [attachmentId]);
+        await this.env.services["mail.messaging"].markAsDone(this.props.data, [attachmentId]);
         this.props.onUpdate();
-        await this.messaging.fetchThreadMessagesNew(this.thread.localId);
+        await this.env.services["mail.messaging"].fetchThreadMessagesNew(this.thread.localId);
     }
 
     async edit() {
         const { id, res_model, res_id } = this.props.data;
-        await this.activity.scheduleActivity(res_model, res_id, id);
+        await this.env.services["mail.messaging"].scheduleActivity(res_model, res_id, id);
         this.props.onUpdate();
     }
 
     async unlink() {
-        await this.orm.unlink("mail.activity", [this.props.data.id]);
+        await this.env.services.orm.unlink("mail.activity", [this.props.data.id]);
         this.props.onUpdate();
     }
 

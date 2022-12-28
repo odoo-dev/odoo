@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { messagingService } from "@mail/new/messaging_service";
-import { activityService } from "@mail/new/activity/activity_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
 import { EventBus } from "@odoo/owl";
@@ -46,7 +45,6 @@ export function makeTestEnv(rpc) {
             dialog: {},
             ui,
             popover: {},
-            "mail.activity": {},
             presence: makeFakePresenceService(),
         },
     };
@@ -73,13 +71,6 @@ export function makeTestEnv(rpc) {
     const effect = effectService.start(env);
     env.services.effect = effect;
     env.services["mail.messaging"] = messaging;
-    const activity = activityService.start(env, {
-        action,
-        bus_service,
-        orm,
-        "mail.messaging": messaging,
-    });
-    env.services["mail.activity"] = activity;
     const popover = popoverService.start();
     env.services.popover = popover;
     const notification = notificationService.start(env);

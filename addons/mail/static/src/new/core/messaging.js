@@ -34,6 +34,7 @@ const commandRegistry = registry.category("mail.channel_commands");
 export const asyncMethods = [
     "fetchPreviews",
     "postMessage",
+    "scheduleActivity",
     "updateMessage",
     "createChannel",
     "getChat",
@@ -95,6 +96,9 @@ export class Messaging {
         });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.state = reactive({
+            /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
+            activities: {},
+            activityCounter: 0,
             get isSmall() {
                 return env.isSmall;
             },
@@ -197,6 +201,15 @@ export class Messaging {
      * Import data received from init_messaging
      */
     initialize() {
+        // not waiting for this on purpose: we do not want to delay the web client
+        this.orm.call("res.users", "systray_get_activities").then((activities) => {
+            let total = 0;
+            for (const activity of activities) {
+                total += activity.total_count;
+            }
+            this.state.activityCounter = total;
+            this.state.activityGroups = activities;
+        });
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
             Partner.insert(this.state, data.current_partner);
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
@@ -316,6 +329,42 @@ export class Messaging {
                 threadId: thread.id,
             });
         }
+    }
+
+    /**
+     * @param {import("@mail/new/core/activity_model").Activity} activity
+     * @param {number[]} attachmentIds
+     */
+    async markAsDone(activity, attachmentIds = []) {
+        await this.orm.call("mail.activity", "action_feedback", [[activity.id]], {
+            attachment_ids: attachmentIds,
+            feedback: activity.feedback,
+        });
+    }
+
+    async scheduleActivity(resModel, resId, activityId = false, defaultActivityTypeId = undefined) {
+        const context = {
+            default_res_model: resModel,
+            default_res_id: resId,
+        };
+        if (defaultActivityTypeId !== undefined) {
+            context.default_activity_type_id = defaultActivityTypeId;
+        }
+        return new Promise((resolve) => {
+            this.env.services.action.doAction(
+                {
+                    type: "ir.actions.act_window",
+                    name: _t("Schedule Activity"),
+                    res_model: "mail.activity",
+                    view_mode: "form",
+                    views: [[false, "form"]],
+                    target: "new",
+                    context,
+                    res_id: activityId,
+                },
+                { onClose: resolve }
+            );
+        });
     }
 
     sortChannels() {
@@ -497,6 +546,14 @@ export class Messaging {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
             switch (notif.type) {
+                case "mail.activity/updated":
+                    if (notif.payload.activity_created) {
+                        this.state.activityCounter++;
+                    }
+                    if (notif.payload.activity_deleted) {
+                        this.state.activityCounter--;
+                    }
+                    break;
                 case "mail.channel/new_message":
                     {
                         const { id, message } = notif.payload;
