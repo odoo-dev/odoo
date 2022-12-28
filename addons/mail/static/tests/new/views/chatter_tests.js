@@ -590,7 +590,7 @@ QUnit.test("show attachment box", async function (assert) {
     assert.containsOnce(target, ".o-mail-chatter");
     assert.containsOnce(target, ".o-mail-chatter-topbar");
     assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments span");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(2)");
     assert.containsNone(target, ".o-mail-attachment-box");
 
     await click(".o-mail-chatter-topbar-add-attachments");

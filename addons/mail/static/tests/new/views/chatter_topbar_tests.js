@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { makeDeferred } from "@mail/utils/deferred";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -179,4 +180,86 @@ QUnit.test("log note/send message switching", async function (assert) {
         target,
         ".o-mail-composer .o-mail-composer-textarea[placeholder='Log an internal note...']"
     );
+});
+
+QUnit.test("attachment counter without attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({});
+    const { openView } = await start();
+    await openView({
+        res_id: resPartnerId,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+});
+
+QUnit.test("attachment counter with attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({});
+    pyEnv["ir.attachment"].create([
+        {
+            mimetype: "text/plain",
+            name: "Blah.txt",
+            res_id: resPartnerId,
+            res_model: "res.partner",
+        },
+        {
+            mimetype: "text/plain",
+            name: "Blu.txt",
+            res_id: resPartnerId,
+            res_model: "res.partner",
+        },
+    ]);
+    const { openView } = await start();
+    await openView({
+        res_id: resPartnerId,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(2)");
+});
+
+QUnit.test("attachment counter while loading attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { openView } = await start({
+        async mockRPC(route) {
+            if (route.includes("/mail/thread/data")) {
+                await makeDeferred(); // simulate long loading
+            }
+        },
+    });
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
+    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+});
+
+QUnit.test("attachment counter transition when attachments become loaded", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const attachmentPromise = makeDeferred();
+    const { openView } = await start({
+        async mockRPC(route) {
+            if (route.includes("/mail/thread/data")) {
+                await attachmentPromise;
+            }
+        },
+    });
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
+    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+
+    await afterNextRender(() => attachmentPromise.resolve());
+    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
 });
