@@ -8,6 +8,7 @@ import {
     dragenterFiles,
     dropFiles,
     insertText,
+    isScrolledTo,
     start,
     startServer,
     waitFormViewLoaded,
@@ -671,5 +672,50 @@ QUnit.test(
         });
 
         assert.containsNone(target, ".o-mail-message-subject");
+    }
+);
+
+QUnit.test(
+    "scroll position is kept when navigating from one record to another",
+    async function (assert) {
+        patchUiSize({ size: SIZES.XXL });
+        const pyEnv = await startServer();
+        const partnerId_1 = pyEnv["res.partner"].create({ name: "Harry Potter" });
+        const partnerId_2 = pyEnv["res.partner"].create({ name: "Ron Weasley" });
+        // Fill both channels with random messages in order for the scrollbar to
+        // appear.
+        pyEnv["mail.message"].create(
+            Array(40)
+                .fill(0)
+                .map((_, index) => ({
+                    body: "Non Empty Body ".repeat(25),
+                    model: "res.partner",
+                    res_id: index & 1 ? partnerId_1 : partnerId_2,
+                }))
+        );
+        const { openFormView } = await start();
+        await openFormView({
+            res_model: "res.partner",
+            res_id: partnerId_1,
+        });
+        const scrolltop_1 = target.querySelector(".o-mail-chatter-scrollable").scrollHeight / 2;
+        target.querySelector(".o-mail-chatter-scrollable").scrollTo({ top: scrolltop_1 });
+        await openFormView({
+            res_model: "res.partner",
+            res_id: partnerId_2,
+        });
+        const scrolltop_2 = target.querySelector(".o-mail-chatter-scrollable").scrollHeight / 3;
+        target.querySelector(".o-mail-chatter-scrollable").scrollTo({ top: scrolltop_2 });
+        await openFormView({
+            res_model: "res.partner",
+            res_id: partnerId_1,
+        });
+        assert.ok(isScrolledTo(target.querySelector(".o-mail-chatter-scrollable"), scrolltop_1));
+
+        await openFormView({
+            res_model: "res.partner",
+            res_id: partnerId_2,
+        });
+        assert.ok(isScrolledTo(target.querySelector(".o-mail-chatter-scrollable"), scrolltop_2));
     }
 );

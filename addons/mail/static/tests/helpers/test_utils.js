@@ -507,6 +507,19 @@ function isScrolledToBottom(el) {
     return Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop) <= 1;
 }
 
+/**
+ * Determine if a DOM element is scrolled to the given scroll top position.
+ *
+ * A 1px margin of error is given to accomodate subpixel rounding issues and
+ * Element.scrollHeight value being either int or decimal
+ *
+ * @param {DOM.Element} el
+ * @param {number} scrollTop expected scroll top value.
+ * @returns {boolean}
+ */
+function isScrolledTo(el, scrollTop) {
+    return Math.abs(el.scrollTop - scrollTop) <= 1;
+}
 //------------------------------------------------------------------------------
 // Export
 //------------------------------------------------------------------------------
@@ -516,6 +529,7 @@ export {
     dragenterFiles,
     dropFiles,
     isScrolledToBottom,
+    isScrolledTo,
     nextAnimationFrame,
     nextTick,
     pasteFiles,

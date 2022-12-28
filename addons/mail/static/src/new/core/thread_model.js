@@ -8,6 +8,7 @@ import { removeFromArray } from "../utils/arrays";
 import { cleanTerm } from "@mail/new/utils/format";
 
 import { RtcSession } from "@mail/new/rtc/rtc_session_model";
+import { ScrollPosition } from "@mail/new/core/scroll_position_model";
 import { createLocalId } from "./thread_model.create_local_id";
 
 export class Thread {
@@ -46,6 +47,8 @@ export class Thread {
     /** @type {'opened' | 'folded' | 'closed'} */
     state;
     status = "new";
+    /** @type {ScrollPosition} */
+    scrollPosition = new ScrollPosition();
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 

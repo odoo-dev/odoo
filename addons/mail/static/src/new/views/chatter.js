@@ -11,6 +11,8 @@ import { Activity } from "@mail/new/activity/activity";
 import {
     Component,
     markup,
+    onMounted,
+    onPatched,
     onWillStart,
     onWillUpdateProps,
     useChildSubEnv,
@@ -22,7 +24,7 @@ import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
-import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
+import { useAttachmentUploader, useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { Attachment } from "../core/attachment_model";
 import { _t } from "@web/core/l10n/translation";
@@ -61,6 +63,7 @@ export class Chatter extends Component {
         this.attachmentUploader = useAttachmentUploader({
             threadLocalId: createLocalId(this.props.resModel, this.props.resId),
         });
+        this.scrollPosition = useScrollPosition("scrollable", undefined, "top");
         this.rootRef = useRef("root");
         useChildSubEnv({
             inChatter: true,
@@ -75,6 +78,8 @@ export class Chatter extends Component {
             }
         });
 
+        onMounted(this.scrollPosition.restore);
+        onPatched(this.scrollPosition.restore);
         onWillStart(() => this.load());
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
@@ -117,6 +122,7 @@ export class Chatter extends Component {
         const { resModel } = this.props;
         const thread = this.messaging.getChatterThread(resModel, resId);
         this.thread = thread;
+        this.scrollPosition.model = this.thread.scrollPosition;
         if (!resId) {
             // todo: reset activities/attachments/followers
             return;
