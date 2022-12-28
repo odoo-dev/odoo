@@ -201,15 +201,6 @@ export class Messaging {
      * Import data received from init_messaging
      */
     initialize() {
-        // not waiting for this on purpose: we do not want to delay the web client
-        this.orm.call("res.users", "systray_get_activities").then((activities) => {
-            let total = 0;
-            for (const activity of activities) {
-                total += activity.total_count;
-            }
-            this.state.activityCounter = total;
-            this.state.activityGroups = activities;
-        });
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
             Partner.insert(this.state, data.current_partner);
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
