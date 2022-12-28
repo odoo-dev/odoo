@@ -1331,7 +1331,9 @@ export class Messaging {
     async leaveChannel(id) {
         await this.orm.call("mail.channel", "action_unfollow", [id]);
         this.state.threads[createLocalId("mail.channel", id)].remove();
-        this.setDiscussThread(this.state.discuss.channels.threads[0]);
+        this.setDiscussThread(
+            this.state.discuss.channels.threads[0] ?? this.state.discuss.inbox.localId
+        );
     }
 
     openDocument({ id, model }) {

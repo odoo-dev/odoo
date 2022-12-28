@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import {
+    afterNextRender,
     click,
     insertText,
     nextAnimationFrame,
@@ -8,7 +9,7 @@ import {
     startServer,
 } from "@mail/../tests/helpers/test_utils";
 
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -87,6 +88,51 @@ QUnit.test("reply: discard on click away", async function (assert) {
     );
 
     await click(".o-mail-message");
+    assert.containsNone(target, ".o-mail-composer");
+});
+
+QUnit.test("reply: discard on pressing escape", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].create({
+        email: "testpartnert@odoo.com",
+        name: "TestPartner",
+    });
+    const mailMessageId = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "res.partner",
+        needaction: true,
+        needaction_partner_ids: [pyEnv.currentPartnerId],
+        res_id: 20,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId,
+        notification_status: "sent",
+        notification_type: "inbox",
+        res_partner_id: pyEnv.currentPartnerId,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-message");
+
+    await click(".o-mail-message-actions i[aria-label='Reply']");
+    assert.containsOnce(target, ".o-mail-composer");
+
+    // Escape on emoji picker does not stop replying
+    await click(".o-mail-composer i[aria-label='Emojis']");
+    assert.containsOnce(target, ".o-mail-emoji-picker");
+    await afterNextRender(() => triggerHotkey("Escape"));
+    assert.containsNone(target, ".o-mail-emoji-picker");
+    assert.containsOnce(target, ".o-mail-composer");
+
+    // Escape on suggestion prompt does not stop replying
+    await insertText(".o-mail-composer-textarea", "@");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
+    await afterNextRender(() => triggerHotkey("Escape"));
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.containsOnce(target, ".o-mail-composer");
+
+    click(".o-mail-composer-textarea").catch(() => {});
+    await afterNextRender(() => triggerHotkey("Escape"));
     assert.containsNone(target, ".o-mail-composer");
 });
 
@@ -493,3 +539,44 @@ QUnit.test("inbox: mark all messages as read", async function (assert) {
         $(target).find('.o-mail-discuss-actions button[data-action="mark-all-read"]')[0].disabled
     );
 });
+
+QUnit.test(
+    "click on (non-channel/non-partner) origin thread link should redirect to form view",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resFakeId = pyEnv["res.fake"].create({ name: "Some record" });
+        const mailMessageId = pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "res.fake",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: resFakeId,
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: mailMessageId,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        });
+        const { env, openDiscuss } = await start();
+        await openDiscuss();
+        patchWithCleanup(env.services.action, {
+            doAction(action) {
+                // Callback of doing an action (action manager).
+                // Expected to be called on click on origin thread link,
+                // which redirects to form view of record related to origin thread
+                assert.step("do-action");
+                assert.strictEqual(action.type, "ir.actions.act_window");
+                assert.deepEqual(action.views, [[false, "form"]]);
+                assert.strictEqual(action.res_model, "res.fake");
+                assert.strictEqual(action.res_id, resFakeId);
+                return Promise.resolve();
+            },
+        });
+        assert.containsOnce(document.body, ".o-mail-message");
+        assert.containsOnce(document.body, ".o-mail-msg-header a:contains(Some record)");
+
+        click(".o-mail-msg-header a:contains(Some record)").catch(() => {});
+        assert.verifySteps(["do-action"]);
+    }
+);

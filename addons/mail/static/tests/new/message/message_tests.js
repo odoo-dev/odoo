@@ -801,3 +801,24 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-own-name");
     }
 );
+
+QUnit.test("click on message edit button should open edit composer", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "General" });
+    pyEnv["mail.message"].create({
+        body: "not empty",
+        message_type: "comment",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    assert.containsOnce(target, ".o-mail-message .o-mail-composer");
+});

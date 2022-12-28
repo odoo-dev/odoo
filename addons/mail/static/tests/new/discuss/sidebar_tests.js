@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { Sidebar } from "@mail/new/discuss/sidebar";
 import { click as webClick, editInput, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
@@ -247,4 +247,82 @@ QUnit.test("sidebar: basic chat rendering", async function (assert) {
     assert.containsOnce($chat, ".o-mail-commands");
     assert.containsOnce($chat, ".o-mail-commands div[title='Unpin Conversation']");
     assert.containsNone($chat, ".badge");
+});
+
+QUnit.test("sidebar: show pinned channel", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-category-item:contains(General)");
+});
+
+QUnit.test("sidebar: open pinned channel", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    await click(".o-mail-category-item:contains(General)");
+    assert.strictEqual($(target).find(".o-mail-discuss-thread-name").val(), "General");
+    assert.containsOnce(
+        target,
+        ".o-mail-discuss-content .o-mail-composer-textarea[placeholder='Message #General…']"
+    );
+});
+
+QUnit.test("sidebar: open channel and leave it", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    fold_state: "open",
+                    is_minimized: true,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+        ],
+    });
+    const { openDiscuss } = await start({
+        async mockRPC(route, args) {
+            if (args.method === "action_unfollow") {
+                assert.step("action_unfollow");
+                assert.deepEqual(args.args[0], mailChannelId1);
+            }
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-category-item:contains(General)");
+    assert.verifySteps([]);
+
+    await click(
+        ".o-mail-category-item:contains(General) .o-mail-commands .btn[title='Leave this channel']"
+    );
+    assert.verifySteps(["action_unfollow"]);
+    assert.containsNone(target, ".o-mail-category-item:contains(General)");
+    assert.notOk($(target).find(".o-mail-discuss-thread-name")?.val() === "General");
+});
+
+QUnit.test("sidebar: unpin channel from bus", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-category-item:contains(General)");
+
+    await click(".o-mail-category-item:contains(General)");
+    assert.strictEqual($(target).find(".o-mail-discuss-thread-name").val(), "General");
+
+    // Simulate receiving a leave channel notification
+    // (e.g. from user interaction from another device or browser tab)
+    await afterNextRender(() => {
+        pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.channel/unpin", {
+            id: mailChannelId,
+        });
+    });
+    assert.containsNone(target, ".o-mail-category-item:contains(General)");
+    assert.notOk($(target).find(".o-mail-discuss-thread-name")?.val() === "General");
 });
