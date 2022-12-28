@@ -2,7 +2,6 @@
 
 import { useMessaging } from "../messaging_hook";
 import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMarkAsDone extends Component {
     static template = "mail.activity_mark_as_done";
@@ -18,7 +17,6 @@ export class ActivityMarkAsDone extends Component {
     setup() {
         this.messaging = useMessaging();
         this.textArea = useRef("textarea");
-        this.activityService = useService("mail.activity");
         onMounted(() => {
             this.textArea.el.focus();
         });
@@ -34,7 +32,7 @@ export class ActivityMarkAsDone extends Component {
     async onClickDone() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
         const thread = this.messaging.getChatterThread(resModel, resId);
-        await this.env.services["mail.activity"].markAsDone(this.props.activity.id);
+        await this.env.services["mail.messaging"].markAsDone(this.props.activity);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
@@ -55,7 +53,7 @@ export class ActivityMarkAsDone extends Component {
             "action_feedback_schedule_next",
             [[this.props.activity.id]],
             {
-                feedback: this.activityService.state.feedback[this.props.activity.id],
+                feedback: this.props.activity.feedback,
             }
         );
         this.messaging.fetchThreadMessagesNew(thread.localId);

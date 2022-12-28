@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { Follower } from "@mail/new/core/follower_model";
+import { Activity as ActivityModel } from "@mail/new/core/activity_model";
 import { Thread } from "../thread/thread";
 import { useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
@@ -27,36 +28,6 @@ import { Attachment } from "../core/attachment_model";
 import { _t } from "@web/core/l10n/translation";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
-/**
- * @typedef ActivityData
- * @property {string} activity_category
- * @property {[number, string]} activity_type_id
- * @property {string|false} activity_decoration
- * @property {boolean} can_write
- * @property {'suggest'|'trigger'} chaining_type
- * @property {string} create_date
- * @property {[number, string]} create_uid
- * @property {string} date_deadline
- * @property {string} display_name
- * @property {boolean} has_recommended_activities
- * @property {string} icon
- * @property {number} id
- * @property {Object[]} mail_template_ids
- * @property {string} note
- * @property {number|false} previous_activity_type_id
- * @property {number|false} recommended_activity_type_id
- * @property {string} res_model
- * @property {[number, string]} res_model_id
- * @property {string} res_id
- * @property {string} res_name
- * @property {number|false} request_partner_id
- * @property {'overdue'|'planned'|'today'} state
- * @property {string} summary
- * @property {[number, string]} user_id
- * @property {string} write_date
- * @property {[number, string]} write_uid
- */
-
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
     static props = [
@@ -68,6 +39,8 @@ export class Chatter extends Component {
     ];
     static template = "mail.chatter";
 
+    /** @type {import("@mail/new/core/messaging").Messaging} */
+    messaging;
     /**
      * @type {import("@mail/new/core/thread_model").Thread}
      */
@@ -75,13 +48,10 @@ export class Chatter extends Component {
 
     setup() {
         this.action = useService("action");
-        this.activity = useService("mail.activity");
         this.messaging = useMessaging();
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
-            /** @type {ActivityData[]} */
-            activities: [],
             attachments: [],
             showActivities: true,
             isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
@@ -117,6 +87,17 @@ export class Chatter extends Component {
         });
     }
 
+    /**
+     * @returns {import("@mail/new/core/activity_model").Activity[]}
+     */
+    get activities() {
+        return Object.values(this.messaging.state.activities).filter((activity) => {
+            return (
+                activity.res_model === this.props.resModel && activity.res_id === this.props.resId
+            );
+        });
+    }
+
     get followerButtonLabel() {
         return _t("Show Followers");
     }
@@ -148,12 +129,18 @@ export class Chatter extends Component {
             this.thread.hasReadAccess = result.hasReadAccess;
             this.thread.hasWriteAccess = result.hasWriteAccess;
             if ("activities" in result) {
+                const existingIds = new Set();
                 for (const activity of result.activities) {
                     if (activity.note) {
                         activity.note = markup(activity.note);
                     }
+                    existingIds.add(ActivityModel.insert(this.messaging.state, activity).id);
                 }
-                this.state.activities = result.activities;
+                for (const activity of this.activities) {
+                    if (!existingIds.has(activity.id)) {
+                        activity.delete();
+                    }
+                }
             }
             if ("attachments" in result) {
                 this.state.attachments = result.attachments.map((attachment) =>
@@ -248,7 +235,7 @@ export class Chatter extends Component {
     }
 
     async scheduleActivity() {
-        await this.activity.scheduleActivity(this.props.resModel, this.props.resId);
+        await this.messaging.scheduleActivity(this.props.resModel, this.props.resId);
         this.load(this.props.resId, ["activities"]);
     }
 

@@ -2,7 +2,6 @@
 
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { ActivityMenu } from "@mail/new/activity/activity_menu";
-import { activityService } from "@mail/new/activity/activity_service";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
@@ -24,7 +23,6 @@ const messagingValuesService = {
 };
 
 const serviceRegistry = registry.category("services");
-serviceRegistry.add("mail.activity", activityService);
 serviceRegistry.add("mail.messaging", newMessagingService);
 serviceRegistry.add("mail.rtc", rtcService);
 serviceRegistry.add("mail.soundEffects", soundEffects);

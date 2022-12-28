@@ -5,6 +5,7 @@ import { createLocalId } from "./core/thread_model.create_local_id";
 
 export const messagingService = {
     dependencies: [
+        "action",
         "rpc",
         "orm",
         "user",
@@ -64,7 +65,6 @@ export const messagingService = {
             messaging.handleNotification(notifEvent.detail);
         });
         bus.start();
-
         // debugging. remove this
         window.messaging = messaging;
         return messaging;
