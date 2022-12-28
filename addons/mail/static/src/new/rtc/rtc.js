@@ -157,7 +157,9 @@ export class Rtc {
         });
 
         browser.addEventListener("beforeunload", async (ev) => {
-            await this.rpcLeaveCall(this.state.channel);
+            if (this.state.channel) {
+                await this.rpcLeaveCall(this.state.channel);
+            }
         });
         /**
          * Call all sessions for which no peerConnection is established at
