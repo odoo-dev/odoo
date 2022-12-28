@@ -80,11 +80,11 @@ export class Chatter extends Component {
 
         onMounted(this.scrollPosition.restore);
         onPatched(this.scrollPosition.restore);
-        onWillStart(() => this.load());
+        onWillStart(() => this.load(this.props.resId, ["followers", "attachments"]));
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
                 this.state.isLoadingAttachments = false;
-                this.load(nextProps.resId);
+                this.load(nextProps.resId, ["followers", "attachments"]);
                 if (nextProps.resId === false) {
                     this.thread.composer.type = false;
                 }

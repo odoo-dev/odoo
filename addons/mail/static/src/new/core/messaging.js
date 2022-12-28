@@ -847,6 +847,9 @@ export class Messaging {
         resModel,
         requestList = ["activities", "followers", "attachments", "messages"]
     ) {
+        if (requestList.includes("messages")) {
+            this.fetchThreadMessagesNew(createLocalId(resModel, resId));
+        }
         const result = await this.rpc("/mail/thread/data", {
             request_list: requestList,
             thread_id: resId,

@@ -5,7 +5,12 @@ import { start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import testUtils from "web.test_utils";
 
-import { legacyExtraNextTick, patchWithCleanup, click } from "@web/../tests/helpers/utils";
+import {
+    editInput,
+    legacyExtraNextTick,
+    patchWithCleanup,
+    click,
+} from "@web/../tests/helpers/utils";
 import { doAction } from "@web/../tests/webclient/helpers";
 import { session } from "@web/session";
 
@@ -284,7 +289,7 @@ QUnit.module("test_mail", {}, function () {
         ]);
     });
 
-    QUnit.skipRefactoring("activity view: activity widget", async function (assert) {
+    QUnit.test("activity view: activity widget", async function (assert) {
         assert.expect(16);
 
         const mailActivityTypeIds = pyEnv["mail.activity.type"].search([]);
@@ -404,7 +409,7 @@ QUnit.module("test_mail", {}, function () {
         await testUtils.dom.click(
             document.querySelector(".o-activity-list-popover-item-mark-as-done")
         );
-        document.querySelector(".o-mail-activity-mark-as-done-feedback").value = "feedback2";
+        await editInput(document.body, ".o-mail-activity-mark-as-done-feedback", "feedback2");
 
         await testUtils.dom.click(
             document.querySelector(".o-mail-activity-mark-as-done-button-done-and-schedule")

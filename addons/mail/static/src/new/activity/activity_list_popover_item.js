@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { ActivityMailTemplate } from "@mail/new/activity/activity_mail_template";
 import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popover";
 
 import { useService } from "@web/core/utils/hooks";
@@ -12,8 +13,16 @@ import { useAttachmentUploader } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
+/**
+ * @typedef {Object} Props
+ * @property {import("@mail/new/core/activity_model").Activity} activity
+ * @property {function} onActivityChanged
+ * @property {function} [onClickDoneAndScheduleNext]
+ * @property {function} onClickEditActivityButton
+ * @extends {Component<Props, Env>}
+ */
 export class ActivityListPopoverItem extends Component {
-    static components = { ActivityMarkAsDone, FileUploader };
+    static components = { ActivityMailTemplate, ActivityMarkAsDone, FileUploader };
     static props = [
         "activity",
         "onActivityChanged",

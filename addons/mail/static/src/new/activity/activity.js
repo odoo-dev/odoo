@@ -6,6 +6,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { FileUploader } from "@web/views/fields/file_handler";
 
+import { ActivityMailTemplate } from "@mail/new/activity/activity_mail_template";
 import { ActivityMarkAsDone } from "./activity_markasdone_popover";
 import { computeDelay } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/utils/hooks";
@@ -19,7 +20,7 @@ import { _t } from "@web/core/l10n/translation";
  * @extends {Component<Props, Env>}
  */
 export class Activity extends Component {
-    static components = { FileUploader };
+    static components = { ActivityMailTemplate, FileUploader };
     static props = ["data", "onUpdate?"];
     static defaultProps = { onUpdate: () => {} };
     static template = "mail.activity";
@@ -28,7 +29,6 @@ export class Activity extends Component {
     closePopover;
 
     setup() {
-        this.orm = useService("orm");
         this.messaging = useService("mail.messaging");
         this.state = useState({
             showDetails: false,
@@ -50,46 +50,6 @@ export class Activity extends Component {
             return sprintf(_t("“%s”"), this.props.data.summary);
         }
         return this.props.data.display_name;
-    }
-
-    /**
-     * @param {MouseEvent} ev
-     * @param {Object} mailTemplate
-     */
-    onClickPreview(ev, mailTemplate) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        const action = {
-            name: _t("Compose Email"),
-            type: "ir.actions.act_window",
-            res_model: "mail.compose.message",
-            views: [[false, "form"]],
-            target: "new",
-            context: {
-                default_res_id: this.props.data.res_id,
-                default_model: this.props.data.res_model,
-                default_use_template: true,
-                default_template_id: mailTemplate.id,
-                force_email: true,
-            },
-        };
-        this.env.services.action.doAction(action, {
-            onClose: () => this.props.onUpdate(),
-        });
-    }
-
-    /**
-     * @param {MouseEvent} ev
-     * @param {Object} mailTemplate
-     */
-    async onClickSend(ev, mailTemplate) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        await this.env.services.orm.call(this.props.data.res_model, "activity_send_mail", [
-            [this.props.data.res_id],
-            mailTemplate.id,
-        ]);
-        this.props.onUpdate();
     }
 
     toggleDetails() {

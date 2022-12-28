@@ -1,11 +1,24 @@
 /* @odoo-module */
 
+import { useMessaging } from "../messaging_hook";
+
+import { Activity } from "@mail/new/core/activity_model";
 import { ActivityListPopoverItem } from "@mail/new/activity/activity_list_popover_item";
+
+import { Component, onWillUpdateProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillUpdateProps, useState } from "@odoo/owl";
-
+/**
+ * @typedef {Object} Props
+ * @property {number[]} activityIds
+ * @property {function} close
+ * @property {number} [defaultActivityTypeId]
+ * @property {function} onActivityChanged
+ * @property {number} resId
+ * @property {string} resModel
+ * @extends {Component<Props, Env>}
+ */
 export class ActivityListPopover extends Component {
     static components = { ActivityListPopoverItem };
     static props = [
@@ -20,10 +33,23 @@ export class ActivityListPopover extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.messaging = useMessaging();
         this.user = useService("user");
-        this.state = useState({ activities: [] });
         this.updateFromProps(this.props);
         onWillUpdateProps((props) => this.updateFromProps(props));
+    }
+
+    get activities() {
+        /** @type {import("@mail/new/core/activity_model").Activity[]} */
+        const allActivities = Object.values(this.messaging.state.activities);
+        return allActivities
+            .filter((activity) => this.props.activityIds.includes(activity.id))
+            .sort(function (a, b) {
+                if (a.date_deadline === b.date_deadline) {
+                    return a.id - b.id;
+                }
+                return a.date_deadline < b.date_deadline ? -1 : 1;
+            });
     }
 
     onClickAddActivityButton() {
@@ -39,27 +65,28 @@ export class ActivityListPopover extends Component {
     }
 
     get overdueActivities() {
-        return this.state.activities.filter((activity) => activity.state === "overdue");
+        return this.activities.filter((activity) => activity.state === "overdue");
     }
 
     get plannedActivities() {
-        return this.state.activities.filter((activity) => activity.state === "planned");
+        return this.activities.filter((activity) => activity.state === "planned");
     }
 
     get todayActivities() {
-        return this.state.activities.filter((activity) => activity.state === "today");
+        return this.activities.filter((activity) => activity.state === "today");
     }
 
     async updateFromProps(props) {
-        this.state.activities = (
-            await this.orm.silent.call("mail.activity", "activity_format", [props.activityIds], {
+        const activitiesData = await this.orm.silent.call(
+            "mail.activity",
+            "activity_format",
+            [props.activityIds],
+            {
                 context: this.user.user_context,
-            })
-        ).sort(function (a, b) {
-            if (a.date_deadline === b.date_deadline) {
-                return a.id - b.id;
             }
-            return a.date_deadline < b.date_deadline ? -1 : 1;
-        });
+        );
+        for (const activityData of activitiesData) {
+            Activity.insert(this.messaging.state, activityData);
+        }
     }
 }
