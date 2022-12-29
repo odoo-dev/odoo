@@ -33,7 +33,7 @@ QUnit.skipRefactoring('rating value displayed on the thread needaction preview',
     const { afterEvent, messaging } = await start();
     await afterNextRender(() => afterEvent({
         eventName: 'o-thread-cache-loaded-messages',
-        func: () => document.querySelector('.o_MessagingMenu_toggler').click(),
+        func: () => document.querySelector(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])").click(),
         message: "should wait until inbox loaded initial needaction messages",
         predicate: ({ threadCache }) => {
             return threadCache.thread === messaging.inbox.thread;

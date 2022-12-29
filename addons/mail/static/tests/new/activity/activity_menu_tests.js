@@ -5,9 +5,6 @@ import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { click as webClick, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 
-const ACTIVITY_MENU_SELECTOR = ".o_menu_systray .dropdown-toggle:has(i[aria-label='Activities'])";
-const ACTIVITY_MENU_COUNTER_SELECTOR = `${ACTIVITY_MENU_SELECTOR} .badge`;
-
 let target;
 
 QUnit.module("activity menu", {
@@ -29,12 +26,12 @@ QUnit.test("activity menu: no activity", async (assert) => {
 QUnit.test("should update activities when opening the activity menu", async (assert) => {
     const pyEnv = await startServer();
     await start();
-    assert.strictEqual($(target).find(ACTIVITY_MENU_COUNTER_SELECTOR).text(), "");
+    assert.strictEqual($(target).find(".o-mail-activity-menu-counter").text(), "");
     const resPartnerId1 = pyEnv["res.partner"].create({});
     pyEnv["mail.activity"].create({
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    await click(ACTIVITY_MENU_SELECTOR);
-    assert.strictEqual($(target).find(ACTIVITY_MENU_COUNTER_SELECTOR).text(), "1");
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Activities'])");
+    assert.strictEqual($(target).find(".o-mail-activity-menu-counter").text(), "1");
 });

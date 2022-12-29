@@ -43,7 +43,12 @@ QUnit.module("mail", {}, function () {
             await afterNextRender(() =>
                 afterEvent({
                     eventName: "o-thread-cache-loaded-messages",
-                    func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                    func: () =>
+                        document
+                            .querySelector(
+                                ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                            )
+                            .click(),
                     message: "should wait until inbox loaded initial needaction messages",
                     predicate: ({ threadCache }) => {
                         return threadCache.thread === messaging.inbox.thread;
@@ -88,7 +93,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     afterEvent({
                         eventName: "o-thread-cache-loaded-messages",
-                        func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                        func: () =>
+                            document
+                                .querySelector(
+                                    ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                                )
+                                .click(),
                         message: "should wait until inbox loaded initial needaction messages",
                         predicate: ({ threadCache }) => {
                             return threadCache.thread === messaging.inbox.thread;
@@ -112,7 +122,7 @@ QUnit.module("mail", {}, function () {
                     ".o-mail-chat-window",
                     "should have opened the thread on clicking on the preview"
                 );
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 assert.containsNone(
                     document.body,
                     ".o_ThreadNeedactionPreviewView",
@@ -159,7 +169,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     afterEvent({
                         eventName: "o-thread-cache-loaded-messages",
-                        func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                        func: () =>
+                            document
+                                .querySelector(
+                                    ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                                )
+                                .click(),
                         message: "should wait until inbox loaded initial needaction messages",
                         predicate: ({ threadCache }) => {
                             return threadCache.thread === messaging.inbox.thread;
@@ -232,7 +247,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     afterEvent({
                         eventName: "o-thread-cache-loaded-messages",
-                        func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                        func: () =>
+                            document
+                                .querySelector(
+                                    ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                                )
+                                .click(),
                         message: "should wait until inbox loaded initial needaction messages",
                         predicate: ({ threadCache }) => {
                             return threadCache.thread === messaging.inbox.thread;
@@ -292,7 +312,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     afterEvent({
                         eventName: "o-thread-cache-loaded-messages",
-                        func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                        func: () =>
+                            document
+                                .querySelector(
+                                    ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                                )
+                                .click(),
                         message: "should wait until inbox loaded initial needaction messages",
                         predicate: ({ threadCache }) => {
                             return threadCache.thread === messaging.inbox.thread;
@@ -337,7 +362,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     afterEvent({
                         eventName: "o-thread-cache-loaded-messages",
-                        func: () => document.querySelector(".o_MessagingMenu_toggler").click(),
+                        func: () =>
+                            document
+                                .querySelector(
+                                    ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
+                                )
+                                .click(),
                         message: "should wait until inbox loaded initial needaction messages",
                         predicate: ({ threadCache }) => {
                             return threadCache.thread === messaging.inbox.thread;

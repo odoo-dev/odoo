@@ -32,7 +32,7 @@ QUnit.skipRefactoring('mark as read', async function (assert) {
         }
     );
     const { afterNextRender, click } = await start();
-    await click('.o_MessagingMenu_toggler');
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
     assert.containsOnce(
         document.body,
         '.o_NotificationGroupView_markAsRead',
@@ -91,7 +91,7 @@ QUnit.skipRefactoring('notifications grouped by notification_type', async functi
         },
     ]);
     const { click } = await start();
-    await click('.o_MessagingMenu_toggler');
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
 
     assert.containsN(
         document.body,
@@ -231,7 +231,7 @@ QUnit.skipRefactoring('grouped notifications by document model', async function 
         },
     });
 
-    await click('.o_MessagingMenu_toggler');
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
 
     assert.containsOnce(
         document.body,

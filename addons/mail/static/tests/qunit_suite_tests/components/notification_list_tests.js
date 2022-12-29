@@ -29,7 +29,7 @@ QUnit.module("mail", {}, function () {
                     },
                 ]);
                 const { click } = await start();
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 assert.containsN(
                     document.body,
                     ".o_ChannelPreviewView",
@@ -75,7 +75,7 @@ QUnit.module("mail", {}, function () {
                     },
                 ]);
                 const { click } = await start();
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 assert.containsN(
                     document.body,
                     ".o_ChannelPreviewView",

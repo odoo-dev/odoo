@@ -30,7 +30,7 @@ QUnit.skipRefactoring('livechats should be in "chat" filter', async function (as
         "should have messaging menu"
     );
 
-    await afterNextRender(() => document.querySelector('.o_MessagingMenu_toggler').click());
+    await afterNextRender(() => document.querySelector(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])").click());
     assert.containsOnce(
         document.body,
         '.o_MessagingMenuTabView[data-tab-id="all"]',
