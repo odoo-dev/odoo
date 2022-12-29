@@ -456,7 +456,7 @@ QUnit.module("test_mail", {}, function () {
         );
     });
 
-    QUnit.skipRefactoring(
+    QUnit.test(
         "activity view: search more to schedule an activity for a record of a respecting model",
         async function (assert) {
             assert.expect(5);
