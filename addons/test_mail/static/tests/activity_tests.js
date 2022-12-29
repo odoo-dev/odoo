@@ -354,9 +354,7 @@ QUnit.module("test_mail", {}, function () {
             },
         });
 
-        await click(
-            document.querySelector(".today .o_ActivityCellView_closestDeadline")
-        );
+        await click(document.querySelector(".today .o_ActivityCellView_closestDeadline"));
         assert.containsOnce(document.body, ".o_ActivityListView", "dropdown should be displayed");
         assert.ok(
             document.querySelector(".o_ActivityListView_todayTitle").textContent.includes("Today"),
@@ -376,13 +374,9 @@ QUnit.module("test_mail", {}, function () {
         );
 
         await click(document.querySelector(".o_MailTemplateView_preview"));
-        await click(
-            document.querySelector(".today .o_ActivityCellView_closestDeadline")
-        );
+        await click(document.querySelector(".today .o_ActivityCellView_closestDeadline"));
         await click(document.querySelector(".o_MailTemplateView_send"));
-        await click(
-            document.querySelector(".overdue .o_ActivityCellView_closestDeadline")
-        );
+        await click(document.querySelector(".overdue .o_ActivityCellView_closestDeadline"));
         assert.containsNone(
             document.body,
             ".o_MailTemplateView_name",
@@ -390,9 +384,7 @@ QUnit.module("test_mail", {}, function () {
         );
 
         await click(document.querySelector(".o_ActivityListView_addActivityButton"));
-        await click(
-            document.querySelector(".overdue .o_ActivityCellView_closestDeadline")
-        );
+        await click(document.querySelector(".overdue .o_ActivityCellView_closestDeadline"));
         await click(document.querySelector(".o_ActivityListViewItem_markAsDone"));
         document.querySelector(".o_ActivityMarkDonePopoverContentView_feedback").value =
             "feedback2";
@@ -739,11 +731,7 @@ QUnit.module("test_mail", {}, function () {
             "other records should be available"
         );
 
-        await click(
-            document.querySelector(
-                '.o_column_progress .progress-bar'
-            )
-        );
+        await click(document.querySelector(".o_column_progress .progress-bar"));
         assert.containsOnce(
             document.querySelector(".o_activity_view thead"),
             ".o_activity_filter_planned",
