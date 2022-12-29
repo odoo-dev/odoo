@@ -1,0 +1,1163 @@
+/** @odoo-module **/
+
+import { makeDeferred } from "@mail/utils/deferred";
+import {
+    afterNextRender,
+    click,
+    createFile,
+    dragenterFiles,
+    dropFiles,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
+
+import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+
+import {
+    click as webClick,
+    getFixture,
+    nextTick,
+    patchWithCleanup,
+    triggerHotkey,
+} from "@web/../tests/helpers/utils";
+import { Composer } from "@mail/new/composer/composer";
+
+let target;
+
+QUnit.module("composer", {
+    async beforeEach() {
+        target = getFixture();
+        // Simulate real user interactions
+        patchWithCleanup(Composer.prototype, {
+            isEventTrusted() {
+                return true;
+            },
+        });
+    },
+});
+
+QUnit.test("composer text input: basic rendering when posting a message", async function (assert) {
+    const pyEnv = await startServer();
+    const { openFormView } = await start();
+    await openFormView({
+        res_id: pyEnv.currentPartnerId,
+        res_model: "res.partner",
+    });
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsOnce(target, ".o-mail-composer");
+    assert.containsOnce(target, "textarea.o-mail-composer-textarea");
+    assert.hasAttrValue(
+        target.querySelector(".o-mail-composer-textarea"),
+        "placeholder",
+        "Send a message to followers..."
+    );
+});
+
+QUnit.test("composer text input: basic rendering when logging note", async function (assert) {
+    const pyEnv = await startServer();
+    const { openFormView } = await start();
+    await openFormView({
+        res_id: pyEnv.currentPartnerId,
+        res_model: "res.partner",
+    });
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.containsOnce(target, ".o-mail-composer");
+    assert.containsOnce(target, "textarea.o-mail-composer-textarea");
+    assert.hasAttrValue(
+        target.querySelector(".o-mail-composer-textarea"),
+        "placeholder",
+        "Log an internal note..."
+    );
+});
+
+QUnit.test(
+    "composer text input: basic rendering when linked thread is a mail.channel",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "dofus-disco" });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-composer");
+        assert.containsOnce(target, "textarea.o-mail-composer-textarea");
+    }
+);
+
+QUnit.test(
+    "composer text input placeholder should contain channel name when thread does not have specific correspondent",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "General",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.hasAttrValue(
+            target.querySelector(".o-mail-composer-textarea"),
+            "placeholder",
+            "Message #General…"
+        );
+    }
+);
+
+QUnit.test("add an emoji", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "swamp-safari" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😤']");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "😤");
+});
+
+QUnit.test(
+    "Exiting emoji picker brings the focus back to the Composer textarea",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Emojis']");
+        await afterNextRender(() => triggerHotkey("Escape"));
+        assert.equal(target.querySelector(".o-mail-composer-textarea"), document.activeElement);
+    }
+);
+
+QUnit.test("add an emoji after some text", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    await insertText(".o-mail-composer-textarea", "Blabla");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "Blabla");
+
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='🤑']");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "Blabla🤑");
+});
+
+QUnit.test("add emoji replaces (keyboard) text selection", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+    await insertText(".o-mail-composer-textarea", "Blabla");
+    assert.strictEqual(composerTextInputTextArea.value, "Blabla");
+
+    // simulate selection of all the content by keyboard
+    composerTextInputTextArea.setSelectionRange(0, composerTextInputTextArea.value.length);
+    await click("i[aria-label='Emojis']");
+    await click('.o-emoji[data-codepoints="🤠"]');
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "🤠");
+});
+
+QUnit.test("Cursor is positioned after emoji after adding it", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+    await insertText(".o-mail-composer-textarea", "Blabla");
+    composerTextInputTextArea.setSelectionRange(2, 2);
+    await click("i[aria-label='Emojis']");
+    await click('.o-emoji[data-codepoints="🤠"]');
+    const expectedCursorPos = 2 + "🤠".length;
+    assert.strictEqual(composerTextInputTextArea.selectionStart, expectedCursorPos);
+    assert.strictEqual(composerTextInputTextArea.selectionEnd, expectedCursorPos);
+});
+
+QUnit.test("selected text is not replaced after cancelling the selection", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "pétanque-tournament-14",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+    await insertText(".o-mail-composer-textarea", "Blabla");
+    assert.strictEqual(composerTextInputTextArea.value, "Blabla");
+
+    // simulate selection of all the content by keyboard
+    composerTextInputTextArea.setSelectionRange(0, composerTextInputTextArea.value.length);
+    document.querySelector(".o-mail-discuss-content").click();
+    await nextTick();
+    await click("i[aria-label='Emojis']");
+    await click('.o-emoji[data-codepoints="🤠"]');
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "Blabla🤠");
+});
+
+QUnit.test(
+    "Selection is kept when changing channel and going back to original channel",
+    async (assert) => {
+        const pyEnv = await startServer();
+        const firstChannelId = pyEnv["mail.channel"].create([
+            { name: "firstChannel" },
+            { name: "secondChannel" },
+        ]);
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${firstChannelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "Foo");
+        // simulate selection of all the content by keyboard
+        const composerTextArea = document.querySelector(".o-mail-composer-textarea");
+        composerTextArea.setSelectionRange(0, composerTextArea.value.length);
+        await nextTick();
+        const [firstChannelBtn, secondChannelBtn] =
+            document.querySelectorAll(".o-mail-category-item");
+        await afterNextRender(() => secondChannelBtn.click());
+        await afterNextRender(() => firstChannelBtn.click());
+        assert.ok(
+            composerTextArea.selectionStart === 0 &&
+                composerTextArea.selectionEnd === composerTextArea.value.length,
+            "Content of the text area should still be selected after switching channels"
+        );
+    }
+);
+
+QUnit.test(
+    "click on emoji button, select emoji, then re-click on button should show emoji picker",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "roblox-skateboarding",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Emojis']");
+        await click(".o-emoji[data-codepoints='👺']");
+        await click("i[aria-label='Emojis']");
+        assert.containsOnce(target, ".o-mail-emoji-picker");
+    }
+);
+
+QUnit.test('do not send typing notification on typing "/" command', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/channel/notify_typing") {
+                assert.step(`notify_typing:${args.is_typing}`);
+            }
+        },
+    });
+    await openDiscuss();
+
+    await insertText(".o-mail-composer-textarea", "/");
+    assert.verifySteps([], "No rpc done");
+});
+
+QUnit.test('display partner mention suggestions on typing "@"', async function (assert) {
+    const pyEnv = await startServer();
+
+    const resPartnerId1 = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    const resPartnerId2 = pyEnv["res.partner"].create({
+        email: "testpartner2@odoo.com",
+        name: "TestPartner2",
+    });
+    pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId1 }],
+            [0, 0, { partner_id: resPartnerId2 }],
+        ],
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+
+    await insertText(".o-mail-composer-textarea", "@");
+    assert.containsN(target, ".o-composer-suggestion", 3);
+});
+
+QUnit.test('display partner mention suggestions on typing "@" in chatter', async function (assert) {
+    const pyEnv = await startServer();
+    const { openFormView } = await start();
+    await openFormView({
+        res_id: pyEnv.currentPartnerId,
+        res_model: "res.partner",
+    });
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsNone(target, ".o-composer-suggestion");
+    await insertText(".o-mail-composer-textarea", "@");
+    assert.containsOnce(target, ".o-composer-suggestion:contains(Mitchell Admin)");
+});
+
+QUnit.test("show other channel member in @ mention", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    await insertText(".o-mail-composer-textarea", "@");
+    assert.containsOnce(target, ".o-composer-suggestion:contains(TestPartner)");
+});
+
+QUnit.test("select @ mention insert mention text in composer", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    await insertText(".o-mail-composer-textarea", "@");
+    await click(".o-composer-suggestion:contains(TestPartner)");
+    assert.strictEqual($(target).find(".o-mail-composer-textarea").val().trim(), "@TestPartner");
+});
+
+QUnit.test("composer text input cleared on message post", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step("message_post");
+            }
+        },
+    });
+    await openDiscuss();
+    // Type message
+    await insertText(".o-mail-composer-textarea", "test message");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "test message");
+
+    // Send message
+    await click(".o-mail-composer-send-button");
+    assert.verifySteps(["message_post"]);
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
+});
+
+QUnit.test(
+    "send message only once when button send is clicked twice quickly",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "nether-picnic" });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+            async mockRPC(route, args) {
+                if (route === "/mail/message/post") {
+                    assert.step("message_post");
+                }
+            },
+        });
+        await openDiscuss();
+        // Type message
+        await insertText(".o-mail-composer-textarea", "test message");
+
+        await afterNextRender(() => {
+            target.querySelector(".o-mail-composer-send-button").click();
+            target.querySelector(".o-mail-composer-send-button").click();
+        });
+        assert.verifySteps(["message_post"]);
+    }
+);
+
+QUnit.test('send button on mail.channel should have "Send" as label', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "minecraft-wii-u" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-send-button").textContent.trim(),
+        "Send"
+    );
+});
+
+QUnit.test(
+    "composer textarea content is retained when changing channel then going back",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const [mailChannelId1] = pyEnv["mail.channel"].create([
+            { name: "minigolf-galaxy-iv" },
+            { name: "epic-shrek-lovers" },
+        ]);
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
+
+        await webClick($(target).find("span:contains('epic-shrek-lovers')")[0]);
+        await webClick($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
+        assert.strictEqual(
+            target.querySelector(".o-mail-composer-textarea").value,
+            "According to all known laws of aviation,"
+        );
+    }
+);
+
+QUnit.test('display command suggestions on typing "/"', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    await insertText(".o-mail-composer-textarea", "/");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
+});
+
+QUnit.test(
+    'do not send typing notification on typing after selecting suggestion from "/" command',
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+            async mockRPC(route, args) {
+                if (route === "/mail/channel/notify_typing") {
+                    assert.step(`notify_typing:${args.is_typing}`);
+                }
+            },
+        });
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "/");
+        await click(".o-composer-suggestion");
+        await insertText(".o-mail-composer-textarea", " is user?");
+        assert.verifySteps([], "No rpc done");
+    }
+);
+
+QUnit.test("use a command for a specific channel type", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ channel_type: "chat" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "/");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "/who ",
+        "text content of composer should have used command + additional whitespace afterwards"
+    );
+});
+
+QUnit.test(
+    "command suggestion should only open if command is the first character",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "General",
+            channel_type: "channel",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+        assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
+        await insertText(".o-mail-composer-textarea", "bluhbluh ");
+        assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "bluhbluh ");
+        await insertText(".o-mail-composer-textarea", "/");
+        assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    }
+);
+
+QUnit.test("add an emoji after a command", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "/");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "/who ",
+        "text content of composer should have previous content + used command + additional whitespace afterwards"
+    );
+
+    // select emoji
+    await click("i[aria-label='Emojis']");
+    await click('.o-emoji[data-codepoints="😊"]');
+    assert.strictEqual(
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "/who 😊"
+    );
+});
+
+QUnit.test('display canned response suggestions on typing ":"', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
+});
+
+QUnit.test("use a canned response", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "Hello! How are you? ",
+        "text content of composer should have canned response + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("use a canned response some text", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "bluhbluh ");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "bluhbluh ");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "bluhbluh Hello! How are you? ",
+        "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("add an emoji after a canned response", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "Hello! How are you? ",
+        "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
+    );
+
+    // select emoji
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "Hello! How are you? 😊"
+    );
+});
+
+QUnit.test("add an emoji after a partner mention", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({
+        email: "testpartner@odoo.com",
+        name: "TestPartner",
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "@");
+    await insertText(".o-mail-composer-textarea", "T");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "@TestPartner "
+    );
+
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "@TestPartner 😊"
+    );
+});
+
+QUnit.test('display channel mention suggestions on typing "#"', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
+});
+
+QUnit.test("mention a channel", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General ",
+        "text content of composer should have mentioned channel + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("mention a channel after some text", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "bluhbluh ");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value,
+        "bluhbluh ",
+        "text content of composer should have content"
+    );
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "bluhbluh #General ",
+        "text content of composer should have previous content + mentioned channel + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("add an emoji after a channel mention", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(document.body, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General ",
+        "text content of composer should have previous content + mentioned channel + additional whitespace afterwards"
+    );
+
+    // select emoji
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General 😊"
+    );
+});
+
+QUnit.test(
+    'do not post message on channel with "SHIFT-Enter" keyboard shortcut',
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+        });
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-message");
+
+        await insertText(".o-mail-composer-textarea", "Test");
+        await triggerHotkey("shift+Enter");
+        await nextTick();
+        assert.containsNone(target, ".o-mail-message");
+    }
+);
+
+QUnit.test('post message on channel with "Enter" keyboard shortcut', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-message");
+
+    // insert some HTML in editable
+    await insertText(".o-mail-composer-textarea", "Test");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsOnce(target, ".o-mail-message");
+});
+
+QUnit.test("leave command on channel", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "general" });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => {
+                assert.step(message);
+            }),
+        },
+    });
+    await openDiscuss();
+    assert.hasClass(
+        $(target).find(`.o-mail-category-item[data-channel-id="${mailChannelId}"]`),
+        "o-active"
+    );
+    await insertText(".o-mail-composer-textarea", "/leave");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsNone(target, `.o-mail-category-item[data-channel-id="${mailChannelId}"]`);
+    assert.containsOnce(target, ".o-mail-discuss-no-thread");
+    assert.verifySteps(["You unsubscribed from general."]);
+});
+
+QUnit.test("leave command on chat", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({ name: "Chuck Norris" });
+    const mailChannelId = pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+        channel_type: "chat",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => {
+                assert.step(message);
+            }),
+        },
+    });
+    await openDiscuss();
+    assert.hasClass(
+        $(target).find(`.o-mail-category-item[data-channel-id="${mailChannelId}"]`),
+        "o-active"
+    );
+    await insertText(".o-mail-composer-textarea", "/leave");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsNone(target, `.o-mail-category-item[data-channel-id="${mailChannelId}"]`);
+    assert.containsOnce(target, ".o-mail-discuss-no-thread");
+    assert.verifySteps(["You unpinned your conversation with Chuck Norris"]);
+});
+
+QUnit.test("Channel suggestions do not crash after rpc returns", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const getSuggestionsDeferred = makeDeferred();
+    const { openDiscuss } = await start({
+        async mockRPC(args, params, originalFn) {
+            if (params.method === "get_mention_suggestions") {
+                const res = await originalFn(args, params);
+                assert.step("get_mention_suggestions");
+                assert.strictEqual(res.length, 1, "Should return a thread");
+                getSuggestionsDeferred.resolve();
+                return res;
+            }
+            return originalFn(args, params);
+        },
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    pyEnv["mail.channel"].create({ name: "foo" });
+    insertText(".o-mail-composer-textarea", "#");
+    await nextTick();
+    insertText(".o-mail-composer-textarea", "f");
+    await getSuggestionsDeferred;
+    assert.verifySteps(["get_mention_suggestions"]);
+});
+
+QUnit.test("Can post suggestions", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    insertText(".o-mail-composer-textarea", "#");
+    await nextTick();
+    await insertText(".o-mail-composer-textarea", "general");
+    // Close the popup.
+    await afterNextRender(() => triggerHotkey("Enter"));
+    // Send the message.
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsOnce(target, ".o-mail-message .o_channel_redirect");
+});
+
+QUnit.test(
+    "composer text input placeholder should contain correspondent name when thread has exactly one correspondent",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.hasAttrValue(
+            target.querySelector(".o-mail-composer-textarea"),
+            "placeholder",
+            "Message Marc Demo…"
+        );
+    }
+);
+
+QUnit.test("send message only once when enter is pressed twice quickly", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step("message_post");
+            }
+        },
+    });
+    await openDiscuss();
+    // Type message
+    await insertText(".o-mail-composer-textarea", "test message");
+    triggerHotkey("Enter");
+    triggerHotkey("Enter");
+    await nextTick();
+    assert.verifySteps(["message_post"], "The message has been posted only once");
+});
+
+QUnit.test("quick edit last self-message from UP arrow", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const mailMessageId = pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Test",
+        attachment_ids: [],
+        message_type: "comment",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId}]`);
+    assert.containsNone(
+        target,
+        `.o-mail-message[data-message-id=${mailMessageId}] .o-mail-composer`
+    );
+
+    await afterNextRender(() => triggerHotkey("ArrowUp"));
+    assert.containsOnce(
+        target,
+        `.o-mail-message[data-message-id=${mailMessageId}] .o-mail-composer`
+    );
+});
+
+QUnit.test(
+    "Select composer suggestion via Enter does not send the message",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            email: "shrek@odoo.com",
+            name: "Shrek",
+        });
+        pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+            async mockRPC(route, args) {
+                if (route === "/mail/message/post") {
+                    assert.step("message_post");
+                }
+            },
+        });
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "@");
+        await insertText(".o-mail-composer-textarea", "Shrek");
+        await afterNextRender(() => triggerHotkey("Enter"));
+        assert.equal(target.querySelector(".o-mail-composer-textarea").value.trim(), "@Shrek");
+        assert.verifySteps([]);
+    }
+);
+
+QUnit.test("composer: drop attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    const files = [
+        await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        }),
+        await createFile({
+            content: "hello, worlduh",
+            contentType: "text/plain",
+            name: "text2.txt",
+        }),
+    ];
+    assert.containsNone(target, ".o-dropzone");
+    assert.containsNone(target, ".o-mail-attachment-card");
+
+    await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-composer-textarea")));
+    assert.containsOnce(target, ".o-dropzone");
+    assert.containsNone(target, ".o-mail-attachment-card");
+
+    await afterNextRender(() => dropFiles(target.querySelector(".o-dropzone"), files));
+    assert.containsNone(target, ".o-dropzone");
+    assert.containsN(target, ".o-mail-attachment-card", 2);
+
+    await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-composer-textarea")));
+    await afterNextRender(async () =>
+        dropFiles(target.querySelector(".o-dropzone"), [
+            await createFile({
+                content: "hello, world",
+                contentType: "text/plain",
+                name: "text3.txt",
+            }),
+        ])
+    );
+    assert.containsN(document.body, ".o-mail-attachment-card", 3);
+});

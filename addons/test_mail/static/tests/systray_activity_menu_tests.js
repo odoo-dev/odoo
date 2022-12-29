@@ -38,7 +38,7 @@ QUnit.module("test_mail", {}, function () {
         },
     });
 
-    QUnit.test("activity menu widget: menu with no records", async function (assert) {
+    QUnit.skipRefactoring("activity menu widget: menu with no records", async function (assert) {
         assert.expect(1);
 
         const { click } = await start({
@@ -52,81 +52,84 @@ QUnit.module("test_mail", {}, function () {
         assert.containsOnce(document.body, ".o_ActivityMenuView_noActivity");
     });
 
-    QUnit.test("activity menu widget: activity menu with 2 models", async function (assert) {
-        assert.expect(10);
+    QUnit.skipRefactoring(
+        "activity menu widget: activity menu with 2 models",
+        async function (assert) {
+            assert.expect(10);
 
-        const { click, env } = await start();
+            const { click, env } = await start();
 
-        await click(".o_ActivityMenuView_dropdownToggle");
-        assert.containsOnce(
-            document.body,
-            ".o_ActivityMenuView",
-            "should contain an instance of widget"
-        );
-        assert.ok(document.querySelectorAll(".o_ActivityMenuView_activityGroup").length);
-        assert.containsOnce(
-            document.body,
-            ".o_ActivityMenuView_counter",
-            "widget should have notification counter"
-        );
-        assert.strictEqual(
-            parseInt(document.querySelector(".o_ActivityMenuView_counter").innerText),
-            5,
-            "widget should have 5 notification counter"
-        );
+            await click(".o_ActivityMenuView_dropdownToggle");
+            assert.containsOnce(
+                document.body,
+                ".o_ActivityMenuView",
+                "should contain an instance of widget"
+            );
+            assert.ok(document.querySelectorAll(".o_ActivityMenuView_activityGroup").length);
+            assert.containsOnce(
+                document.body,
+                ".o_ActivityMenuView_counter",
+                "widget should have notification counter"
+            );
+            assert.strictEqual(
+                parseInt(document.querySelector(".o_ActivityMenuView_counter").innerText),
+                5,
+                "widget should have 5 notification counter"
+            );
 
-        var context = {};
-        patchWithCleanup(env.services.action, {
-            doAction(action) {
-                assert.deepEqual(action.context, context, "wrong context value");
-            },
-        });
+            var context = {};
+            patchWithCleanup(env.services.action, {
+                doAction(action) {
+                    assert.deepEqual(action.context, context, "wrong context value");
+                },
+            });
 
-        // case 1: click on "late"
-        context = {
-            force_search_count: 1,
-            search_default_activities_overdue: 1,
-        };
-        assert.containsOnce(
-            document.body,
-            ".o_ActivityMenuView_dropdownMenu.show",
-            "ActivityMenu should be open"
-        );
-        await click(
-            '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="overdue"]'
-        );
-        assert.containsNone(document.body, ".show", "ActivityMenu should be closed");
-        // case 2: click on "today"
-        context = {
-            force_search_count: 1,
-            search_default_activities_today: 1,
-        };
-        await click('.dropdown-toggle[title="Activities"]');
-        await click(
-            '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="today"]'
-        );
-        // case 3: click on "future"
-        context = {
-            force_search_count: 1,
-            search_default_activities_upcoming_all: 1,
-        };
-        await click('.dropdown-toggle[title="Activities"]');
-        await click(
-            '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="upcoming_all"]'
-        );
-        // case 4: click anywere else
-        context = {
-            force_search_count: 1,
-            search_default_activities_overdue: 1,
-            search_default_activities_today: 1,
-        };
-        await click('.dropdown-toggle[title="Activities"]');
-        await click(
-            '.o_ActivityMenuView_activityGroups > div[data-model_name="mail.test.activity"]'
-        );
-    });
+            // case 1: click on "late"
+            context = {
+                force_search_count: 1,
+                search_default_activities_overdue: 1,
+            };
+            assert.containsOnce(
+                document.body,
+                ".o_ActivityMenuView_dropdownMenu.show",
+                "ActivityMenu should be open"
+            );
+            await click(
+                '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="overdue"]'
+            );
+            assert.containsNone(document.body, ".show", "ActivityMenu should be closed");
+            // case 2: click on "today"
+            context = {
+                force_search_count: 1,
+                search_default_activities_today: 1,
+            };
+            await click('.dropdown-toggle[title="Activities"]');
+            await click(
+                '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="today"]'
+            );
+            // case 3: click on "future"
+            context = {
+                force_search_count: 1,
+                search_default_activities_upcoming_all: 1,
+            };
+            await click('.dropdown-toggle[title="Activities"]');
+            await click(
+                '.o_ActivityMenuView_activityGroupFilterButton[data-model_name="mail.test.activity"][data-filter="upcoming_all"]'
+            );
+            // case 4: click anywere else
+            context = {
+                force_search_count: 1,
+                search_default_activities_overdue: 1,
+                search_default_activities_today: 1,
+            };
+            await click('.dropdown-toggle[title="Activities"]');
+            await click(
+                '.o_ActivityMenuView_activityGroups > div[data-model_name="mail.test.activity"]'
+            );
+        }
+    );
 
-    QUnit.test("activity menu widget: activity view icon", async function (assert) {
+    QUnit.skipRefactoring("activity menu widget: activity view icon", async function (assert) {
         assert.expect(14);
 
         patchWithCleanup(session, { uid: 10 });
@@ -190,23 +193,26 @@ QUnit.module("test_mail", {}, function () {
         assert.verifySteps(["do_action:mail.test.activity", "do_action:res.partner"]);
     });
 
-    QUnit.test("activity menu widget: close on messaging menu click", async function (assert) {
-        assert.expect(2);
+    QUnit.skipRefactoring(
+        "activity menu widget: close on messaging menu click",
+        async function (assert) {
+            assert.expect(2);
 
-        const { click } = await start();
+            const { click } = await start();
 
-        await click('.dropdown-toggle[title="Activities"]');
-        assert.hasClass(
-            document.querySelector(".o_ActivityMenuView_dropdownMenu"),
-            "show",
-            "activity menu should be shown after click on itself"
-        );
+            await click('.dropdown-toggle[title="Activities"]');
+            assert.hasClass(
+                document.querySelector(".o_ActivityMenuView_dropdownMenu"),
+                "show",
+                "activity menu should be shown after click on itself"
+            );
 
-        await click(`.o_MessagingMenu_toggler`);
-        assert.containsNone(
-            document.body,
-            ".o_ActivityMenuView_dropdownMenu",
-            "activity menu should be hidden after click on messaging menu"
-        );
-    });
+            await click(`.o_MessagingMenu_toggler`);
+            assert.containsNone(
+                document.body,
+                ".o_ActivityMenuView_dropdownMenu",
+                "activity menu should be hidden after click on messaging menu"
+            );
+        }
+    );
 });

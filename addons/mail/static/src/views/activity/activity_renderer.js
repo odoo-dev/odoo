@@ -1,15 +1,15 @@
 /** @odoo-module */
 
-import { ActivityCellViewContainer } from "@mail/backend_components/activity_cell_view/activity_cell_view_container";
+import { ActivityCell } from "@mail/new/views/activity/activity_cell";
 import { Component, useState } from "@odoo/owl";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { ActivityRecord } from "./activity_record";
 
 export class ActivityRenderer extends Component {
     static components = {
+        ActivityCell,
         ActivityRecord,
         ColumnProgress,
-        ActivityCellViewContainer,
     };
     static props = {
         activityTypes: { type: Array },

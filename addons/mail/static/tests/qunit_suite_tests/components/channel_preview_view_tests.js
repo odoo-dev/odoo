@@ -6,7 +6,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("channel_preview_view_tests.js");
 
-        QUnit.test("mark as read", async function (assert) {
+        QUnit.skipRefactoring("mark as read", async function (assert) {
             assert.expect(6);
 
             const pyEnv = await startServer();
@@ -70,7 +70,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have opened the thread"
             );
         });

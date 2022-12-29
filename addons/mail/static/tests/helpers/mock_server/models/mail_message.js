@@ -27,6 +27,32 @@ patch(MockServer.prototype, "mail/models/mail_message", {
         return this._super(route, args);
     },
     /**
+     * Simulates `_message_add_reaction` on `mail.message`.
+     */
+    _mockMailMessage_messageAddReaction(content, messageId) {
+        const reaction = this.pyEnv["mail.message.reaction"].searchRead([
+            ["content", "=", content],
+            ["partner_id", "=", this.pyEnv.currentPartnerId],
+        ]);
+        if (!reaction.length) {
+            this.pyEnv["mail.message.reaction"].create({
+                content,
+                partner_id: this.pyEnv.currentPartnerId,
+                message_id: messageId,
+            });
+        }
+    },
+    /**
+     * Simulates `_message_add_reaction` on `mail.message`.
+     */
+    _mockMailMessage_messageRemoveReaction(content, messageId) {
+        const reactionsIdsToUnlink = this.pyEnv["mail.message.reaction"].search([
+            ["content", "=", content],
+            ["partner_id", "=", this.pyEnv.currentPartnerId],
+        ]);
+        this.pyEnv["mail.message.reaction"].unlink(reactionsIdsToUnlink);
+    },
+    /**
      * Simulates `mark_all_as_read` on `mail.message`.
      *
      * @private
@@ -151,9 +177,8 @@ patch(MockServer.prototype, "mail/models/mail_message", {
             const trackingValueIds = this.getRecords("mail.tracking.value", [
                 ["id", "in", message.tracking_value_ids],
             ]);
-            const formattedTrackingValues = this._mockMailTrackingValue_TrackingValueFormat(
-                trackingValueIds
-            );
+            const formattedTrackingValues =
+                this._mockMailTrackingValue_TrackingValueFormat(trackingValueIds);
             const partners = this.getRecords("res.partner", [["id", "in", message.partner_ids]]);
             const linkPreviews = this.getRecords("mail.link.preview", [
                 ["id", "in", message.link_preview_ids],

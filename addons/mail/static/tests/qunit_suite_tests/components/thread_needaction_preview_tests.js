@@ -8,7 +8,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("thread_needaction_preview_tests.js");
 
-        QUnit.test("mark as read", async function (assert) {
+        QUnit.skipRefactoring("mark as read", async function (assert) {
             assert.expect(5);
 
             const pyEnv = await startServer();
@@ -60,12 +60,12 @@ QUnit.module("mail", {}, function () {
             assert.verifySteps(["mark_all_as_read"], "should have marked the thread as read");
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have opened the thread"
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "click on preview should mark as read and open the thread",
             async function (assert) {
                 assert.expect(4);
@@ -102,14 +102,14 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have no chat window initially"
                 );
 
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the thread on clicking on the preview"
                 );
                 await click(".o_MessagingMenu_toggler");
@@ -121,7 +121,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "click on expand from chat window should close the chat window and open the form view",
             async function (assert) {
                 assert.expect(8);
@@ -175,7 +175,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the thread on clicking on the preview"
                 );
                 assert.containsOnce(
@@ -187,7 +187,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ChatWindowHeaderView_commandExpand");
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have closed the chat window on clicking expand"
                 );
                 assert.verifySteps(
@@ -197,7 +197,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "[technical] opening a non-channel chat window should not call channel_fold",
             async function (assert) {
                 // channel_fold should not be called when opening non-channels in chat
@@ -246,20 +246,20 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have no chat window initially"
                 );
 
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the chat window on clicking on the preview"
                 );
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "preview should display last needaction message preview even if there is a more recent message that is not needaction in the thread",
             async function (assert) {
                 assert.expect(2);
@@ -312,7 +312,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat window header should not have unread counter for non-channel thread",
             async function (assert) {
                 assert.expect(2);
@@ -347,7 +347,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the chat window on clicking on the preview"
                 );
                 assert.containsNone(

@@ -1,0 +1,13 @@
+.o-mail-discuss-content {
+    .o-mail-thread {
+        flex-grow: 1;
+    }
+
+    .o-mail-discuss-actions button:not(.btn-secondary):hover {
+        background-color: $gray-400;
+    }
+}
+
+.o-mail-discuss-channel-member-list {
+    width: $o-mail-chat-sidebar-width;
+}

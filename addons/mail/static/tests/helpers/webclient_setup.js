@@ -7,17 +7,26 @@ import { makeMultiTabToLegacyEnv } from "@bus/services/legacy/make_multi_tab_to_
 import { makeBusServiceToLegacyEnv } from "@bus/services/legacy/make_bus_service_to_legacy_env";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
-import { ChatWindowManagerContainer } from "@mail/components/chat_window_manager_container/chat_window_manager_container";
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
-import { DiscussContainer } from "@mail/components/discuss_container/discuss_container";
+import { Discuss } from "@mail/new/discuss/discuss";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
+import { ActivityMenu } from "@mail/new/activity/activity_menu";
+import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
+import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
+import { messagingService as newMessagingService } from "@mail/new/messaging_service";
+import { attachmentViewerService } from "@mail/new/attachment_viewer/attachment_viewer_service";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
 
+import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 import { registry } from "@web/core/registry";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
+import { effectService } from "@web/core/effects/effect_service";
+import { soundEffects } from "@mail/new/sound_effects_service";
+import { userSettingsService } from "@mail/new/user_settings_service";
+import { rtcService } from "@mail/new/rtc/rtc_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -34,7 +43,6 @@ const WEBCLIENT_PARAMETER_NAMES = new Set([
 const SERVICES_PARAMETER_NAMES = new Set([
     "legacyServices",
     "loadingBaseDelayDuration",
-    "messagingBeforeCreationDeferred",
     "messagingBus",
     "services",
 ]);
@@ -44,11 +52,11 @@ const SERVICES_PARAMETER_NAMES = new Set([
  */
 function setupMainComponentRegistry() {
     const mainComponentRegistry = registry.category("main_components");
-    mainComponentRegistry.add("ChatWindowManagerContainer", {
-        Component: ChatWindowManagerContainer,
+    mainComponentRegistry.add("mail.ChatWindowContainer", {
+        Component: ChatWindowContainer,
     });
     mainComponentRegistry.add("DialogManagerContainer", { Component: DialogManagerContainer });
-    registry.category("actions").add("mail.action_discuss", DiscussContainer);
+    registry.category("actions").add("mail.action_discuss", Discuss);
     mainComponentRegistry.add("PopoverManagerContainer", { Component: PopoverManagerContainer });
 }
 
@@ -58,27 +66,16 @@ function setupMainComponentRegistry() {
  * @param {Object} param0
  * @param {Object} [param0.services]
  * @param {number} [param0.loadingBaseDelayDuration=0]
- * @param {Promise} [param0.messagingBeforeCreationDeferred=Promise.resolve()]
- *   Deferred that let tests block messaging creation and simulate resolution.
- *   Useful for testing components behavior when messaging is not yet created.
  * @param {EventBus} [param0.messagingBus]
  * @returns {LegacyRegistry} The registry containing all the legacy services that will be passed
  * to the webClient as a legacy parameter.
  */
-function setupMessagingServiceRegistries({
-    loadingBaseDelayDuration = 0,
-    messagingBeforeCreationDeferred = Promise.resolve(),
-    messagingBus,
-    services,
-}) {
+function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagingBus, services }) {
     const serviceRegistry = registry.category("services");
 
     patchWithCleanup(messagingService, {
-        async _startModelManager(modelManager, messagingValues) {
-            modelManager.isDebug = true;
-            const _super = this._super.bind(this);
-            await messagingBeforeCreationDeferred;
-            return _super(modelManager, messagingValues);
+        async _startModelManager() {
+            // never start model manager since it interferes with tests.
         },
     });
 
@@ -97,7 +94,13 @@ function setupMessagingServiceRegistries({
     services = {
         bus_service: busService,
         im_status: imStatusService,
+        effect: effectService,
+        "mail.messaging": newMessagingService,
+        "mail.rtc": rtcService,
+        "mail.soundEffects": soundEffects,
+        "mail.userSettings": userSettingsService,
         messaging: messagingService,
+        attachmentViewer: attachmentViewerService,
         messagingValues,
         presence: makeFakePresenceService({
             isOdooFocused: () => true,
@@ -106,11 +109,13 @@ function setupMessagingServiceRegistries({
         multi_tab: multiTabService,
         ...services,
     };
+    if (!serviceRegistry.contains("file_upload")) {
+        serviceRegistry.add("file_upload", fileUploadService);
+    }
 
     Object.entries(services).forEach(([serviceName, service]) => {
         serviceRegistry.add(serviceName, service);
     });
-
     registry
         .category("wowlToLegacyServiceMappers")
         .add("bus_service_to_legacy_env", makeBusServiceToLegacyEnv);
@@ -120,6 +125,21 @@ function setupMessagingServiceRegistries({
     registry
         .category("wowlToLegacyServiceMappers")
         .add("messaging_service_to_legacy_env", makeMessagingToLegacyEnv);
+
+    registry.category("systray").add(
+        "mail.activity_menu",
+        {
+            Component: ActivityMenu,
+        },
+        { sequence: 20 }
+    );
+    registry.category("systray").add(
+        "mail.messaging_menu",
+        {
+            Component: MessagingMenu,
+        },
+        { sequence: 25 }
+    );
 }
 
 /**
@@ -130,7 +150,6 @@ function setupMessagingServiceRegistries({
  * @param {Object} [param0.serverData]
  * @param {Object} [param0.services]
  * @param {Object} [param0.loadingBaseDelayDuration]
- * @param {Object} [param0.messagingBeforeCreationDeferred]
  * @param {EventBus} [param0.messagingBus] The event bus to be used by messaging.
  * @returns {WebClient}
  */

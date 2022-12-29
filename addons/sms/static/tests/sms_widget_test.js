@@ -83,7 +83,7 @@ QUnit.module('SmsWidget', (hooks) => {
         assert.strictEqual(target.querySelector('.o_sms_count').textContent, "71 characters, fits in 2 SMS (UNICODE) ");
     });
 
-    QUnit.test('SMS widgets update with emoji picker', async function (assert) {
+    QUnit.skipRefactoring('SMS widgets update with emoji picker', async function (assert) {
         assert.expect(3);
         await openTestView('fields.sms.emojis.partner', `<form><sheet><field name="message" widget="sms_widget"/></sheet></form>`);
 

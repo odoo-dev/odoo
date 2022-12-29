@@ -6,7 +6,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("discuss_sidebar_category_tests.js");
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - counter: should not have a counter if the category is unfolded and without needaction messages",
             async function (assert) {
                 assert.expect(1);
@@ -18,7 +18,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-channel .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is unfolded and without unread messages"
@@ -26,7 +26,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - counter: should not have a counter if the category is unfolded and with needaction messagens",
             async function (assert) {
                 assert.expect(1);
@@ -64,7 +64,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-channel .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is unfolded and with needaction messages"
@@ -72,7 +72,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - counter: should not have a counter if category is folded and without needaction messages",
             async function (assert) {
                 assert.expect(1);
@@ -89,7 +89,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-channel .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is folded and without unread messages"
@@ -97,7 +97,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - counter: should have correct value of needaction threads if category is folded and with needaction messages",
             async function (assert) {
                 assert.expect(1);
@@ -140,7 +140,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.strictEqual(
                     document.querySelector(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-channel .o_DiscussSidebarCategory_counter`
                     ).textContent,
                     "2",
                     "should have correct value of needaction threads if category is folded and with needaction messages"
@@ -148,142 +148,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
-            "channel - command: should have view command when category is unfolded",
-            async function (assert) {
-                assert.expect(1);
-
-                const { openDiscuss } = await start();
-                await openDiscuss();
-
-                assert.strictEqual(
-                    document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandView`
-                    ).length,
-                    1,
-                    "should have view command when channel category is open"
-                );
-            }
-        );
-
-        QUnit.test(
-            "channel - command: should have view command when category is folded",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                pyEnv["res.users.settings"].create({
-                    user_id: pyEnv.currentUserId,
-                    is_discuss_sidebar_category_channel_open: false,
-                });
-                const { click, openDiscuss } = await start();
-                await openDiscuss();
-
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandView`
-                    ).length,
-                    1,
-                    "should have view command when channel category is closed"
-                );
-            }
-        );
-
-        QUnit.test(
-            "channel - command: should have add command when category is unfolded",
-            async function (assert) {
-                assert.expect(1);
-
-                const { openDiscuss } = await start();
-                await openDiscuss();
-
-                assert.strictEqual(
-                    document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandAdd`
-                    ).length,
-                    1,
-                    "should have add command when channel category is open"
-                );
-            }
-        );
-
-        QUnit.test(
-            "channel - command: should not have add command when category is folded",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                pyEnv["res.users.settings"].create({
-                    user_id: pyEnv.currentUserId,
-                    is_discuss_sidebar_category_channel_open: false,
-                });
-                const { openDiscuss } = await start();
-                await openDiscuss();
-
-                assert.strictEqual(
-                    document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandAdd`
-                    ).length,
-                    0,
-                    "should not have add command when channel category is closed"
-                );
-            }
-        );
-
-        QUnit.test(
-            "channel - states: close manually by clicking the title",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                pyEnv["res.users.settings"].create({
-                    user_id: pyEnv.currentUserId,
-                    is_discuss_sidebar_category_channel_open: true,
-                });
-                const { click, openDiscuss } = await start();
-                await openDiscuss();
-
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
-                assert.containsNone(
-                    document.body,
-                    `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
-                    "Category channel should be closed and the content should be invisible"
-                );
-            }
-        );
-
-        QUnit.test(
-            "channel - states: open manually by clicking the title",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                pyEnv["res.users.settings"].create({
-                    user_id: pyEnv.currentUserId,
-                    is_discuss_sidebar_category_channel_open: false,
-                });
-                const { click, openDiscuss } = await start();
-                await openDiscuss();
-
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
-                assert.containsOnce(
-                    document.body,
-                    `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
-                    "Category channel should be open and the content should be visible"
-                );
-            }
-        );
-
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - states: close should update the value on the server",
             async function (assert) {
                 assert.expect(2);
@@ -309,9 +174,7 @@ QUnit.module("mail", {}, function () {
                     "the server side value should be true"
                 );
 
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
+                await click(`.o-mail-category-channel .o_DiscussSidebarCategory_title`);
                 const newSettings = await messaging.rpc({
                     model: "res.users.settings",
                     method: "_find_or_create_for_user",
@@ -325,7 +188,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - states: open should update the value on the server",
             async function (assert) {
                 assert.expect(2);
@@ -351,9 +214,7 @@ QUnit.module("mail", {}, function () {
                     "the server side value should be false"
                 );
 
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
+                await click(`.o-mail-category-channel .o_DiscussSidebarCategory_title`);
                 const newSettings = await messaging.rpc({
                     model: "res.users.settings",
                     method: "_find_or_create_for_user",
@@ -367,7 +228,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test("channel - states: close from the bus", async function (assert) {
+        QUnit.skipRefactoring("channel - states: close from the bus", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -394,7 +255,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("channel - states: open from the bus", async function (assert) {
+        QUnit.skipRefactoring("channel - states: open from the bus", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -421,14 +282,14 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "channel - states: the active category item should be visible even if the category is closed",
             async function (assert) {
                 assert.expect(4);
 
                 const pyEnv = await startServer();
                 const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const { click, messaging, openDiscuss } = await start();
+                const { click, openDiscuss } = await start();
                 await openDiscuss();
 
                 assert.containsOnce(
@@ -444,18 +305,14 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.ok(channel.classList.contains("o-active"));
 
-                await click(
-                    `.o_DiscussSidebarView_categoryChannel .o_DiscussSidebarCategory_title`
-                );
+                await click(`.o-mail-category-channel .o_DiscussSidebarCategory_title`);
                 assert.containsOnce(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
                     "the active channel item should remain even if the category is folded"
                 );
 
-                await click(
-                    `.o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.inbox.localId}"]`
-                );
+                await click(`button[data-mailbox="inbox"]`);
                 assert.containsNone(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
@@ -464,7 +321,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - counter: should not have a counter if the category is unfolded and without unread messages",
             async function (assert) {
                 assert.expect(1);
@@ -488,7 +345,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is unfolded and without unread messages"
@@ -496,7 +353,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - counter: should not have a counter if the category is unfolded and with unread messagens",
             async function (assert) {
                 assert.expect(1);
@@ -519,7 +376,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is unfolded and with unread messages"
@@ -527,7 +384,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - counter: should not have a counter if category is folded and without unread messages",
             async function (assert) {
                 assert.expect(1);
@@ -548,10 +405,10 @@ QUnit.module("mail", {}, function () {
                 });
                 const { click, openDiscuss } = await start();
                 await openDiscuss();
-                await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_counter`
                     ).length,
                     0,
                     "should not have a counter if the category is folded and without unread messages"
@@ -559,7 +416,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - counter: should have correct value of unread threads if category is folded and with unread messages",
             async function (assert) {
                 assert.expect(1);
@@ -595,10 +452,10 @@ QUnit.module("mail", {}, function () {
                 ]);
                 const { click, openDiscuss } = await start();
                 await openDiscuss();
-                await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
                 assert.strictEqual(
                     document.querySelector(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_counter`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_counter`
                     ).textContent,
                     "2",
                     "should have correct value of unread threads if category is folded and with unread messages"
@@ -606,7 +463,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - command: should have add command when category is unfolded",
             async function (assert) {
                 assert.expect(1);
@@ -615,7 +472,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandAdd`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_header .o-mail-category-add-button`
                     ).length,
                     1,
                     "should have add command when chat category is open"
@@ -623,7 +480,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - command: should not have add command when category is folded",
             async function (assert) {
                 assert.expect(1);
@@ -638,7 +495,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.strictEqual(
                     document.querySelectorAll(
-                        `.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_header .o_DiscussSidebarCategory_commandAdd`
+                        `.o-mail-category-chat .o_DiscussSidebarCategory_header .o-mail-category-add-button`
                     ).length,
                     0,
                     "should not have add command when chat category is closed"
@@ -646,122 +503,134 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test("chat - states: close manually by clicking the title", async function (assert) {
-            assert.expect(1);
+        QUnit.skipRefactoring(
+            "chat - states: close manually by clicking the title",
+            async function (assert) {
+                assert.expect(1);
 
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({
-                channel_type: "chat",
-            });
-            pyEnv["res.users.settings"].create({
-                user_id: pyEnv.currentUserId,
-                is_discuss_sidebar_category_chat_open: true,
-            });
-            const { click, openDiscuss } = await start();
-            await openDiscuss();
-            await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
-            assert.containsNone(
-                document.body,
-                `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
-                "Category chat should be closed and the content should be invisible"
-            );
-        });
+                const pyEnv = await startServer();
+                const mailChannelId1 = pyEnv["mail.channel"].create({
+                    channel_type: "chat",
+                });
+                pyEnv["res.users.settings"].create({
+                    user_id: pyEnv.currentUserId,
+                    is_discuss_sidebar_category_chat_open: true,
+                });
+                const { click, openDiscuss } = await start();
+                await openDiscuss();
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
+                assert.containsNone(
+                    document.body,
+                    `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
+                    "Category chat should be closed and the content should be invisible"
+                );
+            }
+        );
 
-        QUnit.test("chat - states: open manually by clicking the title", async function (assert) {
-            assert.expect(1);
+        QUnit.skipRefactoring(
+            "chat - states: open manually by clicking the title",
+            async function (assert) {
+                assert.expect(1);
 
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({
-                channel_type: "chat",
-            });
-            pyEnv["res.users.settings"].create({
-                user_id: pyEnv.currentUserId,
-                is_discuss_sidebar_category_chat_open: false,
-            });
-            const { click, openDiscuss } = await start();
-            await openDiscuss();
-            await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
-            assert.containsOnce(
-                document.body,
-                `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
-                "Category chat should be open and the content should be visible"
-            );
-        });
+                const pyEnv = await startServer();
+                const mailChannelId1 = pyEnv["mail.channel"].create({
+                    channel_type: "chat",
+                });
+                pyEnv["res.users.settings"].create({
+                    user_id: pyEnv.currentUserId,
+                    is_discuss_sidebar_category_chat_open: false,
+                });
+                const { click, openDiscuss } = await start();
+                await openDiscuss();
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
+                assert.containsOnce(
+                    document.body,
+                    `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
+                    "Category chat should be open and the content should be visible"
+                );
+            }
+        );
 
-        QUnit.test("chat - states: close should call update server data", async function (assert) {
-            assert.expect(2);
+        QUnit.skipRefactoring(
+            "chat - states: close should call update server data",
+            async function (assert) {
+                assert.expect(2);
 
-            const pyEnv = await startServer();
-            pyEnv["mail.channel"].create({});
-            pyEnv["res.users.settings"].create({
-                user_id: pyEnv.currentUserId,
-                is_discuss_sidebar_category_chat_open: true,
-            });
-            const currentUserId = pyEnv.currentUserId;
-            const { click, messaging, openDiscuss } = await start();
-            await openDiscuss();
+                const pyEnv = await startServer();
+                pyEnv["mail.channel"].create({});
+                pyEnv["res.users.settings"].create({
+                    user_id: pyEnv.currentUserId,
+                    is_discuss_sidebar_category_chat_open: true,
+                });
+                const currentUserId = pyEnv.currentUserId;
+                const { click, messaging, openDiscuss } = await start();
+                await openDiscuss();
 
-            const initalSettings = await messaging.rpc({
-                model: "res.users.settings",
-                method: "_find_or_create_for_user",
-                args: [[currentUserId]],
-            });
-            assert.strictEqual(
-                initalSettings.is_discuss_sidebar_category_chat_open,
-                true,
-                "the value in server side should be true"
-            );
+                const initalSettings = await messaging.rpc({
+                    model: "res.users.settings",
+                    method: "_find_or_create_for_user",
+                    args: [[currentUserId]],
+                });
+                assert.strictEqual(
+                    initalSettings.is_discuss_sidebar_category_chat_open,
+                    true,
+                    "the value in server side should be true"
+                );
 
-            await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
-            const newSettings = await messaging.rpc({
-                model: "res.users.settings",
-                method: "_find_or_create_for_user",
-                args: [[currentUserId]],
-            });
-            assert.strictEqual(
-                newSettings.is_discuss_sidebar_category_chat_open,
-                false,
-                "the value in server side should be false"
-            );
-        });
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
+                const newSettings = await messaging.rpc({
+                    model: "res.users.settings",
+                    method: "_find_or_create_for_user",
+                    args: [[currentUserId]],
+                });
+                assert.strictEqual(
+                    newSettings.is_discuss_sidebar_category_chat_open,
+                    false,
+                    "the value in server side should be false"
+                );
+            }
+        );
 
-        QUnit.test("chat - states: open should call update server data", async function (assert) {
-            assert.expect(2);
+        QUnit.skipRefactoring(
+            "chat - states: open should call update server data",
+            async function (assert) {
+                assert.expect(2);
 
-            const pyEnv = await startServer();
-            pyEnv["mail.channel"].create({});
-            pyEnv["res.users.settings"].create({
-                user_id: pyEnv.currentUserId,
-                is_discuss_sidebar_category_chat_open: false,
-            });
-            const { click, messaging, openDiscuss } = await start();
-            await openDiscuss();
+                const pyEnv = await startServer();
+                pyEnv["mail.channel"].create({});
+                pyEnv["res.users.settings"].create({
+                    user_id: pyEnv.currentUserId,
+                    is_discuss_sidebar_category_chat_open: false,
+                });
+                const { click, messaging, openDiscuss } = await start();
+                await openDiscuss();
 
-            const initalSettings = await messaging.rpc({
-                model: "res.users.settings",
-                method: "_find_or_create_for_user",
-                args: [[pyEnv.currentUserId]],
-            });
-            assert.strictEqual(
-                initalSettings.is_discuss_sidebar_category_chat_open,
-                false,
-                "the value in server side should be false"
-            );
+                const initalSettings = await messaging.rpc({
+                    model: "res.users.settings",
+                    method: "_find_or_create_for_user",
+                    args: [[pyEnv.currentUserId]],
+                });
+                assert.strictEqual(
+                    initalSettings.is_discuss_sidebar_category_chat_open,
+                    false,
+                    "the value in server side should be false"
+                );
 
-            await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
-            const newSettings = await messaging.rpc({
-                model: "res.users.settings",
-                method: "_find_or_create_for_user",
-                args: [[pyEnv.currentUserId]],
-            });
-            assert.strictEqual(
-                newSettings.is_discuss_sidebar_category_chat_open,
-                true,
-                "the value in server side should be true"
-            );
-        });
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
+                const newSettings = await messaging.rpc({
+                    model: "res.users.settings",
+                    method: "_find_or_create_for_user",
+                    args: [[pyEnv.currentUserId]],
+                });
+                assert.strictEqual(
+                    newSettings.is_discuss_sidebar_category_chat_open,
+                    true,
+                    "the value in server side should be true"
+                );
+            }
+        );
 
-        QUnit.test("chat - states: close from the bus", async function (assert) {
+        QUnit.skipRefactoring("chat - states: close from the bus", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -790,7 +659,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("chat - states: open from the bus", async function (assert) {
+        QUnit.skipRefactoring("chat - states: open from the bus", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -819,7 +688,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "chat - states: the active category item should be visible even if the category is closed",
             async function (assert) {
                 assert.expect(4);
@@ -828,7 +697,7 @@ QUnit.module("mail", {}, function () {
                 const mailChannelId1 = pyEnv["mail.channel"].create({
                     channel_type: "chat",
                 });
-                const { click, messaging, openDiscuss } = await start();
+                const { click, openDiscuss } = await start();
                 await openDiscuss();
 
                 assert.containsOnce(
@@ -844,16 +713,14 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.ok(chat.classList.contains("o-active"));
 
-                await click(`.o_DiscussSidebarView_categoryChat .o_DiscussSidebarCategory_title`);
+                await click(`.o-mail-category-chat .o_DiscussSidebarCategory_title`);
                 assert.containsOnce(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
                     "the active chat item should remain even if the category is folded"
                 );
 
-                await click(
-                    `.o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.inbox.localId}"]`
-                );
+                await click(`button[data-mailbox="inbox"]`);
                 assert.containsNone(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
