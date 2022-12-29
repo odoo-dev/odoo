@@ -65,7 +65,7 @@ export class MessageReactions extends Component {
         if (this.hasUserReacted(reaction)) {
             this.messaging.removeReaction(reaction);
         } else {
-            this.messaging.addReaction(this.props.message.id, reaction.content);
+            this.messaging.addReaction(this.props.message, reaction.content);
         }
     }
 }

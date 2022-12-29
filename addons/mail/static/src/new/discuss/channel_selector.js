@@ -104,9 +104,7 @@ export class ChannelSelector extends Component {
             if (selectedPartners.length === 1) {
                 await this.messaging
                     .joinChat(selectedPartners[0])
-                    .then((chat) =>
-                        this.messaging.openDiscussion(chat.localId, this.env.inChatWindow)
-                    );
+                    .then((chat) => this.messaging.openDiscussion(chat, this.env.inChatWindow));
             } else {
                 const partners_to = [
                     ...new Set([this.messaging.state.user.partnerId, ...selectedPartners]),

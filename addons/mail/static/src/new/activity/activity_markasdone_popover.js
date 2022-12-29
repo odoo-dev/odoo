@@ -36,7 +36,7 @@ export class ActivityMarkAsDone extends Component {
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
-        await this.messaging.fetchThreadMessagesNew(thread.localId);
+        await this.messaging.fetchThreadMessagesNew(thread);
     }
 
     async onClickDoneAndScheduleNext() {
@@ -56,7 +56,7 @@ export class ActivityMarkAsDone extends Component {
                 feedback: this.props.activity.feedback,
             }
         );
-        this.messaging.fetchThreadMessagesNew(thread.localId);
+        this.messaging.fetchThreadMessagesNew(thread);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities", "attachments"]);
         }

@@ -27,9 +27,7 @@
                         <t t-esc="current"/>
                     </div>
                 </t>
-                <t t-elif="state.searchStr">
-                    <t t-set="categorySortId" t-value="null"/>
-                </t>
+                <t t-elif="state.searchStr" t-set="categorySortId" t-value="null"/>
                 <span class="o-emoji p-1 cursor-pointer" t-att-title="emoji.name" t-att-data-codepoints="emoji.codepoints" t-att-data-index="emoji_index" t-att-data-category="categorySortId">
                     <t t-esc="emoji.codepoints"/>
                 </span>

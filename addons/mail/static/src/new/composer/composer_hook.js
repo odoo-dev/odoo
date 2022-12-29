@@ -121,7 +121,7 @@ export function useSuggestion() {
             }
             const [main, extra = { suggestions: [] }] = messaging.searchSuggestions(
                 self.search,
-                { threadLocalId: comp.props.composer.thread.localId },
+                { thread: comp.props.composer.thread },
                 true
             );
             // arbitrary limit to avoid displaying too many elements at once
@@ -146,7 +146,7 @@ export function useSuggestion() {
                     return;
                 }
                 await messaging.fetchSuggestions(self.search, {
-                    threadLocalId: comp.props.composer.thread.localId,
+                    thread: comp.props.composer.thread,
                 });
                 self.update();
             });

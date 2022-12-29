@@ -6,7 +6,7 @@ import { Typing } from "../composer/typing";
 
 /**
  * @typedef {Object} Props
- * @property {string} threadLocalId
+ * @property {import("@mail/new/core/thread_model").Thread} thread
  * @property {string} size
  * @property {string} className
  * @extends {Component<Props, Env>}
@@ -14,7 +14,7 @@ import { Typing } from "../composer/typing";
 export class ChatWindowIcon extends Component {
     static template = "mail.chat_window_icon";
     static components = { Typing };
-    static props = ["threadLocalId", "size?", "className?"];
+    static props = ["thread", "size?", "className?"];
     static defaultProps = {
         size: "medium",
         className: "",
@@ -24,11 +24,7 @@ export class ChatWindowIcon extends Component {
         this.messaging = useMessaging();
     }
 
-    get thread() {
-        return this.messaging.state.threads[this.props.threadLocalId];
-    }
-
     get chatPartner() {
-        return this.messaging.state.partners[this.thread.chatPartnerId];
+        return this.messaging.state.partners[this.props.thread.chatPartnerId];
     }
 }

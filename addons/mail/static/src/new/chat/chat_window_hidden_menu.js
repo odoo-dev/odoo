@@ -17,8 +17,7 @@ export class ChatWindowHiddenMenu extends Component {
     get unread() {
         let unreadCounter = 0;
         for (const chatWindow of this.messaging.hiddenChatWindows) {
-            const thread = this.messaging.state.threads[chatWindow.threadLocalId];
-            unreadCounter += thread.message_unread_counter;
+            unreadCounter += chatWindow.thread.message_unread_counter;
         }
         return unreadCounter;
     }

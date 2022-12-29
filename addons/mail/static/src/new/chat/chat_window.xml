@@ -13,7 +13,7 @@
         t-on-keydown="onKeydown"
     >
         <div class="o-mail-chat-window-header d-flex align-items-center cursor-pointer flex-shrink-0" t-on-click="toggleFold">
-            <ChatWindowIcon t-if="thread" threadLocalId="thread.localId" className="'ms-3 me-1 my-0'" />
+            <ChatWindowIcon t-if="thread" thread="thread" className="'ms-3 me-1 my-0'" />
             <span class="o-mail-chat-window-header-name text-truncate" t-att-title="chatWindow.displayName" t-esc="chatWindow.displayName" t-att-class="{
                     'ms-3 me-1 my-0': !thread,
                 }"
@@ -22,11 +22,9 @@
             <div t-if="thread and thread !== rtc.state.channel" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="() => this.rtc.toggleCall(this.props.chatWindow.thread)">
                 <i class="fa fa-phone"/>
             </div>
-            <t t-if="env.isSmall">
-                <div t-if="thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-att-title="state.activeMode === 'add-users' ? 'Stop adding users' : 'Add users'" t-on-click.stop="toggleAddUsers">
-                    <i class="fa fa-lg fa-user-plus"/>
-                </div>
-            </t>
+            <div t-if="env.isSmall and thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-att-title="state.activeMode === 'add-users' ? 'Stop adding users' : 'Add users'" t-on-click.stop="toggleAddUsers">
+                <i class="fa fa-lg fa-user-plus"/>
+            </div>
             <t t-if="thread">
                 <div t-if="thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
                     <i class="fa fa-users"/>
@@ -34,11 +32,9 @@
                 <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Show Call Settings" t-on-click.stop="toggleSettings">
                     <i class="fa fa-gear"/>
                 </div>
-                <t t-if="!env.isSmall">
-                    <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Open in Discuss" t-on-click.stop="expand">
-                        <i class="fa fa-expand"/>
-                    </div>
-                </t>
+                <div t-if="!env.isSmall" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Open in Discuss" t-on-click.stop="expand">
+                    <i class="fa fa-expand"/>
+                </div>
             </t>
             <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => this.close()">
                 <i class="fa fa-close"></i>
@@ -47,18 +43,12 @@
         <t t-if="!props.chatWindow.folded">
             <div class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
                 <t t-if="thread">
-                    <t t-if="state.activeMode === 'in-settings'">
-                        <CallSettings/>
-                    </t>
-                    <t t-elif="state.activeMode === 'member-list'">
-                        <ChannelMemberList thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
-                    </t>
-                    <t t-elif="state.activeMode === 'add-users'">
-                        <ChannelInvitationForm threadId="thread.id" chatState="state"/>
-                    </t>
+                    <CallSettings t-if="state.activeMode === 'in-settings'"/>
+                    <ChannelMemberList t-elif="state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
+                    <ChannelInvitationForm t-elif="state.activeMode === 'add-users'" thread="thread" chatState="state"/>
                     <t t-else="">
                         <Call t-if="thread.rtcSessions.size > 0" thread="thread"/>
-                        <Thread localId="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
+                        <Thread thread="thread" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
                         <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" startEditingLastMessageOfCurrentUser="startEditingLastMessageOfCurrentUser.bind(this)" dropzoneRef="contentRef"/>
                     </t>
                 </t>

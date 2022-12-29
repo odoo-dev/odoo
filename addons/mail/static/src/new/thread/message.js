@@ -26,7 +26,7 @@ import { useEmojiPicker } from "../composer/emoji_picker";
  * @property {function} [onParentMessageClick]
  * @property {import("@mail/new/core/message_model").Message} message
  * @property {boolean} [squashed]
- * @property {string} [threadLocalId]
+ * @property {import("@mail/new/core/thread_model").Thread} [thread]
  * @extends {Component<Props, Env>}
  */
 export class Message extends Component {
@@ -50,7 +50,7 @@ export class Message extends Component {
         "onParentMessageClick?",
         "message",
         "squashed?",
-        "threadLocalId?",
+        "thread?",
         "onExitEditMode?",
         "shouldEnterEditMode?",
     ];
@@ -103,7 +103,7 @@ export class Message extends Component {
                             partners.find(({ id }) => id === this.user.partnerId)
                     );
                     if (!reaction) {
-                        this.messaging.addReaction(this.message.id, emoji);
+                        this.messaging.addReaction(this.message, emoji);
                     }
                 },
             });
@@ -159,7 +159,7 @@ export class Message extends Component {
         if (this.message.isAuthoredByCurrentUser) {
             return false;
         }
-        return this.thread.chatPartnerId !== this.message.author.id;
+        return this.props.thread.chatPartnerId !== this.message.author.id;
     }
 
     get isAlignedRight() {
@@ -169,17 +169,17 @@ export class Message extends Component {
     }
 
     get isOriginThread() {
-        if (!this.props.threadLocalId) {
+        if (!this.props.thread) {
             return false;
         }
-        return this.message.originThread.localId === this.props.threadLocalId;
+        return this.message.originThread === this.props.thread;
     }
 
     get isInInbox() {
-        if (!this.props.threadLocalId) {
+        if (!this.props.thread) {
             return false;
         }
-        return this.messaging.state.threads[this.props.threadLocalId].id === "inbox";
+        return this.props.thread.id === "inbox";
     }
 
     /**
@@ -192,18 +192,10 @@ export class Message extends Component {
         if (this.message.isAuthoredByCurrentUser) {
             return false;
         }
-        if (this.thread.type === "chat") {
+        if (this.props.thread.type === "chat") {
             return false;
         }
         return true;
-    }
-
-    get thread() {
-        return this.messaging.state.threads[this.props.threadLocalId];
-    }
-
-    toggleStar() {
-        this.messaging.toggleStar(this.props.message.id);
     }
 
     onClickDelete() {
@@ -225,7 +217,7 @@ export class Message extends Component {
 
     openRecord() {
         if (this.message.resModel === "mail.channel") {
-            this.messaging.openDiscussion(this.message.originThread.localId);
+            this.messaging.openDiscussion(this.message.originThread);
         } else {
             this.action.doAction({
                 type: "ir.actions.act_window",

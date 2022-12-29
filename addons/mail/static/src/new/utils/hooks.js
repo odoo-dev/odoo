@@ -223,7 +223,7 @@ function dataUrlToBlob(data, type) {
     return new Blob([uiArr], { type });
 }
 
-export function useAttachmentUploader({ threadLocalId, messageId }) {
+export function useAttachmentUploader(pThread, message) {
     const component = useComponent();
     const env = useEnv();
     const { bus, upload } = useService("file_upload");
@@ -239,9 +239,7 @@ export function useAttachmentUploader({ threadLocalId, messageId }) {
             return this.uploadFile(file);
         },
         async uploadFile(file) {
-            const thread = threadLocalId
-                ? messaging.state.threads[threadLocalId]
-                : messaging.state.messages[messageId].originThread;
+            const thread = pThread ?? message.originThread;
             const tmpId = messaging.nextId++;
             uploadingAttachmentIds.add(tmpId);
             const { id } = await upload("/mail/attachment/upload", [file], {

@@ -37,9 +37,9 @@ export class Sidebar extends Component {
         });
     }
 
-    openThread(ev, localId) {
+    openThread(ev, thread) {
         markEventHandled(ev, "sidebar.openThread");
-        this.messaging.setDiscussThread(localId);
+        this.messaging.setDiscussThread(thread);
     }
 
     toggleCategory(category) {
@@ -102,7 +102,7 @@ export class Sidebar extends Component {
                 )
             );
         }
-        this.messaging.leaveChannel(thread.id);
+        this.messaging.leaveChannel(thread);
     }
 
     askConfirmation(body) {

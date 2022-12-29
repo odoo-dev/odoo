@@ -39,9 +39,7 @@ export class Activity extends Component {
             this.delay = computeDelay(nextProps.data.date_deadline);
         });
         if (this.props.data.activity_category === "upload_file") {
-            this.attachmentUploader = useAttachmentUploader({
-                threadLocalId: this.thread.localId,
-            });
+            this.attachmentUploader = useAttachmentUploader(this.thread);
         }
     }
 
@@ -78,7 +76,7 @@ export class Activity extends Component {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
         await this.env.services["mail.messaging"].markAsDone(this.props.data, [attachmentId]);
         this.props.onUpdate();
-        await this.env.services["mail.messaging"].fetchThreadMessagesNew(this.thread.localId);
+        await this.env.services["mail.messaging"].fetchThreadMessagesNew(this.thread);
     }
 
     async edit() {

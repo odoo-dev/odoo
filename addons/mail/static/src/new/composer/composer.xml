@@ -54,9 +54,7 @@
                         </FileUploader>
                     </div>
                 </div>
-                <t t-if="!compact">
-                    <t t-call="mail.Composer.actionButtons"/>
-                </t>
+                <t t-if="!compact" t-call="mail.Composer.actionButtons"/>
             </div>
             <div class="o-mail-composer-footer overflow-auto">
                 <AttachmentList
@@ -69,23 +67,17 @@
                 </div>
             </div>
         </div>
-        <t t-if="props.composer.message">
-            <span class="text-muted">escape to <a href="#" t-on-click="props.onDiscardCallback">cancel</a>, enter to <a href="#" t-on-click="editMessage">save</a></span>
-        </t>
+        <span t-if="props.composer.message" class="text-muted">escape to <a href="#" t-on-click="props.onDiscardCallback">cancel</a>, enter to <a href="#" t-on-click="editMessage">save</a></span>
     </div>
 </t>
 
     <t t-name="mail.Composer.suggestionPartner" owl="1">
         <t t-set="partner" t-value="option.partner"/>
-        <t t-if="option.partner">
-            <PartnerImStatus partner="partner"/>
-        </t>
+        <PartnerImStatus t-if="option.partner" partner="partner"/>
         <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
             <t t-esc="partner.name" />
         </strong>
-        <t t-if="partner.email">
-            <em class="text-600 text-truncate align-self-center">(<t t-esc="partner.email" />)</em>
-        </t>
+        <em t-if="partner.email" class="text-600 text-truncate align-self-center">(<t t-esc="partner.email" />)</em>
     </t>
 
     <t t-name="mail.Composer.suggestionThread" owl="1">

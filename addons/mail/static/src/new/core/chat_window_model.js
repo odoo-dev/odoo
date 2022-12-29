@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-/** @typedef {{ threadLocalId?: string, folded?: boolean, replaceNewMessageChatWindow?: boolean }} ChatWindowData */
+/** @typedef {{ thread?: import("@mail/new/core/thread_model").Thread, folded?: boolean, replaceNewMessageChatWindow?: boolean }} ChatWindowData */
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -14,7 +14,7 @@ export class ChatWindow {
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 
-    /** @type {string} */
+    /** @type {import("@mail/new/core/thread_model").Thread.localId} */
     threadLocalId;
     autofocus = 0;
     folded = false;
@@ -51,7 +51,7 @@ export class ChatWindow {
      * @returns {ChatWindow}
      */
     static insert(state, data = {}) {
-        const chatWindow = state.chatWindows.find((c) => c.threadLocalId === data.threadLocalId);
+        const chatWindow = state.chatWindows.find((c) => c.thread === data.thread);
         if (!chatWindow) {
             return new ChatWindow(state, data);
         }
@@ -66,7 +66,7 @@ export class ChatWindow {
      */
     constructor(state, data) {
         Object.assign(this, {
-            threadLocalId: data.threadLocalId,
+            thread: data.thread,
             _state: state,
         });
         this.update(data);
@@ -94,6 +94,10 @@ export class ChatWindow {
 
     get thread() {
         return this._state.threads[this.threadLocalId];
+    }
+
+    set thread(thread) {
+        this.threadLocalId = thread?.localId;
     }
 
     get displayName() {
@@ -125,14 +129,12 @@ export class ChatWindow {
 
     fold() {
         this.folded = true;
-        const thread = this._state.threads[this.threadLocalId];
-        thread.state = "folded";
+        this.thread.state = "folded";
     }
 
     unfold() {
         this.folded = false;
-        const thread = this._state.threads[this.threadLocalId];
-        thread.state = "open";
+        this.thread.state = "open";
     }
 
     toggleFold() {

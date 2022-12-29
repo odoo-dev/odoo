@@ -77,7 +77,7 @@ export class ChatWindow extends Component {
         } else {
             this.props.chatWindow.toggleFold();
         }
-        this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
+        this.messaging.notifyChatWindowState(this.props.chatWindow.thread);
     }
 
     toggleSettings() {
@@ -93,7 +93,7 @@ export class ChatWindow extends Component {
     }
 
     expand() {
-        this.messaging.setDiscussThread(this.props.chatWindow.threadLocalId);
+        this.messaging.setDiscussThread(this.props.chatWindow.thread);
         this.action.doAction(
             {
                 type: "ir.actions.client",
@@ -105,7 +105,7 @@ export class ChatWindow extends Component {
 
     close() {
         this.props.chatWindow.close();
-        this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
+        this.messaging.notifyChatWindowState(this.props.chatWindow.thread);
     }
 
     resetMessageInEdit() {

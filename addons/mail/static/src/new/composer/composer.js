@@ -48,10 +48,10 @@ export class Composer extends Component {
     static template = "mail.composer";
 
     setup() {
-        this.attachmentUploader = useAttachmentUploader({
-            threadLocalId: this.props.composer.thread?.localId,
-            messageId: this.props.composer.message?.id,
-        });
+        this.attachmentUploader = useAttachmentUploader(
+            this.props.composer.thread,
+            this.props.composer.message
+        );
         this.messaging = useMessaging();
         this.ref = useRef("textarea");
         this.typingNotified = false;
@@ -360,7 +360,7 @@ export class Composer extends Component {
                 rawMentions: this.suggestion.rawMentions,
                 parentId: messageToReplyTo?.id,
             };
-            const message = await this.messaging.postMessage(thread.localId, value, postData);
+            const message = await this.messaging.postMessage(thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
                     sprintf(_t('Message posted on "%s"'), message.originThread.displayName),
@@ -397,7 +397,7 @@ export class Composer extends Component {
     async editMessage() {
         await this.processMessage(async (value) =>
             this.messaging.updateMessage(
-                this.props.composer.message.id,
+                this.props.composer.message,
                 value,
                 this.attachmentUploader.attachments,
                 this.suggestion.rawMentions
