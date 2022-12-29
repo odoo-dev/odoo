@@ -440,6 +440,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
                     last_interest_dt: memberOfCurrentUser.last_interest_dt,
                     message_unread_counter: memberOfCurrentUser.message_unread_counter,
                     state: memberOfCurrentUser.fold_state || "open",
+                    seen_message_id: memberOfCurrentUser.seen_message_id,
                 });
                 Object.assign(channelData, {
                     custom_channel_name: memberOfCurrentUser.custom_channel_name,

@@ -24,6 +24,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { createLocalId } from "./thread_model.create_local_id";
+import { Failure } from "./failure_model";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 const FETCH_MSG_LIMIT = 30;
@@ -131,6 +132,7 @@ export class Messaging {
             // messaging menu
             menu: {
                 counter: 0,
+                failures: [],
             },
             // discuss app
             discuss: {
@@ -200,6 +202,7 @@ export class Messaging {
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
             Partner.insert(this.state, data.current_partner);
+            this.loadFailures();
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
                 const thread = this.createChannelThread(channelData);
@@ -223,6 +226,44 @@ export class Messaging {
                 CannedResponse.insert(this.state, code);
             });
             this.isReady.resolve();
+        });
+    }
+
+    loadFailures() {
+        this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
+            const notifications = messages
+                .map(
+                    (messageData) =>
+                        Message.insert(this.state, {
+                            ...messageData,
+                            // implicit: failures are sent by the server at
+                            // initialization only if the current partner is
+                            // author of the message
+                            author: this.state.partners[this.state.user.partnerId],
+                        }).notifications
+                )
+                .flat();
+            const failuresByModel = {};
+            const modelNameToResModel = {};
+            for (const notification of notifications) {
+                const message = notification.message;
+                const modelName = message.originThread.modelName;
+                modelNameToResModel[modelName] = message.resModel;
+                failuresByModel[modelName] ??= {};
+                failuresByModel[modelName][notification.notification_type] ??= [];
+                failuresByModel[modelName][notification.notification_type].push(notification);
+            }
+            for (const [modelName, failuresByType] of Object.entries(failuresByModel)) {
+                for (const [type, notifications] of Object.entries(failuresByType)) {
+                    Failure.insert(this.state, {
+                        modelName,
+                        type,
+                        resModel: modelNameToResModel[modelName],
+                        notifications,
+                    });
+                }
+            }
+            this.state.menu.failures.sort((f1, f2) => f2.lastMessage.id - f1.lastMessage.id);
         });
     }
 
@@ -798,7 +839,6 @@ export class Messaging {
         const thread = Thread.insert(this.state, {
             id: resId,
             model: resModel,
-            name: localId,
             type: "chatter",
         });
         if (resId === false) {

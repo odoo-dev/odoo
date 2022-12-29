@@ -60,7 +60,12 @@ QUnit.test("simple chatter on a record", async (assert) => {
 
     assert.containsOnce(target, ".o-mail-chatter-topbar");
     assert.containsOnce(target, ".o-mail-thread");
-    assert.verifySteps(["/mail/init_messaging", "/mail/thread/data", "/mail/thread/messages"]);
+    assert.verifySteps([
+        "/mail/init_messaging",
+        "/mail/thread/data",
+        "/mail/load_message_failures",
+        "/mail/thread/messages",
+    ]);
 });
 
 QUnit.test("simple chatter, with no record", async (assert) => {
@@ -81,7 +86,7 @@ QUnit.test("simple chatter, with no record", async (assert) => {
     assert.containsOnce(target, ".o-mail-message");
     assert.containsOnce(target, ".o-chatter-disabled");
     assert.containsN(target, "button:disabled", 5);
-    assert.verifySteps(["/mail/init_messaging"]);
+    assert.verifySteps(["/mail/init_messaging", "/mail/load_message_failures"]);
 });
 
 QUnit.test("composer is closed when creating record", async (assert) => {
@@ -196,7 +201,6 @@ QUnit.test("displayname is used when sending a message", async (assert) => {
 });
 
 QUnit.test("can post a message on a record thread", async (assert) => {
-    assert.expect(11);
     const server = new TestServer();
     const env = makeTestEnv((route, params) => {
         if (route.startsWith("/mail")) {
@@ -236,6 +240,7 @@ QUnit.test("can post a message on a record thread", async (assert) => {
     assert.verifySteps([
         "/mail/init_messaging",
         "/mail/thread/data",
+        "/mail/load_message_failures",
         "/mail/thread/messages",
         "/mail/message/post",
         "/mail/link_preview",
@@ -243,7 +248,6 @@ QUnit.test("can post a message on a record thread", async (assert) => {
 });
 
 QUnit.test("can post a note on a record thread", async (assert) => {
-    assert.expect(11);
     const server = new TestServer();
     const env = makeTestEnv((route, params) => {
         if (route.startsWith("/mail")) {
@@ -283,6 +287,7 @@ QUnit.test("can post a note on a record thread", async (assert) => {
     assert.verifySteps([
         "/mail/init_messaging",
         "/mail/thread/data",
+        "/mail/load_message_failures",
         "/mail/thread/messages",
         "/mail/message/post",
         "/mail/link_preview",
