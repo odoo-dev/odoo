@@ -4,6 +4,7 @@
 import odoo
 from odoo.tests import HttpCase
 
+from unittest import skip
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestMailPublicPage(HttpCase):
