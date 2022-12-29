@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.messaging_menu" owl="1">
+    <t t-set="failures" t-value="messaging.state.menu.failures"/>
     <Dropdown beforeOpen.bind="() => messaging.fetchPreviews()" position="'bottom-end'" menuClass="'p-0'">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-comments" role="img" aria-label="Messages"></i>
@@ -17,44 +18,46 @@
                     <button t-if="!messaging.state.discuss.isActive" class="btn btn-link o-mail-messaging-menu-new-message" type="button" t-on-click.stop="onClickNewMessage">New Message</button>
                 </div>
                 <div class="d-flex flex-column overflow-auto">
-                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0">
+                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0 and (failures.length === 0 or state.filter !== 'all')">
                         No conversation yet...
                     </div>
-                    <t t-else="" t-foreach="displayedPreviews" t-as="preview" t-key="preview.id">
-                        <t t-call="mail.messaging_menu.preview">
-                            <t t-set="isLastItem" t-value="preview_last"/>
-                        </t>
+                    <t t-foreach="displayedPreviews" t-as="preview" t-key="preview.id">
+                        <NotificationItem
+                            body="preview.mostRecentMsg?.inlineBody"
+                            dateTime="preview.mostRecentMsg?.dateTime"
+                            displayName="preview.displayName"
+                            iconSrc="preview.imgUrl"
+                            isLast="preview_last and messaging.state.menu.failures.length === 0"
+                            onClick="() => this.openDiscussion(preview)"
+                        >
+                            <t t-set-slot="icon">
+                                <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>
+                            </t>
+                            <t t-if="preview.mostRecentMsg" t-set-slot="body-icon">
+                                <t t-if="preview.mostRecentMsg.isAuthoredByCurrentUser">
+                                    <i class="fa fa-mail-reply me-1"/>You
+                                 </t>
+                                 <t t-else="">
+                                    <t t-esc="preview.mostRecentMsg.author.name"/>
+                                 </t>:
+                            </t>
+                        </NotificationItem>
+                    </t>
+                    <t t-if="state.filter === 'all'">
+                        <NotificationItem
+                            t-foreach="failures" t-as="failure" t-key="failure.localId"
+                            body="failure.body"
+                            displayName="failure.displayName"
+                            iconSrc="failure.iconSrc"
+                            isLast="failure_last"
+                            dateTime="failure.lastMessage?.dateTime"
+                            onClick="() => this.onClickFailure(failure)"
+                        />
                     </t>
                 </div>
             </div>
         </t>
     </Dropdown>
-</t>
-
-<t t-name="mail.messaging_menu.preview" owl="1">
-    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !isLastItem }" t-on-click="() => this.openDiscussion(preview)">
-        <div class="position-relative o-mail-background-inherit m-1 flex-shrink-0" style="width:40px;height:40px;">
-            <img class="w-100 h-100 rounded-circle" alt="Thread Image" t-att-src="preview.imgUrl" />
-            <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>
-        </div>
-        <div class="d-flex flex-column flex-grow-1 align-self-start m-2 overflow-auto">
-            <div class="d-flex">
-                <span class="fw-bold text-600 text-truncate"><t t-esc="preview.displayName"/></span>
-                <span class="flex-grow-1"/>
-                <small class="text-muted opacity-50 ms-2" t-if="preview.mostRecentMsg">
-                    <RelativeTime datetime="preview.mostRecentMsg.dateTime" />
-                </small>
-
-            </div>
-            <div class="text-truncate" t-if="preview.mostRecentMsg">
-                <t t-if="preview.mostRecentMsg.isAuthoredByCurrentUser">
-                    <i class="fa fa-mail-reply me-1"/>You
-                </t>
-                <t t-else="" t-esc="preview.mostRecentMsg.author.name"/>:
-                <t t-esc="preview.mostRecentMsg.inlineBody"/>
-            </div>
-        </div>
-    </div>
 </t>
 
 </templates>

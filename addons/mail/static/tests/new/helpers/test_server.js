@@ -253,4 +253,8 @@ export class TestServer {
     _mail_channel_notify_typing() {
         return [];
     }
+
+    _mail_load_message_failures() {
+        return [];
+    }
 }

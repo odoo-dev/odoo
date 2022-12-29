@@ -41,6 +41,7 @@ The service is provided by the In App Purchase Odoo platform.
     'auto_install': True,
     'assets': {
         'mail.assets_messaging': [
+            'sms/static/src/new/**/*.js',
             'sms/static/src/models/*.js',
         ],
         'mail.assets_discuss_public': [

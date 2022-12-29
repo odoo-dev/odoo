@@ -50,7 +50,11 @@ QUnit.test("sanity check", async (assert) => {
         ".o-mail-discuss-content h4:contains(Congratulations, your inbox is empty)"
     );
 
-    assert.verifySteps(["/mail/init_messaging", "/mail/inbox/messages"]);
+    assert.verifySteps([
+        "/mail/init_messaging",
+        "/mail/load_message_failures",
+        "/mail/inbox/messages",
+    ]);
 });
 
 QUnit.test("can open #general", async (assert) => {
@@ -164,6 +168,7 @@ QUnit.test("can create a new channel", async (assert) => {
     assert.containsN(target, ".o-mail-discuss-content .o-mail-message", 0);
     assert.verifySteps([
         "/mail/init_messaging",
+        "/mail/load_message_failures",
         "/mail/inbox/messages",
         "/web/dataset/call_kw/mail.channel/search_read",
         "/web/dataset/call_kw/mail.channel/channel_create",
@@ -204,6 +209,7 @@ QUnit.test("can join a chat conversation", async (assert) => {
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
     assert.verifySteps([
         "/mail/init_messaging",
+        "/mail/load_message_failures",
         "/mail/inbox/messages",
         "/web/dataset/call_kw/mail.channel/channel_get",
         "/mail/channel/messages",

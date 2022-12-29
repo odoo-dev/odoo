@@ -4,16 +4,18 @@ import { Component, useState } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useMessaging } from "../messaging_hook";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
-import { RelativeTime } from "../thread/relative_time";
+import { NotificationItem } from "./notification_item";
 import { browser } from "@web/core/browser/browser";
+import { useService } from "@web/core/utils/hooks";
 
 export class MessagingMenu extends Component {
-    static components = { Dropdown, RelativeTime, PartnerImStatus };
+    static components = { Dropdown, NotificationItem, PartnerImStatus };
     static props = [];
     static template = "mail.messaging_menu";
 
     setup() {
         this.messaging = useMessaging();
+        this.action = useService("action");
         this.state = useState({
             filter: "all", // can be 'all', 'channels' or 'chats'
         });
@@ -49,6 +51,60 @@ export class MessagingMenu extends Component {
         this.close();
     }
 
+    /**
+     *
+     * @param {import("@mail/new/core/failure_model").Failure} failure
+     */
+    onClickFailure(failure) {
+        const originThreadIds = new Set(
+            failure.notifications.map(({ message }) => message.originThread.id)
+        );
+        if (originThreadIds.size === 1) {
+            const message = failure.notifications[0].message;
+            if (!message.originThread.type) {
+                message.originThread.update({ type: "chatter" });
+            }
+            if (this.messaging.state.discuss.isActive) {
+                this.action.doAction({
+                    type: "ir.actions.act_window",
+                    res_model: message.originThread.model,
+                    views: [[false, "form"]],
+                    res_id: message.originThread.id,
+                });
+                // Close the related chat window as having both the form view
+                // and the chat window does not look good.
+                this.messaging.state.chatWindows
+                    .find(({ thread }) => thread === message.originThread)
+                    ?.close();
+            } else {
+                this.messaging.openDiscussion(message.originThread);
+            }
+        } else {
+            this.openFailureView(failure);
+        }
+        this.close();
+    }
+
+    openFailureView(failure) {
+        if (failure.type !== "email") {
+            return;
+        }
+        this.action.doAction({
+            name: this.env._t("Mail Failures"),
+            type: "ir.actions.act_window",
+            view_mode: "kanban,list,form",
+            views: [
+                [false, "kanban"],
+                [false, "list"],
+                [false, "form"],
+            ],
+            target: "current",
+            res_model: failure.resModel,
+            domain: [["message_has_error", "=", true]],
+            context: { create: false },
+        });
+    }
+
     close() {
         // hack: click on window to close dropdown, because we use a dropdown
         // without dropdownitem...
@@ -58,8 +114,9 @@ export class MessagingMenu extends Component {
     get counter() {
         let value =
             this.messaging.state.discuss.inbox.counter +
-            Object.values(this.messaging.state.threads).filter((thread) => thread.is_pinned)
-                .length +
+            Object.values(this.messaging.state.threads).filter(
+                (thread) => thread.is_pinned && thread.isUnread
+            ).length +
             Object.keys(this.messaging.state.notificationGroups).length;
         if (browser.Notification?.permission === "default") {
             value++;

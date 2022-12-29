@@ -249,51 +249,6 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring(
-            "counter is taking into account failure notification",
-            async function (assert) {
-                assert.expect(2);
-
-                patchWithCleanup(browser, {
-                    Notification: {
-                        ...browser.Notification,
-                        permission: "denied",
-                    },
-                });
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                });
-                const [mailChannelMemberId] = pyEnv["mail.channel.member"].search([
-                    ["channel_id", "=", mailChannelId1],
-                    ["partner_id", "=", pyEnv.currentPartnerId],
-                ]);
-                pyEnv["mail.channel.member"].write([mailChannelMemberId], {
-                    seen_message_id: mailMessageId1,
-                });
-                // failure that is expected to be used in the test
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1, // id of the related message
-                    notification_status: "exception", // necessary value to have a failure
-                    notification_type: "email",
-                });
-                await start();
-
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessagingMenu_counter",
-                    "should display a notification counter next to the messaging menu for one notification"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_MessagingMenu_counter").textContent,
-                    "1",
-                    "should display a counter of '1' next to the messaging menu"
-                );
-            }
-        );
-
         QUnit.skipRefactoring("switch tab", async function (assert) {
             assert.expect(15);
 
