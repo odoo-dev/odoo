@@ -55,7 +55,7 @@ QUnit.module("mail", (hooks) => {
                         }
                     },
                 });
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 const thread = messaging.models["Thread"].findFromIdentifyingData({
                     id: mailChannelId1,
                     model: "mail.channel",
@@ -514,7 +514,7 @@ QUnit.module("mail", (hooks) => {
                         context: { active_id: mailChannelId1 },
                     },
                 });
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 const thread = messaging.models["Thread"].findFromIdentifyingData({
                     model: "mail.channel",
                     id: mailChannelId1,
@@ -590,7 +590,7 @@ QUnit.module("mail", (hooks) => {
                     model: "mail.channel",
                     id: mailChannelId1,
                 });
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     async func() {

@@ -144,7 +144,7 @@ QUnit.module("mail", {}, function () {
                 const pyEnv = await startServer();
                 const mailChannelId = pyEnv["mail.channel"].create({});
                 const { click, insertText, messaging, openDiscuss, openView } = await start();
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await click(`.o_MessagingMenu_dropdownMenu .o_NotificationListView_preview`);
                 // Set content of the composer of the chat window
                 await insertText(".o-mail-composer-textarea", "XDU for the win !");
@@ -226,7 +226,7 @@ QUnit.module("mail", {}, function () {
                     });
                 }
                 const { afterEvent, click, openDiscuss, openView } = await start();
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     func: () => document.querySelector(".o_NotificationListView_preview").click(),
@@ -304,7 +304,7 @@ QUnit.module("mail", {}, function () {
             ]);
             const { click } = await start();
 
-            await click(`.o_MessagingMenu_toggler`);
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             await click(`
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId1}"]`);
@@ -339,7 +339,7 @@ QUnit.module("mail", {}, function () {
                 "The chatWindow composer still has focus"
             );
 
-            await click(`.o_MessagingMenu_toggler`);
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             await click(`
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]`);
@@ -542,7 +542,7 @@ QUnit.module("mail", {}, function () {
                     });
                 }
                 const { afterEvent, click } = await start();
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     func: () => document.querySelector(".o_NotificationListView_preview").click(),
@@ -674,7 +674,7 @@ QUnit.module("mail", {}, function () {
                     });
                 }
                 const { afterEvent, click, openDiscuss, openView } = await start();
-                await click(`.o_MessagingMenu_toggler`);
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     func: () => document.querySelector(".o_NotificationListView_preview").click(),
@@ -1185,17 +1185,17 @@ QUnit.module("mail", {}, function () {
                 patchUiSize({ width: 900 }); // enough to fit 2 chat windows + hidden menu
                 const { click, messaging } = await start();
                 // open, from systray menu, chat windows of channels with id 1, 2, 3
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await click(`
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId1}"]
     `);
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await click(`
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]
     `);
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 await click(`
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId3}"]

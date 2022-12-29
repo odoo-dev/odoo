@@ -32,7 +32,7 @@ QUnit.module("mail", {}, function () {
                 },
             ]);
             const { click } = await start();
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             assert.containsOnce(
                 document.body,
                 ".o_NotificationGroupView",
@@ -103,7 +103,7 @@ QUnit.module("mail", {}, function () {
                 notification_type: "email",
             });
             const { click } = await start();
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             assert.containsOnce(
                 document.body,
                 ".o_NotificationGroupView_markAsRead",
@@ -157,7 +157,7 @@ QUnit.module("mail", {}, function () {
                 },
             ]);
             const { click } = await start();
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
 
             assert.containsOnce(
                 document.body,
@@ -271,7 +271,7 @@ QUnit.module("mail", {}, function () {
                     );
                 },
             });
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
 
             assert.containsOnce(
                 document.body,
@@ -342,7 +342,7 @@ QUnit.module("mail", {}, function () {
                 },
             ]);
             const { click } = await start();
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             assert.containsN(
                 document.body,
                 ".o_NotificationGroupView",
@@ -424,7 +424,7 @@ QUnit.module("mail", {}, function () {
                     },
                 ]);
                 const { click } = await start();
-                await click(".o_MessagingMenu_toggler");
+                await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
                 assert.containsN(
                     document.body,
                     ".o_NotificationGroupView",
@@ -491,7 +491,7 @@ QUnit.module("mail", {}, function () {
                 notification_type: "email", // expected notification type for email message
             });
             const { click } = await start();
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             assert.containsNone(
                 document.body,
                 ".o_NotificationGroupView",

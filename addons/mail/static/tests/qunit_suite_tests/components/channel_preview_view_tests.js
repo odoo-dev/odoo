@@ -49,7 +49,7 @@ QUnit.module("mail", {}, function () {
                     }
                 },
             });
-            await click(".o_MessagingMenu_toggler");
+            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
             assert.containsOnce(
                 document.body,
                 ".o_ChannelPreviewView_markAsRead",
