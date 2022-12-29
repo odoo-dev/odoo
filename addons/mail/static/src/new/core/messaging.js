@@ -207,7 +207,7 @@ export class Messaging {
                     ChatWindow.insert(this.state, {
                         autofocus: 0,
                         folded: channelData.state === "folded",
-                        threadLocalId: thread.localId,
+                        thread,
                     });
                 }
             }
@@ -270,22 +270,21 @@ export class Messaging {
             uuid,
             authorizedGroupFullName,
         });
-        this.fetchChannelMembers(thread.localId);
+        this.fetchChannelMembers(thread);
         return thread;
     }
 
     async createGroupChat({ default_display_mode, partners_to }) {
-        const channel = await this.orm.call("mail.channel", "create_group", [], {
+        const data = await this.orm.call("mail.channel", "create_group", [], {
             default_display_mode,
             partners_to,
         });
-        this.createChannelThread(channel);
+        const channel = this.createChannelThread(data);
         this.sortChannels();
-        this.openDiscussion(createLocalId("mail.channel", channel.id));
+        this.openDiscussion(channel);
     }
 
-    async fetchChannelMembers(threadLocalId) {
-        const thread = this.state.threads[threadLocalId];
+    async fetchChannelMembers(thread) {
         const results = await this.orm.call("mail.channel", "load_more_members", [[thread.id]], {
             known_member_ids: thread.channelMembers.map((channelMember) => channelMember.id),
         });
@@ -361,10 +360,6 @@ export class Messaging {
              */
             [...this.registeredImStatusPartners]
         );
-    }
-
-    sortThreadMessages(thread) {
-        thread.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
     }
 
     /**
@@ -535,16 +530,14 @@ export class Messaging {
                     {
                         const { id, message } = notif.payload;
                         const channel = this.state.threads[createLocalId("mail.channel", id)];
-                        if (channel) {
-                            this.createNotificationMessage(message, channel);
-                        } else {
-                            this.joinChat(message.author.id).then((channel) =>
-                                this.createNotificationMessage(message, channel)
-                            );
-                        }
-                        ChatWindow.insert(this.state, {
-                            threadLocalId: createLocalId("mail.channel", id),
-                        });
+                        Promise.resolve(channel ?? this.joinChat(message.author.id)).then(
+                            (channel) => {
+                                this.createNotificationMessage(message, channel);
+                                ChatWindow.insert(this.state, {
+                                    thread: channel,
+                                });
+                            }
+                        );
                     }
                     break;
                 case "mail.channel/leave":
@@ -786,11 +779,10 @@ export class Messaging {
     // actions that can be performed on the messaging system
     // -------------------------------------------------------------------------
 
-    setDiscussThread(threadLocalId) {
-        this.state.discuss.threadLocalId = threadLocalId;
-        const threadId = this.state.threads[threadLocalId].id;
+    setDiscussThread(thread) {
+        this.state.discuss.threadLocalId = thread.localId;
         const activeId =
-            typeof threadId === "string" ? `mail.box_${threadId}` : `mail.channel_${threadId}`;
+            typeof thread.id === "string" ? `mail.box_${thread.id}` : `mail.channel_${thread.id}`;
         this.router.pushState({ active_id: activeId });
     }
 
@@ -829,7 +821,7 @@ export class Messaging {
         requestList = ["activities", "followers", "attachments", "messages"]
     ) {
         if (requestList.includes("messages")) {
-            this.fetchThreadMessagesNew(createLocalId(resModel, resId));
+            this.fetchThreadMessagesNew(Thread.insert(this.state, { model: resModel, id: resId }));
         }
         const result = await this.rpc("/mail/thread/data", {
             request_list: requestList,
@@ -890,8 +882,7 @@ export class Messaging {
         return messages;
     }
 
-    async fetchThreadMessagesNew(threadLocalId) {
-        const thread = this.state.threads[threadLocalId];
+    async fetchThreadMessagesNew(thread) {
         const min = thread.mostRecentNonTransientMessage?.id;
         const fetchedMsgs = await this.fetchThreadMessages(thread, { min });
         const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
@@ -912,8 +903,7 @@ export class Messaging {
         });
     }
 
-    async fetchThreadMessagesMore(threadLocalId) {
-        const thread = this.state.threads[threadLocalId];
+    async fetchThreadMessagesMore(thread) {
         const fetchedMsgs = await this.fetchThreadMessages(thread, {
             max: thread.oldestNonTransientMessage?.id,
         });
@@ -941,15 +931,10 @@ export class Messaging {
         }
     });
 
-    async postMessage(
-        threadLocalId,
-        body,
-        { attachments = [], isNote = false, parentId, rawMentions }
-    ) {
-        const thread = this.state.threads[threadLocalId];
+    async postMessage(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         const command = this.getCommandFromText(thread.type, body);
         if (command) {
-            await this.executeCommand(thread.id, command, body);
+            await this.executeCommand(thread, command, body);
             return;
         }
         let tmpMsg;
@@ -993,14 +978,14 @@ export class Messaging {
                 thread
             );
         }
-        const data = await this.rpc(`/mail/message/post`, params);
+        const data = await this.rpc("/mail/message/post", params);
         const message = Message.insert(
             this.state,
             Object.assign(data, { body: markup(data.body) }),
             thread
         );
         if (!message.isEmpty) {
-            this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
+            this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
         }
         if (thread.type !== "chatter") {
             removeFromArray(thread.messages, tmpMsg.id);
@@ -1036,8 +1021,8 @@ export class Messaging {
         return validMentions;
     }
 
-    executeCommand(threadId, command, body = "") {
-        return this.orm.call("mail.channel", command.methodName, [[threadId]], {
+    executeCommand(thread, command, body = "") {
+        return this.orm.call("mail.channel", command.methodName, [[thread.id]], {
             body,
         });
     }
@@ -1053,8 +1038,7 @@ export class Messaging {
         }
     }
 
-    async updateMessage(messageId, body, attachments = [], rawMentions) {
-        const message = this.state.messages[messageId];
+    async updateMessage(message, body, attachments = [], rawMentions) {
         if (convertBrToLineBreak(message.body) === body && attachments.length === 0) {
             return;
         }
@@ -1070,12 +1054,11 @@ export class Messaging {
         message.attachments.push(...attachments);
     }
 
-    async addReaction(messageId, content) {
+    async addReaction(message, content) {
         const messageData = await this.rpc("/mail/message/add_reaction", {
             content,
-            message_id: messageId,
+            message_id: message.id,
         });
-        const message = this.state.messages[messageId];
         Message.insert(this.state, messageData, message.originThread);
     }
 
@@ -1088,11 +1071,10 @@ export class Messaging {
         Message.insert(this.state, messageData, message.originThread);
     }
 
-    notifyChatWindowState(threadLocalId) {
+    notifyChatWindowState(thread) {
         if (this.env.isSmall) {
             return;
         }
-        const thread = this.state.threads[threadLocalId];
         if (thread?.model === "mail.channel") {
             return this.orm.silent.call("mail.channel", "channel_fold", [[thread.id]], {
                 state: thread.state,
@@ -1100,26 +1082,25 @@ export class Messaging {
         }
     }
 
-    openDiscussion(threadLocalId, replaceNewMessageChatWindow) {
+    openDiscussion(thread, replaceNewMessageChatWindow) {
         if (this.state.discuss.isActive) {
-            this.setDiscussThread(threadLocalId);
+            this.setDiscussThread(thread);
         } else {
             const chatWindow = ChatWindow.insert(this.state, {
                 folded: false,
-                threadLocalId,
+                thread,
                 replaceNewMessageChatWindow,
             });
             chatWindow.autofocus++;
-            const thread = this.state.threads[threadLocalId];
             if (thread) {
-                this.state.threads[threadLocalId].state = "open";
+                thread.state = "open";
             }
-            this.notifyChatWindowState(threadLocalId);
+            this.notifyChatWindowState(thread);
         }
     }
 
     openNewMessageChatWindow() {
-        if (this.state.chatWindows.some(({ threadLocalId }) => !threadLocalId)) {
+        if (this.state.chatWindows.some(({ thread }) => !thread)) {
             // New message chat window is already opened.
             return;
         }
@@ -1127,7 +1108,7 @@ export class Messaging {
     }
 
     closeNewMessageChatWindow() {
-        this.state.chatWindows.find(({ threadLocalId }) => !threadLocalId)?.close();
+        this.state.chatWindows.find(({ thread }) => !thread)?.close();
     }
 
     toggleReplyTo(message) {
@@ -1143,13 +1124,13 @@ export class Messaging {
     }
 
     async createChannel(name) {
-        const channel = await this.orm.call("mail.channel", "channel_create", [
+        const data = await this.orm.call("mail.channel", "channel_create", [
             name,
             this.state.internalUserGroupId,
         ]);
-        this.createChannelThread(channel);
+        const channel = this.createChannelThread(data);
         this.sortChannels();
-        this.openDiscussion(createLocalId("mail.channel", channel.id));
+        this.openDiscussion(channel);
     }
 
     async getChat({ userId, partnerId }) {
@@ -1209,6 +1190,7 @@ export class Messaging {
         });
         this.sortChannels();
         this.state.discuss.threadLocalId = thread.localId;
+        return thread;
     }
 
     async joinChat(id) {
@@ -1248,8 +1230,7 @@ export class Messaging {
         return partners;
     }
 
-    searchChannelCommand(cleanedSearchTerm, threadLocalId, sort) {
-        const thread = this.state.threads[threadLocalId];
+    searchChannelCommand(cleanedSearchTerm, thread, sort) {
         if (!["chat", "channel", "group"].includes(thread.type)) {
             // channel commands are channel specific
             return [[]];
@@ -1312,11 +1293,13 @@ export class Messaging {
         ];
     }
 
-    async leaveChannel(id) {
-        await this.orm.call("mail.channel", "action_unfollow", [id]);
-        this.state.threads[createLocalId("mail.channel", id)].remove();
+    async leaveChannel(channel) {
+        await this.orm.call("mail.channel", "action_unfollow", [channel.id]);
+        channel.remove();
         this.setDiscussThread(
-            this.state.discuss.channels.threads[0] ?? this.state.discuss.inbox.localId
+            this.state.discuss.channels.threads[0]
+                ? this.state.threads[this.state.discuss.channels.threads[0]]
+                : this.state.discuss.inbox
         );
     }
 
@@ -1332,16 +1315,16 @@ export class Messaging {
     async openChat(person) {
         const chat = await this.getChat(person);
         if (chat) {
-            this.openDiscussion(chat.localId);
+            this.openDiscussion(chat);
         }
     }
 
-    async toggleStar(messageId) {
-        await this.orm.call("mail.message", "toggle_message_starred", [[messageId]]);
+    async toggleStar(message) {
+        await this.orm.call("mail.message", "toggle_message_starred", [[message.id]]);
     }
 
-    async setDone(messageId) {
-        await this.orm.call("mail.message", "set_message_done", [[messageId]]);
+    async setDone(message) {
+        await this.orm.call("mail.message", "set_message_done", [[message.id]]);
     }
 
     updateMessageStarredState(message, isStarred) {
@@ -1384,8 +1367,7 @@ export class Messaging {
         await this.orm.call("mail.message", "unstar_all");
     }
 
-    async notifyThreadNameToServer(threadLocalId, name) {
-        const thread = this.state.threads[threadLocalId];
+    async notifyThreadNameToServer(thread, name) {
         if (thread.type === "channel" || thread.type === "group") {
             thread.name = name;
             await this.orm.call("mail.channel", "channel_rename", [[thread.id]], { name });
@@ -1395,7 +1377,7 @@ export class Messaging {
         }
     }
 
-    /*
+    /**
      * Returns suggestions that match the given search term from specified type.
      *
      * @param {Object} [param0={}]
@@ -1406,24 +1388,18 @@ export class Messaging {
      *  result in the context of given thread
      * @returns {[mainSuggestion[], extraSuggestion[]]}
      */
-
-    searchSuggestions({ delimiter, term }, { threadLocalId } = {}, sort = false) {
+    searchSuggestions({ delimiter, term }, { thread } = {}, sort = false) {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                return Partner.searchSuggestions(
-                    this.state,
-                    cleanedSearchTerm,
-                    threadLocalId,
-                    sort
-                );
+                return Partner.searchSuggestions(this.state, cleanedSearchTerm, thread, sort);
             }
             case ":":
                 return CannedResponse.searchSuggestions(this.state, cleanedSearchTerm, sort);
             case "#":
-                return Thread.searchSuggestions(this.state, cleanedSearchTerm, threadLocalId, sort);
+                return Thread.searchSuggestions(this.state, cleanedSearchTerm, thread, sort);
             case "/":
-                return this.searchChannelCommand(cleanedSearchTerm, threadLocalId, sort);
+                return this.searchChannelCommand(cleanedSearchTerm, thread, sort);
         }
         return [
             {
@@ -1437,11 +1413,11 @@ export class Messaging {
         ];
     }
 
-    async fetchSuggestions({ delimiter, term }, { threadLocalId } = {}) {
+    async fetchSuggestions({ delimiter, term }, { thread } = {}) {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                this.fetchPartners(cleanedSearchTerm, threadLocalId);
+                this.fetchPartners(cleanedSearchTerm, thread);
                 break;
             }
             case ":":
@@ -1454,9 +1430,8 @@ export class Messaging {
         }
     }
 
-    async fetchPartners(term, threadLocalId) {
+    async fetchPartners(term, thread) {
         const kwargs = { search: term };
-        const thread = this.state.threads[threadLocalId];
         const isNonPublicChannel =
             thread &&
             (thread.type === "group" ||
@@ -1491,8 +1466,7 @@ export class Messaging {
         });
     }
 
-    async notifyThreadDescriptionToServer(threadLocalId, description) {
-        const thread = this.state.threads[threadLocalId];
+    async notifyThreadDescriptionToServer(thread, description) {
         thread.description = description;
         return this.orm.call("mail.channel", "channel_change_description", [[thread.id]], {
             description,

@@ -28,7 +28,6 @@ import { useAttachmentUploader, useHover, useScrollPosition } from "@mail/new/ut
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { Attachment } from "../core/attachment_model";
 import { _t } from "@web/core/l10n/translation";
-import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
@@ -60,9 +59,9 @@ export class Chatter extends Component {
             isLoadingAttachments: false,
         });
         this.unfollowHover = useHover("unfollow");
-        this.attachmentUploader = useAttachmentUploader({
-            threadLocalId: createLocalId(this.props.resModel, this.props.resId),
-        });
+        this.attachmentUploader = useAttachmentUploader(
+            this.messaging.getChatterThread(this.props.resModel, this.props.resId)
+        );
         this.scrollPosition = useScrollPosition("scrollable", undefined, "top");
         this.rootRef = useRef("root");
         useChildSubEnv({

@@ -31,7 +31,7 @@ QUnit.module("message", {
     },
 });
 
-QUnit.test("Start edition on click edit", async (assert) => {
+QUnit.skipRefactoring("Start edition on click edit", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -76,7 +76,7 @@ QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
     assert.strictEqual(composerTextarea.selectionEnd, contentLength);
 });
 
-QUnit.test("Stop edition on click cancel", async (assert) => {
+QUnit.skipRefactoring("Stop edition on click cancel", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -91,7 +91,7 @@ QUnit.test("Stop edition on click cancel", async (assert) => {
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
-QUnit.test("Stop edition on press escape", async (assert) => {
+QUnit.skipRefactoring("Stop edition on press escape", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -107,7 +107,7 @@ QUnit.test("Stop edition on press escape", async (assert) => {
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
-QUnit.test("Stop edition on click save", async (assert) => {
+QUnit.skipRefactoring("Stop edition on click save", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -122,7 +122,7 @@ QUnit.test("Stop edition on click save", async (assert) => {
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
-QUnit.test("Stop edition on press enter", async (assert) => {
+QUnit.skipRefactoring("Stop edition on press enter", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -138,7 +138,7 @@ QUnit.test("Stop edition on press enter", async (assert) => {
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
-QUnit.test("Stop edition on click away", async (assert) => {
+QUnit.skipRefactoring("Stop edition on click away", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -154,29 +154,32 @@ QUnit.test("Stop edition on click away", async (assert) => {
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
-QUnit.test("Do not stop edition on click away when clicking on emoji", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
-    const { Component: PopoverContainer, props } = registry
-        .category("main_components")
-        .get("PopoverContainer");
-    await mount(PopoverContainer, target, { env, props });
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
+QUnit.skipRefactoring(
+    "Do not stop edition on click away when clicking on emoji",
+    async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
+        const env = makeTestEnv((route, params) => server.rpc(route, params));
+        await env.services["mail.messaging"].isReady;
+        env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+        const { Component: PopoverContainer, props } = registry
+            .category("main_components")
+            .get("PopoverContainer");
+        await mount(PopoverContainer, target, { env, props });
+        await mount(Discuss, target, { env });
+        target.querySelector(".o-mail-message-actions").classList.remove("invisible");
+        await webClick(target, "i[aria-label='Edit']");
 
-    await webClick(target.querySelector("i[aria-label='Emojis']").closest("button"));
-    await loadEmoji(); // wait for emoji being loaded (required for rendering)
-    await nextTick(); // wait for following rendering
-    await webClick(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
-    assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
-});
+        await webClick(target.querySelector("i[aria-label='Emojis']").closest("button"));
+        await loadEmoji(); // wait for emoji being loaded (required for rendering)
+        await nextTick(); // wait for following rendering
+        await webClick(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
+        assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
+    }
+);
 
-QUnit.test("Save on click", async (assert) => {
+QUnit.skipRefactoring("Save on click", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
@@ -192,7 +195,7 @@ QUnit.test("Save on click", async (assert) => {
     assert.strictEqual(document.querySelector(".o-mail-message-body").innerText, "Goodbye World");
 });
 
-QUnit.test("Do not call server on save if no changes", async (assert) => {
+QUnit.skipRefactoring("Do not call server on save if no changes", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world\nGoodbye world");
@@ -213,7 +216,7 @@ QUnit.test("Do not call server on save if no changes", async (assert) => {
     assert.verifySteps([]);
 });
 
-QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
+QUnit.skipRefactoring("Scroll bar to the top when edit starts", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world ! ".repeat(1000));

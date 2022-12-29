@@ -15,7 +15,7 @@ import { Transition } from "@web/core/transition";
 export class Thread extends Component {
     static components = { Message, Transition };
     static props = [
-        "localId",
+        "thread",
         "messageHighlight?",
         "order?",
         "messageInEditId?",
@@ -36,7 +36,7 @@ export class Thread extends Component {
                 ) {
                     return false;
                 }
-                if (this.thread.scrollPosition.isSaved) {
+                if (this.props.thread.scrollPosition.isSaved) {
                     return false;
                 }
                 return true;
@@ -46,12 +46,16 @@ export class Thread extends Component {
         this.pendingLoadMore = false;
         this.loadMoreState = useVisible("load-more", () => this.loadMore());
         this.oldestNonTransientMessageId = null;
-        this.scrollPosition = useScrollPosition("messages", this.thread.scrollPosition, "bottom");
+        this.scrollPosition = useScrollPosition(
+            "messages",
+            this.props.thread.scrollPosition,
+            "bottom"
+        );
         useScrollSnapshot("messages", {
             onWillPatch: () => {
                 return {
                     hasMoreMsgsAbove:
-                        this.thread.oldestNonTransientMessage?.id !==
+                        this.props.thread.oldestNonTransientMessage?.id !==
                             this.oldestNonTransientMessage && this.props.order === "asc",
                 };
             },
@@ -62,40 +66,36 @@ export class Thread extends Component {
                     el.scrollTop = scrollTop + el.scrollHeight - scrollHeight;
                     this.pendingLoadMore = false;
                 }
-                this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
+                this.oldestNonTransientMessage = this.props.thread.oldestNonTransientMessage?.id;
                 if (!wasPendingLoadMore) {
                     this.loadMore();
                 }
             },
         });
         onMounted(() => {
-            this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
+            this.oldestNonTransientMessage = this.props.thread.oldestNonTransientMessage?.id;
             this.loadMore();
             this.scrollPosition.restore();
         });
-        onWillStart(() => this.requestMessages(this.props.localId));
-        onWillUpdateProps((nextProps) => this.requestMessages(nextProps.localId));
-    }
-
-    get thread() {
-        return this.messaging.state.threads[this.props.localId];
+        onWillStart(() => this.requestMessages(this.props.thread));
+        onWillUpdateProps((nextProps) => this.requestMessages(nextProps.thread));
     }
 
     loadMore() {
         if (
             this.loadMoreState.isVisible &&
-            this.thread.status !== "loading" &&
+            this.props.thread.status !== "loading" &&
             !this.pendingLoadMore
         ) {
-            this.messaging.fetchThreadMessagesMore(this.props.localId);
+            this.messaging.fetchThreadMessagesMore(this.props.thread);
             this.pendingLoadMore = true;
         }
     }
 
-    requestMessages(threadLocalId) {
+    requestMessages(thread) {
         // does not return the promise, so the thread is immediately rendered
         // then updated whenever messages get here
-        this.messaging.fetchThreadMessagesNew(threadLocalId);
+        this.messaging.fetchThreadMessagesNew(thread);
     }
 
     isGrayedOut(msg) {

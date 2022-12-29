@@ -11,10 +11,10 @@ export class ChannelMemberList extends Component {
 
     setup() {
         this.messaging = useMessaging();
-        onWillStart(() => this.messaging.fetchChannelMembers(this.props.thread.localId));
+        onWillStart(() => this.messaging.fetchChannelMembers(this.props.thread));
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread.channelMembers.length === 0) {
-                this.messaging.fetchChannelMembers(nextProps.thread.localId);
+                this.messaging.fetchChannelMembers(nextProps.thread);
             }
         });
     }

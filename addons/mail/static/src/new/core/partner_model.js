@@ -68,9 +68,8 @@ export class Partner {
         return this.id === this._state.user.partnerId;
     }
 
-    static searchSuggestions(state, cleanedSearchTerm, threadLocalId, sort) {
+    static searchSuggestions(state, cleanedSearchTerm, thread, sort) {
         let partners;
-        const thread = state.threads[threadLocalId];
         const isNonPublicChannel =
             thread &&
             (thread.type === "group" ||

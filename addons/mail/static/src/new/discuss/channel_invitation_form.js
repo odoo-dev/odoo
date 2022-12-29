@@ -6,11 +6,10 @@ import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
 
 import { _t } from "@web/core/l10n/translation";
-import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ChannelInvitationForm extends Component {
     static components = { PartnerImStatus };
-    static props = ["threadId", "close?", "chatState?"];
+    static props = ["thread", "close?", "chatState?"];
     static template = "mail.channel_invitation_form";
 
     setup() {
@@ -31,7 +30,7 @@ export class ChannelInvitationForm extends Component {
     async fetchPartnersToInvite() {
         const results = await this.messaging.orm.call("res.partner", "search_for_channel_invite", [
             this.searchStr,
-            this.props.threadId,
+            this.props.thread.id,
         ]);
         const Partners = results["partners"];
         const selectablePartners = [];
@@ -74,7 +73,7 @@ export class ChannelInvitationForm extends Component {
     }
 
     async onClickCopy(ev) {
-        await navigator.clipboard.writeText(this.thread.invitationLink);
+        await navigator.clipboard.writeText(this.props.thread.invitationLink);
         this.messaging.notify({
             message: _t("Link copied!"),
             type: "success",
@@ -82,14 +81,14 @@ export class ChannelInvitationForm extends Component {
     }
 
     async onClickInvite() {
-        if (this.thread.type === "chat") {
+        if (this.props.thread.type === "chat") {
             const partners_to = [
                 this.messaging.state.user.partnerId,
-                this.thread.chatPartnerId,
+                this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ];
             await this.messaging.createGroupChat({ partners_to });
-        } else if (["channel", "group"].includes(this.thread.type)) {
+        } else if (["channel", "group"].includes(this.props.thread.type)) {
             await this.messaging.orm.call("mail.channel", "add_members", [[this.props.threadId]], {
                 partner_ids: this.state.selectedPartners.map((partner) => partner.id),
             });
@@ -101,16 +100,12 @@ export class ChannelInvitationForm extends Component {
         }
     }
 
-    get thread() {
-        return this.messaging.state.threads[createLocalId("mail.channel", this.props.threadId)];
-    }
-
     get invitationButtonText() {
-        if (this.thread.type === "channel") {
+        if (this.props.thread.type === "channel") {
             return _t("Invite to Channel");
-        } else if (this.thread.type === "group") {
+        } else if (this.props.thread.type === "group") {
             return _t("Invite to Group Chat");
-        } else if (this.thread.type === "chat") {
+        } else if (this.props.thread.type === "chat") {
             return _t("Create Group Chat");
         }
         return _t("Invite");

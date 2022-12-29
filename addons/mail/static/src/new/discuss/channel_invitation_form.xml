@@ -46,16 +46,16 @@
                     <t t-esc="invitationButtonText"/>
                 </button>
             </div>
-            <t t-if="thread.invitationLink">
+            <t t-if="props.thread.invitationLink">
                 <h4 class="mx-3 mt-3 mb-2">Invitation Link</h4>
                 <div class="mx-3 mt-2 mb-3">
                     <div class="input-group">
-                        <input class="form-control" type="text" t-att-value="thread.invitationLink" readonly="" t-on-focus="onFocusInvitationLinkInput"/>
+                        <input class="form-control" type="text" t-att-value="props.thread.invitationLink" readonly="" t-on-focus="onFocusInvitationLinkInput"/>
                         <button class="btn btn-primary" t-on-click="onClickCopy">
                             <i class="fa fa-copy"/>
                         </button>
                     </div>
-                    <div t-if="thread.accessRestrictedToGroupText" class="o-mail-channel-invitation-form-access-restricted mt-2" t-esc="thread.accessRestrictedToGroupText"/>
+                    <div t-if="props.thread.accessRestrictedToGroupText" class="o-mail-channel-invitation-form-access-restricted mt-2" t-esc="props.thread.accessRestrictedToGroupText"/>
                 </div>
             </t>
         </div>

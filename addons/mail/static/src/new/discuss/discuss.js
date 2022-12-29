@@ -107,8 +107,7 @@ export class Discuss extends Component {
                 el,
                 ChannelInvitationForm,
                 {
-                    threadId:
-                        this.messaging.state.threads[this.messaging.state.discuss.threadLocalId].id,
+                    thread: this.thread,
                 },
                 {
                     onClose: () => (this.closePopover = null),
@@ -139,7 +138,7 @@ export class Discuss extends Component {
                 this.thread.type === "chat" ||
                 this.thread.type === "group")
         ) {
-            await this.messaging.notifyThreadNameToServer(this.thread.localId, newName);
+            await this.messaging.notifyThreadNameToServer(this.thread, newName);
         }
     }
 
@@ -160,10 +159,7 @@ export class Discuss extends Component {
             return;
         }
         if (newDescription !== this.thread.description) {
-            await this.messaging.notifyThreadDescriptionToServer(
-                this.thread.localId,
-                newDescription
-            );
+            await this.messaging.notifyThreadDescriptionToServer(this.thread, newDescription);
         }
     }
 }

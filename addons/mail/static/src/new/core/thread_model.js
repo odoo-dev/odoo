@@ -178,9 +178,8 @@ export class Thread {
         delete this._state.threads[this.localId];
     }
 
-    static searchSuggestions(state, cleanedSearchTerm, threadLocalId, sort) {
+    static searchSuggestions(state, cleanedSearchTerm, thread, sort) {
         let threads;
-        const thread = state.threads[threadLocalId];
         if (
             thread &&
             (thread.type === "group" ||

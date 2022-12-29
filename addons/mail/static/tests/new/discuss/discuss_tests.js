@@ -264,7 +264,7 @@ QUnit.test("focus is set on composer when switching channel", async (assert) => 
     assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
 });
 
-QUnit.test("Message following a notification should not be squashed", async (assert) => {
+QUnit.skipRefactoring("Message following a notification should not be squashed", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
     server.addMessage(

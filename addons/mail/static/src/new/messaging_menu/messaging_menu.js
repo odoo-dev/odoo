@@ -39,8 +39,8 @@ export class MessagingMenu extends Component {
         return previews.filter((preview) => target.includes(preview.type));
     }
 
-    openDiscussion(threadLocalId) {
-        this.messaging.openDiscussion(threadLocalId);
+    openDiscussion(thread) {
+        this.messaging.openDiscussion(thread);
         this.close();
     }
 

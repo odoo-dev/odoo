@@ -19,8 +19,8 @@ import {
     utils,
     clearRegistryWithCleanup,
 } from "@web/../tests/helpers/mock_env";
-import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 import { browser } from "@web/core/browser/browser";
+import { Thread } from "@mail/new/core/thread_model";
 const { prepareRegistriesWithCleanup } = utils;
 const { afterNextRender } = App;
 
@@ -156,7 +156,10 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
         }
         // TODO-DISCUSS-REFACTORING: remove when activeId will be handled.
         webClient.env.services["mail.messaging"].setDiscussThread(
-            createLocalId(threadModel, threadId)
+            Thread.insert(webClient.env.services["mail.messaging"].state, {
+                model: threadModel,
+                id: threadId,
+            })
         );
         if (waitUntilMessagesLoaded) {
             const messagesLoadedPromise = makeDeferred();
