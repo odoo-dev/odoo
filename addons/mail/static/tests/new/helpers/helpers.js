@@ -17,6 +17,7 @@ import { stateService } from "@mail/new/core/state_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
+import { activityService } from "@mail/new/activity/activity_service";
 
 export { TestServer } from "./test_server";
 
@@ -66,6 +67,8 @@ export function makeTestEnv(rpc) {
     env.services["mail.userSettings"] = userSettings;
     const state = stateService.start();
     env.services["mail.state"] = state;
+    const activity = activityService.start(env, { "mail.state": state, orm });
+    env.services["mail.activity"] = activity;
     const chatWindow = chatWindowService.start(env, { "mail.state": state, orm });
     env.services["mail.chatWindow"] = chatWindow;
     const notification = notificationService.start(env);

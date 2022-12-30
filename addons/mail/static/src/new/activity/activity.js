@@ -81,7 +81,7 @@ export class Activity extends Component {
 
     async edit() {
         const { id, res_model, res_id } = this.props.data;
-        await this.env.services["mail.messaging"].scheduleActivity(res_model, res_id, id);
+        await this.env.services["mail.activity"].schedule(res_model, res_id, id);
         this.props.onUpdate();
     }
 
