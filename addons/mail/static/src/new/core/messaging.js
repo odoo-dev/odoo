@@ -24,7 +24,6 @@ import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { createLocalId } from "./thread_model.create_local_id";
-import { Failure } from "./failure_model";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 const FETCH_MSG_LIMIT = 30;
@@ -114,7 +113,7 @@ export class Messaging {
             channelMembers: {},
             /** @type {Object.<number, import("@mail/new/core/notification_model").Notification>} */
             notifications: {},
-            notificationGroups: {},
+            notificationGroups: [],
             /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
             followers: {},
             /** @type {Object.<number, Partner>} */
@@ -132,7 +131,6 @@ export class Messaging {
             // messaging menu
             menu: {
                 counter: 0,
-                failures: [],
             },
             // discuss app
             discuss: {
@@ -231,39 +229,16 @@ export class Messaging {
 
     loadFailures() {
         this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
-            const notifications = messages
-                .map(
-                    (messageData) =>
-                        Message.insert(this.state, {
-                            ...messageData,
-                            // implicit: failures are sent by the server at
-                            // initialization only if the current partner is
-                            // author of the message
-                            author: this.state.partners[this.state.user.partnerId],
-                        }).notifications
-                )
-                .flat();
-            const failuresByModel = {};
-            const modelNameToResModel = {};
-            for (const notification of notifications) {
-                const message = notification.message;
-                const modelName = message.originThread.modelName;
-                modelNameToResModel[modelName] = message.resModel;
-                failuresByModel[modelName] ??= {};
-                failuresByModel[modelName][notification.notification_type] ??= [];
-                failuresByModel[modelName][notification.notification_type].push(notification);
-            }
-            for (const [modelName, failuresByType] of Object.entries(failuresByModel)) {
-                for (const [type, notifications] of Object.entries(failuresByType)) {
-                    Failure.insert(this.state, {
-                        modelName,
-                        type,
-                        resModel: modelNameToResModel[modelName],
-                        notifications,
-                    });
-                }
-            }
-            this.state.menu.failures.sort((f1, f2) => f2.lastMessage.id - f1.lastMessage.id);
+            messages.map((messageData) =>
+                Message.insert(this.state, {
+                    ...messageData,
+                    // implicit: failures are sent by the server at
+                    // initialization only if the current partner is
+                    // author of the message
+                    author: this.state.partners[this.state.user.partnerId],
+                })
+            );
+            this.state.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
         });
     }
 
