@@ -30,6 +30,7 @@ export class Activity extends Component {
 
     setup() {
         this.messaging = useService("mail.messaging");
+        this.chatter = useState(useService("mail.chatter"));
         this.state = useState({
             showDetails: false,
         });
@@ -91,6 +92,6 @@ export class Activity extends Component {
     }
 
     get thread() {
-        return this.messaging.getChatterThread(this.props.data.res_model, this.props.data.res_id);
+        return this.chatter.getThread(this.props.data.res_model, this.props.data.res_id);
     }
 }

@@ -51,6 +51,7 @@ export class Chatter extends Component {
         this.action = useService("action");
         this.messaging = useMessaging();
         this.activity = useState(useService("mail.activity"));
+        this.chatter = useState(useService("mail.chatter"));
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
@@ -61,7 +62,7 @@ export class Chatter extends Component {
         });
         this.unfollowHover = useHover("unfollow");
         this.attachmentUploader = useAttachmentUploader(
-            this.messaging.getChatterThread(this.props.resModel, this.props.resId)
+            this.chatter.getThread(this.props.resModel, this.props.resId)
         );
         this.scrollPosition = useScrollPosition("scrollable", undefined, "top");
         this.rootRef = useRef("root");
@@ -120,7 +121,7 @@ export class Chatter extends Component {
 
     load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
         const { resModel } = this.props;
-        const thread = this.messaging.getChatterThread(resModel, resId);
+        const thread = this.chatter.getThread(resModel, resId);
         this.thread = thread;
         this.scrollPosition.model = this.thread.scrollPosition;
         if (!resId) {
@@ -131,7 +132,7 @@ export class Chatter extends Component {
         if (this.props.hasActivity && !requestList.includes("activities")) {
             requestList.push("activities");
         }
-        this.messaging.fetchChatterData(resId, resModel, requestList).then((result) => {
+        this.chatter.fetchData(resId, resModel, requestList).then((result) => {
             this.thread.hasReadAccess = result.hasReadAccess;
             this.thread.hasWriteAccess = result.hasWriteAccess;
             if ("activities" in result) {
@@ -213,13 +214,13 @@ export class Chatter extends Component {
      * @param {import("@mail/new/core/follower_model").Follower} follower
      */
     async onClickRemove(ev, follower) {
-        await this.messaging.removeFollower(follower);
+        await this.chatter.removeFollower(follower);
         this.onFollowerChanged();
         document.body.click(); // hack to close dropdown
     }
 
     async onClickUnfollow() {
-        await this.messaging.removeFollower(this.thread.followerOfCurrentUser);
+        await this.chatter.removeFollower(this.thread.followerOfCurrentUser);
         this.onFollowerChanged();
     }
 

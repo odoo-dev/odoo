@@ -18,6 +18,7 @@ import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
+import { chatterService } from "@mail/new/views/chatter_service";
 
 export { TestServer } from "./test_server";
 
@@ -82,6 +83,13 @@ export function makeTestEnv(rpc) {
         router,
     });
     env.services["mail.thread"] = thread;
+    const chatter = chatterService.start(env, {
+        "mail.state": state,
+        "mail.thread": thread,
+        rpc,
+        orm,
+    });
+    env.services["mail.chatter"] = chatter;
     const message = messageService.start(env, {
         "mail.state": state,
         rpc,
