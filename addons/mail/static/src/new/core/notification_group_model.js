@@ -12,12 +12,18 @@ export class NotificationGroup {
     resModel;
     /** @type {number} */
     lastMessageId;
+    /** @type {Set<number>} */
+    resIds = new Set();
     /** @type {'sms' | 'email'} */
     type;
 
     static insert(state, data) {
         let group = state.notificationGroups.find((group) => {
-            return group.resModel === data.resModel && group.type === data.type;
+            return (
+                group.resModel === data.resModel &&
+                group.type === data.type &&
+                (group.resModel !== "mail.channel" || group.resIds.has(data.resId))
+            );
         });
         if (!group) {
             group = new NotificationGroup(state);
@@ -42,8 +48,9 @@ export class NotificationGroup {
             status: data.status ?? this.status,
         });
         const notifications = data.notifications ?? [];
+        const alreadyKnownNotifications = new Set(this.notifications.map(({ id }) => id));
         for (const [commandName, notification] of notifications) {
-            if (commandName === "insert") {
+            if (commandName === "insert" && !alreadyKnownNotifications.has(notification.id)) {
                 this.notifications.push(notification);
             }
         }
@@ -53,6 +60,7 @@ export class NotificationGroup {
                 this.lastMessageId = notification.message.id;
             }
         }
+        this.resIds.add(data.resId);
     }
 
     get iconSrc() {

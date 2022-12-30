@@ -295,3 +295,53 @@ QUnit.test("non-failure notifications are ignored", async function (assert) {
     await click(".o_menu_systray i[aria-label='Messages']");
     assert.containsNone(target, ".o-mail-notification-item");
 });
+
+QUnit.test("different mail.channel are not grouped", async function (assert) {
+    const pyEnv = await startServer();
+    const [mailChannelId1, mailChannelId2] = pyEnv["mail.channel"].create([
+        { name: "mailChannel1" },
+        { name: "mailChannel2" },
+    ]);
+    const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+        {
+            message_type: "email",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+            res_model_name: "Channel",
+        },
+        {
+            message_type: "email",
+            model: "mail.channel",
+            res_id: mailChannelId2,
+            res_model_name: "Channel",
+        },
+    ]);
+    pyEnv["mail.notification"].create([
+        {
+            mail_message_id: mailMessageId1,
+            notification_status: "exception",
+            notification_type: "email",
+        },
+        {
+            mail_message_id: mailMessageId1,
+            notification_status: "exception",
+            notification_type: "email",
+        },
+        {
+            mail_message_id: mailMessageId2,
+            notification_status: "bounce",
+            notification_type: "email",
+        },
+        {
+            mail_message_id: mailMessageId2,
+            notification_status: "bounce",
+            notification_type: "email",
+        },
+    ]);
+    await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    assert.containsN(target, ".o-mail-notification-item", 4);
+    const $groups = $(".o-mail-notification-item:contains(Channel (2))");
+    await click($groups);
+    assert.containsOnce(target, ".o-mail-chat-window");
+});
