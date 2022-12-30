@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.messaging_menu" owl="1">
-    <t t-set="failures" t-value="messaging.state.menu.failures"/>
+    <t t-set="failures" t-value="messaging.state.notificationGroups"/>
     <Dropdown beforeOpen.bind="() => messaging.fetchPreviews()" position="'bottom-end'" menuClass="'p-0'">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-comments" role="img" aria-label="Messages"></i>
@@ -27,7 +27,7 @@
                             dateTime="preview.mostRecentMsg?.dateTime"
                             displayName="preview.displayName"
                             iconSrc="preview.imgUrl"
-                            isLast="preview_last and messaging.state.menu.failures.length === 0"
+                            isLast="preview_last and failures.length === 0"
                             onClick="() => this.openDiscussion(preview)"
                         >
                             <t t-set-slot="icon">
@@ -45,14 +45,15 @@
                     </t>
                     <t t-if="state.filter === 'all'">
                         <NotificationItem
-                            t-foreach="failures" t-as="failure" t-key="failure.localId"
+                            t-foreach="failures" t-as="failure" t-key="failure.id"
                             body="failure.body"
-                            displayName="failure.displayName"
+                            count="failure.notifications.length"
+                            dateTime="failure.dateTime"
+                            displayName="failure.modelName"
                             iconSrc="failure.iconSrc"
                             isLast="failure_last"
-                            dateTime="failure.lastMessage?.dateTime"
                             onClick="() => this.onClickFailure(failure)"
-                        />
+x                        />
                     </t>
                 </div>
             </div>

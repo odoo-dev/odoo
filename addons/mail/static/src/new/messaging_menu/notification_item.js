@@ -6,6 +6,15 @@ import { RelativeTime } from "../thread/relative_time";
 
 export class NotificationItem extends Component {
     static components = { RelativeTime, PartnerImStatus };
-    static props = ["displayName", "body?", "slots?", "isLast", "dateTime?", "iconSrc", "onClick"];
+    static props = [
+        "displayName",
+        "body?",
+        "slots?",
+        "isLast",
+        "count?",
+        "dateTime?",
+        "iconSrc",
+        "onClick",
+    ];
     static template = "mail.notification_item";
 }

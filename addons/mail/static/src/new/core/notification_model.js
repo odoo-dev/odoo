@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { NotificationGroup } from "./notification_group_model";
+
 export class Notification {
     /** @type {number} */
     id;
@@ -54,24 +56,13 @@ export class Notification {
             return;
         }
         const thread = this.message.originThread;
-        const groupResId = thread.model === "mail.channel" ? thread.id : null;
-        const group = Object.values(this._state.notificationGroups).find((group) => {
-            if (
-                group.notificationType === this.notification_type &&
-                group.resId === groupResId &&
-                group.model === this.message.originThread.model &&
-                group.modelName === this.message.originThread.modelName
-            ) {
-                return group;
-            }
+        NotificationGroup.insert(this._state, {
+            modelName: thread.modelName,
+            resId: this.message.originThread.id,
+            resModel: this.message.originThread.model,
+            status: this.notification_status,
+            type: this.notification_type,
+            notifications: [["insert", this]],
         });
-        if (!group) {
-            this._state.notificationGroups[this.id] = {
-                notificationType: this.notification_type,
-                resId: groupResId,
-                model: this.message.originThread.model,
-                modelName: this.message.originThread.modelName,
-            };
-        }
     }
 }
