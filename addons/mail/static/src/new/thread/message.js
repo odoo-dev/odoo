@@ -64,6 +64,7 @@ export class Message extends Component {
         this.ref = useRef("ref");
         this.messaging = useMessaging();
         this.threadService = useState(useService("mail.thread"));
+        this.messageService = useState(useService("mail.message"));
         this.action = useService("action");
         this.user = useService("user");
         useChildSubEnv({
@@ -104,7 +105,7 @@ export class Message extends Component {
                             partners.find(({ id }) => id === this.user.partnerId)
                     );
                     if (!reaction) {
-                        this.messaging.addReaction(this.message, emoji);
+                        this.messageService.react(this.message, emoji);
                     }
                 },
             });

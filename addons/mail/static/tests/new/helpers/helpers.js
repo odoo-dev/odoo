@@ -16,6 +16,7 @@ import { suggestionService } from "@mail/new/suggestion/suggestion_service";
 import { stateService } from "@mail/new/core/state_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
+import { messageService } from "@mail/new/thread/message_service";
 
 export { TestServer } from "./test_server";
 
@@ -37,6 +38,7 @@ export function makeTestEnv(rpc) {
         start() {},
     };
     const action = {};
+    const presence = makeFakePresenceService();
     const env = {
         bus: new EventBus(),
         _t: (s) => s,
@@ -49,7 +51,7 @@ export function makeTestEnv(rpc) {
             dialog: {},
             ui,
             popover: {},
-            presence: makeFakePresenceService(),
+            presence,
         },
     };
     const hotkey = hotkeyService.start(env, { ui });
@@ -77,6 +79,14 @@ export function makeTestEnv(rpc) {
         router,
     });
     env.services["mail.thread"] = thread;
+    const message = messageService.start(env, {
+        "mail.state": state,
+        rpc,
+        orm,
+        presence,
+        "mail.thread": thread,
+    });
+    env.services["mail.message"] = message;
     const messaging = messagingService.start(env, {
         "mail.state": state,
         rpc,
@@ -89,6 +99,7 @@ export function makeTestEnv(rpc) {
         "mail.userSettings": userSettings,
         "mail.chat_window": chatWindow,
         "mail.thread": thread,
+        "mail.message": message,
     });
     const effect = effectService.start(env);
     env.services.effect = effect;
