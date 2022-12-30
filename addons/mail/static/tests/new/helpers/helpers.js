@@ -13,6 +13,7 @@ import { soundEffects } from "@mail/new/sound_effects_service";
 import { userSettingsService } from "@mail/new/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/suggestion/suggestion_service";
+import { stateService } from "@mail/new/core/state_service";
 
 export { TestServer } from "./test_server";
 
@@ -59,7 +60,10 @@ export function makeTestEnv(rpc) {
     env.services["mail.soundEffects"] = soundEffect;
     const userSettings = userSettingsService.start(env, { rpc, user });
     env.services["mail.userSettings"] = userSettings;
+    const state = stateService.start();
+    env.services["mail.state"] = state;
     const messaging = messagingService.start(env, {
+        "mail.state": state,
         rpc,
         orm,
         user,
