@@ -53,8 +53,8 @@ export class ActivityListPopover extends Component {
     }
 
     onClickAddActivityButton() {
-        this.env.services["mail.messaging"]
-            .scheduleActivity(
+        this.env.services["mail.activity"]
+            .schedule(
                 this.props.resModel,
                 this.props.resId,
                 undefined,

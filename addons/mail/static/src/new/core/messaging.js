@@ -95,9 +95,6 @@ export class Messaging {
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.state = state;
         Object.assign(this.state, {
-            /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
-            activities: {},
-            activityCounter: 0,
             get isSmall() {
                 return env.isSmall;
             },
@@ -232,42 +229,6 @@ export class Messaging {
                 })
             );
             this.state.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
-        });
-    }
-
-    /**
-     * @param {import("@mail/new/core/activity_model").Activity} activity
-     * @param {number[]} attachmentIds
-     */
-    async markAsDone(activity, attachmentIds = []) {
-        await this.orm.call("mail.activity", "action_feedback", [[activity.id]], {
-            attachment_ids: attachmentIds,
-            feedback: activity.feedback,
-        });
-    }
-
-    async scheduleActivity(resModel, resId, activityId = false, defaultActivityTypeId = undefined) {
-        const context = {
-            default_res_model: resModel,
-            default_res_id: resId,
-        };
-        if (defaultActivityTypeId !== undefined) {
-            context.default_activity_type_id = defaultActivityTypeId;
-        }
-        return new Promise((resolve) => {
-            this.env.services.action.doAction(
-                {
-                    type: "ir.actions.act_window",
-                    name: _t("Schedule Activity"),
-                    res_model: "mail.activity",
-                    view_mode: "form",
-                    views: [[false, "form"]],
-                    target: "new",
-                    context,
-                    res_id: activityId,
-                },
-                { onClose: resolve }
-            );
         });
     }
 

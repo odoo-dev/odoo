@@ -34,7 +34,7 @@ export class ActivityMarkAsDone extends Component {
     async onClickDone() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
         const thread = this.messaging.getChatterThread(resModel, resId);
-        await this.env.services["mail.messaging"].markAsDone(this.props.activity);
+        await this.env.services["mail.activity"].markAsDone(this.props.activity);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }

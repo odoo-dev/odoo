@@ -50,6 +50,7 @@ export class Chatter extends Component {
     setup() {
         this.action = useService("action");
         this.messaging = useMessaging();
+        this.activity = useState(useService("mail.activity"));
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
@@ -240,7 +241,7 @@ export class Chatter extends Component {
     }
 
     async scheduleActivity() {
-        await this.messaging.scheduleActivity(this.props.resModel, this.props.resId);
+        await this.activity.schedule(this.props.resModel, this.props.resId);
         this.load(this.props.resId, ["activities"]);
     }
 
