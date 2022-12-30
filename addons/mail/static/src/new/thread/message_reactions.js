@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -13,6 +13,7 @@ export class MessageReactions extends Component {
     setup() {
         this.user = useService("user");
         this.messaging = useService("mail.messaging");
+        this.messageService = useState(useService("mail.message"));
     }
 
     getReactionSummary(reaction) {
@@ -63,9 +64,9 @@ export class MessageReactions extends Component {
 
     onClickReaction(reaction) {
         if (this.hasUserReacted(reaction)) {
-            this.messaging.removeReaction(reaction);
+            this.messageService.removeReaction(reaction);
         } else {
-            this.messaging.addReaction(this.props.message, reaction.content);
+            this.messageService.react(this.props.message, reaction.content);
         }
     }
 }

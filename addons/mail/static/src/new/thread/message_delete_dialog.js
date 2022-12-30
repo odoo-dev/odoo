@@ -1,10 +1,10 @@
 /* @odoo-module */
 
-import { useMessaging } from "@mail/new/messaging_hook";
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export class MessageDeleteDialog extends Component {
     static components = { Dialog };
@@ -12,12 +12,12 @@ export class MessageDeleteDialog extends Component {
     static template = "mail.message.delete";
 
     setup() {
-        this.messaging = useMessaging();
+        this.messageService = useState(useService("mail.message"));
         this.title = _t("Confirmation");
     }
 
     onClickDelete() {
-        this.messaging.deleteMessage(this.props.message);
+        this.messageService.delete(this.props.message);
         this.props.close();
     }
 }

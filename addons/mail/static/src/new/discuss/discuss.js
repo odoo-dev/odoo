@@ -43,6 +43,7 @@ export class Discuss extends Component {
     setup() {
         this.messaging = useMessaging();
         this.threadService = useState(useService("mail.thread"));
+        this.messageService = useState(useService("mail.message"));
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.contentRef = useRef("content");
@@ -95,7 +96,7 @@ export class Discuss extends Component {
     }
 
     unstarAll() {
-        this.messaging.unstarAll();
+        this.messageService.unstarAll();
     }
 
     toggleInviteForm() {

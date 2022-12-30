@@ -25,6 +25,7 @@ import { browser } from "@web/core/browser/browser";
 import { useSuggestion } from "../suggestion/suggestion_hook";
 
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
@@ -53,6 +54,7 @@ export class Composer extends Component {
             this.props.composer.message
         );
         this.messaging = useMessaging();
+        this.messageService = useState(useService("mail.message"));
         this.ref = useRef("textarea");
         this.typingNotified = false;
         this.state = useState({
@@ -360,7 +362,7 @@ export class Composer extends Component {
                 rawMentions: this.suggestion.rawMentions,
                 parentId: messageToReplyTo?.id,
             };
-            const message = await this.messaging.postMessage(thread, value, postData);
+            const message = await this.messageService.post(thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
                     sprintf(_t('Message posted on "%s"'), message.originThread.displayName),
@@ -396,7 +398,7 @@ export class Composer extends Component {
 
     async editMessage() {
         await this.processMessage(async (value) =>
-            this.messaging.updateMessage(
+            this.messageService.update(
                 this.props.composer.message,
                 value,
                 this.attachmentUploader.attachments,
