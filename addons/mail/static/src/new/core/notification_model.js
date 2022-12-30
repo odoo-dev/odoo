@@ -52,7 +52,7 @@ export class Notification {
             notification_status: data.notification_status,
             notification_type: data.notification_type,
         });
-        if (!(this.isFailure && this.message.author.isCurrentUser)) {
+        if (!this.message.author.isCurrentUser) {
             return;
         }
         const thread = this.message.originThread;
@@ -62,7 +62,7 @@ export class Notification {
             resModel: this.message.originThread.model,
             status: this.notification_status,
             type: this.notification_type,
-            notifications: [["insert", this]],
+            notifications: [[this.isFailure ? "insert" : "insert-and-unlink", this]],
         });
     }
 }

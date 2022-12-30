@@ -53,7 +53,7 @@ export class MessagingMenu extends Component {
 
     /**
      *
-     * @param {import("@mail/new/core/failure_model").Failure} failure
+     * @param {import("@mail/new/core/notification_group_model").NotificationGroup} failure
      */
     onClickFailure(failure) {
         const originThreadIds = new Set(
@@ -102,6 +102,12 @@ export class MessagingMenu extends Component {
             res_model: failure.resModel,
             domain: [["message_has_error", "=", true]],
             context: { create: false },
+        });
+    }
+
+    cancelNotifications(failure) {
+        return this.env.services.orm.call(failure.resModel, "notify_cancel_by_type", [], {
+            notification_type: failure.type,
         });
     }
 

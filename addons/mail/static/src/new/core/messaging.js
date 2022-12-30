@@ -760,6 +760,19 @@ export class Messaging {
                     );
                     break;
                 }
+                case "mail.message/notification_update":
+                    {
+                        notif.payload.elements.map((message) => {
+                            Message.insert(this.state, {
+                                ...message,
+                                // implicit: failures are sent by the server at
+                                // initialization only if the current partner is
+                                // author of the message
+                                author: this.state.partners[this.state.user.partnerId],
+                            });
+                        });
+                    }
+                    break;
             }
         }
     }
@@ -897,17 +910,22 @@ export class Messaging {
         return messages;
     }
 
+    async markThreadAsRead(thread) {
+        const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
+        if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
+            await this.rpc("/mail/channel/set_last_seen_message", {
+                channel_id: thread.id,
+                last_message_id: mostRecentNonTransientMessage?.id,
+            });
+        }
+        thread.update({ isUnread: false });
+    }
+
     async fetchThreadMessagesNew(thread) {
         const min = thread.mostRecentNonTransientMessage?.id;
         const fetchedMsgs = await this.fetchThreadMessages(thread, { min });
-        const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
-        if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
-            if (fetchedMsgs.length > 0) {
-                this.rpc("/mail/channel/set_last_seen_message", {
-                    channel_id: thread.id,
-                    last_message_id: mostRecentNonTransientMessage?.id,
-                });
-            }
+        if (fetchedMsgs.length > 0) {
+            this.markThreadAsRead(thread);
         }
         Object.assign(thread, {
             isUnread: false,

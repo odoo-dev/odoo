@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
+import { removeFromArray } from "../utils/arrays";
 
 let nextId = 0;
 export class NotificationGroup {
@@ -29,6 +30,9 @@ export class NotificationGroup {
             group = new NotificationGroup(state);
         }
         group.update(data);
+        if (group.notifications.length === 0) {
+            removeFromArray(state.notificationGroups, group);
+        }
         return group;
     }
 
@@ -49,11 +53,17 @@ export class NotificationGroup {
         });
         const notifications = data.notifications ?? [];
         const alreadyKnownNotifications = new Set(this.notifications.map(({ id }) => id));
+        const notificationIdsToRemove = new Set();
         for (const [commandName, notification] of notifications) {
             if (commandName === "insert" && !alreadyKnownNotifications.has(notification.id)) {
                 this.notifications.push(notification);
+            } else if (commandName === "insert-and-unlink") {
+                notificationIdsToRemove.add(notification.id);
             }
         }
+        this.notifications = this.notifications.filter(
+            ({ id }) => !notificationIdsToRemove.has(id)
+        );
         this.lastMessageId = this.notifications[0]?.message.id;
         for (const notification of this.notifications) {
             if (this.lastMessageId < notification.message.id) {
