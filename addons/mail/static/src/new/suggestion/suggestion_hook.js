@@ -1,11 +1,11 @@
 /* @odoo-module */
 
-import { useMessaging } from "../messaging_hook";
 import { useComponent, useEffect, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 export function useSuggestion() {
-    const messaging = useMessaging();
     const comp = useComponent();
+    const suggestionService = useService("mail.suggestion");
     const self = {
         clearRawMentions() {
             self.rawMentions.partnerIds.length = 0;
@@ -119,7 +119,7 @@ export function useSuggestion() {
             if (!self.search.delimiter || !comp.props.composer.thread) {
                 return;
             }
-            const [main, extra = { suggestions: [] }] = messaging.searchSuggestions(
+            const [main, extra = { suggestions: [] }] = suggestionService.searchSuggestions(
                 self.search,
                 { thread: comp.props.composer.thread },
                 true
@@ -145,7 +145,7 @@ export function useSuggestion() {
                 if (!comp.props.composer.thread) {
                     return;
                 }
-                await messaging.fetchSuggestions(self.search, {
+                await suggestionService.fetchSuggestions(self.search, {
                     thread: comp.props.composer.thread,
                 });
                 self.update();
