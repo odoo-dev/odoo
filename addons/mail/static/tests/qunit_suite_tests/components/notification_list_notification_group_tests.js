@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
@@ -115,92 +115,6 @@ QUnit.module("mail", {}, function () {
                 document.body,
                 ".o_NotificationGroupView",
                 "should have no notification group"
-            );
-        });
-
-        QUnit.skipRefactoring("different mail.channel are not grouped", async function (assert) {
-            // `mail.channel` is a special case where notifications are not grouped when
-            // they are linked to different channels, even though the model is the same.
-            assert.expect(6);
-
-            const pyEnv = await startServer();
-            const [mailChannelId1, mailChannelId2] = pyEnv["mail.channel"].create([
-                { name: "mailChannel1" },
-                { name: "mailChannel2" },
-            ]);
-            const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
-                // first message that is expected to have a failure
-                {
-                    message_type: "email", // message must be email (goal of the test)
-                    model: "mail.channel", // testing a channel is the goal of the test
-                    res_id: mailChannelId1, // different res_id from second message
-                    res_model_name: "Channel", // random related model name
-                },
-                // second message that is expected to have a failure
-                {
-                    message_type: "email", // message must be email (goal of the test)
-                    model: "mail.channel", // testing a channel is the goal of the test
-                    res_id: mailChannelId2, // different res_id from first message
-                    res_model_name: "Channel", // same related model name for consistency
-                },
-            ]);
-            pyEnv["mail.notification"].create([
-                {
-                    mail_message_id: mailMessageId1, // id of the related first message
-                    notification_status: "exception", // one possible value to have a failure
-                    notification_type: "email", // expected failure type for email message
-                },
-                {
-                    mail_message_id: mailMessageId1,
-                    notification_status: "exception",
-                    notification_type: "email",
-                },
-                {
-                    mail_message_id: mailMessageId2, // id of the related second message
-                    notification_status: "bounce", // other possible value to have a failure
-                    notification_type: "email", // expected failure type for email message
-                },
-                {
-                    mail_message_id: mailMessageId2,
-                    notification_status: "bounce",
-                    notification_type: "email",
-                },
-            ]);
-            await start();
-            await click(".o_menu_systray i[aria-label='Messages']");
-            assert.containsN(
-                document.body,
-                ".o-mail-notification-item",
-                2,
-                "should have 2 notifications items"
-            );
-            const items = document.querySelectorAll(".o-mail-notification-item");
-            assert.containsOnce(
-                items[0],
-                "*:contains(Partner (1))",
-                "should have 1 group counter in first group"
-            );
-            assert.strictEqual(
-                items[0].querySelector(".o_NotificationGroupView_counter").textContent.trim(),
-                "(2)",
-                "should have 2 notifications in first group"
-            );
-            assert.containsOnce(
-                items[1],
-                ".o_NotificationGroupView_counter",
-                "should have 1 group counter in second group"
-            );
-            assert.strictEqual(
-                items[1].querySelector(".o_NotificationGroupView_counter").textContent.trim(),
-                "(2)",
-                "should have 2 notifications in second group"
-            );
-
-            await afterNextRender(() => items[0].click());
-            assert.containsOnce(
-                document.body,
-                ".o-mail-chat-window",
-                "should have opened the channel related to the first group in a chat window"
             );
         });
     });
