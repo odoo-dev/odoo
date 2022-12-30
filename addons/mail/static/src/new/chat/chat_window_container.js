@@ -1,7 +1,8 @@
 /* @odoo-module */
 
-import { Component, onWillStart, useExternalListener } from "@odoo/owl";
+import { Component, onWillStart, useExternalListener, useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
+import { useService } from "@web/core/utils/hooks";
 import {
     CHAT_WINDOW_END_GAP_WIDTH,
     CHAT_WINDOW_INBETWEEN_WIDTH,
@@ -30,6 +31,7 @@ export class ChatWindowContainer extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.chatWindowService = useState(useService("mail.chat_window"));
         onWillStart(() => this.messaging.isReady);
 
         this.onResize();
@@ -37,14 +39,14 @@ export class ChatWindowContainer extends Component {
     }
 
     onResize() {
-        while (this.messaging.visibleChatWindows.length > this.messaging.maxVisibleChatWindows) {
-            this.messaging.visibleChatWindows[this.messaging.visibleChatWindows.length - 1].hide();
+        while (this.chatWindowService.visible.length > this.chatWindowService.maxVisible) {
+            this.chatWindowService.visible[this.chatWindowService.visible.length - 1].hide();
         }
         while (
-            this.messaging.visibleChatWindows.length < this.messaging.maxVisibleChatWindows &&
-            this.messaging.hiddenChatWindows.length > 0
+            this.chatWindowService.visible.length < this.chatWindowService.maxVisible &&
+            this.chatWindowService.hidden.length > 0
         ) {
-            this.messaging.hiddenChatWindows[0].show();
+            this.chatWindowService.hidden[0].show();
         }
     }
 }

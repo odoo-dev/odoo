@@ -37,6 +37,7 @@ export class ChatWindow extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.chatWindowService = useState(useService("mail.chat_window"));
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.state = useState({
@@ -77,7 +78,7 @@ export class ChatWindow extends Component {
         } else {
             this.props.chatWindow.toggleFold();
         }
-        this.messaging.notifyChatWindowState(this.props.chatWindow.thread);
+        this.chatWindowService.notifyState(this.props.chatWindow);
     }
 
     toggleSettings() {
@@ -105,7 +106,7 @@ export class ChatWindow extends Component {
 
     close() {
         this.props.chatWindow.close();
-        this.messaging.notifyChatWindowState(this.props.chatWindow.thread);
+        this.chatWindowService.notifyState(this.props.chatWindow);
     }
 
     resetMessageInEdit() {

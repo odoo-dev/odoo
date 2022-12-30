@@ -14,6 +14,7 @@ import { userSettingsService } from "@mail/new/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/suggestion/suggestion_service";
 import { stateService } from "@mail/new/core/state_service";
+import { chatWindowService } from "@mail/new/chat/chat_window_service";
 
 export { TestServer } from "./test_server";
 
@@ -62,6 +63,8 @@ export function makeTestEnv(rpc) {
     env.services["mail.userSettings"] = userSettings;
     const state = stateService.start();
     env.services["mail.state"] = state;
+    const chatWindow = chatWindowService.start(env, { "mail.state": state, orm });
+    env.services["mail.chatWindow"] = chatWindow;
     const messaging = messagingService.start(env, {
         "mail.state": state,
         rpc,
@@ -72,6 +75,7 @@ export function makeTestEnv(rpc) {
         im_status,
         "mail.soundEffects": soundEffects,
         "mail.userSettings": userSettings,
+        "mail.chat_window": chatWindow,
     });
     const effect = effectService.start(env);
     env.services.effect = effect;

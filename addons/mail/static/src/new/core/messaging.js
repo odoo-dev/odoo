@@ -70,7 +70,8 @@ export class Messaging {
         multiTab,
         presence,
         soundEffects,
-        userSettings
+        userSettings,
+        chatWindow
     ) {
         this.env = env;
         this.rpc = rpc;
@@ -78,6 +79,7 @@ export class Messaging {
         this.notification = notification;
         this.soundEffects = soundEffects;
         this.userSettings = userSettings;
+        this.chatWindow = chatWindow;
         this.nextId = 1;
         this.router = router;
         this.bus = bus;
@@ -169,8 +171,6 @@ export class Messaging {
                 /** @type {Thread} */
                 history: null,
             },
-            /** @type {import("@mail/new/core/chat_window_model").ChatWindow[]} */
-            chatWindows: [],
             cannedResponses: [],
         });
         this.state.discuss.inbox = Thread.insert(this.state, {
@@ -242,18 +242,6 @@ export class Messaging {
             );
             this.state.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
         });
-    }
-
-    get visibleChatWindows() {
-        return ChatWindow.visibleChatWindows(this.state);
-    }
-
-    get hiddenChatWindows() {
-        return ChatWindow.hiddenChatWindows(this.state);
-    }
-
-    get maxVisibleChatWindows() {
-        return ChatWindow.maxVisibleChatWindows(this.state);
     }
 
     /**
@@ -1106,17 +1094,6 @@ export class Messaging {
         Message.insert(this.state, messageData, message.originThread);
     }
 
-    notifyChatWindowState(thread) {
-        if (this.env.isSmall) {
-            return;
-        }
-        if (thread?.model === "mail.channel") {
-            return this.orm.silent.call("mail.channel", "channel_fold", [[thread.id]], {
-                state: thread.state,
-            });
-        }
-    }
-
     openDiscussion(thread, replaceNewMessageChatWindow) {
         if (this.state.discuss.isActive) {
             this.setDiscussThread(thread);
@@ -1130,20 +1107,8 @@ export class Messaging {
             if (thread) {
                 thread.state = "open";
             }
-            this.notifyChatWindowState(thread);
+            this.chatWindow.notifyState(chatWindow);
         }
-    }
-
-    openNewMessageChatWindow() {
-        if (this.state.chatWindows.some(({ thread }) => !thread)) {
-            // New message chat window is already opened.
-            return;
-        }
-        ChatWindow.insert(this.state);
-    }
-
-    closeNewMessageChatWindow() {
-        this.state.chatWindows.find(({ thread }) => !thread)?.close();
     }
 
     toggleReplyTo(message) {

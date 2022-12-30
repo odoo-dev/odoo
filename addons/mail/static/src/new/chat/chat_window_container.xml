@@ -3,8 +3,8 @@
 
 <t t-name="mail.chat_window_container" owl="1">
     <t t-if="!messaging.state.discuss.isActive">
-        <ChatWindowHiddenMenu t-if="messaging.hiddenChatWindows.length > 0" chatWindows="messaging.hiddenChatWindows" />
-        <t t-foreach="messaging.visibleChatWindows" t-as="chatWindow" t-key="chatWindow.threadLocalId">
+        <ChatWindowHiddenMenu t-if="chatWindowService.hidden.length > 0" chatWindows="chatWindowService.hidden" />
+        <t t-foreach="chatWindowService.visible" t-as="chatWindow" t-key="chatWindow.threadLocalId">
             <ChatWindow chatWindow="chatWindow" right="CHAT_WINDOW_END_GAP_WIDTH + chatWindow_index * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH * 2)"/>
         </t>
     </t>
