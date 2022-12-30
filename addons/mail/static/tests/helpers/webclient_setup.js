@@ -33,6 +33,7 @@ import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
+import { chatterService } from "@mail/new/views/chatter_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -104,6 +105,7 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         "mail.suggestion": suggestionService,
         "mail.state": stateService,
         "mail.activity": activityService,
+        "mail.chatter": chatterService,
         "mail.thread": threadService,
         "mail.message": messageService,
         "mail.chat_window": chatWindowService,

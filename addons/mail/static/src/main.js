@@ -21,6 +21,7 @@ import { chatWindowService } from "./new/chat/chat_window_service";
 import { threadService } from "./new/thread/thread_service";
 import { messageService } from "./new/thread/message_service";
 import { activityService } from "./new/activity/activity_service";
+import { chatterService } from "./new/views/chatter_service";
 
 const messagingValuesService = {
     start() {
@@ -31,6 +32,7 @@ const messagingValuesService = {
 const serviceRegistry = registry.category("services");
 serviceRegistry.add("mail.state", stateService);
 serviceRegistry.add("mail.activity", activityService);
+serviceRegistry.add("mail.chatter", chatterService);
 serviceRegistry.add("mail.chat_window", chatWindowService);
 serviceRegistry.add("mail.thread", threadService);
 serviceRegistry.add("mail.message", messageService);
