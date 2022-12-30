@@ -15,6 +15,7 @@ import { registry } from "@web/core/registry";
 import { rtcService } from "./new/rtc/rtc_service";
 import { soundEffects } from "./new/sound_effects_service";
 import { userSettingsService } from "./new/user_settings_service";
+import { suggestionService } from "./new/suggestion/suggestion_service";
 
 const messagingValuesService = {
     start() {
@@ -24,6 +25,7 @@ const messagingValuesService = {
 
 const serviceRegistry = registry.category("services");
 serviceRegistry.add("mail.messaging", newMessagingService);
+serviceRegistry.add("mail.suggestion", suggestionService);
 serviceRegistry.add("mail.rtc", rtcService);
 serviceRegistry.add("mail.soundEffects", soundEffects);
 serviceRegistry.add("mail.userSettings", userSettingsService);

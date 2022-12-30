@@ -12,6 +12,7 @@ import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 import { soundEffects } from "@mail/new/sound_effects_service";
 import { userSettingsService } from "@mail/new/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
+import { suggestionService } from "@mail/new/suggestion/suggestion_service";
 
 export { TestServer } from "./test_server";
 
@@ -71,6 +72,8 @@ export function makeTestEnv(rpc) {
     const effect = effectService.start(env);
     env.services.effect = effect;
     env.services["mail.messaging"] = messaging;
+    const suggestion = suggestionService.start(env, { "mail.messaging": messaging, orm });
+    env.services["mail.suggestion"] = suggestion;
     const popover = popoverService.start();
     env.services.popover = popover;
     const notification = notificationService.start(env);
