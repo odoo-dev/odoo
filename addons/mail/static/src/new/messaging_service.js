@@ -19,6 +19,7 @@ export const messagingService = {
         "mail.soundEffects",
         "mail.userSettings",
         "mail.chat_window",
+        "mail.thread",
     ],
     async: asyncMethods,
     start(
@@ -37,6 +38,7 @@ export const messagingService = {
             "mail.soundEffects": soundEffects,
             "mail.userSettings": userSettings,
             "mail.chat_window": chatWindow,
+            "mail.thread": thread,
         }
     ) {
         // compute initial discuss thread
@@ -64,7 +66,8 @@ export const messagingService = {
             presence,
             soundEffects,
             userSettings,
-            chatWindow
+            chatWindow,
+            thread
         );
         messaging.initialize();
         bus.addEventListener("notification", (notifEvent) => {

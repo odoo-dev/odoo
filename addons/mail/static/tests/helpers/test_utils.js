@@ -155,7 +155,7 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
             threadId = parseInt(threadId, 10);
         }
         // TODO-DISCUSS-REFACTORING: remove when activeId will be handled.
-        webClient.env.services["mail.messaging"].setDiscussThread(
+        webClient.env.services["mail.thread"].setDiscussThread(
             Thread.insert(webClient.env.services["mail.messaging"].state, {
                 model: threadModel,
                 id: threadId,

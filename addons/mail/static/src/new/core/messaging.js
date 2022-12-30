@@ -26,7 +26,6 @@ import { url } from "@web/core/utils/urls";
 import { createLocalId } from "./thread_model.create_local_id";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
-const FETCH_MSG_LIMIT = 30;
 export const OTHER_LONG_TYPING = 60000;
 
 const commandRegistry = registry.category("mail.channel_commands");
@@ -71,7 +70,8 @@ export class Messaging {
         presence,
         soundEffects,
         userSettings,
-        chatWindow
+        chatWindow,
+        thread
     ) {
         this.env = env;
         this.rpc = rpc;
@@ -80,6 +80,7 @@ export class Messaging {
         this.soundEffects = soundEffects;
         this.userSettings = userSettings;
         this.chatWindow = chatWindow;
+        this.thread = thread;
         this.nextId = 1;
         this.router = router;
         this.bus = bus;
@@ -124,10 +125,6 @@ export class Messaging {
             partners: {},
             partnerRoot: {},
             rtcSessions: new Map(),
-            /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */
-            messages: {},
-            /** @type {{[key: string|number]: Thread}} */
-            threads: {},
             users: {},
             internalUserGroupId: null,
             registeredImStatusPartners: this.registeredImStatusPartners,
@@ -205,7 +202,7 @@ export class Messaging {
             this.loadFailures();
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
-                const thread = this.createChannelThread(channelData);
+                const thread = this.thread.createChannelThread(channelData);
                 if (channelData.is_minimized && channelData.state !== "closed") {
                     ChatWindow.insert(this.state, {
                         autofocus: 0,
@@ -214,7 +211,7 @@ export class Messaging {
                     });
                 }
             }
-            this.sortChannels();
+            this.thread.sortChannels();
             const settings = data.current_user_settings;
             this.userSettings.updateFromCommands(settings);
             this.state.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
@@ -242,75 +239,6 @@ export class Messaging {
             );
             this.state.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
         });
-    }
-
-    /**
-     * todo: merge this with Thread.insert() (?)
-     *
-     * @returns {Thread}
-     */
-    createChannelThread(serverData) {
-        const {
-            id,
-            name,
-            last_message_id,
-            seen_message_id,
-            description,
-            channel,
-            uuid,
-            authorizedGroupFullName,
-        } = serverData;
-        const isUnread = last_message_id !== seen_message_id;
-        const type = channel.channel_type;
-        const channelType = serverData.channel.channel_type;
-        const isAdmin = channelType !== "group" && serverData.create_uid === this.state.user.uid;
-        const thread = Thread.insert(this.state, {
-            id,
-            model: "mail.channel",
-            name,
-            type,
-            isUnread,
-            description,
-            serverData: serverData,
-            isAdmin,
-            uuid,
-            authorizedGroupFullName,
-        });
-        this.fetchChannelMembers(thread);
-        return thread;
-    }
-
-    async createGroupChat({ default_display_mode, partners_to }) {
-        const data = await this.orm.call("mail.channel", "create_group", [], {
-            default_display_mode,
-            partners_to,
-        });
-        const channel = this.createChannelThread(data);
-        this.sortChannels();
-        this.openDiscussion(channel);
-    }
-
-    async fetchChannelMembers(thread) {
-        const results = await this.orm.call("mail.channel", "load_more_members", [[thread.id]], {
-            known_member_ids: thread.channelMembers.map((channelMember) => channelMember.id),
-        });
-        let channelMembers = [];
-        if (
-            results["channelMembers"] &&
-            results["channelMembers"][0] &&
-            results["channelMembers"][0][1]
-        ) {
-            channelMembers = results["channelMembers"][0][1];
-        }
-        thread.memberCount = results["memberCount"];
-        for (const channelMember of channelMembers) {
-            Partner.insert(this.state, channelMember.persona.partner);
-            ChannelMember.insert(this.state, {
-                id: channelMember.id,
-                partnerId: channelMember.persona.partner.id,
-                threadId: thread.id,
-            });
-        }
     }
 
     /**
@@ -346,14 +274,6 @@ export class Messaging {
                 },
                 { onClose: resolve }
             );
-        });
-    }
-
-    sortChannels() {
-        this.state.discuss.channels.threads.sort((id1, id2) => {
-            const thread1 = this.state.threads[id1];
-            const thread2 = this.state.threads[id2];
-            return String.prototype.localeCompare.call(thread1.name, thread2.name);
         });
     }
 
@@ -536,7 +456,7 @@ export class Messaging {
                     {
                         const { id, message } = notif.payload;
                         const channel = this.state.threads[createLocalId("mail.channel", id)];
-                        Promise.resolve(channel ?? this.joinChat(message.author.id)).then(
+                        Promise.resolve(channel ?? this.thread.joinChat(message.author.id)).then(
                             (channel) => {
                                 this.createNotificationMessage(message, channel);
                                 ChatWindow.insert(this.state, {
@@ -677,7 +597,7 @@ export class Messaging {
                     if (
                         this.state.discuss.inbox.counter > this.state.discuss.inbox.messages.length
                     ) {
-                        this.fetchThreadMessages(this.state.discuss.inbox);
+                        this.thread.fetchMessages(this.state.discuss.inbox);
                     }
                     break;
                 }
@@ -798,13 +718,6 @@ export class Messaging {
     // actions that can be performed on the messaging system
     // -------------------------------------------------------------------------
 
-    setDiscussThread(thread) {
-        this.state.discuss.threadLocalId = thread.localId;
-        const activeId =
-            typeof thread.id === "string" ? `mail.box_${thread.id}` : `mail.channel_${thread.id}`;
-        this.router.pushState({ active_id: activeId });
-    }
-
     getChatterThread(resModel, resId) {
         const localId = createLocalId(resModel, resId);
         if (localId in this.state.threads) {
@@ -839,7 +752,7 @@ export class Messaging {
         requestList = ["activities", "followers", "attachments", "messages"]
     ) {
         if (requestList.includes("messages")) {
-            this.fetchThreadMessagesNew(Thread.insert(this.state, { model: resModel, id: resId }));
+            this.thread.fetchNewMessages(Thread.insert(this.state, { model: resModel, id: resId }));
         }
         const result = await this.rpc("/mail/thread/data", {
             request_list: requestList,
@@ -853,86 +766,6 @@ export class Messaging {
             }));
         }
         return result;
-    }
-
-    async fetchThreadMessages(thread, { min, max }) {
-        thread.status = "loading";
-        let rawMessages;
-        switch (thread.type) {
-            case "mailbox":
-                rawMessages = await this.rpc(`/mail/${thread.id}/messages`, {
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            case "chatter":
-                if (thread.id === false) {
-                    return [];
-                }
-                rawMessages = await this.rpc("/mail/thread/messages", {
-                    thread_id: thread.id,
-                    thread_model: thread.model,
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            case "channel":
-            case "group":
-            case "chat":
-                rawMessages = await this.rpc("/mail/channel/messages", {
-                    channel_id: thread.id,
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            default:
-                throw new Error("Unknown thread type");
-        }
-        thread.status = "ready";
-        const messages = rawMessages
-            .reverse()
-            .map((data) =>
-                Message.insert(this.state, Object.assign(data, { body: markup(data.body) }), thread)
-            );
-        return messages;
-    }
-
-    async markThreadAsRead(thread) {
-        const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
-        if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
-            await this.rpc("/mail/channel/set_last_seen_message", {
-                channel_id: thread.id,
-                last_message_id: mostRecentNonTransientMessage?.id,
-            });
-        }
-        thread.update({ isUnread: false });
-    }
-
-    async fetchThreadMessagesNew(thread) {
-        const min = thread.mostRecentNonTransientMessage?.id;
-        const fetchedMsgs = await this.fetchThreadMessages(thread, { min });
-        if (fetchedMsgs.length > 0) {
-            this.markThreadAsRead(thread);
-        }
-        Object.assign(thread, {
-            isUnread: false,
-            loadMore:
-                min === undefined && fetchedMsgs.length === FETCH_MSG_LIMIT
-                    ? true
-                    : thread.loadMore,
-        });
-    }
-
-    async fetchThreadMessagesMore(thread) {
-        const fetchedMsgs = await this.fetchThreadMessages(thread, {
-            max: thread.oldestNonTransientMessage?.id,
-        });
-        if (fetchedMsgs.length < FETCH_MSG_LIMIT) {
-            thread.loadMore = false;
-        }
     }
 
     fetchPreviews = memoize(async () => {
@@ -957,7 +790,7 @@ export class Messaging {
     async postMessage(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         const command = this.getCommandFromText(thread.type, body);
         if (command) {
-            await this.executeCommand(thread, command, body);
+            await this.thread.executeCommand(thread, command, body);
             return;
         }
         let tmpMsg;
@@ -1044,12 +877,6 @@ export class Messaging {
         return validMentions;
     }
 
-    executeCommand(thread, command, body = "") {
-        return this.orm.call("mail.channel", command.methodName, [[thread.id]], {
-            body,
-        });
-    }
-
     getCommandFromText(threadType, content) {
         if (content.startsWith("/")) {
             const firstWord = content.substring(1).split(/\s/)[0];
@@ -1094,23 +921,6 @@ export class Messaging {
         Message.insert(this.state, messageData, message.originThread);
     }
 
-    openDiscussion(thread, replaceNewMessageChatWindow) {
-        if (this.state.discuss.isActive) {
-            this.setDiscussThread(thread);
-        } else {
-            const chatWindow = ChatWindow.insert(this.state, {
-                folded: false,
-                thread,
-                replaceNewMessageChatWindow,
-            });
-            chatWindow.autofocus++;
-            if (thread) {
-                thread.state = "open";
-            }
-            this.chatWindow.notifyState(chatWindow);
-        }
-    }
-
     toggleReplyTo(message) {
         if (this.state.discuss.messageToReplyTo === message) {
             this.state.discuss.messageToReplyTo = null;
@@ -1121,89 +931,6 @@ export class Messaging {
 
     cancelReplyTo() {
         this.state.discuss.messageToReplyTo = null;
-    }
-
-    async createChannel(name) {
-        const data = await this.orm.call("mail.channel", "channel_create", [
-            name,
-            this.state.internalUserGroupId,
-        ]);
-        const channel = this.createChannelThread(data);
-        this.sortChannels();
-        this.openDiscussion(channel);
-    }
-
-    async getChat({ userId, partnerId }) {
-        if (!partnerId) {
-            let user = this.state.users[userId];
-            if (!user) {
-                this.state.users[userId] = { id: userId };
-                user = this.state.users[userId];
-            }
-            if (!user.partner_id) {
-                const [userData] = await this.orm.silent.read(
-                    "res.users",
-                    [user.id],
-                    ["partner_id"],
-                    {
-                        context: { active_test: false },
-                    }
-                );
-                if (userData) {
-                    user.partner_id = userData.partner_id[0];
-                }
-            }
-            if (!user.partner_id) {
-                this.notification.add(_t("You can only chat with existing users."), {
-                    type: "warning",
-                });
-                return;
-            }
-            partnerId = user.partner_id;
-        }
-        let chat = Object.values(this.state.threads).find(
-            (thread) => thread.type === "chat" && thread.chatPartnerId === partnerId
-        );
-        if (!chat || !chat.is_pinned) {
-            chat = await this.joinChat(partnerId);
-        }
-        if (!chat) {
-            this.notification.add(
-                _t("An unexpected error occurred during the creation of the chat."),
-                { type: "warning" }
-            );
-            return;
-        }
-        return chat;
-    }
-
-    async joinChannel(id, name) {
-        await this.orm.call("mail.channel", "add_members", [[id]], {
-            partner_ids: [this.state.user.partnerId],
-        });
-        const thread = Thread.insert(this.state, {
-            id,
-            model: "mail.channel",
-            name,
-            type: "channel",
-            serverData: { channel: { avatarCacheKey: "hello" } },
-        });
-        this.sortChannels();
-        this.state.discuss.threadLocalId = thread.localId;
-        return thread;
-    }
-
-    async joinChat(id) {
-        const data = await this.orm.call("mail.channel", "channel_get", [], {
-            partners_to: [id],
-        });
-        return Thread.insert(this.state, {
-            id: data.id,
-            model: "mail.channel",
-            name: undefined,
-            type: "chat",
-            serverData: data,
-        });
     }
 
     async searchPartners(searchStr = "", limit = 10) {
@@ -1230,16 +957,6 @@ export class Messaging {
         return partners;
     }
 
-    async leaveChannel(channel) {
-        await this.orm.call("mail.channel", "action_unfollow", [channel.id]);
-        channel.remove();
-        this.setDiscussThread(
-            this.state.discuss.channels.threads[0]
-                ? this.state.threads[this.state.discuss.channels.threads[0]]
-                : this.state.discuss.inbox
-        );
-    }
-
     openDocument({ id, model }) {
         this.env.services.action.doAction({
             type: "ir.actions.act_window",
@@ -1247,13 +964,6 @@ export class Messaging {
             views: [[false, "form"]],
             res_id: id,
         });
-    }
-
-    async openChat(person) {
-        const chat = await this.getChat(person);
-        if (chat) {
-            this.openDiscussion(chat);
-        }
     }
 
     async toggleStar(message) {
@@ -1302,23 +1012,6 @@ export class Messaging {
         this.state.discuss.starred.counter = 0;
         this.state.discuss.starred.messages = [];
         await this.orm.call("mail.message", "unstar_all");
-    }
-
-    async notifyThreadNameToServer(thread, name) {
-        if (thread.type === "channel" || thread.type === "group") {
-            thread.name = name;
-            await this.orm.call("mail.channel", "channel_rename", [[thread.id]], { name });
-        } else if (thread.type === "chat") {
-            thread.customName = name;
-            await this.orm.call("mail.channel", "channel_set_custom_name", [[thread.id]], { name });
-        }
-    }
-
-    async notifyThreadDescriptionToServer(thread, description) {
-        thread.description = description;
-        return this.orm.call("mail.channel", "channel_change_description", [[thread.id]], {
-            description,
-        });
     }
 
     /**

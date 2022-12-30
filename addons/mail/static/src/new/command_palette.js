@@ -31,12 +31,13 @@ commandProviderRegistry.add("mail.partner", {
     async provide(env, options) {
         /** @type {import("@mail/new/core/messaging").Messaging} */
         const messaging = env.services["mail.messaging"];
+        const threadService = env.services["mail.thread"];
         const results = await messaging.searchPartners(options.searchValue);
         return results.map(function (partner) {
             return {
                 Component: DialogCommand,
                 action() {
-                    messaging.openChat({ partnerId: partner.id });
+                    threadService.openChat({ partnerId: partner.id });
                 },
                 name: partner.nameOrDisplayName,
                 props: { email: partner.email },
@@ -61,6 +62,7 @@ commandProviderRegistry.add("mail.channel", {
     async provide(env, options) {
         /** @type {import("@mail/new/core/messaging").Messaging} */
         const messaging = env.services["mail.messaging"];
+        const threadService = env.services["mail.thread"];
         const domain = [
             ["channel_type", "=", "channel"],
             ["name", "ilike", cleanTerm(options.searchValue)],
@@ -73,8 +75,8 @@ commandProviderRegistry.add("mail.channel", {
         );
         return channelsData.map((data) => ({
             async action() {
-                const channel = await messaging.joinChannel(data.id, data.name);
-                messaging.openDiscussion(channel);
+                const channel = await threadService.joinChannel(data.id, data.name);
+                threadService.open(channel);
             },
             // todo: handle displayname in a way (seems like "group" channels
             // do not have a name

@@ -18,6 +18,7 @@ export class ChannelSelector extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.orm = useService("orm");
         this.state = useState({
             value: "",
@@ -78,9 +79,9 @@ export class ChannelSelector extends Component {
     onSelect(option) {
         if (this.props.category.id === "channels") {
             if (option.channelId === "__create__") {
-                this.messaging.createChannel(option.label);
+                this.threadService.createChannel(option.label);
             } else {
-                this.messaging.joinChannel(option.channelId, option.label);
+                this.threadService.joinChannel(option.channelId, option.label);
             }
             this.onValidate();
         }
@@ -102,14 +103,14 @@ export class ChannelSelector extends Component {
                 return;
             }
             if (selectedPartners.length === 1) {
-                await this.messaging
+                await this.threadService
                     .joinChat(selectedPartners[0])
-                    .then((chat) => this.messaging.openDiscussion(chat, this.env.inChatWindow));
+                    .then((chat) => this.threadService.open(chat, this.env.inChatWindow));
             } else {
                 const partners_to = [
                     ...new Set([this.messaging.state.user.partnerId, ...selectedPartners]),
                 ];
-                await this.messaging.createGroupChat({ partners_to });
+                await this.threadService.createGroupChat({ partners_to });
             }
         }
         if (this.props.onValidate) {

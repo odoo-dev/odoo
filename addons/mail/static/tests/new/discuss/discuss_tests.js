@@ -284,7 +284,7 @@ QUnit.skipRefactoring("Message following a notification should not be squashed",
     server.addMessage("comment", 2, 1, "mail.channel", 3, "Hello world !");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
 
     assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");

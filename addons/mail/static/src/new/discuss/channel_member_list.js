@@ -1,8 +1,9 @@
 /* @odoo-module */
 
-import { Component, onWillUpdateProps, onWillStart } from "@odoo/owl";
+import { Component, onWillUpdateProps, onWillStart, useState } from "@odoo/owl";
 import { useMessaging } from "@mail/new/messaging_hook";
 import { PartnerImStatus } from "./partner_im_status";
+import { useService } from "@web/core/utils/hooks";
 
 export class ChannelMemberList extends Component {
     static components = { PartnerImStatus };
@@ -11,10 +12,11 @@ export class ChannelMemberList extends Component {
 
     setup() {
         this.messaging = useMessaging();
-        onWillStart(() => this.messaging.fetchChannelMembers(this.props.thread));
+        this.threadService = useState(useService("mail.thread"));
+        onWillStart(() => this.threadService.fetchChannelMembers(this.props.thread));
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread.channelMembers.length === 0) {
-                this.messaging.fetchChannelMembers(nextProps.thread);
+                this.threadService.fetchChannelMembers(nextProps.thread);
             }
         });
     }
@@ -23,6 +25,6 @@ export class ChannelMemberList extends Component {
         if (member.isCurrentUser) {
             return;
         }
-        this.messaging.openChat({ partnerId: member.partner.id });
+        this.threadService.openChat({ partnerId: member.partner.id });
     }
 }

@@ -25,6 +25,7 @@ export class Sidebar extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
         this.orm = useService("orm");
@@ -39,7 +40,7 @@ export class Sidebar extends Component {
 
     openThread(ev, thread) {
         markEventHandled(ev, "sidebar.openThread");
-        this.messaging.setDiscussThread(thread);
+        this.threadService.setDiscussThread(thread);
     }
 
     toggleCategory(category) {
@@ -102,7 +103,7 @@ export class Sidebar extends Component {
                 )
             );
         }
-        this.messaging.leaveChannel(thread);
+        this.threadService.leaveChannel(thread);
     }
 
     askConfirmation(body) {

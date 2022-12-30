@@ -16,6 +16,7 @@ export class MessagingMenu extends Component {
     setup() {
         this.messaging = useMessaging();
         this.chatWindowService = useState(useService("mail.chat_window"));
+        this.threadService = useState(useService("mail.thread"));
         this.action = useService("action");
         this.state = useState({
             filter: "all", // can be 'all', 'channels' or 'chats'
@@ -43,7 +44,7 @@ export class MessagingMenu extends Component {
     }
 
     openDiscussion(thread) {
-        this.messaging.openDiscussion(thread);
+        this.threadService.open(thread);
         this.close();
     }
 
@@ -78,7 +79,7 @@ export class MessagingMenu extends Component {
                     .find(({ thread }) => thread === message.originThread)
                     ?.close();
             } else {
-                this.messaging.openDiscussion(message.originThread);
+                this.threadService.open(message.originThread);
             }
         } else {
             this.openFailureView(failure);

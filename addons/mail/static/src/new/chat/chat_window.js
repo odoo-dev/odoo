@@ -38,6 +38,7 @@ export class ChatWindow extends Component {
     setup() {
         this.messaging = useMessaging();
         this.chatWindowService = useState(useService("mail.chat_window"));
+        this.threadService = useState(useService("mail.thread"));
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.state = useState({
@@ -94,7 +95,7 @@ export class ChatWindow extends Component {
     }
 
     expand() {
-        this.messaging.setDiscussThread(this.props.chatWindow.thread);
+        this.threadService.setDiscussThread(this.props.chatWindow.thread);
         this.action.doAction(
             {
                 type: "ir.actions.client",

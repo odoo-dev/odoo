@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Component, onMounted, onWillStart, onWillUpdateProps, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUpdateProps, useRef, useState } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 import {
     useAutoScroll,
@@ -11,6 +11,7 @@ import {
 import { Message } from "./message";
 
 import { Transition } from "@web/core/transition";
+import { useService } from "@web/core/utils/hooks";
 
 export class Thread extends Component {
     static components = { Message, Transition };
@@ -28,6 +29,7 @@ export class Thread extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         if (!this.env.inChatter) {
             useAutoScroll("messages", () => {
                 if (
@@ -87,7 +89,7 @@ export class Thread extends Component {
             this.props.thread.status !== "loading" &&
             !this.pendingLoadMore
         ) {
-            this.messaging.fetchThreadMessagesMore(this.props.thread);
+            this.threadService.fetchMoreMessages(this.props.thread);
             this.pendingLoadMore = true;
         }
     }
@@ -95,7 +97,7 @@ export class Thread extends Component {
     requestMessages(thread) {
         // does not return the promise, so the thread is immediately rendered
         // then updated whenever messages get here
-        this.messaging.fetchThreadMessagesNew(thread);
+        this.threadService.fetchNewMessages(thread);
     }
 
     isGrayedOut(msg) {

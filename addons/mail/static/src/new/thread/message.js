@@ -63,6 +63,7 @@ export class Message extends Component {
         });
         this.ref = useRef("ref");
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.action = useService("action");
         this.user = useService("user");
         useChildSubEnv({
@@ -217,7 +218,7 @@ export class Message extends Component {
 
     openRecord() {
         if (this.message.resModel === "mail.channel") {
-            this.messaging.openDiscussion(this.message.originThread);
+            this.threadService.open(this.message.originThread);
         } else {
             this.action.doAction({
                 type: "ir.actions.act_window",
@@ -232,7 +233,7 @@ export class Message extends Component {
         if (!this.hasOpenChatFeature) {
             return;
         }
-        this.messaging.openChat({ partnerId: this.message.author.id });
+        this.threadService.openChat({ partnerId: this.message.author.id });
     }
 
     onClickEdit() {
