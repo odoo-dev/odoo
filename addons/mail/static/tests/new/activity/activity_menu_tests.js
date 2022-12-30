@@ -1,9 +1,7 @@
 /** @odoo-module **/
 
 import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { ActivityMenu } from "@mail/new/activity/activity_menu";
-import { click as webClick, getFixture, mount } from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
+import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -11,16 +9,6 @@ QUnit.module("activity menu", {
     async beforeEach() {
         target = getFixture();
     },
-});
-
-QUnit.test("activity menu: no activity", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(ActivityMenu, target, { env });
-    await webClick(
-        document.querySelector("i[aria-label='Activities']").closest(".dropdown-toggle")
-    );
-    assert.containsOnce(target, ".o-mail-no-activity");
 });
 
 QUnit.test("should update activities when opening the activity menu", async (assert) => {
