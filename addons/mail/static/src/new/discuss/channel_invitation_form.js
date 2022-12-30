@@ -6,6 +6,7 @@ import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
 
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export class ChannelInvitationForm extends Component {
     static components = { PartnerImStatus };
@@ -14,6 +15,7 @@ export class ChannelInvitationForm extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.inputRef = useRef("input");
         this.searchStr = "";
         this.state = useState({
@@ -87,7 +89,7 @@ export class ChannelInvitationForm extends Component {
                 this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ];
-            await this.messaging.createGroupChat({ partners_to });
+            await this.threadService.createGroupChat({ partners_to });
         } else if (["channel", "group"].includes(this.props.thread.type)) {
             await this.messaging.orm.call("mail.channel", "add_members", [[this.props.threadId]], {
                 partner_ids: this.state.selectedPartners.map((partner) => partner.id),

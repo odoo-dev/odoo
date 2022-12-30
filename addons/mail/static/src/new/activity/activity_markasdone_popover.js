@@ -1,7 +1,8 @@
 /* @odoo-module */
 
 import { useMessaging } from "../messaging_hook";
-import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
+import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMarkAsDone extends Component {
     static template = "mail.activity_mark_as_done";
@@ -16,6 +17,7 @@ export class ActivityMarkAsDone extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.textArea = useRef("textarea");
         onMounted(() => {
             this.textArea.el.focus();
@@ -36,7 +38,7 @@ export class ActivityMarkAsDone extends Component {
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
-        await this.messaging.fetchThreadMessagesNew(thread);
+        await this.threadService.fetchNewMessages(thread);
     }
 
     async onClickDoneAndScheduleNext() {
@@ -56,7 +58,7 @@ export class ActivityMarkAsDone extends Component {
                 feedback: this.props.activity.feedback,
             }
         );
-        this.messaging.fetchThreadMessagesNew(thread);
+        this.threadService.fetchNewMessages(thread);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities", "attachments"]);
         }

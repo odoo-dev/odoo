@@ -18,6 +18,7 @@ import { userSettingsService } from "./new/user_settings_service";
 import { suggestionService } from "./new/suggestion/suggestion_service";
 import { stateService } from "./new/core/state_service";
 import { chatWindowService } from "./new/chat/chat_window_service";
+import { threadService } from "./new/thread/thread_service";
 
 const messagingValuesService = {
     start() {
@@ -28,6 +29,7 @@ const messagingValuesService = {
 const serviceRegistry = registry.category("services");
 serviceRegistry.add("mail.state", stateService);
 serviceRegistry.add("mail.chat_window", chatWindowService);
+serviceRegistry.add("mail.thread", threadService);
 serviceRegistry.add("mail.messaging", newMessagingService);
 serviceRegistry.add("mail.suggestion", suggestionService);
 serviceRegistry.add("mail.rtc", rtcService);

@@ -29,7 +29,7 @@
                             iconSrc="preview.imgUrl"
                             hasMarkAsReadButton="preview.isUnread"
                             isLast="preview_last and failures.length === 0"
-                            onClick="(isMarkAsRead) => isMarkAsRead ? messaging.markThreadAsRead(preview) : this.openDiscussion(preview)"
+                            onClick="(isMarkAsRead) => isMarkAsRead ? threadService.markAsRead(preview) : this.openDiscussion(preview)"
                         >
                             <t t-set-slot="icon">
                                 <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>

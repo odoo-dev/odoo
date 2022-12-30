@@ -15,6 +15,7 @@ import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/suggestion/suggestion_service";
 import { stateService } from "@mail/new/core/state_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
+import { threadService } from "@mail/new/thread/thread_service";
 
 export { TestServer } from "./test_server";
 
@@ -65,6 +66,17 @@ export function makeTestEnv(rpc) {
     env.services["mail.state"] = state;
     const chatWindow = chatWindowService.start(env, { "mail.state": state, orm });
     env.services["mail.chatWindow"] = chatWindow;
+    const notification = notificationService.start(env);
+    env.services.notification = notification;
+    const thread = threadService.start(env, {
+        "mail.state": state,
+        orm,
+        rpc,
+        "mail.chat_window": chatWindow,
+        notification,
+        router,
+    });
+    env.services["mail.thread"] = thread;
     const messaging = messagingService.start(env, {
         "mail.state": state,
         rpc,
@@ -76,6 +88,7 @@ export function makeTestEnv(rpc) {
         "mail.soundEffects": soundEffects,
         "mail.userSettings": userSettings,
         "mail.chat_window": chatWindow,
+        "mail.thread": thread,
     });
     const effect = effectService.start(env);
     env.services.effect = effect;
@@ -84,8 +97,6 @@ export function makeTestEnv(rpc) {
     env.services["mail.suggestion"] = suggestion;
     const popover = popoverService.start();
     env.services.popover = popover;
-    const notification = notificationService.start(env);
-    env.services.notification = notification;
     const fileUpload = fileUploadService.start(env, { notification });
     env.services.file_upload = fileUpload;
     const rtc = rtcService.start(env, {

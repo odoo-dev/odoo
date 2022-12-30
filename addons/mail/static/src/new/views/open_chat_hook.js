@@ -12,7 +12,7 @@ export const helpers = {
 };
 
 export function useOpenChat(resModel) {
-    const messaging = useService("mail.messaging");
+    const threadService = useService("mail.thread");
     if (!helpers.SUPPORTED_M2X_AVATAR_MODELS.includes(resModel)) {
         throw new Error(
             `This widget is only supported on many2one and many2many fields pointing to ${JSON.stringify(
@@ -21,6 +21,6 @@ export function useOpenChat(resModel) {
         );
     }
     return async (id) => {
-        messaging.openChat(helpers.buildOpenChatParams(resModel, id));
+        threadService.openChat(helpers.buildOpenChatParams(resModel, id));
     };
 }

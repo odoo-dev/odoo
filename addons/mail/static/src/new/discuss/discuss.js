@@ -42,6 +42,7 @@ export class Discuss extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.threadService = useState(useService("mail.thread"));
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.contentRef = useRef("content");
@@ -138,7 +139,7 @@ export class Discuss extends Component {
                 this.thread.type === "chat" ||
                 this.thread.type === "group")
         ) {
-            await this.messaging.notifyThreadNameToServer(this.thread, newName);
+            await this.threadService.notifyThreadNameToServer(this.thread, newName);
         }
     }
 
@@ -159,7 +160,7 @@ export class Discuss extends Component {
             return;
         }
         if (newDescription !== this.thread.description) {
-            await this.messaging.notifyThreadDescriptionToServer(this.thread, newDescription);
+            await this.threadService.notifyThreadDescriptionToServer(this.thread, newDescription);
         }
     }
 }

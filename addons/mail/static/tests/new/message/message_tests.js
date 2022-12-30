@@ -37,7 +37,7 @@ QUnit.skipRefactoring("Start edition on click edit", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -82,7 +82,7 @@ QUnit.skipRefactoring("Stop edition on click cancel", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -97,7 +97,7 @@ QUnit.skipRefactoring("Stop edition on press escape", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -113,7 +113,7 @@ QUnit.skipRefactoring("Stop edition on click save", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -128,7 +128,7 @@ QUnit.skipRefactoring("Stop edition on press enter", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -144,7 +144,7 @@ QUnit.skipRefactoring("Stop edition on click away", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -162,7 +162,7 @@ QUnit.skipRefactoring(
         server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
         const env = makeTestEnv((route, params) => server.rpc(route, params));
         await env.services["mail.messaging"].isReady;
-        env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+        env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
         const { Component: PopoverContainer, props } = registry
             .category("main_components")
             .get("PopoverContainer");
@@ -185,7 +185,7 @@ QUnit.skipRefactoring("Save on click", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -206,7 +206,7 @@ QUnit.skipRefactoring("Do not call server on save if no changes", async (assert)
         return server.rpc(route, params);
     });
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");
@@ -222,7 +222,7 @@ QUnit.skipRefactoring("Scroll bar to the top when edit starts", async (assert) =
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world ! ".repeat(1000));
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
+    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await webClick(target, "i[aria-label='Edit']");

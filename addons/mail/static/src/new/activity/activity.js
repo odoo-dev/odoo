@@ -74,9 +74,9 @@ export class Activity extends Component {
 
     async onFileUploaded(data) {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
-        await this.env.services["mail.messaging"].markAsDone(this.props.data, [attachmentId]);
+        await this.env.services["mail.thread"].markAsDone(this.props.data, [attachmentId]);
         this.props.onUpdate();
-        await this.env.services["mail.messaging"].fetchThreadMessagesNew(this.thread);
+        await this.env.services["mail.thread"].fetchNewMessages(this.thread);
     }
 
     async edit() {
