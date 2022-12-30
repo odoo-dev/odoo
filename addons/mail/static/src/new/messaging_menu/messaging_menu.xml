@@ -27,8 +27,9 @@
                             dateTime="preview.mostRecentMsg?.dateTime"
                             displayName="preview.displayName"
                             iconSrc="preview.imgUrl"
+                            hasMarkAsReadButton="preview.isUnread"
                             isLast="preview_last and failures.length === 0"
-                            onClick="() => this.openDiscussion(preview)"
+                            onClick="(isMarkAsRead) => isMarkAsRead ? messaging.markThreadAsRead(preview) : this.openDiscussion(preview)"
                         >
                             <t t-set-slot="icon">
                                 <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>
@@ -52,7 +53,8 @@
                             displayName="failure.modelName"
                             iconSrc="failure.iconSrc"
                             isLast="failure_last"
-                            onClick="() => this.onClickFailure(failure)"
+                            hasMarkAsReadButton="true"
+                            onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
 x                        />
                     </t>
                 </div>

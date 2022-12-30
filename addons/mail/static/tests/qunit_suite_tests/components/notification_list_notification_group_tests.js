@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { start, startServer } from "@mail/../tests/helpers/test_utils";
 
 QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
@@ -80,41 +80,6 @@ QUnit.module("mail", {}, function () {
                 document.body,
                 ".o_NotificationGroupView_markAsRead",
                 "should have 1 mark as read button"
-            );
-        });
-
-        QUnit.skipRefactoring("mark as read", async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                message_type: "email", // message must be email (goal of the test)
-                model: "mail.channel", // expected value to link message to channel
-                res_id: mailChannelId1,
-                res_model_name: "Channel", // random res model name, will be asserted in the test
-            });
-            // failure that is expected to be used in the test
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1, // id of the related message
-                notification_status: "exception", // necessary value to have a failure
-                notification_type: "email",
-            });
-            const { click } = await start();
-            await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-            assert.containsOnce(
-                document.body,
-                ".o_NotificationGroupView_markAsRead",
-                "should have 1 mark as read button"
-            );
-
-            await afterNextRender(() => {
-                document.querySelector(".o_NotificationGroupView_markAsRead").click();
-            });
-            assert.containsNone(
-                document.body,
-                ".o_NotificationGroupView",
-                "should have no notification group"
             );
         });
     });

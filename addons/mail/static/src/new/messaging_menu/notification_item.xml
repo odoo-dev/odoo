@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.notification_item" owl="1">
-    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !props.isLast }" t-on-click="props.onClick">
+    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !props.isLast, 'o-muted': !props.hasMarkAsReadButton }" t-on-click="onClick">
         <div class="position-relative o-mail-background-inherit m-1 flex-shrink-0" style="width:40px;height:40px;">
             <img class="w-100 h-100 rounded-circle" alt="Notification Item Image" t-att-src="props.iconSrc" />
             <t t-slot="icon"/>
@@ -11,7 +11,7 @@
             <div class="d-flex">
                 <span class="fw-bold text-600 text-truncate">
                     <t t-esc="props.displayName"/>
-                    <span t-if="props.count > 0"> (<t t-esc="props.count"/>)</span>
+                    <span t-if="props.count > 1"> (<t t-esc="props.count"/>)</span>
                 </span>
                 <span class="flex-grow-1"/>
                 <small t-if="props.dateTime" class="text-muted opacity-50 ms-2">
@@ -19,9 +19,13 @@
                 </small>
 
             </div>
-            <div class="text-truncate">
-                <t t-slot="body-icon"/>
-                <t t-if="props.body" t-esc="props.body"/>
+            <div class="d-flex">
+                <div class="text-truncate">
+                    <t t-slot="body-icon"/>
+                    <t t-if="props.body" t-esc="props.body"/>
+                </div>
+                <div class="flex-grow-1"/>
+                <i t-if="props.hasMarkAsReadButton" class="fa fa-check d-flex ms-2 text-600 opacity-50 opacity-100-hover" title="Mark As Read" t-ref="markAsRead"/>
             </div>
         </div>
     </div>
