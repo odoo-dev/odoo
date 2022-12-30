@@ -29,6 +29,7 @@ import { userSettingsService } from "@mail/new/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/suggestion/suggestion_service";
 import { stateService } from "@mail/new/core/state_service";
+import { chatWindowService } from "@mail/new/chat/chat_window_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -99,6 +100,7 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         effect: effectService,
         "mail.suggestion": suggestionService,
         "mail.state": stateService,
+        "mail.chat_window": chatWindowService,
         "mail.messaging": newMessagingService,
         "mail.rtc": rtcService,
         "mail.soundEffects": soundEffects,

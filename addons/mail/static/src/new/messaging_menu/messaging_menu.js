@@ -15,6 +15,7 @@ export class MessagingMenu extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.chatWindowService = useState(useService("mail.chat_window"));
         this.action = useService("action");
         this.state = useState({
             filter: "all", // can be 'all', 'channels' or 'chats'
@@ -47,7 +48,7 @@ export class MessagingMenu extends Component {
     }
 
     onClickNewMessage() {
-        this.messaging.openNewMessageChatWindow();
+        this.chatWindowService.openNewMessage();
         this.close();
     }
 

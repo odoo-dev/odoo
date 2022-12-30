@@ -21,20 +21,20 @@ export class ChatWindow {
     hidden = false;
 
     /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static visibleChatWindows(state) {
+    static visible(state) {
         return state.chatWindows.filter((chatWindow) => !chatWindow.hidden);
     }
 
     /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static hiddenChatWindows(state) {
+    static hidden(state) {
         return state.chatWindows.filter((chatWindow) => chatWindow.hidden);
     }
 
     /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static maxVisibleChatWindows(state) {
+    static maxVisible(state) {
         const startGap = state.isSmall
             ? 0
-            : this.hiddenChatWindows(state).length > 0
+            : this.hidden(state).length > 0
             ? CHAT_WINDOW_END_GAP_WIDTH + CHAT_WINDOW_HIDDEN_WIDTH
             : CHAT_WINDOW_END_GAP_WIDTH;
         const endGap = state.isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
@@ -70,9 +70,9 @@ export class ChatWindow {
             _state: state,
         });
         this.update(data);
-        if (ChatWindow.maxVisibleChatWindows(this._state) <= this._state.chatWindows.length) {
-            const visibleChatWindows = ChatWindow.visibleChatWindows(this._state);
-            const swaped = visibleChatWindows[visibleChatWindows.length - 1];
+        if (ChatWindow.maxVisible(this._state) <= this._state.chatWindows.length) {
+            const visible = ChatWindow.visible(this._state);
+            const swaped = visible[visible.length - 1];
             swaped.hidden = true;
             swaped.folded = true;
         }
@@ -156,10 +156,8 @@ export class ChatWindow {
     }
 
     makeVisible() {
-        const visibleChatWindows = this._state.chatWindows.filter(
-            (chatWindow) => !chatWindow.hidden
-        );
-        const swaped = visibleChatWindows[visibleChatWindows.length - 1];
+        const visible = ChatWindow.visible(this._state);
+        const swaped = visible[visible.length - 1];
         swaped.hide();
         this.show();
     }
