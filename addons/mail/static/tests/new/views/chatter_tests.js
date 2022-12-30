@@ -17,27 +17,16 @@ import {
 import {
     click as webClick,
     editInput,
-    nextTick,
     getFixture,
     mount,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
-import { Component, useState, xml } from "@odoo/owl";
 import { file } from "web.test_utils";
 
 const { createFile } = file;
 
 let target;
-
-class ChatterParent extends Component {
-    static components = { Chatter };
-    static template = xml`<Chatter resId="state.resId" resModel="props.resModel" displayName="props.displayName" hasActivity="true"/>`;
-
-    setup() {
-        this.state = useState({ resId: this.props.resId });
-    }
-}
 
 QUnit.module("chatter", {
     async beforeEach() {
@@ -66,126 +55,6 @@ QUnit.test("simple chatter on a record", async (assert) => {
         "/mail/load_message_failures",
         "/mail/thread/messages",
     ]);
-});
-
-QUnit.test("simple chatter, with no record", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
-    });
-    await mount(Chatter, target, {
-        env,
-        props: { resId: false, resModel: "somemodel", displayName: "", hasActivity: true },
-    });
-
-    assert.containsOnce(target, ".o-mail-chatter-topbar");
-    assert.containsOnce(target, ".o-mail-thread");
-    assert.containsOnce(target, ".o-mail-message");
-    assert.containsOnce(target, ".o-chatter-disabled");
-    assert.containsN(target, "button:disabled", 5);
-    assert.verifySteps(["/mail/init_messaging", "/mail/load_message_failures"]);
-});
-
-QUnit.test("composer is closed when creating record", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    const props = { resId: 43, resModel: "somemodel", displayName: "" };
-    const parent = await mount(ChatterParent, target, { env, props });
-    assert.containsNone(target, ".o-mail-composer");
-
-    await webClick($(target).find("button:contains(Send message)")[0]);
-    assert.containsOnce(target, ".o-mail-composer");
-
-    parent.state.resId = false;
-    await nextTick();
-    assert.containsNone(target, ".o-mail-composer");
-});
-
-QUnit.test("composer has proper placeholder when sending message", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
-    });
-    assert.containsNone(target, ".o-mail-composer");
-
-    await webClick($(target).find("button:contains(Send message)")[0]);
-    assert.containsOnce(target, ".o-mail-composer");
-    assert.hasAttrValue(
-        target.querySelector("textarea"),
-        "placeholder",
-        "Send a message to followers..."
-    );
-});
-
-QUnit.test("composer has proper placeholder when logging note", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
-    });
-    assert.containsNone(target, ".o-mail-composer");
-
-    await webClick($(target).find("button:contains(Log note)")[0]);
-    assert.containsOnce(target, ".o-mail-composer");
-    assert.hasAttrValue(target.querySelector("textarea"), "placeholder", "Log an internal note...");
-});
-
-QUnit.test("send/log buttons are properly styled", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
-    });
-    assert.containsNone(target, ".o-mail-composer");
-
-    const sendMsgBtn = $(target).find("button:contains(Send message)")[0];
-    const sendNoteBtn = $(target).find("button:contains(Log note)")[0];
-    assert.ok(sendMsgBtn.classList.contains("btn-odoo"));
-    assert.notOk(sendNoteBtn.classList.contains("btn-odoo"));
-
-    await webClick(sendNoteBtn);
-    assert.notOk(sendMsgBtn.classList.contains("btn-odoo"));
-    assert.ok(sendNoteBtn.classList.contains("btn-odoo"));
-
-    await webClick(sendMsgBtn);
-    assert.ok(sendMsgBtn.classList.contains("btn-odoo"));
-    assert.notOk(sendNoteBtn.classList.contains("btn-odoo"));
-});
-
-QUnit.test("composer is focused", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
-    });
-    assert.containsNone(target, ".o-mail-composer");
-
-    const sendMsgBtn = $(target).find("button:contains(Send message)")[0];
-    const sendNoteBtn = $(target).find("button:contains(Log note)")[0];
-
-    await webClick(sendMsgBtn);
-    const composer = target.querySelector(".o-mail-composer textarea");
-    assert.strictEqual(document.activeElement, composer);
-
-    // unfocus composer
-    composer.blur();
-    assert.notEqual(document.activeElement, composer);
-    await webClick(sendNoteBtn);
-    assert.strictEqual(document.activeElement, composer);
-
-    // unfocus composer
-    composer.blur();
-    assert.notEqual(document.activeElement, composer);
-    await webClick(sendMsgBtn);
-    assert.strictEqual(document.activeElement, composer);
 });
 
 QUnit.test("displayname is used when sending a message", async (assert) => {

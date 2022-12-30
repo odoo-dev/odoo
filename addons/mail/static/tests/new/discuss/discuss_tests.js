@@ -57,27 +57,6 @@ QUnit.test("sanity check", async (assert) => {
     ]);
 });
 
-QUnit.test("can open #general", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => {
-        if (route === "/mail/channel/messages") {
-            assert.strictEqual(route, "/mail/channel/messages");
-            assert.strictEqual(params.channel_id, 1);
-            assert.strictEqual(params.limit, 30);
-        }
-        return server.rpc(route, params);
-    });
-
-    await mount(Discuss, target, { env });
-    assert.containsOnce(target, ".o-mail-category-item");
-    assert.containsNone(target, ".o-mail-category-item.o-active");
-    await webClick(target, ".o-mail-category-item");
-    assert.containsOnce(target, ".o-mail-category-item.o-active");
-    assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
-    assert.strictEqual(target.querySelector(".o-mail-composer-textarea"), document.activeElement);
-});
-
 QUnit.test("can change the thread name of #general", async (assert) => {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({
@@ -245,29 +224,6 @@ QUnit.test("can create a group chat conversation", async (assert) => {
     });
     assert.containsN(target, ".o-mail-category-item", 1);
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
-});
-
-QUnit.test("focus is set on composer when switching channel", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addChannel(2, "other", "info");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-
-    await mount(Discuss, target, { env });
-    assert.containsNone(target, ".o-mail-composer-textarea");
-    assert.containsN(target, ".o-mail-category-item", 2);
-
-    // switch to first channel and check focus is correct
-    await webClick(target.querySelectorAll(".o-mail-category-item")[0]);
-    assert.containsOnce(target, ".o-mail-composer-textarea");
-    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
-
-    // unfocus composer, then switch on second channel and see if focus is correct
-    target.querySelector(".o-mail-composer-textarea").blur();
-    assert.notOk(document.activeElement === target.querySelector(".o-mail-composer-textarea"));
-    await webClick(target.querySelectorAll(".o-mail-category-item")[1]);
-    assert.containsOnce(target, ".o-mail-composer-textarea");
-    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
 });
 
 QUnit.skipRefactoring("Message following a notification should not be squashed", async (assert) => {
@@ -541,8 +497,6 @@ QUnit.test("sidebar: chat custom name", async function (assert) {
 });
 
 QUnit.test("reply to message from inbox (message linked to document)", async function (assert) {
-    assert.expect(17);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({ name: "Refactoring" });
     const mailMessageId1 = pyEnv["mail.message"].create({
@@ -578,21 +532,17 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-message");
     assert.strictEqual(
-        document.querySelector(".o-mail-message-recod-name").textContent,
+        target.querySelector(".o-mail-message-recod-name").textContent,
         " on Refactoring"
     );
 
     await click("i[aria-label='Reply']");
-    assert.ok(document.querySelector(".o-mail-composer"));
+    assert.ok(target.querySelector(".o-mail-composer"));
     assert.strictEqual(
-        document.querySelector(".o-mail-composer-origin-thread").textContent,
+        target.querySelector(".o-mail-composer-origin-thread").textContent,
         " on: Refactoring"
     );
-    assert.strictEqual(
-        document.activeElement,
-        document.querySelector(".o-mail-composer-textarea"),
-        "composer text input should be auto-focus"
-    );
+    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
 
     await insertText(".o-mail-composer-textarea", "Test");
     await click(".o-mail-composer-send-button");
@@ -600,10 +550,10 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
     assert.containsNone(target, ".o-mail-composer");
     assert.containsOnce(target, ".o-mail-message");
     assert.strictEqual(
-        parseInt(document.querySelector(".o-mail-message").dataset.messageId),
+        parseInt(target.querySelector(".o-mail-message").dataset.messageId),
         mailMessageId1
     );
-    assert.doesNotHaveClass(document.querySelector(".o-mail-message"), "o-selected");
+    assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-selected");
 });
 
 QUnit.test("Can reply to starred message", async function (assert) {
