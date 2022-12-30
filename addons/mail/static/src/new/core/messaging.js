@@ -58,6 +58,7 @@ export class Messaging {
 
     setup(
         env,
+        state,
         rpc,
         orm,
         user,
@@ -95,7 +96,8 @@ export class Messaging {
             });
         });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
-        this.state = reactive({
+        this.state = state;
+        Object.assign(this.state, {
             /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
             activities: {},
             activityCounter: 0,

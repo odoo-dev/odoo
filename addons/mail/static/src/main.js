@@ -16,6 +16,7 @@ import { rtcService } from "./new/rtc/rtc_service";
 import { soundEffects } from "./new/sound_effects_service";
 import { userSettingsService } from "./new/user_settings_service";
 import { suggestionService } from "./new/suggestion/suggestion_service";
+import { stateService } from "./new/core/state_service";
 
 const messagingValuesService = {
     start() {
@@ -24,6 +25,7 @@ const messagingValuesService = {
 };
 
 const serviceRegistry = registry.category("services");
+serviceRegistry.add("mail.state", stateService);
 serviceRegistry.add("mail.messaging", newMessagingService);
 serviceRegistry.add("mail.suggestion", suggestionService);
 serviceRegistry.add("mail.rtc", rtcService);
