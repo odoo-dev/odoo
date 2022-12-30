@@ -971,10 +971,7 @@ export class Rtc {
                 type === "camera"
                     ? _t('%s" requires "camera" access')
                     : _t('%s" requires "screen recording" access');
-            this.messaging.notify({
-                message: sprintf(str, window.location.host),
-                type: "warning",
-            });
+            this.notification.add(sprintf(str, window.location.host), { type: "warning", })
             stopVideo();
             return;
         }

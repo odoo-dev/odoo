@@ -812,9 +812,4 @@ export class Messaging {
         ]);
         follower.delete();
     }
-
-    notify(params) {
-        const { message, ...options } = params;
-        return this.notification.add(message, options);
-    }
 }

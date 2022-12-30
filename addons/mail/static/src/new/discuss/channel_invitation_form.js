@@ -15,6 +15,7 @@ export class ChannelInvitationForm extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
         this.inputRef = useRef("input");
         this.searchStr = "";
@@ -76,10 +77,7 @@ export class ChannelInvitationForm extends Component {
 
     async onClickCopy(ev) {
         await navigator.clipboard.writeText(this.props.thread.invitationLink);
-        this.messaging.notify({
-            message: _t("Link copied!"),
-            type: "success",
-        });
+        this.notification.add(_t("Link copied!"), { type: "success" });
     }
 
     async onClickInvite() {

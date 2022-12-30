@@ -39,8 +39,7 @@ export class Call extends Component {
             this.state.isFullScreen = false;
             // TODO
             /*
-            this.messaging.notify({
-                message: this.env._t("The FullScreen mode was denied by the browser"),
+            this.notification.add(_t("The FullScreen mode was denied by the browser"), {
                 type: "warning",
             });
             */
