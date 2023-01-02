@@ -20,36 +20,6 @@ QUnit.module("mail", (hooks) => {
     QUnit.module("components", {}, function () {
         QUnit.module("composer_tests.js");
 
-        QUnit.skipRefactoring("composer: add an attachment", async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const { messaging, openDiscuss } = await start({
-                discuss: {
-                    context: { active_id: mailChannelId1 },
-                },
-            });
-            await openDiscuss();
-
-            const file = await createFile({
-                content: "hello, world",
-                contentType: "text/plain",
-                name: "text.txt",
-            });
-            await afterNextRender(() =>
-                inputFiles(messaging.discuss.threadView.composerView.fileUploader.fileInput, [file])
-            );
-            assert.ok(
-                document.querySelector(".o_ComposerView_attachmentList"),
-                "should have an attachment list"
-            );
-            assert.ok(
-                document.querySelector(`.o_ComposerView .o_AttachmentCard`),
-                "should have an attachment"
-            );
-        });
-
         QUnit.skipRefactoring("composer: paste attachments", async function (assert) {
             assert.expect(2);
 
