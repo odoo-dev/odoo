@@ -15,7 +15,7 @@ QUnit.module("messaging menu", {
 QUnit.test("should have messaging menu button in systray", async (assert) => {
     await start();
     assert.containsOnce(target, ".o_menu_systray i[aria-label='Messages']");
-    assert.containsNone(target, ".o-mail-messaging-menu", "messaging menu closed by default");
+    assert.containsNone(target, ".o-mail-messaging-menu");
     assert.hasClass(
         target.querySelector(".o_menu_systray i[aria-label='Messages']"),
         "fa-comments"

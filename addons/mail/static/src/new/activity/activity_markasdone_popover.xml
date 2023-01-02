@@ -4,15 +4,15 @@
         <div class="o-mail-activity-mark-as-done">
             <h6 t-if="props.hasHeader" class="p-2 fw-bolder bg-200 border-bottom">Mark Done</h6>
             <div class="py-2 px-3">
-                <textarea class="form-control o-mail-activity-mark-as-done-feedback" rows="3" placeholder="Write Feedback" t-model="props.activity.feedback" t-ref="textarea"/>
-                <div class="o-mail-activity-mark-as-done-buttons mt-2">
-                    <button type="button" class="o-mail-activity-mark-as-done-button-done-and-schedule btn btn-sm btn-primary" t-on-click="onClickDoneAndScheduleNext">
+                <textarea class="form-control" rows="3" placeholder="Write Feedback" t-model="props.activity.feedback" t-ref="textarea"/>
+                <div t-ref="buttons" class="mt-2">
+                    <button type="button" t-ref="done-and-schedule" class="btn btn-sm btn-primary" t-on-click="onClickDoneAndScheduleNext">
                         Done &amp; Schedule Next
                     </button>
-                    <button t-if="isSuggested" type="button" class="o-mail-activity-mark-as-done-button-done btn btn-sm btn-primary mx-2" t-on-click="onClickDone">
+                    <button t-if="isSuggested" t-ref="done" type="button" class="btn btn-sm btn-primary mx-2" t-on-click="onClickDone">
                         Done
                     </button>
-                    <button type="button" class="o-mail-activity-mark-as-done-button-discard btn btn-sm btn-link" t-on-click="props.close">
+                    <button type="button" t-ref="discard" class="btn btn-sm btn-link" t-on-click="props.close">
                         Discard
                     </button>
                 </div>

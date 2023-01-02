@@ -40,7 +40,7 @@ QUnit.test("list activity widget with no activity", async function (assert) {
         views: [[false, "list"]],
     });
 
-    assert.containsOnce(target, ".o-activity-button-icon.text-muted");
+    assert.containsOnce(target, ".o-activity-button__icon.text-muted");
     assert.strictEqual(document.querySelector(".o-list-activity-summary").innerText, "");
 
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
@@ -93,14 +93,14 @@ QUnit.test("list activity widget with activities", async function (assert) {
     });
 
     const firstRow = document.querySelector(".o_data_row");
-    assert.containsOnce(firstRow, ".o-activity-button-icon.text-warning.fa-phone");
+    assert.containsOnce(firstRow, ".o-activity-button__icon.text-warning.fa-phone");
     assert.strictEqual(
         firstRow.querySelector(".o-list-activity-summary").innerText,
         "Call with Al"
     );
 
     const secondRow = document.querySelectorAll(".o_data_row")[1];
-    assert.containsOnce(secondRow, ".o-activity-button-icon.text-success.fa-clock-o");
+    assert.containsOnce(secondRow, ".o-activity-button__icon.text-success.fa-clock-o");
     assert.strictEqual(secondRow.querySelector(".o-list-activity-summary").innerText, "Type 2");
 
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
@@ -143,7 +143,7 @@ QUnit.test("list activity widget with exception", async function (assert) {
         views: [[false, "list"]],
     });
 
-    assert.containsOnce(target, ".o-activity-button-icon.text-warning.fa-warning");
+    assert.containsOnce(target, ".o-activity-button__icon.text-warning.fa-warning");
     assert.strictEqual(document.querySelector(".o-list-activity-summary").innerText, "Warning");
 
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
@@ -231,7 +231,7 @@ QUnit.test("list activity widget: open dropdown", async function (assert) {
 
     await click(".o-activity-button"); // open the popover
     await click(".o-activity-list-popover-item-mark-as-done"); // mark the first activity as done
-    await click(".o-mail-activity-mark-as-done-button-done"); // confirm
+    await click(".o-mail-activity-mark-as-done__done"); // confirm
     assert.strictEqual(document.querySelector(".o-list-activity-summary").innerText, "Meet FP");
     assert.verifySteps([
         "web_search_read",
@@ -293,10 +293,10 @@ QUnit.test("list activity exception widget with activity", async function (asser
     assert.containsN(target, ".o_data_row", 2);
     assert.containsNone(
         document.querySelectorAll(".o_data_row .o_activity_exception_cell")[0],
-        ".o_ActivityException"
+        ".o-mail-activity-exception"
     );
     assert.containsOnce(
         document.querySelectorAll(".o_data_row .o_activity_exception_cell")[1],
-        ".o_ActivityException"
+        ".o-mail-activity-exception"
     );
 });

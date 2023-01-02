@@ -446,7 +446,7 @@ QUnit.test(
 
         await click(".btn:contains('Mark Done')");
         assert.strictEqual(
-            document.querySelector(".o-mail-activity-mark-as-done-feedback"),
+            document.querySelector(".o-mail-activity-mark-as-done__feedback"),
             document.activeElement
         );
     }
@@ -565,7 +565,7 @@ QUnit.test("activity mark done popover click on discard", async function (assert
 
     await click(".btn:contains('Mark Done')");
     assert.containsOnce(target, ".o-mail-activity-mark-as-done");
-    assert.containsOnce(target, ".o-mail-activity-mark-as-done-button-discard");
-    await click(".o-mail-activity-mark-as-done-button-discard");
+    assert.containsOnce(target, ".o-mail-activity-mark-as-done__discard");
+    await click(".o-mail-activity-mark-as-done__discard");
     assert.containsNone(target, ".o-mail-activity-mark-as-done");
 });

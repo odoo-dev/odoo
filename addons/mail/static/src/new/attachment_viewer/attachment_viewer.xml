@@ -24,7 +24,7 @@
                     <i class="fa fa-fw fa-times" role="img"/>
                 </div>
             </div>
-            <div t-on-click="close" t-on-mousemove="onMousemoveView" class="o-mail-attachment-viewer-main position-absolute top-0 bottom-0 start-0 end-0 align-items-center justify-content-center d-flex" t-att-class="{ 'o_with_img overflow-hidden': state.attachment.isImage }">
+            <div t-on-click="close" t-on-mousemove="onMousemoveView" class="o-mail-attachment-viewer-main position-absolute top-0 bottom-0 start-0 end-0 align-items-center justify-content-center d-flex" t-att-class="{ 'overflow-hidden': state.attachment.isImage }">
                 <div t-if="state.attachment.isImage" class="o-mail-attachment-viewer-zoomer position-absolute align-items-center justify-content-center d-flex w-100 h-100" t-ref="zoomer">
                     <div t-if="!state.imageLoaded" class="o-mail-attachment-viewer-loading position-absolute">
                         <i class="fa fa-3x fa-circle-o-notch fa-fw fa-spin text-white" role="img" title="Loading"/>
@@ -32,7 +32,7 @@
                     <img t-on-click.stop="" t-on-load="onImageLoaded" t-on-wheel="onWheelImage" t-on-mousedown.stop="onMousedownImage" t-on-mouseup.stop="onMouseupImage" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewImage mw-100 mh-100 transition-base" t-att-src="state.attachment.imageUrl" t-att-style="imageStyle" draggable="false" alt="Viewer" t-ref="image"/>
                 </div>
                 <iframe t-if="state.attachment.isPdf" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewIframe o-mail-attachment-viewer-viewPdf w-75 h-100 border-0" t-ref="iframeViewerPdf" t-att-class="{ 'w-100': env.isSmall }" t-att-src="state.attachment.defaultSource"/>
-                <iframe t-if="state.attachment.isText" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewIframe o-mail-attachment-viewer-isText o_text w-75 h-100 border-0" t-att-src="state.attachment.defaultSource"/>
+                <iframe t-if="state.attachment.isText" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewIframe o-mail-attachment-viewer-isText w-75 h-100 border-0" t-att-src="state.attachment.defaultSource"/>
                 <iframe t-if="state.attachment.isUrlYoutube" allow="autoplay; encrypted-media" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewIframe o-mail-attachment-viewer-youtube w-75 h-100 border-0" t-att-src="state.attachment.defaultSource" height="315" width="560"/>
                 <video t-if="state.attachment.isVideo" class="o-mail-attachment-viewer-view o-mail-attachment-viewer-viewVideo w-75 h-75" t-att-class="{ 'w-100 h-100': env.isSmall }" t-on-click="onClickVideo" controls="controls">
                     <source t-att-data-type="state.attachment.mimetype" t-att-src="state.attachment.defaultSource"/>
@@ -42,10 +42,10 @@
                 <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-on-click="zoomIn" title="Zoom In (+)" role="button">
                     <i class="fa fa-fw fa-plus" role="img"/>
                 </div>
-                <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-att-class="{ 'o_disabled opacity-50': state.scale === 1 }" t-on-click="resetZoom" role="button" title="Reset Zoom (0)">
+                <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-att-class="{ 'opacity-50': state.scale === 1 }" t-on-click="resetZoom" role="button" title="Reset Zoom (0)">
                     <i class="fa fa-fw fa-search" role="img"/>
                 </div>
-                <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-att-class="{ 'o_disabled opacity-50': state.scale === minScale }" t-on-click="zoomOut" title="Zoom Out (-)" role="button">
+                <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-att-class="{ 'opacity-50': state.scale === minScale }" t-on-click="zoomOut" title="Zoom Out (-)" role="button">
                     <i class="fa fa-fw fa-minus" role="img"/>
                 </div>
                 <div class="o-mail-attachment-viewer-toolbarButton p-3 rounded-0" t-on-click="rotate" title="Rotate (r)" role="button">

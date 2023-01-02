@@ -29,23 +29,23 @@
             </div>
             <t t-if="props.session">
                 <!-- overlay -->
-                <span class="o-mail-call-participant-card-overlay o-mail-call-participant-card-overlayBottom position-absolute bottom-0 start-0 d-flex overflow-hidden">
+                <span class="o-mail-call-participant-card-overlay o-bottom position-absolute bottom-0 start-0 d-flex overflow-hidden">
                     <span t-if="!isMinimized" class="o-mail-call-participant-card-name p-1 rounded-1 bg-black-75 text-truncate" t-esc="name"/>
                     <small t-if="props.session.isScreenSharingOn and isMinimized and !isOfActiveCall" class="o-mail-call-participant-card-liveIndicator o-isMinimized rounded-pill text-bg-danger d-flex align-items-center fw-bolder" title="live" aria-label="live">
                         LIVE
                     </small>
                 </span>
-                <div class="o-mail-call-participant-card-overlay o-mail-call-participant-card-overlayTop position-absolute top-0 end-0 d-flex flex-row-reverse">
-                    <span t-if="props.session.isSelfMuted and !props.session.isDeaf" class="o-mail-call-participant-card-overlayTopElement d-flex flex-column justify-content-center me-1 rounded-circle bg-900" t-att-class="{'o-isMinimized p-1': isMinimized, 'p-2': !isMinimized }" title="muted" aria-label="muted">
+                <div class="o-mail-call-participant-card-overlay position-absolute top-0 end-0 d-flex flex-row-reverse">
+                    <span t-if="props.session.isSelfMuted and !props.session.isDeaf" class="d-flex flex-column justify-content-center me-1 rounded-circle bg-900" t-att-class="{'o-isMinimized p-1': isMinimized, 'p-2': !isMinimized }" title="muted" aria-label="muted">
                         <i class="fa fa-microphone-slash"/>
                     </span>
-                    <span t-if="props.session.isDeaf" class="o-mail-call-participant-card-overlayTopElement d-flex flex-column justify-content-center me-1 rounded-circle bg-900" t-att-class="{'o-isMinimized p-1': isMinimized, 'p-2': !isMinimized }" title="deaf" aria-label="deaf">
+                    <span t-if="props.session.isDeaf" class="d-flex flex-column justify-content-center me-1 rounded-circle bg-900" t-att-class="{'o-isMinimized p-1': isMinimized, 'p-2': !isMinimized }" title="deaf" aria-label="deaf">
                         <i class="fa fa-deaf"/>
                     </span>
-                    <span t-if="isOfActiveCall and props.session.isAudioInError" class="o-mail-call-participant-card-overlayTopElement d-flex flex-column justify-content-center me-1 p-2 rounded-circle bg-900 text-danger" title="Issue with audio">
+                    <span t-if="isOfActiveCall and props.session.isAudioInError" class="d-flex flex-column justify-content-center me-1 p-2 rounded-circle bg-900 text-danger" title="Issue with audio">
                         <i class="fa fa-exclamation-triangle"/>
                     </span>
-                    <span t-if="showConnectionState" class="o-mail-call-participant-card-overlayTopElement d-flex flex-column justify-content-center me-1 p-2 rounded-circle bg-900" t-att-title="props.session.connectionState">
+                    <span t-if="showConnectionState" class="d-flex flex-column justify-content-center me-1 p-2 rounded-circle bg-900" t-att-title="props.session.connectionState">
                         <i class="fa fa-exclamation-triangle o-mail-call-participant-card-connectionState text-warning"/>
                     </span>
                     <span t-if="props.session.isScreenSharingOn and !isMinimized and !isOfActiveCall" class="o-mail-call-participant-card-liveIndicator rounded-pill text-bg-danger d-flex align-items-center me-1 fw-bolder" title="live" aria-label="live">

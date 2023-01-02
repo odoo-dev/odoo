@@ -3,7 +3,7 @@
 }
 
 .o-mail-thread-typing-icon-dot {
-    animation: o_ThreadTypingIconView_dot_animation 1.5s linear infinite;
+    animation: o-mail-thread-typing-icon-dot-animation 1.5s linear infinite;
 
     &.o-sizeMedium {
         width: $o-mail-thread-typing-icon-size-medium;
@@ -15,16 +15,16 @@
         height: $o-mail-thread-typing-icon-size-small;
     }
 
-    &.o-mail-thread-typing-icon-dot2 {
+    &.o-dot2 {
         animation-delay: -1.35s;
     }
 
-    &.o-mail-thread-typing-icon-dot3 {
+    &.o-dot3 {
         animation-delay: -1.2s;
     }
 }
 
-@keyframes o_ThreadTypingIconView_dot_animation {
+@keyframes o-mail-thread-typing-icon-dot-animation {
     0%, 40%, 100% {
         opacity: initial;
     }
