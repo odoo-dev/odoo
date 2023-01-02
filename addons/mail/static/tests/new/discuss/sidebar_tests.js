@@ -1,10 +1,7 @@
 /** @odoo-module **/
 
 import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { Sidebar } from "@mail/new/discuss/sidebar";
-import { click as webClick, editInput, getFixture, mount } from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
-import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
+import { editInput, getFixture } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -15,28 +12,42 @@ QUnit.module("discuss sidebar", {
 });
 
 QUnit.test("toggling category button hide category items", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(43, "abc");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Sidebar, target, { env });
-
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
     assert.containsOnce(target, "button.o-active:contains('Inbox')");
-    assert.containsN(target, ".o-mail-category-item", 1);
-    await webClick(target.querySelector(".o-mail-category-icon"));
+    assert.containsOnce(target, ".o-mail-category-item");
+
+    await click(".o-mail-category-icon");
     assert.containsNone(target, ".o-mail-category-item");
 });
 
 QUnit.test("toggling category button does not hide active category items", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(43, "abc");
-    server.addChannel(46, "def");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    env.services["mail.messaging"].state.discuss.threadLocalId = createLocalId("mail.channel", 43); // #abc is active
-
-    await mount(Sidebar, target, { env });
+    const pyEnv = await startServer();
+    const [mailChannelId] = pyEnv["mail.channel"].create([
+        {
+            name: "abc",
+            channel_type: "channel",
+        },
+        {
+            name: "def",
+            channel_type: "channel",
+        },
+    ]);
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
     assert.containsN(target, ".o-mail-category-item", 2);
     assert.containsOnce(target, ".o-mail-category-item.o-active");
-    await webClick(target.querySelector(".o-mail-category-icon"));
+
+    await click(".o-mail-category-icon");
     assert.containsOnce(target, ".o-mail-category-item");
     assert.containsOnce(target, ".o-mail-category-item.o-active");
 });

@@ -1,27 +1,22 @@
 /** @odoo-module **/
 
-import { loadEmoji } from "@mail/new/composer/emoji_picker";
-import { Discuss } from "@mail/new/discuss/discuss";
-import { startServer, start, click, insertText } from "@mail/../tests/helpers/test_utils";
-
-import { deserializeDateTime } from "@web/core/l10n/dates";
-
-const { DateTime } = luxon;
-
 import {
-    click as webClick,
+    startServer,
+    start,
+    click,
+    insertText,
+    afterNextRender,
+} from "@mail/../tests/helpers/test_utils";
+import { deserializeDateTime } from "@web/core/l10n/dates";
+const { DateTime } = luxon;
+import {
     editInput,
     getFixture,
-    mount,
     nextTick,
     patchWithCleanup,
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
-
-import { registry } from "@web/core/registry";
-import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 
 let target;
 
@@ -31,17 +26,26 @@ QUnit.module("message", {
     },
 });
 
-QUnit.skipRefactoring("Start edition on click edit", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
+QUnit.test("Start edition on click edit", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
     assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
     assert.strictEqual(
         target.querySelector(".o-mail-message-editable-content .o-mail-composer-textarea").value,
@@ -76,169 +80,228 @@ QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
     assert.strictEqual(composerTextarea.selectionEnd, contentLength);
 });
 
-QUnit.skipRefactoring("Stop edition on click cancel", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await webClick($("a:contains('cancel')")[0]);
-    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
-});
-
-QUnit.skipRefactoring("Stop edition on press escape", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await triggerHotkey("Escape", false);
-    await nextTick();
-    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
-});
-
-QUnit.skipRefactoring("Stop edition on click save", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await webClick($("a:contains('save')")[0]);
-    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
-});
-
-QUnit.skipRefactoring("Stop edition on press enter", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await triggerHotkey("Enter", false);
-    await nextTick();
-    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
-});
-
-QUnit.skipRefactoring("Stop edition on click away", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await triggerEvent(target, ".o-mail-discuss-sidebar", "click");
-    await nextTick();
-    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
-});
-
-QUnit.skipRefactoring(
-    "Do not stop edition on click away when clicking on emoji",
-    async (assert) => {
-        const server = new TestServer();
-        server.addChannel(1, "general", "General announcements...");
-        server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-        const env = makeTestEnv((route, params) => server.rpc(route, params));
-        await env.services["mail.messaging"].isReady;
-        env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-        const { Component: PopoverContainer, props } = registry
-            .category("main_components")
-            .get("PopoverContainer");
-        await mount(PopoverContainer, target, { env, props });
-        await mount(Discuss, target, { env });
-        target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-        await webClick(target, "i[aria-label='Edit']");
-
-        await webClick(target.querySelector("i[aria-label='Emojis']").closest("button"));
-        await loadEmoji(); // wait for emoji being loaded (required for rendering)
-        await nextTick(); // wait for following rendering
-        await webClick(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
-        assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
-    }
-);
-
-QUnit.skipRefactoring("Save on click", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    await editInput(target, ".o-mail-message textarea", "Goodbye World");
-    await webClick($("a:contains('save')")[0]);
-    assert.strictEqual(document.querySelector(".o-mail-message-body").innerText, "Goodbye World");
-});
-
-QUnit.skipRefactoring("Do not call server on save if no changes", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world\nGoodbye world");
-    const env = makeTestEnv((route, params) => {
-        if (route === "/mail/message/update_content") {
-            assert.step("update_content");
-        }
-        return server.rpc(route, params);
+QUnit.test("Stop edition on click cancel", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
     });
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await click(".o-mail-message a:contains('cancel')");
+    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
+});
 
-    await webClick($("a:contains('save')")[0]);
-    await nextTick();
+QUnit.test("Stop edition on press escape", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await afterNextRender(() => triggerHotkey("Escape", false));
+    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
+});
+
+QUnit.test("Stop edition on click save", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await click(".o-mail-message a:contains('save')");
+    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
+});
+
+QUnit.test("Stop edition on press enter", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await afterNextRender(() => triggerHotkey("Enter", false));
+    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
+});
+
+QUnit.test("Stop edition on click away", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await afterNextRender(() => triggerEvent(target, ".o-mail-discuss-sidebar", "click"));
+    assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
+});
+
+QUnit.test("Do not stop edition on click away when clicking on emoji", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await click(".o-mail-composer i[aria-label='Emojis']");
+    await click(".o-mail-emoji-picker-content .o-emoji");
+    assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
+});
+
+QUnit.test("Edit and click save", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await editInput(target, ".o-mail-message textarea", "Goodbye World");
+    await click(".o-mail-message a:contains('save')");
+    assert.strictEqual(target.querySelector(".o-mail-message-body").innerText, "Goodbye World");
+});
+
+QUnit.test("Do not call server on save if no changes", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/message/update_content") {
+                assert.step("update_content");
+            }
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    await click(".o-mail-message a:contains('save')");
     assert.verifySteps([]);
 });
 
-QUnit.skipRefactoring("Scroll bar to the top when edit starts", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world ! ".repeat(1000));
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-    target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await webClick(target, "i[aria-label='Edit']");
-
-    const messageTextarea = document.querySelector(
-        ".o-mail-message-editable-content .o-mail-composer-textarea"
-    );
-    assert.ok(
-        messageTextarea.scrollHeight > messageTextarea.clientHeight,
-        "Composer textarea has a vertical scroll bar"
-    );
-    assert.strictEqual(
-        messageTextarea.scrollTop,
-        0,
-        "Composer text area is scrolled to the top when edit starts"
-    );
+QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world!".repeat(1000),
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-message-actions i[aria-label='Edit']");
+    const $textarea = $(target).find(".o-mail-composer-textarea");
+    assert.ok($textarea[0].scrollHeight > $textarea[0].clientHeight);
+    assert.strictEqual($textarea[0].scrollTop, 0);
 });
 
 QUnit.test("Other messages are grayed out when replying to another one", async function (assert) {
