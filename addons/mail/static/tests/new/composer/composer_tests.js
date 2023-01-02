@@ -925,3 +925,31 @@ QUnit.test(
         assert.notOk(target.querySelector(".o-mail-composer-send-button").attributes.disabled);
     }
 );
+
+QUnit.test(
+    "remove an attachment from composer does not need any confirmation",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId}` },
+            },
+        });
+        await openDiscuss();
+        const file = await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        });
+        await afterNextRender(() =>
+            inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
+        );
+        await nextTick(); // wait for uploading
+        assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
+        assert.containsOnce(target, ".o-mail-attachment-list .o-mail-attachment-card");
+
+        await click(".o-mail-attachment-card-aside-unlink");
+        assert.containsNone(target, ".o-mail-attachment-list .o-mail-attachment-card");
+    }
+);
