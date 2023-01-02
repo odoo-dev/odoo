@@ -954,3 +954,23 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-attachment-list .o-mail-attachment-card");
     }
 );
+
+QUnit.test(
+    "Show a default status in the recipient status text when the thread doesn't have a name.",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({});
+        const { click, openView } = await start();
+        await openView({
+            res_model: "res.partner",
+            res_id: resPartnerId1,
+            views: [[false, "form"]],
+        });
+        await click(".o-mail-chatter-topbar-send-message-button");
+        assert.strictEqual(
+            document.querySelector(".o-mail-followerTo").textContent.replace(/\s+/g, ""),
+            "To:Followersofthisdocument",
+            'Composer should display "To: Followers of this document" if the thread as no name.'
+        );
+    }
+);

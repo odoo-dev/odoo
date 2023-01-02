@@ -104,6 +104,10 @@ export class Chatter extends Component {
         });
     }
 
+    get displayName() {
+        return this.props.displayName ? `"${this.props.displayName}"` : "this document";
+    }
+
     get followerButtonLabel() {
         return _t("Show Followers");
     }
