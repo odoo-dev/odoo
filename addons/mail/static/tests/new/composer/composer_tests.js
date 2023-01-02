@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { file } from "web.test_utils";
+import { file, makeTestPromise } from "web.test_utils";
 import {
     afterNextRender,
     click,
@@ -886,3 +886,42 @@ QUnit.test("composer: add an attachment", async function (assert) {
         ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card"
     );
 });
+
+QUnit.test(
+    "composer: send button is disabled if attachment upload is not finished",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const attachmentUploadedPromise = makeTestPromise();
+        const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId}` },
+            },
+            async mockRPC(route) {
+                if (route === "/mail/attachment/upload") {
+                    await attachmentUploadedPromise;
+                }
+            },
+        });
+        await openDiscuss();
+        const file = await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        });
+        await afterNextRender(() =>
+            inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
+        );
+        assert.containsOnce(target, ".o-mail-attachment-card");
+        assert.containsOnce(target, ".o-mail-attachment-card.o-mail-is-uploading");
+        assert.containsOnce(target, ".o-mail-composer-send-button");
+        assert.ok(target.querySelector(".o-mail-composer-send-button").attributes.disabled);
+
+        // simulates attachment finishes uploading
+        await afterNextRender(() => attachmentUploadedPromise.resolve());
+        assert.containsOnce(target, ".o-mail-attachment-card");
+        assert.containsNone(target, ".o-mail-attachment-card.o-mail-is-uploading");
+        assert.containsOnce(target, ".o-mail-composer-send-button");
+        assert.notOk(target.querySelector(".o-mail-composer-send-button").attributes.disabled);
+    }
+);
