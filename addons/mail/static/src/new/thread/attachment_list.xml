@@ -14,6 +14,7 @@
                 <div t-foreach="imagesAttachments" t-as="attachment" t-key="attachment.id" t-att-aria-label="attachment.filename"
                     class="o-mail-attachment-image d-flex position-relative flex-shrink-0 mw-100 mb-1 me-1"
                     t-att-title="attachment.name"
+                    t-att-class="{ 'o-mail-is-uploading': attachment.uploading }"
                     tabindex="0"
                     aria-label="View image"
                     role="menuitem"
@@ -43,6 +44,7 @@
                         'ms-1': isInChatWindowAndIsAlignedRight,
                         'me-1': !isInChatWindowAndIsAlignedRight,
                         'o-mail-viewable': attachment.isViewable,
+                        'o-mail-is-uploading': attachment.uploading,
                     }" t-att-title="attachment.name ? attachment.name : undefined" role="menu" t-att-aria-label="attachment.name"
                      t-on-click="() => this.attachmentViewerService.open(attachment, props.attachments)"
                 >
