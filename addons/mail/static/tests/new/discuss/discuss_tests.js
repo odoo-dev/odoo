@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
-import { Discuss } from "@mail/new/discuss/discuss";
 import {
     afterNextRender,
     click,
@@ -13,18 +12,13 @@ import {
     click as webClick,
     editInput,
     getFixture,
-    mount,
     nextTick,
-    patchWithCleanup,
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
-import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
-import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 
 let target;
 
@@ -124,27 +118,28 @@ QUnit.test("can change the thread description of #general", async (assert) => {
 });
 
 QUnit.test("can create a new channel", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (
-            route.startsWith("/mail") ||
-            [
-                "/web/dataset/call_kw/mail.channel/search_read",
-                "/web/dataset/call_kw/mail.channel/channel_create",
-            ].includes(route)
-        ) {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
+    await startServer();
+    const { openDiscuss } = await start({
+        mockRPC(route, params) {
+            if (
+                route.startsWith("/mail") ||
+                [
+                    "/web/dataset/call_kw/mail.channel/search_read",
+                    "/web/dataset/call_kw/mail.channel/channel_create",
+                ].includes(route)
+            ) {
+                assert.step(route);
+            }
+        },
     });
-    await mount(Discuss, target, { env });
+    await openDiscuss();
     assert.containsNone(target, ".o-mail-category-item");
-    await webClick(target, ".o-mail-discuss-sidebar i[title='Add or join a channel']");
-    await editInput(target, ".o-mail-channel-selector-input", "abc");
-    await nextTick(); // wait for following rendering
-    await webClick(target, ".o-mail-channel-selector-suggestion");
-    assert.containsN(target, ".o-mail-category-item", 1);
-    assert.containsN(target, ".o-mail-discuss-content .o-mail-message", 0);
+
+    await click(".o-mail-discuss-sidebar i[title='Add or join a channel']");
+    await afterNextRender(() => editInput(target, ".o-mail-channel-selector-input", "abc"));
+    await click(".o-mail-channel-selector-suggestion");
+    assert.containsOnce(target, ".o-mail-category-item");
+    assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
     assert.verifySteps([
         "/mail/init_messaging",
         "/mail/load_message_failures",
@@ -152,39 +147,43 @@ QUnit.test("can create a new channel", async (assert) => {
         "/web/dataset/call_kw/mail.channel/search_read",
         "/web/dataset/call_kw/mail.channel/channel_create",
         "/mail/channel/messages",
+        "/mail/channel/set_last_seen_message",
+        "/mail/channel/messages",
     ]);
 });
 
 QUnit.test("can join a chat conversation", async (assert) => {
-    // for autocomplete stuff
-    patchWithCleanup(browser, {
-        setTimeout: (fn) => fn(),
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({
+        name: "Mario",
     });
-    const server = new TestServer();
-    server.addPartner(43, "abc");
-    const env = makeTestEnv((route, params) => {
-        if (
-            route.startsWith("/mail") ||
-            ["/web/dataset/call_kw/mail.channel/channel_get"].includes(route)
-        ) {
-            assert.step(route);
-        }
-        if (route === "/web/dataset/call_kw/mail.channel/channel_get") {
-            assert.equal(params.kwargs.partners_to[0], 43);
-        }
-        return server.rpc(route, params);
+    pyEnv["res.users"].create({
+        partner_id: resPartnerId,
     });
-
-    await mount(Discuss, target, { env });
+    const { openDiscuss } = await start({
+        mockRPC(route, params) {
+            if (
+                route.startsWith("/mail") ||
+                ["/web/dataset/call_kw/mail.channel/channel_get"].includes(route)
+            ) {
+                assert.step(route);
+            }
+            if (route === "/web/dataset/call_kw/mail.channel/channel_get") {
+                assert.equal(params.kwargs.partners_to[0], resPartnerId);
+            }
+        },
+    });
+    await openDiscuss();
     assert.containsNone(target, ".o-mail-category-item");
-    await webClick(target, ".o-mail-discuss-sidebar i[title='Start a conversation']");
-    await editInput(target, ".o-mail-channel-selector-input", "abc");
+
+    await click(".o-mail-discuss-sidebar i[title='Start a conversation']");
+    await editInput(target, ".o-mail-channel-selector-input", "mario");
     await nextTick(); // wait for following rendering
-    await webClick(target, ".o-mail-channel-selector-suggestion");
+    await click(".o-mail-channel-selector-suggestion");
     await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
         key: "Enter",
     });
-    assert.containsN(target, ".o-mail-category-item", 1);
+    assert.containsOnce(target, ".o-mail-category-item");
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
     assert.verifySteps([
         "/mail/init_messaging",
@@ -226,23 +225,27 @@ QUnit.test("can create a group chat conversation", async (assert) => {
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
 });
 
-QUnit.skipRefactoring("Message following a notification should not be squashed", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    server.addMessage(
-        "notification",
-        1,
-        1,
-        "mail.channel",
-        3,
-        '<div class="o_mail_notification">created <a href="#" class="o_channel_redirect">#general</a></div>'
-    );
-    server.addMessage("comment", 2, 1, "mail.channel", 3, "Hello world !");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await env.services["mail.messaging"].isReady;
-    env.services["mail.thread"].setDiscussThread(createLocalId("mail.channel", 1));
-    await mount(Discuss, target, { env });
-
+QUnit.test("Message following a notification should not be squashed", async (assert) => {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: '<div class="o_mail_notification">created <a href="#" class="o_channel_redirect">#general</a></div>',
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "notification",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    await editInput(target, ".o-mail-composer-textarea", "Hello world!");
+    await click(".o-mail-composer button[data-action='send']");
     assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");
 });
 

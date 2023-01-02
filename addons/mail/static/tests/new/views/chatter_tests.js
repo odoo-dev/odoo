@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { Chatter } from "@mail/new/views/chatter";
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import {
     afterNextRender,
@@ -14,14 +13,7 @@ import {
     waitFormViewLoaded,
 } from "@mail/../tests/helpers/test_utils";
 
-import {
-    click as webClick,
-    editInput,
-    getFixture,
-    mount,
-    triggerHotkey,
-} from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
+import { editInput, getFixture, triggerHotkey } from "@web/../tests/helpers/utils";
 import { file } from "web.test_utils";
 
 const { createFile } = file;
@@ -35,132 +27,116 @@ QUnit.module("chatter", {
 });
 
 QUnit.test("simple chatter on a record", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
+    const { openFormView, pyEnv } = await start({
+        mockRPC(route, args) {
+            if (route.startsWith("/mail")) {
+                assert.step(route);
+            }
+        },
     });
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
+    const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+    await openFormView({
+        res_model: "res.partner",
+        res_id: partnerId,
     });
-
     assert.containsOnce(target, ".o-mail-chatter-topbar");
     assert.containsOnce(target, ".o-mail-thread");
     assert.verifySteps([
         "/mail/init_messaging",
-        "/mail/thread/data",
         "/mail/load_message_failures",
+        "/mail/thread/data",
+        "/mail/thread/messages",
         "/mail/thread/messages",
     ]);
 });
 
 QUnit.test("displayname is used when sending a message", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "Gnargl", hasActivity: true },
+    const { openFormView, pyEnv } = await start();
+    const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+    await openFormView({
+        res_model: "res.partner",
+        res_id: partnerId,
     });
-    await webClick($(target).find("button:contains(Send message)")[0]);
-    const msg = $(target).find("small:contains(Gnargl)")[0];
-    assert.ok(msg);
+    await click("button:contains(Send message)");
+    assert.containsOnce(target, 'small:contains(To followers of: "John Doe")');
 });
 
 QUnit.test("can post a message on a record thread", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
-        }
-        if (route === "/mail/message/post") {
-            const expected = {
-                post_data: {
-                    body: "hey",
-                    attachment_ids: [],
-                    message_type: "comment",
-                    partner_ids: [],
-                    subtype_xmlid: "mail.mt_comment",
-                },
-                thread_id: 43,
-                thread_model: "somemodel",
-            };
-            assert.deepEqual(params, expected);
-        }
-        return server.rpc(route, params);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+    const { openFormView } = await start({
+        mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step(route);
+                const expected = {
+                    post_data: {
+                        body: "hey",
+                        attachment_ids: [],
+                        message_type: "comment",
+                        partner_ids: [],
+                        subtype_xmlid: "mail.mt_comment",
+                    },
+                    thread_id: partnerId,
+                    thread_model: "res.partner",
+                };
+                assert.deepEqual(args, expected);
+            }
+        },
     });
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
+    await openFormView({
+        res_model: "res.partner",
+        res_id: partnerId,
     });
-
     assert.containsNone(target, ".o-mail-composer");
-    await webClick($(target).find("button:contains(Send message)")[0]);
+
+    await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-composer");
 
     await editInput(target, "textarea", "hey");
-
     assert.containsNone(target, ".o-mail-message");
-    await webClick($(target).find(".o-mail-composer button:contains(Send)")[0]);
-    assert.containsOnce(target, ".o-mail-message");
 
-    assert.verifySteps([
-        "/mail/init_messaging",
-        "/mail/thread/data",
-        "/mail/load_message_failures",
-        "/mail/thread/messages",
-        "/mail/message/post",
-        "/mail/link_preview",
-    ]);
+    await click(".o-mail-composer button:contains(Send)");
+    assert.containsOnce(target, ".o-mail-message");
+    assert.verifySteps(["/mail/message/post"]);
 });
 
 QUnit.test("can post a note on a record thread", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
-        }
-        if (route === "/mail/message/post") {
-            const expected = {
-                post_data: {
-                    attachment_ids: [],
-                    body: "hey",
-                    message_type: "comment",
-                    partner_ids: [],
-                    subtype_xmlid: "mail.mt_note",
-                },
-                thread_id: 43,
-                thread_model: "somemodel",
-            };
-            assert.deepEqual(params, expected);
-        }
-        return server.rpc(route, params);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+    const { openFormView } = await start({
+        mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step(route);
+                const expected = {
+                    post_data: {
+                        attachment_ids: [],
+                        body: "hey",
+                        message_type: "comment",
+                        partner_ids: [],
+                        subtype_xmlid: "mail.mt_note",
+                    },
+                    thread_id: partnerId,
+                    thread_model: "res.partner",
+                };
+                assert.deepEqual(args, expected);
+            }
+        },
     });
-    await mount(Chatter, target, {
-        env,
-        props: { resId: 43, resModel: "somemodel", displayName: "", hasActivity: true },
+    await openFormView({
+        res_model: "res.partner",
+        res_id: partnerId,
     });
-
     assert.containsNone(target, ".o-mail-composer");
-    await webClick($(target).find("button:contains(Log note)")[0]);
+
+    await click("button:contains(Log note)");
     assert.containsOnce(target, ".o-mail-composer");
 
     await editInput(target, "textarea", "hey");
-
     assert.containsNone(target, ".o-mail-message");
-    await webClick($(target).find(".o-mail-composer button:contains(Send)")[0]);
-    assert.containsOnce(target, ".o-mail-message");
 
-    assert.verifySteps([
-        "/mail/init_messaging",
-        "/mail/thread/data",
-        "/mail/load_message_failures",
-        "/mail/thread/messages",
-        "/mail/message/post",
-        "/mail/link_preview",
-    ]);
+    await click(".o-mail-composer button:contains(Send)");
+    assert.containsOnce(target, ".o-mail-message");
+    assert.verifySteps(["/mail/message/post"]);
 });
 
 QUnit.test("No attachment loading spinner when creating records", async (assert) => {

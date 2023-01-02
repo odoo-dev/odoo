@@ -24,6 +24,11 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             const state = args.args[1] || args.kwargs.state;
             return this._mockMailChannelChannelFold(ids, state);
         }
+        if (args.model === "mail.channel" && args.method === "channel_create") {
+            const name = args.args[0];
+            const groupId = args.args[1];
+            return this._mockMailChannelChannelCreate(name, groupId);
+        }
         if (args.model === "mail.channel" && args.method === "channel_get") {
             const partners_to = args.args[0] || args.kwargs.partners_to;
             const pin =
@@ -343,6 +348,39 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
                 },
             });
         }
+    },
+    /**
+     * Simulates 'channel_create' on 'mail.channel'.
+     *
+     * @private
+     * @param {string} name
+     * @param {string} [group_id]
+     * @returns {Object}
+     */
+    _mockMailChannelChannelCreate(name, group_id) {
+        const id = this.pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        partner_id: this.pyEnv.currentPartner.id,
+                    },
+                ],
+            ],
+            channel_type: "channel",
+            name,
+            group_public_id: group_id,
+        });
+        this.pyEnv["mail.channel"].write([id], {
+            group_public_id: group_id,
+        });
+        this._mockMailChannelMessagePost(id, {
+            body: `<div class="o_mail_notification">created <a href="#" class="o_channel_redirect" data-oe-id="${id}">#${name}</a></div>`,
+            message_type: "notification",
+        });
+        this._mockMailChannel_broadcast(id, [this.pyEnv.currentPartner]);
+        return this._mockMailChannelChannelInfo([id])[0];
     },
     /**
      * Simulates 'channel_get' on 'mail.channel'.
