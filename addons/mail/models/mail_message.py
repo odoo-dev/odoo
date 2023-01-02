@@ -986,6 +986,7 @@ class Message(models.Model):
             'res_model_name': message.env['ir.model']._get(message.model).display_name,
             'date': message.date,
             'message_type': message.message_type,
+            'body': message.body,
             'notifications': message.notification_ids._filtered_for_web_client()._notification_format(),
         } for message in self]
 

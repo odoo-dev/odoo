@@ -8,68 +8,6 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("thread_needaction_preview_tests.js");
 
-        QUnit.skipRefactoring("mark as read", async function (assert) {
-            assert.expect(5);
-
-            const pyEnv = await startServer();
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                model: "res.partner",
-                needaction: true,
-                needaction_partner_ids: [pyEnv.currentPartnerId],
-                res_id: resPartnerId1,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1,
-                notification_status: "sent",
-                notification_type: "inbox",
-                res_partner_id: pyEnv.currentPartnerId,
-            });
-            const { afterEvent, click, messaging } = await start({
-                async mockRPC(route, args) {
-                    if (route.includes("mark_all_as_read")) {
-                        assert.step("mark_all_as_read");
-                        assert.deepEqual(
-                            args.kwargs.domain,
-                            [
-                                ["model", "=", "res.partner"],
-                                ["res_id", "=", resPartnerId1],
-                            ],
-                            "should mark all as read the correct thread"
-                        );
-                    }
-                },
-            });
-            await afterNextRender(() =>
-                afterEvent({
-                    eventName: "o-thread-cache-loaded-messages",
-                    func: () =>
-                        document
-                            .querySelector(
-                                ".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])"
-                            )
-                            .click(),
-                    message: "should wait until inbox loaded initial needaction messages",
-                    predicate: ({ threadCache }) => {
-                        return threadCache.thread === messaging.inbox.thread;
-                    },
-                })
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_ThreadNeedactionPreviewView_markAsRead",
-                "should have 1 mark as read button"
-            );
-
-            await click(".o_ThreadNeedactionPreviewView_markAsRead");
-            assert.verifySteps(["mark_all_as_read"], "should have marked the thread as read");
-            assert.containsNone(
-                document.body,
-                ".o-mail-chat-window",
-                "should not have opened the thread"
-            );
-        });
-
         QUnit.skipRefactoring(
             "click on preview should mark as read and open the thread",
             async function (assert) {
