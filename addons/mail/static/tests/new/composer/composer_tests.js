@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { file } from "web.test_utils";
 import {
     afterNextRender,
     click,
@@ -12,6 +13,7 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+const { inputFiles } = file;
 
 import {
     click as webClick,
@@ -859,4 +861,28 @@ QUnit.test("composer: drop attachments", async function (assert) {
         ])
     );
     assert.containsN(document.body, ".o-mail-attachment-card", 3);
+});
+
+QUnit.test("composer: add an attachment", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    const file = await createFile({
+        content: "hello, world",
+        contentType: "text/plain",
+        name: "text.txt",
+    });
+    await afterNextRender(() =>
+        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
+    );
+    assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card"
+    );
 });
