@@ -222,6 +222,7 @@ export class Messaging {
             messages.map((messageData) =>
                 Message.insert(this.state, {
                     ...messageData,
+                    body: markup(messageData.body),
                     // implicit: failures are sent by the server at
                     // initialization only if the current partner is
                     // author of the message
@@ -600,6 +601,7 @@ export class Messaging {
                         notif.payload.elements.map((message) => {
                             Message.insert(this.state, {
                                 ...message,
+                                body: markup(message.body),
                                 // implicit: failures are sent by the server at
                                 // initialization only if the current partner is
                                 // author of the message

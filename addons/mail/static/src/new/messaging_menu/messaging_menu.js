@@ -125,7 +125,10 @@ export class MessagingMenu extends Component {
             Object.values(this.messaging.state.threads).filter(
                 (thread) => thread.is_pinned && thread.isUnread
             ).length +
-            this.messaging.state.notificationGroups.length;
+            Object.values(this.messaging.state.notificationGroups).reduce(
+                (acc, ng) => acc + parseInt(Object.values(ng.notifications).length),
+                0
+            );
         if (browser.Notification?.permission === "default") {
             value++;
         }

@@ -55,7 +55,7 @@
                             isLast="failure_last"
                             hasMarkAsReadButton="true"
                             onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
-x                        />
+                        />
                     </t>
                 </div>
             </div>
