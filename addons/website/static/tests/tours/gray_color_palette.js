@@ -4,6 +4,10 @@ import wTourUtils from 'website.tour_utils';
 function waitForCSSReload() {
     return [
         {
+            content: "Wait for the loading to start",
+            trigger: '.o_loading_indicator',
+        },
+        {
             // This step is here because the option is applied but triggers a
             // reloading of the CC value, so if the second value is sent too
             // soon, it will be ignored. Clicking on the snippet tab and back
