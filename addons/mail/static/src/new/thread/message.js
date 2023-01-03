@@ -237,6 +237,16 @@ export class Message extends Component {
         this.threadService.openChat({ partnerId: this.message.author.id });
     }
 
+    /**
+     * @param {MouseEvent} ev
+     */
+    onClick(ev) {
+        if (ev.target.closest(".o_mail_redirect")) {
+            ev.preventDefault();
+            this.threadService.openChat({ partnerId: Number(ev.target.dataset.oeId) });
+        }
+    }
+
     onClickEdit() {
         this.enterEditMode();
     }

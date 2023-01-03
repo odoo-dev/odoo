@@ -9,6 +9,7 @@
         }"
         t-att-data-message-id="message.id"
         t-ref="ref"
+        t-on-click="onClick"
     >
         <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
         <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
