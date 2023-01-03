@@ -51,6 +51,7 @@ export class Message extends Component {
         "message",
         "squashed?",
         "thread?",
+        "threadViewRef?",
         "onExitEditMode?",
         "shouldEnterEditMode?",
     ];
@@ -89,7 +90,9 @@ export class Message extends Component {
             if (!this.ref.el || ev.target === this.ref.el || this.ref.el.contains(ev.target)) {
                 return;
             }
-            this.exitEditMode();
+            if (this.state.isEditing) {
+                this.exitEditMode();
+            }
         });
         onPatched(() => {
             if (this.props.highlighted && this.ref.el) {
@@ -269,5 +272,8 @@ export class Message extends Component {
         this.props.onExitEditMode?.();
         this.message.composer = null;
         this.state.isEditing = false;
+        this.props.threadViewRef.el.parentNode
+            .querySelector(".o-mail-thread ~ .o-mail-composer-container .o-mail-composer-textarea")
+            .focus();
     }
 }

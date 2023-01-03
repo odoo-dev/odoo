@@ -32,6 +32,7 @@
                             thread="props.thread"
                             shouldEnterEditMode="isMessageInEdit"
                             onExitEditMode="() => isMessageInEdit and props.resetMessageInEdit?.()"
+                            threadViewRef="messagesRef"
                         />
                     </t>
                     <Transition visible="props.thread.serverLastSeenMsgByCurrentUser === msg.id and !messageId_last" name="'o-fade'" t-slot-scope="transition">
