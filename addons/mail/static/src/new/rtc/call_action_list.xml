@@ -62,7 +62,7 @@
                         }"
                         t-att-aria-label="screenSharingText"
                         t-att-title="screenSharingText"
-                        t-on-click="() => this.rtc.toggleVideo('display')">
+                        t-on-click="() => this.rtc.toggleVideo('screen')">
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
                             <i class="fa fa-desktop fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendScreen }"/>
                         </div>

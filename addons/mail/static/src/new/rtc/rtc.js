@@ -212,7 +212,7 @@ export class Rtc {
      */
     filterIncomingVideoTraffic(sessions) {
         const ids = new Set(sessions.map((session) => session.id));
-        for (const session of Object.value(this.messaging.state.rtcSessions)) {
+        for (const session of Object.values(this.state.channel.rtcSessions)) {
             const fullDirection = this.state.videoTrack ? "sendrecv" : "recvonly";
             const limitedDirection = this.state.videoTrack ? "sendonly" : "inactive";
             const transceiver = getTransceiver(session.peerConnection, "video");
@@ -226,7 +226,7 @@ export class Rtc {
 
     async handleNotification(sessionId, content) {
         const { event, channelId, payload } = JSON.parse(content);
-        const session = this.state.channel.rtcSessions.get(sessionId);
+        const session = this.state.channel.rtcSessions[sessionId];
         if (
             !session ||
             session.channelId !== this.state.channel.id || // does handle notifications targeting a different session
@@ -251,7 +251,7 @@ export class Rtc {
                 }
                 const description = new window.RTCSessionDescription(payload.sdp);
                 try {
-                    await peerConnection.setRemoteDescriptions(description);
+                    await peerConnection.setRemoteDescription(description);
                 } catch (e) {
                     this.log(session, "offer handling: failed at setting remoteDescription", {
                         error: e,
@@ -453,7 +453,7 @@ export class Rtc {
         if (!this.state.channel.rtcSessions) {
             return;
         }
-        for (const session of this.state.channel.rtcSessions.values()) {
+        for (const session of Object.values(this.state.channel.rtcSessions)) {
             if (session.peerConnection || session.id === this.state.selfSession.id) {
                 continue;
             }
@@ -484,7 +484,7 @@ export class Rtc {
                     state: peerConnection.iceConnectionState,
                 }
             );
-            if (!this.state.channel.rtcSessions.has(session.id)) {
+            if (!this.state.channel.rtcSessions[session.id]) {
                 return;
             }
             session.connectionState = peerConnection.iceConnectionState;
@@ -598,7 +598,9 @@ export class Rtc {
             "/mail/rtc/channel/join_call",
             {
                 channel_id: channel.id,
-                check_rtc_session_ids: channel.rtcSessions.keys(),
+                check_rtc_session_ids: Object.values(channel.rtcSessions).map(
+                    (session) => session.id
+                ),
             },
             { silent: true }
         );
@@ -611,7 +613,7 @@ export class Rtc {
                 invitedPartners,
             },
         });
-        this.state.selfSession = this.messaging.state.rtcSessions.get(sessionId);
+        this.state.selfSession = this.messaging.state.rtcSessions[sessionId];
         this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         const channelProxy = reactive(this.state.channel, () => {
             if (channel !== this.state.channel) {
@@ -620,26 +622,26 @@ export class Rtc {
             if (this.state.channel) {
                 if (
                     this.state.channel &&
-                    !channelProxy.rtcSessions.has(this.state.selfSession.id)
+                    !channelProxy.rtcSessions[this.state.selfSession.id]
                 ) {
                     // if the current RTC session is not in the channel sessions, this call is no longer valid.
                     this.endCall();
                     return;
                 }
-                for (const session of Object.values(this.messaging.state.rtcSessions)) {
-                    if (!channelProxy.rtcSessions.has(session.id)) {
+                for (const session of Object.values(this.state.channel.rtcSessions)) {
+                    if (!channelProxy.rtcSessions[session.id]) {
                         this.log(session, "session removed from the server");
                         this.disconnect(session);
                     }
                 }
             }
-            void channelProxy.rtcSessions.size;
+            void Object.keys(channelProxy.rtcSessions);
         });
         this.state.channel.rtcInvitingSession = undefined;
         // discuss refactor: todo call channel.update below when availalbe and do the formatting in update
         this.call();
         this.soundEffects.play("channel-join");
-        await this.resetAudioTrack();
+        await this.resetAudioTrack(true);
         if (startWithVideo) {
             await this.toggleVideo("camera");
         }
@@ -696,7 +698,9 @@ export class Rtc {
             "/mail/channel/ping",
             {
                 channel_id: this.state.channel.id,
-                check_rtc_session_ids: this.state.channel.rtcSessions.keys(),
+                check_rtc_session_ids: Object.values(this.state.channel.rtcSessions).map(
+                    (session) => session.id
+                ),
                 rtc_session_id: this.state.selfSession.id,
             },
             { silent: true }
@@ -705,12 +709,12 @@ export class Rtc {
             const activeSessionsData = rtcSessions[0][1];
             for (const sessionData of activeSessionsData) {
                 const session = RtcSession.insert(this.messaging.state, sessionData);
-                this.state.channel.rtcSessions.set(session.id, session);
+                this.state.channel.rtcSessions[session.id] = session;
             }
             const outdatedSessionsData = rtcSessions[1][1];
             for (const sessionData of outdatedSessionsData) {
                 const session = RtcSession.delete(this.messaging.state, sessionData);
-                this.state.channel.rtcSessions.delete(session.id);
+                delete this.state.channel.rtcSessions[session.id];
             }
         }
     }
@@ -825,7 +829,7 @@ export class Rtc {
      */
     async setDeaf(isDeaf) {
         this.updateAndBroadcast({ isDeaf });
-        for (const session of this.messaging.state.rtcSessions.values()) {
+        for (const session of Object.values(this.state.channel.rtcSessions)) {
             if (!session.audioElement) {
                 continue;
             }
@@ -882,7 +886,10 @@ export class Rtc {
                 this.state.selfSession.updateStream(this.state.videoTrack);
             }
         }
-        for (const session of Object.values(this.messaging.state.rtcSessions)) {
+        for (const session of Object.values(this.state.channel.rtcSessions)) {
+            if (session.id === this.state.selfSession.id) {
+                continue;
+            }
             await this.updateRemote(session, "video");
         }
         if (!this.state.selfSession) {
@@ -971,7 +978,7 @@ export class Rtc {
                 type === "camera"
                     ? _t('%s" requires "camera" access')
                     : _t('%s" requires "screen recording" access');
-            this.notification.add(sprintf(str, window.location.host), { type: "warning", })
+            this.notification.add(sprintf(str, window.location.host), { type: "warning" });
             stopVideo();
             return;
         }
@@ -1080,7 +1087,10 @@ export class Rtc {
             audioTrack.enabled = !this.state.selfSession.isMute && this.state.selfSession.isTalking;
             this.state.audioTrack = audioTrack;
             await this.linkVoiceActivation();
-            for (const session of Object.values(this.messaging.state.rtcSessions)) {
+            for (const session of Object.values(this.state.channel.rtcSessions)) {
+                if (session.id === this.state.selfSession.id) {
+                    continue;
+                }
                 await this.updateRemote(session, "audio");
             }
         }

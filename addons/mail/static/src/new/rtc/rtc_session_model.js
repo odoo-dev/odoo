@@ -33,25 +33,25 @@ export class RtcSession {
      */
     static insert(state, data) {
         let session;
-        if (state.rtcSessions.has(data.id)) {
-            session = state.rtcSessions.get(data.id);
+        if (state.rtcSessions[data.id]) {
+            session = state.rtcSessions[data.id];
         } else {
             session = new RtcSession();
             session._state = state;
         }
         session.update(data);
-        state.rtcSessions.set(session.id, session);
+        state.rtcSessions[session.id] = session;
         // return reactive version
-        return state.rtcSessions.get(session.id);
+        return state.rtcSessions[session.id];
     }
 
     static delete(state, id) {
-        const session = state.rtcSessions.get(id);
+        const session = state.rtcSessions[id];
         if (session) {
-            state.threads[createLocalId("mail.channel", session.channelId)]?.rtcSessions.delete(id);
+            delete state.threads[createLocalId("mail.channel", session.channelId)]?.rtcSessions[id];
             session.clear();
         }
-        state.rtcSessions.delete(id);
+        delete state.rtcSessions[id];
     }
 
     update(data) {

@@ -115,7 +115,8 @@ export class Messaging {
             /** @type {Object.<number, Partner>} */
             partners: {},
             partnerRoot: {},
-            rtcSessions: new Map(),
+            /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */
+            rtcSessions: {},
             users: {},
             internalUserGroupId: null,
             registeredImStatusPartners: this.registeredImStatusPartners,
@@ -620,7 +621,7 @@ export class Messaging {
         if (!channel) {
             return;
         }
-        const oldCount = channel.rtcSessions.size;
+        const oldCount = Object.keys(channel.rtcSessions).length;
         switch (command) {
             case "insert-and-unlink":
                 for (const sessionData of sessionsData) {
@@ -630,14 +631,13 @@ export class Messaging {
             case "insert":
                 for (const sessionData of sessionsData) {
                     const session = RtcSession.insert(this.state, sessionData);
-                    channel.rtcSessions.set(session.id, session);
+                    channel.rtcSessions[session.id] = session;
                 }
                 break;
         }
-        if (sessionsData.length > oldCount) {
+        if (Object.keys(channel.rtcSessions).length > oldCount) {
             this.soundEffects.play("channel-join");
-        }
-        if (sessionsData.length < oldCount) {
+        } else if (Object.keys(channel.rtcSessions).length < oldCount) {
             this.soundEffects.play("member-leave");
         }
     }

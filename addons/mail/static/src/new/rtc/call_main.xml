@@ -10,7 +10,7 @@
             t-on-mousemove="onMouseMove"
             t-ref="grid"
         >
-            <CallParticipantCard t-foreach="[...props.thread.rtcSessions.values()]" t-as="session" t-key="session.id"
+            <CallParticipantCard t-foreach="[...Object.values(props.thread.rtcSessions)]" t-as="session" t-key="session.id"
                 className="'o-mail-call-main-gridParticipantCard'"
                 session="session"
             />

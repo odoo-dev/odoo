@@ -19,8 +19,8 @@ export class Thread {
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
     channelMembers = [];
-    /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession} */
-    rtcSessions = new Map();
+    /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */
+    rtcSessions = {};
     /** @type {import("@mail/new/core/partner_model").partner[]} */
     invitedPartners = [];
     /** @type {integer} */
@@ -149,7 +149,7 @@ export class Thread {
                     case "insert":
                         for (const rtcSessionData of sessionsData) {
                             const session = RtcSession.insert(this._state, rtcSessionData);
-                            this.rtcSessions.set(session.id, session);
+                            this.rtcSessions[session.id] = session;
                         }
                         break;
                 }
