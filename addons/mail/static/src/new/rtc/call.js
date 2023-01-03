@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { CallMain } from "@mail/new/rtc/call_main";
 
 export class Call extends Component {

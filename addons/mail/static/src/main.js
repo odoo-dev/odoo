@@ -3,7 +3,7 @@
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { Discuss } from "@mail/new/discuss/discuss";
-import { messagingService as newMessagingService } from "@mail/new/messaging_service";
+import { messagingService as newMessagingService } from "@mail/new/core/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
@@ -13,8 +13,8 @@ import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_e
 
 import { registry } from "@web/core/registry";
 import { rtcService } from "./new/rtc/rtc_service";
-import { soundEffects } from "./new/sound_effects_service";
-import { userSettingsService } from "./new/user_settings_service";
+import { soundEffects } from "./new/core/sound_effects_service";
+import { userSettingsService } from "./new/core/user_settings_service";
 import { suggestionService } from "./new/suggestion/suggestion_service";
 import { stateService } from "./new/core/state_service";
 import { chatWindowService } from "./new/chat/chat_window_service";

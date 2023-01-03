@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 
 import { Activity } from "@mail/new/core/activity_model";
 import { ActivityListPopoverItem } from "@mail/new/activity/activity_list_popover_item";

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { Typing } from "../composer/typing";
 
 /**

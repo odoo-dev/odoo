@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { NavigableList } from "../composer/navigable_list";
 import { useService } from "@web/core/utils/hooks";

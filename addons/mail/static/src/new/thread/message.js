@@ -11,7 +11,7 @@ import { Component, onPatched, useChildSubEnv, useEffect, useRef, useState } fro
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Composer as ComposerModel } from "../core/composer_model";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";

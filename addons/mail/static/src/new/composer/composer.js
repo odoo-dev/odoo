@@ -13,7 +13,7 @@ import {
     useState,
 } from "@odoo/owl";
 import { useDropzone } from "../dropzone/dropzone_hook";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { NavigableList } from "./navigable_list";
 import { useEmojiPicker } from "./emoji_picker";
 
