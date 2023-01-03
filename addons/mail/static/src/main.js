@@ -2,7 +2,7 @@
 
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { ActivityMenu } from "@mail/new/activity/activity_menu";
-import { Discuss } from "@mail/new/discuss/discuss";
+import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
 import { messagingService as newMessagingService } from "@mail/new/core/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
@@ -46,7 +46,7 @@ serviceRegistry.add("messagingValues", messagingValuesService);
 serviceRegistry.add("systray_service", systrayService);
 serviceRegistry.add("messaging_service_to_legacy_env", makeMessagingToLegacyEnv(owl.Component.env));
 
-registry.category("actions").add("mail.action_discuss", Discuss);
+registry.category("actions").add("mail.action_discuss", DiscussClientAction);
 
 registry
     .category("main_components")

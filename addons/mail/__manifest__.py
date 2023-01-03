@@ -259,9 +259,15 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'web/static/src/legacy/js/widgets/translation_dialog.js'),
             ('remove', 'web_tour/static/src/js/tour_manager.js'),
             ('remove', 'web_tour/static/src/js/tour_service.js'),
+            'web/static/src/views/fields/formatters.js',
+            'web/static/src/views/fields/file_handler.*',
+            'web/static/src/views/fields/many2many_tags/tags_list.*',
 
-            'mail/static/src/new/public/**/*',
-        ],
+            'mail/static/src/new/**/*',
+            ('remove', 'mail/static/src/new/views/**/*'),
+            ('remove', 'mail/static/src/new/backend/**/*',),
+            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+        ]
     },
     'license': 'LGPL-3',
 }

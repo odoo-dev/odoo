@@ -1,8 +1,7 @@
 /* @odoo-module */
 
-import { Component, useRef } from "@odoo/owl";
+import { Component, onMounted, onPatched, useRef } from "@odoo/owl";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
-import { useUpdate } from "@mail/component_hooks/use_update";
 
 export class CallParticipantVideo extends Component {
     static props = ["session"];
@@ -11,7 +10,8 @@ export class CallParticipantVideo extends Component {
     setup() {
         this.rtc = useRtc();
         this.root = useRef("root");
-        useUpdate({ func: () => this._update() });
+        onMounted(() => this._update());
+        onPatched(() => this._update());
     }
 
     _update() {

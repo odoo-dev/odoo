@@ -67,7 +67,6 @@ export class Message extends Component {
         this.messaging = useMessaging();
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
-        this.action = useService("action");
         this.user = useService("user");
         useChildSubEnv({
             LinkPreviewListComponent: LinkPreviewList,
@@ -219,19 +218,6 @@ export class Message extends Component {
     async onClickAttachmentUnlink(attachment) {
         await this.messaging.unlinkAttachment(attachment);
         removeFromArrayWithPredicate(this.message.attachments, ({ id }) => id === attachment.id);
-    }
-
-    openRecord() {
-        if (this.message.resModel === "mail.channel") {
-            this.threadService.open(this.message.originThread);
-        } else {
-            this.action.doAction({
-                type: "ir.actions.act_window",
-                res_id: this.message.resId,
-                res_model: this.message.resModel,
-                views: [[false, "form"]],
-            });
-        }
     }
 
     openChatAvatar() {

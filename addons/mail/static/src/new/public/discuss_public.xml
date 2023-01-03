@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.discuss_public" owl="1">
-    <div>
-        DISCUSS PUBLIC
+    <div class="o-mail-discuss-public d-flex h-100 w-100 position-absolute">
+        <Discuss sidebar="false"/>
     </div>
 </t>
 
