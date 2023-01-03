@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { cleanTerm } from "@mail/new/utils/format";
+import { isEventHandled } from "@mail/new/utils/misc";
 import { Partner } from "../core/partner_model";
 import { _t } from "@web/core/l10n/translation";
 
@@ -122,7 +123,7 @@ export class ChannelSelector extends Component {
         const hotkey = getActiveHotkey(ev);
         switch (hotkey) {
             case "enter":
-                if (!this.state.value === "") {
+                if (isEventHandled(ev, "NavigableList.select") || !this.state.value === "") {
                     return;
                 }
                 this.onValidate();
