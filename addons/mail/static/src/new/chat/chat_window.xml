@@ -3,7 +3,6 @@
 
 <t t-name="mail.chat_window" owl="1">
     <t t-set="chatWindow" t-value="props.chatWindow"/>
-    <t t-set="thread" t-value="chatWindow.thread"/>
     <div class="o-mail-chat-window"
         t-attf-style="right:{{props.right}}px;"
         t-att-class="{

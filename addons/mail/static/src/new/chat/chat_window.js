@@ -57,6 +57,10 @@ export class ChatWindow extends Component {
         useChildSubEnv({ inChatWindow: true });
     }
 
+    get thread() {
+        return this.props.chatWindow.thread;
+    }
+
     onKeydown(ev) {
         switch (ev.key) {
             case "Escape":
@@ -95,7 +99,7 @@ export class ChatWindow extends Component {
     }
 
     expand() {
-        this.threadService.setDiscussThread(this.props.chatWindow.thread);
+        this.threadService.setDiscussThread(this.thread);
         this.action.doAction(
             {
                 type: "ir.actions.client",
