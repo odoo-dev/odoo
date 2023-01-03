@@ -17,6 +17,8 @@ import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
 import { MessageReactions } from "@mail/new/thread/message_reactions";
 import { useEmojiPicker } from "../composer/emoji_picker";
+import { usePopover } from "@web/core/popover/popover_hook";
+import { MessageNotificationPopover } from "./message_notification_popover";
 
 /**
  * @typedef {Object} Props
@@ -57,6 +59,7 @@ export class Message extends Component {
     static template = "mail.message";
 
     setup() {
+        this.popover = usePopover();
         this.state = useState({
             isEditing: false,
             isActionListSquashed: this.env.inChatWindow,
@@ -269,5 +272,22 @@ export class Message extends Component {
         this.props.onExitEditMode?.();
         this.message.composer = null;
         this.state.isEditing = false;
+    }
+
+    onClickNotificationIcon(ev) {
+        this.popover.add(
+            ev.target,
+            MessageNotificationPopover,
+            { message: this.message },
+            { position: "top" }
+        );
+    }
+
+    onClickFailure() {
+        this.env.services.action.doAction("mail.mail_resend_message_action", {
+            additionalContext: {
+                mail_message_to_resend: this.message.id,
+            },
+        });
     }
 }

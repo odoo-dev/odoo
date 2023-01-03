@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { makeDeferred } from "@mail/utils/deferred";
 import {
     afterNextRender,
     nextAnimationFrame,
@@ -13,157 +12,6 @@ import { patchWithCleanup } from "@web/../tests/helpers/utils";
 QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("message_tests.js");
-
-        QUnit.skipRefactoring("Notification Sent", async function (assert) {
-            assert.expect(9);
-
-            const pyEnv = await startServer();
-            const [threadId, resPartnerId] = pyEnv["res.partner"].create([
-                {},
-                { name: "Someone", partner_share: true },
-            ]);
-            const mailMessageId = pyEnv["mail.message"].create({
-                body: "not empty",
-                message_type: "email",
-                model: "res.partner",
-                res_id: threadId,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId,
-                notification_status: "sent",
-                notification_type: "email",
-                res_partner_id: resPartnerId,
-            });
-            const { click, openView } = await start();
-            await openView({
-                res_id: threadId,
-                res_model: "res.partner",
-                views: [[false, "form"]],
-            });
-            assert.containsOnce(
-                document.body,
-                ".o-mail-message",
-                "should display a message component"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_notificationIconClickable",
-                "should display the notification icon container"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_notificationIcon",
-                "should display the notification icon"
-            );
-            assert.hasClass(
-                document.querySelector(".o_MessageView_notificationIcon"),
-                "fa-envelope-o",
-                "icon should represent email success"
-            );
-
-            await click(".o_MessageView_notificationIconClickable");
-            assert.containsOnce(
-                document.body,
-                ".o_MessageNotificationPopoverContentView",
-                "notification popover should be open"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageNotificationPopoverContentView_notificationIcon",
-                "popover should have one icon"
-            );
-            assert.hasClass(
-                document.querySelector(".o_MessageNotificationPopoverContentView_notificationIcon"),
-                "fa-check",
-                "popover should have the sent icon"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageNotificationPopoverContentView_notificationPartnerName",
-                "popover should have the partner name"
-            );
-            assert.strictEqual(
-                document
-                    .querySelector(
-                        ".o_MessageNotificationPopoverContentView_notificationPartnerName"
-                    )
-                    .textContent.trim(),
-                "Someone",
-                "partner name should be correct"
-            );
-        });
-
-        QUnit.skipRefactoring("Notification Error", async function (assert) {
-            assert.expect(8);
-
-            const pyEnv = await startServer();
-            const [threadId, resPartnerId] = pyEnv["res.partner"].create([
-                {},
-                { name: "Someone", partner_share: true },
-            ]);
-            const mailMessageId = pyEnv["mail.message"].create({
-                body: "not empty",
-                message_type: "email",
-                model: "res.partner",
-                res_id: threadId,
-            });
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId,
-                notification_status: "exception",
-                notification_type: "email",
-                res_partner_id: resPartnerId,
-            });
-            const openResendActionDef = makeDeferred();
-            const { env, openView } = await start();
-            await openView({
-                res_id: threadId,
-                res_model: "res.partner",
-                views: [[false, "form"]],
-            });
-            patchWithCleanup(env.services.action, {
-                doAction(action, options) {
-                    assert.step("do_action");
-                    assert.strictEqual(
-                        action,
-                        "mail.mail_resend_message_action",
-                        "action should be the one to resend email"
-                    );
-                    assert.strictEqual(
-                        options.additionalContext.mail_message_to_resend,
-                        mailMessageId,
-                        "action should have correct message id"
-                    );
-                    openResendActionDef.resolve();
-                },
-            });
-
-            assert.containsOnce(
-                document.body,
-                ".o-mail-message",
-                "should display a message component"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_notificationIconClickable",
-                "should display the notification icon container"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_notificationIcon",
-                "should display the notification icon"
-            );
-            assert.hasClass(
-                document.querySelector(".o_MessageView_notificationIcon"),
-                "fa-envelope",
-                "icon should represent email error"
-            );
-            document.querySelector(".o_MessageView_notificationIconClickable").click();
-            await openResendActionDef;
-            assert.verifySteps(
-                ["do_action"],
-                "should do an action to display the resend email dialog"
-            );
-        });
 
         QUnit.skipRefactoring(
             "'channel_fetch' notification received is correctly handled",
@@ -1098,7 +946,9 @@ QUnit.module("mail", {}, function () {
                     // intercept the action: this action is not relevant in the context of this test.
                     doAction() {},
                 });
-                document.querySelector(".o_MessageView_notificationIconClickable.o-error").click();
+                document
+                    .querySelector(".o-mail-message-notification-icon-clickable.o-error")
+                    .click();
                 await nextAnimationFrame();
                 assert.doesNotHaveClass(
                     document.querySelector(`.o-mail-message`),

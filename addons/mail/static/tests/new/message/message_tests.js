@@ -17,6 +17,7 @@ import {
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
+import { makeDeferred } from "@mail/utils/deferred";
 
 let target;
 
@@ -325,12 +326,12 @@ QUnit.test("Other messages are grayed out when replying to another one", async f
     assert.containsN(target, ".o-mail-message", 2);
     await click(`.o-mail-message[data-message-id='${firstMessageId}'] i[aria-label='Reply']`);
     assert.doesNotHaveClass(
-        document.querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`),
+        target.querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`),
         "opacity-50",
         "First message should not be grayed out"
     );
     assert.hasClass(
-        document.querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`),
+        target.querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`),
         "opacity-50",
         "Second message should be grayed out"
     );
@@ -360,7 +361,7 @@ QUnit.test("Parent message body is displayed on replies", async function (assert
     await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
     await click(".o-mail-composer-send-button");
     assert.containsOnce(target, ".o-mail-message-in-reply-body");
-    assert.ok(document.querySelector(".o-mail-message-in-reply-body").innerText, "Hello world");
+    assert.ok(target.querySelector(".o-mail-message-in-reply-body").innerText, "Hello world");
 });
 
 QUnit.test(
@@ -394,7 +395,7 @@ QUnit.test(
         await triggerHotkey("Enter", false);
         await nextTick();
         assert.strictEqual(
-            document.querySelector(".o-mail-message-in-reply-body").innerText,
+            target.querySelector(".o-mail-message-in-reply-body").innerText,
             "Goodbye World"
         );
     }
@@ -428,7 +429,7 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
     $('button:contains("Delete")').click();
     await nextTick();
     assert.strictEqual(
-        document.querySelector(".o-mail-message-in-reply-deleted-message").innerText,
+        target.querySelector(".o-mail-message-in-reply-deleted-message").innerText,
         "Original message was deleted"
     );
 });
@@ -887,4 +888,88 @@ QUnit.test("click on message edit button should open edit composer", async funct
     await openDiscuss();
     await click(".o-mail-message-actions i[aria-label='Edit']");
     assert.containsOnce(target, ".o-mail-message .o-mail-composer");
+});
+
+QUnit.test("Notification Sent", async function (assert) {
+    const pyEnv = await startServer();
+    const [threadId, resPartnerId] = pyEnv["res.partner"].create([
+        {},
+        { name: "Someone", partner_share: true },
+    ]);
+    const mailMessageId = pyEnv["mail.message"].create({
+        body: "not empty",
+        message_type: "email",
+        model: "res.partner",
+        res_id: threadId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId,
+        notification_status: "sent",
+        notification_type: "email",
+        res_partner_id: resPartnerId,
+    });
+    const { click, openView } = await start();
+    await openView({
+        res_id: threadId,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-message");
+    assert.containsOnce(target, ".o-mail-message-notification-icon-clickable");
+    assert.containsOnce(target, ".o-mail-message-notification-icon");
+    assert.hasClass(target.querySelector(".o-mail-message-notification-icon"), "fa-envelope-o");
+
+    await click(".o-mail-message-notification-icon-clickable");
+    assert.containsOnce(target, ".o-mail-message-notification-popover");
+    assert.containsOnce(target, ".o-mail-message-notification-popover-icon");
+    assert.hasClass(target.querySelector(".o-mail-message-notification-popover-icon"), "fa-check");
+    assert.containsOnce(target, ".o-mail-message-notification-popover-partner-name");
+    assert.strictEqual(
+        target
+            .querySelector(".o-mail-message-notification-popover-partner-name")
+            .textContent.trim(),
+        "Someone"
+    );
+});
+
+QUnit.test("Notification Error", async function (assert) {
+    const pyEnv = await startServer();
+    const [threadId, resPartnerId] = pyEnv["res.partner"].create([
+        {},
+        { name: "Someone", partner_share: true },
+    ]);
+    const mailMessageId = pyEnv["mail.message"].create({
+        body: "not empty",
+        message_type: "email",
+        model: "res.partner",
+        res_id: threadId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId,
+        notification_status: "exception",
+        notification_type: "email",
+        res_partner_id: resPartnerId,
+    });
+    const openResendActionDef = makeDeferred();
+    const { env, openView } = await start();
+    await openView({
+        res_id: threadId,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    patchWithCleanup(env.services.action, {
+        doAction(action, options) {
+            assert.step("do_action");
+            assert.strictEqual(action, "mail.mail_resend_message_action");
+            assert.strictEqual(options.additionalContext.mail_message_to_resend, mailMessageId);
+            openResendActionDef.resolve();
+        },
+    });
+    assert.containsOnce(target, ".o-mail-message");
+    assert.containsOnce(target, ".o-mail-message-notification-icon-clickable");
+    assert.containsOnce(target, ".o-mail-message-notification-icon");
+    assert.hasClass(target.querySelector(".o-mail-message-notification-icon"), "fa-envelope");
+    click(".o-mail-message-notification-icon-clickable").then(() => {});
+    await openResendActionDef;
+    assert.verifySteps(["do_action"]);
 });

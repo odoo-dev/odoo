@@ -77,11 +77,11 @@
                             </t>
                         </small>
                         <div t-if="messageListViewItemOwner and message.originThread and message.originThread === messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread and message.notifications.length > 0" t-att-class="{ 'ms-2': isInChatWindowAndIsAlignedRight }">
-                            <span t-if="message.failureNotifications.length > 0" class="o_MessageView_notificationIconClickable o-error cursor-pointer text-danger" role="button" tabindex="0" t-on-click="onClickFailure">
-                                <i class="o_MessageView_notificationIcon" t-att-class="failureNotificationIconClassName" role="img" aria-label="Delivery failure"/> <span t-if="failureNotificationIconLabel" t-out="failureNotificationIconLabel"/>
+                            <span t-if="message.failureNotifications.length > 0" class="o-mail-message-notification-icon-clickable o-error cursor-pointer text-danger" role="button" tabindex="0" t-on-click="onClickFailure">
+                                <i class="o-mail-message-notification-icon" t-att-class="failureNotificationIconClassName" role="img" aria-label="Delivery failure"/> <span t-if="failureNotificationIconLabel" t-out="failureNotificationIconLabel"/>
                             </span>
-                            <span t-else="" class="o_MessageView_notificationIconClickable text-600 cursor-pointer" t-on-click="onClickNotificationIcon" t-ref="notificationIcon">
-                                <i class="o_MessageView_notificationIcon" t-att-class="notificationIconClassName"/> <span t-if="notificationIconLabel" t-out="notificationIconLabel"/>
+                            <span t-else="" class="o-mail-message-notification-icon-clickable text-600 cursor-pointer" t-on-click="onClickNotificationIcon" t-ref="notificationIcon">
+                                <i class="o-mail-message-notification-icon" t-att-class="notificationIconClassName"/> <span t-if="notificationIconLabel" t-out="notificationIconLabel"/>
                             </span>
                         </div>
                     </div>

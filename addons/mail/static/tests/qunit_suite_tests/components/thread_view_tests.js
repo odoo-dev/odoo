@@ -441,46 +441,44 @@ QUnit.module("mail", (hooks) => {
 
             assert.containsOnce(
                 document.body,
-                ".o_MessageView_notificationIconClickable",
+                ".o-mail-message-notification-icon-clickable",
                 "should display the notification icon container on the message"
             );
             assert.containsOnce(
                 document.body,
-                ".o_MessageView_notificationIcon",
+                ".o-mail-message-notification-icon",
                 "should display the notification icon on the message"
             );
             assert.hasClass(
-                document.querySelector(".o_MessageView_notificationIcon"),
+                document.querySelector(".o-mail-message-notification-icon"),
                 "fa-envelope-o",
                 "notification icon shown on the message should represent email"
             );
 
-            await click(".o_MessageView_notificationIconClickable");
+            await click(".o-mail-message-notification-icon-clickable");
             assert.containsOnce(
                 document.body,
-                ".o_MessageNotificationPopoverContentView",
+                ".o-mail-message-notification-popover",
                 "notification popover should be opened after notification has been clicked"
             );
             assert.containsOnce(
                 document.body,
-                ".o_MessageNotificationPopoverContentView_notificationIcon",
+                ".o-mail-message-notification-popover-icon",
                 "an icon should be shown in notification popover"
             );
             assert.containsOnce(
                 document.body,
-                ".o_MessageNotificationPopoverContentView_notificationIcon.fa.fa-trash-o",
+                ".o-mail-message-notification-popover-icon.fa.fa-trash-o",
                 "the icon shown in notification popover should be the canceled icon"
             );
             assert.containsOnce(
                 document.body,
-                ".o_MessageNotificationPopoverContentView_notificationPartnerName",
+                ".o-mail-message-notification-popover-partner-name",
                 "partner name should be shown in notification popover"
             );
             assert.strictEqual(
                 document
-                    .querySelector(
-                        ".o_MessageNotificationPopoverContentView_notificationPartnerName"
-                    )
+                    .querySelector(".o-mail-message-notification-popover-partner-name")
                     .textContent.trim(),
                 "Someone",
                 "partner name shown in notification popover should be the one concerned by the notification"

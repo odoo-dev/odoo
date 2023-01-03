@@ -86,7 +86,7 @@ QUnit.module("mail", (hooks) => {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_MessageView_notificationIcon",
+                    ".o-mail-message-notification-icon",
                     "should not display any notification icon in Inbox"
                 );
             }

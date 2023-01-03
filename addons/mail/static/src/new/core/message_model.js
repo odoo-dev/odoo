@@ -287,4 +287,8 @@ export class Message {
     get inlineBody() {
         return htmlToTextContentInline(this.body);
     }
+
+    get failureNotifications() {
+        return this.notifications.filter((notification) => notification.isFailure);
+    }
 }
