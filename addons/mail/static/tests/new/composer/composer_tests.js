@@ -954,3 +954,18 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-attachment-list .o-mail-attachment-card");
     }
 );
+
+QUnit.test("Show a thread name in the recipient status text.", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "test name" });
+    const { openFormView } = await start();
+    await openFormView({
+        res_model: "res.partner",
+        res_id: resPartnerId1,
+    });
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.strictEqual(
+        target.querySelector(".o-mail-chatter-followerTo").textContent.replace(/\s+/g, ""),
+        'To:Followersof"testname"'
+    );
+});
