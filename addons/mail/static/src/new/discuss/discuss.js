@@ -4,7 +4,7 @@ import { AutoresizeInput } from "./autoresize_input";
 import { Sidebar } from "./sidebar";
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";

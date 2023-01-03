@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { ChatWindow } from "./chat_window";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";

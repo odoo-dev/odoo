@@ -2,7 +2,7 @@
 
 import { Component } from "@odoo/owl";
 import { sprintf } from "@web/core/utils/strings";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 
 import { _t } from "@web/core/l10n/translation";
 

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
-import { Messaging, asyncMethods } from "./core/messaging";
-import { createLocalId } from "./core/thread_model.create_local_id";
+import { Messaging, asyncMethods } from "./messaging";
+import { createLocalId } from "./thread_model.create_local_id";
 
 export const messagingService = {
     dependencies: [

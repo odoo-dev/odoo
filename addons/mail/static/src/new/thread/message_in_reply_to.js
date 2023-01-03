@@ -4,7 +4,7 @@ import { Component } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
-import { useMessaging } from "@mail/new/messaging_hook";
+import { useMessaging } from "@mail/new/core/messaging_hook";
 
 export class MessageInReplyTo extends Component {
     static props = ["message", "alignedRight", "onClick"];

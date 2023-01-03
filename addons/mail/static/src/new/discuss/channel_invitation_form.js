@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, useRef, useState, onMounted, onWillStart } from "@odoo/owl";
-import { useMessaging } from "@mail/new/messaging_hook";
+import { useMessaging } from "@mail/new/core/messaging_hook";
 import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
 

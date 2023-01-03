@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { ThreadIcon } from "./thread_icon";
 import { ChannelSelector } from "./channel_selector";
 import { PartnerImStatus } from "./partner_im_status";

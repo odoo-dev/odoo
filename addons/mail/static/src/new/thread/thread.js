@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, onMounted, onWillStart, onWillUpdateProps, useRef, useState } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import {
     useAutoScroll,
     useScrollPosition,

@@ -3,7 +3,7 @@
 import { Call } from "../rtc/call";
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";

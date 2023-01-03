@@ -8,7 +8,7 @@ import {
     CHAT_WINDOW_INBETWEEN_WIDTH,
     CHAT_WINDOW_WIDTH,
 } from "../core/chat_window_model";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { ChatWindow } from "./chat_window";
 import { ChatWindowHiddenMenu } from "./chat_window_hidden_menu";
 

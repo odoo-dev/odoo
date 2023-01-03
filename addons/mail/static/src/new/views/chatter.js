@@ -3,7 +3,7 @@
 import { Follower } from "@mail/new/core/follower_model";
 import { Activity as ActivityModel } from "@mail/new/core/activity_model";
 import { Thread } from "../thread/thread";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging } from "../core/messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { Composer } from "../composer/composer";
