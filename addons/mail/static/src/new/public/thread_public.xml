@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="mail.thread_public" owl="1">
+    <div class="d-flex h-100 flex-grow-1">
+        <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view overflow-auto" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}" t-ref="content">
+            <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
+                <div class="text-center align-self-center flex-shrink-0 flex-grow-1">
+                    <h1 t-esc="thread.name"/>
+                </div>
+                <div class="o-mail-discuss-actions flex-shrink-0 d-flex align-items-center ms-1">
+                    <button class="btn" title="Start a Call">
+                        <i class="fa fa-lg fa-phone text-700"/>
+                    </button>
+                    <button t-if="thread.model === 'mail.channel'" class="btn" t-ref="addUsers" title="Add Users" data-action="add-users">
+                        <i class="fa fa-lg fa-user-plus text-700"/>
+                    </button>
+                    <button t-if="thread.type === 'channel'" class="btn">
+                        <i class="fa fa-lg fa-users text-700"/>
+                    </button>
+                    <button class="btn" t-ref="settings" title="Show Call Settings">
+                        <i class="fa fa-lg fa-gear text-700"/>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-auto d-flex flex-grow-1">
+                <div class="d-flex flex-column flex-grow-1">
+                    <Call t-if="thread.rtcSessions.size > 0" thread="thread"/>
+                    <Thread thread="thread" t-key="thread.localId"/>
+                    <Composer t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo" t-key="thread.localId" composer="thread.composer" autofocus="true" dropzoneRef="contentRef"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+</templates>

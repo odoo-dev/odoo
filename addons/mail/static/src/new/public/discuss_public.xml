@@ -2,9 +2,12 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.discuss_public" owl="1">
-    <div>
-        DISCUSS PUBLIC
-    </div>
+    <div class="o_DiscussPublicView d-flex flex-column h-100 w-100 position-absolute" t-attf-class="{{ className }}" t-ref="root">
+            <ThreadPublic data="props.data"/>
+            <WelcomeView t-if="welcomeView"
+                record="welcomeView"
+            />
+        </div>
 </t>
 
 </templates>

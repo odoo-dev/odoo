@@ -233,6 +233,14 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/tests/qunit_mobile_suite_tests/**/*.js',
         ],
         # new bundles
+        'mail.assets_messaging_new': [
+            'mail/static/src/new/*.js',
+            'mail/static/src/new/**/*.js',
+            'mail/static/src/new/**/*.xml',
+            'mail/static/src/new/**/*.scss',
+            ('remove', 'mail/static/src/new/public/**/*'),
+            ('remove', 'mail/static/src/new/views/**/*'),
+        ],
         'mail.assets_backend': [
             'mail/static/src/new/**/*',
             ('remove', 'mail/static/src/new/public/**/*'),
@@ -259,8 +267,16 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'web_tour/static/src/js/tour_manager.js'),
             ('remove', 'web_tour/static/src/js/tour_service.js'),
 
+            'web/static/src/views/fields/formatters.js',
+            'web/static/src/views/fields/file_handler.*',
+            'web/static/src/views/fields/many2many_tags/tags_list.*',
+            'mail/static/src/model/model_listener.js',
+            'mail/static/src/component_hooks/use_update.js',
+            ('include', 'mail.assets_messaging_new'),
             'mail/static/src/new/public/**/*',
-        ],
+            ('remove', 'mail/static/src/new/backend/**/*',),
+            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+        ]
     },
     'license': 'LGPL-3',
 }
