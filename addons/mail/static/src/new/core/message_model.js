@@ -185,6 +185,9 @@ export class Message {
      * @returns {boolean}
      */
     get canBeEdited() {
+        if (this.isEmpty) {
+            return false;
+        }
         if (!this._state.user.isAdmin && !this.isAuthoredByCurrentUser) {
             return false;
         }

@@ -973,3 +973,40 @@ QUnit.test("Notification Error", async function (assert) {
     await openResendActionDef;
     assert.verifySteps(["do_action"]);
 });
+
+QUnit.test(
+    'Quick edit (edit from Composer with ArrowUp) ignores empty ("deleted") messages.',
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_type: "channel",
+        });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId,
+            message_type: "comment",
+        });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "", // empty body
+            model: "mail.channel",
+            res_id: mailChannelId,
+            message_type: "comment",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId}` },
+            },
+        });
+        await openDiscuss();
+        await afterNextRender(() => triggerHotkey("ArrowUp"));
+        assert.containsOnce(target, ".o-mail-message .o-mail-message-editable-content");
+        assert.strictEqual(
+            $(target).find(".o-mail-message .o-mail-composer-textarea").val(),
+            "not empty"
+        );
+    }
+);
