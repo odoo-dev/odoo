@@ -53,6 +53,51 @@ QUnit.test("toggling category button does not hide active category items", async
 });
 
 QUnit.test(
+    "Closing a category sends the updated user setting to the server.",
+    async function (assert) {
+        const { openDiscuss } = await start({
+            mockRPC(route, args) {
+                if (route === "/web/dataset/call_kw/res.users.settings/set_res_users_settings") {
+                    assert.step(route);
+                    assert.strictEqual(
+                        args.kwargs.new_settings.is_discuss_sidebar_category_channel_open,
+                        false
+                    );
+                }
+            },
+        });
+        await openDiscuss();
+        await click(".o-mail-category-icon");
+        assert.verifySteps(["/web/dataset/call_kw/res.users.settings/set_res_users_settings"]);
+    }
+);
+
+QUnit.test(
+    "Opening a category sends the updated user setting to the server.",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_channel_open: false,
+        });
+        const { openDiscuss } = await start({
+            mockRPC(route, args) {
+                if (route === "/web/dataset/call_kw/res.users.settings/set_res_users_settings") {
+                    assert.step(route);
+                    assert.strictEqual(
+                        args.kwargs.new_settings.is_discuss_sidebar_category_channel_open,
+                        true
+                    );
+                }
+            },
+        });
+        await openDiscuss();
+        await click(".o-mail-category-icon");
+        assert.verifySteps(["/web/dataset/call_kw/res.users.settings/set_res_users_settings"]);
+    }
+);
+
+QUnit.test(
     "channel - command: should have view command when category is unfolded",
     async function (assert) {
         const { openDiscuss } = await start();
