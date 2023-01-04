@@ -1010,3 +1010,34 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test(
+    "Editing a message to clear its composer opens message delete dialog.",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_type: "channel",
+        });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId,
+            message_type: "comment",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId}` },
+            },
+        });
+        await openDiscuss();
+        await click(".o-mail-message-actions i[aria-label='Edit']");
+        await editInput(target, ".o-mail-message-editable-content .o-mail-composer-textarea", "");
+        await afterNextRender(() => triggerHotkey("Enter"));
+        assert.containsOnce(
+            target,
+            ".modal-body p:contains('Are you sure you want to delete this message?')"
+        );
+    }
+);

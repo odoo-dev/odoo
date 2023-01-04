@@ -26,6 +26,7 @@ import { useSuggestion } from "../suggestion/suggestion_hook";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
+import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
@@ -45,6 +46,7 @@ export class Composer extends Component {
         "placeholder?",
         "dropzoneRef?",
         "messageEdition?",
+        "messageComponent?",
     ];
     static template = "mail.composer";
 
@@ -355,10 +357,10 @@ export class Composer extends Component {
                 this.props.onPostCallback();
             }
             this.state.active = true;
+            this.attachmentUploader.reset();
+            this.props.composer.textInputContent = "";
+            el.focus();
         }
-        this.attachmentUploader.reset();
-        this.props.composer.textInputContent = "";
-        el.focus();
     }
 
     async sendMessage() {
@@ -406,14 +408,21 @@ export class Composer extends Component {
     }
 
     async editMessage() {
-        await this.processMessage(async (value) =>
-            this.messageService.update(
-                this.props.composer.message,
-                value,
-                this.attachmentUploader.attachments,
-                this.suggestion.rawMentions
-            )
-        );
+        if (this.ref.el.value) {
+            await this.processMessage(async (value) =>
+                this.messageService.update(
+                    this.props.composer.message,
+                    value,
+                    this.attachmentUploader.attachments,
+                    this.suggestion.rawMentions
+                )
+            );
+        } else {
+            this.env.services.dialog.add(MessageDeleteDialog, {
+                message: this.props.composer.message,
+                messageComponent: this.props.messageComponent,
+            });
+        }
         this.suggestion.clearRawMentions();
     }
 
