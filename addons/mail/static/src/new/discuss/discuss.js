@@ -6,7 +6,7 @@ import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
 import { useMessaging } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
-import { useMessageHighlight } from "@mail/new/utils/hooks";
+import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Call } from "../rtc/call";
 import { ChannelMemberList } from "./channel_member_list";
@@ -46,6 +46,7 @@ export class Discuss extends Component {
         this.messageService = useState(useService("mail.message"));
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
+        this.messageEdition = useMessageEdition();
         this.contentRef = useRef("content");
         this.popover = usePopover();
         this.closePopover = null;
@@ -58,7 +59,6 @@ export class Discuss extends Component {
              *   "": no action pannel
              */
             activeMode: "",
-            messageInEditId: undefined,
         });
         this.orm = useService("orm");
         this.effect = useService("effect");
@@ -141,17 +141,6 @@ export class Discuss extends Component {
                 this.thread.type === "group")
         ) {
             await this.threadService.notifyThreadNameToServer(this.thread, newName);
-        }
-    }
-
-    resetMessageInEdit() {
-        this.state.messageInEditId = undefined;
-    }
-
-    startEditingLastMessageOfCurrentUser() {
-        const messageToEdit = this.thread.lastEditableMessageOfCurrentUser;
-        if (messageToEdit) {
-            this.state.messageInEditId = messageToEdit.id;
         }
     }
 

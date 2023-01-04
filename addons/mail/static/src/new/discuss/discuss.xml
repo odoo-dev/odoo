@@ -45,8 +45,8 @@
             <div class="overflow-auto d-flex flex-grow-1">
                 <div class="d-flex flex-column flex-grow-1">
                     <Call t-if="thread.rtcSessions.size > 0" thread="thread"/>
-                    <Thread thread="thread" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
-                    <Composer t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo" t-key="thread.localId" composer="thread.composer" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" startEditingLastMessageOfCurrentUser="startEditingLastMessageOfCurrentUser.bind(this)" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
+                    <Thread thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageHighlight="messageHighlight"/>
+                    <Composer t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo" t-key="thread.localId" composer="thread.composer" autofocus="true" messageEdition="messageEdition" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
                 </div>
                 <ChannelMemberList t-if="thread.type === 'channel' and state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start'"/>
             </div>

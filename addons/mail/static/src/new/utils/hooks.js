@@ -443,3 +443,17 @@ export function useScrollPosition(refName, model, clearOn) {
     });
     return self;
 }
+
+export function useMessageEdition() {
+    const state = reactive({
+        composerOfThread: null,
+        editingMessage: null,
+        exitEditMode() {
+            state.editingMessage = null;
+            if (state.composerOfThread) {
+                state.composerOfThread.state.autofocus++;
+            }
+        },
+    });
+    return state;
+}

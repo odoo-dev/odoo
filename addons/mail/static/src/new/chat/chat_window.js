@@ -5,7 +5,7 @@ import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useMessaging } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
-import { useMessageHighlight } from "@mail/new/utils/hooks";
+import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallSettings } from "../rtc/call_settings";
@@ -40,6 +40,7 @@ export class ChatWindow extends Component {
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.threadService = useState(useService("mail.thread"));
         this.rtc = useRtc();
+        this.messageEdition = useMessageEdition();
         this.messageHighlight = useMessageHighlight();
         this.state = useState({
             /**
@@ -50,7 +51,6 @@ export class ChatWindow extends Component {
              *   "": no action pannel
              */
             activeMode: "",
-            messageInEditId: undefined,
         });
         this.action = useService("action");
         this.contentRef = useRef("content");
@@ -112,16 +112,5 @@ export class ChatWindow extends Component {
     close() {
         this.props.chatWindow.close();
         this.chatWindowService.notifyState(this.props.chatWindow);
-    }
-
-    resetMessageInEdit() {
-        this.state.messageInEditId = undefined;
-    }
-
-    startEditingLastMessageOfCurrentUser() {
-        const messageToEdit = this.thread.lastEditableMessageOfCurrentUser;
-        if (messageToEdit) {
-            this.state.messageInEditId = messageToEdit.id;
-        }
     }
 }

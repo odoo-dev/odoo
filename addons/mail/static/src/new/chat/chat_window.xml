@@ -47,8 +47,8 @@
                     <ChannelInvitationForm t-elif="state.activeMode === 'add-users'" thread="thread" chatState="state"/>
                     <t t-else="">
                         <Call t-if="thread.rtcSessions.size > 0" thread="thread"/>
-                        <Thread thread="thread" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
-                        <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" startEditingLastMessageOfCurrentUser="startEditingLastMessageOfCurrentUser.bind(this)" dropzoneRef="contentRef"/>
+                        <Thread thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageHighlight="messageHighlight"/>
+                        <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" messageEdition="messageEdition" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
                     </t>
                 </t>
                 <div t-else="" class="d-flex align-items-center m-3">

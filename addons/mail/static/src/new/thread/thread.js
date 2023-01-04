@@ -15,13 +15,7 @@ import { useService } from "@web/core/utils/hooks";
 
 export class Thread extends Component {
     static components = { Message, Transition };
-    static props = [
-        "thread",
-        "messageHighlight?",
-        "order?",
-        "messageInEditId?",
-        "resetMessageInEdit?",
-    ];
+    static props = ["thread", "messageEdition?", "messageHighlight?", "order?"];
     static defaultProps = {
         order: "asc", // 'asc' or 'desc'
     };

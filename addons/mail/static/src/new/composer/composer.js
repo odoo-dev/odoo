@@ -44,7 +44,7 @@ export class Composer extends Component {
         "mode?",
         "placeholder?",
         "dropzoneRef?",
-        "startEditingLastMessageOfCurrentUser?",
+        "messageEdition?",
     ];
     static template = "mail.composer";
 
@@ -90,6 +90,9 @@ export class Composer extends Component {
                     }
                 }
             });
+        }
+        if (this.props.messageEdition) {
+            this.props.messageEdition.composerOfThread = this;
         }
         useChildSubEnv({
             inComposer: true,
@@ -214,7 +217,13 @@ export class Composer extends Component {
                 if (this.hasSuggestions) {
                     return;
                 }
-                this.props.startEditingLastMessageOfCurrentUser?.();
+                if (this.props.messageEdition) {
+                    const messageToEdit =
+                        this.props.composer.thread.lastEditableMessageOfCurrentUser;
+                    if (messageToEdit) {
+                        this.props.messageEdition.editingMessage = messageToEdit;
+                    }
+                }
                 break;
             case "Enter": {
                 if (isEventHandled(ev, "NavigableList.select")) {

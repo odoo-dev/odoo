@@ -51,10 +51,9 @@ export class Message extends Component {
         "highlighted?",
         "onParentMessageClick?",
         "message",
+        "messageEdition?",
         "squashed?",
         "thread?",
-        "onExitEditMode?",
-        "shouldEnterEditMode?",
     ];
     static template = "mail.message";
 
@@ -75,12 +74,12 @@ export class Message extends Component {
             alignedRight: this.isAlignedRight,
         });
         useEffect(
-            (shouldEnterEditMode) => {
-                if (shouldEnterEditMode) {
+            (editingMessage) => {
+                if (editingMessage === this.props.message) {
                     this.enterEditMode();
                 }
             },
-            () => [this.props.shouldEnterEditMode]
+            () => [this.props.messageEdition?.editingMessage]
         );
         onExternalClick("ref", async (ev) => {
             // Let event be handled by bubbling handlers first.
@@ -92,7 +91,9 @@ export class Message extends Component {
             if (!this.ref.el || ev.target === this.ref.el || this.ref.el.contains(ev.target)) {
                 return;
             }
-            this.exitEditMode();
+            if (this.state.isEditing) {
+                this.exitEditMode();
+            }
         });
         onPatched(() => {
             if (this.props.highlighted && this.ref.el) {
@@ -269,7 +270,7 @@ export class Message extends Component {
     }
 
     exitEditMode() {
-        this.props.onExitEditMode?.();
+        this.props.messageEdition?.exitEditMode();
         this.message.composer = null;
         this.state.isEditing = false;
     }
