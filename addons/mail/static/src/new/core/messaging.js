@@ -205,6 +205,7 @@ export class Messaging {
             this.thread.sortChannels();
             const settings = data.current_user_settings;
             this.userSettings.updateFromCommands(settings);
+            this.userSettings.id = settings.id;
             this.state.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
             this.state.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
             this.state.discuss.inbox.counter = data.needaction_inbox_counter;

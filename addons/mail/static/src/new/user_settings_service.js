@@ -3,6 +3,8 @@
 import { browser } from "@web/core/browser/browser";
 
 class UserSettings {
+    id;
+
     constructor(env, rpc, user) {
         this.rpc = rpc;
         this.user = user;
@@ -17,7 +19,7 @@ class UserSettings {
         this.pushToTalkKey = settings.push_to_talk_key ?? this.pushToTalkKey;
         this.voiceActiveDuration = settings.voice_active_duration ?? this.voiceActiveDuration;
         //process volume settings model command
-        const volumeRecordSet = settings.volume_settings_ids[0][1];
+        const volumeRecordSet = settings.volume_settings_ids?.[0][1] ?? [];
         for (const volumeRecord of volumeRecordSet) {
             this.partnerVolumes.set(volumeRecord.partner_id.id, volumeRecord.volume);
         }

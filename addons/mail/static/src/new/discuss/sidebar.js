@@ -28,6 +28,7 @@ export class Sidebar extends Component {
         this.threadService = useState(useService("mail.thread"));
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
+        this.userSettings = useService("mail.userSettings");
         this.orm = useService("orm");
         this.state = useState({
             editing: false,
@@ -43,8 +44,22 @@ export class Sidebar extends Component {
         this.threadService.setDiscussThread(thread);
     }
 
-    toggleCategory(category) {
+    async toggleCategory(category) {
         category.isOpen = !category.isOpen;
+        const serverStateKey =
+            category.id === "channels"
+                ? "is_discuss_sidebar_category_channel_open"
+                : "is_discuss_sidebar_category_chat_open";
+        await this.orm.call(
+            "res.users.settings",
+            "set_res_users_settings",
+            [[this.userSettings.id]],
+            {
+                new_settings: {
+                    [serverStateKey]: category.isOpen,
+                },
+            }
+        );
     }
 
     openCategory(category) {
