@@ -35,8 +35,7 @@
                 <div class="o-mail-channel-invitation-form-selected-partners overflow-auto">
                     <t t-foreach="state.selectedPartners" t-as="selectedPartner" t-key="selectedPartner.id">
                         <button class="btn btn-secondary" t-on-click="() => this.onClickSelectedPartner(selectedPartner)">
-                            <t t-esc="selectedPartner.name"/>
-                            <i class="fa fa-times"/>
+                            <t t-esc="selectedPartner.name"/> <i class="fa fa-times"/>
                         </button>
                     </t>
                 </div>
