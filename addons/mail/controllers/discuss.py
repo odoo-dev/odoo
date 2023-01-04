@@ -103,7 +103,7 @@ class DiscussController(http.Controller):
                     })
                     add_guest_cookie = True
                     discuss_public_view_data.update({
-                        'shouldAddGuestAsMemberOnJoin': True,
+                        'addGuestAsMemberOnJoin': True,
                         'shouldDisplayWelcomeViewInitially': True,
                     })
                 channel_sudo = channel_sudo.with_context(guest=guest)

@@ -8,6 +8,7 @@ import { removeFromArray } from "@mail/new/utils/arrays";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
+import { Guest } from "./guest_model";
 import { ChannelMember } from "../core/channel_member_model";
 import { RtcSession } from "@mail/new/rtc/rtc_session_model";
 import { LinkPreview } from "./link_preview_model";
@@ -105,8 +106,10 @@ export class Messaging {
                 avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
                 isAdmin: user.isAdmin,
             },
+            currentGuest: null,
             /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
             channelMembers: {},
+            companyName: "",
             /** @type {Object.<number, import("@mail/new/core/notification_model").Notification>} */
             notifications: {},
             notificationGroups: [],
@@ -115,6 +118,7 @@ export class Messaging {
             /** @type {Object.<number, Partner>} */
             partners: {},
             partnerRoot: {},
+            guests: {},
             /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */
             rtcSessions: {},
             users: {},
@@ -190,7 +194,12 @@ export class Messaging {
      */
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
-            Partner.insert(this.state, data.current_partner);
+            if (data.current_partner) {
+                Partner.insert(this.state, data.current_partner);
+            }
+            if (data.currentGuest) {
+                this.state.currentGuest = Guest.insert(this.state, data.currentGuest);
+            }
             this.loadFailures();
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
@@ -207,6 +216,7 @@ export class Messaging {
             const settings = data.current_user_settings;
             this.userSettings.updateFromCommands(settings);
             this.userSettings.id = settings.id;
+            this.state.companyName = data.companyName;
             this.state.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
             this.state.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
             this.state.discuss.inbox.counter = data.needaction_inbox_counter;
@@ -427,6 +437,16 @@ export class Messaging {
                             for (const partner of partners) {
                                 if (partner.im_status) {
                                     Partner.insert(this.state, partner);
+                                }
+                            }
+                        }
+                        if (notif.payload.Guest) {
+                            const guests = Array.isArray(notif.payload.Guest)
+                                ? notif.payload.Guest
+                                : [notif.payload.Guest];
+                            for (const guest of guests) {
+                                if (guest.im_status) {
+                                    Guest.insert(this.state, guest);
                                 }
                             }
                         }

@@ -4,6 +4,7 @@ import { markup } from "@odoo/owl";
 import { Message } from "@mail/new/core/message_model";
 import { ChannelMember } from "../core/channel_member_model";
 import { Partner } from "../core/partner_model";
+import { Guest } from "../core/guest_model";
 import { Thread } from "../core/thread_model";
 import { ChatWindow } from "../core/chat_window_model";
 import { _t } from "@web/core/l10n/translation";
@@ -77,10 +78,16 @@ export class ThreadService {
         }
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
-            Partner.insert(this.state, channelMember.persona.partner);
+            if (channelMember.persona?.partner) {
+                Partner.insert(this.state, channelMember.persona.partner);
+            }
+            if (channelMember.persona?.guest) {
+                Guest.insert(this.state, channelMember.persona.guest);
+            }
             ChannelMember.insert(this.state, {
                 id: channelMember.id,
-                partnerId: channelMember.persona.partner.id,
+                partnerId: channelMember.persona?.partner?.id,
+                guestId: channelMember.persona?.guest?.id,
                 threadId: thread.id,
             });
         }

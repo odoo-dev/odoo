@@ -19,6 +19,9 @@ class UserSettings {
         this.pushToTalkKey = settings.push_to_talk_key ?? this.pushToTalkKey;
         this.voiceActiveDuration = settings.voice_active_duration ?? this.voiceActiveDuration;
         //process volume settings model command
+        if (!settings.volume_settings_ids) {
+            return;
+        }
         const volumeRecordSet = settings.volume_settings_ids?.[0][1] ?? [];
         for (const volumeRecord of volumeRecordSet) {
             this.partnerVolumes.set(volumeRecord.partner_id.id, volumeRecord.volume);

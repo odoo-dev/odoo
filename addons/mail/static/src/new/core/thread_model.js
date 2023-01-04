@@ -2,6 +2,7 @@
 
 import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
+import { Guest } from "./guest_model";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { removeFromArray } from "../utils/arrays";
@@ -52,6 +53,8 @@ export class Thread {
     typingMemberIds = [];
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
+    /** @type {string} */
+    defaultDisplayMode;
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -119,6 +122,9 @@ export class Thread {
             if ("state" in serverData) {
                 this.state = serverData.state;
             }
+            if ("defaultDisplayMode" in serverData) {
+                this.defaultDisplayMode = serverData.defaultDisplayMode;
+            }
             if (this.type === "chat") {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
                     Partner.insert(this._state, elem.persona.partner);
@@ -134,7 +140,12 @@ export class Thread {
             }
             if (this.type === "group") {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
-                    Partner.insert(this._state, elem.persona.partner);
+                    if (elem.persona?.partner) {
+                        Partner.insert(this._state, elem.persona.partner);
+                    }
+                    if (elem.persona?.guest) {
+                        Guest.insert(this._state, elem.persona.guest);
+                    }
                 });
             }
             if ("rtcSessions" in serverData) {

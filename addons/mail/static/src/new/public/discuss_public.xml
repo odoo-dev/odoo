@@ -3,7 +3,8 @@
 
 <t t-name="mail.discuss_public" owl="1">
     <div class="o-mail-discuss-public d-flex h-100 w-100 position-absolute">
-        <Discuss sidebar="false"/>
+        <WelcomePage t-if="state.welcome" data="props.data" proceed="() => state.welcome = false"/>
+        <Discuss t-else="" sidebar="false"/>
     </div>
 </t>
 
