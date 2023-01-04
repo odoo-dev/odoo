@@ -247,7 +247,10 @@ export class Message extends Component {
     onClick(ev) {
         if (ev.target.closest(".o_mail_redirect")) {
             ev.preventDefault();
-            this.threadService.openChat({ partnerId: Number(ev.target.dataset.oeId) });
+            const partnerId = Number(ev.target.dataset.oeId);
+            if (this.user.partnerId !== partnerId) {
+                this.threadService.openChat({ partnerId });
+            }
         }
     }
 
