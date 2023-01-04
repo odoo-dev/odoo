@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { startServer, start, afterNextRender, click } from "@mail/../tests/helpers/test_utils";
+import { startServer, start, click } from "@mail/../tests/helpers/test_utils";
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeDeferred } from "@mail/utils/deferred";
 
