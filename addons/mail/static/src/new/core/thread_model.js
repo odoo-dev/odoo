@@ -43,7 +43,7 @@ export class Thread {
     message_unread_counter = 0;
     /** @type {import("@mail/new/core/message_model").Message[]} */
     messages = [];
-    /** @type {integer} */
+    /** @type {number} */
     serverLastSeenMsgByCurrentUser;
     /** @type {'opened' | 'folded' | 'closed'} */
     state;
