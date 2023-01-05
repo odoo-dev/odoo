@@ -615,3 +615,89 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test(
+    "new message separator is shown in a chat window of a chat on receiving new message if there is a history of conversation",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId = pyEnv["res.partner"].create({ name: "Demo" });
+        const resUsersId = pyEnv["res.users"].create({
+            name: "Foreigner user",
+            partner_id: resPartnerId,
+        });
+        const mailChannelId = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        is_minimized: true,
+                        is_pinned: false,
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+                [0, 0, { partner_id: resPartnerId }],
+            ],
+            channel_type: "chat",
+            uuid: "channel-10-uuid",
+        });
+        const mailMessageId = pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId,
+        });
+        const [mailChannelMemberId] = pyEnv["mail.channel.member"].search([
+            ["channel_id", "=", mailChannelId],
+            ["partner_id", "=", pyEnv.currentPartnerId],
+        ]);
+        pyEnv["mail.channel.member"].write([mailChannelMemberId], {
+            seen_message_id: mailMessageId,
+        });
+        const { env } = await start();
+        // simulate receiving a message
+        await afterNextRender(async () =>
+            env.services.rpc("/mail/chat_post", {
+                context: {
+                    mockedUserId: resUsersId,
+                },
+                message_content: "hu",
+                uuid: "channel-10-uuid",
+            })
+        );
+        assert.containsOnce(target, ".o-mail-chat-window");
+        assert.containsN(target, ".o-mail-message", 2);
+        assert.containsOnce(target, "hr + span:contains(New messages)");
+    }
+);
+
+QUnit.test(
+    "new message separator is not shown in a chat window of a chat on receiving new message if there is no history of conversation",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId = pyEnv["res.partner"].create({ name: "Demo" });
+        const resUsersId = pyEnv["res.users"].create({
+            name: "Foreigner user",
+            partner_id: resPartnerId,
+        });
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId }],
+            ],
+            channel_type: "chat",
+            uuid: "channel-10-uuid",
+        });
+        const { env } = await start();
+        // simulate receiving a message
+        await afterNextRender(async () =>
+            env.services.rpc("/mail/chat_post", {
+                context: {
+                    mockedUserId: resUsersId,
+                },
+                message_content: "hu",
+                uuid: "channel-10-uuid",
+            })
+        );
+        assert.containsNone(target, "hr + span:contains(New messages)");
+    }
+);
