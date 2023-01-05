@@ -16,6 +16,8 @@ export class Thread {
     /** @type {number} */
     id;
     /** @type {string} */
+    uuid;
+    /** @type {string} */
     model;
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
@@ -101,6 +103,9 @@ export class Thread {
         }
         if (data.serverData) {
             const { serverData } = data;
+            if ("uuid" in serverData) {
+                this.uuid = serverData.uuid;
+            }
             if ("authorizedGroupFullName" in serverData) {
                 this.authorizedGroupFullName = serverData.authorizedGroupFullName;
             }
