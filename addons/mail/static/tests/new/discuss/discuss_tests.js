@@ -152,6 +152,40 @@ QUnit.test("can create a new channel", async (assert) => {
     ]);
 });
 
+QUnit.test(
+    "do not close channel selector when creating chat conversation after selection",
+    async (assert) => {
+        const pyEnv = await startServer();
+        const resPartnerId = pyEnv["res.partner"].create({
+            name: "Mario",
+        });
+        pyEnv["res.users"].create({
+            partner_id: resPartnerId,
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category-item");
+
+        await click(".o-mail-discuss-sidebar i[title='Start a conversation']");
+        await afterNextRender(() => editInput(target, ".o-mail-channel-selector-input", "mario"));
+        await click(".o-mail-channel-selector-suggestion");
+        assert.containsOnce(target, ".o-mail-channel-selector span[title='Mario']");
+        assert.containsNone(target, ".o-mail-category-item");
+
+        await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
+            key: "Backspace",
+        });
+        assert.containsNone(target, ".o-mail-channel-selector span[title='Mario']");
+
+        await afterNextRender(() => editInput(target, ".o-mail-channel-selector-input", "mario"));
+        await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
+            key: "Enter",
+        });
+        assert.containsOnce(target, ".o-mail-channel-selector span[title='Mario']");
+        assert.containsNone(target, ".o-mail-category-item");
+    }
+);
+
 QUnit.test("can join a chat conversation", async (assert) => {
     const pyEnv = await startServer();
     const resPartnerId = pyEnv["res.partner"].create({
@@ -177,8 +211,7 @@ QUnit.test("can join a chat conversation", async (assert) => {
     assert.containsNone(target, ".o-mail-category-item");
 
     await click(".o-mail-discuss-sidebar i[title='Start a conversation']");
-    await editInput(target, ".o-mail-channel-selector-input", "mario");
-    await nextTick(); // wait for following rendering
+    await afterNextRender(() => editInput(target, ".o-mail-channel-selector-input", "mario"));
     await click(".o-mail-channel-selector-suggestion");
     await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
         key: "Enter",
@@ -263,8 +296,7 @@ QUnit.test("Posting message should transform links.", async (assert) => {
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
     await webClick(target, ".o-mail-composer-send-button");
-    await loadEmoji(); // wait for emoji being loaded (required for rendering)
-    await nextTick(); // wait for following rendering
+    await afterNextRender(() => loadEmoji()); // wait for emoji being loaded (required for rendering)
     assert.containsOnce(target, "a[href='https://www.odoo.com/']", "Message should have a link");
 });
 
@@ -282,8 +314,7 @@ QUnit.test("Posting message should transform relevant data to emoji.", async (as
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test :P :laughing:");
     await webClick(target, ".o-mail-composer-send-button");
-    await loadEmoji(); // wait for emoji being loaded (required for rendering)
-    await nextTick(); // wait for following rendering
+    await afterNextRender(() => loadEmoji()); // wait for emoji being loaded (required for rendering)
     assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
 });
 

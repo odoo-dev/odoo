@@ -488,11 +488,9 @@ export class Messaging {
                 }
                 case "mail.channel/legacy_insert":
                     Thread.insert(this.state, {
-                        ...notif.payload,
+                        id: notif.payload.channel.id,
                         model: "mail.channel",
-                        serverData: {
-                            channel: notif.payload.channel,
-                        },
+                        serverData: notif.payload,
                         type: notif.payload.channel.channel_type,
                     });
                     break;
