@@ -407,3 +407,63 @@ QUnit.test("open 3 different chat windows: not enough screen width", async funct
             .find(".o-mail-composer-textarea")[0]
     );
 });
+
+QUnit.test(
+    "focus next visible chat window when closing current chat window with ESCAPE [REQUIRE FOCUS]",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create([
+            {
+                name: "General",
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            fold_state: "open",
+                            is_minimized: true,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+            },
+            {
+                name: "MyTeam",
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            fold_state: "open",
+                            is_minimized: true,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+            },
+        ]);
+        patchUiSize({ width: 1920 });
+        assert.ok(
+            CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 2 + CHAT_WINDOW_INBETWEEN_WIDTH <
+                1920,
+            "should have enough space to open 2 chat windows simultaneously"
+        );
+        await start();
+        assert.containsN(target, ".o-mail-chat-window .o-mail-composer-textarea", 2);
+
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(MyTeam)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+            .focus();
+        await afterNextRender(() => triggerHotkey("Escape"));
+        assert.containsOnce(target, ".o-mail-chat-window");
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window-header-name:contains(General)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+    }
+);

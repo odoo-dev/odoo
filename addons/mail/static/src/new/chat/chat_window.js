@@ -72,7 +72,7 @@ export class ChatWindow extends Component {
                 ) {
                     return;
                 }
-                this.close();
+                this.close({ escape: true });
                 break;
         }
     }
@@ -109,8 +109,8 @@ export class ChatWindow extends Component {
         );
     }
 
-    close() {
-        this.props.chatWindow.close();
+    close(options) {
+        this.props.chatWindow.close(options);
         this.chatWindowService.notifyState(this.props.chatWindow);
     }
 }

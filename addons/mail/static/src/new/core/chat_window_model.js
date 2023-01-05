@@ -116,7 +116,7 @@ export class ChatWindow {
         });
     }
 
-    close() {
+    close({ escape = false } = {}) {
         const index = this._state.chatWindows.findIndex((c) => c.thread === this.thread);
         if (index > -1) {
             this._state.chatWindows.splice(index, 1);
@@ -124,6 +124,9 @@ export class ChatWindow {
         const thread = this.thread;
         if (thread) {
             thread.state = "closed";
+        }
+        if (escape && this._state.chatWindows.length > 0) {
+            this._state.chatWindows[index - 1].autofocus++;
         }
     }
 
