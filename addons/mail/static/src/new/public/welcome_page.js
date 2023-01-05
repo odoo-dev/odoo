@@ -12,7 +12,7 @@ export class WelcomePage extends Component {
         this.messaging = useMessaging();
         this.rpc = useService("rpc");
         this.state = useState({
-            userName: "",
+            userName: "Guest",
         });
     }
 
