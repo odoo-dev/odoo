@@ -16,7 +16,6 @@ import {
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
@@ -295,8 +294,7 @@ QUnit.test("Posting message should transform links.", async (assert) => {
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
-    await webClick(target, ".o-mail-composer-send-button");
-    await afterNextRender(() => loadEmoji()); // wait for emoji being loaded (required for rendering)
+    await click(target, ".o-mail-composer-send-button");
     assert.containsOnce(target, "a[href='https://www.odoo.com/']", "Message should have a link");
 });
 
@@ -313,8 +311,7 @@ QUnit.test("Posting message should transform relevant data to emoji.", async (as
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test :P :laughing:");
-    await webClick(target, ".o-mail-composer-send-button");
-    await afterNextRender(() => loadEmoji()); // wait for emoji being loaded (required for rendering)
+    await click(target, ".o-mail-composer-send-button");
     assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
 });
 
