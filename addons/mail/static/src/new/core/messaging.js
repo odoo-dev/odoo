@@ -234,7 +234,7 @@ export class Messaging {
             messages.map((messageData) =>
                 Message.insert(this.state, {
                     ...messageData,
-                    body: markup(messageData.body),
+                    body: messageData.body ? markup(messageData.body) : messageData.body,
                     // implicit: failures are sent by the server at
                     // initialization only if the current partner is
                     // author of the message
@@ -388,6 +388,9 @@ export class Messaging {
                         const channel = this.state.threads[createLocalId("mail.channel", id)];
                         Promise.resolve(channel ?? this.thread.joinChat(message.author.id)).then(
                             (channel) => {
+                                if ("parentMessage" in message && message.parentMessage.body) {
+                                    message.parentMessage.body = markup(message.parentMessage.body);
+                                }
                                 const data = Object.assign(message, { body: markup(message.body) });
                                 Message.insert(this.state, data, channel);
                                 if (
@@ -460,7 +463,12 @@ export class Messaging {
                         }
                         const { Message: messageData } = notif.payload;
                         if (messageData) {
-                            Message.insert(this.state, messageData);
+                            Message.insert(this.state, {
+                                ...messageData,
+                                body: messageData.body
+                                    ? markup(messageData.body)
+                                    : messageData.body,
+                            });
                         }
                         const { "res.users.settings": userSettingsData } = notif.payload;
                         if (userSettingsData) {

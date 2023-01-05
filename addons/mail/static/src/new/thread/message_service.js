@@ -10,6 +10,8 @@ import { createLocalId } from "../core/thread_model.create_local_id";
 const commandRegistry = registry.category("mail.channel_commands");
 
 export class MessageService {
+    nextId = 0;
+
     constructor(env, state, rpc, orm, presence, thread) {
         this.env = env;
         this.state = state;
@@ -67,6 +69,11 @@ export class MessageService {
             );
         }
         const data = await this.rpc("/mail/message/post", params);
+        if ("parentMessage" in data) {
+            data.parentMessage.body = data.parentMessage.body
+                ? markup(data.parentMessage.body)
+                : data.parentMessage.body;
+        }
         const message = Message.insert(
             this.state,
             Object.assign(data, { body: markup(data.body) }),

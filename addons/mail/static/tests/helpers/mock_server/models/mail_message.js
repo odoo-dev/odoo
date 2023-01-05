@@ -238,6 +238,7 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 notifications.map((notification) => notification.id)
             );
             return {
+                body: message.body,
                 date: message.date,
                 id: message.id,
                 message_type: message.message_type,

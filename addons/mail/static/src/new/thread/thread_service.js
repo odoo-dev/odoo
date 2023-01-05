@@ -141,11 +141,18 @@ export class ThreadService {
                 throw new Error("Unknown thread type");
         }
         thread.status = "ready";
-        const messages = rawMessages
-            .reverse()
-            .map((data) =>
-                Message.insert(this.state, Object.assign(data, { body: markup(data.body) }), thread)
+        const messages = rawMessages.reverse().map((data) => {
+            if ("parentMessage" in data) {
+                data.parentMessage.body = data.parentMessage.body
+                    ? markup(data.parentMessage.body)
+                    : data.parentMessage.body;
+            }
+            return Message.insert(
+                this.state,
+                Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
+                thread
             );
+        });
         return messages;
     }
 
