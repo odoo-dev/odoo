@@ -887,6 +887,43 @@ QUnit.test("composer: add an attachment", async function (assert) {
     );
 });
 
+QUnit.test("composer: add an attachment in reply to message in history", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "General" });
+    const mailMessageId1 = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        history_partner_ids: [pyEnv.currentPartnerId],
+        res_id: mailChannelId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId1,
+        notification_type: "inbox",
+        res_partner_id: pyEnv.currentPartnerId,
+        is_read: true,
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: "mail.box_history" },
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Reply']");
+    const file = await createFile({
+        content: "hello, world",
+        contentType: "text/plain",
+        name: "text.txt",
+    });
+    await afterNextRender(() =>
+        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
+    );
+    assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card"
+    );
+});
+
 QUnit.skipRefactoring(
     "composer: send button is disabled if attachment upload is not finished",
     // FIXME: upload uses XHR, so not properly testable.

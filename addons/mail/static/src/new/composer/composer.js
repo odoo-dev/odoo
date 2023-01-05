@@ -49,11 +49,11 @@ export class Composer extends Component {
     static template = "mail.composer";
 
     setup() {
+        this.messaging = useMessaging();
         this.attachmentUploader = useAttachmentUploader(
-            this.props.composer.thread,
+            this.messageToReplyTo?.originThread ?? this.props.composer.thread,
             this.props.composer.message
         );
-        this.messaging = useMessaging();
         this.messageService = useState(useService("mail.message"));
         this.ref = useRef("textarea");
         this.typingNotified = false;
@@ -167,15 +167,18 @@ export class Composer extends Component {
     }
 
     get hasReplyToHeader() {
-        const { messageToReplyTo } = this.messaging.state.discuss;
         const thread = this.props.composer.thread;
-        if (!messageToReplyTo || !thread) {
+        if (!this.messageToReplyTo || !thread) {
             return false;
         }
         return (
-            messageToReplyTo.resId === thread.id ||
-            (thread.type === "mailbox" && thread.messages.includes(messageToReplyTo.id))
+            this.messageToReplyTo.resId === thread.id ||
+            (thread.type === "mailbox" && thread.messages.includes(this.messageToReplyTo.id))
         );
+    }
+
+    get messageToReplyTo() {
+        return this.messaging.state.discuss.messageToReplyTo;
     }
 
     get placeholder() {
