@@ -74,6 +74,18 @@ export class ChatWindow extends Component {
                 }
                 this.close({ escape: true });
                 break;
+            case "Tab": {
+                const index = this.chatWindowService.visible.findIndex(
+                    (cw) => cw === this.props.chatWindow
+                );
+                if (index === 0) {
+                    this.chatWindowService.visible[this.chatWindowService.visible.length - 1]
+                        .autofocus++;
+                } else {
+                    this.chatWindowService.visible[index - 1].autofocus++;
+                }
+                break;
+            }
         }
     }
 

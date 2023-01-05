@@ -467,3 +467,151 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test("chat window: switch on TAB", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create([{ name: "channel1" }, { name: "channel2" }]);
+    patchUiSize({ width: 1920 });
+    assert.ok(
+        CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 2 + CHAT_WINDOW_INBETWEEN_WIDTH < 1920,
+        "should have enough space to open 2 chat windows simultaneously"
+    );
+    await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-notification-item:contains(channel1)");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.containsOnce(target, ".o-mail-chat-window-header-name:contains(channel1)");
+    assert.strictEqual(
+        document.activeElement,
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(channel1)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+    );
+
+    await afterNextRender(() => triggerHotkey("Tab"));
+    assert.strictEqual(
+        document.activeElement,
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(channel1)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+    );
+
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-notification-item:contains(channel2)");
+    assert.containsN(target, ".o-mail-chat-window", 2);
+    assert.containsOnce(target, ".o-mail-chat-window-header-name:contains(channel1)");
+    assert.containsOnce(target, ".o-mail-chat-window-header-name:contains(channel2)");
+    assert.strictEqual(
+        document.activeElement,
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(channel2)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+    );
+
+    await afterNextRender(() => triggerHotkey("Tab"));
+    assert.containsN(target, ".o-mail-chat-window", 2);
+    assert.strictEqual(
+        document.activeElement,
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(channel1)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+    );
+});
+
+QUnit.test(
+    "chat window: TAB cycle with 3 open chat windows [REQUIRE FOCUS]",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create([
+            {
+                name: "General",
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            fold_state: "open",
+                            is_minimized: true,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+            },
+            {
+                name: "MyTeam",
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            fold_state: "open",
+                            is_minimized: true,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+            },
+            {
+                name: "MyProject",
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            fold_state: "open",
+                            is_minimized: true,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+            },
+        ]);
+        patchUiSize({ width: 1920 });
+        assert.ok(
+            CHAT_WINDOW_END_GAP_WIDTH * 3 +
+                CHAT_WINDOW_WIDTH * 3 +
+                CHAT_WINDOW_INBETWEEN_WIDTH * 2 <
+                1920,
+            "should have enough space to open 3 chat windows simultaneously"
+        );
+        await start();
+        // FIXME: assumes ordering: MyProject, MyTeam, General
+        assert.containsN(target, ".o-mail-chat-window .o-mail-composer-textarea", 3);
+
+        $(target)
+            .find(".o-mail-chat-window-header-name:contains(MyProject)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+            .focus();
+        await afterNextRender(() => triggerHotkey("Tab"));
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window-header-name:contains(MyTeam)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+
+        await afterNextRender(() => triggerHotkey("Tab"));
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window-header-name:contains(General)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+
+        await afterNextRender(() => triggerHotkey("Tab"));
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window-header-name:contains(MyProject)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+    }
+);

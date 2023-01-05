@@ -39,24 +39,22 @@
                 <i class="fa fa-close"></i>
             </div>
         </div>
-        <t t-if="!props.chatWindow.folded">
-            <div class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
-                <t t-if="thread">
-                    <CallSettings t-if="state.activeMode === 'in-settings'"/>
-                    <ChannelMemberList t-elif="state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
-                    <ChannelInvitationForm t-elif="state.activeMode === 'add-users'" thread="thread" chatState="state"/>
-                    <t t-else="">
-                        <Call t-if="Object.keys(thread.rtcSessions).length > 0" thread="thread"/>
-                        <Thread thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageHighlight="messageHighlight"/>
-                        <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" messageEdition="messageEdition" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
-                    </t>
+        <div t-if="!props.chatWindow.folded" class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
+            <t t-if="thread">
+                <CallSettings t-if="state.activeMode === 'in-settings'"/>
+                <ChannelMemberList t-elif="state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
+                <ChannelInvitationForm t-elif="state.activeMode === 'add-users'" thread="thread" chatState="state"/>
+                <t t-else="">
+                    <Call t-if="Object.keys(thread.rtcSessions).length > 0" thread="thread"/>
+                    <Thread thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageHighlight="messageHighlight"/>
+                    <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" messageEdition="messageEdition" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
                 </t>
-                <div t-else="" class="d-flex align-items-center m-3">
-                    <span class="flex-shrink-0 me-2">To :</span>
-                    <ChannelSelector category="messaging.state.discuss.chats" onValidate="() => chatWindowService.closeNewMessage()" multiple="false" autofocus="true"/>
-                </div>
+            </t>
+            <div t-else="" class="d-flex align-items-center m-3">
+                <span class="flex-shrink-0 me-2">To :</span>
+                <ChannelSelector category="messaging.state.discuss.chats" onValidate="() => chatWindowService.closeNewMessage()" multiple="false" autofocus="true"/>
             </div>
-        </t>
+        </div>
     </div>
 </t>
 
