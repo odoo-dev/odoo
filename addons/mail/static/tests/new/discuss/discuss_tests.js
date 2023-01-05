@@ -9,7 +9,6 @@ import {
     startServer,
 } from "@mail/../tests/helpers/test_utils";
 import {
-    click as webClick,
     editInput,
     getFixture,
     nextTick,
@@ -68,15 +67,15 @@ QUnit.test("can change the thread name of #general", async (assert) => {
     });
     await openDiscuss();
     assert.containsOnce(target, "input.o-mail-discuss-thread-name");
-    const threadNameElement = target.querySelector("input.o-mail-discuss-thread-name");
+    const $name = $(target).find("input.o-mail-discuss-thread-name");
 
-    await webClick(threadNameElement);
-    assert.strictEqual(threadNameElement.value, "general");
+    click($name).catch(() => {});
+    assert.strictEqual($name.val(), "general");
     await editInput(target, "input.o-mail-discuss-thread-name", "special");
     await triggerEvent(target, "input.o-mail-discuss-thread-name", "keydown", {
         key: "Enter",
     });
-    assert.strictEqual(threadNameElement.value, "special");
+    assert.strictEqual($name.val(), "special");
 
     assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_rename"]);
 });
@@ -101,17 +100,15 @@ QUnit.test("can change the thread description of #general", async (assert) => {
     await openDiscuss();
 
     assert.containsOnce(target, "input.o-mail-discuss-thread-description");
-    const threadDescriptionElement = target.querySelector(
-        "input.o-mail-discuss-thread-description"
-    );
+    const $description = $(target).find("input.o-mail-discuss-thread-description");
 
-    await webClick(threadDescriptionElement);
-    assert.strictEqual(threadDescriptionElement.value, "General announcements...");
+    click($description).then(() => {});
+    assert.strictEqual($description.val(), "General announcements...");
     await editInput(target, "input.o-mail-discuss-thread-description", "I want a burger today!");
     await triggerEvent(target, "input.o-mail-discuss-thread-description", "keydown", {
         key: "Enter",
     });
-    assert.strictEqual(threadDescriptionElement.value, "I want a burger today!");
+    assert.strictEqual($description.val(), "I want a burger today!");
 
     assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_change_description"]);
 });
@@ -294,7 +291,7 @@ QUnit.test("Posting message should transform links.", async (assert) => {
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
-    await click(target, ".o-mail-composer-send-button");
+    await click(".o-mail-composer-send-button");
     assert.containsOnce(target, "a[href='https://www.odoo.com/']", "Message should have a link");
 });
 
@@ -311,7 +308,7 @@ QUnit.test("Posting message should transform relevant data to emoji.", async (as
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test :P :laughing:");
-    await click(target, ".o-mail-composer-send-button");
+    await click(".o-mail-composer-send-button");
     assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
 });
 
@@ -338,12 +335,12 @@ QUnit.test(
         await openDiscuss();
         // write 1 message
         await editInput(target, ".o-mail-composer-textarea", "abc");
-        await webClick(target, ".o-mail-composer button[data-action='send']");
+        await click(".o-mail-composer button[data-action='send']");
 
         // write another message, but /mail/message/post is delayed by promise
         flag = true;
         await editInput(target, ".o-mail-composer-textarea", "def");
-        await webClick(target, ".o-mail-composer button[data-action='send']");
+        await click(".o-mail-composer button[data-action='send']");
         assert.containsN(target, ".o-mail-message", 2);
         assert.containsN(target, ".o-mail-msg-header", 1); // just 1, because 2nd message is squashed
     }
@@ -366,10 +363,8 @@ QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
         res_id: testPartnerId,
         res_model: "res.partner",
     });
-    assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer");
-    await webClick(
-        target.querySelector(".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer")
-    );
+    assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container img");
+    await click(".o-mail-message-sidebar .o-mail-avatar-container img");
     assert.containsOnce(target, ".o-mail-chat-window-header-name");
     assert.ok(
         target.querySelector(".o-mail-chat-window-header-name").textContent.includes("testPartner")

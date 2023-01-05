@@ -15,13 +15,7 @@ import {
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 const { inputFiles } = file;
 
-import {
-    click as webClick,
-    getFixture,
-    nextTick,
-    patchWithCleanup,
-    triggerHotkey,
-} from "@web/../tests/helpers/utils";
+import { getFixture, nextTick, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
 import { Composer } from "@mail/new/composer/composer";
 
 let target;
@@ -377,8 +371,8 @@ QUnit.test(
         await openDiscuss();
         await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
 
-        await webClick($(target).find("span:contains('epic-shrek-lovers')")[0]);
-        await webClick($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
+        await click($(target).find("span:contains('epic-shrek-lovers')"));
+        await click($(target).find("span:contains('minigolf-galaxy-iv')"));
         assert.strictEqual(
             target.querySelector(".o-mail-composer-textarea").value,
             "According to all known laws of aviation,"
