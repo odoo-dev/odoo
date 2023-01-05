@@ -3,7 +3,7 @@
 
 <t t-name="mail.message" owl="1">
     <div class="o-mail-message position-relative py-1 mt-1 px-3" t-att-class="{
-            'o-mail-is-author': message.isAuthoredByCurrentUser,
+            'o-mail-is-author': message.isSelfAuthored,
             'o-highlighted bg-view shadow-lg': props.highlighted,
             'opacity-50': props.grayedOut,
         }"
@@ -21,9 +21,17 @@
                         t-on-click="openChatAvatar" />
                     <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>
                 </div>
-                <small t-elif="!message.isTransient" class="o-mail-message-date text-muted opacity-0 ms-2" t-att-title="message.dateTimeStr">
-                    <t t-esc="message.dateTimeSimpleStr"/>
-                </small>
+                <t t-elif="!message.isTransient">
+                    <small class="o-mail-message-date text-muted opacity-0 ms-2" t-att-title="message.dateTimeStr">
+                        <t t-esc="message.dateTimeSimpleStr"/>
+                    </small>
+                    <div t-att-class="{ 'position-absolute bottom-0 mb-1': !env.inChatter }">
+                        <MessageSeenIndicator
+                            t-if="props.message.isSelfAuthored and props.thread"
+                            message="props.message"
+                            thread="props.thread"/>
+                    </div>
+                </t>
             </div>
             <div class="flex-grow-1">
                 <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
@@ -32,11 +40,15 @@
                         <t t-esc="message.author.name"/>
                         </strong>
                     </span>
-                    <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50" t-att-title="message.dateTimeStr">
+                    <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50" t-att-class="{ 'me-2': !isAlignedRight }" t-att-title="message.dateTimeStr">
                         <t t-if="shouldDisplayAuthorName">-</t>
                         <RelativeTime datetime="message.dateTime" />
                     </small>
-
+                    <MessageSeenIndicator
+                        t-if="props.message.isSelfAuthored and !props.isSquashed and props.thread"
+                        className="'ms-1'"
+                        message="props.message"
+                        thread="props.thread"/>
                     <small t-if="!isOriginThread and !message.isTransient" t-on-click.prevent="openRecord" class="o-mail-message-recod-name ms-1 text-500">
                         <t t-if="message.resModel !== 'mail.channel'">
                             on <a t-att-href="message.url"><t t-esc="message.originThread?.displayName"/></a>
@@ -69,8 +81,8 @@
                     <t t-if="message.type !== 'notification' and !message.isTransient and !message.isBodyEmpty">
                         <div class="o-mail-message-bubble-wrap position-relative">
                             <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
-                                    'bg-info-light border-info': !message.isAuthoredByCurrentUser,
-                                    'bg-success-light border-success opacity-25': message.isAuthoredByCurrentUser,
+                                    'bg-info-light border-info': !message.isSelfAuthored,
+                                    'bg-success-light border-success opacity-25': message.isSelfAuthored,
                                 }"/>
                             <div class="position-relative" t-att-class="{
                                 'p-1': message.isNote,
@@ -122,8 +134,8 @@
                 </div>
                 <div t-else="" class="position-relative">
                     <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
-                            'bg-info-light border-info': !message.isAuthoredByCurrentUser,
-                            'bg-success-light border-success opacity-25': message.isAuthoredByCurrentUser,
+                            'bg-info-light border-info': !message.isSelfAuthored,
+                            'bg-success-light border-success opacity-25': message.isSelfAuthored,
                         }"/>
                     <div class="o-mail-message-editable-content position-relative flex-grow-1" t-att-class="{
                         'p-1': message.isNote,

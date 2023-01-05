@@ -18,6 +18,7 @@ import { MessageReactions } from "@mail/new/thread/message_reactions";
 import { useEmojiPicker } from "../composer/emoji_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { MessageNotificationPopover } from "./message_notification_popover";
+import { MessageSeenIndicator } from "./message_seen_indicator";
 
 /**
  * @typedef {Object} Props
@@ -37,6 +38,7 @@ export class Message extends Component {
         LinkPreviewList,
         MessageInReplyTo,
         MessageReactions,
+        MessageSeenIndicator,
         PartnerImStatus,
         RelativeTime,
     };
@@ -169,7 +171,7 @@ export class Message extends Component {
         if (!this.message.author) {
             return false;
         }
-        if (this.message.isAuthoredByCurrentUser) {
+        if (this.message.isSelfAuthored) {
             return false;
         }
         return this.props.thread.chatPartnerId !== this.message.author.partner?.id;
@@ -202,7 +204,7 @@ export class Message extends Component {
         if (!this.env.inChatWindow) {
             return true;
         }
-        if (this.message.isAuthoredByCurrentUser) {
+        if (this.message.isSelfAuthored) {
             return false;
         }
         if (this.props.thread.type === "chat") {

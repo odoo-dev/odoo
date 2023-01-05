@@ -444,6 +444,21 @@ export class ThreadService {
                     serverData.invitedPartners &&
                     serverData.invitedPartners.map((partner) => this.partner.insert(partner));
             }
+            if ("seen_partners_info" in serverData) {
+                thread.seenInfos = serverData.seen_partners_info.map(
+                    ({ fetched_message_id, partner_id, seen_message_id }) => {
+                        return {
+                            lastFetchedMessage: fetched_message_id
+                                ? this.message.insert({ id: fetched_message_id })
+                                : undefined,
+                            lastSeenMessage: seen_message_id
+                                ? this.message.insert({ id: seen_message_id })
+                                : undefined,
+                            partner: this.partner.insert({ id: partner_id }),
+                        };
+                    }
+                );
+            }
             thread.canLeave =
                 ["channel", "group"].includes(thread.type) &&
                 !thread.message_needaction_counter &&

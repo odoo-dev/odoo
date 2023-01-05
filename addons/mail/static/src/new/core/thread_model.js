@@ -51,6 +51,14 @@ export class Thread {
     _store;
     /** @type {string} */
     defaultDisplayMode;
+    /**
+     * @typedef SeenInfo
+     * @property {{id: number|undefined}} lastFetchedMessage
+     * @property {{id: number|undefined}} lastSeenMessage
+     * @property {{id: number}} partner
+     */
+    /** @type {SeenInfo[]} */
+    seenInfos = [];
 
     constructor(store, data) {
         Object.assign(this, {
@@ -123,7 +131,7 @@ export class Thread {
     get lastEditableMessageOfCurrentUser() {
         const messages = this.messages.map((id) => this._store.messages[id]);
         const editableMessagesOfCurrentUser = messages.filter(
-            (message) => message.isAuthoredByCurrentUser && message.canBeEdited
+            (message) => message.isSelfAuthored && message.canBeEdited
         );
         if (editableMessagesOfCurrentUser.length > 0) {
             return editableMessagesOfCurrentUser.at(-1);
@@ -193,6 +201,37 @@ export class Thread {
             Number.isInteger(messageId)
         );
         return this._store.messages[oldestNonTransientMessageId];
+    }
+
+    get nonTransientMessages() {
+        const messages = this.messages.map((id) => this._store.messages[id]);
+        return messages.filter((message) => !message.isTransient);
+    }
+
+    get lastSelfMessageSeenByEveryone() {
+        const otherSeenInfos = [...this.seenInfos].filter(
+            (partnerSeenInfo) => partnerSeenInfo.partner.id !== this._store.user.partnerId
+        );
+        if (otherSeenInfos.length === 0) {
+            return false;
+        }
+        const otherLastSeenMessageIds = otherSeenInfos
+            .filter((partnerSeenInfo) => partnerSeenInfo.lastSeenMessage)
+            .map((partnerSeenInfo) => partnerSeenInfo.lastSeenMessage.id);
+        if (otherLastSeenMessageIds.length === 0) {
+            return false;
+        }
+        const lastMessageSeenByAllId = Math.min(...otherLastSeenMessageIds);
+        const orderedSelfSeenMessages = this.nonTransientMessages.filter((message) => {
+            return (
+                message.author.partner?.id === this._store.user.partnerId &&
+                message.id <= lastMessageSeenByAllId
+            );
+        });
+        if (!orderedSelfSeenMessages || orderedSelfSeenMessages.length === 0) {
+            return false;
+        }
+        return orderedSelfSeenMessages.slice().pop();
     }
 
     get onlineMembers() {

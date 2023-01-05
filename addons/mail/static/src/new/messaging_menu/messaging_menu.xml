@@ -35,7 +35,7 @@
                                 <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.partners[preview.chatPartnerId]"/>
                             </t>
                             <t t-if="preview.mostRecentMsg" t-set-slot="body-icon">
-                                <t t-if="preview.mostRecentMsg.isAuthoredByCurrentUser">
+                                <t t-if="preview.mostRecentMsg.isSelfAuthored">
                                     <i class="fa fa-mail-reply me-1"/>You
                                  </t>
                                  <t t-else="">

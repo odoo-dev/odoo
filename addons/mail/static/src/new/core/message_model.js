@@ -65,7 +65,7 @@ export class Message {
         if (this.isEmpty) {
             return false;
         }
-        if (!this._store.user.isAdmin && !this.isAuthoredByCurrentUser) {
+        if (!this._store.user.isAdmin && !this.isSelfAuthored) {
             return false;
         }
         if (this.type !== "comment") {
@@ -94,7 +94,7 @@ export class Message {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
     }
 
-    get isAuthoredByCurrentUser() {
+    get isSelfAuthored() {
         if (!this.author) {
             return false;
         }
