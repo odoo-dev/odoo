@@ -229,6 +229,7 @@ export function useAttachmentUploader(pThread, message) {
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
     const messaging = useService("mail.messaging");
+    const store = useService("mail.store");
     let abortByUploadId = {};
     let deferredByUploadId = {};
     const uploadingAttachmentIds = new Set();
@@ -291,7 +292,7 @@ export function useAttachmentUploader(pThread, message) {
         }
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
-        const originThread = Thread.insert(messaging.state, { model: threadModel, id: threadId });
+        const originThread = Thread.insert(store, { model: threadModel, id: threadId });
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
         state.attachments.push({
             extension: upload.title.split(".").pop(),
@@ -318,7 +319,7 @@ export function useAttachmentUploader(pThread, message) {
         }
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
-        const originThread = messaging.state.threads[createLocalId(threadModel, threadId)];
+        const originThread = store.threads[createLocalId(threadModel, threadId)];
         const attachment = {
             ...response,
             extension: upload.title.split(".").pop(),

@@ -52,6 +52,7 @@ export class Chatter extends Component {
         this.messaging = useMessaging();
         this.activity = useState(useService("mail.activity"));
         this.chatter = useState(useService("mail.chatter"));
+        this.store = useService("mail.store");
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
@@ -97,7 +98,7 @@ export class Chatter extends Component {
      * @returns {import("@mail/new/core/activity_model").Activity[]}
      */
     get activities() {
-        return Object.values(this.messaging.state.activities).filter((activity) => {
+        return Object.values(this.store.activities).filter((activity) => {
             return (
                 activity.res_model === this.props.resModel && activity.res_id === this.props.resId
             );
@@ -141,7 +142,7 @@ export class Chatter extends Component {
                     if (activity.note) {
                         activity.note = markup(activity.note);
                     }
-                    existingIds.add(ActivityModel.insert(this.messaging.state, activity).id);
+                    existingIds.add(ActivityModel.insert(this.store, activity).id);
                 }
                 for (const activity of this.activities) {
                     if (!existingIds.has(activity.id)) {
@@ -151,13 +152,13 @@ export class Chatter extends Component {
             }
             if ("attachments" in result) {
                 this.state.attachments = result.attachments.map((attachment) =>
-                    Attachment.insert(this.messaging.state, attachment)
+                    Attachment.insert(this.store, attachment)
                 );
                 this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {
                 for (const followerData of result.followers) {
-                    Follower.insert(this.messaging.state, {
+                    Follower.insert(this.store, {
                         followedThread: this.thread,
                         ...followerData,
                     });
@@ -204,7 +205,7 @@ export class Chatter extends Component {
 
     async onClickFollow() {
         await this.orm.call(this.props.resModel, "message_subscribe", [[this.props.resId]], {
-            partner_ids: [this.messaging.state.user.partnerId],
+            partner_ids: [this.store.user.partnerId],
         });
         this.onFollowerChanged();
     }

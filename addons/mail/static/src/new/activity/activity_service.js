@@ -3,15 +3,11 @@
 import { _t } from "@web/core/l10n/translation";
 
 export class ActivityService {
-    constructor(env, state, orm) {
+    constructor(env, store, orm) {
         this.env = env;
-        this.state = state;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
         this.orm = orm;
-        Object.assign(this.state, {
-            /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
-            activities: {},
-            activityCounter: 0,
-        });
     }
 
     /**
@@ -52,8 +48,8 @@ export class ActivityService {
 }
 
 export const activityService = {
-    dependencies: ["mail.state", "orm"],
-    start(env, { "mail.state": state, orm }) {
-        return new ActivityService(env, state, orm);
+    dependencies: ["mail.store", "orm"],
+    start(env, { "mail.store": store, orm }) {
+        return new ActivityService(env, store, orm);
     },
 };

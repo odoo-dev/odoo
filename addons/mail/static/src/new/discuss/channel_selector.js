@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { NavigableList } from "../composer/navigable_list";
 import { useService } from "@web/core/utils/hooks";
@@ -19,6 +19,7 @@ export class ChannelSelector extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.orm = useService("orm");
         this.state = useState({
@@ -65,7 +66,7 @@ export class ChannelSelector extends Component {
                     this.state.selectedPartners,
                 ]);
                 const suggestions = results.map((data) => {
-                    Partner.insert(this.messaging.state, data);
+                    Partner.insert(this.store, data);
                     return {
                         classList: "o-mail-channel-selector-suggestion",
                         label: data.name,
@@ -116,9 +117,7 @@ export class ChannelSelector extends Component {
                     .joinChat(selectedPartners[0])
                     .then((chat) => this.threadService.open(chat, this.env.inChatWindow));
             } else {
-                const partners_to = [
-                    ...new Set([this.messaging.state.user.partnerId, ...selectedPartners]),
-                ];
+                const partners_to = [...new Set([this.store.user.partnerId, ...selectedPartners])];
                 await this.threadService.createGroupChat({ partners_to });
             }
         }
@@ -164,7 +163,7 @@ export class ChannelSelector extends Component {
     get tagsList() {
         const res = [];
         for (const partnerId of this.state.selectedPartners) {
-            const partner = this.messaging.state.partners[partnerId];
+            const partner = this.store.partners[partnerId];
             res.push({
                 id: partner.id,
                 text: partner.name,

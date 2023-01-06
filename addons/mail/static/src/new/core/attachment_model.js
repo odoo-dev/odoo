@@ -3,7 +3,8 @@
 import { Thread } from "./thread_model";
 
 export class Attachment {
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
     accessToken;
     checksum;
     extension;
@@ -16,10 +17,10 @@ export class Attachment {
     type;
     url;
 
-    static insert(state, data) {
+    static insert(store, data) {
         const attachment = new Attachment();
 
-        attachment._state = state;
+        attachment._store = store;
 
         if ("id" in data) {
             attachment.id = data.id;
@@ -48,8 +49,8 @@ export class Attachment {
         }
         if ("originThread" in data) {
             attachment.originThread = Array.isArray(data.originThread)
-                ? Thread.insert(attachment._state, data.originThread[0][1])
-                : Thread.insert(attachment._state, data.originThread);
+                ? Thread.insert(attachment._store, data.originThread[0][1])
+                : Thread.insert(attachment._store, data.originThread);
         }
         return attachment;
     }

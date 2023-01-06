@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "@mail/new/core/messaging_hook";
+import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 
 import { Component } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -13,6 +13,7 @@ export class ActivityMenu extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.action = useService("action");
         this.userId = useService("user").userId;
         this.fetchSystrayActivities();
@@ -24,8 +25,8 @@ export class ActivityMenu extends Component {
         for (const group of groups) {
             total += group.total_count;
         }
-        this.messaging.state.activityCounter = total;
-        this.messaging.state.activityGroups = groups;
+        this.store.activityCounter = total;
+        this.store.activityGroups = groups;
     }
 
     onBeforeOpen() {

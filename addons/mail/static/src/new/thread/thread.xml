@@ -9,7 +9,7 @@
                 <t t-set="prevMsg" t-value="0"/>
                 <t t-if="props.thread.loadMore and props.order === 'asc' and !props.thread.isTransient" t-call="mail.thread.load_more"/>
                 <t t-foreach="props.order === 'asc' ? props.thread.messages : [...props.thread.messages].reverse()" t-as="messageId" t-key="messageId">
-                    <t t-set="msg" t-value="messaging.state.messages[messageId]"/>
+                    <t t-set="msg" t-value="store.messages[messageId]"/>
                     <t t-if="!msg.isEmpty and msg.dateDay !== currentDay">
                         <div class="o-mail-thread-date-separator d-flex fw-bolder pt-4">
                             <hr class="flex-grow-1 border-top"/>

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, onMounted, onWillStart, onWillUpdateProps, useRef, useState } from "@odoo/owl";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import {
     useAutoScroll,
     useScrollPosition,
@@ -23,6 +23,7 @@ export class Thread extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         if (!this.env.inChatter) {
             useAutoScroll("messages", () => {
@@ -95,7 +96,7 @@ export class Thread extends Component {
     }
 
     isGrayedOut(msg) {
-        const { messageToReplyTo } = this.messaging.state.discuss;
+        const { messageToReplyTo } = this.store.discuss;
         return (
             messageToReplyTo &&
             messageToReplyTo.id !== msg.id &&

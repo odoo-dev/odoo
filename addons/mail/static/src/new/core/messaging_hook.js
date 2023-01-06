@@ -9,3 +9,10 @@ import { useService } from "@web/core/utils/hooks";
 export function useMessaging() {
     return useState(useService("mail.messaging"));
 }
+
+/**
+ *  @returns {import("@mail/new/core/store_service").Store}
+ */
+export function useStore() {
+    return useState(useService("mail.store"));
+}

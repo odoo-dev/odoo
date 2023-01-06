@@ -19,26 +19,26 @@ export class Follower {
     isActive;
     /** @type {import("@mail/new/core/partner_model").Partner} */
     partner;
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {import("@mail/new/core/follower_model").Data} data
      * @returns {import("@mail/new/core/follower_model").Follower}
      */
-    static insert(state, data) {
-        let follower = state.followers[data.id];
+    static insert(store, data) {
+        let follower = store.followers[data.id];
         if (!follower) {
-            state.followers[data.id] = new Follower();
-            follower = state.followers[data.id];
+            store.followers[data.id] = new Follower();
+            follower = store.followers[data.id];
         }
         Object.assign(follower, {
             followedThread: data.followedThread,
             id: data.id,
             isActive: data.is_active,
-            partner: Partner.insert(state, data.partner),
-            _state: state,
+            partner: Partner.insert(store, data.partner),
+            _store: store,
         });
         if (!follower.followedThread.followers.includes(follower)) {
             follower.followedThread.followers.push(follower);
@@ -51,7 +51,7 @@ export class Follower {
         if (index !== -1) {
             this.followedThread.followers.splice(index, 1);
         }
-        delete this._state.followers[this.id];
+        delete this._store.followers[this.id];
     }
 
     /**
@@ -59,7 +59,7 @@ export class Follower {
      */
     get isEditable() {
         const hasWriteAccess = this.followedThread ? this.followedThread.hasWriteAccess : false;
-        return this._state.user.partnerId === this.partner.id
+        return this._store.user.partnerId === this.partner.id
             ? this.followedThread.hasReadAccess
             : hasWriteAccess;
     }

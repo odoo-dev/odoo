@@ -3,36 +3,35 @@
 import { ChatWindow } from "../core/chat_window_model";
 
 class ChatWindowService {
-    constructor(env, state, orm) {
+    constructor(env, store, orm) {
         this.env = env;
-        this.state = state;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
         this.orm = orm;
-        /** @type {import("@mail/new/core/chat_window_model").ChatWindow[]} */
-        this.state.chatWindows = [];
     }
 
     openNewMessage() {
-        if (this.state.chatWindows.some(({ thread }) => !thread)) {
+        if (this.store.chatWindows.some(({ thread }) => !thread)) {
             // New message chat window is already opened.
             return;
         }
-        ChatWindow.insert(this.state);
+        ChatWindow.insert(this.store);
     }
 
     closeNewMessage() {
-        this.state.chatWindows.find(({ thread }) => !thread)?.close();
+        this.store.chatWindows.find(({ thread }) => !thread)?.close();
     }
 
     get visible() {
-        return ChatWindow.visible(this.state);
+        return ChatWindow.visible(this.store);
     }
 
     get hidden() {
-        return ChatWindow.hidden(this.state);
+        return ChatWindow.hidden(this.store);
     }
 
     get maxVisible() {
-        return ChatWindow.maxVisible(this.state);
+        return ChatWindow.maxVisible(this.store);
     }
 
     notifyState(chatWindow) {
@@ -48,8 +47,8 @@ class ChatWindowService {
 }
 
 export const chatWindowService = {
-    dependencies: ["mail.state", "orm"],
-    start(env, { "mail.state": state, orm }) {
-        return new ChatWindowService(env, state, orm);
+    dependencies: ["mail.store", "orm"],
+    start(env, { "mail.store": store, orm }) {
+        return new ChatWindowService(env, store, orm);
     },
 };

@@ -11,21 +11,21 @@ export class MessageReactions {
     partnerIds = [];
     /** @type {number} **/
     messageId;
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Object} data
      * @returns {MessageReactions}
      */
-    static insert(state, data) {
-        let reaction = state.messages[data.message.id]?.reactions.find(
+    static insert(store, data) {
+        let reaction = store.messages[data.message.id]?.reactions.find(
             ({ content }) => content === data.content
         );
         if (!reaction) {
             reaction = new MessageReactions();
-            reaction._state = state;
+            reaction._store = store;
         }
         const partnerIdsToUnlink = new Set();
         const alreadyKnownPartnerIds = new Set(reaction.partnerIds);
@@ -33,7 +33,7 @@ export class MessageReactions {
             const [command, partnerData] = Array.isArray(rawPartner)
                 ? rawPartner
                 : ["insert", rawPartner];
-            const partnerId = Partner.insert(state, partnerData).id;
+            const partnerId = Partner.insert(store, partnerData).id;
             if (command === "insert" && !alreadyKnownPartnerIds.has(partnerId)) {
                 reaction.partnerIds.push(partnerId);
             } else if (command !== "insert") {
@@ -50,6 +50,6 @@ export class MessageReactions {
     }
 
     get partners() {
-        return this.partnerIds.map((id) => this._state.partners[id]);
+        return this.partnerIds.map((id) => this._store.partners[id]);
     }
 }

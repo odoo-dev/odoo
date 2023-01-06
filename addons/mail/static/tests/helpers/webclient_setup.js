@@ -27,7 +27,7 @@ import { soundEffects } from "@mail/new/core/sound_effects_service";
 import { userSettingsService } from "@mail/new/core/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/suggestion/suggestion_service";
-import { stateService } from "@mail/new/core/state_service";
+import { storeService } from "@mail/new/core/store_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
@@ -103,7 +103,7 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         im_status: imStatusService,
         effect: effectService,
         "mail.suggestion": suggestionService,
-        "mail.state": stateService,
+        "mail.store": storeService,
         "mail.activity": activityService,
         "mail.chatter": chatterService,
         "mail.thread": threadService,

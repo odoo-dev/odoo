@@ -53,17 +53,17 @@ export class Thread {
     /** @type {ScrollPosition} */
     scrollPosition = new ScrollPosition();
     typingMemberIds = [];
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
     /** @type {string} */
     defaultDisplayMode;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Object} data
      * @returns {Thread}
      */
-    static insert(state, data) {
+    static insert(store, data) {
         if (!("id" in data)) {
             throw new Error("Cannot insert thread: id is missing in data");
         }
@@ -71,30 +71,30 @@ export class Thread {
             throw new Error("Cannot insert thread: model is missing in data");
         }
         const localId = createLocalId(data.model, data.id);
-        if (localId in state.threads) {
-            const thread = state.threads[localId];
+        if (localId in store.threads) {
+            const thread = store.threads[localId];
             thread.update(data);
             return thread;
         }
-        const thread = new Thread(state, data);
+        const thread = new Thread(store, data);
         // return reactive version
-        return state.threads[thread.localId];
+        return store.threads[thread.localId];
     }
 
-    constructor(state, data) {
+    constructor(store, data) {
         Object.assign(this, {
             id: data.id,
             model: data.model,
             type: data.type,
-            _state: state,
+            _store: store,
         });
         if (this.type === "channel") {
-            this._state.discuss.channels.threads.push(this.localId);
+            this._store.discuss.channels.threads.push(this.localId);
         } else if (this.type === "chat" || this.type === "group") {
-            this._state.discuss.chats.threads.push(this.localId);
+            this._store.discuss.chats.threads.push(this.localId);
         }
         this.update(data);
-        state.threads[this.localId] = this;
+        store.threads[this.localId] = this;
     }
 
     update(data) {
@@ -132,11 +132,11 @@ export class Thread {
             }
             if (this.type === "chat") {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
-                    Partner.insert(this._state, elem.persona.partner);
+                    Partner.insert(this._store, elem.persona.partner);
                     if (
-                        elem.persona.partner.id !== this._state.user.partnerId ||
+                        elem.persona.partner.id !== this._store.user.partnerId ||
                         (serverData.channel.channelMembers[0][1].length === 1 &&
-                            elem.persona.partner.id === this._state.user.partnerId)
+                            elem.persona.partner.id === this._store.user.partnerId)
                     ) {
                         this.chatPartnerId = elem.persona.partner.id;
                     }
@@ -146,10 +146,10 @@ export class Thread {
             if (this.type === "group") {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
                     if (elem.persona?.partner) {
-                        Partner.insert(this._state, elem.persona.partner);
+                        Partner.insert(this._store, elem.persona.partner);
                     }
                     if (elem.persona?.guest) {
-                        Guest.insert(this._state, elem.persona.guest);
+                        Guest.insert(this._store, elem.persona.guest);
                     }
                 });
             }
@@ -159,12 +159,12 @@ export class Thread {
                 switch (command) {
                     case "insert-and-unlink":
                         for (const rtcSessionData of sessionsData) {
-                            RtcSession.delete(this._state, rtcSessionData.id);
+                            RtcSession.delete(this._store, rtcSessionData.id);
                         }
                         break;
                     case "insert":
                         for (const rtcSessionData of sessionsData) {
-                            const session = RtcSession.insert(this._state, rtcSessionData);
+                            const session = RtcSession.insert(this._store, rtcSessionData);
                             this.rtcSessions[session.id] = session;
                         }
                         break;
@@ -174,7 +174,7 @@ export class Thread {
                 this.invitedPartners =
                     serverData.invitedPartners &&
                     serverData.invitedPartners.map((partner) =>
-                        Partner.insert(this._state, partner)
+                        Partner.insert(this._store, partner)
                     );
             }
             this.canLeave =
@@ -182,19 +182,22 @@ export class Thread {
                 !this.message_needaction_counter &&
                 !this.serverData.group_based_subscription;
         }
-        Composer.insert(this._state, { thread: this });
+        Composer.insert(this._store, { thread: this });
     }
 
     /**
-     * Remove a thread form the state
+     * Remove a thread form the store
      */
     remove() {
-        removeFromArray(this._state.discuss.chats.threads, this.localId);
-        removeFromArray(this._state.discuss.channels.threads, this.localId);
-        delete this._state.threads[this.localId];
+        removeFromArray(this._store.discuss.chats.threads, this.localId);
+        removeFromArray(this._store.discuss.channels.threads, this.localId);
+        delete this._store.threads[this.localId];
     }
 
-    static searchSuggestions(state, cleanedSearchTerm, thread, sort) {
+    /**
+     * @param {import("@mail/new/core/store_service").Store} store
+     */
+    static searchSuggestions(store, cleanedSearchTerm, thread, sort) {
         let threads;
         if (
             thread &&
@@ -209,7 +212,7 @@ export class Thread {
             // channel.
             threads = [thread];
         } else {
-            threads = Object.values(state.threads);
+            threads = Object.values(store.threads);
         }
         const suggestionList = threads.filter(
             (thread) =>
@@ -267,8 +270,8 @@ export class Thread {
     sortMessages() {
         this.messages.sort((msgId1, msgId2) => {
             const indicator =
-                new Date(this._state.messages[msgId1].dateTime) -
-                new Date(this._state.messages[msgId2].dateTime);
+                new Date(this._store.messages[msgId1].dateTime) -
+                new Date(this._store.messages[msgId2].dateTime);
             if (indicator) {
                 return indicator;
             } else {
@@ -292,7 +295,7 @@ export class Thread {
 
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
-            return this.customName || this._state.partners[this.chatPartnerId].name;
+            return this.customName || this._store.partners[this.chatPartnerId].name;
         }
         if (this.type === "group" && !this.name) {
             return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
@@ -304,7 +307,7 @@ export class Thread {
      * @returns {import("@mail/new/core/follower_model").Follower}
      */
     get followerOfCurrentUser() {
-        return this.followers.find((f) => f.partner.id === this._state.user.partnerId);
+        return this.followers.find((f) => f.partner.id === this._store.user.partnerId);
     }
 
     get imgUrl() {
@@ -331,7 +334,7 @@ export class Thread {
     }
 
     get lastEditableMessageOfCurrentUser() {
-        const messages = this.messages.map((id) => this._state.messages[id]);
+        const messages = this.messages.map((id) => this._store.messages[id]);
         const editableMessagesOfCurrentUser = messages.filter(
             (message) => message.isAuthoredByCurrentUser && message.canBeEdited
         );
@@ -350,7 +353,7 @@ export class Thread {
         if (!this.mostRecentMsgId) {
             return undefined;
         }
-        return this._state.messages[this.mostRecentMsgId];
+        return this._store.messages[this.mostRecentMsgId];
     }
 
     get mostRecentMsgId() {
@@ -367,7 +370,7 @@ export class Thread {
         const oldestNonTransientMessageId = [...this.messages]
             .reverse()
             .find((messageId) => Number.isInteger(messageId));
-        return this._state.messages[oldestNonTransientMessageId];
+        return this._store.messages[oldestNonTransientMessageId];
     }
 
     get hasCurrentUserAsMember() {
@@ -402,7 +405,7 @@ export class Thread {
         const oldestNonTransientMessageId = this.messages.find((messageId) =>
             Number.isInteger(messageId)
         );
-        return this._state.messages[oldestNonTransientMessageId];
+        return this._store.messages[oldestNonTransientMessageId];
     }
 
     get onlineMembers() {
@@ -424,6 +427,6 @@ export class Thread {
     }
 
     get typingMembers() {
-        return this.typingMemberIds.map((memberId) => this._state.channelMembers[memberId]);
+        return this.typingMemberIds.map((memberId) => this._store.channelMembers[memberId]);
     }
 }

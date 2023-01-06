@@ -11,22 +11,22 @@
         <hr class="w-100 border-top"/>
         <div class="d-flex flex-column flex-grow-0">
             <t t-call="mail.discuss_mailbox">
-                <t t-set="mailbox" t-value="messaging.state.discuss.inbox" />
+                <t t-set="mailbox" t-value="store.discuss.inbox" />
             </t>
             <t t-call="mail.discuss_mailbox">
-                <t t-set="mailbox" t-value="messaging.state.discuss.starred" />
+                <t t-set="mailbox" t-value="store.discuss.starred" />
             </t>
             <t t-call="mail.discuss_mailbox">
-                <t t-set="mailbox" t-value="messaging.state.discuss.history" />
+                <t t-set="mailbox" t-value="store.discuss.history" />
             </t>
         </div>
         <hr class="w-100 border-top"/>
         <input t-if="hasQuickSearch" class="form-control mx-4 mb-2 rounded-3 w-auto" placeholder="Quick search..." t-model="state.quickSearchVal"/>
         <t t-call="mail.discuss_category">
-            <t t-set="category" t-value="messaging.state.discuss.channels" />
+            <t t-set="category" t-value="store.discuss.channels" />
         </t>
         <t t-call="mail.discuss_category">
-            <t t-set="category" t-value="messaging.state.discuss.chats" />
+            <t t-set="category" t-value="store.discuss.chats" />
         </t>
     </div>
 </t>
@@ -34,8 +34,8 @@
 <t t-name="mail.discuss_mailbox" owl="1">
     <button class="btn d-flex align-items-center py-1 px-0 border-0 rounded-0 fw-normal text-dark"
         t-att-class="{
-            'bg-100': mailbox.localId !== messaging.state.discuss.threadLocalId,
-            'o-active bg-200': mailbox.localId === messaging.state.discuss.threadLocalId,
+            'bg-100': mailbox.localId !== store.discuss.threadLocalId,
+            'o-active bg-200': mailbox.localId === store.discuss.threadLocalId,
             'o-starred-box': mailbox.id === 'starred',
         }"
         t-on-click="(ev) => this.openThread(ev, mailbox)"
@@ -73,12 +73,12 @@
             <ChannelSelector category="category" onValidate.bind="stopEditing" autofocus="true"/>
         </div>
         <t t-foreach="filteredThreads(category)" t-as="threadLocalId" t-key="threadLocalId" t-call="mail.discuss_category_item">
-            <t t-set="thread" t-value="messaging.state.threads[threadLocalId]"/>
+            <t t-set="thread" t-value="store.threads[threadLocalId]"/>
         </t>
     </t>
-    <t t-elif="category.threads.includes(messaging.state.discuss.threadLocalId)" t-call="mail.discuss_category_item">
-        <t t-set="threadLocalId" t-value="messaging.state.discuss.threadLocalId"/>
-        <t t-set="thread" t-value="messaging.state.threads[threadLocalId]"/>
+    <t t-elif="category.threads.includes(store.discuss.threadLocalId)" t-call="mail.discuss_category_item">
+        <t t-set="threadLocalId" t-value="store.discuss.threadLocalId"/>
+        <t t-set="thread" t-value="store.threads[threadLocalId]"/>
     </t>
 </t>
 
@@ -87,8 +87,8 @@
     <t t-else="" t-set="counter" t-value="thread.message_needaction_counter"/>
     <button class="o-mail-category-item btn d-flex align-items-center w-100 px-0 py-2 border-0 text-reset"
         t-att-class="{
-            'bg-100': threadLocalId !== messaging.state.discuss.threadLocalId,
-            'o-active bg-200': threadLocalId === messaging.state.discuss.threadLocalId,
+            'bg-100': threadLocalId !== store.discuss.threadLocalId,
+            'o-active bg-200': threadLocalId === store.discuss.threadLocalId,
             'o-unread': thread.isUnread,
         }"
         t-att-data-channel-id="thread.id"

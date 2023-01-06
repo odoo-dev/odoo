@@ -3,7 +3,7 @@
 import { Call } from "../rtc/call";
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
-import { useMessaging } from "../core/messaging_hook";
+import { useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
 import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
@@ -36,7 +36,7 @@ export class ChatWindow extends Component {
     static template = "mail.chat_window";
 
     setup() {
-        this.messaging = useMessaging();
+        this.store = useStore();
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.threadService = useState(useService("mail.thread"));
         this.rtc = useRtc();

@@ -123,7 +123,7 @@ QUnit.test("Can handle im_status of unknown partner", async function (assert) {
         Partner: { im_status: "online", id: partnerId },
     });
     await nextTick();
-    const partners = env.services["mail.messaging"].state.partners;
+    const partners = env.services["mail.store"].partners;
     assert.ok(partnerId in partners, "Unknown partner should have been added");
     assert.ok(
         partners[partnerId].im_status === "online",

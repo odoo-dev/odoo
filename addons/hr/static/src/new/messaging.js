@@ -9,7 +9,7 @@ import { ThreadService } from "@mail/new/thread/thread_service";
 patch(Messaging.prototype, "hr", {
     setup(...args) {
         this._super(...args);
-        this.state.employees = {};
+        this.store.employees = {};
     },
 });
 
@@ -20,10 +20,10 @@ patch(ThreadService.prototype, "hr", {
         if (!employeeId) {
             return _super(person);
         }
-        let employee = this.state.employees[employeeId];
+        let employee = this.store.employees[employeeId];
         if (!employee) {
-            this.state.employees[employeeId] = { id: employeeId };
-            employee = this.state.employees[employeeId];
+            this.store.employees[employeeId] = { id: employeeId };
+            employee = this.store.employees[employeeId];
         }
         if (!employee.user_id && !employee.hasCheckedUser) {
             employee.hasCheckedUser = true;
@@ -37,10 +37,10 @@ patch(ThreadService.prototype, "hr", {
             );
             if (employeeData) {
                 employee.user_id = employeeData.user_id[0];
-                let user = this.state.users[employee.user_id];
+                let user = this.store.users[employee.user_id];
                 if (!user) {
-                    this.state.users[employee.user_id] = { id: employee.user_id };
-                    user = this.state.users[employee.user_id];
+                    this.store.users[employee.user_id] = { id: employee.user_id };
+                    user = this.store.users[employee.user_id];
                 }
                 user.partner_id = employeeData.user_partner_id[0];
             }

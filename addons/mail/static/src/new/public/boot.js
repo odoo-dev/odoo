@@ -12,7 +12,7 @@ import { templates } from "@web/core/assets";
 import { messagingService } from "../core/messaging_service";
 import { soundEffects } from "../core/sound_effects_service";
 import { userSettingsService } from "../core/user_settings_service";
-import { stateService } from "../core/state_service";
+import { storeService } from "../core/store_service";
 import { chatWindowService } from "../chat/chat_window_service";
 import { threadService } from "../thread/thread_service";
 import { messageService } from "../thread/message_service";
@@ -25,7 +25,7 @@ import { DiscussPublic } from "./discuss_public";
     await whenReady();
 
     const serviceRegistry = registry.category("services");
-    serviceRegistry.add("mail.state", stateService);
+    serviceRegistry.add("mail.store", storeService);
     serviceRegistry.add("mail.soundEffects", soundEffects);
     serviceRegistry.add("mail.userSettings", userSettingsService);
     serviceRegistry.add("mail.chat_window", chatWindowService);

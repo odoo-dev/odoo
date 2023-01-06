@@ -15,35 +15,37 @@ export class Notification {
     notification_type;
     /** @type {Partner} */
     partner;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Object} data
      * @returns {Notification}
      */
-    static insert(state, data) {
+    static insert(store, data) {
         let notification;
-        if (data.id in state.notifications) {
-            notification = state.notifications[data.id];
+        if (data.id in store.notifications) {
+            notification = store.notifications[data.id];
             notification.update(data);
             return notification;
         }
-        notification = new Notification(state, data);
+        notification = new Notification(store, data);
         // return reactive version
-        return state.notifications[data.id];
+        return store.notifications[data.id];
     }
 
-    constructor(state, data) {
+    constructor(store, data) {
         Object.assign(this, {
             id: data.id,
-            _state: state,
+            _store: store,
         });
         this.update(data);
-        state.notifications[this.id] = this;
+        store.notifications[this.id] = this;
     }
 
     get message() {
-        return this._state.messages[this.messageId];
+        return this._store.messages[this.messageId];
     }
 
     get isFailure() {
@@ -99,7 +101,7 @@ export class Notification {
             notification_status: data.notification_status,
             notification_type: data.notification_type,
             partner: data.res_partner_id
-                ? Partner.insert(this._state, {
+                ? Partner.insert(this._store, {
                       id: data.res_partner_id[0],
                       name: data.res_partner_id[1],
                   })
@@ -109,7 +111,7 @@ export class Notification {
             return;
         }
         const thread = this.message.originThread;
-        NotificationGroup.insert(this._state, {
+        NotificationGroup.insert(this._store, {
             modelName: thread.modelName,
             resId: this.message.originThread.id,
             resModel: this.message.originThread.model,

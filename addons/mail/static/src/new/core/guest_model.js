@@ -13,20 +13,22 @@ export class Guest {
     name;
     /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
     im_status;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Data} data
      * @returns {Guest}
      */
-    static insert(state, data) {
-        let guest = state.guests[data.id];
+    static insert(store, data) {
+        let guest = store.guests[data.id];
         if (!guest) {
             guest = new Guest();
-            guest._state = state;
-            state.guests[data.id] = guest;
+            guest._store = store;
+            store.guests[data.id] = guest;
             // Get reactive version.
-            guest = state.guests[data.id];
+            guest = store.guests[data.id];
         }
         const { id = guest.id, name = guest.name, im_status = guest.im_status } = data;
         Object.assign(guest, {

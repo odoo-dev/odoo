@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 
 import { Activity } from "@mail/new/core/activity_model";
 import { ActivityListPopoverItem } from "@mail/new/activity/activity_list_popover_item";
@@ -35,13 +35,14 @@ export class ActivityListPopover extends Component {
         this.orm = useService("orm");
         this.messaging = useMessaging();
         this.user = useService("user");
+        this.store = useStore();
         this.updateFromProps(this.props);
         onWillUpdateProps((props) => this.updateFromProps(props));
     }
 
     get activities() {
         /** @type {import("@mail/new/core/activity_model").Activity[]} */
-        const allActivities = Object.values(this.messaging.state.activities);
+        const allActivities = Object.values(this.store.activities);
         return allActivities
             .filter((activity) => this.props.activityIds.includes(activity.id))
             .sort(function (a, b) {
@@ -86,7 +87,7 @@ export class ActivityListPopover extends Component {
             }
         );
         for (const activityData of activitiesData) {
-            Activity.insert(this.messaging.state, activityData);
+            Activity.insert(this.store, activityData);
         }
     }
 }

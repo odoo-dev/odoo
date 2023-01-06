@@ -18,20 +18,22 @@ export class Partner {
     email;
     /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
     im_status;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {import("@mail/new/core/partner_model").Data} data
      * @returns {import("@mail/new/core/partner_model").Partner}
      */
-    static insert(state, data) {
-        let partner = state.partners[data.id];
+    static insert(store, data) {
+        let partner = store.partners[data.id];
         if (!partner) {
             partner = new Partner();
-            partner._state = state;
-            state.partners[data.id] = partner;
+            partner._store = store;
+            store.partners[data.id] = partner;
             // Get reactive version.
-            partner = state.partners[data.id];
+            partner = store.partners[data.id];
         }
         const {
             id = partner.id,
@@ -48,9 +50,9 @@ export class Partner {
         if (
             partner.im_status !== "im_partner" &&
             !partner.is_public &&
-            !state.registeredImStatusPartners.includes(partner.id)
+            !store.registeredImStatusPartners.includes(partner.id)
         ) {
-            state.registeredImStatusPartners.push(partner.id);
+            store.registeredImStatusPartners.push(partner.id);
         }
         // return reactive version
         return partner;
@@ -65,10 +67,13 @@ export class Partner {
     }
 
     get isCurrentUser() {
-        return this.id === this._state.user.partnerId;
+        return this.id === this._store.user.partnerId;
     }
 
-    static searchSuggestions(state, cleanedSearchTerm, thread, sort) {
+    /**
+     * @param {import("@mail/new/core/store_service").Store} store
+     */
+    static searchSuggestions(store, cleanedSearchTerm, thread, sort) {
         let partners;
         const isNonPublicChannel =
             thread &&
@@ -83,12 +88,12 @@ export class Partner {
             // mentioned partner.
             partners = thread.channelMembers.map((member) => member.partner);
         } else {
-            partners = Object.values(state.partners);
+            partners = Object.values(store.partners);
         }
         const mainSuggestionList = [];
         const extraSuggestionList = [];
         for (const partner of partners) {
-            if (partner === state.partnerRoot) {
+            if (partner === store.partnerRoot) {
                 // ignore archived partners (except OdooBot)
                 continue;
             }

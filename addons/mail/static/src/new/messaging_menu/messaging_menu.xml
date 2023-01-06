@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.messaging_menu" owl="1">
-    <t t-set="failures" t-value="messaging.state.notificationGroups"/>
+    <t t-set="failures" t-value="store.notificationGroups"/>
     <Dropdown beforeOpen.bind="() => messaging.fetchPreviews()" position="'bottom-end'" menuClass="'p-0'">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-comments" role="img" aria-label="Messages"></i>
@@ -15,7 +15,7 @@
                     <button class="btn btn-link" t-att-class="state.filter === 'chats' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="chats">Chats</button>
                     <button class="btn btn-link" t-att-class="state.filter === 'channels' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="channels">Channels</button>
                     <div class="flex-grow-1"></div>
-                    <button t-if="!messaging.state.discuss.isActive" class="btn btn-link o-mail-messaging-menu-new-message" type="button" t-on-click.stop="onClickNewMessage">New Message</button>
+                    <button t-if="!store.discuss.isActive" class="btn btn-link o-mail-messaging-menu-new-message" type="button" t-on-click.stop="onClickNewMessage">New Message</button>
                 </div>
                 <div class="d-flex flex-column overflow-auto">
                     <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0 and (failures.length === 0 or state.filter !== 'all')">
@@ -32,7 +32,7 @@
                             onClick="(isMarkAsRead) => isMarkAsRead ? threadService.markAsRead(preview) : this.openDiscussion(preview)"
                         >
                             <t t-set-slot="icon">
-                                <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>
+                                <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.partners[preview.chatPartnerId]"/>
                             </t>
                             <t t-if="preview.mostRecentMsg" t-set-slot="body-icon">
                                 <t t-if="preview.mostRecentMsg.isAuthoredByCurrentUser">

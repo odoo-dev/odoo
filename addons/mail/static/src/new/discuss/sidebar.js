@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { ThreadIcon } from "./thread_icon";
 import { ChannelSelector } from "./channel_selector";
 import { PartnerImStatus } from "./partner_im_status";
@@ -25,6 +25,7 @@ export class Sidebar extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
@@ -98,7 +99,7 @@ export class Sidebar extends Component {
      */
     unpinChannel(channelId) {
         this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
-        this.messaging.state.threads[createLocalId("mail.channel", channelId)].remove();
+        this.store.threads[createLocalId("mail.channel", channelId)].remove();
     }
 
     stopEditing() {
@@ -133,7 +134,7 @@ export class Sidebar extends Component {
 
     get hasQuickSearch() {
         return (
-            Object.values(this.messaging.state.threads).filter(
+            Object.values(this.store.threads).filter(
                 (thread) => thread.is_pinned && thread.model === "mail.channel"
             ).length > 19
         );
@@ -144,7 +145,7 @@ export class Sidebar extends Component {
             return category.threads;
         }
         return category.threads.filter((threadLocalId) => {
-            const thread = this.messaging.state.threads[threadLocalId];
+            const thread = this.store.threads[threadLocalId];
             return thread.name.includes(this.state.quickSearchVal);
         });
     }

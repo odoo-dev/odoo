@@ -6,9 +6,11 @@ import { Thread } from "../core/thread_model";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ChatterService {
-    constructor(env, state, thread, rpc, orm) {
+    constructor(env, store, thread, rpc, orm) {
         this.env = env;
-        this.state = state;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
+        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
         this.thread = thread;
         this.rpc = rpc;
         this.orm = orm;
@@ -20,7 +22,7 @@ export class ChatterService {
         requestList = ["activities", "followers", "attachments", "messages"]
     ) {
         if (requestList.includes("messages")) {
-            this.thread.fetchNewMessages(Thread.insert(this.state, { model: resModel, id: resId }));
+            this.thread.fetchNewMessages(Thread.insert(this.store, { model: resModel, id: resId }));
         }
         const result = await this.rpc("/mail/thread/data", {
             request_list: requestList,
@@ -30,7 +32,7 @@ export class ChatterService {
         if ("attachments" in result) {
             result["attachments"] = result["attachments"].map((attachment) => ({
                 ...attachment,
-                originThread: Thread.insert(this.state, attachment.originThread[0][1]),
+                originThread: Thread.insert(this.store, attachment.originThread[0][1]),
             }));
         }
         return result;
@@ -38,14 +40,14 @@ export class ChatterService {
 
     getThread(resModel, resId) {
         const localId = createLocalId(resModel, resId);
-        if (localId in this.state.threads) {
+        if (localId in this.store.threads) {
             if (resId === false) {
-                return this.state.threads[localId];
+                return this.store.threads[localId];
             }
             // to force a reload
-            this.state.threads[localId].status = "new";
+            this.store.threads[localId].status = "new";
         }
-        const thread = Thread.insert(this.state, {
+        const thread = Thread.insert(this.store, {
             id: resId,
             model: resModel,
             type: "chatter",
@@ -54,12 +56,12 @@ export class ChatterService {
             const tmpId = `virtual${this.nextId++}`;
             const tmpData = {
                 id: tmpId,
-                author: { id: this.state.user.partnerId },
+                author: { id: this.store.user.partnerId },
                 body: _t("Creating a new record..."),
                 message_type: "notification",
                 trackingValues: [],
             };
-            Message.insert(this.state, tmpData, thread);
+            Message.insert(this.store, tmpData, thread);
         }
         return thread;
     }
@@ -77,8 +79,8 @@ export class ChatterService {
 }
 
 export const chatterService = {
-    dependencies: ["mail.state", "mail.thread", "rpc", "orm"],
-    start(env, { "mail.state": state, "mail.thread": thread, rpc, orm }) {
-        return new ChatterService(env, state, thread, rpc, orm);
+    dependencies: ["mail.store", "mail.thread", "rpc", "orm"],
+    start(env, { "mail.store": store, "mail.thread": thread, rpc, orm }) {
+        return new ChatterService(env, store, thread, rpc, orm);
     },
 };

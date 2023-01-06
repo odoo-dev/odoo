@@ -25,33 +25,38 @@ export class RtcSession {
     dataChannel;
     /** @type {RTCPeerConnection} */
     peerConnection;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Object} data
      * @returns {RtcSession}
      */
-    static insert(state, data) {
+    static insert(store, data) {
         let session;
-        if (state.rtcSessions[data.id]) {
-            session = state.rtcSessions[data.id];
+        if (store.rtcSessions[data.id]) {
+            session = store.rtcSessions[data.id];
         } else {
             session = new RtcSession();
-            session._state = state;
+            session._store = store;
         }
         session.update(data);
-        state.rtcSessions[session.id] = session;
+        store.rtcSessions[session.id] = session;
         // return reactive version
-        return state.rtcSessions[session.id];
+        return store.rtcSessions[session.id];
     }
 
-    static delete(state, id) {
-        const session = state.rtcSessions[id];
+    /**
+     * @param {import("@mail/new/core/store_service").Store} store
+     */
+    static delete(store, id) {
+        const session = store.rtcSessions[id];
         if (session) {
-            delete state.threads[createLocalId("mail.channel", session.channelId)]?.rtcSessions[id];
+            delete store.threads[createLocalId("mail.channel", session.channelId)]?.rtcSessions[id];
             session.clear();
         }
-        delete state.rtcSessions[id];
+        delete store.rtcSessions[id];
     }
 
     update(data) {
@@ -63,17 +68,17 @@ export class RtcSession {
             this.channelId = channelMember.channel.id;
         }
         if (channelMember) {
-            ChannelMember.insert(this._state, channelMember);
+            ChannelMember.insert(this._store, channelMember);
             this.channelMemberId = channelMember.id;
         }
     }
 
     get channelMember() {
-        return this._state.channelMembers[this.channelMemberId];
+        return this._store.channelMembers[this.channelMemberId];
     }
 
     get channel() {
-        return this._state.threads[createLocalId("mail.channel", this.channelId)];
+        return this._store.threads[createLocalId("mail.channel", this.channelId)];
     }
 
     /**

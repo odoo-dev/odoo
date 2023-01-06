@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, useRef, useState, onMounted, onWillStart } from "@odoo/owl";
-import { useMessaging } from "@mail/new/core/messaging_hook";
+import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
 
@@ -15,6 +15,7 @@ export class ChannelInvitationForm extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
         this.inputRef = useRef("input");
@@ -40,7 +41,7 @@ export class ChannelInvitationForm extends Component {
         for (const selectablePartner of Partners) {
             const partnerId = selectablePartner.id;
             const name = selectablePartner.name;
-            const newPartner = Partner.insert(this.messaging.state, {
+            const newPartner = Partner.insert(this.store, {
                 id: partnerId,
                 name: name,
             });
@@ -83,7 +84,7 @@ export class ChannelInvitationForm extends Component {
     async onClickInvite() {
         if (this.props.thread.type === "chat") {
             const partners_to = [
-                this.messaging.state.user.partnerId,
+                this.store.user.partnerId,
                 this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ];

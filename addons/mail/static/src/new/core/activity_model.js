@@ -85,32 +85,32 @@ export class Activity {
     write_date;
     /** @type {[number, string]} */
     write_uid;
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {import("@mail/new/core/activity_model").Data} data
      * @returns {import("@mail/new/core/activity_model").Activity}
      */
-    static insert(state, data) {
-        const activity = state.activities[data.id] ?? new Activity(state, data);
+    static insert(store, data) {
+        const activity = store.activities[data.id] ?? new Activity(store, data);
         activity.update(data);
         return activity;
     }
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {import("@mail/new/core/activity_model").Data} data
      * @returns {import("@mail/new/core/activity_model").Activity}
      */
-    constructor(state, data) {
+    constructor(store, data) {
         Object.assign(this, {
             id: data.id,
-            _state: state,
+            _store: store,
         });
-        state.activities[data.id] = this;
-        return state.activities[data.id];
+        store.activities[data.id] = this;
+        return store.activities[data.id];
     }
 
     /**
@@ -174,6 +174,6 @@ export class Activity {
     }
 
     delete() {
-        delete this._state.activities[this.id];
+        delete this._store.activities[this.id];
     }
 }

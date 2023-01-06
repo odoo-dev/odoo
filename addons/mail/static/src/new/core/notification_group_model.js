@@ -17,9 +17,11 @@ export class NotificationGroup {
     resIds = new Set();
     /** @type {'sms' | 'email'} */
     type;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
-    static insert(state, data) {
-        let group = state.notificationGroups.find((group) => {
+    static insert(store, data) {
+        let group = store.notificationGroups.find((group) => {
             return (
                 group.resModel === data.resModel &&
                 group.type === data.type &&
@@ -27,21 +29,21 @@ export class NotificationGroup {
             );
         });
         if (!group) {
-            group = new NotificationGroup(state);
+            group = new NotificationGroup(store);
         }
         group.update(data);
         if (group.notifications.length === 0) {
-            removeFromArray(state.notificationGroups, group);
+            removeFromArray(store.notificationGroups, group);
         }
         return group;
     }
 
-    constructor(state) {
-        this._state = state;
-        this._state.notificationGroups.push(this);
+    constructor(store) {
+        this._store = store;
+        this._store.notificationGroups.push(this);
         this.id = nextId++;
         // return reactive
-        return state.notificationGroups.find((group) => group === this);
+        return store.notificationGroups.find((group) => group === this);
     }
 
     update(data) {
@@ -82,7 +84,7 @@ export class NotificationGroup {
     }
 
     get lastMessage() {
-        return this._state.messages[this.lastMessageId];
+        return this._store.messages[this.lastMessageId];
     }
 
     get dateTime() {

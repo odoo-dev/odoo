@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging } from "@mail/new/core/messaging_hook";
+import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 
 import { Component } from "@odoo/owl";
 
@@ -13,11 +13,12 @@ export class ThreadIcon extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
     }
 
     get chatPartner() {
         if (this.thread.chatPartnerId) {
-            return this.messaging.state.partners[this.thread.chatPartnerId];
+            return this.store.partners[this.thread.chatPartnerId];
         }
         return null;
     }
@@ -59,7 +60,7 @@ export class ThreadIcon extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[this.props.thread.localId];
+        return this.store.threads[this.props.thread.localId];
     }
 
     get titleText() {

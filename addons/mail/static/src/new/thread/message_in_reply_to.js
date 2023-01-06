@@ -4,7 +4,7 @@ import { Component } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 
-import { useMessaging } from "@mail/new/core/messaging_hook";
+import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 
 export class MessageInReplyTo extends Component {
     static props = ["message", "alignedRight", "onClick"];
@@ -12,6 +12,7 @@ export class MessageInReplyTo extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.user = useService("user");
     }
 

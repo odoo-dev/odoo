@@ -4,7 +4,7 @@ import { AutoresizeInput } from "./autoresize_input";
 import { Sidebar } from "./sidebar";
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
 import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
@@ -45,6 +45,7 @@ export class Discuss extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
         this.rtc = useRtc();
@@ -65,15 +66,15 @@ export class Discuss extends Component {
         });
         this.orm = useService("orm");
         this.effect = useService("effect");
-        this.prevInboxCounter = this.messaging.state.discuss.inbox.counter;
+        this.prevInboxCounter = this.store.discuss.inbox.counter;
         useChildSubEnv({
             inDiscuss: true,
         });
         useEffect(
             () => {
                 if (
-                    this.prevInboxCounter !== this.messaging.state.discuss.inbox.counter &&
-                    this.messaging.state.discuss.inbox.counter === 0
+                    this.prevInboxCounter !== this.store.discuss.inbox.counter &&
+                    this.store.discuss.inbox.counter === 0
                 ) {
                     this.effect.add({
                         message: _t("Congratulations, your inbox is empty!"),
@@ -81,13 +82,13 @@ export class Discuss extends Component {
                         fadeout: "fast",
                     });
                 }
-                this.prevInboxCounter = this.messaging.state.discuss.inbox.counter;
+                this.prevInboxCounter = this.store.discuss.inbox.counter;
             },
-            () => [this.messaging.state.discuss.inbox.counter]
+            () => [this.store.discuss.inbox.counter]
         );
         onWillStart(() => this.messaging.isReady);
-        onMounted(() => (this.messaging.state.discuss.isActive = true));
-        onWillUnmount(() => (this.messaging.state.discuss.isActive = false));
+        onMounted(() => (this.store.discuss.isActive = true));
+        onWillUnmount(() => (this.store.discuss.isActive = false));
     }
 
     markAllAsRead() {
@@ -99,7 +100,7 @@ export class Discuss extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[this.messaging.state.discuss.threadLocalId];
+        return this.store.threads[this.store.discuss.threadLocalId];
     }
 
     unstarAll() {

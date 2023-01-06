@@ -15,13 +15,15 @@ export class ChannelMember {
     guestId;
     threadId;
     typingTimer;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
-    static insert(state, data) {
-        let channelMember = state.channelMembers[data.id];
+    static insert(store, data) {
+        let channelMember = store.channelMembers[data.id];
         if (!channelMember) {
-            state.channelMembers[data.id] = new ChannelMember();
-            channelMember = state.channelMembers[data.id];
-            channelMember._state = state;
+            store.channelMembers[data.id] = new ChannelMember();
+            channelMember = store.channelMembers[data.id];
+            channelMember._store = store;
         }
         Object.assign(channelMember, {
             id: data.id,
@@ -36,11 +38,11 @@ export class ChannelMember {
     }
 
     get partner() {
-        return this._state.partners[this.partnerId];
+        return this._store.partners[this.partnerId];
     }
 
     get guest() {
-        return this._state.guests[this.guestId];
+        return this._store.guests[this.guestId];
     }
 
     get persona() {
@@ -64,6 +66,6 @@ export class ChannelMember {
     }
 
     get thread() {
-        return this._state.threads[createLocalId("mail.channel", this.threadId)];
+        return this._store.threads[createLocalId("mail.channel", this.threadId)];
     }
 }

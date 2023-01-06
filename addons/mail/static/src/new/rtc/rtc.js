@@ -62,9 +62,11 @@ function getTransceiver(peerConnection, trackKind) {
 }
 
 export class Rtc {
-    constructor(env, messaging, notification, rpc, soundEffects, userSettings) {
+    constructor(env, store, messaging, notification, rpc, soundEffects, userSettings) {
         // services
         this.env = env;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
         this.messaging = messaging;
         this.notification = notification;
         this.rpc = rpc;
@@ -613,17 +615,14 @@ export class Rtc {
                 invitedPartners,
             },
         });
-        this.state.selfSession = this.messaging.state.rtcSessions[sessionId];
+        this.state.selfSession = this.store.rtcSessions[sessionId];
         this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         const channelProxy = reactive(this.state.channel, () => {
             if (channel !== this.state.channel) {
                 throw new Error("channel has changed");
             }
             if (this.state.channel) {
-                if (
-                    this.state.channel &&
-                    !channelProxy.rtcSessions[this.state.selfSession.id]
-                ) {
+                if (this.state.channel && !channelProxy.rtcSessions[this.state.selfSession.id]) {
                     // if the current RTC session is not in the channel sessions, this call is no longer valid.
                     this.endCall();
                     return;
@@ -708,12 +707,12 @@ export class Rtc {
         if (this.state.channel) {
             const activeSessionsData = rtcSessions[0][1];
             for (const sessionData of activeSessionsData) {
-                const session = RtcSession.insert(this.messaging.state, sessionData);
+                const session = RtcSession.insert(this.store, sessionData);
                 this.state.channel.rtcSessions[session.id] = session;
             }
             const outdatedSessionsData = rtcSessions[1][1];
             for (const sessionData of outdatedSessionsData) {
-                const session = RtcSession.delete(this.messaging.state, sessionData);
+                const session = RtcSession.delete(this.store, sessionData);
                 delete this.state.channel.rtcSessions[session.id];
             }
         }
@@ -759,7 +758,7 @@ export class Rtc {
     }
 
     clear() {
-        for (const session of Object.values(this.messaging.state.rtcSessions)) {
+        for (const session of Object.values(this.store.rtcSessions)) {
             this.disconnect(session);
         }
         for (const timeoutId of this.state.recoverTimeouts.values()) {

@@ -5,7 +5,7 @@ import { createLocalId } from "./thread_model.create_local_id";
 
 export const messagingService = {
     dependencies: [
-        "mail.state",
+        "mail.store",
         "rpc",
         "orm",
         "user",
@@ -25,7 +25,7 @@ export const messagingService = {
     start(
         env,
         {
-            "mail.state": state,
+            "mail.store": store,
             rpc,
             orm,
             user,
@@ -54,7 +54,7 @@ export const messagingService = {
 
         const messaging = new Messaging(
             env,
-            state,
+            store,
             rpc,
             orm,
             user,

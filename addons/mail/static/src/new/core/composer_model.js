@@ -17,6 +17,8 @@ export class Composer {
     forceCursorMove;
     /** @typedef {'message' | 'note'| false} */
     type;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -35,7 +37,7 @@ export class Composer {
         return new Composer(state, data);
     }
 
-    constructor(state, data) {
+    constructor(store, data) {
         const { message, thread } = data;
         if (thread) {
             this.thread = thread;
@@ -47,7 +49,7 @@ export class Composer {
         Object.assign(this, {
             textInputContent: "",
             type: thread?.type === "chatter" ? false : "message",
-            _state: state,
+            _store: store,
         });
         return this.update(data);
     }

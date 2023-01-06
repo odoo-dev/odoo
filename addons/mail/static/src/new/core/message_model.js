@@ -58,30 +58,32 @@ export class Message {
     /** @type {string} */
     type;
     now = DateTime.now();
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {Object} data
      * @param {Thread} [thread]
      * @returns {Message}
      */
-    static insert(state, data, thread) {
+    static insert(store, data, thread) {
         let message;
-        thread ??= Thread.insert(state, { model: data.model, id: data.res_id });
-        if (data.id in state.messages) {
-            message = state.messages[data.id];
+        thread ??= Thread.insert(store, { model: data.model, id: data.res_id });
+        if (data.id in store.messages) {
+            message = store.messages[data.id];
         } else {
             message = new Message();
-            message._state = state;
+            message._store = store;
         }
-        message.update(state, data, thread);
-        state.messages[message.id] = message;
+        message.update(store, data, thread);
+        store.messages[message.id] = message;
         message.updateNotifications();
         // return reactive version
-        return state.messages[message.id];
+        return store.messages[message.id];
     }
 
-    update(state, data, thread) {
+    update(store, data, thread) {
         const {
             attachment_ids: attachments = this.attachments,
             body = this.body,
@@ -104,18 +106,18 @@ export class Message {
         }
         Object.assign(this, {
             attachments: attachments.map((attachment) =>
-                Attachment.insert(this._state, attachment)
+                Attachment.insert(this._store, attachment)
             ),
-            author: data.author ? Partner.insert(this._state, data.author) : this.author,
+            author: data.author ? Partner.insert(this._store, data.author) : this.author,
             body,
             isDiscussion,
             isNote,
-            isStarred: starred_partner_ids.includes(this._state.user.partnerId),
+            isStarred: starred_partner_ids.includes(this._store.user.partnerId),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
             needaction_partner_ids,
             parentMessage: this.parentMessage
-                ? Message.insert(this._state, this.parentMessage, this.parentMessage.originThread)
+                ? Message.insert(this._store, this.parentMessage, this.parentMessage.originThread)
                 : undefined,
             resId,
             resModel,
@@ -133,24 +135,24 @@ export class Message {
             this.originThread.modelName = data.res_model_name;
         }
         this._updateReactions(data.messageReactionGroups);
-        state.messages[this.id] = this;
+        store.messages[this.id] = this;
         if (thread) {
             if (!thread.messages.includes(this.id)) {
                 thread.messages.push(this.id);
                 thread.sortMessages();
             }
         }
-        if (this.isNeedaction && !this._state.discuss.inbox.messages.includes(this.id)) {
-            this._state.discuss.inbox.counter++;
+        if (this.isNeedaction && !this._store.discuss.inbox.messages.includes(this.id)) {
+            this._store.discuss.inbox.counter++;
             this.originThread.message_needaction_counter++;
-            this._state.discuss.inbox.messages.push(this.id);
-            this._state.discuss.inbox.sortMessages();
+            this._store.discuss.inbox.messages.push(this.id);
+            this._store.discuss.inbox.sortMessages();
         }
     }
 
     updateNotifications() {
         this.notifications = this.notifications.map((notification) =>
-            Notification.insert(this._state, { ...notification, messageId: this.id })
+            Notification.insert(this._store, { ...notification, messageId: this.id })
         );
     }
 
@@ -161,7 +163,7 @@ export class Message {
             const [command, reactionData] = Array.isArray(rawReaction)
                 ? rawReaction
                 : ["insert", rawReaction];
-            const reaction = MessageReactions.insert(this._state, reactionData);
+            const reaction = MessageReactions.insert(this._store, reactionData);
             if (command === "insert") {
                 reactionsToInsert.push(reaction);
             } else {
@@ -188,7 +190,7 @@ export class Message {
         if (this.isEmpty) {
             return false;
         }
-        if (!this._state.user.isAdmin && !this.isAuthoredByCurrentUser) {
+        if (!this._store.user.isAdmin && !this.isAuthoredByCurrentUser) {
             return false;
         }
         if (this.type !== "comment") {
@@ -224,14 +226,14 @@ export class Message {
         if (!this.author) {
             return false;
         }
-        return this.author.id === this._state.user.partnerId;
+        return this.author.id === this._store.user.partnerId;
     }
 
     /**
      * @returns {boolean}
      */
     get isNeedaction() {
-        return this.needaction_partner_ids.includes(this._state.user.partnerId);
+        return this.needaction_partner_ids.includes(this._store.user.partnerId);
     }
 
     /**
@@ -264,7 +266,7 @@ export class Message {
     }
 
     get originThread() {
-        return Thread.insert(this._state, { id: this.resId, model: this.resModel });
+        return Thread.insert(this._store, { id: this.resId, model: this.resModel });
     }
 
     get url() {

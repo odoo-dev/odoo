@@ -16,7 +16,7 @@ import { rtcService } from "./new/rtc/rtc_service";
 import { soundEffects } from "./new/core/sound_effects_service";
 import { userSettingsService } from "./new/core/user_settings_service";
 import { suggestionService } from "./new/suggestion/suggestion_service";
-import { stateService } from "./new/core/state_service";
+import { storeService } from "./new/core/store_service";
 import { chatWindowService } from "./new/chat/chat_window_service";
 import { threadService } from "./new/thread/thread_service";
 import { messageService } from "./new/thread/message_service";
@@ -30,7 +30,7 @@ const messagingValuesService = {
 };
 
 const serviceRegistry = registry.category("services");
-serviceRegistry.add("mail.state", stateService);
+serviceRegistry.add("mail.store", storeService);
 serviceRegistry.add("mail.activity", activityService);
 serviceRegistry.add("mail.chatter", chatterService);
 serviceRegistry.add("mail.chat_window", chatWindowService);

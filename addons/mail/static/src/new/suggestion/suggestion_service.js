@@ -9,9 +9,10 @@ import { registry } from "@web/core/registry";
 const commandRegistry = registry.category("mail.channel_commands");
 
 class SuggestionService {
-    constructor(env, messaging, orm) {
+    constructor(env, store, orm) {
         this.orm = orm;
-        this.messaging = messaging;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
     }
 
     async fetchSuggestions({ delimiter, term }, { thread } = {}) {
@@ -48,7 +49,7 @@ class SuggestionService {
             kwargs
         );
         suggestedPartners.map((data) => {
-            Partner.insert(this.messaging.state, data);
+            Partner.insert(this.store, data);
         });
     }
 
@@ -60,7 +61,7 @@ class SuggestionService {
             { search: term }
         );
         suggestedThreads.map((data) => {
-            Thread.insert(this.messaging.state, {
+            Thread.insert(this.store, {
                 model: "mail.channel",
                 ...data,
             });
@@ -82,26 +83,12 @@ class SuggestionService {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                return Partner.searchSuggestions(
-                    this.messaging.state,
-                    cleanedSearchTerm,
-                    thread,
-                    sort
-                );
+                return Partner.searchSuggestions(this.store, cleanedSearchTerm, thread, sort);
             }
             case ":":
-                return CannedResponse.searchSuggestions(
-                    this.messaging.state,
-                    cleanedSearchTerm,
-                    sort
-                );
+                return CannedResponse.searchSuggestions(this.store, cleanedSearchTerm, sort);
             case "#":
-                return Thread.searchSuggestions(
-                    this.messaging.state,
-                    cleanedSearchTerm,
-                    thread,
-                    sort
-                );
+                return Thread.searchSuggestions(this.store, cleanedSearchTerm, thread, sort);
             case "/":
                 return this.searchChannelCommand(cleanedSearchTerm, thread, sort);
         }
@@ -182,8 +169,8 @@ class SuggestionService {
 }
 
 export const suggestionService = {
-    dependencies: ["orm", "mail.messaging"],
-    start(env, { orm, "mail.messaging": messaging }) {
-        return new SuggestionService(env, messaging, orm);
+    dependencies: ["orm", "mail.store"],
+    start(env, { orm, "mail.store": store }) {
+        return new SuggestionService(env, store, orm);
     },
 };

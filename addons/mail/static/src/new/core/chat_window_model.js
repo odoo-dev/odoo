@@ -11,8 +11,8 @@ export const CHAT_WINDOW_WIDTH = 340;
 export const CHAT_WINDOW_HIDDEN_WIDTH = 55;
 
 export class ChatWindow {
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
-    _state;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
 
     /** @type {import("@mail/new/core/thread_model").Thread.localId} */
     threadLocalId;
@@ -20,24 +20,24 @@ export class ChatWindow {
     folded = false;
     hidden = false;
 
-    /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static visible(state) {
-        return state.chatWindows.filter((chatWindow) => !chatWindow.hidden);
+    /** @param {import("@mail/new/core/store_service").Store} */
+    static visible(store) {
+        return store.chatWindows.filter((chatWindow) => !chatWindow.hidden);
     }
 
-    /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static hidden(state) {
-        return state.chatWindows.filter((chatWindow) => chatWindow.hidden);
+    /** @param {import("@mail/new/core/store_service").Store} */
+    static hidden(store) {
+        return store.chatWindows.filter((chatWindow) => chatWindow.hidden);
     }
 
-    /** @params {import("@mail/new/core/messaging").Messaging['state']} */
-    static maxVisible(state) {
-        const startGap = state.isSmall
+    /** @param {import("@mail/new/core/store_service").Store} */
+    static maxVisible(store) {
+        const startGap = store.isSmall
             ? 0
-            : this.hidden(state).length > 0
+            : this.hidden(store).length > 0
             ? CHAT_WINDOW_END_GAP_WIDTH + CHAT_WINDOW_HIDDEN_WIDTH
             : CHAT_WINDOW_END_GAP_WIDTH;
-        const endGap = state.isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
+        const endGap = store.isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
         const awailable = browser.innerWidth - startGap - endGap;
         const maxAmountWithoutHidden = Math.floor(
             awailable / (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH)
@@ -46,54 +46,54 @@ export class ChatWindow {
     }
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {ChatWindowData} [data]
      * @returns {ChatWindow}
      */
-    static insert(state, data = {}) {
-        const chatWindow = state.chatWindows.find((c) => c.thread === data.thread);
+    static insert(store, data = {}) {
+        const chatWindow = store.chatWindows.find((c) => c.thread === data.thread);
         if (!chatWindow) {
-            return new ChatWindow(state, data);
+            return new ChatWindow(store, data);
         }
         chatWindow.update(data);
         return chatWindow;
     }
 
     /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/store_service").Store} store
      * @param {ChatWindowData} data
      * @returns {ChatWindow}
      */
-    constructor(state, data) {
+    constructor(store, data) {
         Object.assign(this, {
             thread: data.thread,
-            _state: state,
+            _store: store,
         });
         this.update(data);
-        if (ChatWindow.maxVisible(this._state) <= this._state.chatWindows.length) {
-            const visible = ChatWindow.visible(this._state);
+        if (ChatWindow.maxVisible(this._store) <= this._store.chatWindows.length) {
+            const visible = ChatWindow.visible(this._store);
             const swaped = visible[visible.length - 1];
             swaped.hidden = true;
             swaped.folded = true;
         }
         let index;
         if (!data.replaceNewMessageChatWindow) {
-            index = state.chatWindows.length;
+            index = store.chatWindows.length;
         } else {
-            const newMessageChatWindowIndex = state.chatWindows.findIndex(
+            const newMessageChatWindowIndex = store.chatWindows.findIndex(
                 (chatWindow) => !chatWindow.thread
             );
             index =
                 newMessageChatWindowIndex !== -1
                     ? newMessageChatWindowIndex
-                    : state.chatWindows.length;
+                    : store.chatWindows.length;
         }
-        state.chatWindows.splice(index, 1, this);
-        return state.chatWindows[index]; // return reactive version
+        store.chatWindows.splice(index, 1, this);
+        return store.chatWindows[index]; // return reactive version
     }
 
     get thread() {
-        return this._state.threads[this.threadLocalId];
+        return this._store.threads[this.threadLocalId];
     }
 
     set thread(thread) {
@@ -117,16 +117,16 @@ export class ChatWindow {
     }
 
     close({ escape = false } = {}) {
-        const index = this._state.chatWindows.findIndex((c) => c.thread === this.thread);
+        const index = this._store.chatWindows.findIndex((c) => c.thread === this.thread);
         if (index > -1) {
-            this._state.chatWindows.splice(index, 1);
+            this._store.chatWindows.splice(index, 1);
         }
         const thread = this.thread;
         if (thread) {
             thread.state = "closed";
         }
-        if (escape && this._state.chatWindows.length > 0) {
-            this._state.chatWindows[index - 1].autofocus++;
+        if (escape && this._store.chatWindows.length > 0) {
+            this._store.chatWindows[index - 1].autofocus++;
         }
     }
 
@@ -159,7 +159,7 @@ export class ChatWindow {
     }
 
     makeVisible() {
-        const visible = ChatWindow.visible(this._state);
+        const visible = ChatWindow.visible(this._store);
         const swaped = visible[visible.length - 1];
         swaped.hide();
         this.show();

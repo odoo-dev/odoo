@@ -7,14 +7,14 @@
             <span t-if="thread and thread.defaultDisplayMode === 'video_full_screen'">You've been invited to a meeting!</span>
             <span t-else="">You've been invited to a chat!</span>
         </h1>
-        <h2 class="m-5" t-esc="messaging.state.companyName"/>
+        <h2 class="m-5" t-esc="store.companyName"/>
         <div class="d-flex justify-content-center">
             <div class="d-flex flex-column justify-content-center">
-                <t t-if="messaging.state.currentGuest">
+                <t t-if="store.currentGuest">
                     <label class="o-mail-welcome-page-guest-name-input-label text-center fs-4" >What's your name?</label>
                     <input class="form-control mb-3" type="text" placeholder="Your name" t-model="state.userName" t-on-keydown="onKeydownInput"/>
                 </t>
-                <button class="o-mail-welcome-page-join-button btn btn-success fa-stack align-self-end p-0 rounded-circle fs-1 shadow" title="Join Channel" t-att-disabled="messaging.state.currentGuest and state.userName.trim() === ''" t-on-click="joinChannel">
+                <button class="o-mail-welcome-page-join-button btn btn-success fa-stack align-self-end p-0 rounded-circle fs-1 shadow" title="Join Channel" t-att-disabled="store.currentGuest and state.userName.trim() === ''" t-on-click="joinChannel">
                     <i class="fa fa-arrow-right fa-stack"/>
                 </button>
             </div>

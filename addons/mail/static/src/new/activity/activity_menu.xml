@@ -5,15 +5,15 @@
     <Dropdown position="'bottom-end'" menuClass="'p-0'" beforeOpen.bind="onBeforeOpen">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-clock-o" role="img" aria-label="Activities"></i>
-            <span t-if="messaging.state.activityCounter" class="o-mail-activity-menu-counter badge"><t t-esc="messaging.state.activityCounter"/></span>
+            <span t-if="store.activityCounter" class="o-mail-activity-menu-counter badge"><t t-esc="store.activityCounter"/></span>
         </t>
         <t t-set-slot="default">
             <div class="o-mail-activity-menu">
-                <div t-if="messaging.state.activityCounter === 0" class="o-mail-no-activity align-items-center text-muted p-2 opacity-50 d-flex justify-content-center">
+                <div t-if="store.activityCounter === 0" class="o-mail-no-activity align-items-center text-muted p-2 opacity-50 d-flex justify-content-center">
                     <span>Congratulations, you're done with your activities.</span>
                 </div>
                 <div t-else="" class="d-flex flex-column overflow-auto cursor-pointer">
-                    <t t-foreach="messaging.state.activityGroups" t-as="group" t-key="group.id">
+                    <t t-foreach="store.activityGroups" t-as="group" t-key="group.id">
                         <div class="o-mail-activity d-flex p-2 border-bottom" t-att-data-model_name="group.model" t-on-click="() => this.openActivityGroup(group)">
                             <img class="o-mail-activity-img" alt="Activity" t-att-src="group.icon"/>
                             <div class="flex-grow-1">

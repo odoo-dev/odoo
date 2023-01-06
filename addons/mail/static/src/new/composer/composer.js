@@ -13,7 +13,7 @@ import {
     useState,
 } from "@odoo/owl";
 import { useDropzone } from "../dropzone/dropzone_hook";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { NavigableList } from "./navigable_list";
 import { useEmojiPicker } from "./emoji_picker";
 
@@ -52,6 +52,7 @@ export class Composer extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.attachmentUploader = useAttachmentUploader(
             this.messageToReplyTo?.originThread ?? this.props.composer.thread,
             this.props.composer.message
@@ -118,7 +119,7 @@ export class Composer extends Component {
                     this.state.autofocus++;
                 }
             },
-            () => [this.messaging.state.discuss.messageToReplyTo]
+            () => [this.store.discuss.messageToReplyTo]
         );
         useEffect(
             () => {
@@ -180,7 +181,7 @@ export class Composer extends Component {
     }
 
     get messageToReplyTo() {
-        return this.messaging.state.discuss.messageToReplyTo;
+        return this.store.discuss.messageToReplyTo;
     }
 
     get placeholder() {
@@ -368,7 +369,7 @@ export class Composer extends Component {
 
     async sendMessage() {
         return this.processMessage(async (value) => {
-            const { messageToReplyTo } = this.messaging.state.discuss;
+            const { messageToReplyTo } = this.store.discuss;
             const thread = messageToReplyTo?.originThread ?? this.props.composer.thread;
             const postData = {
                 attachments: this.attachmentUploader.attachments,

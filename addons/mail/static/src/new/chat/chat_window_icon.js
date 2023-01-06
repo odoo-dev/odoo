@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { useMessaging } from "../core/messaging_hook";
+import { useStore } from "../core/messaging_hook";
 import { Typing } from "../composer/typing";
 
 /**
@@ -21,10 +21,10 @@ export class ChatWindowIcon extends Component {
     };
 
     setup() {
-        this.messaging = useMessaging();
+        this.store = useStore();
     }
 
     get chatPartner() {
-        return this.messaging.state.partners[this.props.thread.chatPartnerId];
+        return this.store.partners[this.props.thread.chatPartnerId];
     }
 }

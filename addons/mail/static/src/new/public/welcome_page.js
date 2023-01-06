@@ -2,7 +2,7 @@
 
 import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 
 export class WelcomePage extends Component {
     static props = ["data?", "proceed?"];
@@ -10,6 +10,7 @@ export class WelcomePage extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.rpc = useService("rpc");
         this.state = useState({
             userName: "Guest",
@@ -23,9 +24,9 @@ export class WelcomePage extends Component {
     }
 
     async joinChannel() {
-        if (this.messaging.state.currentGuest) {
+        if (this.store.currentGuest) {
             await this.rpc("/mail/guest/update_name", {
-                guest_id: this.messaging.state.currentGuest.id,
+                guest_id: this.store.currentGuest.id,
                 name: this.state.userName.trim(),
             });
         }
@@ -39,6 +40,6 @@ export class WelcomePage extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[this.messaging.state.discuss.threadLocalId];
+        return this.store.threads[this.store.discuss.threadLocalId];
     }
 }

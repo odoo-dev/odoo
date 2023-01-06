@@ -11,7 +11,7 @@ import { Component, onPatched, useChildSubEnv, useEffect, useRef, useState } fro
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Composer as ComposerModel } from "../core/composer_model";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
@@ -65,6 +65,7 @@ export class Message extends Component {
         });
         this.ref = useRef("ref");
         this.messaging = useMessaging();
+        this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
         this.user = useService("user");
@@ -246,7 +247,7 @@ export class Message extends Component {
 
     enterEditMode() {
         const messageContent = convertBrToLineBreak(this.props.message.body);
-        ComposerModel.insert(this.messaging.state, {
+        ComposerModel.insert(this.store, {
             message: this.props.message,
             textInputContent: messageContent,
             selection: {

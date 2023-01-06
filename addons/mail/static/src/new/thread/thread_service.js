@@ -12,20 +12,15 @@ import { _t } from "@web/core/l10n/translation";
 const FETCH_MSG_LIMIT = 30;
 
 export class ThreadService {
-    constructor(env, state, orm, rpc, chatWindow, notification, router) {
+    constructor(env, store, orm, rpc, chatWindow, notification, router) {
         this.env = env;
-        this.state = state;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = store;
         this.orm = orm;
         this.rpc = rpc;
         this.chatWindow = chatWindow;
         this.notification = notification;
         this.router = router;
-        Object.assign(this.state, {
-            /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */
-            messages: {},
-            /** @type {{[key: string|number]: Thread}} */
-            threads: {},
-        });
     }
 
     /**
@@ -47,8 +42,8 @@ export class ThreadService {
         const isUnread = last_message_id !== seen_message_id;
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
-        const isAdmin = channelType !== "group" && serverData.create_uid === this.state.user.uid;
-        const thread = Thread.insert(this.state, {
+        const isAdmin = channelType !== "group" && serverData.create_uid === this.store.user.uid;
+        const thread = Thread.insert(this.store, {
             id,
             model: "mail.channel",
             name,
@@ -81,12 +76,12 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona?.partner) {
-                Partner.insert(this.state, channelMember.persona.partner);
+                Partner.insert(this.store, channelMember.persona.partner);
             }
             if (channelMember.persona?.guest) {
-                Guest.insert(this.state, channelMember.persona.guest);
+                Guest.insert(this.store, channelMember.persona.guest);
             }
-            ChannelMember.insert(this.state, {
+            ChannelMember.insert(this.store, {
                 id: channelMember.id,
                 partnerId: channelMember.persona?.partner?.id,
                 guestId: channelMember.persona?.guest?.id,
@@ -150,7 +145,7 @@ export class ThreadService {
                     : data.parentMessage.body;
             }
             return Message.insert(
-                this.state,
+                this.store,
                 Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
                 thread
             );
@@ -185,7 +180,7 @@ export class ThreadService {
     async createChannel(name) {
         const data = await this.orm.call("mail.channel", "channel_create", [
             name,
-            this.state.internalUserGroupId,
+            this.store.internalUserGroupId,
         ]);
         const channel = this.createChannelThread(data);
         this.sortChannels();
@@ -193,18 +188,18 @@ export class ThreadService {
     }
 
     sortChannels() {
-        this.state.discuss.channels.threads.sort((id1, id2) => {
-            const thread1 = this.state.threads[id1];
-            const thread2 = this.state.threads[id2];
+        this.store.discuss.channels.threads.sort((id1, id2) => {
+            const thread1 = this.store.threads[id1];
+            const thread2 = this.store.threads[id2];
             return String.prototype.localeCompare.call(thread1.name, thread2.name);
         });
     }
 
     open(thread, replaceNewMessageChatWindow) {
-        if (this.state.discuss.isActive) {
+        if (this.store.discuss.isActive) {
             this.setDiscussThread(thread);
         } else {
-            const chatWindow = ChatWindow.insert(this.state, {
+            const chatWindow = ChatWindow.insert(this.store, {
                 folded: false,
                 thread,
                 replaceNewMessageChatWindow,
@@ -226,10 +221,10 @@ export class ThreadService {
 
     async getChat({ userId, partnerId }) {
         if (!partnerId) {
-            let user = this.state.users[userId];
+            let user = this.store.users[userId];
             if (!user) {
-                this.state.users[userId] = { id: userId };
-                user = this.state.users[userId];
+                this.store.users[userId] = { id: userId };
+                user = this.store.users[userId];
             }
             if (!user.partner_id) {
                 const [userData] = await this.orm.silent.read(
@@ -252,7 +247,7 @@ export class ThreadService {
             }
             partnerId = user.partner_id;
         }
-        let chat = Object.values(this.state.threads).find(
+        let chat = Object.values(this.store.threads).find(
             (thread) => thread.type === "chat" && thread.chatPartnerId === partnerId
         );
         if (!chat || !chat.is_pinned) {
@@ -270,9 +265,9 @@ export class ThreadService {
 
     async joinChannel(id, name) {
         await this.orm.call("mail.channel", "add_members", [[id]], {
-            partner_ids: [this.state.user.partnerId],
+            partner_ids: [this.store.user.partnerId],
         });
-        const thread = Thread.insert(this.state, {
+        const thread = Thread.insert(this.store, {
             id,
             model: "mail.channel",
             name,
@@ -280,7 +275,7 @@ export class ThreadService {
             serverData: { channel: { avatarCacheKey: "hello" } },
         });
         this.sortChannels();
-        this.state.discuss.threadLocalId = thread.localId;
+        this.store.discuss.threadLocalId = thread.localId;
         return thread;
     }
 
@@ -288,7 +283,7 @@ export class ThreadService {
         const data = await this.orm.call("mail.channel", "channel_get", [], {
             partners_to: [id],
         });
-        return Thread.insert(this.state, {
+        return Thread.insert(this.store, {
             id: data.id,
             model: "mail.channel",
             name: undefined,
@@ -324,14 +319,14 @@ export class ThreadService {
         await this.orm.call("mail.channel", "action_unfollow", [channel.id]);
         channel.remove();
         this.setDiscussThread(
-            this.state.discuss.channels.threads[0]
-                ? this.state.threads[this.state.discuss.channels.threads[0]]
-                : this.state.discuss.inbox
+            this.store.discuss.channels.threads[0]
+                ? this.store.threads[this.store.discuss.channels.threads[0]]
+                : this.store.discuss.inbox
         );
     }
 
     setDiscussThread(thread) {
-        this.state.discuss.threadLocalId = thread.localId;
+        this.store.discuss.threadLocalId = thread.localId;
         const activeId =
             typeof thread.id === "string" ? `mail.box_${thread.id}` : `mail.channel_${thread.id}`;
         this.router.pushState({ active_id: activeId });
@@ -349,11 +344,11 @@ export class ThreadService {
 }
 
 export const threadService = {
-    dependencies: ["mail.state", "orm", "rpc", "mail.chat_window", "notification", "router"],
+    dependencies: ["mail.store", "orm", "rpc", "mail.chat_window", "notification", "router"],
     start(
         env,
-        { "mail.state": state, orm, rpc, "mail.chat_window": chatWindow, notification, router }
+        { "mail.store": store, orm, rpc, "mail.chat_window": chatWindow, notification, router }
     ) {
-        return new ThreadService(env, state, orm, rpc, chatWindow, notification, router);
+        return new ThreadService(env, store, orm, rpc, chatWindow, notification, router);
     },
 };

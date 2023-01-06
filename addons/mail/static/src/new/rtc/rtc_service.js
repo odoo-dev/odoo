@@ -6,6 +6,7 @@ import { Rtc } from "./rtc";
 
 export const rtcService = {
     dependencies: [
+        "mail.store",
         "mail.messaging",
         "notification",
         "rpc",
@@ -16,6 +17,7 @@ export const rtcService = {
     start(
         env,
         {
+            "mail.store": store,
             "mail.messaging": messaging,
             notification,
             rpc,
@@ -24,7 +26,7 @@ export const rtcService = {
             "mail.userSettings": userSettings,
         }
     ) {
-        const rtc = new Rtc(env, messaging, notification, rpc, soundEffects, userSettings);
+        const rtc = new Rtc(env, store, messaging, notification, rpc, soundEffects, userSettings);
         bus.addEventListener("notification", (notifEvent) => {
             for (const notif of notifEvent.detail) {
                 switch (notif.type) {

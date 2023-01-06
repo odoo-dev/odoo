@@ -2,7 +2,7 @@
 
 import { Component, useState } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { NotificationItem } from "./notification_item";
 import { browser } from "@web/core/browser/browser";
@@ -15,6 +15,7 @@ export class MessagingMenu extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.store = useStore();
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.threadService = useState(useService("mail.thread"));
         this.action = useService("action");
@@ -32,7 +33,7 @@ export class MessagingMenu extends Component {
 
     get displayedPreviews() {
         /** @type {import("@mail/new/core/thread_model").Thread[]} **/
-        const threads = Object.values(this.messaging.state.threads);
+        const threads = Object.values(this.store.threads);
         const previews = threads.filter((thread) => thread.is_pinned);
 
         const filter = this.state.filter;
@@ -66,7 +67,7 @@ export class MessagingMenu extends Component {
             if (!message.originThread.type) {
                 message.originThread.update({ type: "chatter" });
             }
-            if (this.messaging.state.discuss.isActive) {
+            if (this.store.discuss.isActive) {
                 this.action.doAction({
                     type: "ir.actions.act_window",
                     res_model: message.originThread.model,
@@ -75,7 +76,7 @@ export class MessagingMenu extends Component {
                 });
                 // Close the related chat window as having both the form view
                 // and the chat window does not look good.
-                this.messaging.state.chatWindows
+                this.store.chatWindows
                     .find(({ thread }) => thread === message.originThread)
                     ?.close();
             } else {
@@ -121,11 +122,11 @@ export class MessagingMenu extends Component {
 
     get counter() {
         let value =
-            this.messaging.state.discuss.inbox.counter +
-            Object.values(this.messaging.state.threads).filter(
+            this.store.discuss.inbox.counter +
+            Object.values(this.store.threads).filter(
                 (thread) => thread.is_pinned && thread.isUnread
             ).length +
-            Object.values(this.messaging.state.notificationGroups).reduce(
+            Object.values(this.store.notificationGroups).reduce(
                 (acc, ng) => acc + parseInt(Object.values(ng.notifications).length),
                 0
             );
