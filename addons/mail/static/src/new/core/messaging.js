@@ -433,6 +433,9 @@ export class Messaging {
                     break;
                 case "mail.record/insert":
                     {
+                        if (notif.payload.RtcSession) {
+                            RtcSession.insert(this.state, notif.payload.RtcSession);
+                        }
                         if (notif.payload.Partner) {
                             const partners = Array.isArray(notif.payload.Partner)
                                 ? notif.payload.Partner

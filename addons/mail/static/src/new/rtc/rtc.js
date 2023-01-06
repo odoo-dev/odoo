@@ -931,7 +931,7 @@ export class Rtc {
         }
         this.state.audioTrack.enabled =
             !this.state.selfSession.isMute && this.state.selfSession.isTalking;
-        await this.notify([this.messaging.state.rtcSession], "trackChange", {
+        await this.notify(Object.values(this.state.channel.rtcSessions), "trackChange", {
             type: "audio",
             state: {
                 isTalking: this.state.selfSession.isTalking && !this.state.selfSession.isSelfMuted,
