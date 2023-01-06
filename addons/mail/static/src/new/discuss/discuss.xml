@@ -34,7 +34,7 @@
                     <button t-if="thread.model === 'mail.channel'" class="btn" t-ref="addUsers" title="Add Users" data-action="add-users" t-on-click.stop="toggleInviteForm">
                         <i class="fa fa-lg fa-user-plus text-700"/>
                     </button>
-                    <button t-if="thread.type === 'channel'" class="btn" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
+                    <button t-if="hasMemberListFeature" class="btn" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
                         <i class="fa fa-lg fa-users text-700"/>
                     </button>
                     <button t-if="thread.type !== 'mailbox'" class="btn" t-ref="settings" title="Show Call Settings" t-on-click="toggleSettings">
@@ -48,7 +48,7 @@
                     <Thread thread="thread" t-key="thread.localId" messageEdition="messageEdition" messageHighlight="messageHighlight"/>
                     <Composer t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo" t-key="thread.localId" composer="thread.composer" autofocus="true" messageEdition="messageEdition" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
                 </div>
-                <ChannelMemberList t-if="thread.type === 'channel' and state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start'"/>
+                <ChannelMemberList t-if="hasMemberListFeature and state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start'"/>
             </div>
         </div>
         <div t-if="!thread" class="o-mail-discuss-no-thread d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
