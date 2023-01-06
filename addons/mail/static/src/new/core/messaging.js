@@ -19,6 +19,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { createLocalId } from "./thread_model.create_local_id";
+import { session } from "@web/session";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 export const OTHER_LONG_TYPING = 60000;
@@ -200,7 +201,9 @@ export class Messaging {
             if (data.currentGuest) {
                 this.state.currentGuest = Guest.insert(this.state, data.currentGuest);
             }
-            this.loadFailures();
+            if (session.user_context.uid) {
+                this.loadFailures();
+            }
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
                 const thread = this.thread.createChannelThread(channelData);

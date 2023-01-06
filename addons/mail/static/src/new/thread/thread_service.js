@@ -65,8 +65,10 @@ export class ThreadService {
     }
 
     async fetchChannelMembers(thread) {
-        const results = await this.orm.call("mail.channel", "load_more_members", [[thread.id]], {
-            known_member_ids: thread.channelMembers.map((channelMember) => channelMember.id),
+        const known_member_ids = thread.channelMembers.map((channelMember) => channelMember.id);
+        const results = await this.rpc("/mail/channel/members", {
+            channel_id: thread.id,
+            known_member_ids: known_member_ids,
         });
         let channelMembers = [];
         if (

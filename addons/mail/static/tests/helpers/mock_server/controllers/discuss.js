@@ -54,6 +54,10 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
         if (route === "/mail/channel/ping") {
             return;
         }
+        if (route === "/mail/channel/members") {
+            const { channel_id, known_member_ids } = args;
+            return this._mockMailChannelLoadMoreMembers([channel_id], known_member_ids);
+        }
         if (route === "/mail/history/messages") {
             const { min_id, max_id, limit } = args;
             return this._mockRouteMailMessageHistory(min_id, max_id, limit);

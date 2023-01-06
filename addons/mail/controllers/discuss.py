@@ -198,6 +198,11 @@ class DiscussController(http.Controller):
             return guest.sudo()._init_messaging()
         raise NotFound()
 
+    @http.route('/mail/channel/members', methods=['POST'], type='json', auth='public')
+    def mail_channel_members(self, channel_id, known_member_ids):
+        channel_member = request.env['mail.channel.member']._get_as_sudo_from_request_or_raise(request=request, channel_id=channel_id)
+        return channel_member.channel_id.sudo().load_more_members(known_member_ids)
+
     @http.route('/mail/load_message_failures', methods=['POST'], type='json', auth='user')
     def mail_load_message_failures(self, **kwargs):
         return request.env.user.partner_id._message_fetch_failed()
