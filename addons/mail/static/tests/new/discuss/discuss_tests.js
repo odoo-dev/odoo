@@ -1536,7 +1536,7 @@ QUnit.test(
             },
         });
         await openDiscuss();
-        assert.containsOnce(target, ".fa-users");
+        assert.containsOnce(target, ".o-mail-discuss-thread-icon .fa-users");
     }
 );
 
