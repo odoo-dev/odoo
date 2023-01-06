@@ -64,7 +64,7 @@ export class ChannelSelector extends Component {
                     10,
                     this.state.selectedPartners,
                 ]);
-                return results.map((data) => {
+                const suggestions = results.map((data) => {
                     Partner.insert(this.messaging.state, data);
                     return {
                         classList: "o-mail-channel-selector-suggestion",
@@ -72,6 +72,14 @@ export class ChannelSelector extends Component {
                         partner: data,
                     };
                 });
+                if (this.messaging.currentPartner.name.includes(cleanedTerm)) {
+                    suggestions.push({
+                        classList: "o-mail-channel-selector-suggestion",
+                        label: this.messaging.currentPartner.name,
+                        partner: this.messaging.currentPartner,
+                    });
+                }
+                return suggestions;
             }
         }
         return [];

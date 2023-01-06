@@ -370,6 +370,10 @@ export class Messaging {
         return Boolean(browser.Notification && browser.Notification.permission === "granted");
     }
 
+    get currentPartner() {
+        return this.state.partners[this.state.user.partnerId];
+    }
+
     handleNotification(notifications) {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
