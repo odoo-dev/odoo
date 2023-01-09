@@ -7,7 +7,7 @@ import {
     CHAT_WINDOW_END_GAP_WIDTH,
     CHAT_WINDOW_INBETWEEN_WIDTH,
     CHAT_WINDOW_WIDTH,
-} from "../core/chat_window_model";
+} from "../chat/chat_window_service";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { ChatWindow } from "./chat_window";
 import { ChatWindowHiddenMenu } from "./chat_window_hidden_menu";
@@ -41,13 +41,15 @@ export class ChatWindowContainer extends Component {
 
     onResize() {
         while (this.chatWindowService.visible.length > this.chatWindowService.maxVisible) {
-            this.chatWindowService.visible[this.chatWindowService.visible.length - 1].hide();
+            this.chatWindowService.hide(
+                this.chatWindowService.visible[this.chatWindowService.visible.length - 1]
+            );
         }
         while (
             this.chatWindowService.visible.length < this.chatWindowService.maxVisible &&
             this.chatWindowService.hidden.length > 0
         ) {
-            this.chatWindowService.hidden[0].show();
+            this.chatWindowService.show(this.chatWindowService.hidden[0]);
         }
     }
 }

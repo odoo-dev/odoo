@@ -1,18 +1,20 @@
 /* @odoo-module */
 
 import { cleanTerm } from "@mail/new/utils/format";
-import { CannedResponse } from "../core/canned_response_model";
-import { Partner } from "../core/partner_model";
-import { Thread } from "../core/thread_model";
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 
 const commandRegistry = registry.category("mail.channel_commands");
 
 class SuggestionService {
-    constructor(env, store, orm) {
+    constructor(env, store, orm, thread, partner) {
         this.orm = orm;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = store;
+        /** @type {import("@mail/new/thread/thread_service").Thread} */
+        this.thread = thread;
+        /** @type {import("@mail/new/core/partner_service").Partner} */
+        this.partner = partner;
     }
 
     async fetchSuggestions({ delimiter, term }, { thread } = {}) {
@@ -49,7 +51,7 @@ class SuggestionService {
             kwargs
         );
         suggestedPartners.map((data) => {
-            Partner.insert(this.store, data);
+            this.partner.insert(data);
         });
     }
 
@@ -61,7 +63,7 @@ class SuggestionService {
             { search: term }
         );
         suggestedThreads.map((data) => {
-            Thread.insert(this.store, {
+            this.thread.insert({
                 model: "mail.channel",
                 ...data,
             });
@@ -83,12 +85,12 @@ class SuggestionService {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                return Partner.searchSuggestions(this.store, cleanedSearchTerm, thread, sort);
+                return this.searchPartnerSuggestions(cleanedSearchTerm, thread, sort);
             }
             case ":":
-                return CannedResponse.searchSuggestions(this.store, cleanedSearchTerm, sort);
+                return this.searchCannedResponseSuggestions(cleanedSearchTerm, sort);
             case "#":
-                return Thread.searchSuggestions(this.store, cleanedSearchTerm, thread, sort);
+                return this.searchChannelSuggestions(cleanedSearchTerm, thread, sort);
             case "/":
                 return this.searchChannelCommand(cleanedSearchTerm, thread, sort);
         }
@@ -166,11 +168,245 @@ class SuggestionService {
             },
         ];
     }
+
+    searchPartnerSuggestions(cleanedSearchTerm, thread, sort) {
+        let partners;
+        const isNonPublicChannel =
+            thread &&
+            (thread.type === "group" ||
+                thread.type === "chat" ||
+                (thread.type === "channel" && thread.serverData.group_based_subscription));
+        if (isNonPublicChannel) {
+            // Only return the channel members when in the context of a
+            // group restricted channel. Indeed, the message with the mention
+            // would be notified to the mentioned partner, so this prevents
+            // from inadvertently leaking the private message to the
+            // mentioned partner.
+            partners = thread.channelMembers.map((member) => member.partner);
+        } else {
+            partners = Object.values(this.store.partners);
+        }
+        const mainSuggestionList = [];
+        const extraSuggestionList = [];
+        for (const partner of partners) {
+            if (partner === this.store.partnerRoot) {
+                // ignore archived partners (except OdooBot)
+                continue;
+            }
+            if (!partner.name) {
+                continue;
+            }
+            if (
+                cleanTerm(partner.name).includes(cleanedSearchTerm) ||
+                (partner.email && cleanTerm(partner.email).includes(cleanedSearchTerm))
+            ) {
+                if (partner.user) {
+                    mainSuggestionList.push(partner);
+                } else {
+                    extraSuggestionList.push(partner);
+                }
+            }
+        }
+        const sortFunc = (a, b) => {
+            const isAInternalUser = a.user && a.user.isInternalUser;
+            const isBInternalUser = b.user && b.user.isInternalUser;
+            if (isAInternalUser && !isBInternalUser) {
+                return -1;
+            }
+            if (!isAInternalUser && isBInternalUser) {
+                return 1;
+            }
+            if (thread?.serverData?.channel) {
+                const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
+                const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
+                if (isAMember && !isBMember) {
+                    return -1;
+                }
+                if (!isAMember && isBMember) {
+                    return 1;
+                }
+            }
+            if (thread) {
+                const isAFollower = thread.followers.some((follower) => follower.partner === a);
+                const isBFollower = thread.followers.some((follower) => follower.partner === b);
+                if (isAFollower && !isBFollower) {
+                    return -1;
+                }
+                if (!isAFollower && isBFollower) {
+                    return 1;
+                }
+            }
+            const cleanedAName = cleanTerm(a.name || "");
+            const cleanedBName = cleanTerm(b.name || "");
+            if (
+                cleanedAName.startsWith(cleanedSearchTerm) &&
+                !cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedAName.startsWith(cleanedSearchTerm) &&
+                cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAName < cleanedBName) {
+                return -1;
+            }
+            if (cleanedAName > cleanedBName) {
+                return 1;
+            }
+            const cleanedAEmail = cleanTerm(a.email || "");
+            const cleanedBEmail = cleanTerm(b.email || "");
+            if (
+                cleanedAEmail.startsWith(cleanedSearchTerm) &&
+                !cleanedAEmail.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedBEmail.startsWith(cleanedSearchTerm) &&
+                cleanedBEmail.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAEmail < cleanedBEmail) {
+                return -1;
+            }
+            if (cleanedAEmail > cleanedBEmail) {
+                return 1;
+            }
+            return a.id - b.id;
+        };
+        return [
+            {
+                type: "Partner",
+                suggestions: sort ? mainSuggestionList.sort(sortFunc) : mainSuggestionList,
+            },
+            {
+                type: "Partner",
+                suggestions: sort ? extraSuggestionList.sort(sortFunc) : extraSuggestionList,
+            },
+        ];
+    }
+
+    searchCannedResponseSuggestions(cleanedSearchTerm, sort) {
+        const cannedResponses = this.store.cannedResponses
+            .filter((cannedResponse) => {
+                return cleanTerm(cannedResponse.name).includes(cleanedSearchTerm);
+            })
+            .map(({ id, name, substitution }) => {
+                return {
+                    id,
+                    name,
+                    substitution: _t(substitution),
+                };
+            });
+        const sortFunc = (a, b) => {
+            const cleanedAName = cleanTerm(a.name || "");
+            const cleanedBName = cleanTerm(b.name || "");
+            if (
+                cleanedAName.startsWith(cleanedSearchTerm) &&
+                !cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedAName.startsWith(cleanedSearchTerm) &&
+                cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAName < cleanedBName) {
+                return -1;
+            }
+            if (cleanedAName > cleanedBName) {
+                return 1;
+            }
+            return a.id - b.id;
+        };
+        return [
+            {
+                type: "CannedResponse",
+                suggestions: sort ? cannedResponses.sort(sortFunc) : cannedResponses,
+            },
+        ];
+    }
+
+    searchChannelSuggestions(cleanedSearchTerm, thread, sort) {
+        let threads;
+        if (
+            thread &&
+            (thread.type === "group" ||
+                thread.type === "chat" ||
+                (thread.type === "channel" && thread.authorizedGroupFullName))
+        ) {
+            // Only return the current channel when in the context of a
+            // group restricted channel or group or chat. Indeed, the message with the mention
+            // would appear in the target channel, so this prevents from
+            // inadvertently leaking the private message into the mentioned
+            // channel.
+            threads = [thread];
+        } else {
+            threads = Object.values(this.store.threads);
+        }
+        const suggestionList = threads.filter(
+            (thread) =>
+                thread.type === "channel" &&
+                thread.displayName &&
+                cleanTerm(thread.displayName).includes(cleanedSearchTerm)
+        );
+        const sortFunc = (a, b) => {
+            const isAPublicChannel = a.type === "channel" && !a.authorizedGroupFullName;
+            const isBPublicChannel = b.type === "channel" && !b.authorizedGroupFullName;
+            if (isAPublicChannel && !isBPublicChannel) {
+                return -1;
+            }
+            if (!isAPublicChannel && isBPublicChannel) {
+                return 1;
+            }
+            const isMemberOfA = a.hasCurrentUserAsMember;
+            const isMemberOfB = b.hasCurrentUserAsMember;
+            if (isMemberOfA && !isMemberOfB) {
+                return -1;
+            }
+            if (!isMemberOfA && isMemberOfB) {
+                return 1;
+            }
+            const cleanedADisplayName = cleanTerm(a.displayName || "");
+            const cleanedBDisplayName = cleanTerm(b.displayName || "");
+            if (
+                cleanedADisplayName.startsWith(cleanedSearchTerm) &&
+                !cleanedBDisplayName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedADisplayName.startsWith(cleanedSearchTerm) &&
+                cleanedBDisplayName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedADisplayName < cleanedBDisplayName) {
+                return -1;
+            }
+            if (cleanedADisplayName > cleanedBDisplayName) {
+                return 1;
+            }
+            return a.id - b.id;
+        };
+        return [
+            {
+                type: "Thread",
+                suggestions: sort ? suggestionList.sort(sortFunc) : suggestionList,
+            },
+        ];
+    }
 }
 
 export const suggestionService = {
-    dependencies: ["orm", "mail.store"],
-    start(env, { orm, "mail.store": store }) {
-        return new SuggestionService(env, store, orm);
+    dependencies: ["orm", "mail.store", "mail.thread", "mail.partner"],
+    start(env, { orm, "mail.store": store, "mail.thread": thread, "mail.partner": partner }) {
+        return new SuggestionService(env, store, orm, thread, partner);
     },
 };

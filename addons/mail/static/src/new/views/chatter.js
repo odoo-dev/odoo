@@ -1,7 +1,5 @@
 /* @odoo-module */
 
-import { Follower } from "@mail/new/core/follower_model";
-import { Activity as ActivityModel } from "@mail/new/core/activity_model";
 import { Thread } from "../thread/thread";
 import { useMessaging } from "../core/messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
@@ -26,7 +24,6 @@ import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
-import { Attachment } from "../core/attachment_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class Chatter extends Component {
@@ -40,7 +37,7 @@ export class Chatter extends Component {
     ];
     static template = "mail.chatter";
 
-    /** @type {import("@mail/new/core/messaging").Messaging} */
+    /** @type {import("@mail/new/core/messaging_service").Messaging} */
     messaging;
     /**
      * @type {import("@mail/new/core/thread_model").Thread}
@@ -51,7 +48,9 @@ export class Chatter extends Component {
         this.action = useService("action");
         this.messaging = useMessaging();
         this.activity = useState(useService("mail.activity"));
+        this.attachment = useService("mail.attachment");
         this.chatter = useState(useService("mail.chatter"));
+        this.threadService = useService("mail.thread");
         this.store = useService("mail.store");
         this.orm = useService("orm");
         this.rpc = useService("rpc");
@@ -142,23 +141,23 @@ export class Chatter extends Component {
                     if (activity.note) {
                         activity.note = markup(activity.note);
                     }
-                    existingIds.add(ActivityModel.insert(this.store, activity).id);
+                    existingIds.add(this.activity.insert(activity).id);
                 }
                 for (const activity of this.activities) {
                     if (!existingIds.has(activity.id)) {
-                        activity.delete();
+                        this.activity.delete(activity);
                     }
                 }
             }
             if ("attachments" in result) {
                 this.state.attachments = result.attachments.map((attachment) =>
-                    Attachment.insert(this.store, attachment)
+                    this.attachment.insert(attachment)
                 );
                 this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {
                 for (const followerData of result.followers) {
-                    Follower.insert(this.store, {
+                    this.chatter.insertFollower({
                         followedThread: this.thread,
                         ...followerData,
                     });

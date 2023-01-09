@@ -1,19 +1,20 @@
 /** @odoo-module */
 
 import { markup } from "@odoo/owl";
-import { Message } from "@mail/new/core/message_model";
 import { ChannelMember } from "../core/channel_member_model";
-import { Partner } from "../core/partner_model";
-import { Guest } from "../core/guest_model";
 import { Thread } from "../core/thread_model";
-import { ChatWindow } from "../core/chat_window_model";
 import { _t } from "@web/core/l10n/translation";
 import { removeFromArray } from "@mail/new/utils/arrays";
+import { createLocalId } from "../core/thread_model.create_local_id";
+import { Composer } from "../core/composer_model";
+import { prettifyMessageContent } from "../utils/format";
 
 const FETCH_MSG_LIMIT = 30;
 
 export class ThreadService {
-    constructor(env, store, orm, rpc, chatWindow, notification, router) {
+    nextId = 0;
+
+    constructor(env, store, orm, rpc, chatWindow, notification, router, partner, message) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = store;
@@ -22,10 +23,20 @@ export class ThreadService {
         this.chatWindow = chatWindow;
         this.notification = notification;
         this.router = router;
+        /** @type {import("@mail/new/core/partner_service").PartnerService} */
+        this.partner = partner;
+        /** @type {import("@mail/new/thread/message_service").MessageService} */
+        this.message = message;
+        // FIXME this prevents cyclic dependencies between mail.thread and mail.message
+        this.env.bus.addEventListener("MESSAGE-SERVICE:INSERT_THREAD", ({ detail }) => {
+            const model = detail.model;
+            const id = detail.id;
+            this.insert({ model, id });
+        });
     }
 
     /**
-     * todo: merge this with Thread.insert() (?)
+     * todo: merge this with this.insert() (?)
      *
      * @returns {Thread}
      */
@@ -44,7 +55,7 @@ export class ThreadService {
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
         const isAdmin = channelType !== "group" && serverData.create_uid === this.store.user.uid;
-        const thread = Thread.insert(this.store, {
+        const thread = this.insert({
             id,
             model: "mail.channel",
             name,
@@ -77,12 +88,12 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona?.partner) {
-                Partner.insert(this.store, channelMember.persona.partner);
+                this.partner.insert(channelMember.persona.partner);
             }
             if (channelMember.persona?.guest) {
-                Guest.insert(this.store, channelMember.persona.guest);
+                this.partner.insertGuest(channelMember.persona.guest);
             }
-            ChannelMember.insert(this.store, {
+            this.insertChannelMember({
                 id: channelMember.id,
                 partnerId: channelMember.persona?.partner?.id,
                 guestId: channelMember.persona?.guest?.id,
@@ -102,7 +113,7 @@ export class ThreadService {
                 last_message_id: mostRecentNonTransientMessage?.id,
             });
         }
-        thread.update({ isUnread: false });
+        this.update(thread, { isUnread: false });
     }
 
     /**
@@ -152,10 +163,9 @@ export class ThreadService {
                     ? markup(data.parentMessage.body)
                     : data.parentMessage.body;
             }
-            return Message.insert(
-                this.store,
+            return this.message.insert(
                 Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
-                thread
+                true
             );
         });
         return messages;
@@ -207,7 +217,7 @@ export class ThreadService {
         if (this.store.discuss.isActive) {
             this.setDiscussThread(thread);
         } else {
-            const chatWindow = ChatWindow.insert(this.store, {
+            const chatWindow = this.chatWindow.insert({
                 folded: false,
                 thread,
                 replaceNewMessageChatWindow,
@@ -275,7 +285,7 @@ export class ThreadService {
         await this.orm.call("mail.channel", "add_members", [[id]], {
             partner_ids: [this.store.user.partnerId],
         });
-        const thread = Thread.insert(this.store, {
+        const thread = this.insert({
             id,
             model: "mail.channel",
             name,
@@ -291,7 +301,7 @@ export class ThreadService {
         const data = await this.orm.call("mail.channel", "channel_get", [], {
             partners_to: [id],
         });
-        return Thread.insert(this.store, {
+        return this.insert({
             id: data.id,
             model: "mail.channel",
             name: undefined,
@@ -355,14 +365,248 @@ export class ThreadService {
         removeFromArray(this.store.discuss.channels.threads, thread.localId);
         delete this.store.threads[thread.localId];
     }
+
+    update(thread, data) {
+        for (const key in data) {
+            thread[key] = data[key];
+        }
+        if (data.serverData) {
+            const { serverData } = data;
+            if ("uuid" in serverData) {
+                thread.uuid = serverData.uuid;
+            }
+            if ("authorizedGroupFullName" in serverData) {
+                thread.authorizedGroupFullName = serverData.authorizedGroupFullName;
+            }
+            if ("hasWriteAccess" in serverData) {
+                thread.hasWriteAccess = serverData.hasWriteAccess;
+            }
+            if ("is_pinned" in serverData) {
+                thread.is_pinned = serverData.is_pinned;
+            }
+            if ("message_needaction_counter" in serverData) {
+                thread.message_needaction_counter = serverData.message_needaction_counter;
+            }
+            if ("message_unread_counter" in serverData) {
+                thread.message_unread_counter = serverData.message_unread_counter;
+            }
+            if ("seen_message_id" in serverData) {
+                thread.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
+            }
+            if ("state" in serverData) {
+                thread.state = serverData.state;
+            }
+            if ("defaultDisplayMode" in serverData) {
+                thread.defaultDisplayMode = serverData.defaultDisplayMode;
+            }
+            if (thread.type === "chat") {
+                for (const elem of serverData.channel.channelMembers[0][1]) {
+                    this.partner.insert(elem.persona.partner);
+                    if (
+                        elem.persona.partner.id !== thread._store.user.partnerId ||
+                        (serverData.channel.channelMembers[0][1].length === 1 &&
+                            elem.persona.partner.id === thread._store.user.partnerId)
+                    ) {
+                        thread.chatPartnerId = elem.persona.partner.id;
+                    }
+                }
+                thread.customName = serverData.channel.custom_channel_name;
+            }
+            if (
+                thread.type === "group" &&
+                serverData.channel &&
+                serverData.channel.channelMembers
+            ) {
+                serverData.channel.channelMembers[0][1].forEach((elem) => {
+                    if (elem.persona?.partner) {
+                        this.partner.insert(elem.persona.partner);
+                    }
+                    if (elem.persona?.guest) {
+                        this.partner.insertGuest(elem.persona.guest);
+                    }
+                });
+            }
+            if ("rtcSessions" in serverData) {
+                // FIXME this prevents cyclic dependencies between mail.thread and mail.rtc
+                this.env.bus.trigger("THREAD-SERVICE:UPDATE_RTC_SESSIONS", {
+                    thread,
+                    data: serverData.rtcSessions[0],
+                });
+            }
+            if ("invitedPartners" in serverData) {
+                thread.invitedPartners =
+                    serverData.invitedPartners &&
+                    serverData.invitedPartners.map((partner) => this.partner.insert(partner));
+            }
+            thread.canLeave =
+                ["channel", "group"].includes(thread.type) &&
+                !thread.message_needaction_counter &&
+                !thread.serverData.group_based_subscription;
+        }
+        this.insertComposer({ thread });
+    }
+
+    /**
+     * @param {Object} data
+     * @returns {Thread}
+     */
+    insert(data) {
+        if (!("id" in data)) {
+            throw new Error("Cannot insert thread: id is missing in data");
+        }
+        if (!("model" in data)) {
+            throw new Error("Cannot insert thread: model is missing in data");
+        }
+        const localId = createLocalId(data.model, data.id);
+        if (localId in this.store.threads) {
+            const thread = this.store.threads[localId];
+            this.update(thread, data);
+            return thread;
+        }
+        let thread = new Thread(this.store, data);
+        thread = this.store.threads[thread.localId] = thread;
+        this.update(thread, data);
+        return thread;
+    }
+
+    /**
+     * @param {Object} data
+     * @returns {Composer}
+     */
+    insertComposer(data) {
+        const { message, thread } = data;
+        if (Boolean(message) === Boolean(thread)) {
+            throw new Error("Composer shall have a thread xor a message.");
+        }
+        let composer = (thread ?? message)?.composer;
+        if (!composer) {
+            composer = new Composer(this.store, data);
+        }
+        if ("textInputContent" in data) {
+            composer.textInputContent = data.textInputContent;
+        }
+        if ("selection" in data) {
+            Object.assign(composer.selection, data.selection);
+        }
+        return composer;
+    }
+
+    insertChannelMember(data) {
+        let channelMember = this.store.channelMembers[data.id];
+        if (!channelMember) {
+            this.store.channelMembers[data.id] = new ChannelMember();
+            channelMember = this.store.channelMembers[data.id];
+            channelMember._store = this.store;
+        }
+        Object.assign(channelMember, {
+            id: data.id,
+            partnerId: data.partnerId ?? data.persona?.partner?.id,
+            guestId: data.guestId ?? data.persona?.guest?.id,
+            threadId: data.threadId ?? channelMember.threadId ?? data?.channel.id,
+        });
+        if (channelMember.thread && !channelMember.thread.channelMembers.includes(channelMember)) {
+            channelMember.thread.channelMembers.push(channelMember);
+        }
+        return channelMember;
+    }
+
+    async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
+        const command = this.message.getCommandFromText(thread.type, body);
+        if (command) {
+            await this.executeCommand(thread, command, body);
+            return;
+        }
+        let tmpMsg;
+        const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
+        const validMentions = this.message.getMentionsFromText(rawMentions, body);
+        const params = {
+            post_data: {
+                body: await prettifyMessageContent(body, validMentions),
+                attachment_ids: attachments.map(({ id }) => id),
+                message_type: "comment",
+                partner_ids: validMentions.partners.map((partner) => partner.id),
+                subtype_xmlid: subtype,
+            },
+            thread_id: thread.id,
+            thread_model: thread.model,
+        };
+        if (parentId) {
+            params.post_data.parent_id = parentId;
+        }
+        if (thread.type === "chatter") {
+            params.thread_id = thread.id;
+            params.thread_model = thread.model;
+        } else {
+            const tmpId = `pending${this.nextId++}`;
+            const tmpData = {
+                id: tmpId,
+                author: { id: this.store.user.partnerId },
+                attachments: attachments,
+                res_id: thread.id,
+                model: "mail.channel",
+            };
+            if (parentId) {
+                tmpData.parentMessage = this.store.messages[parentId];
+            }
+            tmpMsg = this.message.insert({
+                ...tmpData,
+                body: markup(await prettifyMessageContent(body, validMentions)),
+                res_id: thread.id,
+                model: thread.model,
+            });
+        }
+        const data = await this.rpc("/mail/message/post", params);
+        if (data.parentMessage) {
+            data.parentMessage.body = data.parentMessage.body
+                ? markup(data.parentMessage.body)
+                : data.parentMessage.body;
+        }
+        const message = this.message.insert(Object.assign(data, { body: markup(data.body) }));
+        if (!message.isEmpty) {
+            this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
+        }
+        if (thread.type !== "chatter") {
+            removeFromArray(thread.messages, tmpMsg.id);
+            delete this.store.messages[tmpMsg.id];
+        }
+        return message;
+    }
 }
 
 export const threadService = {
-    dependencies: ["mail.store", "orm", "rpc", "mail.chat_window", "notification", "router"],
+    dependencies: [
+        "mail.store",
+        "orm",
+        "rpc",
+        "mail.chat_window",
+        "notification",
+        "router",
+        "mail.partner",
+        "mail.message",
+    ],
     start(
         env,
-        { "mail.store": store, orm, rpc, "mail.chat_window": chatWindow, notification, router }
+        {
+            "mail.store": store,
+            orm,
+            rpc,
+            "mail.chat_window": chatWindow,
+            notification,
+            router,
+            "mail.partner": partner,
+            "mail.message": message,
+        }
     ) {
-        return new ThreadService(env, store, orm, rpc, chatWindow, notification, router);
+        return new ThreadService(
+            env,
+            store,
+            orm,
+            rpc,
+            chatWindow,
+            notification,
+            router,
+            partner,
+            message
+        );
     },
 };

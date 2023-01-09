@@ -14,7 +14,7 @@ import {
     CHAT_WINDOW_END_GAP_WIDTH,
     CHAT_WINDOW_INBETWEEN_WIDTH,
     CHAT_WINDOW_WIDTH,
-} from "@mail/new/core/chat_window_model";
+} from "@mail/new/chat/chat_window_service";
 
 let target;
 QUnit.module("chat window: new message", {

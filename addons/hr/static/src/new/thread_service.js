@@ -1,17 +1,8 @@
 /** @odoo-module */
 
-import { Messaging } from "@mail/new/core/messaging";
-
-import { patch } from "web.utils";
 import { _t } from "@web/core/l10n/translation";
 import { ThreadService } from "@mail/new/thread/thread_service";
-
-patch(Messaging.prototype, "hr", {
-    setup(...args) {
-        this._super(...args);
-        this.store.employees = {};
-    },
-});
+import { patch } from "web.utils";
 
 patch(ThreadService.prototype, "hr", {
     async getChat(person) {

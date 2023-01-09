@@ -18,25 +18,6 @@ export class ChannelMember {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    static insert(store, data) {
-        let channelMember = store.channelMembers[data.id];
-        if (!channelMember) {
-            store.channelMembers[data.id] = new ChannelMember();
-            channelMember = store.channelMembers[data.id];
-            channelMember._store = store;
-        }
-        Object.assign(channelMember, {
-            id: data.id,
-            partnerId: data.partnerId ?? data.persona?.partner?.id,
-            guestId: data.guestId ?? data.persona?.guest?.id,
-            threadId: data.threadId ?? channelMember.threadId ?? data?.channel.id,
-        });
-        if (channelMember.thread && !channelMember.thread.channelMembers.includes(channelMember)) {
-            channelMember.thread.channelMembers.push(channelMember);
-        }
-        return channelMember;
-    }
-
     get partner() {
         return this._store.partners[this.partnerId];
     }

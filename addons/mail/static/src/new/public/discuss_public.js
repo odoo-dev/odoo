@@ -4,7 +4,6 @@ import { Component, useState, useEffect } from "@odoo/owl";
 import { WelcomePage } from "./welcome_page";
 import { Discuss } from "./../discuss/discuss";
 import { useMessaging, useStore } from "../core/messaging_hook";
-import { Thread } from "../core/thread_model";
 import { useService } from "@web/core/utils/hooks";
 
 export class DiscussPublic extends Component {
@@ -38,7 +37,7 @@ export class DiscussPublic extends Component {
     }
 
     get thread() {
-        return Thread.insert(this.store, {
+        return this.threadService.insert({
             id: this.props.data.channelData.id,
             model: "mail.channel",
             type: this.props.data.channelData.channel.channel_type,

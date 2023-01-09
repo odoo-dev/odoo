@@ -1,10 +1,5 @@
 /* @odoo-module */
 
-import { LinkPreview } from "./link_preview_model";
-import { MessageReactions } from "./message_reactions_model";
-import { Partner } from "./partner_model";
-import { Thread } from "./thread_model";
-import { Notification } from "./notification_model";
 import { htmlToTextContentInline } from "@mail/new/utils/format";
 
 import { toRaw } from "@odoo/owl";
@@ -12,7 +7,7 @@ import { toRaw } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { deserializeDateTime } from "@web/core/l10n/dates";
-import { Attachment } from "./attachment_model";
+import { createLocalId } from "./thread_model.create_local_id";
 
 const { DateTime } = luxon;
 
@@ -37,6 +32,8 @@ export class Message {
     linkPreviews = [];
     /** @type {number[]} */
     needaction_partner_ids = [];
+    /** @type {number[]} */
+    history_partner_ids = [];
     /** @type {Message|undefined} */
     parentMessage;
     /** @type {MessageReactions[]} */
@@ -60,129 +57,6 @@ export class Message {
     now = DateTime.now();
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
-
-    /**
-     * @param {import("@mail/new/core/store_service").Store} store
-     * @param {Object} data
-     * @param {Thread} [thread]
-     * @returns {Message}
-     */
-    static insert(store, data, thread) {
-        let message;
-        thread ??= Thread.insert(store, { model: data.model, id: data.res_id });
-        if (data.id in store.messages) {
-            message = store.messages[data.id];
-        } else {
-            message = new Message();
-            message._store = store;
-        }
-        message.update(store, data, thread);
-        store.messages[message.id] = message;
-        message.updateNotifications();
-        // return reactive version
-        return store.messages[message.id];
-    }
-
-    update(store, data, thread) {
-        const {
-            attachment_ids: attachments = this.attachments,
-            body = this.body,
-            is_discussion: isDiscussion = this.isDiscussion,
-            is_note: isNote = this.isNote,
-            is_transient: isTransient = this.isTransient,
-            linkPreviews = this.linkPreviews,
-            message_type: type = this.type,
-            model: resModel = this.resModel,
-            needaction_partner_ids = this.needaction_partner_ids,
-            res_id: resId = this.resId,
-            subject = this.subject,
-            subtype_description: subtypeDescription = this.subtypeDescription,
-            starred_partner_ids = this.starred_partner_ids,
-            trackingValues = this.trackingValues,
-            notifications = this.notifications,
-            ...remainingData
-        } = data;
-        for (const key in remainingData) {
-            this[key] = remainingData[key];
-        }
-        Object.assign(this, {
-            attachments: attachments.map((attachment) =>
-                Attachment.insert(this._store, attachment)
-            ),
-            author: data.author ? Partner.insert(this._store, data.author) : this.author,
-            body,
-            isDiscussion,
-            isNote,
-            isStarred: starred_partner_ids.includes(this._store.user.partnerId),
-            isTransient,
-            linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
-            needaction_partner_ids,
-            parentMessage: this.parentMessage
-                ? Message.insert(this._store, this.parentMessage, this.parentMessage.originThread)
-                : undefined,
-            resId,
-            resModel,
-            starred_partner_ids,
-            subject,
-            subtypeDescription,
-            trackingValues,
-            type,
-            notifications,
-        });
-        if (data.record_name) {
-            this.originThread.name = data.record_name;
-        }
-        if (data.res_model_name) {
-            this.originThread.modelName = data.res_model_name;
-        }
-        this._updateReactions(data.messageReactionGroups);
-        store.messages[this.id] = this;
-        if (thread) {
-            if (!thread.messages.includes(this.id)) {
-                thread.messages.push(this.id);
-                thread.sortMessages();
-            }
-        }
-        if (this.isNeedaction && !this._store.discuss.inbox.messages.includes(this.id)) {
-            this._store.discuss.inbox.counter++;
-            this.originThread.message_needaction_counter++;
-            this._store.discuss.inbox.messages.push(this.id);
-            this._store.discuss.inbox.sortMessages();
-        }
-    }
-
-    updateNotifications() {
-        this.notifications = this.notifications.map((notification) =>
-            Notification.insert(this._store, { ...notification, messageId: this.id })
-        );
-    }
-
-    _updateReactions(reactionGroups = []) {
-        const reactionContentToUnlink = new Set();
-        const reactionsToInsert = [];
-        for (const rawReaction of reactionGroups) {
-            const [command, reactionData] = Array.isArray(rawReaction)
-                ? rawReaction
-                : ["insert", rawReaction];
-            const reaction = MessageReactions.insert(this._store, reactionData);
-            if (command === "insert") {
-                reactionsToInsert.push(reaction);
-            } else {
-                reactionContentToUnlink.add(reaction.content);
-            }
-        }
-        this.reactions = this.reactions.filter(
-            ({ content }) => !reactionContentToUnlink.has(content)
-        );
-        reactionsToInsert.forEach((reaction) => {
-            const idx = this.reactions.findIndex(({ content }) => reaction.content === content);
-            if (idx !== -1) {
-                this.reactions[idx] = reaction;
-            } else {
-                this.reactions.push(reaction);
-            }
-        });
-    }
 
     /**
      * @returns {boolean}
@@ -231,6 +105,16 @@ export class Message {
         return this.needaction_partner_ids.includes(this._store.user.partnerId);
     }
 
+    /**
+     * @returns {boolean}
+     */
+    get isHistory() {
+        return this.history_partner_ids.includes(this._store.user.partnerId);
+    }
+
+    /**
+     * @returns {boolean}
+     */
     get isNotification() {
         return this.type === "notification" && this.resModel === "mail.channel";
     }
@@ -258,7 +142,7 @@ export class Message {
     }
 
     get originThread() {
-        return Thread.insert(this._store, { id: this.resId, model: this.resModel });
+        return this._store.threads[createLocalId(this.resModel, this.resId)];
     }
 
     get url() {

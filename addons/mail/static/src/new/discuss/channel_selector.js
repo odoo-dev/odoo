@@ -8,7 +8,6 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { cleanTerm } from "@mail/new/utils/format";
 import { isEventHandled } from "@mail/new/utils/misc";
-import { Partner } from "../core/partner_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class ChannelSelector extends Component {
@@ -21,6 +20,7 @@ export class ChannelSelector extends Component {
         this.messaging = useMessaging();
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
+        this.partnerService = useService("mail.partner");
         this.orm = useService("orm");
         this.state = useState({
             value: "",
@@ -66,7 +66,7 @@ export class ChannelSelector extends Component {
                     this.state.selectedPartners,
                 ]);
                 const suggestions = results.map((data) => {
-                    Partner.insert(this.store, data);
+                    this.partnerService.insert(data);
                     return {
                         classList: "o-mail-channel-selector-suggestion",
                         label: data.name,

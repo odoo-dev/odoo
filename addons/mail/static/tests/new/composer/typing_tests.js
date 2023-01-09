@@ -9,7 +9,7 @@ import {
     startServer,
 } from "@mail/../tests/helpers/test_utils";
 import { LONG_TYPING, SHORT_TYPING } from "@mail/new/composer/composer";
-import { OTHER_LONG_TYPING } from "@mail/new/core/messaging";
+import { OTHER_LONG_TYPING } from "@mail/new/core/messaging_service";
 
 let target;
 QUnit.module("typing", {

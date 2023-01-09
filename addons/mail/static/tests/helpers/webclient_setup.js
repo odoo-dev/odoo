@@ -32,6 +32,8 @@ import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { chatterService } from "@mail/new/views/chatter_service";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
+import { partnerService } from "@mail/new/core/partner_service";
+import { attachmentService } from "@mail/new/attachment_viewer/attachment_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -101,6 +103,7 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         "mail.suggestion": suggestionService,
         "mail.store": storeService,
         "mail.activity": activityService,
+        "mail.attachment": attachmentService,
         "mail.chatter": chatterService,
         "mail.thread": threadService,
         "mail.message": messageService,
@@ -109,8 +112,9 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         "mail.rtc": rtcService,
         "mail.soundEffects": soundEffects,
         "mail.userSettings": userSettingsService,
+        "mail.partner": partnerService,
         messaging: messagingService,
-        attachmentViewer: attachmentViewerService,
+        "mail.attachment_viewer": attachmentViewerService,
         messagingValues,
         presence: makeFakePresenceService({
             isOdooFocused: () => true,

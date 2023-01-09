@@ -58,6 +58,7 @@ export class Composer extends Component {
             this.props.composer.message
         );
         this.messageService = useState(useService("mail.message"));
+        this.threadService = useService("mail.thread");
         this.ref = useRef("textarea");
         this.typingNotified = false;
         this.state = useState({
@@ -377,7 +378,7 @@ export class Composer extends Component {
                 rawMentions: this.suggestion.rawMentions,
                 parentId: messageToReplyTo?.id,
             };
-            const message = await this.messageService.post(thread, value, postData);
+            const message = await this.threadService.post(thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
                     sprintf(_t('Message posted on "%s"'), message.originThread.displayName),

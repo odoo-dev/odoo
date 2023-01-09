@@ -1,8 +1,6 @@
 /* @odoo-module */
 
-import { Partner } from "@mail/new/core/partner_model";
 import { _t } from "@web/core/l10n/translation";
-import { NotificationGroup } from "./notification_group_model";
 
 export class Notification {
     /** @type {number} */
@@ -18,29 +16,11 @@ export class Notification {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    /**
-     * @param {import("@mail/new/core/store_service").Store} store
-     * @param {Object} data
-     * @returns {Notification}
-     */
-    static insert(store, data) {
-        let notification;
-        if (data.id in store.notifications) {
-            notification = store.notifications[data.id];
-            notification.update(data);
-            return notification;
-        }
-        notification = new Notification(store, data);
-        // return reactive version
-        return store.notifications[data.id];
-    }
-
     constructor(store, data) {
         Object.assign(this, {
             id: data.id,
             _store: store,
         });
-        this.update(data);
         store.notifications[this.id] = this;
     }
 
@@ -93,31 +73,5 @@ export class Notification {
                 return _t("Canceled");
         }
         return "";
-    }
-
-    update(data) {
-        Object.assign(this, {
-            messageId: data.messageId,
-            notification_status: data.notification_status,
-            notification_type: data.notification_type,
-            partner: data.res_partner_id
-                ? Partner.insert(this._store, {
-                      id: data.res_partner_id[0],
-                      name: data.res_partner_id[1],
-                  })
-                : undefined,
-        });
-        if (!this.message.author.isCurrentUser) {
-            return;
-        }
-        const thread = this.message.originThread;
-        NotificationGroup.insert(this._store, {
-            modelName: thread.modelName,
-            resId: this.message.originThread.id,
-            resModel: this.message.originThread.model,
-            status: this.notification_status,
-            type: this.notification_type,
-            notifications: [[this.isFailure ? "insert" : "insert-and-unlink", this]],
-        });
     }
 }

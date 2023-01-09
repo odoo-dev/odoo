@@ -10,7 +10,6 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, onPatched, useChildSubEnv, useEffect, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
-import { Composer as ComposerModel } from "../core/composer_model";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
@@ -315,7 +314,7 @@ export class Message extends Component {
 
     enterEditMode() {
         const messageContent = convertBrToLineBreak(this.props.message.body);
-        ComposerModel.insert(this.store, {
+        this.threadService.insertComposer({
             message: this.props.message,
             textInputContent: messageContent,
             selection: {

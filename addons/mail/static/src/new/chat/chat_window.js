@@ -91,9 +91,9 @@ export class ChatWindow extends Component {
 
     toggleFold() {
         if (this.props.chatWindow.hidden) {
-            this.props.chatWindow.makeVisible();
+            this.chatWindowService.makeVisible(this.props.chatWindow);
         } else {
-            this.props.chatWindow.toggleFold();
+            this.chatWindowService.toggleFold(this.props.chatWindow);
         }
         this.chatWindowService.notifyState(this.props.chatWindow);
     }
@@ -122,7 +122,7 @@ export class ChatWindow extends Component {
     }
 
     close(options) {
-        this.props.chatWindow.close(options);
+        this.chatWindowService.close(this.props.chatWindow, options);
         this.chatWindowService.notifyState(this.props.chatWindow);
     }
 }

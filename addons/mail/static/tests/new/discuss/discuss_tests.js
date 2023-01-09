@@ -388,7 +388,6 @@ QUnit.test("Can use channel command /who", async (assert) => {
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "/who");
     await click(".o-mail-composer button[data-action='send']");
-
     assert.strictEqual(
         document.querySelector(".o_mail_notification").textContent,
         "You are alone in this channel.",

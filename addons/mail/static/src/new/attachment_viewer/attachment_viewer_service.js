@@ -44,4 +44,4 @@ export const attachmentViewerService = {
     },
 };
 
-registry.category("services").add("attachmentViewer", attachmentViewerService);
+registry.category("services").add("mail.attachment_viewer", attachmentViewerService);

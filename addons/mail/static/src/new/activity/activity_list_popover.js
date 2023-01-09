@@ -2,7 +2,6 @@
 
 import { useMessaging, useStore } from "../core/messaging_hook";
 
-import { Activity } from "@mail/new/core/activity_model";
 import { ActivityListPopoverItem } from "@mail/new/activity/activity_list_popover_item";
 
 import { Component, onWillUpdateProps } from "@odoo/owl";
@@ -35,6 +34,9 @@ export class ActivityListPopover extends Component {
         this.orm = useService("orm");
         this.messaging = useMessaging();
         this.user = useService("user");
+        /** @type {import("@mail/new/activity/activity_service").ActivityService} */
+        this.activity = useService("mail.activity");
+        /** @type {import("@mail/new/core/store_service").Store} */
         this.store = useStore();
         this.updateFromProps(this.props);
         onWillUpdateProps((props) => this.updateFromProps(props));
@@ -87,7 +89,7 @@ export class ActivityListPopover extends Component {
             }
         );
         for (const activityData of activitiesData) {
-            Activity.insert(this.store, activityData);
+            this.activity.insert(activityData);
         }
     }
 }

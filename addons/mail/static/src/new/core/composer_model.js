@@ -20,23 +20,6 @@ export class Composer {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
-     * @param {Object} data
-     * @returns {Composer}
-     */
-    static insert(state, data) {
-        const { message, thread } = data;
-        if (Boolean(message) === Boolean(thread)) {
-            throw new Error("Composer shall have a thread xor a message.");
-        }
-        const composer = (thread ?? message)?.composer;
-        if (composer) {
-            return composer.update(data);
-        }
-        return new Composer(state, data);
-    }
-
     constructor(store, data) {
         const { message, thread } = data;
         if (thread) {
@@ -51,16 +34,5 @@ export class Composer {
             type: thread?.type === "chatter" ? false : "message",
             _store: store,
         });
-        return this.update(data);
-    }
-
-    update(data) {
-        if ("textInputContent" in data) {
-            this.textInputContent = data.textInputContent;
-        }
-        if ("selection" in data) {
-            Object.assign(this.selection, data.selection);
-        }
-        return this;
     }
 }

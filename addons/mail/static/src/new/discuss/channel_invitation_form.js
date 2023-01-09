@@ -3,7 +3,6 @@
 import { Component, useRef, useState, onMounted, onWillStart } from "@odoo/owl";
 import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 import { PartnerImStatus } from "./partner_im_status";
-import { Partner } from "../core/partner_model";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -18,6 +17,7 @@ export class ChannelInvitationForm extends Component {
         this.store = useStore();
         this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
+        this.partnerService = useService("mail.partner");
         this.inputRef = useRef("input");
         this.searchStr = "";
         this.state = useState({
@@ -41,7 +41,7 @@ export class ChannelInvitationForm extends Component {
         for (const selectablePartner of Partners) {
             const partnerId = selectablePartner.id;
             const name = selectablePartner.name;
-            const newPartner = Partner.insert(this.store, {
+            const newPartner = this.partnerService.insert({
                 id: partnerId,
                 name: name,
             });

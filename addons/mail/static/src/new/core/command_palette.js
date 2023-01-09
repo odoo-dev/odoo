@@ -29,7 +29,7 @@ DialogCommand.template = xml`
 commandProviderRegistry.add("mail.partner", {
     namespace: "@",
     async provide(env, options) {
-        /** @type {import("@mail/new/core/messaging").Messaging} */
+        /** @type {import("@mail/new/core/messaging_service").Messaging} */
         const messaging = env.services["mail.messaging"];
         const threadService = env.services["mail.thread"];
         const results = await messaging.searchPartners(options.searchValue);
@@ -60,7 +60,7 @@ commandSetupRegistry.add("#", {
 commandProviderRegistry.add("mail.channel", {
     namespace: "#",
     async provide(env, options) {
-        /** @type {import("@mail/new/core/messaging").Messaging} */
+        /** @type {import("@mail/new/core/messaging_service").Messaging} */
         const messaging = env.services["mail.messaging"];
         const threadService = env.services["mail.thread"];
         const domain = [

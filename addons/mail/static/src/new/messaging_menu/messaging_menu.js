@@ -65,7 +65,7 @@ export class MessagingMenu extends Component {
         if (originThreadIds.size === 1) {
             const message = failure.notifications[0].message;
             if (!message.originThread.type) {
-                message.originThread.update({ type: "chatter" });
+                this.threadService.update(message.originThread, { type: "chatter" });
             }
             if (this.store.discuss.isActive) {
                 this.action.doAction({
