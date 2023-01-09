@@ -20,11 +20,11 @@ export class Thread {
     /** @type {string} */
     model;
     canLeave = false;
-    /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
+    /** @type {import("@mail/new/core/channel_member_model").ChannelMember[]} */
     channelMembers = [];
-    /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */
+    /** @type {RtcSession{}} */
     rtcSessions = {};
-    /** @type {import("@mail/new/core/partner_model").partner[]} */
+    /** @type {Partner[]} */
     invitedPartners = [];
     /** @type {integer} */
     chatPartnerId;
@@ -43,7 +43,7 @@ export class Thread {
     memberCount = 0;
     message_needaction_counter = 0;
     message_unread_counter = 0;
-    /** @type {import("@mail/new/core/message_model").Message[]} */
+    /** @type {number[]} */
     messages = [];
     /** @type {number} */
     serverLastSeenMsgByCurrentUser;

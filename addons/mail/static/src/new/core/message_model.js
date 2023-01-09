@@ -219,9 +219,6 @@ export class Message {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
     }
 
-    /**
-     * @returns {boolean}
-     */
     get isAuthoredByCurrentUser() {
         if (!this.author) {
             return false;
@@ -229,16 +226,10 @@ export class Message {
         return this.author.id === this._store.user.partnerId;
     }
 
-    /**
-     * @returns {boolean}
-     */
     get isNeedaction() {
         return this.needaction_partner_ids.includes(this._store.user.partnerId);
     }
 
-    /**
-     * @returns {boolean}
-     */
     get isNotification() {
         return this.type === "notification" && this.resModel === "mail.channel";
     }

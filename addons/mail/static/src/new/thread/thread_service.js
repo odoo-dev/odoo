@@ -90,6 +90,9 @@ export class ThreadService {
         }
     }
 
+    /**
+     * @param {Thread} thread
+     */
     async markAsRead(thread) {
         const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
         if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
@@ -101,6 +104,10 @@ export class ThreadService {
         thread.update({ isUnread: false });
     }
 
+    /**
+     * @param {Thread} thread
+     * @param {{min: Number, max: Number}}
+     */
     async fetchMessages(thread, { min, max }) {
         thread.status = "loading";
         let rawMessages;
