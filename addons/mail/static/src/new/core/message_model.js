@@ -54,7 +54,7 @@ export class Message {
     /** @type {string} */
     subtypeDescription;
     /** @type {Object[]} */
-    trackingValues;
+    trackingValues = [];
     /** @type {string} */
     type;
     now = DateTime.now();
@@ -98,6 +98,7 @@ export class Message {
             subject = this.subject,
             subtype_description: subtypeDescription = this.subtypeDescription,
             starred_partner_ids = this.starred_partner_ids,
+            trackingValues = this.trackingValues,
             notifications = this.notifications,
             ...remainingData
         } = data;
@@ -124,7 +125,7 @@ export class Message {
             starred_partner_ids,
             subject,
             subtypeDescription,
-            trackingValues: data.trackingValues || [],
+            trackingValues,
             type,
             notifications,
         });
