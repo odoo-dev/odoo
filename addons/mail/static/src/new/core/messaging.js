@@ -379,7 +379,7 @@ export class Messaging {
                 case "mail.record/insert":
                     {
                         if (notif.payload.RtcSession) {
-                            RtcSession.insert(this.state, notif.payload.RtcSession);
+                            RtcSession.insert(this.store, notif.payload.RtcSession);
                         }
                         if (notif.payload.Partner) {
                             const partners = Array.isArray(notif.payload.Partner)
