@@ -5,7 +5,6 @@ import { Partner } from "./partner_model";
 import { Guest } from "./guest_model";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
-import { removeFromArray } from "../utils/arrays";
 import { cleanTerm } from "@mail/new/utils/format";
 
 import { RtcSession } from "@mail/new/rtc/rtc_session_model";
@@ -183,15 +182,6 @@ export class Thread {
                 !this.serverData.group_based_subscription;
         }
         Composer.insert(this._store, { thread: this });
-    }
-
-    /**
-     * Remove a thread form the store
-     */
-    remove() {
-        removeFromArray(this._store.discuss.chats.threads, this.localId);
-        removeFromArray(this._store.discuss.channels.threads, this.localId);
-        delete this._store.threads[this.localId];
     }
 
     /**

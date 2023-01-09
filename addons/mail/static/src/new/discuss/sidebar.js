@@ -99,7 +99,7 @@ export class Sidebar extends Component {
      */
     unpinChannel(channelId) {
         this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
-        this.store.threads[createLocalId("mail.channel", channelId)].remove();
+        this.threadService.remove(this.store.threads[createLocalId("mail.channel", channelId)]);
     }
 
     stopEditing() {

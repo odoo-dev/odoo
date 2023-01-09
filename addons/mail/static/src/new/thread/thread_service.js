@@ -8,6 +8,7 @@ import { Guest } from "../core/guest_model";
 import { Thread } from "../core/thread_model";
 import { ChatWindow } from "../core/chat_window_model";
 import { _t } from "@web/core/l10n/translation";
+import { removeFromArray } from "@mail/new/utils/arrays";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -324,7 +325,7 @@ export class ThreadService {
 
     async leaveChannel(channel) {
         await this.orm.call("mail.channel", "action_unfollow", [channel.id]);
-        channel.remove();
+        this.remove(channel);
         this.setDiscussThread(
             this.store.discuss.channels.threads[0]
                 ? this.store.threads[this.store.discuss.channels.threads[0]]
@@ -347,6 +348,12 @@ export class ThreadService {
         const channel = this.createChannelThread(data);
         this.sortChannels();
         this.open(channel);
+    }
+
+    remove(thread) {
+        removeFromArray(this.store.discuss.chats.threads, thread.localId);
+        removeFromArray(this.store.discuss.channels.threads, thread.localId);
+        delete this.store.threads[thread.localId];
     }
 }
 

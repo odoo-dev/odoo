@@ -565,7 +565,7 @@ export class Messaging {
                     if (!thread) {
                         return;
                     }
-                    this.store.threads[thread.localId]?.remove();
+                    this.thread.remove(thread);
                     this.notification.add(
                         sprintf(_t("You unpinned your conversation with %s"), thread.displayName),
                         { type: "info" }
