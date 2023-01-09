@@ -18,7 +18,7 @@ export class DiscussPublic extends Component {
         this.state = useState({ welcome: true });
         this.threadService = useService("mail.thread");
         const thread = Thread.insert(this.store, {
-            ...this.props.data.channelData.channel,
+            id: this.props.data.channelData.id,
             model: "mail.channel",
             type: this.props.data.channelData.channel.channel_type,
         });
