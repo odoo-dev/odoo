@@ -16,7 +16,7 @@
             <div class="o-mail-message-sidebar d-flex flex-shrink-0" t-att-class="{ 'justify-content-end': isAlignedRight }">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
-                        t-att-src="message.author and message.author.avatarUrl"
+                        t-att-src="avatarUrl"
                         t-att-class="{ 'cursor-pointer': hasOpenChatFeature }"
                         t-on-click="openChatAvatar" />
                     <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>

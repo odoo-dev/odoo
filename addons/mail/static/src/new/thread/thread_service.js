@@ -88,17 +88,23 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona?.partner) {
-                this.partner.insert(channelMember.persona.partner);
+                this.insertChannelMember({
+                    id: channelMember.id,
+                    persona: this.partner.insertPersona({
+                        partner: this.partner.insert(channelMember.persona.partner),
+                    }),
+                    threadId: thread.id,
+                });
             }
             if (channelMember.persona?.guest) {
-                this.partner.insertGuest(channelMember.persona.guest);
+                this.insertChannelMember({
+                    id: channelMember.id,
+                    persona: this.partner.insertPersona({
+                        guest: this.partner.insertGuest(channelMember.persona.guest),
+                    }),
+                    threadId: thread.id,
+                });
             }
-            this.insertChannelMember({
-                id: channelMember.id,
-                partnerId: channelMember.persona?.partner?.id,
-                guestId: channelMember.persona?.guest?.id,
-                threadId: thread.id,
-            });
         }
     }
 
@@ -500,8 +506,7 @@ export class ThreadService {
         }
         Object.assign(channelMember, {
             id: data.id,
-            partnerId: data.partnerId ?? data.persona?.partner?.id,
-            guestId: data.guestId ?? data.persona?.guest?.id,
+            persona: data.persona,
             threadId: data.threadId ?? channelMember.threadId ?? data?.channel.id,
         });
         if (channelMember.thread && !channelMember.thread.channelMembers.includes(channelMember)) {

@@ -74,6 +74,7 @@ export class Rtc {
         this.userSettings = services["mail.userSettings"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
+        this.partner = services["mail.partner"];
         this.state = reactive({
             hasPendingRequest: false,
             selfSession: undefined,
@@ -545,7 +546,9 @@ export class Rtc {
         };
         peerConnection.ontrack = ({ transceiver, track }) => {
             this.log(session, `received ${track.kind} track`);
-            const volume = this.userSettings.partnerVolumes.get(session.channelMember.partnerId);
+            const volume = this.userSettings.partnerVolumes.get(
+                session.channelMember.persona.partner?.id
+            );
             this.updateStream(session, track, {
                 mute: this.state.selfSession.isDeaf,
                 volume: volume ?? 1,
@@ -1152,7 +1155,13 @@ export class Rtc {
             session.channelId = channelMember.channel.id;
         }
         if (channelMember) {
-            this.thread.insertChannelMember(channelMember);
+            this.thread.insertChannelMember({
+                id: channelMember.id,
+                persona: this.partner.insertPersona({
+                    partner: this.partner.insert(channelMember.persona.partner),
+                }),
+                threadId: channelMember.channel.id,
+            });
             session.channelMemberId = channelMember.id;
         }
         this.store.rtcSessions[session.id] = session;
@@ -1302,6 +1311,7 @@ export const rtcService = {
         "mail.soundEffects",
         "mail.userSettings",
         "mail.thread",
+        "mail.partner",
     ],
     start(env, services) {
         const rtc = new Rtc(env, services);

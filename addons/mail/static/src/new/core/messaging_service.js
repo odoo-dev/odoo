@@ -314,27 +314,27 @@ export class Messaging {
                     {
                         const { id, message } = notif.payload;
                         const channel = this.store.threads[createLocalId("mail.channel", id)];
-                        Promise.resolve(channel ?? this.thread.joinChat(message.author.id)).then(
-                            (channel) => {
-                                if ("parentMessage" in message && message.parentMessage.body) {
-                                    message.parentMessage.body = markup(message.parentMessage.body);
-                                }
-                                const data = Object.assign(message, { body: markup(message.body) });
-                                this.message.insert({
-                                    ...data,
-                                    res_id: channel.id,
-                                    model: channel.model,
-                                });
-                                if (
-                                    !this.presence.isOdooFocused() &&
-                                    channel.type === "chat" &&
-                                    channel.chatPartnerId !== this.store.partnerRoot.id
-                                ) {
-                                    this.notifyOutOfFocusMessage(message, channel);
-                                }
-                                this.chatWindow.insert({ thread: channel });
+                        Promise.resolve(
+                            channel ?? this.thread.joinChat(message.author.partner?.id)
+                        ).then((channel) => {
+                            if ("parentMessage" in message && message.parentMessage.body) {
+                                message.parentMessage.body = markup(message.parentMessage.body);
                             }
-                        );
+                            const data = Object.assign(message, { body: markup(message.body) });
+                            this.message.insert({
+                                ...data,
+                                res_id: channel.id,
+                                model: channel.model,
+                            });
+                            if (
+                                !this.presence.isOdooFocused() &&
+                                channel.type === "chat" &&
+                                channel.chatPartnerId !== this.store.partnerRoot.id
+                            ) {
+                                this.notifyOutOfFocusMessage(message, channel);
+                            }
+                            this.chatWindow.insert({ thread: channel });
+                        });
                     }
                     break;
                 case "mail.channel/leave":
@@ -517,14 +517,15 @@ export class Messaging {
                         this.store.threads[createLocalId("mail.channel", notif.payload.channel.id)];
                     const member = this.thread.insertChannelMember({
                         id: notif.payload.id,
-                        partnerId: notif.payload.persona.partner.id,
+                        persona: this.partner.insertPersona({
+                            partner: this.partner.insert({
+                                id: notif.payload.persona.partner.id,
+                                name: notif.payload.persona.partner.name,
+                            }),
+                        }),
                         threadId: channel.id,
                     });
-                    this.partner.insert({
-                        id: notif.payload.persona.partner.id,
-                        name: notif.payload.persona.partner.name,
-                    });
-                    if (member.partner.id === this.store.user.partnerId) {
+                    if (member.persona.partner?.id === this.store.user.partnerId) {
                         return;
                     }
                     if (isTyping) {

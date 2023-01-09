@@ -36,6 +36,7 @@ export class Store {
     partners = {};
     partnerRoot = {};
     guests = {};
+    personas = {};
 
     /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */
     rtcSessions = {};

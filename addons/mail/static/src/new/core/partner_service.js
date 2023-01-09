@@ -1,7 +1,9 @@
 /** @odoo-module */
 
 import { Partner } from "@mail/new/core/partner_model";
+import { Persona } from "@mail/new/core/persona_model";
 import { Guest } from "./guest_model";
+import { createLocalId } from "./thread_model.create_local_id";
 
 export class PartnerService {
     constructor(env, services) {
@@ -35,6 +37,7 @@ export class PartnerService {
             im_status,
             email,
         });
+        this.insertPersona({ partner });
         if (
             partner.im_status !== "im_partner" &&
             !partner.is_public &&
@@ -61,6 +64,7 @@ export class PartnerService {
             name,
             im_status,
         });
+        this.insertPersona({ guest });
         return guest;
     }
 
@@ -69,6 +73,29 @@ export class PartnerService {
             guest_id: guest.id,
             name,
         });
+    }
+
+    /**
+     * @param {import("@mail/new/core/persona_model").Data} data
+     * @returns {import("@mail/new/core/persona_model").Persona}
+     */
+    insertPersona(data) {
+        const localId = data.partner
+            ? createLocalId("Partner", data.partner.id)
+            : createLocalId("Guest", data.guest.id);
+        let persona = this.store.personas[localId];
+        if (!persona) {
+            persona = new Persona();
+            persona._store = this.store;
+            this.store.personas[localId] = persona;
+            // Get reactive version.
+            persona = this.store.personas[localId];
+        }
+        Object.assign(persona, {
+            guest: data?.guest,
+            partner: data?.partner,
+        });
+        return persona;
     }
 }
 

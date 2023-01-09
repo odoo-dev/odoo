@@ -32,17 +32,17 @@ export class CallParticipantCard extends Component {
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
-                !(this.props.session.channelMember?.partnerId === this.user.partnerId) &&
+                !(this.props.session.channelMember?.persona.partner?.id === this.user.partnerId) &&
                 !["connected", "completed"].includes(this.props.session.connectionState)
         );
     }
 
     get name() {
-        return this.props.session.channelMember?.partner?.name;
+        return this.props.session.channelMember?.name;
     }
 
     get avatarUrl() {
-        return this.props.session.channelMember?.partner?.avatarUrl;
+        return this.props.session.channelMember?.avatarUrl;
     }
 
     get hasVideo() {

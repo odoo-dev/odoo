@@ -182,7 +182,7 @@ class SuggestionService {
             // would be notified to the mentioned partner, so this prevents
             // from inadvertently leaking the private message to the
             // mentioned partner.
-            partners = thread.channelMembers.map((member) => member.partner);
+            partners = thread.channelMembers.map((member) => member.persona.partner);
         } else {
             partners = Object.values(this.store.partners);
         }

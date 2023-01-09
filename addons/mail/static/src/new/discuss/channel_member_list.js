@@ -25,6 +25,6 @@ export class ChannelMemberList extends Component {
         if (member.isCurrentUser) {
             return;
         }
-        this.threadService.openChat({ partnerId: member.partner.id });
+        this.threadService.openChat({ partnerId: member.persona.partner?.id });
     }
 }

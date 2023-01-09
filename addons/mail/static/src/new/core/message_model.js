@@ -14,7 +14,7 @@ const { DateTime } = luxon;
 export class Message {
     /** @type {Object[]} */
     attachments = [];
-    /** @type {Partner} */
+    /** @type {Persona} */
     author;
     /** @type {string} */
     body;
@@ -98,7 +98,10 @@ export class Message {
         if (!this.author) {
             return false;
         }
-        return this.author.id === this._store.user.partnerId;
+        if (this._store.currentGuest) {
+            return this.author.guest?.id === this._store.currentGuest.id;
+        }
+        return this.author.partner?.id === this._store.user.partnerId;
     }
 
     get isNeedaction() {

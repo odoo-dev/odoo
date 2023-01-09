@@ -1,5 +1,11 @@
 /* @odoo-module */
 
+/**
+ * @typedef Data
+ * @property {number} id
+ * @property {string} name
+ */
+
 export class Guest {
     /** @type {number} */
     id;

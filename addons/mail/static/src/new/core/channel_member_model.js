@@ -6,13 +6,11 @@ import { createLocalId } from "./thread_model.create_local_id";
  * @class ChannelMember
  * @typedef Data
  * @property {number} id
- * @property {number} partnerId
- * @property {number} guestId
+ * @property {string} personaLocalId
  * @property {number} threadId
  */
 export class ChannelMember {
-    partnerId;
-    guestId;
+    personaLocalId;
     threadId;
     typingTimer;
     /** @type {import("@mail/new/core/store_service").Store} */
@@ -27,7 +25,11 @@ export class ChannelMember {
     }
 
     get persona() {
-        return this.guest || this.partner;
+        return this._store.personas[this.personaLocalId];
+    }
+
+    set persona(persona) {
+        this.personaLocalId = persona?.localId;
     }
 
     get im_status() {
@@ -39,11 +41,17 @@ export class ChannelMember {
     }
 
     get avatarUrl() {
-        return this.persona.avatarUrl;
+        if (this.persona.partner) {
+            return `/mail/channel/${this.thread.id}/partner/${this.persona.partner.id}/avatar_128`;
+        }
+        if (this.persona.guest) {
+            return `/mail/channel/${this.thread.id}/guest/${this.persona.guest.id}/avatar_128?unique=${this.persona.guest.name}`;
+        }
+        return "";
     }
 
     get isCurrentUser() {
-        return this.persona.isCurrentUser;
+        return this.persona.partner?.isCurrentUser;
     }
 
     get thread() {

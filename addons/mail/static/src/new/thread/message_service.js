@@ -214,7 +214,6 @@ export class MessageService {
         }
         Object.assign(message, {
             attachments: attachments.map((attachment) => this.attachment.insert(attachment)),
-            author: data.author ? this.partner.insert(data.author) : message.author,
             body,
             isDiscussion,
             isNote,
@@ -232,6 +231,16 @@ export class MessageService {
             type,
             notifications,
         });
+        if (data?.author?.id) {
+            message.author = this.partner.insertPersona({
+                partner: this.partner.insert(data.author),
+            });
+        }
+        if (data?.guestAuthor?.id) {
+            message.author = this.partner.insertPersona({
+                guest: this.partner.insertGuest(data.guestAuthor),
+            });
+        }
         if (data.record_name) {
             message.originThread.name = data.record_name;
         }
@@ -360,7 +369,7 @@ export class MessageService {
                   })
                 : undefined,
         });
-        if (!notification.message.author.isCurrentUser) {
+        if (!notification.message.author.partner?.isCurrentUser) {
             return;
         }
         const thread = notification.message.originThread;

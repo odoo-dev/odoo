@@ -115,6 +115,14 @@ export class Message extends Component {
         }
     }
 
+    get avatarUrl() {
+        if (this.message.author?.guest) {
+            return `/mail/channel/${this.message.originThread.id}/guest/${this.message.author.guest.id}/avatar_128?unique=${this.message.author.guest.name}`;
+        } else {
+            return this.message.author && this.message.author.avatarUrl;
+        }
+    }
+
     get message() {
         return this.props.message;
     }
@@ -164,12 +172,12 @@ export class Message extends Component {
         if (this.message.isAuthoredByCurrentUser) {
             return false;
         }
-        return this.props.thread.chatPartnerId !== this.message.author.id;
+        return this.props.thread.chatPartnerId !== this.message.author.partner?.id;
     }
 
     get isAlignedRight() {
         return Boolean(
-            this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
+            this.env.inChatWindow && this.user.partnerId === this.props.message.author.partner?.id
         );
     }
 
@@ -224,7 +232,7 @@ export class Message extends Component {
         if (!this.hasOpenChatFeature) {
             return;
         }
-        this.threadService.openChat({ partnerId: this.message.author.id });
+        this.threadService.openChat({ partnerId: this.message.author.partner?.id });
     }
 
     /**

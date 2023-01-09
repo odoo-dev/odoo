@@ -166,6 +166,13 @@ export class Composer extends Component {
         this.stopTyping();
     }
 
+    get avatarUrl() {
+        if (this.store.currentGuest) {
+            return `/mail/channel/${this.props.composer.thread.id}/guest/${this.store.currentGuest.id}/avatar_128?unique=${this.store.currentGuest.name}`;
+        }
+        return this.store.user.avatarUrl;
+    }
+
     get hasSuggestions() {
         return this.suggestion.state.items.length > 0;
     }
