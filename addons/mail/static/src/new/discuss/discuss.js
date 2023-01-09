@@ -40,6 +40,7 @@ export class Discuss extends Component {
     static defaultProps = { sidebar: true };
     static props = {
         sidebar: { type: Boolean, optional: true },
+        guest: { type: Boolean, optional: true },
     };
     static template = "mail.discuss";
 
