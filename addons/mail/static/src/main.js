@@ -5,6 +5,7 @@ import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
 import { messagingService as newMessagingService } from "@mail/new/core/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
+import { CallMenu } from "@mail/new/rtc/call_menu";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
 import { messagingService } from "@mail/services/messaging_service";
@@ -71,4 +72,11 @@ registry.category("systray").add(
         Component: MessagingMenu,
     },
     { sequence: 25 }
+);
+registry.category("systray").add(
+    "mail.call_menu",
+    {
+        Component: CallMenu,
+    },
+    { sequence: 100 }
 );
