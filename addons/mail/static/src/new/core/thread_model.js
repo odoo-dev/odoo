@@ -143,7 +143,7 @@ export class Thread {
                 }
                 this.customName = serverData.channel.custom_channel_name;
             }
-            if (this.type === "group") {
+            if (this.type === "group" && serverData.channel && serverData.channel.channelMembers) {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
                     if (elem.persona?.partner) {
                         Partner.insert(this._store, elem.persona.partner);
