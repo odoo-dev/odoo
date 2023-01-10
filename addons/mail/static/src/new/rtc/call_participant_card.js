@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Component } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { CallParticipantVideo } from "@mail/new/rtc/call_participant_video";
 import { useService } from "@web/core/utils/hooks";
@@ -13,6 +13,16 @@ export class CallParticipantCard extends Component {
     setup() {
         this.rtc = useRtc();
         this.user = useService("user");
+        onMounted(() => {
+            this.rtc.updateVideoDownload(this.props.session, {
+                viewCountIncrement: 1,
+            })
+        });
+        onWillUnmount(() => {
+            this.rtc.updateVideoDownload(this.props.session, {
+                viewCountIncrement: -1,
+            })
+        });
     }
 
     get isOfActiveCall() {

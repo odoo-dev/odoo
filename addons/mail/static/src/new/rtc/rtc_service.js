@@ -11,6 +11,7 @@ import { RtcSession } from "./rtc_session_model";
 import { debounce } from "@web/core/utils/timing";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
+const ORDERED_TRANSCEIVER_NAMES = ["audio", "video"];
 const PEER_NOTIFICATION_WAIT_DELAY = 50;
 const RECOVERY_TIMEOUT = 15_000;
 const RECOVERY_DELAY = 3_000;
@@ -59,7 +60,7 @@ function serializeRTCDataChannel(data) {
  */
 function getTransceiver(peerConnection, trackKind) {
     const transceivers = peerConnection.getTransceivers();
-    return transceivers[["audio", "video"].indexOf(trackKind)];
+    return transceivers[ORDERED_TRANSCEIVER_NAMES.indexOf(trackKind)];
 }
 
 export class Rtc {
@@ -228,31 +229,12 @@ export class Rtc {
         await this.setDeaf(true);
         this.soundEffects.play("deafen");
     }
-    /**
-     * @param {RtcSession[]} [sessions] session of the peerConnections for which
-     * the incoming video traffic is allowed. If undefined, all traffic is
-     * allowed. TODO: this should be done based on views
-     */
-    filterIncomingVideoTraffic(sessions) {
-        const ids = new Set(sessions.map((session) => session.id));
-        for (const session of Object.values(this.state.channel.rtcSessions)) {
-            const fullDirection = this.state.videoTrack ? "sendrecv" : "recvonly";
-            const limitedDirection = this.state.videoTrack ? "sendonly" : "inactive";
-            const transceiver = getTransceiver(session.peerConnection, "video");
-            if (!transceiver) {
-                continue;
-            }
-            transceiver.direction =
-                !ids.size || ids.has(session.id) ? fullDirection : limitedDirection;
-        }
-    }
 
     async handleNotification(sessionId, content) {
         const { event, channelId, payload } = JSON.parse(content);
-        const session = this.state.channel.rtcSessions[sessionId];
+        const session = this.state.channel?.rtcSessions[sessionId];
         if (
             !session ||
-            session.channelId !== this.state.channel.id || // does handle notifications targeting a different session
             !IS_CLIENT_RTC_COMPATIBLE ||
             (!session.peerConnection &&
                 (!channelId || !this.state.channel || channelId !== this.state.channel.id))
@@ -467,8 +449,9 @@ export class Rtc {
 
     async connect(session) {
         this.createConnection(session);
-        await this.updateRemote(session, "audio", true);
-        await this.updateRemote(session, "video", true);
+        for (const transceiverName of ORDERED_TRANSCEIVER_NAMES) {
+            await this.updateRemote(session, transceiverName, true);
+        }
         this.state.outgoingSessions.add(session.id);
     }
 
@@ -657,6 +640,28 @@ export class Rtc {
             }
             void Object.keys(channelProxy.rtcSessions);
         });
+        this.state.updateAndBroadcastDebounce = debounce(
+            async () => {
+                if (!this.state.selfSession) {
+                    return;
+                }
+                await this.rpc(
+                    "/mail/rtc/session/update_and_broadcast",
+                    {
+                        session_id: this.state.selfSession.id,
+                        values: {
+                            is_camera_on: this.state.selfSession.isCameraOn,
+                            is_deaf: this.state.selfSession.isDeaf,
+                            is_muted: this.state.selfSession.isSelfMuted,
+                            is_screen_sharing_on: this.state.selfSession.isScreenSharingOn,
+                        },
+                    },
+                    { silent: true }
+                );
+            },
+            3000,
+            true
+        );
         this.state.channel.rtcInvitingSession = undefined;
         // discuss refactor: todo call channel.update below when availalbe and do the formatting in update
         this.call();
@@ -924,21 +929,7 @@ export class Rtc {
     updateAndBroadcast(data) {
         const session = this.state.selfSession;
         Object.assign(session, data);
-        this.state.updateAndBroadcastDebounce = debounce(async () => {
-            await this.rpc(
-                "/mail/rtc/session/update_and_broadcast",
-                {
-                    session_id: session.id,
-                    values: {
-                        is_camera_on: session.isCameraOn,
-                        is_deaf: session.isDeaf,
-                        is_muted: session.isSelfMuted,
-                        is_screen_sharing_on: session.isScreenSharingOn,
-                    },
-                },
-                { silent: true }
-            );
-        }, 3000);
+        this.state.updateAndBroadcastDebounce?.();
     }
 
     /**
@@ -1025,14 +1016,9 @@ export class Rtc {
     async updateRemote(session, trackKind, initTransceiver = false) {
         this.log(session, `updating ${trackKind} transceiver`);
         const track = trackKind === "audio" ? this.state.audioTrack : this.state.videoTrack;
-        const fullDirection = track ? "sendrecv" : "recvonly";
-        const limitedDirection = track ? "sendonly" : "inactive";
-        let transceiverDirection = fullDirection;
+        let transceiverDirection = track ? "sendrecv" : "recvonly";
         if (trackKind === "video") {
-            transceiverDirection =
-                !this.state.focusedRtcSessionId || this.state.focusedRtcSessionId === session.id
-                    ? fullDirection
-                    : limitedDirection;
+            transceiverDirection = this.getTransceiverDirection(session, Boolean(track));
         }
         let transceiver;
         if (initTransceiver) {
@@ -1281,6 +1267,30 @@ export class Rtc {
             }
         }
         session.videoStream = undefined;
+    }
+
+    updateVideoDownload(rtcSession, { viewCountIncrement }) {
+        rtcSession.videoComponentCount += viewCountIncrement;
+        if (!rtcSession.peerConnection) {
+            return;
+        }
+        const transceivers = rtcSession.peerConnection.getTransceivers();
+        const transceiver = transceivers[ORDERED_TRANSCEIVER_NAMES.indexOf("video")];
+        if (!transceiver) {
+            return;
+        }
+        transceiver.direction = this.getTransceiverDirection(
+            rtcSession,
+            Boolean(this.state.videoTrack)
+        );
+    }
+
+    getTransceiverDirection(session, allowUpload = false) {
+        if (session.videoComponentCount > 0) {
+            return allowUpload ? "sendrecv" : "recvonly";
+        } else {
+            return allowUpload ? "sendonly" : "inactive";
+        }
     }
 }
 

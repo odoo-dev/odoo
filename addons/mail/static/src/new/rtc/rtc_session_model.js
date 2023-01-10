@@ -26,6 +26,7 @@ export class RtcSession {
     peerConnection;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
+    videoComponentCount = 0;
 
     get channelMember() {
         return this._store.channelMembers[this.channelMemberId];
