@@ -4,11 +4,11 @@ import { Activity } from "@mail/new/core/activity_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class ActivityService {
-    constructor(env, store, orm) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.orm = orm;
+        this.store = services["mail.store"];
+        this.orm = services.orm;
     }
 
     /**
@@ -124,7 +124,7 @@ export class ActivityService {
 
 export const activityService = {
     dependencies: ["mail.store", "orm"],
-    start(env, { "mail.store": store, orm }) {
-        return new ActivityService(env, store, orm);
+    start(env, services) {
+        return new ActivityService(env, services);
     },
 };

@@ -7,14 +7,14 @@ import { _t } from "@web/core/l10n/translation";
 const commandRegistry = registry.category("mail.channel_commands");
 
 class SuggestionService {
-    constructor(env, store, orm, thread, partner) {
-        this.orm = orm;
+    constructor(env, services) {
+        this.orm = services.orm;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
+        this.store = services["mail.store"];
         /** @type {import("@mail/new/thread/thread_service").Thread} */
-        this.thread = thread;
+        this.thread = services["mail.thread"];
         /** @type {import("@mail/new/core/partner_service").Partner} */
-        this.partner = partner;
+        this.partner = services["mail.partner"];
     }
 
     async fetchSuggestions({ delimiter, term }, { thread } = {}) {
@@ -406,7 +406,7 @@ class SuggestionService {
 
 export const suggestionService = {
     dependencies: ["orm", "mail.store", "mail.thread", "mail.partner"],
-    start(env, { orm, "mail.store": store, "mail.thread": thread, "mail.partner": partner }) {
-        return new SuggestionService(env, store, orm, thread, partner);
+    start(env, services) {
+        return new SuggestionService(env, services);
     },
 };

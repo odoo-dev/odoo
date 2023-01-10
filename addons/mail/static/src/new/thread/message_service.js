@@ -14,17 +14,17 @@ import { NotificationGroup } from "../core/notification_group_model";
 const commandRegistry = registry.category("mail.channel_commands");
 
 export class MessageService {
-    constructor(env, store, rpc, orm, presence, partner, attachment) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.rpc = rpc;
-        this.orm = orm;
-        this.presence = presence;
+        this.store = services["mail.store"];
+        this.rpc = services.rpc;
+        this.orm = services.orm;
+        this.presence = services.presence;
         /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = partner;
+        this.partner = services["mail.partner"];
         /** @type {import("@mail/new/attachment_viewer/attachment_service").AttachmentService} */
-        this.attachment = attachment;
+        this.attachment = services["mail.attachment"];
     }
 
     async update(message, body, attachments = [], rawMentions) {
@@ -439,17 +439,7 @@ export class MessageService {
 
 export const messageService = {
     dependencies: ["mail.store", "rpc", "orm", "presence", "mail.partner", "mail.attachment"],
-    start(
-        env,
-        {
-            "mail.store": store,
-            rpc,
-            orm,
-            presence,
-            "mail.partner": partner,
-            "mail.attachment": attachment,
-        }
-    ) {
-        return new MessageService(env, store, rpc, orm, presence, partner, attachment);
+    start(env, services) {
+        return new MessageService(env, services);
     },
 };

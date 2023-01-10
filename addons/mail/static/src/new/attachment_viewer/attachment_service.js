@@ -4,10 +4,10 @@ import { Attachment } from "../core/attachment_model";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class AttachmentService {
-    constructor(env, store) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
+        this.store = services["mail.store"];
     }
 
     insert(data) {
@@ -50,7 +50,7 @@ export class AttachmentService {
 
 export const attachmentService = {
     dependencies: ["mail.store"],
-    start(env, { "mail.store": store }) {
-        return new AttachmentService(env, store);
+    start(env, services) {
+        return new AttachmentService(env, services);
     },
 };

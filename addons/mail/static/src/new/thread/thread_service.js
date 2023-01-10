@@ -14,19 +14,19 @@ const FETCH_MSG_LIMIT = 30;
 export class ThreadService {
     nextId = 0;
 
-    constructor(env, store, orm, rpc, chatWindow, notification, router, partner, message) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.orm = orm;
-        this.rpc = rpc;
-        this.chatWindow = chatWindow;
-        this.notification = notification;
-        this.router = router;
+        this.store = services["mail.store"];
+        this.orm = services.orm;
+        this.rpc = services.rpc;
+        this.chatWindow = services["mail.chat_window"];
+        this.notification = services.notification;
+        this.router = services.router;
         /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = partner;
+        this.partner = services["mail.partner"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
-        this.message = message;
+        this.message = services["mail.message"];
         // FIXME this prevents cyclic dependencies between mail.thread and mail.message
         this.env.bus.addEventListener("MESSAGE-SERVICE:INSERT_THREAD", ({ detail }) => {
             const model = detail.model;
@@ -584,29 +584,7 @@ export const threadService = {
         "mail.partner",
         "mail.message",
     ],
-    start(
-        env,
-        {
-            "mail.store": store,
-            orm,
-            rpc,
-            "mail.chat_window": chatWindow,
-            notification,
-            router,
-            "mail.partner": partner,
-            "mail.message": message,
-        }
-    ) {
-        return new ThreadService(
-            env,
-            store,
-            orm,
-            rpc,
-            chatWindow,
-            notification,
-            router,
-            partner,
-            message
-        );
+    start(env, services) {
+        return new ThreadService(env, services);
     },
 };

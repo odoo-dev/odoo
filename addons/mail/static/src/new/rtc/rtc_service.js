@@ -64,17 +64,16 @@ function getTransceiver(peerConnection, trackKind) {
 }
 
 export class Rtc {
-    constructor(env, store, notification, rpc, soundEffects, userSettings, thread) {
-        // services
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.notification = notification;
-        this.rpc = rpc;
-        this.soundEffects = soundEffects;
-        this.userSettings = userSettings;
+        this.store = services["mail.store"];
+        this.notification = services.notification;
+        this.rpc = services.rpc;
+        this.soundEffects = services["mail.soundEffects"];
+        this.userSettings = services["mail.userSettings"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
-        this.thread = thread;
+        this.thread = services["mail.thread"];
         this.state = reactive({
             hasPendingRequest: false,
             selfSession: undefined,
@@ -1304,20 +1303,9 @@ export const rtcService = {
         "mail.userSettings",
         "mail.thread",
     ],
-    start(
-        env,
-        {
-            "mail.store": store,
-            notification,
-            rpc,
-            bus_service: bus,
-            "mail.soundEffects": soundEffects,
-            "mail.userSettings": userSettings,
-            "mail.thread": thread,
-        }
-    ) {
-        const rtc = new Rtc(env, store, notification, rpc, soundEffects, userSettings, thread);
-        bus.addEventListener("notification", (notifEvent) => {
+    start(env, services) {
+        const rtc = new Rtc(env, services);
+        services["bus_service"].addEventListener("notification", (notifEvent) => {
             for (const notif of notifEvent.detail) {
                 switch (notif.type) {
                     case "mail.channel.rtc.session/peer_notification":
@@ -1333,7 +1321,7 @@ export const rtcService = {
                             const { sessionId } = notif.payload;
                             if (rtc.state.selfSession?.id === sessionId) {
                                 rtc.endCall();
-                                notification.add(
+                                services.notification.add(
                                     _t("Disconnected from the RTC call by the server"),
                                     { type: "warning" }
                                 );

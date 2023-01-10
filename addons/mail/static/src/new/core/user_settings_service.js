@@ -5,9 +5,9 @@ import { browser } from "@web/core/browser/browser";
 class UserSettings {
     id;
 
-    constructor(env, rpc, user) {
-        this.rpc = rpc;
-        this.user = user;
+    constructor(env, services) {
+        this.rpc = services.rpc;
+        this.user = services.user;
     }
     /**
      * @param {Object} settings: the old model-style command with the settings from the server
@@ -231,7 +231,7 @@ class UserSettings {
 
 export const userSettingsService = {
     dependencies: ["rpc", "user"],
-    start(env, { rpc, user }) {
-        return new UserSettings(env, rpc, user);
+    start(env, services) {
+        return new UserSettings(env, services);
     },
 };

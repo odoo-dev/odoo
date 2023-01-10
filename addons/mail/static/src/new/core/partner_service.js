@@ -4,10 +4,10 @@ import { Partner } from "@mail/new/core/partner_model";
 import { Guest } from "./guest_model";
 
 export class PartnerService {
-    constructor(env, store) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
+        this.store = services["mail.store"];
     }
 
     /**
@@ -74,7 +74,7 @@ export class PartnerService {
 
 export const partnerService = {
     dependencies: ["mail.store"],
-    start(env, { "mail.store": store }) {
-        return new PartnerService(env, store);
+    start(env, services) {
+        return new PartnerService(env, services);
     },
 };

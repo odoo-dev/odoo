@@ -9,11 +9,11 @@ export const CHAT_WINDOW_WIDTH = 340;
 export const CHAT_WINDOW_HIDDEN_WIDTH = 55;
 
 class ChatWindowService {
-    constructor(env, store, orm) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.orm = orm;
+        this.store = services["mail.store"];
+        this.orm = services.orm;
     }
 
     openNewMessage() {
@@ -153,7 +153,7 @@ class ChatWindowService {
 
 export const chatWindowService = {
     dependencies: ["mail.store", "orm"],
-    start(env, { "mail.store": store, orm }) {
-        return new ChatWindowService(env, store, orm);
+    start(env, services) {
+        return new ChatWindowService(env, services);
     },
 };
