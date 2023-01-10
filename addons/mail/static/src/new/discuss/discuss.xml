@@ -3,7 +3,7 @@
 
 <t t-name="mail.discuss" owl="1">
     <div class="d-flex h-100 flex-grow-1">
-        <Sidebar t-if="props.sidebar"/>
+        <Sidebar t-if="!store.currentGuest"/>
         <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view overflow-auto" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}" t-ref="content">
             <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
                 <ThreadIcon className="'o-mail-discuss-thread-icon me-2 align-self-center'" thread="thread"/>
@@ -42,7 +42,11 @@
                     </button>
                     <div t-if="props.guest and !env.isSmall" class="d-flex align-items-center">
                         <img class="o-mail-discuss-guest-avatar mx-1 rounded-circle o_object_fit_cover flex-shrink-0" alt="Avatar" t-att-src="store.currentGuest.avatarUrl"/>
-                        <span class="px-1 fw-bold text-truncate" t-esc="store.currentGuest.name"/>
+                        <AutoresizeInput
+                            className="'o-mail-discuss-thread-guest-name lead fw-bold flex-shrink-1 text-dark'"
+                            onValidate.bind="renameGuest"
+                            value="props.guest.name"
+                        />
                     </div>
                 </div>
             </div>

@@ -14,6 +14,7 @@ export class DiscussPublic extends Component {
     setup() {
         this.messaging = useMessaging();
         this.threadService = useService("mail.thread");
+        this.partnerService = useService("mail.partner");
         this.store = useStore();
         this.state = useState({
             welcome: this.props.data.discussPublicViewData.shouldDisplayWelcomeViewInitially,

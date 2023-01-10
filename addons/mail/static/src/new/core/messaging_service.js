@@ -400,9 +400,7 @@ export class Messaging {
                                 ? notif.payload.Guest
                                 : [notif.payload.Guest];
                             for (const guest of guests) {
-                                if (guest.im_status) {
-                                    this.partner.insertGuest(guest);
-                                }
+                                this.partner.insertGuest(guest);
                             }
                         }
                         const { LinkPreview: linkPreviews } = notif.payload;

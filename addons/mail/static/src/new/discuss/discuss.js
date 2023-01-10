@@ -9,6 +9,7 @@ import { useRtc } from "../rtc/rtc_hook";
 import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Call } from "../rtc/call";
+import { Guest } from "../core/guest_model";
 import { ChannelMemberList } from "./channel_member_list";
 import {
     Component,
@@ -37,11 +38,7 @@ export class Discuss extends Component {
         CallSettings,
         ChannelMemberList,
     };
-    static defaultProps = { sidebar: true };
-    static props = {
-        sidebar: { type: Boolean, optional: true },
-        guest: { type: Boolean, optional: true },
-    };
+    static props = {};
     static template = "mail.discuss";
 
     setup() {
@@ -49,6 +46,7 @@ export class Discuss extends Component {
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
+        this.partnerService = useService("mail.partner");
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.messageEdition = useMessageEdition();
@@ -160,6 +158,13 @@ export class Discuss extends Component {
         }
         if (newDescription !== this.thread.description) {
             await this.threadService.notifyThreadDescriptionToServer(this.thread, newDescription);
+        }
+    }
+
+    async renameGuest({ value: name }) {
+        const newName = name.trim();
+        if (this.props.guest?.name !== newName) {
+            await this.partnerService.updateGuestName(this.props.guest, newName);
         }
     }
 }

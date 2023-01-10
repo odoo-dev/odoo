@@ -25,10 +25,10 @@ export class WelcomePage extends Component {
 
     async joinChannel() {
         if (this.store.currentGuest) {
-            await this.rpc("/mail/guest/update_name", {
-                guest_id: this.store.currentGuest.id,
-                name: this.state.userName.trim(),
-            });
+            await this.messaging.updateGuestName(
+                this.store.currentGuest,
+                this.state.userName.trim()
+            );
         }
         if (this.props.data?.discussPublicViewData.addGuestAsMemberOnJoin) {
             await this.messaging.rpc("/mail/channel/add_guest_as_member", {

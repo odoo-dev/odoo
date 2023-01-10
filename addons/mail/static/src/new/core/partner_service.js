@@ -63,6 +63,13 @@ export class PartnerService {
         });
         return guest;
     }
+
+    async updateGuestName(guest, name) {
+        await this.rpc("/mail/guest/update_name", {
+            guest_id: guest.id,
+            name,
+        });
+    }
 }
 
 export const partnerService = {
