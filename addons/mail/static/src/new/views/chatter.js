@@ -31,7 +31,11 @@ import { _t } from "@web/core/l10n/translation";
 
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
+    static defaultProps = {
+        compactHeight: false,
+    };
     static props = [
+        "compactHeight?",
         "hasActivity",
         "resId",
         "resModel",
