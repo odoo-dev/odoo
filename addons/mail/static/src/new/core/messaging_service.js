@@ -42,52 +42,32 @@ export class Messaging {
         this.setup(...args);
     }
 
-    setup(
-        env,
-        store,
-        rpc,
-        orm,
-        user,
-        router,
-        bus,
-        initialThreadLocalId,
-        im_status,
-        notification,
-        multiTab,
-        presence,
-        soundEffects,
-        userSettings,
-        chatWindow,
-        thread,
-        message,
-        partner,
-        rtc
-    ) {
+    setup(env, services, initialThreadLocalId) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
-        this.rpc = rpc;
-        this.orm = orm;
-        this.notification = notification;
-        this.soundEffects = soundEffects;
-        this.userSettings = userSettings;
+        this.store = services["mail.store"];
+        this.rpc = services.rpc;
+        this.orm = services.orm;
+        this.notification = services.notification;
+        this.soundEffects = services.soundEffects;
+        this.userSettings = services.userSettings;
         /** @type {import("@mail/new/chat/chat_window_service").ChatWindow} */
-        this.chatWindow = chatWindow;
+        this.chatWindow = services["mail.chat_window"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
-        this.thread = thread;
+        this.thread = services["mail.thread"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
-        this.message = message;
+        this.message = services["mail.message"];
         /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = partner;
+        this.partner = services["mail.partner"];
         /** @type {import("@mail/new/rtc/rtc_service").Rtc} */
-        this.rtc = rtc;
+        this.rtc = services.rtc;
         this.nextId = 1;
-        this.router = router;
-        this.bus = bus;
-        this.multiTab = multiTab;
-        this.presence = presence;
+        this.router = services.router;
+        this.bus = services.bus;
+        this.multiTab = services.multiTab;
+        this.presence = services.presence;
         this.isReady = new Deferred();
-        this.imStatusService = im_status;
+        this.imStatusService = services.im_status;
         this.outOfFocusAudio = new Audio();
         this.outOfFocusAudio.src = this.outOfFocusAudio.canPlayType("audio/ogg; codecs=vorbis")
             ? url("/mail/static/src/audio/ting.ogg")
@@ -98,6 +78,7 @@ export class Messaging {
                 part: "_chat",
             });
         });
+        const user = services.user;
         Object.assign(this.store.user, {
             partnerId: user.partnerId,
             uid: user.context.uid,
@@ -730,31 +711,10 @@ export const messagingService = {
         "mail.rtc",
     ],
     async: asyncMethods,
-    start(
-        env,
-        {
-            "mail.store": store,
-            rpc,
-            orm,
-            user,
-            router,
-            bus_service: bus,
-            im_status,
-            notification,
-            multi_tab: multiTab,
-            presence,
-            "mail.soundEffects": soundEffects,
-            "mail.userSettings": userSettings,
-            "mail.chat_window": chatWindow,
-            "mail.thread": thread,
-            "mail.message": message,
-            "mail.partner": partner,
-            "mail.rtc": rtc,
-        }
-    ) {
+    start(env, services) {
         // compute initial discuss thread
         let threadLocalId = createLocalId("mail.box", "inbox");
-        const activeId = router.current.hash.active_id;
+        const activeId = services.router.current.hash.active_id;
         if (typeof activeId === "string" && activeId.startsWith("mail.box_")) {
             threadLocalId = createLocalId("mail.box", activeId.slice(9));
         }
@@ -762,32 +722,12 @@ export const messagingService = {
             threadLocalId = createLocalId("mail.channel", parseInt(activeId.slice(13), 10));
         }
 
-        const messaging = new Messaging(
-            env,
-            store,
-            rpc,
-            orm,
-            user,
-            router,
-            bus,
-            threadLocalId,
-            im_status,
-            notification,
-            multiTab,
-            presence,
-            soundEffects,
-            userSettings,
-            chatWindow,
-            thread,
-            message,
-            partner,
-            rtc
-        );
+        const messaging = new Messaging(env, services, threadLocalId);
         messaging.initialize();
-        bus.addEventListener("notification", (notifEvent) => {
+        services.bus_service.addEventListener("notification", (notifEvent) => {
             messaging.handleNotification(notifEvent.detail);
         });
-        bus.start();
+        services.bus_service.start();
         // debugging. remove this
         window.messaging = messaging;
         return messaging;
