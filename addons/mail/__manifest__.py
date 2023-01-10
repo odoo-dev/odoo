@@ -235,6 +235,7 @@ For more specific needs, you may also assign custom-defined actions
         # new bundles
         'mail.assets_backend': [
             'mail/static/src/new/core/**/*',
+            'mail/static/src/new/thread/**/*',
             'mail/static/src/new/**/*',
             ('remove', 'mail/static/src/new/public/**/*'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),

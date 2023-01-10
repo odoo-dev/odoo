@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div t-if="!state.isEditing" class="o-mail-message-content d-flex position-relative">
-                    <t t-if="message.type === 'notification' or message.isTransient or message.trackingValues.length > 0">
+                    <t name="hasTrackingValue" t-if="(message.type === 'notification' or message.isTransient) and !message.isBodyEmpty">
                         <t t-if="message.subtype_description">
                             <p class="mb-0"><t t-esc="message.subtype_description"/></p>
                         </t>
@@ -146,12 +146,11 @@
 
 <t t-name="mail.tracking_values" owl="1">
     <ul class="mb-0 ps-4">
-        <t t-foreach="message.trackingValues" t-as="trackingValue" t-key="trackingValue.id">
-            <li class="o-mail-message-tracking mb-1" role="group">
-                <span class="o-mail-message-tracking-old me-1 px-1 text-muted fw-bold" t-esc="formatTrackingOrNone(trackingValue.oldValue)"/>
-                <i class="o-mail-message-tracking-separator fa fa-long-arrow-right mx-1 text-600" />
-                <span class="o-mail-message-tracking-new me-1 fw-bold text-info" t-esc="formatTrackingOrNone(trackingValue.newValue)"/>
-                <span class="o-mail-message-tracking-field ms-1 fst-italic text-muted">(<t t-esc="trackingValue.changedField"/>)</span>
+        <t name="trackingValues" t-foreach="message.trackingValues" t-as="trackingValue" t-key="trackingValue.id">
+            <li>
+                <span class="fw-bold" t-esc="trackingValue.oldValue.value"/>
+                <i class="fa fa-long-arrow-right mx-1 text-600" />
+                <span class="text-info fw-bold" t-esc="trackingValue.newValue.value"/> (<t t-esc="trackingValue.changedField"/>)
             </li>
         </t>
     </ul>

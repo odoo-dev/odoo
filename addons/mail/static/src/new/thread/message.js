@@ -19,13 +19,6 @@ import { useEmojiPicker } from "../composer/emoji_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { MessageNotificationPopover } from "./message_notification_popover";
 
-import { format } from "web.field_utils";
-import { deserializeDateTime } from "@web/core/l10n/dates";
-import { registry } from "@web/core/registry";
-import { session } from "@web/session";
-
-const formatters = registry.category("formatters");
-
 /**
  * @typedef {Object} Props
  * @property {boolean} [hasActions]
@@ -153,67 +146,6 @@ export class Message extends Component {
      */
     get canToggleStar() {
         return Boolean(!this.message.isTransient && this.message.resId);
-    }
-
-    /**
-     * @returns {string}
-     */
-    formatTracking(trackingValue) {
-        /**
-         * Maps tracked field type to a JS formatter. Tracking values are
-         * not always stored in the same field type as their origin type.
-         * Field types that are not listed here are not supported by
-         * tracking in Python. Also see `create_tracking_values` in Python.
-         */
-        switch (trackingValue.fieldType) {
-            case "boolean":
-                return trackingValue.value ? this.env._t("Yes") : this.env._t("No");
-            /**
-             * many2one formatter exists but is expecting id/name_get or data
-             * object but only the target record name is known in this context.
-             *
-             * Selection formatter exists but requires knowing all
-             * possibilities and they are not given in this context.
-             */
-            case "char":
-            case "many2one":
-            case "selection":
-                return format.char(trackingValue.value);
-            case "date":
-                if (trackingValue.value) {
-                    return format.date(moment.utc(trackingValue.value));
-                }
-                return format.date(trackingValue.value);
-            case "datetime": {
-                const value = trackingValue.value
-                    ? deserializeDateTime(trackingValue.value)
-                    : trackingValue.value;
-                return formatters.get("datetime")(value);
-            }
-            case "float":
-                return format.float(trackingValue.value);
-            case "integer":
-                return format.integer(trackingValue.value);
-            case "text":
-                return format.text(trackingValue.value);
-            case "monetary":
-                return format.monetary(trackingValue.value, undefined, {
-                    currency: trackingValue.currencyId
-                        ? session.currencies[trackingValue.currencyId]
-                        : undefined,
-                    forceString: true,
-                });
-            default:
-                return trackingValue.value;
-        }
-    }
-
-    /**
-     * @returns {string}
-     */
-    formatTrackingOrNone(trackingValue) {
-        const formattedValue = this.formatTracking(trackingValue);
-        return formattedValue || this.env._t("None");
     }
 
     /**
