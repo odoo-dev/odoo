@@ -4,7 +4,6 @@
     <t t-name="mail.MessageView" owl="1">
         <div class="o_MessageView position-relative py-1"
             t-att-class="{
-                'o_MessageView_active': isActive,
                 'o-clicked': messagingAsClickedMessageView,
                 'o-discussion': message.isDiscussionOrNotification,
                 'o-has-message-selection': messageListViewItemOwner and messageListViewItemOwner.messageListViewOwner.threadViewOwner.replyingToMessageView,
