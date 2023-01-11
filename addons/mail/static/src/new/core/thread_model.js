@@ -120,11 +120,11 @@ export class Thread {
     }
 
     get isDescriptionChangeable() {
-        return ["channel", "group"].includes(this.type);
+        return !this._store.currentGuest && ["channel", "group"].includes(this.type);
     }
 
     get isRenameable() {
-        return ["chat", "channel", "group"].includes(this.type);
+        return !this._store.currentGuest && ["chat", "channel", "group"].includes(this.type);
     }
 
     get isTransient() {
