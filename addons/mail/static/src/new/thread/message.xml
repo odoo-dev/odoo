@@ -2,10 +2,12 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.message" owl="1">
-        <div class="o-mail-message position-relative py-1 mt-1 px-3"
+        <div class="o-mail-message position-relative py-1 mt-1"
             t-att-class="{
                 'o-highlighted bg-view shadow-lg': props.highlighted,
                 'o-mail-is-author': message.isSelfAuthored,
+                'px-3': !props.isInChatWindow,
+                'px-1': props.isInChatWindow,
                 'opacity-50': props.grayedOut,
             }"
             t-att-data-message-id="message.id"

@@ -44,10 +44,12 @@ export class Message extends Component {
     };
     static defaultProps = {
         hasActions: true,
+        isInChatWindow: false,
         onParentMessageClick: () => {},
     };
     static props = [
         "hasActions?",
+        "isInChatWindow?",
         "grayedOut?",
         "highlighted?",
         "onParentMessageClick?",

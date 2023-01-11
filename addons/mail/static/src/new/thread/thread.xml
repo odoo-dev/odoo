@@ -23,6 +23,7 @@
                     </t>
                     <t t-elif="!msg.isEmpty">
                         <Message
+                            isInChatWindow="props.isInChatWindow"
                             message="msg"
                             squashed="isSquashed(msg, prevMsg)"
                             highlighted="props.messageHighlight and props.messageHighlight.highlightedMessageId === msg.id"

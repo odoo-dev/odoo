@@ -15,8 +15,9 @@ import { useService } from "@web/core/utils/hooks";
 
 export class Thread extends Component {
     static components = { Message, Transition };
-    static props = ["thread", "messageEdition?", "messageHighlight?", "order?"];
+    static props = ["isInChatWindow?", "thread", "messageEdition?", "messageHighlight?", "order?"];
     static defaultProps = {
+        isInChatWindow: false,
         order: "asc", // 'asc' or 'desc'
     };
     static template = "mail.thread";
