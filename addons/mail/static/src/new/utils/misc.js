@@ -1,5 +1,14 @@
 /* @odoo-module */
 
+export function assignDefined(obj, data) {
+    for (const key in data) {
+        if (data[key] === undefined) {
+            continue;
+        }
+        obj[key] = data[key];
+    }
+}
+
 // todo: move this some other place in the future
 export function isDragSourceExternalFile(dataTransfer) {
     const dragDataType = dataTransfer.types;

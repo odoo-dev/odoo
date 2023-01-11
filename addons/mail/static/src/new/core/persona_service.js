@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { Persona } from "@mail/new/core/persona_model";
+import { assignDefined } from "../utils/misc";
 import { createLocalId } from "./thread_model.create_local_id";
 
 export class PersonaService {
@@ -32,21 +33,7 @@ export class PersonaService {
             // Get reactive version.
             persona = this.store.personas[localId];
         }
-        const {
-            id = persona.id,
-            name = persona.name,
-            im_status = persona.im_status,
-            email = persona.email,
-            type,
-        } = data;
-        Object.assign(persona, {
-            localId,
-            id,
-            name,
-            im_status,
-            email,
-            type,
-        });
+        assignDefined(persona, { ...data, localId });
         if (
             persona.type === "partner" &&
             persona.im_status !== "im_partner" &&

@@ -495,6 +495,7 @@ QUnit.test("add an emoji after a partner mention", async function (assert) {
     assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "@");
     await insertText(".o-mail-composer-textarea", "T");
+    await insertText(".o-mail-composer-textarea", "e");
     await click(".o-composer-suggestion");
     assert.strictEqual(
         target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),

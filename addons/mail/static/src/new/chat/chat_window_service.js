@@ -2,6 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { ChatWindow } from "../core/chat_window_model";
+import { assignDefined } from "../utils/misc";
 
 export const CHAT_WINDOW_END_GAP_WIDTH = 10; // for a single end, multiply by 2 for left and right together.
 export const CHAT_WINDOW_INBETWEEN_WIDTH = 5;
@@ -72,7 +73,7 @@ class ChatWindowService {
         const chatWindow = this.store.chatWindows.find((c) => c.thread === data.thread);
         if (!chatWindow) {
             const chatWindow = new ChatWindow(this.store, data);
-            this.update(chatWindow, data);
+            assignDefined(chatWindow, data);
             if (this.maxVisible <= this.store.chatWindows.length) {
                 const swaped = this.visible[this.visible.length - 1];
                 swaped.hidden = true;
@@ -93,21 +94,8 @@ class ChatWindowService {
             this.store.chatWindows.splice(index, 1, chatWindow);
             return this.store.chatWindows[index]; // return reactive version
         }
-        this.update(chatWindow, data);
+        assignDefined(chatWindow, data);
         return chatWindow;
-    }
-
-    update(chatWindow, data) {
-        const {
-            autofocus = chatWindow.autofocus,
-            folded = chatWindow.folded,
-            hidden = chatWindow.hidden,
-        } = data;
-        Object.assign(chatWindow, {
-            autofocus,
-            folded,
-            hidden,
-        });
     }
 
     makeVisible(chatWindow) {

@@ -10,6 +10,7 @@ import { MessageReactions } from "../core/message_reactions_model";
 import { Notification } from "../core/notification_model";
 import { LinkPreview } from "../core/link_preview_model";
 import { NotificationGroup } from "../core/notification_group_model";
+import { assignDefined } from "../utils/misc";
 
 const commandRegistry = registry.category("mail.channel_commands");
 
@@ -198,51 +199,37 @@ export class MessageService {
     _update(message, data, fromFetch = false) {
         const {
             attachment_ids: attachments = message.attachments,
-            body = message.body,
             is_discussion: isDiscussion = message.isDiscussion,
             is_note: isNote = message.isNote,
             is_transient: isTransient = message.isTransient,
             linkPreviews = message.linkPreviews,
             message_type: type = message.type,
             model: resModel = message.resModel,
-            needaction_partner_ids = message.needaction_partner_ids,
             res_id: resId = message.resId,
-            subject = message.subject,
             subtype_description: subtypeDescription = message.subtypeDescription,
-            starred_partner_ids = message.starred_partner_ids,
-            trackingValues = message.trackingValues,
-            notifications = message.notifications,
             ...remainingData
         } = data;
-        for (const key in remainingData) {
-            message[key] = remainingData[key];
-        }
-        Object.assign(message, {
+        Object.assign(message, remainingData);
+        assignDefined(message, {
             attachments: attachments.map((attachment) => this.attachment.insert(attachment)),
-            body,
             isDiscussion,
             isNote,
-            isStarred: starred_partner_ids.includes(this.store.self.id),
+            isStarred: message.starred_partner_ids.includes(this.store.self.id),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
-            needaction_partner_ids,
             parentMessage: message.parentMessage ? this.insert(message.parentMessage) : undefined,
             resId,
             resModel,
-            starred_partner_ids,
-            subject,
             subtypeDescription,
-            trackingValues,
             type,
-            notifications,
         });
-        if (data?.author?.id) {
+        if (data.author?.id) {
             message.author = this.persona.insert({
                 ...data.author,
                 type: "partner",
             });
         }
-        if (data?.guestAuthor?.id) {
+        if (data.guestAuthor?.id) {
             message.author = this.persona.insert({
                 ...data.guestAuthor,
                 type: "guest",
