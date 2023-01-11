@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { afterNextRender, pasteFiles, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -19,40 +19,6 @@ QUnit.module("mail", (hooks) => {
     });
     QUnit.module("components", {}, function () {
         QUnit.module("composer_tests.js");
-
-        QUnit.skipRefactoring("composer: paste attachments", async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const { openDiscuss } = await start({
-                discuss: {
-                    context: { active_id: mailChannelId1 },
-                },
-            });
-            await openDiscuss();
-            const files = [
-                await createFile({
-                    content: "hello, world",
-                    contentType: "text/plain",
-                    name: "text.txt",
-                }),
-            ];
-            assert.strictEqual(
-                document.querySelectorAll(`.o_ComposerView .o_AttachmentCard`).length,
-                0,
-                "should not have any attachment in the composer before paste"
-            );
-
-            await afterNextRender(() =>
-                pasteFiles(document.querySelector(".o_ComposerTextInputView"), files)
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`.o_ComposerView .o_AttachmentCard`).length,
-                1,
-                "should have 1 attachment in the composer after paste"
-            );
-        });
 
         QUnit.skipRefactoring("remove an uploading attachment", async function (assert) {
             assert.expect(4);

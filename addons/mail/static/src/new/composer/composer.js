@@ -225,6 +225,19 @@ export class Composer extends Component {
         );
     }
 
+    /**
+     * This doesn't work on firefox https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
+     */
+    onPaste(ev) {
+        ev.preventDefault();
+        if (!ev.clipboardData?.items) {
+            return;
+        }
+        for (const file of ev.clipboardData.files) {
+            this.attachmentUploader.uploadFile(file);
+        }
+    }
+
     onKeydown(ev) {
         switch (ev.key) {
             case "ArrowUp":

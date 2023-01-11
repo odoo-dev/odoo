@@ -10,6 +10,7 @@ import {
     insertText,
     start,
     startServer,
+    pasteFiles,
 } from "@mail/../tests/helpers/test_utils";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
@@ -985,3 +986,27 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-attachment-list .o-mail-attachment-card");
     }
 );
+
+QUnit.test("composer: paste attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "test" });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId}` },
+        },
+    });
+    await openDiscuss();
+    const files = [
+        await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        }),
+    ];
+    assert.containsNone(target, ".o-mail-attachment-list .o-mail-attachment-card");
+
+    await afterNextRender(() =>
+        pasteFiles(target.querySelector(".o-mail-composer-textarea"), files)
+    );
+    assert.containsOnce(target, ".o-mail-attachment-list .o-mail-attachment-card");
+});
