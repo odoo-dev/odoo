@@ -593,7 +593,7 @@ Model({
         /**
          * Determine whether the message is highlighted.
          */
-        isHighlighted: attr({
+        isHighlightedFromMention: attr({
             compute() {
                 return (
                     this.isCurrentPartnerMentioned &&

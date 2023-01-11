@@ -5,7 +5,7 @@
         <div class="o_MessageView position-relative py-1"
             t-att-class="{
                 'o-clicked': messagingAsClickedMessageView,
-                'o-highlighted': message.isHighlighted or isHighlighted,
+                'o-highlighted': message.isHighlightedFromMention or isHighlighted,
                 'o-isReplyHighlighted bg-view shadow-lg': isHighlighted,
                 'o-isDeviceSmall': messaging.device.isSmall,
                 'o-not-discussion': !message.isDiscussionOrNotification,
@@ -117,9 +117,9 @@
                                     'rounded-end-3': !isInChatWindowAndIsAlignedRight and (message.isDiscussionOrNotification or message.message_type === 'sms'),
                                     'rounded-start-3': isInChatWindowAndIsAlignedRight and (message.isDiscussionOrNotification or message.message_type === 'sms'),
                                     'rounded-bottom-3 border': message.isDiscussionOrNotification or message.message_type === 'sms',
-                                    'o-isAuthorNotCurrentUserOrGuest border-info bg-info-light': !message.isCurrentUserOrGuestAuthor and !message.isHighlighted and (message.isDiscussionOrNotification or message.message_type === 'sms'),
-                                    'border-success bg-success-light opacity-25': message.isCurrentUserOrGuestAuthor and !message.isHighlighted and (message.isDiscussionOrNotification or message.message_type === 'sms'),
-                                    'border-warning bg-warning-light opacity-50': message.isHighlighted and (message.isDiscussionOrNotification or message.message_type === 'sms'),
+                                    'o-isAuthorNotCurrentUserOrGuest border-info bg-info-light': !message.isCurrentUserOrGuestAuthor and !message.isHighlightedFromMention and (message.isDiscussionOrNotification or message.message_type === 'sms'),
+                                    'border-success bg-success-light opacity-25': message.isCurrentUserOrGuestAuthor and !message.isHighlightedFromMention and (message.isDiscussionOrNotification or message.message_type === 'sms'),
+                                    'border-warning bg-warning-light opacity-50': message.isHighlightedFromMention and (message.isDiscussionOrNotification or message.message_type === 'sms'),
                                 }"
                             />
                             <em t-if="message.subject and !message.isSubjectSimilarToOriginThreadName" class="o_MessageView_subject position-relative mb-1 me-2">Subject: <t t-esc="message.subject"/></em>
