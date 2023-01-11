@@ -113,10 +113,14 @@ export class ThreadService {
      */
     async markAsRead(thread) {
         const mostRecentNonTransientMessage = thread.mostRecentNonTransientMessage;
-        if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
+        if (
+            thread.isUnread &&
+            ["chat", "channel"].includes(thread.type) &&
+            mostRecentNonTransientMessage
+        ) {
             await this.rpc("/mail/channel/set_last_seen_message", {
                 channel_id: thread.id,
-                last_message_id: mostRecentNonTransientMessage?.id,
+                last_message_id: mostRecentNonTransientMessage.id,
             });
         }
         this.update(thread, { isUnread: false });
