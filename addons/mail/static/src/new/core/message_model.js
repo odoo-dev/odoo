@@ -14,7 +14,7 @@ const { DateTime } = luxon;
 export class Message {
     /** @type {Object[]} */
     attachments = [];
-    /** @type {Persona} */
+    /** @type {import("@mail/new/core/persona_model").Persona} */
     author;
     /** @type {string} */
     body;

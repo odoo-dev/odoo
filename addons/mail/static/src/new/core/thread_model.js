@@ -59,6 +59,7 @@ export class Thread {
      */
     /** @type {SeenInfo[]} */
     seenInfos = [];
+    serverMessageUnreadCounter = 0;
 
     constructor(store, data) {
         Object.assign(this, {

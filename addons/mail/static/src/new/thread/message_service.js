@@ -68,6 +68,16 @@ export class MessageService {
         }
     }
 
+    /**
+     * @returns {number}
+     */
+    getLastMessageId() {
+        return Object.values(this.store.messages).reduce(
+            (lastMessageId, message) => Math.max(lastMessageId, message.id),
+            0
+        );
+    }
+
     getMentionsFromText(rawMentions, body) {
         const validMentions = {};
         const partners = [];
@@ -104,10 +114,7 @@ export class MessageService {
      */
     createTransient(data) {
         const { body, res_id, model } = data;
-        const lastMessageId = Object.values(this.store.messages).reduce(
-            (lastMessageId, message) => Math.max(lastMessageId, message.id),
-            0
-        );
+        const lastMessageId = this.getLastMessageId();
         this.insert({
             author: this.store.partnerRoot,
             body,
@@ -431,6 +438,9 @@ export class MessageService {
         group.resIds.add(data.resId);
     }
 
+    /**
+     * @param {import("@mail/new/core/thread_model").Thread} thread
+     */
     sortMessages(thread) {
         thread.messages.sort((msgId1, msgId2) => {
             const indicator =
