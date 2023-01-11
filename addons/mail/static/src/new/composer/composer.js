@@ -407,7 +407,7 @@ export class Composer extends Component {
      * @param {boolean} [is_typing=true]
      */
     notifyIsTyping(is_typing = true) {
-        if (["chat", "channel"].includes(this.thread?.type)) {
+        if (["chat", "channel", "group"].includes(this.thread?.type)) {
             this.messaging.rpc(
                 "/mail/channel/notify_typing",
                 {
