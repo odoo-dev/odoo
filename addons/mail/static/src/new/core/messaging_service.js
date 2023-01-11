@@ -733,13 +733,15 @@ export const messagingService = {
         // compute initial discuss thread
         let threadLocalId = createLocalId("mail.box", "inbox");
         const activeId = services.router.current.hash.active_id;
+        if (typeof activeId === "number") {
+            threadLocalId = createLocalId("mail.channel", activeId);
+        }
         if (typeof activeId === "string" && activeId.startsWith("mail.box_")) {
             threadLocalId = createLocalId("mail.box", activeId.slice(9));
         }
         if (typeof activeId === "string" && activeId.startsWith("mail.channel_")) {
             threadLocalId = createLocalId("mail.channel", parseInt(activeId.slice(13), 10));
         }
-
         const messaging = new Messaging(env, services, threadLocalId);
         messaging.initialize();
         services.bus_service.addEventListener("notification", (notifEvent) => {

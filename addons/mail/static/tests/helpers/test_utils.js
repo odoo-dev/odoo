@@ -149,7 +149,8 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
             type: "ir.actions.client",
         };
         const activeId = context.active_id ?? params.default_active_id ?? "mail.box_inbox";
-        let [threadModel, threadId] = activeId.split("_");
+        let [threadModel, threadId] =
+            typeof activeId === "number" ? ["mail.channel", activeId] : activeId.split("_");
         if (threadModel === "mail.channel") {
             threadId = parseInt(threadId, 10);
         }
