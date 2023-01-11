@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 
-class UserSettings {
+export class UserSettings {
     id;
 
     constructor(env, services) {
