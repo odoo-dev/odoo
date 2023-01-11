@@ -410,3 +410,5 @@ export const suggestionService = {
         return new SuggestionService(env, services);
     },
 };
+
+registry.category("services").add("mail.suggestion", suggestionService);

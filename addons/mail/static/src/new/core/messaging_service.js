@@ -13,6 +13,7 @@ import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { createLocalId } from "../utils/misc";
 import { session } from "@web/session";
+import { registry } from "@web/core/registry";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 export const OTHER_LONG_TYPING = 60000;
@@ -49,8 +50,8 @@ export class Messaging {
         this.rpc = services.rpc;
         this.orm = services.orm;
         this.notification = services.notification;
-        this.soundEffects = services["mail.soundEffects"];
-        this.userSettings = services["mail.userSettings"];
+        this.soundEffects = services["mail.sound_effects"];
+        this.userSettings = services["mail.user_settings"];
         /** @type {import("@mail/new/chat/chat_window_service").ChatWindow} */
         this.chatWindow = services["mail.chat_window"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
@@ -724,8 +725,8 @@ export const messagingService = {
         "notification",
         "multi_tab",
         "presence",
-        "mail.soundEffects",
-        "mail.userSettings",
+        "mail.sound_effects",
+        "mail.user_settings",
         "mail.chat_window",
         "mail.thread",
         "mail.message",
@@ -757,3 +758,5 @@ export const messagingService = {
         return messaging;
     },
 };
+
+registry.category("services").add("mail.messaging", messagingService);

@@ -28,7 +28,7 @@ export class Sidebar extends Component {
         this.threadService = useState(useService("mail.thread"));
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.userSettings = useService("mail.userSettings");
+        this.userSettings = useService("mail.user_settings");
         this.orm = useService("orm");
         this.state = useState({
             editing: false,

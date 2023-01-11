@@ -3,6 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { ChatWindow } from "../core/chat_window_model";
 import { assignDefined } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 export const CHAT_WINDOW_END_GAP_WIDTH = 10; // for a single end, multiply by 2 for left and right together.
 export const CHAT_WINDOW_INBETWEEN_WIDTH = 5;
@@ -145,3 +146,5 @@ export const chatWindowService = {
         return new ChatWindowService(env, services);
     },
 };
+
+registry.category("services").add("mail.chat_window", chatWindowService);

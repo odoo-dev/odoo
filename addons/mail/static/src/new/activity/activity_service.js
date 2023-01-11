@@ -3,6 +3,7 @@
 import { Activity } from "@mail/new/core/activity_model";
 import { _t } from "@web/core/l10n/translation";
 import { assignDefined } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 export class ActivityService {
     constructor(env, services) {
@@ -69,3 +70,5 @@ export const activityService = {
         return new ActivityService(env, services);
     },
 };
+
+registry.category("services").add("mail.activity", activityService);

@@ -2,6 +2,7 @@
 
 import { Attachment } from "../core/attachment_model";
 import { createLocalId } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 export class AttachmentService {
     constructor(env, services) {
@@ -54,3 +55,5 @@ export const attachmentService = {
         return new AttachmentService(env, services);
     },
 };
+
+registry.category("services").add("mail.attachment", attachmentService);

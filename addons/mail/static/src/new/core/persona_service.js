@@ -2,6 +2,7 @@
 
 import { Persona } from "@mail/new/core/persona_model";
 import { assignDefined, createLocalId } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 export class PersonaService {
     constructor(env, services) {
@@ -52,3 +53,5 @@ export const personaService = {
         return new PersonaService(env, services);
     },
 };
+
+registry.category("services").add("mail.persona", personaService);

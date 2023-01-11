@@ -3,6 +3,7 @@
 import { Follower } from "@mail/new/core/follower_model";
 import { _t } from "@web/core/l10n/translation";
 import { createLocalId } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 export class ChatterService {
     constructor(env, services) {
@@ -116,3 +117,5 @@ export const chatterService = {
         return new ChatterService(env, services);
     },
 };
+
+registry.category("services").add("mail.chatter", chatterService);
