@@ -40,6 +40,8 @@ export class Message {
     reactions = [];
     /** @type {Notification[]} */
     notifications = [];
+    /** @type {import("@mail/new/core/partner_model").Partner[]} */
+    recipients = [];
     /** @type {number|string} */
     resId;
     /** @type {string|undefined} */
@@ -92,6 +94,14 @@ export class Message {
 
     get dateTimeStr() {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
+    }
+
+    get isCurrentPartnerMentioned() {
+        return this.recipients.some((recipient) => recipient.id === this._store.user.partnerId);
+    }
+
+    get isHighlightedFromMention() {
+        return this.isCurrentPartnerMentioned && this.resModel === "mail.channel";
     }
 
     get isSelfAuthored() {

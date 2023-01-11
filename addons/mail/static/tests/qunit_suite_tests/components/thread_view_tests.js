@@ -1547,7 +1547,7 @@ QUnit.module("mail", (hooks) => {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "highlight the message mentioning the current user inside the channel",
             async function (assert) {
                 assert.expect(1);
@@ -1575,14 +1575,14 @@ QUnit.module("mail", (hooks) => {
                 });
                 await openDiscuss();
                 assert.hasClass(
-                    document.querySelector(`.o_MessageListView .o-mail-message`),
-                    "o-highlighted",
+                    document.querySelector(`.o-mail-message`),
+                    "o-mail-message-highlighted-from-mention",
                     "message should be highlighted"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "not highlighting the message if not mentioning the current user inside the channel",
             async function (assert) {
                 assert.expect(1);
@@ -1611,8 +1611,8 @@ QUnit.module("mail", (hooks) => {
                 });
                 await openDiscuss();
                 assert.doesNotHaveClass(
-                    document.querySelector(`.o_MessageListView .o-mail-message`),
-                    "o-highlighted",
+                    document.querySelector(`.o-mail-message`),
+                    "o-mail-message-highlighted-from-mention",
                     "message should not be highlighted"
                 );
             }

@@ -4,6 +4,7 @@
     <t t-name="mail.message" owl="1">
         <div class="o-mail-message position-relative py-1 mt-1"
             t-att-class="{
+                'o-mail-message-highlighted-from-mention': message.isHighlightedFromMention,
                 'o-mail-message-highlighted bg-view shadow-lg': props.highlighted,
                 'o-mail-is-author': message.isSelfAuthored,
                 'px-3': !props.isInChatWindow,

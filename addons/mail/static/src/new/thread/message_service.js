@@ -190,6 +190,11 @@ export class MessageService {
         return this.store.messages[message.id];
     }
 
+    /**
+     * @param {import("@mail/new/core/message_model").Message} message
+     * @param {Object} data
+     * @param {boolean} [fromFetch=false]
+     */
     _update(message, data, fromFetch = false) {
         const {
             attachment_ids: attachments = message.attachments,
@@ -240,6 +245,9 @@ export class MessageService {
             message.author = this.partner.insertPersona({
                 guest: this.partner.insertGuest(data.guestAuthor),
             });
+        }
+        if (data.recipients) {
+            message.recipients = data.recipients.map((recipient) => this.partner.insert(recipient));
         }
         if (data.record_name) {
             message.originThread.name = data.record_name;
