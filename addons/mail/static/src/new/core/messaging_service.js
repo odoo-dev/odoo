@@ -115,45 +115,49 @@ export class Messaging {
      * Import data received from init_messaging
      */
     initialize() {
-        this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
-            if (data.current_partner) {
-                this.persona.insert({ ...data.current_partner, type: "partner" });
-            }
-            if (data.currentGuest) {
-                this.store.currentGuest = this.persona.insert({
-                    ...data.currentGuest,
-                    type: "guest",
+        this.rpc("/mail/init_messaging", {}, { silent: true }).then(
+            this.initMessagingCallback.bind(this)
+        );
+    }
+
+    initMessagingCallback(data) {
+        if (data.current_partner) {
+            this.persona.insert({ ...data.current_partner, type: "partner" });
+        }
+        if (data.currentGuest) {
+            this.store.currentGuest = this.persona.insert({
+                ...data.currentGuest,
+                type: "guest",
+            });
+        }
+        if (session.user_context.uid) {
+            this.loadFailures();
+        }
+        this.store.partnerRoot = this.persona.insert({ ...data.partner_root, type: "partner" });
+        for (const channelData of data.channels) {
+            const thread = this.thread.createChannelThread(channelData);
+            if (channelData.is_minimized && channelData.state !== "closed") {
+                this.chatWindow.insert({
+                    autofocus: 0,
+                    folded: channelData.state === "folded",
+                    thread,
                 });
             }
-            if (session.user_context.uid) {
-                this.loadFailures();
-            }
-            this.store.partnerRoot = this.persona.insert({ ...data.partner_root, type: "partner" });
-            for (const channelData of data.channels) {
-                const thread = this.thread.createChannelThread(channelData);
-                if (channelData.is_minimized && channelData.state !== "closed") {
-                    this.chatWindow.insert({
-                        autofocus: 0,
-                        folded: channelData.state === "folded",
-                        thread,
-                    });
-                }
-            }
-            this.thread.sortChannels();
-            const settings = data.current_user_settings;
-            this.userSettings.updateFromCommands(settings);
-            this.userSettings.id = settings.id;
-            this.store.companyName = data.companyName;
-            this.store.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
-            this.store.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
-            this.store.discuss.inbox.counter = data.needaction_inbox_counter;
-            this.store.internalUserGroupId = data.internalUserGroupId;
-            this.store.discuss.starred.counter = data.starred_counter;
-            (data.shortcodes ?? []).forEach((code) => {
-                this.insertCannedResponse(code);
-            });
-            this.isReady.resolve();
+        }
+        this.thread.sortChannels();
+        const settings = data.current_user_settings;
+        this.userSettings.updateFromCommands(settings);
+        this.userSettings.id = settings.id;
+        this.store.companyName = data.companyName;
+        this.store.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
+        this.store.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
+        this.store.discuss.inbox.counter = data.needaction_inbox_counter;
+        this.store.internalUserGroupId = data.internalUserGroupId;
+        this.store.discuss.starred.counter = data.starred_counter;
+        (data.shortcodes ?? []).forEach((code) => {
+            this.insertCannedResponse(code);
         });
+        this.isReady.resolve();
     }
 
     loadFailures() {
