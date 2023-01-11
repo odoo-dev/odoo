@@ -15,7 +15,6 @@
                 'o-selected': isSelected,
                 'o-squashed pt-1': isSquashed,
                 'o-starred': message.isStarred,
-                'o-currentAuthor': message.isCurrentUserOrGuestAuthor,
                 'mt-1': !isSquashed and messageListViewItemOwner,
                 'px-3': !isInChatWindow,
                 'px-1': isInChatWindow,
