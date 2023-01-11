@@ -64,7 +64,7 @@ export class Message extends Component {
             isEditing: false,
             isActionListSquashed: this.env.inChatWindow,
         });
-        this.ref = useRef("ref");
+        this.root = useRef("root");
         this.messaging = useMessaging();
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
@@ -82,14 +82,14 @@ export class Message extends Component {
             },
             () => [this.props.messageEdition?.editingMessage]
         );
-        onExternalClick("ref", async (ev) => {
+        onExternalClick("root", async (ev) => {
             // Let event be handled by bubbling handlers first.
             await new Promise(setTimeout);
             if (isEventHandled(ev, "emoji.selectEmoji")) {
                 return;
             }
             // Stop editing the message on click away.
-            if (!this.ref.el || ev.target === this.ref.el || this.ref.el.contains(ev.target)) {
+            if (!this.root.el || ev.target === this.root.el || this.root.el.contains(ev.target)) {
                 return;
             }
             if (this.state.isEditing) {
@@ -97,8 +97,8 @@ export class Message extends Component {
             }
         });
         onPatched(() => {
-            if (this.props.highlighted && this.ref.el) {
-                this.ref.el.scrollIntoView({ behavior: "smooth", block: "center" });
+            if (this.props.highlighted && this.root.el) {
+                this.root.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
         if (this.props.hasActions && this.canAddReaction) {
