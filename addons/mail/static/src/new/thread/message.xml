@@ -2,14 +2,15 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.message" owl="1">
-        <div class="o-mail-message position-relative py-1 mt-1 px-3" t-att-class="{
-                'o-mail-is-author': message.isSelfAuthored,
+        <div class="o-mail-message position-relative py-1 mt-1 px-3"
+            t-att-class="{
                 'o-highlighted bg-view shadow-lg': props.highlighted,
+                'o-mail-is-author': message.isSelfAuthored,
                 'opacity-50': props.grayedOut,
             }"
             t-att-data-message-id="message.id"
-            t-ref="ref"
             t-on-click="onClick"
+            t-ref="ref"
         >
             <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
             <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
