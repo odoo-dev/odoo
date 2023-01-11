@@ -11,7 +11,6 @@
                 'o-isReplyHighlighted bg-view shadow-lg': isHighlighted,
                 'o-isDeviceSmall': messaging.device.isSmall,
                 'o-not-discussion': !message.isDiscussionOrNotification,
-                'o-notification': message.message_type === 'notification',
                 'o-selected': isSelected,
                 'o-squashed pt-1': isSquashed,
                 'o-starred': message.isStarred,
