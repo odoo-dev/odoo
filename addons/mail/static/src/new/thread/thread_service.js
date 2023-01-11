@@ -8,6 +8,7 @@ import { removeFromArray } from "@mail/new/utils/arrays";
 import { createLocalId } from "../utils/misc";
 import { Composer } from "../core/composer_model";
 import { prettifyMessageContent } from "../utils/format";
+import { registry } from "@web/core/registry";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -617,3 +618,5 @@ export const threadService = {
         return new ThreadService(env, services);
     },
 };
+
+registry.category("services").add("mail.thread", threadService);

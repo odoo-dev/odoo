@@ -2,6 +2,7 @@
 
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 
 export class Store {
     constructor(env) {
@@ -106,3 +107,5 @@ export const storeService = {
         return reactive(new Store(env));
     },
 };
+
+registry.category("services").add("mail.store", storeService);

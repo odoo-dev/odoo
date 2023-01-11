@@ -75,7 +75,7 @@ export class MessageService {
         const rawMentionedPartnerIds = rawMentions.partnerIds || [];
         const rawMentionedThreadIds = rawMentions.threadIds || [];
         for (const partnerId of rawMentionedPartnerIds) {
-            const partner = this.store.partners[partnerId];
+            const partner = this.store.personas[createLocalId("partner", partnerId)];
             const index = body.indexOf(`@${partner.name}`);
             if (index === -1) {
                 continue;
@@ -451,3 +451,5 @@ export const messageService = {
         return new MessageService(env, services);
     },
 };
+
+registry.category("services").add("mail.message", messageService);

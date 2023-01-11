@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
 
 export class UserSettings {
     id;
@@ -235,3 +236,5 @@ export const userSettingsService = {
         return new UserSettings(env, services);
     },
 };
+
+registry.category("services").add("mail.user_settings", userSettingsService);

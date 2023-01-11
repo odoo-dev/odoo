@@ -10,6 +10,7 @@ import { reactive } from "@odoo/owl";
 import { RtcSession } from "./rtc_session_model";
 import { debounce } from "@web/core/utils/timing";
 import { createLocalId } from "../utils/misc";
+import { registry } from "@web/core/registry";
 
 const ORDERED_TRANSCEIVER_NAMES = ["audio", "video"];
 const PEER_NOTIFICATION_WAIT_DELAY = 50;
@@ -70,8 +71,8 @@ export class Rtc {
         this.store = services["mail.store"];
         this.notification = services.notification;
         this.rpc = services.rpc;
-        this.soundEffects = services["mail.soundEffects"];
-        this.userSettings = services["mail.userSettings"];
+        this.soundEffects = services["mail.sound_effects"];
+        this.userSettings = services["mail.user_settings"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
         this.persona = services["mail.persona"];
@@ -1308,8 +1309,8 @@ export const rtcService = {
         "notification",
         "rpc",
         "bus_service",
-        "mail.soundEffects",
-        "mail.userSettings",
+        "mail.sound_effects",
+        "mail.user_settings",
         "mail.thread",
         "mail.persona",
     ],
@@ -1346,3 +1347,5 @@ export const rtcService = {
         return rtc;
     },
 };
+
+registry.category("services").add("mail.rtc", rtcService);

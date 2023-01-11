@@ -3,7 +3,6 @@
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
-import { messagingService as newMessagingService } from "@mail/new/core/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
 import { CallMenu } from "@mail/new/rtc/call_menu";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
@@ -13,18 +12,6 @@ import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
 
 import { registry } from "@web/core/registry";
-import { rtcService } from "./new/rtc/rtc_service";
-import { soundEffects } from "./new/core/sound_effects_service";
-import { userSettingsService } from "./new/core/user_settings_service";
-import { suggestionService } from "./new/suggestion/suggestion_service";
-import { storeService } from "./new/core/store_service";
-import { chatWindowService } from "./new/chat/chat_window_service";
-import { threadService } from "./new/thread/thread_service";
-import { messageService } from "./new/thread/message_service";
-import { activityService } from "./new/activity/activity_service";
-import { chatterService } from "./new/views/chatter_service";
-import { personaService } from "./new/core/persona_service";
-import { attachmentService } from "./new/attachment_viewer/attachment_service";
 
 const messagingValuesService = {
     start() {
@@ -33,19 +20,6 @@ const messagingValuesService = {
 };
 
 const serviceRegistry = registry.category("services");
-serviceRegistry.add("mail.store", storeService);
-serviceRegistry.add("mail.activity", activityService);
-serviceRegistry.add("mail.attachment", attachmentService);
-serviceRegistry.add("mail.chatter", chatterService);
-serviceRegistry.add("mail.chat_window", chatWindowService);
-serviceRegistry.add("mail.thread", threadService);
-serviceRegistry.add("mail.message", messageService);
-serviceRegistry.add("mail.messaging", newMessagingService);
-serviceRegistry.add("mail.suggestion", suggestionService);
-serviceRegistry.add("mail.persona", personaService);
-serviceRegistry.add("mail.rtc", rtcService);
-serviceRegistry.add("mail.soundEffects", soundEffects);
-serviceRegistry.add("mail.userSettings", userSettingsService);
 serviceRegistry.add("messaging", messagingService);
 serviceRegistry.add("messagingValues", messagingValuesService);
 serviceRegistry.add("systray_service", systrayService);
