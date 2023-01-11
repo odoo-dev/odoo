@@ -42,7 +42,7 @@ export class AttachmentService {
             const threadData = Array.isArray(data.originThread)
                 ? data.originThread[0][1]
                 : data.originThread;
-            attachment.originThreadLocalId = createLocalId(threadData.model, threadData.model);
+            attachment.originThreadLocalId = createLocalId(threadData.model, threadData.id);
         }
         return attachment;
     }

@@ -365,3 +365,35 @@ QUnit.test(
         assert.containsOnce(target, ".o-mail-attachment-viewer");
     }
 );
+
+QUnit.test("img file has proper src in mail.channel", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        channel_type: "channel",
+        name: "channel1",
+    });
+    const messageAttachmentId = pyEnv["ir.attachment"].create({
+        name: "test.png",
+        mimetype: "image/png",
+        res_id: channelId,
+        res_model: "mail.channel",
+    });
+    pyEnv["mail.message"].create({
+        attachment_ids: [messageAttachmentId],
+        body: "<p>Test</p>",
+        model: "mail.channel",
+        res_id: channelId,
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${channelId}` },
+        },
+    });
+    await openDiscuss();
+    assert.ok(
+        $(target)
+            .find(".o-mail-attachment-image[title='test.png'] img")
+            .data("src")
+            .includes(`/mail/channel/${channelId}/image`)
+    );
+});
