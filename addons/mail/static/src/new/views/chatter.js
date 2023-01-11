@@ -208,7 +208,7 @@ export class Chatter extends Component {
 
     async onClickFollow() {
         await this.orm.call(this.props.resModel, "message_subscribe", [[this.props.resId]], {
-            partner_ids: [this.store.user.partnerId],
+            partner_ids: [this.store.self.id],
         });
         this.onFollowerChanged();
     }

@@ -18,7 +18,7 @@ export class Thread {
     channelMembers = [];
     /** @type {RtcSession{}} */
     rtcSessions = {};
-    /** @type {Partner[]} */
+    /** @type {import("@mail/new/core/persona_model").Persona[]} */
     invitedPartners = [];
     /** @type {integer} */
     chatPartnerId;
@@ -90,7 +90,10 @@ export class Thread {
 
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
-            return this.customName || this._store.partners[this.chatPartnerId].name;
+            return (
+                this.customName ||
+                this._store.personas[createLocalId("partner", this.chatPartnerId)].name
+            );
         }
         if (this.type === "group" && !this.name) {
             return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
@@ -102,7 +105,7 @@ export class Thread {
      * @returns {import("@mail/new/core/follower_model").Follower}
      */
     get followerOfCurrentUser() {
-        return this.followers.find((f) => f.partner.id === this._store.user.partnerId);
+        return this.followers.find((f) => f.partner === this._store.self);
     }
 
     get imgUrl() {
@@ -168,8 +171,8 @@ export class Thread {
         return this._store.messages[oldestNonTransientMessageId];
     }
 
-    get hasCurrentUserAsMember() {
-        return this.channelMembers.some((channelMember) => channelMember.isCurrentUser);
+    get hasSelfAsMember() {
+        return this.channelMembers.some((channelMember) => channelMember.isSelf);
     }
 
     get invitationLink() {
@@ -210,23 +213,20 @@ export class Thread {
 
     get lastSelfMessageSeenByEveryone() {
         const otherSeenInfos = [...this.seenInfos].filter(
-            (partnerSeenInfo) => partnerSeenInfo.partner.id !== this._store.user.partnerId
+            (seenInfo) => seenInfo.partner.id !== this._store.self.id
         );
         if (otherSeenInfos.length === 0) {
             return false;
         }
         const otherLastSeenMessageIds = otherSeenInfos
-            .filter((partnerSeenInfo) => partnerSeenInfo.lastSeenMessage)
-            .map((partnerSeenInfo) => partnerSeenInfo.lastSeenMessage.id);
+            .filter((seenInfo) => seenInfo.lastSeenMessage)
+            .map((seenInfo) => seenInfo.lastSeenMessage.id);
         if (otherLastSeenMessageIds.length === 0) {
             return false;
         }
         const lastMessageSeenByAllId = Math.min(...otherLastSeenMessageIds);
         const orderedSelfSeenMessages = this.nonTransientMessages.filter((message) => {
-            return (
-                message.author.partner?.id === this._store.user.partnerId &&
-                message.id <= lastMessageSeenByAllId
-            );
+            return message.author === this._store.self && message.id <= lastMessageSeenByAllId;
         });
         if (!orderedSelfSeenMessages || orderedSelfSeenMessages.length === 0) {
             return false;

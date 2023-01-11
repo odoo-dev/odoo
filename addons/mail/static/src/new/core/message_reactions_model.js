@@ -6,13 +6,14 @@ export class MessageReactions {
     /** @type {number} **/
     count;
     /** @type {number[]} **/
-    partnerIds = [];
+    personaLocalIds = [];
     /** @type {number} **/
     messageId;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    get partners() {
-        return this.partnerIds.map((id) => this._store.partners[id]);
+    /** @type {import("@mail/new/core/persona_model").Persona[]} */
+    get personas() {
+        return this.personaLocalIds.map((localId) => this._store.personas[localId]);
     }
 }

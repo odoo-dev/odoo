@@ -23,8 +23,8 @@ export class ThreadService {
         this.chatWindow = services["mail.chat_window"];
         this.notification = services.notification;
         this.router = services.router;
-        /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = services["mail.partner"];
+        /** @type {import("@mail/new/core/persona_service").PersonaService} */
+        this.persona = services["mail.persona"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
         this.message = services["mail.message"];
         // FIXME this prevents cyclic dependencies between mail.thread and mail.message
@@ -90,8 +90,9 @@ export class ThreadService {
             if (channelMember.persona?.partner) {
                 this.insertChannelMember({
                     id: channelMember.id,
-                    persona: this.partner.insertPersona({
-                        partner: this.partner.insert(channelMember.persona.partner),
+                    persona: this.persona.insert({
+                        ...channelMember.persona.partner,
+                        type: "partner",
                     }),
                     threadId: thread.id,
                 });
@@ -99,8 +100,9 @@ export class ThreadService {
             if (channelMember.persona?.guest) {
                 this.insertChannelMember({
                     id: channelMember.id,
-                    persona: this.partner.insertPersona({
-                        guest: this.partner.insertGuest(channelMember.persona.guest),
+                    persona: this.persona.insert({
+                        ...channelMember.persona.guest,
+                        type: "guest",
                     }),
                     threadId: thread.id,
                 });
@@ -411,7 +413,7 @@ export class ThreadService {
             }
             if (thread.type === "chat") {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
-                    this.partner.insert(elem.persona.partner);
+                    this.persona.insert({ ...elem.persona.partner, type: "partner" });
                     if (
                         elem.persona.partner.id !== thread._store.user.partnerId ||
                         (serverData.channel.channelMembers[0][1].length === 1 &&
@@ -429,10 +431,10 @@ export class ThreadService {
             ) {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
                     if (elem.persona?.partner) {
-                        this.partner.insert(elem.persona.partner);
+                        this.persona.insert({ ...elem.persona.partner, type: "partner" });
                     }
                     if (elem.persona?.guest) {
-                        this.partner.insertGuest(elem.persona.guest);
+                        this.persona.insert({ ...elem.persona.guest, type: "guest" });
                     }
                 });
             }
@@ -446,7 +448,9 @@ export class ThreadService {
             if ("invitedPartners" in serverData) {
                 thread.invitedPartners =
                     serverData.invitedPartners &&
-                    serverData.invitedPartners.map((partner) => this.partner.insert(partner));
+                    serverData.invitedPartners.map((partner) =>
+                        this.persona.insert({ ...partner, type: "partner" })
+                    );
             }
             if ("seen_partners_info" in serverData) {
                 thread.seenInfos = serverData.seen_partners_info.map(
@@ -458,7 +462,7 @@ export class ThreadService {
                             lastSeenMessage: seen_message_id
                                 ? this.message.insert({ id: seen_message_id })
                                 : undefined,
-                            partner: this.partner.insert({ id: partner_id }),
+                            partner: this.persona.insert({ id: partner_id, type: "partner" }),
                         };
                     }
                 );
@@ -564,7 +568,7 @@ export class ThreadService {
             const tmpId = `pending${this.nextId++}`;
             const tmpData = {
                 id: tmpId,
-                author: { id: this.store.user.partnerId },
+                author: { id: this.store.self.id },
                 attachments: attachments,
                 res_id: thread.id,
                 model: "mail.channel",
@@ -605,7 +609,7 @@ export const threadService = {
         "mail.chat_window",
         "notification",
         "router",
-        "mail.partner",
+        "mail.persona",
         "mail.message",
     ],
     start(env, services) {

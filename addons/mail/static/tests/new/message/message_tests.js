@@ -513,17 +513,30 @@ QUnit.test("Can remove a reaction", async (assert) => {
 
 QUnit.test("Two users reacting with the same emoji", async (assert) => {
     const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const channelId = pyEnv["mail.channel"].create({
         channel_type: "channel",
         name: "channel1",
     });
-    pyEnv["mail.message"].create({
+    const messageId = pyEnv["mail.message"].create({
         body: "Hello world",
         res_id: channelId,
         message_type: "comment",
         model: "mail.channel",
     });
-    const { env, openDiscuss } = await start({
+    pyEnv["mail.message.reaction"].create([
+        {
+            message_id: messageId,
+            content: "😅",
+            partner_id: pyEnv.currentPartnerId,
+        },
+        {
+            message_id: messageId,
+            content: "😅",
+            partner_id: partnerId,
+        },
+    ]);
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -531,23 +544,10 @@ QUnit.test("Two users reacting with the same emoji", async (assert) => {
         },
     });
     await openDiscuss();
-    await click("i[aria-label='Add a Reaction']");
-    await click(".o-emoji[data-codepoints='😅']");
-
-    pyEnv.currentPartnerId = pyEnv["res.partner"].create({ name: "Jean Pierre" });
-    patchWithCleanup(env.services.user, {
-        partnerId: pyEnv.currentPartnerId,
-    });
-    await click("i[aria-label='Add a Reaction']");
-    await click(".o-emoji[data-codepoints='😅']");
     assert.containsOnce(target, ".o-mail-message-reaction:contains(2)");
 
     await click(".o-mail-message-reaction");
-    assert.containsOnce(
-        target,
-        ".o-mail-message-reaction:contains('😅')",
-        "Reaction should still be visible after one of the partners deleted its reaction"
-    );
+    assert.containsOnce(target, ".o-mail-message-reaction:contains('😅')");
     assert.containsOnce(target, ".o-mail-message-reaction:contains(1)");
 });
 

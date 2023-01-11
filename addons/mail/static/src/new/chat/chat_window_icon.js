@@ -3,6 +3,7 @@
 import { Component } from "@odoo/owl";
 import { useStore } from "../core/messaging_hook";
 import { Typing } from "../composer/typing";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 /**
  * @typedef {Object} Props
@@ -25,6 +26,6 @@ export class ChatWindowIcon extends Component {
     }
 
     get chatPartner() {
-        return this.store.partners[this.props.thread.chatPartnerId];
+        return this.store.personas[createLocalId("partner", this.props.thread.chatPartnerId)];
     }
 }

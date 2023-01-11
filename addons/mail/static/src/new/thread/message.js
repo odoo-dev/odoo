@@ -107,9 +107,9 @@ export class Message extends Component {
             useEmojiPicker("emoji-picker", {
                 onSelect: (emoji) => {
                     const reaction = this.message.reactions.find(
-                        ({ content, partners }) =>
+                        ({ content, personas }) =>
                             content === emoji &&
-                            partners.find(({ id }) => id === this.user.partnerId)
+                            personas.find((persona) => persona === this.store.self)
                     );
                     if (!reaction) {
                         this.messageService.react(this.message, emoji);
@@ -176,12 +176,12 @@ export class Message extends Component {
         if (this.message.isSelfAuthored) {
             return false;
         }
-        return this.props.thread.chatPartnerId !== this.message.author.partner?.id;
+        return this.props.thread.chatPartnerId !== this.message.author.id;
     }
 
     get isAlignedRight() {
         return Boolean(
-            this.env.inChatWindow && this.user.partnerId === this.props.message.author.partner?.id
+            this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
         );
     }
 
@@ -236,7 +236,7 @@ export class Message extends Component {
         if (!this.hasOpenChatFeature) {
             return;
         }
-        this.threadService.openChat({ partnerId: this.message.author.partner?.id });
+        this.threadService.openChat({ partnerId: this.message.author.id });
     }
 
     /**

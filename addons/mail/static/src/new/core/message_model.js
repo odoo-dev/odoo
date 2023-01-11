@@ -40,7 +40,7 @@ export class Message {
     reactions = [];
     /** @type {Notification[]} */
     notifications = [];
-    /** @type {import("@mail/new/core/partner_model").Partner[]} */
+    /** @type {import("@mail/new/core/persona_model").Persona[]} */
     recipients = [];
     /** @type {number|string} */
     resId;
@@ -96,22 +96,19 @@ export class Message {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
     }
 
-    get isCurrentPartnerMentioned() {
-        return this.recipients.some((recipient) => recipient.id === this._store.user.partnerId);
+    get isSelfMentioned() {
+        return this.recipients.some((recipient) => recipient === this._store.self);
     }
 
     get isHighlightedFromMention() {
-        return this.isCurrentPartnerMentioned && this.resModel === "mail.channel";
+        return this.isSelfMentioned && this.resModel === "mail.channel";
     }
 
     get isSelfAuthored() {
         if (!this.author) {
             return false;
         }
-        if (this._store.currentGuest) {
-            return this.author.guest?.id === this._store.currentGuest.id;
-        }
-        return this.author.partner?.id === this._store.user.partnerId;
+        return this.author.id === this._store.self.id;
     }
 
     get isNeedaction() {

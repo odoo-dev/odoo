@@ -57,8 +57,8 @@ export class Messaging {
         this.thread = services["mail.thread"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
         this.message = services["mail.message"];
-        /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = services["mail.partner"];
+        /** @type {import("@mail/new/core/persona_service").PersonaService} */
+        this.persona = services["mail.persona"];
         /** @type {import("@mail/new/rtc/rtc_service").Rtc} */
         this.rtc = services["mail.rtc"];
         this.nextId = 1;
@@ -117,15 +117,18 @@ export class Messaging {
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
             if (data.current_partner) {
-                this.partner.insert(data.current_partner);
+                this.persona.insert({ ...data.current_partner, type: "partner" });
             }
             if (data.currentGuest) {
-                this.store.currentGuest = this.partner.insertGuest(data.currentGuest);
+                this.store.currentGuest = this.persona.insert({
+                    ...data.currentGuest,
+                    type: "guest",
+                });
             }
             if (session.user_context.uid) {
                 this.loadFailures();
             }
-            this.store.partnerRoot = this.partner.insert(data.partner_root);
+            this.store.partnerRoot = this.persona.insert({ ...data.partner_root, type: "partner" });
             for (const channelData of data.channels) {
                 const thread = this.thread.createChannelThread(channelData);
                 if (channelData.is_minimized && channelData.state !== "closed") {
@@ -162,7 +165,9 @@ export class Messaging {
                     // implicit: failures are sent by the server at
                     // initialization only if the current partner is
                     // author of the message
-                    author: this.store.partners[this.store.user.partnerId],
+                    author: this.store.personas[
+                        createLocalId("partner", this.store.user.partnerId)
+                    ],
                 })
             );
             this.store.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
@@ -294,10 +299,6 @@ export class Messaging {
         return Boolean(browser.Notification && browser.Notification.permission === "granted");
     }
 
-    get currentPartner() {
-        return this.store.partners[this.store.user.partnerId];
-    }
-
     handleNotification(notifications) {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
@@ -314,27 +315,27 @@ export class Messaging {
                     {
                         const { id, message } = notif.payload;
                         const channel = this.store.threads[createLocalId("mail.channel", id)];
-                        Promise.resolve(
-                            channel ?? this.thread.joinChat(message.author.partner?.id)
-                        ).then((channel) => {
-                            if ("parentMessage" in message && message.parentMessage.body) {
-                                message.parentMessage.body = markup(message.parentMessage.body);
+                        Promise.resolve(channel ?? this.thread.joinChat(message.author.id)).then(
+                            (channel) => {
+                                if ("parentMessage" in message && message.parentMessage.body) {
+                                    message.parentMessage.body = markup(message.parentMessage.body);
+                                }
+                                const data = Object.assign(message, { body: markup(message.body) });
+                                this.message.insert({
+                                    ...data,
+                                    res_id: channel.id,
+                                    model: channel.model,
+                                });
+                                if (
+                                    !this.presence.isOdooFocused() &&
+                                    channel.type === "chat" &&
+                                    channel.chatPartnerId !== this.store.partnerRoot.id
+                                ) {
+                                    this.notifyOutOfFocusMessage(message, channel);
+                                }
+                                this.chatWindow.insert({ thread: channel });
                             }
-                            const data = Object.assign(message, { body: markup(message.body) });
-                            this.message.insert({
-                                ...data,
-                                res_id: channel.id,
-                                model: channel.model,
-                            });
-                            if (
-                                !this.presence.isOdooFocused() &&
-                                channel.type === "chat" &&
-                                channel.chatPartnerId !== this.store.partnerRoot.id
-                            ) {
-                                this.notifyOutOfFocusMessage(message, channel);
-                            }
-                            this.chatWindow.insert({ thread: channel });
-                        });
+                        );
                     }
                     break;
                 case "mail.channel/leave":
@@ -372,7 +373,7 @@ export class Messaging {
                                 : [notif.payload.Partner];
                             for (const partner of partners) {
                                 if (partner.im_status) {
-                                    this.partner.insert(partner);
+                                    this.persona.insert({ ...partner, type: "partner" });
                                 }
                             }
                         }
@@ -381,7 +382,7 @@ export class Messaging {
                                 ? notif.payload.Guest
                                 : [notif.payload.Guest];
                             for (const guest of guests) {
-                                this.partner.insertGuest(guest);
+                                this.persona.insert({ ...guest, type: "guest" });
                             }
                         }
                         const { LinkPreview: linkPreviews } = notif.payload;
@@ -536,15 +537,14 @@ export class Messaging {
                         this.store.threads[createLocalId("mail.channel", notif.payload.channel.id)];
                     const member = this.thread.insertChannelMember({
                         id: notif.payload.id,
-                        persona: this.partner.insertPersona({
-                            partner: this.partner.insert({
-                                id: notif.payload.persona.partner.id,
-                                name: notif.payload.persona.partner.name,
-                            }),
+                        persona: this.persona.insert({
+                            id: notif.payload.persona.partner.id,
+                            name: notif.payload.persona.partner.name,
+                            type: "partner",
                         }),
                         threadId: channel.id,
                     });
-                    if (member.persona.partner?.id === this.store.user.partnerId) {
+                    if (member.persona === this.store.self) {
                         return;
                     }
                     if (isTyping) {
@@ -584,7 +584,7 @@ export class Messaging {
                                 // implicit: failures are sent by the server at
                                 // initialization only if the current partner is
                                 // author of the message
-                                author: this.store.partners[this.store.user.partnerId],
+                                author: this.store.self,
                             });
                         });
                     }
@@ -657,8 +657,12 @@ export class Messaging {
     async searchPartners(searchStr = "", limit = 10) {
         let partners = [];
         const searchTerm = cleanTerm(searchStr);
-        for (const id in this.store.partners) {
-            const partner = this.store.partners[id];
+        for (const localId in this.store.personas) {
+            const persona = this.store.personas[localId];
+            if (persona.type !== "partner") {
+                continue;
+            }
+            const partner = persona;
             // todo: need to filter out non-user partners (there was a user key)
             // also, filter out inactive partners
             if (partner.name && cleanTerm(partner.name).includes(searchTerm)) {
@@ -673,7 +677,9 @@ export class Messaging {
                 searchTerm,
                 limit,
             ]);
-            partners = partnersData.map((data) => this.partner.insert(data));
+            partners = partnersData.map((data) =>
+                this.persona.insert({ ...data, type: "partner" })
+            );
         }
         return partners;
     }
@@ -725,7 +731,7 @@ export const messagingService = {
         "mail.chat_window",
         "mail.thread",
         "mail.message",
-        "mail.partner",
+        "mail.persona",
         "mail.rtc",
     ],
     async: asyncMethods,

@@ -45,7 +45,7 @@ export class Discuss extends Component {
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
         this.messageService = useState(useService("mail.message"));
-        this.partnerService = useService("mail.partner");
+        this.personaService = useService("mail.persona");
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.messageEdition = useMessageEdition();
@@ -163,7 +163,7 @@ export class Discuss extends Component {
     async renameGuest({ value: name }) {
         const newName = name.trim();
         if (this.store.currentGuest?.name !== newName) {
-            await this.partnerService.updateGuestName(this.store.currentGuest, newName);
+            await this.personaService.updateGuestName(this.store.self, newName);
         }
     }
 }

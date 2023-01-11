@@ -2,6 +2,7 @@
 
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { createLocalId } from "./thread_model.create_local_id";
 
 export class Store {
     constructor(env) {
@@ -10,6 +11,13 @@ export class Store {
 
     get isSmall() {
         return this.env.isSmall;
+    }
+
+    get self() {
+        if (this.currentGuest) {
+            return this.currentGuest;
+        }
+        return this.personas[createLocalId("partner", this.user.partnerId)];
     }
 
     // base data
@@ -32,10 +40,8 @@ export class Store {
     /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
     followers = {};
 
-    /** @type {Object.<number, import("@mail/new/core/partner_model").Partner>} */
-    partners = {};
     partnerRoot = {};
-    guests = {};
+    /** @type {Object.<number, import("@mail/new/core/persona_model").Persona>} */
     personas = {};
 
     /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession{}} */

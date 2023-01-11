@@ -11,10 +11,10 @@ class SuggestionService {
         this.orm = services.orm;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
-        /** @type {import("@mail/new/thread/thread_service").Thread} */
+        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
-        /** @type {import("@mail/new/core/partner_service").Partner} */
-        this.partner = services["mail.partner"];
+        /** @type {import("@mail/new/core/persona_service").PersonaService} */
+        this.persona = services["mail.persona"];
     }
 
     async fetchSuggestions({ delimiter, term }, { thread } = {}) {
@@ -51,7 +51,7 @@ class SuggestionService {
             kwargs
         );
         suggestedPartners.map((data) => {
-            this.partner.insert(data);
+            this.persona.insert({ ...data, type: "partner" });
         });
     }
 
@@ -182,9 +182,13 @@ class SuggestionService {
             // would be notified to the mentioned partner, so this prevents
             // from inadvertently leaking the private message to the
             // mentioned partner.
-            partners = thread.channelMembers.map((member) => member.persona.partner);
+            partners = thread.channelMembers
+                .map((member) => member.persona)
+                .filter((persona) => persona.type === "partner");
         } else {
-            partners = Object.values(this.store.partners);
+            partners = Object.values(this.store.personas).filter(
+                (persona) => persona.type === "partner"
+            );
         }
         const mainSuggestionList = [];
         const extraSuggestionList = [];
@@ -365,8 +369,8 @@ class SuggestionService {
             if (!isAPublicChannel && isBPublicChannel) {
                 return 1;
             }
-            const isMemberOfA = a.hasCurrentUserAsMember;
-            const isMemberOfB = b.hasCurrentUserAsMember;
+            const isMemberOfA = a.hasSelfAsMember;
+            const isMemberOfB = b.hasSelfAsMember;
             if (isMemberOfA && !isMemberOfB) {
                 return -1;
             }
@@ -405,7 +409,7 @@ class SuggestionService {
 }
 
 export const suggestionService = {
-    dependencies: ["orm", "mail.store", "mail.thread", "mail.partner"],
+    dependencies: ["orm", "mail.store", "mail.thread", "mail.persona"],
     start(env, services) {
         return new SuggestionService(env, services);
     },

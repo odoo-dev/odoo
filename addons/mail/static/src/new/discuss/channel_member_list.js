@@ -22,9 +22,9 @@ export class ChannelMemberList extends Component {
     }
 
     openChatAvatar(member) {
-        if (member.isCurrentUser) {
+        if (member.isSelf) {
             return;
         }
-        this.threadService.openChat({ partnerId: member.persona.partner?.id });
+        this.threadService.openChat({ partnerId: member.persona.id });
     }
 }

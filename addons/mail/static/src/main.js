@@ -23,7 +23,7 @@ import { threadService } from "./new/thread/thread_service";
 import { messageService } from "./new/thread/message_service";
 import { activityService } from "./new/activity/activity_service";
 import { chatterService } from "./new/views/chatter_service";
-import { partnerService } from "./new/core/partner_service";
+import { personaService } from "./new/core/persona_service";
 import { attachmentService } from "./new/attachment_viewer/attachment_service";
 
 const messagingValuesService = {
@@ -42,7 +42,7 @@ serviceRegistry.add("mail.thread", threadService);
 serviceRegistry.add("mail.message", messageService);
 serviceRegistry.add("mail.messaging", newMessagingService);
 serviceRegistry.add("mail.suggestion", suggestionService);
-serviceRegistry.add("mail.partner", partnerService);
+serviceRegistry.add("mail.persona", personaService);
 serviceRegistry.add("mail.rtc", rtcService);
 serviceRegistry.add("mail.soundEffects", soundEffects);
 serviceRegistry.add("mail.userSettings", userSettingsService);

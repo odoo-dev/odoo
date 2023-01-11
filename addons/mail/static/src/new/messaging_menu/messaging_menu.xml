@@ -32,7 +32,7 @@
                             onClick="(isMarkAsRead) => isMarkAsRead ? threadService.markAsRead(preview) : this.openDiscussion(preview)"
                         >
                             <t t-set-slot="icon">
-                                <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.partners[preview.chatPartnerId]"/>
+                                <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.personas[createLocalId('partner', preview.chatPartnerId)]"/>
                             </t>
                             <t t-if="preview.mostRecentMsg" t-set-slot="body-icon">
                                 <t t-if="preview.mostRecentMsg.isSelfAuthored">

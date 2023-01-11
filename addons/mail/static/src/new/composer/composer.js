@@ -167,8 +167,8 @@ export class Composer extends Component {
     }
 
     get avatarUrl() {
-        if (this.store.currentGuest) {
-            return `/mail/channel/${this.props.composer.thread.id}/guest/${this.store.currentGuest.id}/avatar_128?unique=${this.store.currentGuest.name}`;
+        if (this.store.self?.type === "guest") {
+            return `/mail/channel/${this.props.composer.thread.id}/guest/${this.store.self.id}/avatar_128?unique=${this.store.self.name}`;
         }
         return this.store.user.avatarUrl;
     }
@@ -296,7 +296,7 @@ export class Composer extends Component {
                             optionTemplate: "mail.Composer.suggestionPartner",
                             options: mainOrExtraSuggestions.suggestions.map((suggestion) => {
                                 return {
-                                    label: suggestion.nameOrDisplayName,
+                                    label: suggestion.name,
                                     partner: suggestion,
                                     classList:
                                         "o-composer-suggestion o-composer-suggestion-partner",

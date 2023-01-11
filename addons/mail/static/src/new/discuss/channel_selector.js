@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { useMessaging, useStore } from "../core/messaging_hook";
+import { useStore } from "../core/messaging_hook";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
 import { NavigableList } from "../composer/navigable_list";
 import { useService } from "@web/core/utils/hooks";
@@ -9,6 +9,7 @@ import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { cleanTerm } from "@mail/new/utils/format";
 import { isEventHandled } from "@mail/new/utils/misc";
 import { _t } from "@web/core/l10n/translation";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ChannelSelector extends Component {
     static components = { TagsList, NavigableList };
@@ -17,10 +18,9 @@ export class ChannelSelector extends Component {
     static template = "mail.channel_selector";
 
     setup() {
-        this.messaging = useMessaging();
         this.store = useStore();
         this.threadService = useState(useService("mail.thread"));
-        this.partnerService = useService("mail.partner");
+        this.personaService = useService("mail.persona");
         this.orm = useService("orm");
         this.state = useState({
             value: "",
@@ -66,18 +66,18 @@ export class ChannelSelector extends Component {
                     this.state.selectedPartners,
                 ]);
                 const suggestions = results.map((data) => {
-                    this.partnerService.insert(data);
+                    this.personaService.insert({ ...data, type: "partner" });
                     return {
                         classList: "o-mail-channel-selector-suggestion",
                         label: data.name,
                         partner: data,
                     };
                 });
-                if (this.messaging.currentPartner.name.includes(cleanedTerm)) {
+                if (this.store.self.name.includes(cleanedTerm)) {
                     suggestions.push({
                         classList: "o-mail-channel-selector-suggestion",
-                        label: this.messaging.currentPartner.name,
-                        partner: this.messaging.currentPartner,
+                        label: this.store.self.name,
+                        partner: this.store.self,
                     });
                 }
                 return suggestions;
@@ -117,7 +117,7 @@ export class ChannelSelector extends Component {
                     .joinChat(selectedPartners[0])
                     .then((chat) => this.threadService.open(chat, this.env.inChatWindow));
             } else {
-                const partners_to = [...new Set([this.store.user.partnerId, ...selectedPartners])];
+                const partners_to = [...new Set([this.store.self.id, ...selectedPartners])];
                 await this.threadService.createGroupChat({ partners_to });
             }
         }
@@ -163,7 +163,7 @@ export class ChannelSelector extends Component {
     get tagsList() {
         const res = [];
         for (const partnerId of this.state.selectedPartners) {
-            const partner = this.store.partners[partnerId];
+            const partner = this.store.personas[createLocalId("partner", partnerId)];
             res.push({
                 id: partner.id,
                 text: partner.name,

@@ -15,7 +15,7 @@ export class Follower {
     id;
     /** @type {boolean} */
     isActive;
-    /** @type {import("@mail/new/core/partner_model").Partner} */
+    /** @type {import("@mail/new/core/persona_model").Persona} */
     partner;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;

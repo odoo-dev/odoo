@@ -10,8 +10,8 @@
         <button t-foreach="props.message.reactions" t-as="reaction" t-key="reaction.content" class="o-mail-message-reaction btn d-flex p-0 border rounded-1 mb-1"
             t-on-click="() => this.onClickReaction(reaction)"
             t-att-class="{
-                'o-hasUserReacted border-primary text-primary fw-bolder': hasUserReacted(reaction),
-                'bg-view': !hasUserReacted(reaction),
+                'o-has-self-reacted border-primary text-primary fw-bolder': hasSelfReacted(reaction),
+                'bg-view': !hasSelfReacted(reaction),
                 'ms-1': env.inChatWindow and env.alignedRight,
                 'me-1': !(env.inChatWindow and env.alignedRight),
          }" t-att-title="getReactionSummary(reaction)">

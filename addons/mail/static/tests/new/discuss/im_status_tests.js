@@ -2,6 +2,7 @@
 
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
+import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;
@@ -123,10 +124,7 @@ QUnit.test("Can handle im_status of unknown partner", async function (assert) {
         Partner: { im_status: "online", id: partnerId },
     });
     await nextTick();
-    const partners = env.services["mail.store"].partners;
-    assert.ok(partnerId in partners, "Unknown partner should have been added");
-    assert.ok(
-        partners[partnerId].im_status === "online",
-        "ImStatus of partner should be the same as the one present in the notification"
-    );
+    const persona = env.services["mail.store"].personas[createLocalId("partner", partnerId)];
+    assert.ok(persona);
+    assert.ok(persona.im_status === "online");
 });

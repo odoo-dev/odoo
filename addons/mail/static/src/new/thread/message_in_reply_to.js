@@ -22,10 +22,10 @@ export class MessageInReplyTo extends Component {
             parentMessage.author &&
             (parentMessage.resModel === "mail.channel" || !parentMessage.resModel)
         ) {
-            return `/web/image/res.partner/${parentMessage.author.partner.id}/avatar_128`;
+            return `/web/image/res.partner/${parentMessage.author.id}/avatar_128`;
         }
         if (parentMessage.author && parentMessage.resModel === "mail.channel") {
-            return `/mail/channel/${parentMessage.resId}/partner/${parentMessage.author.partner.id}/avatar_128`;
+            return `/mail/channel/${parentMessage.resId}/partner/${parentMessage.author.id}/avatar_128`;
         }
         if (parentMessage.type === "email") {
             return "/mail/static/src/img/email_icon.png";

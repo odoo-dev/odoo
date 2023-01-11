@@ -5,6 +5,7 @@ import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
+import { useStore } from "../core/messaging_hook";
 
 export class MessageReactions extends Component {
     static props = ["message"];
@@ -13,11 +14,12 @@ export class MessageReactions extends Component {
     setup() {
         this.user = useService("user");
         this.messaging = useService("mail.messaging");
+        this.store = useStore();
         this.messageService = useState(useService("mail.message"));
     }
 
     getReactionSummary(reaction) {
-        const [firstUserName, secondUserName, thirdUserName] = reaction.partners.map(
+        const [firstUserName, secondUserName, thirdUserName] = reaction.personas.map(
             ({ name, displayName }) => name || displayName
         );
         switch (reaction.count) {
@@ -52,18 +54,18 @@ export class MessageReactions extends Component {
                     firstUserName,
                     secondUserName,
                     thirdUserName,
-                    reaction.partners.length - 3,
+                    reaction.personas.length - 3,
                     reaction.content
                 );
         }
     }
 
-    hasUserReacted(reaction) {
-        return reaction.partners.some(({ id }) => id === this.user.partnerId);
+    hasSelfReacted(reaction) {
+        return reaction.personas.includes(this.store.self);
     }
 
     onClickReaction(reaction) {
-        if (this.hasUserReacted(reaction)) {
+        if (this.hasSelfReacted(reaction)) {
             this.messageService.removeReaction(reaction);
         } else {
             this.messageService.react(this.props.message, reaction.content);

@@ -6,6 +6,7 @@ import { Component } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ThreadIcon extends Component {
     static props = ["thread", "className?"];
@@ -18,7 +19,7 @@ export class ThreadIcon extends Component {
 
     get chatPartner() {
         if (this.thread.chatPartnerId) {
-            return this.store.partners[this.thread.chatPartnerId];
+            return this.store.personas[createLocalId("partner", this.thread.chatPartnerId)];
         }
         return null;
     }

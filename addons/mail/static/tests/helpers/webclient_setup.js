@@ -32,7 +32,7 @@ import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { chatterService } from "@mail/new/views/chatter_service";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
-import { partnerService } from "@mail/new/core/partner_service";
+import { personaService } from "@mail/new/core/persona_service";
 import { attachmentService } from "@mail/new/attachment_viewer/attachment_service";
 
 const ROUTES_TO_IGNORE = [
@@ -112,7 +112,7 @@ function setupMessagingServiceRegistries({ loadingBaseDelayDuration = 0, messagi
         "mail.rtc": rtcService,
         "mail.soundEffects": soundEffects,
         "mail.userSettings": userSettingsService,
-        "mail.partner": partnerService,
+        "mail.persona": personaService,
         messaging: messagingService,
         "mail.attachment_viewer": attachmentViewerService,
         messagingValues,

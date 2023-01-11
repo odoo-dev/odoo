@@ -72,7 +72,7 @@ export class FollowerSubtypeDialog extends Component {
 
     get title() {
         return sprintf(_t("Edit Subscription of %(name)s"), {
-            name: this.props.follower.partner.nameOrDisplayName,
+            name: this.props.follower.partner.name,
         });
     }
 }

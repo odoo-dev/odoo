@@ -7,6 +7,7 @@ import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { NotificationItem } from "./notification_item";
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class MessagingMenu extends Component {
     static components = { Dropdown, NotificationItem, PartnerImStatus };
@@ -22,6 +23,10 @@ export class MessagingMenu extends Component {
         this.state = useState({
             filter: "all", // can be 'all', 'channels' or 'chats'
         });
+    }
+
+    createLocalId(...args) {
+        return createLocalId(...args);
     }
 
     activateTab(ev) {

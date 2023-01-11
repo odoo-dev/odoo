@@ -187,10 +187,45 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 this._mockMailLinkPreviewFormat(linkPreview)
             );
 
+            const reactionsPerContent = {};
+            for (const reactionId of message.reaction_ids) {
+                const [reaction] = this.getRecords("mail.message.reaction", [
+                    ["id", "=", reactionId],
+                ]);
+                if (reactionsPerContent[reaction.content]) {
+                    reactionsPerContent[reaction.content].push(reaction);
+                } else {
+                    reactionsPerContent[reaction.content] = [reaction];
+                }
+            }
+            const reactionGroups = [];
+            for (const content in reactionsPerContent) {
+                const reactions = reactionsPerContent[content];
+                const guests = reactions
+                    .map(
+                        (reaction) =>
+                            this.getRecords("mail.guest", [["id", "=", reaction.guest_id]])[0]
+                    )
+                    .filter((guest) => !!guest);
+                const partners = reactions
+                    .map(
+                        (reaction) =>
+                            this.getRecords("res.partner", [["id", "=", reaction.partner_id]])[0]
+                    )
+                    .filter((partner) => !!partner);
+                reactionGroups.push({
+                    content: content,
+                    count: reactionsPerContent[content].length,
+                    guests: guests.map((guest) => ({ id: guest.id, name: guest.name })),
+                    message: { id: message.id },
+                    partners: partners.map((partner) => ({ id: partner.id, name: partner.name })),
+                });
+            }
             const response = Object.assign({}, message, {
                 attachment_ids: formattedAttachments,
                 author: formattedAuthor,
                 history_partner_ids: historyPartnerIds,
+                messageReactionGroups: reactionGroups,
                 linkPreviews: linkPreviewsFormatted,
                 needaction_partner_ids: needactionPartnerIds,
                 notifications,

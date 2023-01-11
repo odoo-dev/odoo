@@ -39,7 +39,7 @@ commandProviderRegistry.add("mail.partner", {
                 action() {
                     threadService.openChat({ partnerId: partner.id });
                 },
-                name: partner.nameOrDisplayName,
+                name: partner.name,
                 props: { email: partner.email },
             };
         });

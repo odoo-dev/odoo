@@ -16,12 +16,12 @@ import { storeService } from "../core/store_service";
 import { chatWindowService } from "../chat/chat_window_service";
 import { threadService } from "../thread/thread_service";
 import { messageService } from "../thread/message_service";
-import { partnerService } from "../core/partner_service";
 import { attachmentService } from "../attachment_viewer/attachment_service";
 import { rtcService } from "../rtc/rtc_service";
 import { suggestionService } from "../suggestion/suggestion_service";
 import { mount, whenReady } from "@odoo/owl";
 import { DiscussPublic } from "./discuss_public";
+import { personaService } from "../core/persona_service";
 
 (async function boot() {
     await whenReady();
@@ -34,7 +34,7 @@ import { DiscussPublic } from "./discuss_public";
     serviceRegistry.add("mail.thread", threadService);
     serviceRegistry.add("mail.message", messageService);
     serviceRegistry.add("mail.messaging", messagingService);
-    serviceRegistry.add("mail.partner", partnerService);
+    serviceRegistry.add("mail.persona", personaService);
     serviceRegistry.add("mail.attachment", attachmentService);
     serviceRegistry.add("mail.suggestion", suggestionService);
     serviceRegistry.add("mail.rtc", rtcService);

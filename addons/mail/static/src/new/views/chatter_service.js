@@ -5,18 +5,18 @@ import { _t } from "@web/core/l10n/translation";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ChatterService {
-    constructor(env, store, thread, message, rpc, orm, partner) {
+    constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
-        this.store = store;
+        this.store = services["mail.store"];
         /** @type {import("@mail/new/thread/thread_service").ThreadService} */
-        this.thread = thread;
+        this.thread = services["mail.thread"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
-        this.message = message;
-        this.rpc = rpc;
-        this.orm = orm;
-        /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = partner;
+        this.message = services["mail.message"];
+        this.rpc = services.rpc;
+        this.orm = services.orm;
+        /** @type {import("@mail/new/core/persona_service").PersonaService} */
+        this.persona = services["mail.persona"];
     }
 
     async fetchData(
@@ -59,7 +59,7 @@ export class ChatterService {
             const tmpId = `virtual${this.nextId++}`;
             const tmpData = {
                 id: tmpId,
-                author: { id: this.store.user.partnerId },
+                author: { id: this.store.self.id },
                 body: _t("Creating a new record..."),
                 message_type: "notification",
                 trackingValues: [],
@@ -100,7 +100,7 @@ export class ChatterService {
             followedThread: data.followedThread,
             id: data.id,
             isActive: data.is_active,
-            partner: this.partner.insert(data.partner),
+            partner: this.persona.insert({ ...data.partner, type: "partner" }),
             _store: this.store,
         });
         if (!follower.followedThread.followers.includes(follower)) {
@@ -111,18 +111,8 @@ export class ChatterService {
 }
 
 export const chatterService = {
-    dependencies: ["mail.store", "mail.thread", "mail.message", "rpc", "orm", "mail.partner"],
-    start(
-        env,
-        {
-            "mail.store": store,
-            "mail.thread": thread,
-            "mail.message": message,
-            rpc,
-            orm,
-            "mail.partner": partner,
-        }
-    ) {
-        return new ChatterService(env, store, thread, message, rpc, orm, partner);
+    dependencies: ["mail.store", "mail.thread", "mail.message", "rpc", "orm", "mail.persona"],
+    start(env, services) {
+        return new ChatterService(env, services);
     },
 };

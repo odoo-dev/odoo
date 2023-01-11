@@ -16,12 +16,12 @@ export class CallParticipantCard extends Component {
         onMounted(() => {
             this.rtc.updateVideoDownload(this.props.session, {
                 viewCountIncrement: 1,
-            })
+            });
         });
         onWillUnmount(() => {
             this.rtc.updateVideoDownload(this.props.session, {
                 viewCountIncrement: -1,
-            })
+            });
         });
     }
 
@@ -32,7 +32,7 @@ export class CallParticipantCard extends Component {
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
-                !(this.props.session.channelMember?.persona.partner?.id === this.user.partnerId) &&
+                !(this.props.session.channelMember?.persona.id === this.user.partnerId) &&
                 !["connected", "completed"].includes(this.props.session.connectionState)
         );
     }

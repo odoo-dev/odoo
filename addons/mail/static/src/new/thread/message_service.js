@@ -21,8 +21,8 @@ export class MessageService {
         this.rpc = services.rpc;
         this.orm = services.orm;
         this.presence = services.presence;
-        /** @type {import("@mail/new/core/partner_service").PartnerService} */
-        this.partner = services["mail.partner"];
+        /** @type {import("@mail/new/core/persona_service").PersonaService} */
+        this.persona = services["mail.persona"];
         /** @type {import("@mail/new/attachment_viewer/attachment_service").AttachmentService} */
         this.attachment = services["mail.attachment"];
     }
@@ -222,7 +222,7 @@ export class MessageService {
             body,
             isDiscussion,
             isNote,
-            isStarred: starred_partner_ids.includes(this.store.user.partnerId),
+            isStarred: starred_partner_ids.includes(this.store.self.id),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
             needaction_partner_ids,
@@ -237,17 +237,21 @@ export class MessageService {
             notifications,
         });
         if (data?.author?.id) {
-            message.author = this.partner.insertPersona({
-                partner: this.partner.insert(data.author),
+            message.author = this.persona.insert({
+                ...data.author,
+                type: "partner",
             });
         }
         if (data?.guestAuthor?.id) {
-            message.author = this.partner.insertPersona({
-                guest: this.partner.insertGuest(data.guestAuthor),
+            message.author = this.persona.insert({
+                ...data.guestAuthor,
+                type: "guest",
             });
         }
         if (data.recipients) {
-            message.recipients = data.recipients.map((recipient) => this.partner.insert(recipient));
+            message.recipients = data.recipients.map((recipient) =>
+                this.persona.insert({ ...recipient, type: "partner" })
+            );
         }
         if (data.record_name) {
             message.originThread.name = data.record_name;
@@ -326,24 +330,24 @@ export class MessageService {
             reaction = new MessageReactions();
             reaction._store = this.store;
         }
-        const partnerIdsToUnlink = new Set();
+        const personasToUnlink = new Set();
         const alreadyKnownPartnerIds = new Set(reaction.partnerIds);
         for (const rawPartner of data.partners) {
             const [command, partnerData] = Array.isArray(rawPartner)
                 ? rawPartner
                 : ["insert", rawPartner];
-            const partnerId = this.partner.insert(partnerData).id;
-            if (command === "insert" && !alreadyKnownPartnerIds.has(partnerId)) {
-                reaction.partnerIds.push(partnerId);
+            const persona = this.persona.insert({ ...partnerData, type: "partner" });
+            if (command === "insert" && !alreadyKnownPartnerIds.has(persona.id)) {
+                reaction.personaLocalIds.push(persona.localId);
             } else if (command !== "insert") {
-                partnerIdsToUnlink.add(partnerId);
+                personasToUnlink.add(persona);
             }
         }
         Object.assign(reaction, {
             count: data.count,
             content: data.content,
             messageId: data.message.id,
-            partnerIds: reaction.partnerIds.filter((id) => !partnerIdsToUnlink.has(id)),
+            partnerIds: reaction.personas.filter((persona) => !personasToUnlink.has(persona)),
         });
         return reaction;
     }
@@ -371,13 +375,14 @@ export class MessageService {
             notification_status: data.notification_status,
             notification_type: data.notification_type,
             partner: data.res_partner_id
-                ? this.partner.insert({
+                ? this.persona.insert({
                       id: data.res_partner_id[0],
                       name: data.res_partner_id[1],
+                      type: "partner",
                   })
                 : undefined,
         });
-        if (!notification.message.author.partner?.isCurrentUser) {
+        if (!notification.message.author.isSelf) {
             return;
         }
         const thread = notification.message.originThread;
@@ -455,7 +460,7 @@ export class MessageService {
 }
 
 export const messageService = {
-    dependencies: ["mail.store", "rpc", "orm", "presence", "mail.partner", "mail.attachment"],
+    dependencies: ["mail.store", "rpc", "orm", "presence", "mail.persona", "mail.attachment"],
     start(env, services) {
         return new MessageService(env, services);
     },

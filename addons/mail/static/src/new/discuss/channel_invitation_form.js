@@ -17,7 +17,7 @@ export class ChannelInvitationForm extends Component {
         this.store = useStore();
         this.notification = useService("notification");
         this.threadService = useState(useService("mail.thread"));
-        this.partnerService = useService("mail.partner");
+        this.personaService = useService("mail.persona");
         this.inputRef = useRef("input");
         this.searchStr = "";
         this.state = useState({
@@ -41,9 +41,10 @@ export class ChannelInvitationForm extends Component {
         for (const selectablePartner of Partners) {
             const partnerId = selectablePartner.id;
             const name = selectablePartner.name;
-            const newPartner = this.partnerService.insert({
+            const newPartner = this.personaService.insert({
                 id: partnerId,
                 name: name,
+                type: "partner",
             });
             selectablePartners.push(newPartner);
         }
@@ -84,7 +85,7 @@ export class ChannelInvitationForm extends Component {
     async onClickInvite() {
         if (this.props.thread.type === "chat") {
             const partners_to = [
-                this.store.user.partnerId,
+                this.store.self.id,
                 this.props.thread.chatPartnerId,
                 ...this.state.selectedPartners.map((partner) => partner.id),
             ];

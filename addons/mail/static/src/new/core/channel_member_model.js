@@ -17,11 +17,11 @@ export class ChannelMember {
     _store;
 
     get partner() {
-        return this._store.partners[this.partnerId];
+        return this._store.personas[createLocalId("partner", this.partnerId)];
     }
 
     get guest() {
-        return this._store.guests[this.guestId];
+        return this._store.personas[createLocalId("guest", this.guestId)];
     }
 
     get persona() {
@@ -41,17 +41,17 @@ export class ChannelMember {
     }
 
     get avatarUrl() {
-        if (this.persona.partner) {
-            return `/mail/channel/${this.thread.id}/partner/${this.persona.partner.id}/avatar_128`;
+        if (this.persona.type === "partner") {
+            return `/mail/channel/${this.thread.id}/partner/${this.persona.id}/avatar_128`;
         }
-        if (this.persona.guest) {
-            return `/mail/channel/${this.thread.id}/guest/${this.persona.guest.id}/avatar_128?unique=${this.persona.guest.name}`;
+        if (this.persona.type === "guest") {
+            return `/mail/channel/${this.thread.id}/guest/${this.persona.id}/avatar_128?unique=${this.persona.name}`;
         }
         return "";
     }
 
-    get isCurrentUser() {
-        return this.persona.partner?.isCurrentUser;
+    get isSelf() {
+        return this.persona.isSelf;
     }
 
     get thread() {
