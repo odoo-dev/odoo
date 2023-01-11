@@ -378,3 +378,31 @@ QUnit.test("sidebar: unpin channel from bus", async function (assert) {
     assert.containsNone(target, ".o-mail-category-item:contains(General)");
     assert.notOk($(target).find(".o-mail-discuss-thread-name")?.val() === "General");
 });
+
+QUnit.test("chat - channel should count unread message", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({
+        name: "Demo",
+        im_status: "offline",
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [0, 0, { message_unread_counter: 1, partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId1 }],
+        ],
+        channel_type: "chat",
+    });
+    pyEnv["mail.message"].create({
+        author_id: resPartnerId1,
+        body: "<p>Test</p>",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-discuss-sidebar-counter");
+    assert.strictEqual(target.querySelector(".o-mail-discuss-sidebar-counter").textContent, "1");
+
+    await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.containsNone(target, ".o-mail-discuss-sidebar-counter");
+});

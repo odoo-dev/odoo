@@ -401,9 +401,11 @@ export class ThreadService {
             if ("message_needaction_counter" in serverData) {
                 thread.message_needaction_counter = serverData.message_needaction_counter;
             }
-            if ("message_unread_counter" in serverData) {
-                thread.message_unread_counter = serverData.message_unread_counter;
+
+            if (serverData.channel && "serverMessageUnreadCounter" in serverData.channel) {
+                thread.serverMessageUnreadCounter = serverData.channel.serverMessageUnreadCounter;
             }
+
             if ("seen_message_id" in serverData) {
                 thread.serverLastSeenMsgBySelf = serverData.seen_message_id;
             }
@@ -540,6 +542,10 @@ export class ThreadService {
         return channelMember;
     }
 
+    /**
+     * @param {Thread} thread
+     * @param {string} body
+     */
     async post(thread, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         const command = this.message.getCommandFromText(thread.type, body);
         if (command) {
@@ -567,7 +573,8 @@ export class ThreadService {
             params.thread_id = thread.id;
             params.thread_model = thread.model;
         } else {
-            const tmpId = `pending${this.nextId++}`;
+            const lastMessageId = this.message.getLastMessageId();
+            const tmpId = lastMessageId + 0.01;
             const tmpData = {
                 id: tmpId,
                 author: { id: this.store.self.id },
@@ -600,6 +607,50 @@ export class ThreadService {
             delete this.store.messages[tmpMsg.id];
         }
         return message;
+    }
+
+    /**
+     * @param {Thread} thread
+     */
+    localMessageUnreadCounter(thread) {
+        let baseCounter = thread.serverMessageUnreadCounter;
+        let countFromId = thread.serverLastSeenMsgBySelf ? thread.serverLastSeenMsgBySelf : 0;
+        this.message.sortMessages(thread);
+        const lastSeenMessageId = this.lastSeenBySelfMessageId(thread);
+        const firstMessageId = thread.messages[0];
+        if (firstMessageId && lastSeenMessageId && lastSeenMessageId >= firstMessageId) {
+            baseCounter = 0;
+            countFromId = lastSeenMessageId;
+        }
+        return thread.messages.reduce((total, messageId) => {
+            if (messageId <= countFromId) {
+                return total;
+            }
+            return total + 1;
+        }, baseCounter);
+    }
+
+    /**
+     * @param {Thread} thread
+     */
+    lastSeenBySelfMessageId(thread) {
+        const firstMessageId = thread.messages[0];
+        if (firstMessageId && thread.serverLastSeenMsgBySelf < firstMessageId) {
+            return thread.serverLastSeenMsgBySelf;
+        }
+        let lastSeenMessageId = thread.serverLastSeenMsgBySelf;
+        for (const messageId of thread.messages) {
+            const message = this.store.messages[messageId];
+            if (message.id <= thread.serverLastSeenMsgBySelf) {
+                continue;
+            }
+            if (message.isSelfAuthored || message.isTransient) {
+                lastSeenMessageId = message.id;
+                continue;
+            }
+            return lastSeenMessageId;
+        }
+        return lastSeenMessageId;
     }
 }
 

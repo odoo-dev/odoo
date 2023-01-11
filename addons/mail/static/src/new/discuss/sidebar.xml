@@ -83,7 +83,7 @@
 </t>
 
 <t t-name="mail.discuss_category_item" owl="1">
-    <t t-if="thread.type === 'chat'" t-set="counter" t-value="thread.message_unread_counter"/>
+    <t t-if="thread.type === 'chat'" t-set="counter" t-value="threadService.localMessageUnreadCounter(thread)"/>
     <t t-else="" t-set="counter" t-value="thread.message_needaction_counter"/>
     <button class="o-mail-category-item btn d-flex align-items-center w-100 px-0 py-2 border-0 text-reset"
         t-att-class="{
@@ -108,7 +108,7 @@
                 t-on-click.stop="() => this.leaveChannel(thread)" title="Leave this channel" role="img"/>
             <div t-if="thread.type === 'chat' and counter === 0" t-attf-class="fa fa-times ms-1" t-on-click.stop="() => this.unpinChannel(thread.id)" title="Unpin Conversation" role="img"/>
         </div>
-        <div t-if="counter > 0" t-attf-class="badge rounded-pill text-bg-primary ms-1 me-3">
+        <div t-if="counter > 0" t-attf-class="o-mail-discuss-sidebar-counter badge rounded-pill text-bg-primary ms-1 me-3">
             <t t-esc="counter"/>
         </div>
     </button>
