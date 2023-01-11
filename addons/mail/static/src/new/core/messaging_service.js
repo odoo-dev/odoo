@@ -411,6 +411,7 @@ export class Messaging {
                     const { channel, invited_by_user_id: invitedByUserId } = notif.payload;
                     const thread = this.thread.insert({
                         ...channel,
+                        rtcSessions: channel.rtcSessions[0][1],
                         model: "mail.channel",
                         serverData: {
                             channel: channel.channel,
