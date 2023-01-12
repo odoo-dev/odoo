@@ -33,7 +33,7 @@
                 <ActivityMailTemplate activity="activity" onUpdate="props.onUpdate"/>
             </div>
             <div t-if="activity.can_write">
-                <span class="btn btn-link btn-primary p-0 me-3" t-on-click="onClickMarkAsDone"><i class="fa fa-check"/> Mark Done</span>
+                <span class="o-mail-activity-mark-done btn btn-link btn-primary p-0 me-3" t-on-click="onClickMarkAsDone"><i class="fa fa-check"/> Mark Done</span>
                 <FileUploader t-if="activity.activity_category === 'upload_file'" onUploaded.bind="onFileUploaded">
                     <t t-set-slot="toggler">
                         <span class="btn btn-link btn-primary p-0 me-3"><i t-attf-class="fa {{ activity.icon }}"/><t t-out="' ' + activity.display_name"/></span>
