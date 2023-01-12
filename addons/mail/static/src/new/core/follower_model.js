@@ -25,7 +25,7 @@ export class Follower {
      */
     get isEditable() {
         const hasWriteAccess = this.followedThread ? this.followedThread.hasWriteAccess : false;
-        return this._store.user.partnerId === this.partner.id
+        return this._store.user === this.partner
             ? this.followedThread.hasReadAccess
             : hasWriteAccess;
     }

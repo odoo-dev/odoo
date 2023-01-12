@@ -2,7 +2,6 @@
 
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { createLocalId } from "../utils/misc";
 
 export class Store {
     constructor(env) {
@@ -14,20 +13,13 @@ export class Store {
     }
 
     get self() {
-        if (this.currentGuest) {
-            return this.currentGuest;
-        }
-        return this.personas[createLocalId("partner", this.user.partnerId)];
+        return this.guest ?? this.user;
     }
 
     // base data
-    user = {
-        partnerId: null,
-        uid: null,
-        avatarUrl: null,
-        isAdmin: false,
-    };
-    currentGuest = null;
+    /** @type {Object.<number, import("@mail/new/core/persona_model").Persona>} */
+    user = null;
+    guest = null;
 
     /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
     channelMembers = {};

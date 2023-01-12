@@ -112,14 +112,14 @@ export class Message {
     }
 
     get isNeedaction() {
-        return this.needaction_partner_ids.includes(this._store.user.partnerId);
+        return this.needaction_partner_ids.includes(this._store.user.id);
     }
 
     /**
      * @returns {boolean}
      */
     get isHistory() {
-        return this.history_partner_ids.includes(this._store.user.partnerId);
+        return this.history_partner_ids.includes(this._store.user.id);
     }
 
     /**
