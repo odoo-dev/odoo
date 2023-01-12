@@ -919,6 +919,38 @@ QUnit.test(
 );
 
 QUnit.test(
+    "highlight the message mentioning the current user inside the channel",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            display_name: "Test Partner",
+        });
+        pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "General",
+        });
+        pyEnv["mail.message"].create({
+            author_id: resPartnerId1,
+            body: "hello @Admin",
+            model: "mail.channel",
+            partner_ids: [pyEnv.currentPartnerId],
+            res_id: mailChannelId1,
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: mailChannelId1 },
+            },
+        });
+        await openDiscuss();
+        assert.hasClass(
+            target.querySelector(`.o-mail-message`),
+            "o-mail-message-highlighted-from-mention"
+        );
+    }
+);
+
+QUnit.test(
     'message should not be considered as "clicked" after clicking on notification failure icon',
     async function (assert) {
         const pyEnv = await startServer();
@@ -950,5 +982,38 @@ QUnit.test(
         target.querySelector(".o-mail-message-notification-icon-clickable.text-danger").click();
         await nextTick();
         assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-mail-message-clicked");
+    }
+);
+
+QUnit.test(
+    "not highlighting the message if not mentioning the current user inside the channel",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            display_name: "testPartner",
+            email: "testPartner@odoo.com",
+        });
+        pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "General",
+        });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "hello @testPartner",
+            model: "mail.channel",
+            partner_ids: [resPartnerId1],
+            res_id: mailChannelId1,
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: mailChannelId1 },
+            },
+        });
+        await openDiscuss();
+        assert.doesNotHaveClass(
+            target.querySelector(`.o-mail-message`),
+            "o-mail-message-highlighted-from-mention"
+        );
     }
 );
