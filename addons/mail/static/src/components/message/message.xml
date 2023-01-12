@@ -9,7 +9,7 @@
                 'o-mail-message-highlighted bg-view shadow-lg': isHighlighted,
                 'o-not-discussion': !message.isDiscussionOrNotification,
                 'o-selected': isSelected,
-                'o-squashed pt-1': isSquashed,
+                'o-mail-message-is-squashed pt-1': isSquashed,
                 'o-starred': message.isStarred,
                 'mt-1': !isSquashed and messageListViewItemOwner,
                 'px-3': !isInChatWindow,
@@ -139,7 +139,6 @@
                             t-if="messageActionList and !composerViewInEditing"
                             class="o_MessageView_actionListContainer"
                             t-att-class="{
-                                'o-squashed': isSquashed,
                                 'position-absolute top-0': !isInDiscuss,
                                 'start-0 ms-3': isInChatWindowAndIsAlignedRight,
                                 'end-0 me-3': isInChatWindowAndIsAlignedLeft || isInChatter,

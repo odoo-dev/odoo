@@ -761,10 +761,7 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(async () => {
                     controllerContentEl.scrollTop =
                         controllerContentEl.scrollHeight - controllerContentEl.clientHeight;
-                    await triggerEvent(
-                        document.querySelector(".o_ThreadView_messageList"),
-                        "scroll"
-                    );
+                    await triggerEvent(document.querySelector(".o-mail-thread"), "scroll");
                 });
                 assert.ok(
                     isScrolledToBottom(controllerContentEl),

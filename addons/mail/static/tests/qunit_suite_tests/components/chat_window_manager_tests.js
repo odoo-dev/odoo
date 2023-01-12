@@ -152,7 +152,7 @@ QUnit.module("mail", {}, function () {
                     message:
                         "should wait until channel scrolled to its last message after opening it from the messaging menu",
                     predicate: ({ scrollTop, thread }) => {
-                        const messageList = document.querySelector(".o_ThreadView_messageList");
+                        const messageList = document.querySelector(".o-mail-thread");
                         return (
                             thread &&
                             thread.model === "mail.channel" &&
@@ -165,7 +165,7 @@ QUnit.module("mail", {}, function () {
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     func: () => {
-                        document.querySelector(`.o_ThreadView_messageList`).scrollTop = 142;
+                        document.querySelector(`.o-mail-thread`).scrollTop = 142;
                     },
                     message:
                         "should wait until channel scrolled to 142 after setting this value manually",
@@ -206,7 +206,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadView_messageList`).scrollTop,
+                    document.querySelector(`.o-mail-thread`).scrollTop,
                     142,
                     "chat window scrollTop should still be the same after closing discuss"
                 );
@@ -235,7 +235,7 @@ QUnit.module("mail", {}, function () {
                     message:
                         "should wait until channel scrolled to its last message after opening it from the messaging menu",
                     predicate: ({ scrollTop, thread }) => {
-                        const messageList = document.querySelector(".o_ThreadView_messageList");
+                        const messageList = document.querySelector(".o-mail-thread");
                         return (
                             thread &&
                             thread.model === "mail.channel" &&
@@ -248,7 +248,7 @@ QUnit.module("mail", {}, function () {
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
                     func: () => {
-                        document.querySelector(`.o_ThreadView_messageList`).scrollTop = 142;
+                        document.querySelector(`.o-mail-thread`).scrollTop = 142;
                     },
                     message:
                         "should wait until channel scrolled to 142 after setting this value manually",
@@ -262,7 +262,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadView_messageList`).scrollTop,
+                    document.querySelector(`.o-mail-thread`).scrollTop,
                     142,
                     "verify chat window initial scrollTop"
                 );
@@ -292,7 +292,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadView_messageList`).scrollTop,
+                    document.querySelector(`.o-mail-thread`).scrollTop,
                     142,
                     "chat window scrollTop should still be the same when chat window is unfolded"
                 );
@@ -367,7 +367,7 @@ QUnit.module("mail", {}, function () {
                     message:
                         "should wait until channel scrolled to its last message after opening it from the messaging menu",
                     predicate: ({ scrollTop, thread }) => {
-                        const messageList = document.querySelector(".o_ThreadView_messageList");
+                        const messageList = document.querySelector(".o-mail-thread");
                         return (
                             thread &&
                             thread.model === "mail.channel" &&
@@ -379,8 +379,7 @@ QUnit.module("mail", {}, function () {
                 // Set a scroll position to chat window
                 await afterEvent({
                     eventName: "o-component-message-list-scrolled",
-                    func: () =>
-                        (document.querySelector(`.o_ThreadView_messageList`).scrollTop = 142),
+                    func: () => (document.querySelector(`.o-mail-thread`).scrollTop = 142),
                     message:
                         "should wait until channel scrolled to 142 after setting this value manually",
                     predicate: ({ scrollTop, thread }) => {
@@ -422,7 +421,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadView_messageList`).scrollTop,
+                    document.querySelector(`.o-mail-thread`).scrollTop,
                     142,
                     "chat window scrollTop should still be the same after closing discuss"
                 );

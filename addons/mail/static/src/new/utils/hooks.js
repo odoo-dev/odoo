@@ -192,6 +192,12 @@ export function useScrollSnapshot(refName, { onWillPatch: p_onWillPatch, onPatch
     });
 }
 
+/**
+ * @typedef {Object} MessageHighlight
+ * @property {function} highlightMessage
+ * @property {number|null} highlightedMessageId
+ * @returns {MessageHighlight}
+ */
 export function useMessageHighlight(duration = 2000) {
     let timeout;
     const state = reactive({
@@ -445,6 +451,13 @@ export function useScrollPosition(refName, model, clearOn) {
     return self;
 }
 
+/**
+ * @typedef {Object} MessageEdition
+ * @property {composerOfThread} composerOfThread
+ * @property {editingMessage} editingMessage
+ * @property {function} exitEditMode
+ * @returns {MessageEdition}
+ */
 export function useMessageEdition() {
     const state = reactive({
         composerOfThread: null,
