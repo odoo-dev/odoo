@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { createLocalId } from "./thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 /**
  * @class ChannelMember

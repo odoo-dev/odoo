@@ -2,7 +2,7 @@
 
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
-import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
+import { createLocalId } from "@mail/new/utils/misc";
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;

@@ -6,7 +6,7 @@ import { Component } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class ThreadIcon extends Component {
     static props = ["thread", "className?"];

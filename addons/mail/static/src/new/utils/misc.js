@@ -1,5 +1,9 @@
 /* @odoo-module */
 
+export function createLocalId(...args) {
+    return args.join(",");
+}
+
 export function assignDefined(obj, data) {
     for (const key in data) {
         if (data[key] === undefined) {

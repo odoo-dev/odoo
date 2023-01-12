@@ -7,7 +7,7 @@ import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { NotificationItem } from "./notification_item";
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class MessagingMenu extends Component {
     static components = { Dropdown, NotificationItem, PartnerImStatus };

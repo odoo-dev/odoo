@@ -9,7 +9,7 @@ import { reactive } from "@odoo/owl";
 
 import { RtcSession } from "./rtc_session_model";
 import { debounce } from "@web/core/utils/timing";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 const ORDERED_TRANSCEIVER_NAMES = ["audio", "video"];
 const PEER_NOTIFICATION_WAIT_DELAY = 50;

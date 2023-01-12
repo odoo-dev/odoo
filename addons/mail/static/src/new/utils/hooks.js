@@ -16,7 +16,7 @@ import {
 import { Deferred } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./arrays";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "./misc";
 
 function useExternalListener(target, eventName, handler, eventParams) {
     const boundHandler = handler.bind(useComponent());

@@ -3,7 +3,7 @@
 import { Component } from "@odoo/owl";
 import { useStore } from "../core/messaging_hook";
 import { Typing } from "../composer/typing";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 /**
  * @typedef {Object} Props

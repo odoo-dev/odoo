@@ -11,7 +11,7 @@ import { browser } from "@web/core/browser/browser";
 import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
-import { createLocalId } from "./thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 import { session } from "@web/session";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers

@@ -5,7 +5,7 @@ import { ChannelMember } from "../core/channel_member_model";
 import { Thread } from "../core/thread_model";
 import { _t } from "@web/core/l10n/translation";
 import { removeFromArray } from "@mail/new/utils/arrays";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 import { Composer } from "../core/composer_model";
 import { prettifyMessageContent } from "../utils/format";
 

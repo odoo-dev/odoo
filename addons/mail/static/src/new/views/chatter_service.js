@@ -2,7 +2,7 @@
 
 import { Follower } from "@mail/new/core/follower_model";
 import { _t } from "@web/core/l10n/translation";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class ChatterService {
     constructor(env, services) {

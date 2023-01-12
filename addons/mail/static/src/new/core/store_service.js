@@ -2,7 +2,7 @@
 
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { createLocalId } from "./thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class Store {
     constructor(env) {

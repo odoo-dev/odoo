@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 
 import { ScrollPosition } from "@mail/new/core/scroll_position_model";
-import { createLocalId } from "./thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class Thread {
     /** @type {number} */

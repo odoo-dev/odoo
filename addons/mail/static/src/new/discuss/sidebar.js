@@ -8,9 +8,8 @@ import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
-import { markEventHandled } from "../utils/misc";
+import { createLocalId, markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
-import { createLocalId } from "../core/thread_model.create_local_id";
 
 import { _t } from "@web/core/l10n/translation";
 

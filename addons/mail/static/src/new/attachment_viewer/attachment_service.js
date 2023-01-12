@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Attachment } from "../core/attachment_model";
-import { createLocalId } from "../core/thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 export class AttachmentService {
     constructor(env, services) {

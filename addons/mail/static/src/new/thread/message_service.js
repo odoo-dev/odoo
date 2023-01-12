@@ -5,12 +5,11 @@ import { Message } from "../core/message_model";
 import { removeFromArray } from "../utils/arrays";
 import { convertBrToLineBreak, prettifyMessageContent } from "../utils/format";
 import { registry } from "@web/core/registry";
-import { createLocalId } from "../core/thread_model.create_local_id";
 import { MessageReactions } from "../core/message_reactions_model";
 import { Notification } from "../core/notification_model";
 import { LinkPreview } from "../core/link_preview_model";
 import { NotificationGroup } from "../core/notification_group_model";
-import { assignDefined } from "../utils/misc";
+import { assignDefined, createLocalId } from "../utils/misc";
 
 const commandRegistry = registry.category("mail.channel_commands");
 

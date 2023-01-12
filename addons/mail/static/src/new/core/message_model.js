@@ -7,7 +7,7 @@ import { toRaw } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { deserializeDateTime } from "@web/core/l10n/dates";
-import { createLocalId } from "./thread_model.create_local_id";
+import { createLocalId } from "../utils/misc";
 
 const { DateTime } = luxon;
 

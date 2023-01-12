@@ -1,8 +1,7 @@
 /** @odoo-module */
 
 import { Persona } from "@mail/new/core/persona_model";
-import { assignDefined } from "../utils/misc";
-import { createLocalId } from "./thread_model.create_local_id";
+import { assignDefined, createLocalId } from "../utils/misc";
 
 export class PersonaService {
     constructor(env, services) {
