@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.message" owl="1">
-        <div class="o-mail-message position-relative py-1 mt-1"
+        <div class="o-mail-message position-relative py-1"
             t-att-class="{
                 'o-mail-message-clicked': isClicked,
                 'o-mail-message-highlighted-from-mention': message.isHighlightedFromMention,
@@ -10,6 +10,7 @@
                 'o-mail-is-author': message.isSelfAuthored,
                 'o-mail-message-is-selected': !props.grayedOut,
                 'o-mail-message-is-squashed pt-1': props.squashed,
+                'mt-1': !props.squashed and props.thread,
                 'px-3': !props.isInChatWindow,
                 'px-1': props.isInChatWindow,
                 'opacity-50': props.grayedOut,
