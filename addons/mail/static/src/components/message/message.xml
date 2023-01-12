@@ -18,7 +18,6 @@
             t-attf-class="{{ extraClass }} {{ className }}"
             role="group"
             t-att-aria-label="message.messageTypeText"
-            t-att-data-id="message.id"
             t-att-data-message-id="message.id"
             t-on-click="onClick"
             t-on-mouseenter="onMouseenter"
