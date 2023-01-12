@@ -139,7 +139,7 @@ function getMouseenter({ afterNextRender }) {
 }
 
 function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {}) {
-    return async function openDiscuss({ waitUntilMessagesLoaded = true } = {}) {
+    return async function openDiscuss(pActiveId, { waitUntilMessagesLoaded = true } = {}) {
         const actionOpenDiscuss = {
             // hardcoded actionId, required for discuss_container props validation.
             id: 104,
@@ -148,7 +148,8 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
             tag: "mail.action_discuss",
             type: "ir.actions.client",
         };
-        const activeId = context.active_id ?? params.default_active_id ?? "mail.box_inbox";
+        const activeId =
+            pActiveId ?? context.active_id ?? params.default_active_id ?? "mail.box_inbox";
         let [threadModel, threadId] =
             typeof activeId === "number" ? ["mail.channel", activeId] : activeId.split("_");
         if (threadModel === "mail.channel") {

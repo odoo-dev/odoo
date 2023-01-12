@@ -49,14 +49,8 @@ QUnit.test("auto layout with link preview list", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-message .o-mail-link-preview-list");
 });
 
@@ -71,14 +65,8 @@ QUnit.test("auto layout with link preview as gif", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-link-preview-image");
 });
 
@@ -93,14 +81,8 @@ QUnit.test("simplest card layout", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-link-preview-card");
     assert.containsOnce(document.body, ".o-mail-link-preview-card-title");
     assert.containsOnce(document.body, ".o-mail-link-preview-card-description");
@@ -117,14 +99,8 @@ QUnit.test("simplest card layout with image", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-link-preview-card");
     assert.containsOnce(document.body, ".o-mail-link-preview-card-title");
     assert.containsOnce(document.body, ".o-mail-link-preview-card-description");
@@ -142,14 +118,8 @@ QUnit.test("Link preview video layout", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-link-preview-video");
     assert.containsOnce(document.body, ".o-mail-link-preview-video-title");
     assert.containsOnce(document.body, ".o-mail-link-preview-video-description");
@@ -167,14 +137,8 @@ QUnit.test("Link preview image layout", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(document.body, ".o-mail-link-preview-image");
 });
 
@@ -189,20 +153,10 @@ QUnit.test("Remove link preview Gif", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-link-preview-aside");
-    assert.containsOnce(
-        document.body,
-        ".o-link-preview-confirm-delete-text",
-        "Should have a link preview confirmation dialog"
-    );
+    assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });
 
 QUnit.test("Remove link preview card", async function (assert) {
@@ -216,14 +170,8 @@ QUnit.test("Remove link preview card", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-link-preview-aside");
     assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });
@@ -239,14 +187,8 @@ QUnit.test("Remove link preview video", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-link-preview-aside");
     assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });
@@ -262,14 +204,8 @@ QUnit.test("Remove link preview image", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-link-preview-aside");
     assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });

@@ -28,12 +28,8 @@ QUnit.test("dragover files on thread with composer", async function (assert) {
         group_public_id: false,
         name: "General",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId1}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     await afterNextRender(() => dragenterFiles(target.querySelector(".o-mail-thread")));
     assert.containsOnce(target, ".o-dropzone");
 });
@@ -52,12 +48,8 @@ QUnit.test("load more messages from channel (auto-load on scroll)", async functi
             res_id: mailChannelId1,
         });
     }
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId1}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.containsN(target, ".o-mail-thread button:contains(Load More) ~ .o-mail-message", 30);
 
     await afterNextRender(() => (target.querySelector(".o-mail-thread").scrollTop = 0));
@@ -79,12 +71,8 @@ QUnit.test(
             res_id: mailChannelId1,
             subject: "Salutations, voyageur",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.containsOnce(target, ".o-mail-message");
         assert.containsOnce(target, ".o-mail-message-subject");
         assert.strictEqual(
@@ -109,12 +97,8 @@ QUnit.test(
             res_id: mailChannelId1,
             subject: "Salutations, voyageur",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -129,14 +113,8 @@ QUnit.test("auto-scroll to bottom of thread on load", async function (assert) {
             res_id: mailChannelId1,
         });
     }
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.containsN(target, ".o-mail-message", 25);
     const $thread = $(target).find(".o-mail-thread");
     assert.strictEqual($thread[0].scrollTop, $thread[0].scrollHeight - $thread[0].clientHeight); // FIXME UI scaling might mess with this assertion
@@ -157,12 +135,8 @@ QUnit.test("display day separator before first message of the day", async functi
             res_id: mailChannelId1,
         },
     ]);
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId1}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.containsOnce(target, ".o-mail-thread-date-separator");
 });
 
@@ -176,12 +150,8 @@ QUnit.test(
             model: "mail.channel",
             res_id: mailChannelId1,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.containsNone(target, ".o-mail-thread-date-separator");
     }
 );
@@ -204,14 +174,8 @@ QUnit.test(
                     res_id: index & 1 ? channelId_1 : channelId_2,
                 }))
         );
-        const { openDiscuss } = await start({
-            discuss: {
-                context: {
-                    active_id: `mail.channel_${channelId_1}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId_1);
         const scrolltop_1 = target.querySelector(".o-mail-thread").scrollHeight / 2;
         target.querySelector(".o-mail-thread").scrollTo({ top: scrolltop_1 });
         await click(".o-mail-category-item:contains(channel-2)");
@@ -238,14 +202,8 @@ QUnit.test("thread is still scrolling after scrolling up then to bottom", async 
                 res_id: channelId,
             }))
     );
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     const thread = target.querySelector(".o-mail-thread");
     thread.scrollTo({ top: thread.scrollHeight / 2 });
     thread.scrollTo({ top: thread.scrollHeight });

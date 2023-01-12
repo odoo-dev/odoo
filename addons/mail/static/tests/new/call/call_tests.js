@@ -15,10 +15,8 @@ QUnit.test("basic rendering", async function (assert) {
     const channelId = pyEnv["mail.channel"].create({
         name: "General",
     });
-    const { openDiscuss } = await start({
-        discuss: { context: { active_id: `mail.channel_${channelId}` } },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click(".o-mail-discuss-actions button[title='Start a Call']");
     assert.containsOnce(target, ".o-mail-call");
     assert.containsOnce(target, ".o-mail-call-participant-card[aria-label='Mitchell Admin']");
@@ -43,10 +41,8 @@ QUnit.test(
         const channelId = pyEnv["mail.channel"].create({
             name: "General",
         });
-        const { openDiscuss } = await start({
-            discuss: { context: { active_id: `mail.channel_${channelId}` } },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId);
         await click(".o-mail-discuss-actions button[title='Start a Call']");
         assert.containsOnce(target, ".o-mail-call");
 
@@ -77,10 +73,8 @@ QUnit.test("should disconnect when closing page while in call", async function (
     const channelId = pyEnv["mail.channel"].create({
         name: "General",
     });
-    const { openDiscuss } = await start({
-        discuss: { context: { active_id: `mail.channel_${channelId}` } },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click(".o-mail-discuss-actions button[title='Start a Call']");
     assert.containsOnce(target, ".o-mail-call");
 

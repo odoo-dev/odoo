@@ -24,14 +24,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         assert.containsOnce(target, "[title='Show Member List']");
     }
 );
@@ -49,14 +43,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[title='Show Member List']");
         assert.containsOnce(target, ".o-mail-channel-member-list");
     }
@@ -73,14 +61,8 @@ QUnit.test("should have correct members in member list", async function (assert)
         ],
         channel_type: "channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-discuss-actions button[title='Show Member List']");
     assert.containsN(target, ".o-mail-channel-member", 2);
     assert.containsOnce(
@@ -106,14 +88,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[title='Show Member List']");
         assert.containsOnce(target, "[title='Hide Member List']");
     }
@@ -133,14 +109,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[title='Show Member List']");
         await click(".o-mail-channel-member.cursor-pointer");
         assert.containsOnce(target, ".o-mail-autoresize-input[title='Demo']");
@@ -161,14 +131,8 @@ QUnit.test(
             name: "TestChanel",
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         pyEnv["mail.channel"].write([mailChannelId], { channel_member_ids });
         await click(".o-mail-discuss-actions button[title='Show Member List']");
         assert.containsOnce(target, "button:contains(Load more)");
@@ -187,14 +151,8 @@ QUnit.test("Load more button should load more members", async function (assert) 
         name: "TestChanel",
         channel_type: "channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     pyEnv["mail.channel"].write([mailChannelId], { channel_member_ids });
     await click(".o-mail-discuss-actions button[title='Show Member List']");
     await click("button[title='Load more']");

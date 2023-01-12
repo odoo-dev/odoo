@@ -23,15 +23,8 @@ QUnit.test("initially online", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { advanceTime, openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-        hasTimeControl: true,
-    });
-    await openDiscuss();
+    const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+    await openDiscuss(mailChannelId);
     await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
     assert.containsOnce(target, ".o-mail-partner-im-status-icon.o-online");
 });
@@ -46,15 +39,8 @@ QUnit.test("initially offline", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { advanceTime, openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-        hasTimeControl: true,
-    });
-    await openDiscuss();
+    const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+    await openDiscuss(mailChannelId);
     await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
     assert.containsOnce(target, ".o-mail-partner-im-status-icon.o-offline");
 });
@@ -69,15 +55,8 @@ QUnit.test("initially away", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { advanceTime, openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-        hasTimeControl: true,
-    });
-    await openDiscuss();
+    const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+    await openDiscuss(mailChannelId);
     await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
     assert.containsOnce(target, ".o-mail-partner-im-status-icon.o-away");
 });
@@ -92,15 +71,8 @@ QUnit.test("change icon on change partner im_status", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { advanceTime, openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId}`,
-            },
-        },
-        hasTimeControl: true,
-    });
-    await openDiscuss();
+    const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+    await openDiscuss(mailChannelId);
     await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
     assert.containsOnce(target, ".o-mail-partner-im-status-icon.o-online");
 

@@ -27,12 +27,8 @@ QUnit.test("simplest layout", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-message .o-mail-attachment-list");
     assert.hasAttrValue($(target).find(".o-mail-attachment-card"), "title", "test.txt");
     assert.containsOnce(target, ".o-mail-attachment-image");
@@ -59,12 +55,8 @@ QUnit.test("layout with card details and filename and extension", async function
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-attachment-card:contains('test.txt')");
     assert.containsOnce(target, ".o-mail-attachment-card small:contains('txt')");
 });
@@ -88,17 +80,13 @@ QUnit.test(
             res_id: channelId,
         });
         const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${channelId}` },
-            },
             async mockRPC(route, args) {
                 if (route === "/mail/attachment/delete") {
                     assert.step("attachment_unlink");
                 }
             },
         });
-        await openDiscuss();
-
+        await openDiscuss(channelId);
         await click(".o-mail-attachment-card-aside-unlink");
         await afterNextRender(() => {
             document.querySelector(".modal-footer .btn-primary").click();
@@ -125,12 +113,8 @@ QUnit.test("view attachment", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-attachment-image img");
     await click(".o-mail-attachment-image");
     assert.containsOnce(target, ".o-mail-attachment-viewer");
@@ -152,12 +136,8 @@ QUnit.test("close attachment viewer", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-attachment-image img");
 
     await click(".o-mail-attachment-image");
@@ -194,12 +174,8 @@ QUnit.test(
             model: "mail.channel",
             res_id: channelId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${channelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId);
         await click(".o-mail-attachment-image");
         const imageEl = document.querySelector(".o-mail-attachment-viewer-viewImage");
         await click(".o-mail-attachment-viewer-headerItemButtonClose");
@@ -232,12 +208,8 @@ QUnit.test("plain text file is viewable", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.hasClass($(target).find(".o-mail-attachment-card"), "o-mail-viewable");
 });
 
@@ -257,12 +229,8 @@ QUnit.test("HTML file is viewable", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.hasClass($(target).find(".o-mail-attachment-card"), "o-mail-viewable");
 });
 
@@ -282,12 +250,8 @@ QUnit.test("ODT file is not viewable", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.doesNotHaveClass($(target).find(".o-mail-attachment-card"), "o-mail-viewable");
 });
 
@@ -307,12 +271,8 @@ QUnit.test("DOCX file is not viewable", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.doesNotHaveClass($(target).find(".o-mail-attachment-card"), "o-mail-viewable");
 });
 
@@ -340,12 +300,8 @@ QUnit.test(
             model: "mail.channel",
             res_id: channelId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${channelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId);
         assert.containsOnce(target, ".o-mail-attachment-image[title='test.png']");
         assert.containsOnce(target, ".o-mail-attachment-card:contains(test.odt)");
         assert.hasClass(
@@ -384,12 +340,8 @@ QUnit.test("img file has proper src in mail.channel", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${channelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.ok(
         $(target)
             .find(".o-mail-attachment-image[title='test.png'] img")

@@ -38,12 +38,8 @@ QUnit.test("rendering when just one has received the message", async function (a
         fetched_message_id: mailMessageId,
         seen_message_id: false,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message-seen-indicator");
     assert.doesNotHaveClass(target.querySelector(".o-mail-message-seen-indicator"), "o-all-seen");
     assert.containsOnce(target, ".o-mail-message-seen-indicator-icon");
@@ -75,12 +71,8 @@ QUnit.test("rendering when everyone have received the message", async function (
         fetched_message_id: mailMessageId,
         seen_message_id: false,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message-seen-indicator");
     assert.doesNotHaveClass(target.querySelector(".o-mail-message-seen-indicator"), "o-all-seen");
     assert.containsOnce(target, ".o-mail-message-seen-indicator-icon");
@@ -119,12 +111,8 @@ QUnit.test("rendering when just one has seen the message", async function (asser
     pyEnv["mail.channel.member"].write([mailChannelMemberId1], {
         seen_message_id: mailMessageId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message-seen-indicator");
     assert.doesNotHaveClass(target.querySelector(".o-mail-message-seen-indicator"), "o-all-seen");
     assert.containsN(target, ".o-mail-message-seen-indicator-icon", 2);
@@ -157,12 +145,8 @@ QUnit.test("rendering when just one has seen & received the message", async func
         seen_message_id: mailMessageId,
         fetched_message_id: mailMessageId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message-seen-indicator");
     assert.doesNotHaveClass(target.querySelector(".o-mail-message-seen-indicator"), "o-all-seen");
     assert.containsN(target, ".o-mail-message-seen-indicator-icon", 2);
@@ -194,12 +178,8 @@ QUnit.test("rendering when just everyone has seen the message", async function (
         fetched_message_id: mailMessageId,
         seen_message_id: mailMessageId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message-seen-indicator");
     assert.hasClass(target.querySelector(".o-mail-message-seen-indicator"), "o-all-seen");
     assert.containsN(target, ".o-mail-message-seen-indicator-icon", 2);
@@ -222,12 +202,8 @@ QUnit.test("'channel_fetch' notification received is correctly handled", async f
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message");
     assert.containsNone(target, ".o-mail-message-seen-indicator-icon");
 
@@ -260,12 +236,8 @@ QUnit.test("'channel_seen' notification received is correctly handled", async fu
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsOnce(target, ".o-mail-message");
     assert.containsNone(target, ".o-mail-message-seen-indicator-icon");
 
@@ -300,12 +272,8 @@ QUnit.test(
             model: "mail.channel",
             res_id: mailChannelId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         assert.containsOnce(target, ".o-mail-message");
         assert.containsNone(target, ".o-mail-message-seen-indicator-icon");
 
@@ -353,12 +321,8 @@ QUnit.test(
         });
         const memberIds = pyEnv["mail.channel.member"].search([["channel_id", "=", mailChannelId]]);
         pyEnv["mail.channel.member"].write(memberIds, { seen_message_id: mailMessageId });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         assert.containsOnce(target, ".o-mail-message");
         assert.containsNone(target, ".o-mail-message-seen-indicator");
     }
@@ -395,12 +359,8 @@ QUnit.test(
         pyEnv["mail.channel.member"].write(memberIds, {
             seen_message_id: lastMailMessageId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         assert.containsOnce(target, `.o-mail-message[data-message-id=${beforeLastMailMessageId}]`);
         assert.containsOnce(
             target,
@@ -437,12 +397,8 @@ QUnit.test(
             fetched_message_id: mailMessageId,
             seen_message_id: mailMessageId - 1,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         assert.containsOnce(target, ".o-mail-message");
         assert.containsOnce(target, ".o-mail-message-seen-indicator");
         assert.containsN(target, ".o-mail-message-seen-indicator-icon", 1);

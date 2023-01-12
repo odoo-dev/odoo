@@ -38,12 +38,8 @@ QUnit.test("toggling category button does not hide active category items", async
             channel_type: "channel",
         },
     ]);
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     assert.containsN(target, ".o-mail-category-item", 2);
     assert.containsOnce(target, ".o-mail-category-item.o-active");
 
