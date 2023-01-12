@@ -9,9 +9,7 @@ Model({
         async loadEmojiData() {
             this.update({ isLoading: true });
             await getBundle("mail.assets_emoji").then(loadBundle);
-            const { categories, emojis } = await odoo.runtimeImport(
-                "@mail/new/composer/emoji_data"
-            );
+            const { categories, emojis } = await odoo.runtimeImport("@mail/new/emoji/emoji_data");
             if (!this.exists()) {
                 return;
             }

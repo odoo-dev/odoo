@@ -15,7 +15,7 @@ import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/activity_model").Activity} data
+ * @property {import("@mail/new/activity/activity_model").Activity} data
  * @property {function} [onUpdate]
  * @extends {Component<Props, Env>}
  */

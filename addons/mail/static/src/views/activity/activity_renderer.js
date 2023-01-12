@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ActivityCell } from "@mail/new/views/activity/activity_cell";
+import { ActivityCell } from "@mail/new/web/activity/activity_cell";
 import { Component, useState } from "@odoo/owl";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { ActivityRecord } from "./activity_record";

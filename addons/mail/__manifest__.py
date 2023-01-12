@@ -239,13 +239,13 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/new/**/*',
             ('remove', 'mail/static/src/new/public/**/*'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),
-            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+            ('remove', 'mail/static/src/new/emoji/emoji_data.js'),
         ],
         'mail.assets_dark': [
             'mail/static/src/new/**/*.dark.scss',
         ],
         'mail.assets_emoji': [
-            'mail/static/src/new/composer/emoji_data.js',
+            'mail/static/src/new/emoji/emoji_data.js',
         ],
         'mail.assets_public': [
             ('include', 'web._assets_helpers'),
@@ -267,9 +267,9 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/views/fields/many2many_tags/tags_list.*',
 
             'mail/static/src/new/**/*',
-            ('remove', 'mail/static/src/new/views/**/*'),
+            ('remove', 'mail/static/src/new/web/**/*'),
             ('remove', 'mail/static/src/new/backend/**/*',),
-            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+            ('remove', 'mail/static/src/new/emoji/emoji_data.js'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),
         ]
     },

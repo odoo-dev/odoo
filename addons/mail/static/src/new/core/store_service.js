@@ -32,7 +32,7 @@ export class Store {
     notifications = {};
     notificationGroups = [];
 
-    /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
+    /** @type {Object.<number, import("@mail/new/web/follower_model").Follower>} */
     followers = {};
 
     partnerRoot = {};
@@ -87,11 +87,11 @@ export class Store {
     };
     cannedResponses = [];
 
-    /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
+    /** @type {Object.<number, import("@mail/new/activity/activity_model").Activity>} */
     activities = {};
     activityCounter = 0;
 
-    /** @type {import("@mail/new/core/chat_window_model").ChatWindow[]} */
+    /** @type {import("@mail/new/chat/chat_window_model").ChatWindow[]} */
     chatWindows = [];
 
     /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */

@@ -11,7 +11,7 @@ import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/attachment_model").Attachment[]} attachments
+ * @property {import("@mail/new/attachment_viewer/attachment_model").Attachment[]} attachments
  * @property {function} unlinkAttachment
  * @property {number} imagesHeight
  * @extends {Component<Props, Env>}

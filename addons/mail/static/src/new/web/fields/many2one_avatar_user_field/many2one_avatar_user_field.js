@@ -2,8 +2,8 @@
 
 import { registry } from "@web/core/registry";
 import { Many2OneAvatarField } from "@web/views/fields/many2one_avatar/many2one_avatar_field";
-import { useOpenChat } from "@mail/new/views/open_chat_hook";
-import { useAssignUserCommand } from "@mail/new/views/fields/assign_user_command_hook";
+import { useOpenChat } from "@mail/new/web/open_chat_hook";
+import { useAssignUserCommand } from "@mail/new/web/fields/assign_user_command_hook";
 
 export class Many2OneAvatarUserField extends Many2OneAvatarField {
     setup() {

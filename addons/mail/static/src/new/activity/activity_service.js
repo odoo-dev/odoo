@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Activity } from "@mail/new/core/activity_model";
+import { Activity } from "@mail/new/activity/activity_model";
 import { _t } from "@web/core/l10n/translation";
 import { assignDefined } from "../utils/misc";
 import { registry } from "@web/core/registry";
@@ -14,7 +14,7 @@ export class ActivityService {
     }
 
     /**
-     * @param {import("@mail/new/core/activity_model").Activity} activity
+     * @param {import("@mail/new/activity/activity_model").Activity} activity
      * @param {number[]} attachmentIds
      */
     async markAsDone(activity, attachmentIds = []) {
@@ -50,8 +50,8 @@ export class ActivityService {
     }
 
     /**
-     * @param {import("@mail/new/core/activity_model").Data} data
-     * @returns {import("@mail/new/core/activity_model").Activity}
+     * @param {import("@mail/new/activity/activity_model").Data} data
+     * @returns {import("@mail/new/activity/activity_model").Activity}
      */
     insert(data) {
         const activity = this.store.activities[data.id] ?? new Activity(this.store, data);

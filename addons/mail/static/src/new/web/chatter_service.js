@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Follower } from "@mail/new/core/follower_model";
+import { Follower } from "@mail/new/web/follower_model";
 import { _t } from "@web/core/l10n/translation";
 import { createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
@@ -73,7 +73,7 @@ export class ChatterService {
     }
 
     /**
-     * @param {import("@mail/new/core/follower_model").Follower} follower
+     * @param {import("@mail/new/web/follower_model").Follower} follower
      */
     async removeFollower(follower) {
         await this.orm.call(follower.followedThread.model, "message_unsubscribe", [
@@ -88,8 +88,8 @@ export class ChatterService {
     }
 
     /**
-     * @param {import("@mail/new/core/follower_model").Data} data
-     * @returns {import("@mail/new/core/follower_model").Follower}
+     * @param {import("@mail/new/web/follower_model").Data} data
+     * @returns {import("@mail/new/web/follower_model").Follower}
      */
     insertFollower(data) {
         let follower = this.store.followers[data.id];

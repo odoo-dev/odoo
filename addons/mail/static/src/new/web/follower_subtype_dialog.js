@@ -17,7 +17,7 @@ import { _t } from "@web/core/l10n/translation";
 /**
  * @typedef {Object} Props
  * @property {function} close
- * @property {import("@mail/new/core/follower_model").Follower} follower
+ * @property {import("@mail/new/web/follower_model").Follower} follower
  * @property {function} onFollowerChanged
  * @extends {Component<Props, Env>}
  */

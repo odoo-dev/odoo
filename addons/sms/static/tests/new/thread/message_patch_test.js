@@ -6,7 +6,7 @@ import { makeDeferred } from "@mail/utils/deferred";
 
 let target;
 
-QUnit.module("sms_message", {
+QUnit.module("message/sms", {
     async beforeEach() {
         target = getFixture();
     },

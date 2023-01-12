@@ -98,7 +98,7 @@ export class Chatter extends Component {
     }
 
     /**
-     * @returns {import("@mail/new/core/activity_model").Activity[]}
+     * @returns {import("@mail/new/activity/activity_model").Activity[]}
      */
     get activities() {
         return Object.values(this.store.activities).filter((activity) => {
@@ -196,7 +196,7 @@ export class Chatter extends Component {
 
     /**
      * @param {MouseEvent} ev
-     * @param {import("@mail/new/core/follower_model").Follower} follower
+     * @param {import("@mail/new/web/follower_model").Follower} follower
      */
     async onClickEdit(ev, follower) {
         this.env.services.dialog.add(FollowerSubtypeDialog, {
@@ -215,7 +215,7 @@ export class Chatter extends Component {
 
     /**
      * @param {MouseEvent} ev
-     * @param {import("@mail/new/core/follower_model").Follower} follower
+     * @param {import("@mail/new/web/follower_model").Follower} follower
      */
     async onClickRemove(ev, follower) {
         await this.chatter.removeFollower(follower);
