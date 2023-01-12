@@ -536,9 +536,9 @@ export class Messaging {
                     const member = this.thread.insertChannelMember({
                         id: notif.payload.id,
                         persona: this.persona.insert({
-                            id: notif.payload.persona.partner.id,
-                            name: notif.payload.persona.partner.name,
-                            type: "partner",
+                            ...notif.payload.persona.partner,
+                            ...notif.payload.persona.guest,
+                            type: notif.payload.persona.partner ? "partner" : "guest",
                         }),
                         threadId: channel.id,
                     });
