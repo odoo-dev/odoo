@@ -51,6 +51,11 @@ export function useEmojiPicker(refName, props) {
         ref.el.addEventListener("click", toggle);
         ref.el.addEventListener("mouseenter", loadEmoji);
     });
+    return {
+        get isOpen() {
+            return Boolean(closePopover);
+        },
+    };
 }
 
 const _loadEmoji = memoize(() => getBundle("mail.assets_emoji").then(loadBundle));

@@ -723,6 +723,8 @@ QUnit.test(
         assert.containsOnce($message1, ".o-mail-msg-header");
         assert.containsNone($message2, ".o-mail-msg-header");
         assert.containsNone($message1, ".o-mail-message-sidebar .o-mail-message-date");
+        assert.containsNone($message2, ".o-mail-message-sidebar .o-mail-message-date");
+        await click($message2);
         assert.containsOnce($message2, ".o-mail-message-sidebar .o-mail-message-date");
     }
 );

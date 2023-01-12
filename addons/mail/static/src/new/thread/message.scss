@@ -42,15 +42,6 @@
     z-index: 10;
 }
 
-.o-mail-message:hover {
-    .o-mail-message-actions {
-        visibility: visible !important;
-        .fa-star {
-            color: $o-main-favorite-color;
-        }
-    }
-
-    .o-mail-message-sidebar .o-mail-message-date {
-        opacity: 50% !important;
-    }
+.o-mail-message-actions-is-starred {
+    color: $o-main-favorite-color;
 }

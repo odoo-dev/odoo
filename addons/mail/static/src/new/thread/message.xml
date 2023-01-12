@@ -14,6 +14,8 @@
             }"
             t-att-data-message-id="message.id"
             t-on-click="onClick"
+            t-on-mouseenter="onMouseenter"
+            t-on-mouseleave="onMouseleave"
             t-ref="root"
         >
             <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
@@ -27,7 +29,7 @@
                         <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>
                     </div>
                     <t t-elif="!message.isTransient">
-                        <small class="o-mail-message-date text-muted opacity-0 ms-2" t-att-title="message.dateTimeStr">
+                        <small t-if="isActive" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
                             <t t-esc="message.dateTimeSimpleStr"/>
                         </small>
                         <div t-att-class="{ 'position-absolute bottom-0 mb-1': !env.inChatter }">
@@ -99,7 +101,7 @@
                                 </div>
                             </div>
                         </t>
-                        <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions bg-view invisible"
+                        <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions bg-view"
                             t-att-class="{
                                 'position-absolute top-0': !env.inDiscuss,
                                 'start-0 ms-3': isAlignedRight,
@@ -109,6 +111,7 @@
                                 'mt-2': env.inDiscuss and (message.isDiscussion or message.isNotification),
                                 'mt-n3': env.inChatWindow,
                                 'ms-2': env.inDiscuss,
+                                'invisible': !isActive,
                             }"
                         >
                             <div class="d-flex rounded-1 shadow-sm overflow-hidden alignedRight" t-att-class="{
@@ -122,7 +125,7 @@
                                     t-on-click="() => state.isActionListSquashed = !state.isActionListSquashed" role="button" tabindex="1" title="Compact" aria-label="Compact"/>
                                 <t t-if="!env.inChatWindow or !state.isActionListSquashed">
                                     <i t-if="canToggleStar" class="o-mail-message-action-toggle-star cursor-pointer px-1 py-2 fa fa-lg"
-                                        t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
+                                        t-att-class="message.isStarred ? 'fa-star o-mail-message-actions-is-starred' : 'fa-star-o'"
                                         t-on-click="() => messageService.toggleStar(props.message)"
                                         role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
                                     <i t-if="canBeDeleted" class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-on-click="onClickDelete"

@@ -72,6 +72,7 @@ export class Message extends Component {
         this.popover = usePopover();
         this.state = useState({
             isEditing: false,
+            isHovered: false,
             isActionListSquashed: this.env.inChatWindow,
         });
         this.root = useRef("root");
@@ -112,7 +113,7 @@ export class Message extends Component {
             }
         });
         if (this.props.hasActions && this.canAddReaction) {
-            useEmojiPicker("emoji-picker", {
+            this.emojiPicker = useEmojiPicker("emoji-picker", {
                 onSelect: (emoji) => {
                     const reaction = this.message.reactions.find(
                         ({ content, personas }) =>
@@ -187,6 +188,10 @@ export class Message extends Component {
         return this.props.thread.chatPartnerId !== this.message.author.id;
     }
 
+    get isActive() {
+        return this.state.isHovered || this.isClicked || this.emojiPicker?.isOpen;
+    }
+
     get isAlignedRight() {
         return Boolean(
             this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
@@ -209,6 +214,15 @@ export class Message extends Component {
             return false;
         }
         return this.props.thread.id === "inbox";
+    }
+
+    onMouseenter() {
+        this.state.isHovered = true;
+    }
+
+    onMouseleave() {
+        this.state.isHovered = false;
+        this.store.clickedMessage = null;
     }
 
     /**
