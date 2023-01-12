@@ -406,3 +406,38 @@ QUnit.test("chat - channel should count unread message", async function (assert)
     await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
     assert.containsNone(target, ".o-mail-discuss-sidebar-counter");
 });
+
+QUnit.test("mark channel as seen on last message visible", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "test",
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    message_unread_counter: 1,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+        ],
+    });
+    pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.hasClass(
+        target.querySelector(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`),
+        "o-unread"
+    );
+
+    await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.doesNotHaveClass(
+        target.querySelector(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`),
+        "o-unread"
+    );
+});
