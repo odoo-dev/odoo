@@ -129,10 +129,10 @@ export class Message extends Component {
     }
 
     get avatarUrl() {
-        if (this.message.author?.guest) {
-            return `/mail/channel/${this.message.originThread.id}/guest/${this.message.author.guest.id}/avatar_128?unique=${this.message.author.guest.name}`;
+        if (this.message.author?.type === "guest") {
+            return `/mail/channel/${this.message.originThread.id}/guest/${this.message.author.id}/avatar_128?unique=${this.message.author.name}`;
         } else {
-            return this.message.author && this.message.author.avatarUrl;
+            return this.message.author?.avatarUrl;
         }
     }
 

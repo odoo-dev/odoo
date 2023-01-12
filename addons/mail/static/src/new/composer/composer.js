@@ -245,8 +245,7 @@ export class Composer extends Component {
                     return;
                 }
                 if (this.props.messageEdition) {
-                    const messageToEdit =
-                        this.props.composer.thread.lastEditableMessageOfCurrentUser;
+                    const messageToEdit = this.props.composer.thread.lastEditableMessageOfSelf;
                     if (messageToEdit) {
                         this.props.messageEdition.editingMessage = messageToEdit;
                     }

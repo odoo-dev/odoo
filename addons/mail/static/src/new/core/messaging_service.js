@@ -506,7 +506,7 @@ export class Messaging {
                         return;
                     }
                     if (this.store.user.id === partner_id) {
-                        channel.serverLastSeenMsgByCurrentUser = last_message_id;
+                        channel.serverLastSeenMsgBySelf = last_message_id;
                     }
                     const seenInfo = channel.seenInfos.find(
                         (seenInfo) => seenInfo.partner.id === partner_id

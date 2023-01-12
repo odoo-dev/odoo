@@ -16,28 +16,12 @@ export class ChannelMember {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    get partner() {
-        return this._store.personas[createLocalId("partner", this.partnerId)];
-    }
-
-    get guest() {
-        return this._store.personas[createLocalId("guest", this.guestId)];
-    }
-
     get persona() {
         return this._store.personas[this.personaLocalId];
     }
 
     set persona(persona) {
         this.personaLocalId = persona?.localId;
-    }
-
-    get im_status() {
-        return this.persona.im_status;
-    }
-
-    get name() {
-        return this.persona.name;
     }
 
     get avatarUrl() {
@@ -48,10 +32,6 @@ export class ChannelMember {
             return `/mail/channel/${this.thread.id}/guest/${this.persona.id}/avatar_128?unique=${this.persona.name}`;
         }
         return "";
-    }
-
-    get isSelf() {
-        return this.persona.isSelf;
     }
 
     get thread() {

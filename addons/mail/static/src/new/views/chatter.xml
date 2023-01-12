@@ -54,7 +54,7 @@
                         </div>
                     </t>
                 </Dropdown>
-                <button t-if="thread.followerOfCurrentUser" class="o-mail-chatter-topbar-unfollow btn px-0" t-att-class="{ 'text-success': !unfollowHover.isHover, 'text-warning': unfollowHover.isHover, 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="onClickUnfollow" t-ref="unfollow">
+                <button t-if="thread.followerOfSelf" class="o-mail-chatter-topbar-unfollow btn px-0" t-att-class="{ 'text-success': !unfollowHover.isHover, 'text-warning': unfollowHover.isHover, 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="onClickUnfollow" t-ref="unfollow">
                     <div class="position-relative">
                         <!-- Hidden element used to set the button maximum size -->
                         <span class="invisible">
@@ -68,7 +68,7 @@
                         </span>
                     </div>
                 </button>
-                <button t-if="!thread.followerOfCurrentUser" class="o-mail-chatter-topbar-follow btn btn-link text-600" t-on-click="onClickFollow">Follow</button>
+                <button t-if="!thread.followerOfSelf" class="o-mail-chatter-topbar-follow btn btn-link text-600" t-on-click="onClickFollow">Follow</button>
             </div>
         </div>
         <t t-if="thread.composer.type">

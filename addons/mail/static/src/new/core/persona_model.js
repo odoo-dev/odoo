@@ -29,8 +29,4 @@ export class Persona {
                 return "";
         }
     }
-
-    get isSelf() {
-        return this === this._store.self;
-    }
 }

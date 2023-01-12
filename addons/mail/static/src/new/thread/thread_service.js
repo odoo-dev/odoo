@@ -404,7 +404,7 @@ export class ThreadService {
                 thread.message_unread_counter = serverData.message_unread_counter;
             }
             if ("seen_message_id" in serverData) {
-                thread.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
+                thread.serverLastSeenMsgBySelf = serverData.seen_message_id;
             }
             if ("state" in serverData) {
                 thread.state = serverData.state;
