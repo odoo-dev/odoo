@@ -37,7 +37,9 @@ export class Discuss extends Component {
         CallSettings,
         ChannelMemberList,
     };
-    static props = {};
+    static props = {
+        public: { type: Boolean, optional: true },
+    };
     static template = "mail.discuss";
 
     setup() {
