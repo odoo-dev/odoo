@@ -180,7 +180,7 @@ class ChannelMember(models.Model):
             'sessionId': rtc_session.id,
         }
         if len(self.channel_id.rtc_session_ids) == 1 and self.channel_id.channel_type in {'chat', 'group'}:
-            self.channel_id.message_post(body=_("%s started a live conference", self.partner_id.name or self.guest_id.name), message_type='notification')
+            self.channel_id.message_post(body=_(" started a live conference"), message_type='notification')
             invited_members = self._rtc_invite_members()
             if invited_members:
                 res['invitedMembers'] = [('insert', list(invited_members._mail_channel_member_format(fields={'id': True, 'channel': {}, 'persona': {'partner': {'id', 'name', 'im_status'}, 'guest': {'id', 'name', 'im_status'}}}).values()))]
