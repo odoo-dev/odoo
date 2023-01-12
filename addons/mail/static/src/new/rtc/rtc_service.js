@@ -1157,7 +1157,8 @@ export class Rtc {
                 id: channelMember.id,
                 persona: this.persona.insert({
                     ...channelMember.persona.partner,
-                    type: "partner",
+                    ...channelMember.persona.guest,
+                    type: channelMember.persona.partner ? "partner" : "guest",
                 }),
                 threadId: channelMember.channel.id,
             });
