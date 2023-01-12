@@ -1,5 +1,15 @@
 /* @odoo-module */
 
+/**
+ * @typedef {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} ImStatus
+ * @typedef Data
+ * @property {number} id
+ * @property {string} name
+ * @property {string} email
+ * @property {'partner'|'guest'} type
+ * @property {ImStatus} im_status
+ */
+
 export class Persona {
     /** @type {string} */
     localId;
@@ -13,9 +23,9 @@ export class Persona {
     email;
     /** @type {Array | undefined} */
     user;
-    /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
+    /** @type {ImStatus} */
     im_status;
-    isAdmin;
+    isAdmin = false;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
