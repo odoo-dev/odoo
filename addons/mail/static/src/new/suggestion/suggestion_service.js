@@ -130,36 +130,34 @@ class SuggestionService {
                     name,
                 };
             });
-        const sortFunc = (a, b) => {
-            const isATypeSpecific = a.channel_types;
-            const isBTypeSpecific = b.channel_types;
-            if (isATypeSpecific && !isBTypeSpecific) {
+        const sortFunc = (c1, c2) => {
+            if (c1.channel_types && !c2.channel_types) {
                 return -1;
             }
-            if (!isATypeSpecific && isBTypeSpecific) {
+            if (!c1.channel_types && c2.channel_types) {
                 return 1;
             }
-            const cleanedAName = cleanTerm(a.name || "");
-            const cleanedBName = cleanTerm(b.name || "");
+            const cleanedName1 = cleanTerm(c1.name || "");
+            const cleanedName2 = cleanTerm(c2.name || "");
             if (
-                cleanedAName.startsWith(cleanedSearchTerm) &&
-                !cleanedBName.startsWith(cleanedSearchTerm)
+                cleanedName1.startsWith(cleanedSearchTerm) &&
+                !cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return -1;
             }
             if (
-                !cleanedAName.startsWith(cleanedSearchTerm) &&
-                cleanedBName.startsWith(cleanedSearchTerm)
+                !cleanedName1.startsWith(cleanedSearchTerm) &&
+                cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return 1;
             }
-            if (cleanedAName < cleanedBName) {
+            if (cleanedName1 < cleanedName2) {
                 return -1;
             }
-            if (cleanedAName > cleanedBName) {
+            if (cleanedName1 > cleanedName2) {
                 return 1;
             }
-            return a.id - b.id;
+            return c1.id - c2.id;
         };
         return [
             {
@@ -211,9 +209,9 @@ class SuggestionService {
                 }
             }
         }
-        const sortFunc = (a, b) => {
-            const isAInternalUser = a.user && a.user.isInternalUser;
-            const isBInternalUser = b.user && b.user.isInternalUser;
+        const sortFunc = (p1, p2) => {
+            const isAInternalUser = p1.user?.isInternalUser;
+            const isBInternalUser = p2.user?.isInternalUser;
             if (isAInternalUser && !isBInternalUser) {
                 return -1;
             }
@@ -221,66 +219,66 @@ class SuggestionService {
                 return 1;
             }
             if (thread?.serverData?.channel) {
-                const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
-                const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
-                if (isAMember && !isBMember) {
+                const isMember1 = thread.serverData.channel.channelMembers[0][1].includes(p1);
+                const isMember2 = thread.serverData.channel.channelMembers[0][1].includes(p2);
+                if (isMember1 && !isMember2) {
                     return -1;
                 }
-                if (!isAMember && isBMember) {
+                if (!isMember1 && isMember2) {
                     return 1;
                 }
             }
             if (thread) {
-                const isAFollower = thread.followers.some((follower) => follower.partner === a);
-                const isBFollower = thread.followers.some((follower) => follower.partner === b);
-                if (isAFollower && !isBFollower) {
+                const isFollower1 = thread.followers.some((follower) => follower.partner === p1);
+                const isFollower2 = thread.followers.some((follower) => follower.partner === p2);
+                if (isFollower1 && !isFollower2) {
                     return -1;
                 }
-                if (!isAFollower && isBFollower) {
+                if (!isFollower1 && isFollower2) {
                     return 1;
                 }
             }
-            const cleanedAName = cleanTerm(a.name || "");
-            const cleanedBName = cleanTerm(b.name || "");
+            const cleanedName1 = cleanTerm(p1.name ?? "");
+            const cleanedName2 = cleanTerm(p2.name ?? "");
             if (
-                cleanedAName.startsWith(cleanedSearchTerm) &&
-                !cleanedBName.startsWith(cleanedSearchTerm)
+                cleanedName1.startsWith(cleanedSearchTerm) &&
+                !cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return -1;
             }
             if (
-                !cleanedAName.startsWith(cleanedSearchTerm) &&
-                cleanedBName.startsWith(cleanedSearchTerm)
+                !cleanedName1.startsWith(cleanedSearchTerm) &&
+                cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return 1;
             }
-            if (cleanedAName < cleanedBName) {
+            if (cleanedName1 < cleanedName2) {
                 return -1;
             }
-            if (cleanedAName > cleanedBName) {
+            if (cleanedName1 > cleanedName2) {
                 return 1;
             }
-            const cleanedAEmail = cleanTerm(a.email || "");
-            const cleanedBEmail = cleanTerm(b.email || "");
+            const cleanedEmail1 = cleanTerm(p1.email ?? "");
+            const cleanedEmail2 = cleanTerm(p2.email ?? "");
             if (
-                cleanedAEmail.startsWith(cleanedSearchTerm) &&
-                !cleanedAEmail.startsWith(cleanedSearchTerm)
+                cleanedEmail1.startsWith(cleanedSearchTerm) &&
+                !cleanedEmail1.startsWith(cleanedSearchTerm)
             ) {
                 return -1;
             }
             if (
-                !cleanedBEmail.startsWith(cleanedSearchTerm) &&
-                cleanedBEmail.startsWith(cleanedSearchTerm)
+                !cleanedEmail2.startsWith(cleanedSearchTerm) &&
+                cleanedEmail2.startsWith(cleanedSearchTerm)
             ) {
                 return 1;
             }
-            if (cleanedAEmail < cleanedBEmail) {
+            if (cleanedEmail1 < cleanedEmail2) {
                 return -1;
             }
-            if (cleanedAEmail > cleanedBEmail) {
+            if (cleanedEmail1 > cleanedEmail2) {
                 return 1;
             }
-            return a.id - b.id;
+            return p1.id - p2.id;
         };
         return [
             {
@@ -306,28 +304,28 @@ class SuggestionService {
                     substitution: _t(substitution),
                 };
             });
-        const sortFunc = (a, b) => {
-            const cleanedAName = cleanTerm(a.name || "");
-            const cleanedBName = cleanTerm(b.name || "");
+        const sortFunc = (c1, c2) => {
+            const cleanedName1 = cleanTerm(c1.name ?? "");
+            const cleanedName2 = cleanTerm(c2.name ?? "");
             if (
-                cleanedAName.startsWith(cleanedSearchTerm) &&
-                !cleanedBName.startsWith(cleanedSearchTerm)
+                cleanedName1.startsWith(cleanedSearchTerm) &&
+                !cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return -1;
             }
             if (
-                !cleanedAName.startsWith(cleanedSearchTerm) &&
-                cleanedBName.startsWith(cleanedSearchTerm)
+                !cleanedName1.startsWith(cleanedSearchTerm) &&
+                cleanedName2.startsWith(cleanedSearchTerm)
             ) {
                 return 1;
             }
-            if (cleanedAName < cleanedBName) {
+            if (cleanedName1 < cleanedName2) {
                 return -1;
             }
-            if (cleanedAName > cleanedBName) {
+            if (cleanedName1 > cleanedName2) {
                 return 1;
             }
-            return a.id - b.id;
+            return c1.id - c2.id;
         };
         return [
             {
@@ -360,44 +358,42 @@ class SuggestionService {
                 thread.displayName &&
                 cleanTerm(thread.displayName).includes(cleanedSearchTerm)
         );
-        const sortFunc = (a, b) => {
-            const isAPublicChannel = a.type === "channel" && !a.authorizedGroupFullName;
-            const isBPublicChannel = b.type === "channel" && !b.authorizedGroupFullName;
-            if (isAPublicChannel && !isBPublicChannel) {
+        const sortFunc = (c1, c2) => {
+            const isPublicChannel1 = c1.type === "channel" && !c2.authorizedGroupFullName;
+            const isPublicChannel2 = c2.type === "channel" && !c2.authorizedGroupFullName;
+            if (isPublicChannel1 && !isPublicChannel2) {
                 return -1;
             }
-            if (!isAPublicChannel && isBPublicChannel) {
+            if (!isPublicChannel1 && isPublicChannel2) {
                 return 1;
             }
-            const isMemberOfA = a.hasSelfAsMember;
-            const isMemberOfB = b.hasSelfAsMember;
-            if (isMemberOfA && !isMemberOfB) {
+            if (c1.hasSelfAsMember && !c2.hasSelfAsMember) {
                 return -1;
             }
-            if (!isMemberOfA && isMemberOfB) {
+            if (!c1.hasSelfAsMember && c2.hasSelfAsMember) {
                 return 1;
             }
-            const cleanedADisplayName = cleanTerm(a.displayName || "");
-            const cleanedBDisplayName = cleanTerm(b.displayName || "");
+            const cleanedDisplayName1 = cleanTerm(c1.displayName ?? "");
+            const cleanedDisplayName2 = cleanTerm(c2.displayName ?? "");
             if (
-                cleanedADisplayName.startsWith(cleanedSearchTerm) &&
-                !cleanedBDisplayName.startsWith(cleanedSearchTerm)
+                cleanedDisplayName1.startsWith(cleanedSearchTerm) &&
+                !cleanedDisplayName2.startsWith(cleanedSearchTerm)
             ) {
                 return -1;
             }
             if (
-                !cleanedADisplayName.startsWith(cleanedSearchTerm) &&
-                cleanedBDisplayName.startsWith(cleanedSearchTerm)
+                !cleanedDisplayName1.startsWith(cleanedSearchTerm) &&
+                cleanedDisplayName2.startsWith(cleanedSearchTerm)
             ) {
                 return 1;
             }
-            if (cleanedADisplayName < cleanedBDisplayName) {
+            if (cleanedDisplayName1 < cleanedDisplayName2) {
                 return -1;
             }
-            if (cleanedADisplayName > cleanedBDisplayName) {
+            if (cleanedDisplayName1 > cleanedDisplayName2) {
                 return 1;
             }
-            return a.id - b.id;
+            return c1.id - c2.id;
         };
         return [
             {

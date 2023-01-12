@@ -40,7 +40,7 @@ export class Thread {
     /** @type {number[]} */
     messages = [];
     /** @type {number} */
-    serverLastSeenMsgByCurrentUser;
+    serverLastSeenMsgBySelf;
     /** @type {'opened' | 'folded' | 'closed'} */
     state;
     status = "new";
@@ -96,7 +96,9 @@ export class Thread {
             );
         }
         if (this.type === "group" && !this.name) {
-            return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
+            return this.channelMembers
+                .map((channelMember) => channelMember.persona.name)
+                .join(_t(", "));
         }
         return this.name;
     }
@@ -104,7 +106,7 @@ export class Thread {
     /**
      * @returns {import("@mail/new/core/follower_model").Follower}
      */
-    get followerOfCurrentUser() {
+    get followerOfSelf() {
         return this.followers.find((f) => f.partner === this._store.self);
     }
 
@@ -131,13 +133,13 @@ export class Thread {
         return !this.id;
     }
 
-    get lastEditableMessageOfCurrentUser() {
+    get lastEditableMessageOfSelf() {
         const messages = this.messages.map((id) => this._store.messages[id]);
-        const editableMessagesOfCurrentUser = messages.filter(
+        const editableMessagesBySelf = messages.filter(
             (message) => message.isSelfAuthored && message.canBeEdited
         );
-        if (editableMessagesOfCurrentUser.length > 0) {
-            return editableMessagesOfCurrentUser.at(-1);
+        if (editableMessagesBySelf.length > 0) {
+            return editableMessagesBySelf.at(-1);
         }
         return null;
     }
@@ -172,7 +174,9 @@ export class Thread {
     }
 
     get hasSelfAsMember() {
-        return this.channelMembers.some((channelMember) => channelMember.isSelf);
+        return this.channelMembers.some(
+            (channelMember) => channelMember.persona === this._store.self
+        );
     }
 
     get invitationLink() {
@@ -189,11 +193,11 @@ export class Thread {
     get offlineMembers() {
         const orderedOnlineMembers = [];
         for (const member of this.channelMembers) {
-            if (member.im_status !== "online") {
+            if (member.persona.im_status !== "online") {
                 orderedOnlineMembers.push(member);
             }
         }
-        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
+        return orderedOnlineMembers.sort((m1, m2) => (m1.persona.name < m2.persona.name ? -1 : 1));
     }
 
     get oldestNonTransientMessage() {
@@ -237,11 +241,11 @@ export class Thread {
     get onlineMembers() {
         const orderedOnlineMembers = [];
         for (const member of this.channelMembers) {
-            if (member.im_status === "online") {
+            if (member.persona.im_status === "online") {
                 orderedOnlineMembers.push(member);
             }
         }
-        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
+        return orderedOnlineMembers.sort((m1, m2) => (m1.persona.name < m2.persona.name ? -1 : 1));
     }
 
     get unknownMembersCount() {

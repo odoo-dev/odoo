@@ -224,7 +224,7 @@ export class Chatter extends Component {
     }
 
     async onClickUnfollow() {
-        await this.chatter.removeFollower(this.thread.followerOfCurrentUser);
+        await this.chatter.removeFollower(this.thread.followerOfSelf);
         this.onFollowerChanged();
     }
 

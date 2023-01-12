@@ -30,19 +30,19 @@ export class Typing extends Component {
         if (this.props.channel.hasTypingMembers) {
             const typingMembers = this.props.channel.typingMembers;
             if (typingMembers.length === 1) {
-                return sprintf(_t("%s is typing..."), typingMembers[0].name);
+                return sprintf(_t("%s is typing..."), typingMembers[0].persona.name);
             }
             if (typingMembers.length === 2) {
                 return sprintf(
                     _t("%s and %s are typing..."),
-                    typingMembers[0].name,
-                    typingMembers[1].name
+                    typingMembers[0].persona.name,
+                    typingMembers[1].persona.name
                 );
             }
             return sprintf(
                 _t("%s, %s and more are typing..."),
-                typingMembers[0].name,
-                typingMembers[1].name
+                typingMembers[0].persona.name,
+                typingMembers[1].persona.name
             );
         }
         return false;

@@ -51,7 +51,7 @@ export class RtcSession {
      * @returns {string}
      */
     get name() {
-        return this.channelMember?.name;
+        return this.channelMember?.persona.name;
     }
 
     /**

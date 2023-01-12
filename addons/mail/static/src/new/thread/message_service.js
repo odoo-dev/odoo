@@ -368,7 +368,7 @@ export class MessageService {
                   })
                 : undefined,
         });
-        if (!notification.message.author.isSelf) {
+        if (notification.message.author !== this.store.self) {
             return;
         }
         const thread = notification.message.originThread;

@@ -24,14 +24,15 @@
             </div>
         </div>
     </t>
+
     <t t-name="mail.channel_member" owl="1">
-        <div class="o-mail-channel-member d-flex align-items-center mx-2 p-2 bg-light" t-att-class="{'cursor-pointer': !member.isSelf}" t-on-click.stop="() => this.openChatAvatar(member)">
+        <div class="o-mail-channel-member d-flex align-items-center mx-2 p-2 bg-light" t-att-class="{'cursor-pointer': member.persona !== store.self}" t-on-click.stop="() => this.openChatAvatar(member)">
             <div class="o-mail-background-inherit o-mail-channel-member-avatar-container position-relative d-flex ms-4 flex-shrink-0">
                 <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
                     t-att-src="member.avatarUrl"/>
                 <PartnerImStatus className="'position-absolute bottom-0 end-0'" partner="member"/>
             </div>
-            <span class="o-mail-channel-member-name ms-2 text-truncate" t-esc="member.name"/>
+            <span class="o-mail-channel-member-name ms-2 text-truncate" t-esc="member.persona.name"/>
         </div>
     </t>
 

@@ -38,7 +38,7 @@ export class CallParticipantCard extends Component {
     }
 
     get name() {
-        return this.props.session.channelMember?.name;
+        return this.props.session.channelMember?.persona.name;
     }
 
     get avatarUrl() {
