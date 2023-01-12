@@ -28,15 +28,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            hasTimeControl: true,
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start({ hasTimeControl: true });
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[title='Add Users']");
         assert.containsOnce(target, ".o-mail-channel-invitation-form");
     }
@@ -64,14 +57,8 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[title='Add Users']");
         await insertText(".o-mail-channel-invitation-form-search-input", "TestPartner2");
         assert.strictEqual(
@@ -97,14 +84,8 @@ QUnit.test("Invitation form should display channel group restriction", async fun
         channel_type: "channel",
         group_public_id: resGroupId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     await click(".o-mail-discuss-actions button[title='Add Users']");
     assert.containsOnce(target, ".o-mail-channel-invitation-form-access-restricted");
 });
@@ -131,14 +112,8 @@ QUnit.test(
             ],
             channel_type: "chat",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-discuss-actions button[data-action='add-users']");
         await insertText(".o-mail-channel-invitation-form-search-input", "TestPartner2");
         await click(".form-check-input");

@@ -1343,7 +1343,7 @@ QUnit.module("mail", (hooks) => {
                         }
                     },
                 });
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
 
                 assert.containsOnce(
                     document.body,
@@ -1373,7 +1373,7 @@ QUnit.module("mail", (hooks) => {
                         }
                     },
                 });
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
 
                 assert.containsOnce(
                     document.body,

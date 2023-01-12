@@ -27,14 +27,8 @@ QUnit.test("click on message in reply to highlight the parent message", async fu
         parent_id: mailMessageId1,
         res_id: mailChannelId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     await click(
         `.o-mail-message[data-message-id="${mailMessageId2}"] .o-mail-message-in-reply-body`
     );
@@ -68,14 +62,8 @@ QUnit.test("click on message in reply to scroll to the parent message", async fu
         parent_id: oldestMessageId,
         res_id: mailChannelId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     await click(
         `.o-mail-message[data-message-id="${latestMessageId}"] .o-mail-message-in-reply-body`
     );

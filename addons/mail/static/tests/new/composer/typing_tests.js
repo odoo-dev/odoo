@@ -28,12 +28,8 @@ QUnit.test('receive other member typing status "is typing"', async function (ass
             [0, 0, { partner_id: resPartnerId1 }],
         ],
     });
-    const { env, openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId1}` },
-        },
-    });
-    await openDiscuss();
+    const { env, openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
         "",
@@ -65,12 +61,8 @@ QUnit.test(
                 [0, 0, { partner_id: resPartnerId1 }],
             ],
         });
-        const { env, openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-        });
-        await openDiscuss();
+        const { env, openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "");
 
         // simulate receive typing notification from demo "is typing"
@@ -114,13 +106,8 @@ QUnit.test(
                 [0, 0, { partner_id: resPartnerId1 }],
             ],
         });
-        const { advanceTime, env, openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-            hasTimeControl: true,
-        });
-        await openDiscuss();
+        const { advanceTime, env, openDiscuss } = await start({ hasTimeControl: true });
+        await openDiscuss(mailChannelId1);
 
         assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "");
 
@@ -156,13 +143,8 @@ QUnit.test(
                 [0, 0, { partner_id: resPartnerId1 }],
             ],
         });
-        const { advanceTime, env, openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId1}` },
-            },
-            hasTimeControl: true,
-        });
-        await openDiscuss();
+        const { advanceTime, env, openDiscuss } = await start({ hasTimeControl: true });
+        await openDiscuss(mailChannelId1);
         assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "");
 
         // simulate receive typing notification from demo "is typing"
@@ -217,12 +199,8 @@ QUnit.test('receive several other members typing status "is typing"', async func
             [0, 0, { partner_id: resPartnerId3 }],
         ],
     });
-    const { env, openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId1}` },
-        },
-    });
-    await openDiscuss();
+    const { env, openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "");
 
     // simulate receive typing notification from other 10 (is typing)
@@ -309,18 +287,13 @@ QUnit.test("current partner notify is typing to other thread members", async fun
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
     const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
         async mockRPC(route, args) {
             if (route === "/mail/channel/notify_typing") {
                 assert.step(`notify_typing:${args.is_typing}`);
             }
         },
     });
-    await openDiscuss();
+    await openDiscuss(mailChannelId1);
     await insertText(".o-mail-composer-textarea", "a");
     assert.verifySteps(["notify_typing:true"]);
 });
@@ -331,11 +304,6 @@ QUnit.test(
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
         const { advanceTime, openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId1}`,
-                },
-            },
             hasTimeControl: true,
             async mockRPC(route, args) {
                 if (route === "/mail/channel/notify_typing") {
@@ -343,7 +311,7 @@ QUnit.test(
                 }
             },
         });
-        await openDiscuss();
+        await openDiscuss(mailChannelId1);
         await insertText(".o-mail-composer-textarea", "a");
         assert.verifySteps(["notify_typing:true"]);
 
@@ -365,11 +333,6 @@ QUnit.test(
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
         const { advanceTime, openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId1}`,
-                },
-            },
             hasTimeControl: true,
             async mockRPC(route, args) {
                 if (route === "/mail/channel/notify_typing") {
@@ -377,7 +340,7 @@ QUnit.test(
                 }
             },
         });
-        await openDiscuss();
+        await openDiscuss(mailChannelId1);
         await insertText(".o-mail-composer-textarea", "a");
         assert.verifySteps(["notify_typing:true"]);
 
@@ -392,11 +355,6 @@ QUnit.test(
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
         const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId1}`,
-                },
-            },
             hasTimeControl: true,
             async mockRPC(route, args) {
                 if (route === "/mail/channel/notify_typing") {
@@ -404,7 +362,7 @@ QUnit.test(
                 }
             },
         });
-        await openDiscuss();
+        await openDiscuss(mailChannelId1);
         await insertText(".o-mail-composer-textarea", "a");
         assert.verifySteps(["notify_typing:true"]);
 

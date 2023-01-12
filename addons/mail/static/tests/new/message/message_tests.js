@@ -40,12 +40,8 @@ QUnit.test("Start edition on click edit", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
     assert.strictEqual(
@@ -66,14 +62,8 @@ QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
         model: "mail.channel",
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Edit']");
     const composerTextarea = target.querySelector(".o-mail-composer-textarea");
     const contentLength = composerTextarea.value.length;
@@ -94,12 +84,8 @@ QUnit.test("Stop edition on click cancel", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await click(".o-mail-message a:contains('cancel')");
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
@@ -118,12 +104,8 @@ QUnit.test("Stop edition on press escape", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await afterNextRender(() => triggerHotkey("Escape", false));
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
@@ -142,12 +124,8 @@ QUnit.test("Stop edition on click save", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await click(".o-mail-message a:contains('save')");
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
@@ -166,12 +144,8 @@ QUnit.test("Stop edition on press enter", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await afterNextRender(() => triggerHotkey("Enter", false));
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
@@ -190,12 +164,8 @@ QUnit.test("Stop edition on click away", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await afterNextRender(() => triggerEvent(target, ".o-mail-discuss-sidebar", "click"));
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
@@ -214,12 +184,8 @@ QUnit.test("Do not stop edition on click away when clicking on emoji", async (as
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await click(".o-mail-composer i[aria-label='Emojis']");
     await click(".o-mail-emoji-picker-content .o-emoji");
@@ -239,12 +205,8 @@ QUnit.test("Edit and click save", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await editInput(target, ".o-mail-message textarea", "Goodbye World");
     await click(".o-mail-message a:contains('save')");
@@ -265,16 +227,13 @@ QUnit.test("Do not call server on save if no changes", async (assert) => {
         message_type: "comment",
     });
     const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
         async mockRPC(route, args) {
             if (route === "/mail/message/update_content") {
                 assert.step("update_content");
             }
         },
     });
-    await openDiscuss();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     await click(".o-mail-message a:contains('save')");
     assert.verifySteps([]);
@@ -293,12 +252,8 @@ QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
         res_id: mailChannelId,
         message_type: "comment",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: { active_id: `mail.channel_${mailChannelId}` },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     const $textarea = $(target).find(".o-mail-composer-textarea");
     assert.ok($textarea[0].scrollHeight > $textarea[0].clientHeight);
@@ -315,25 +270,17 @@ QUnit.test("Other messages are grayed out when replying to another one", async f
         { body: "Hello world", res_id: channelId, model: "mail.channel" },
         { body: "Goodbye world", res_id: channelId, model: "mail.channel" },
     ]);
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsN(target, ".o-mail-message", 2);
     await click(`.o-mail-message[data-message-id='${firstMessageId}'] i[aria-label='Reply']`);
     assert.doesNotHaveClass(
         target.querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`),
-        "opacity-50",
-        "First message should not be grayed out"
+        "opacity-50"
     );
     assert.hasClass(
         target.querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`),
-        "opacity-50",
-        "Second message should be grayed out"
+        "opacity-50"
     );
 });
 
@@ -348,15 +295,8 @@ QUnit.test("Parent message body is displayed on replies", async function (assert
         res_id: channelId,
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
-
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click(".o-mail-message i[aria-label='Reply']");
     await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
     await click(".o-mail-composer-send-button");
@@ -378,15 +318,8 @@ QUnit.test(
             message_type: "comment",
             model: "mail.channel",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: {
-                    active_id: `mail.channel_${channelId}`,
-                },
-            },
-        });
-        await openDiscuss();
-
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId);
         await click("i[aria-label='Reply']");
         await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
         await triggerHotkey("Enter", false);
@@ -413,15 +346,8 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
-
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Reply']");
     await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
     await triggerHotkey("Enter", false);
@@ -446,14 +372,8 @@ QUnit.test("Can open emoji picker after edit mode", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Edit']");
     await triggerEvent(target, ".o-mail-discuss-sidebar", "click");
     await click("i[aria-label='Add a Reaction']");
@@ -472,14 +392,8 @@ QUnit.test("Can add a reaction", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Add a Reaction']");
     await click(".o-emoji[data-codepoints='😅']");
     assert.containsOnce(target, ".o-mail-message-reaction:contains('😅')");
@@ -497,14 +411,8 @@ QUnit.test("Can remove a reaction", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Add a Reaction']");
     await click(".o-emoji[data-codepoints='😅']");
     await click(".o-mail-message-reaction");
@@ -536,14 +444,8 @@ QUnit.test("Two users reacting with the same emoji", async (assert) => {
             partner_id: partnerId,
         },
     ]);
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-message-reaction:contains(2)");
 
     await click(".o-mail-message-reaction");
@@ -563,14 +465,8 @@ QUnit.test("Reaction summary", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     const partnerNames = ["Foo", "Bar", "FooBar", "Bob"];
     const expectedSummaries = [
         "Foo has reacted with 😅",
@@ -603,14 +499,8 @@ QUnit.test("Add the same reaction twice from the emoji picker", async (assert) =
         message_type: "comment",
         model: "mail.channel",
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            context: {
-                active_id: `mail.channel_${channelId}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
     await click("i[aria-label='Add a Reaction']");
     await click(".o-emoji[data-codepoints='😅']");
     await click("i[aria-label='Add a Reaction']");
@@ -629,14 +519,8 @@ QUnit.test("basic rendering of message", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId1}]`);
     const $message = $(target).find(`.o-mail-message[data-message-id=${mailMessageId1}]`);
     assert.containsOnce($message, ".o-mail-message-sidebar");
@@ -666,14 +550,8 @@ QUnit.test("basic rendering of message", async function (assert) {
 QUnit.test("should not be able to reply to temporary/transient messages", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     // these user interactions is to forge a transient message response from channel command "/who"
     await insertText(".o-mail-composer-textarea", "/who");
     await click(".o-mail-composer-send-button");
@@ -707,14 +585,8 @@ QUnit.test(
                 res_id: mailChannelId1,
             },
         ]);
-        const { openDiscuss } = await start({
-            discuss: {
-                params: {
-                    default_active_id: `mail.channel_${mailChannelId1}`,
-                },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.containsN(target, ".o-mail-message", 2);
         assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId1}]`);
         assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId2}]`);
@@ -749,14 +621,8 @@ QUnit.test("redirect to author (open chat)", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     assert.containsOnce(target, ".o-mail-category-item.o-active:contains(General)");
     assert.containsOnce(
         target,
@@ -776,11 +642,6 @@ QUnit.test("toggle_star message", async function (assert) {
         res_id: mailChannelId1,
     });
     const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
         async mockRPC(route, args) {
             if (args.method === "toggle_message_starred") {
                 assert.step("rpc:toggle_message_starred");
@@ -792,7 +653,7 @@ QUnit.test("toggle_star message", async function (assert) {
             }
         },
     });
-    await openDiscuss();
+    await openDiscuss(mailChannelId1);
     assert.containsNone(target, 'button[data-mailbox="starred"] .badge');
     assert.containsOnce(target, ".o-mail-message");
     let $message = $(target).find(".o-mail-message");
@@ -880,14 +741,8 @@ QUnit.test("click on message edit button should open edit composer", async funct
         model: "mail.channel",
         res_id: mailChannelId1,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: `mail.channel_${mailChannelId1}`,
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
     await click(".o-mail-message-actions i[aria-label='Edit']");
     assert.containsOnce(target, ".o-mail-message .o-mail-composer");
 });
@@ -998,12 +853,8 @@ QUnit.test(
             res_id: mailChannelId,
             message_type: "comment",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await afterNextRender(() => triggerHotkey("ArrowUp"));
         assert.containsOnce(target, ".o-mail-message .o-mail-message-editable-content");
         assert.strictEqual(
@@ -1028,12 +879,8 @@ QUnit.test(
             res_id: mailChannelId,
             message_type: "comment",
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: `mail.channel_${mailChannelId}` },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
         await click(".o-mail-message-actions i[aria-label='Edit']");
         await editInput(target, ".o-mail-message-editable-content .o-mail-composer-textarea", "");
         await afterNextRender(() => triggerHotkey("Enter"));

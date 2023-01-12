@@ -232,11 +232,7 @@ QUnit.test("show subject of message in Inbox", async function (assert) {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            default_active_id: "inbox",
-        },
-    });
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-message");
     assert.containsOnce(target, ".o-mail-message-subject");
@@ -261,14 +257,8 @@ QUnit.test("show subject of message in history", async function (assert) {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const { openDiscuss } = await start({
-        discuss: {
-            params: {
-                default_active_id: "mail.box_history",
-            },
-        },
-    });
-    await openDiscuss();
+    const { openDiscuss } = await start();
+    await openDiscuss("mail.box_history");
     assert.containsOnce(target, ".o-mail-message");
     assert.containsOnce(target, ".o-mail-message-subject");
     assert.strictEqual(
@@ -297,12 +287,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -327,12 +313,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -357,12 +339,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -387,12 +365,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -417,12 +391,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsOnce(target, ".o-mail-message-subject");
     }
 );
@@ -447,12 +417,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
@@ -477,12 +443,8 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                default_active_id: "mail.box_inbox",
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss("mail.box_inbox");
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );

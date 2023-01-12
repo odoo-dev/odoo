@@ -26,7 +26,7 @@ QUnit.module("mail", {}, function () {
                 messagingBeforeCreationDeferred,
                 waitUntilMessagingCondition: "none",
             });
-            await openDiscuss({ waitUntilMessagesLoaded: false });
+            await openDiscuss(null, { waitUntilMessagesLoaded: false });
             assert.containsOnce(
                 document.body,
                 ".o_DiscussContainer_spinner",
@@ -45,7 +45,7 @@ QUnit.module("mail", {}, function () {
                     messagingBeforeCreationDeferred,
                     waitUntilMessagingCondition: "none",
                 });
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
 
                 await afterNextRender(() => messagingBeforeCreationDeferred.resolve());
                 const { messaging } = env.services.messaging.modelManager;
@@ -84,7 +84,7 @@ QUnit.module("mail", {}, function () {
                 },
                 waitUntilMessagingCondition: "created",
             });
-            await openDiscuss({ waitUntilMessagesLoaded: false });
+            await openDiscuss(null, { waitUntilMessagesLoaded: false });
             assert.strictEqual(
                 document.querySelectorAll(".o_DiscussContainer_spinner").length,
                 1,
@@ -106,7 +106,7 @@ QUnit.module("mail", {}, function () {
                 },
                 waitUntilMessagingCondition: "created",
             });
-            await openDiscuss({ waitUntilMessagesLoaded: false });
+            await openDiscuss(null, { waitUntilMessagesLoaded: false });
             assert.strictEqual(
                 document.querySelectorAll(".o_DiscussContainer_spinner").length,
                 1,

@@ -75,7 +75,7 @@ QUnit.module("mail", {}, function () {
                             },
                         },
                     });
-                    await openDiscuss({ waitUntilMessagesLoaded: false });
+                    await openDiscuss(mailChannelId1, { waitUntilMessagesLoaded: false });
                     assert.hasClass(
                         document.querySelector(
                             '.o_MobileMessagingNavbarView_tab[data-tab-id="channel"]'

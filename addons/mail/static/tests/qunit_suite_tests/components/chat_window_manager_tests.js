@@ -104,7 +104,7 @@ QUnit.module("mail", {}, function () {
                     "composer should have 2 total attachments after adding 2 attachments"
                 );
 
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
                     ".o-mail-chat-window",
@@ -179,7 +179,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
 
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
                     ".o-mail-chat-window",
@@ -394,7 +394,7 @@ QUnit.module("mail", {}, function () {
                 });
                 // fold chat window
                 await click(".o_ChatWindow_header");
-                await openDiscuss({ waitUntilMessagesLoaded: false });
+                await openDiscuss(null, { waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
                     ".o-mail-chat-window",
