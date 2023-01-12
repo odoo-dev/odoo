@@ -13,6 +13,15 @@ import { Message } from "./message";
 import { Transition } from "@web/core/transition";
 import { useService } from "@web/core/utils/hooks";
 
+/**
+ * @typedef {Object} Props
+ * @property {boolean} [isInChatWindow=false]
+ * @property {import("@mail/new/utils/hooks").MessageEdition} [messageEdition]
+ * @property {import("@mail/new/utils/hooks").MessageHighlight} [messageHighlight]
+ * @property {"asc"|"desc"} [order="asc"]
+ * @property {import("@mail/new/core/thread_model").Thread} thread
+ * @extends {Component<Props, Env>}
+ */
 export class Thread extends Component {
     static components = { Message, Transition };
     static props = ["isInChatWindow?", "thread", "messageEdition?", "messageHighlight?", "order?"];
@@ -106,6 +115,9 @@ export class Thread extends Component {
     }
 
     isSquashed(msg, prevMsg) {
+        if (this.props.thread.model === "mail.box") {
+            return false;
+        }
         if (!prevMsg || prevMsg.type === "notification" || prevMsg.isEmpty || this.env.inChatter) {
             return false;
         }

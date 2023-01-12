@@ -277,7 +277,7 @@ QUnit.module("mail", (hooks) => {
 
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageListView_message",
+                    ".o-mail-message",
                     "should have an initial message"
                 );
                 assert.containsNone(
@@ -377,11 +377,7 @@ QUnit.module("mail", (hooks) => {
             });
             await openDiscuss();
 
-            assert.containsNone(
-                document.body,
-                ".o_MessageListView_message",
-                "should have no messages"
-            );
+            assert.containsNone(document.body, ".o-mail-message", "should have no messages");
             assert.containsNone(
                 document.body,
                 ".o_MessageListView_separatorNewMessages",
@@ -525,7 +521,7 @@ QUnit.module("mail", (hooks) => {
                     message: "should wait until channel scrolled initially",
                     predicate: (data) => thread === data.threadViewer.thread,
                 });
-                const initialMessageList = document.querySelector(".o_ThreadView_messageList");
+                const initialMessageList = document.querySelector(".o-mail-thread");
                 assert.ok(
                     isScrolledToBottom(initialMessageList),
                     "should have scrolled to bottom of channel 20 initially"
@@ -548,7 +544,7 @@ QUnit.module("mail", (hooks) => {
                     message: "should wait until channel scrolled after receiving a message",
                     predicate: (data) => thread === data.threadViewer.thread,
                 });
-                const messageList = document.querySelector(".o_ThreadView_messageList");
+                const messageList = document.querySelector(".o-mail-thread");
                 assert.ok(
                     isScrolledToBottom(messageList),
                     "should scroll to bottom on receiving new message because the list is initially scrolled to bottom"
@@ -597,7 +593,7 @@ QUnit.module("mail", (hooks) => {
                     message: "should wait until channel scrolled initially",
                     predicate: (data) => thread === data.threadViewer.thread,
                 });
-                const initialMessageList = document.querySelector(".o_ThreadView_messageList");
+                const initialMessageList = document.querySelector(".o-mail-thread");
                 assert.ok(
                     isScrolledToBottom(initialMessageList),
                     "should have scrolled to bottom of channel 1 initially"
@@ -635,7 +631,7 @@ QUnit.module("mail", (hooks) => {
                         data.hint.type === "message-received",
                 });
                 assert.strictEqual(
-                    document.querySelector(".o_ThreadView_messageList").scrollTop,
+                    document.querySelector(".o-mail-thread").scrollTop,
                     0,
                     "should not scroll on receiving new message because the list is initially scrolled anywhere else than bottom"
                 );

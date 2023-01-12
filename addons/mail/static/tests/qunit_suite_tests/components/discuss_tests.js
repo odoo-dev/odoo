@@ -154,88 +154,6 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("inbox messages are never squashed", async function (assert) {
-            assert.expect(3);
-
-            const pyEnv = await startServer();
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
-                {
-                    author_id: resPartnerId1, // must be same author as other message
-                    body: "<p>body1</p>", // random body, set for consistency
-                    date: "2019-04-20 10:00:00", // date must be within 1 min from other message
-                    message_type: "comment", // must be a squash-able type-
-                    model: "mail.channel", // to link message to channel
-                    needaction: true,
-                    needaction_partner_ids: [pyEnv.currentPartnerId], // for consistency
-                    res_id: mailChannelId1, // id of related channel
-                },
-                {
-                    author_id: resPartnerId1, // must be same author as other message
-                    body: "<p>body2</p>", // random body, will be asserted in the test
-                    date: "2019-04-20 10:00:30", // date must be within 1 min from other message
-                    message_type: "comment", // must be a squash-able type
-                    model: "mail.channel", // to link message to channel
-                    needaction: true,
-                    needaction_partner_ids: [pyEnv.currentPartnerId], // for consistency
-                    res_id: mailChannelId1, // id of related channel
-                },
-            ]);
-            pyEnv["mail.notification"].create([
-                {
-                    mail_message_id: mailMessageId1,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                },
-                {
-                    mail_message_id: mailMessageId2,
-                    notification_status: "sent",
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId,
-                },
-            ]);
-            const { afterEvent, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
-
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                2,
-                "should have 2 messages"
-            );
-            const message1 = document.querySelector(`
-        .o-mail-discuss-content .o-mail-thread
-        .o_ThreadView_messageList
-        .o_MessageListView_message[data-message-id="${mailMessageId1}"]
-    `);
-            const message2 = document.querySelector(`
-        .o-mail-discuss-content .o-mail-thread
-        .o_ThreadView_messageList
-        .o_MessageListView_message[data-message-id="${mailMessageId2}"]
-    `);
-            assert.notOk(
-                message1.classList.contains("o-squashed"),
-                "message 1 should not be squashed"
-            );
-            assert.notOk(
-                message2.classList.contains("o-squashed"),
-                "message 2 should not be squashed"
-            );
-        });
-
         QUnit.skipRefactoring("new messages separator [REQUIRE FOCUS]", async function (assert) {
             // this test requires several messages so that the last message is not
             // visible. This is necessary in order to display 'new messages' and not
@@ -278,7 +196,7 @@ QUnit.module("mail", {}, function () {
                 message: "should wait until channel scrolled to its last message initially",
                 predicate: ({ scrollTop, thread }) => {
                     const messageList = document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
+                        `.o-mail-discuss-content .o-mail-thread`
                     );
                     return (
                         thread &&
@@ -288,12 +206,7 @@ QUnit.module("mail", {}, function () {
                     );
                 },
             });
-            assert.containsN(
-                document.body,
-                ".o_MessageListView_message",
-                25,
-                "should have 25 messages"
-            );
+            assert.containsN(document.body, ".o-mail-message", 25, "should have 25 messages");
             assert.containsNone(
                 document.body,
                 ".o_MessageListView_separatorNewMessages",
@@ -303,9 +216,7 @@ QUnit.module("mail", {}, function () {
             await afterEvent({
                 eventName: "o-component-message-list-scrolled",
                 func: () => {
-                    document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-                    ).scrollTop = 0;
+                    document.querySelector(`.o-mail-discuss-content .o-mail-thread`).scrollTop = 0;
                 },
                 message: "should wait until channel scrolled to top",
                 predicate: ({ scrollTop, thread }) => {
@@ -333,12 +244,7 @@ QUnit.module("mail", {}, function () {
                 })
             );
 
-            assert.containsN(
-                document.body,
-                ".o_MessageListView_message",
-                26,
-                "should have 26 messages"
-            );
+            assert.containsN(document.body, ".o-mail-message", 26, "should have 26 messages");
             assert.containsOnce(
                 document.body,
                 ".o_MessageListView_separatorNewMessages",
@@ -348,14 +254,14 @@ QUnit.module("mail", {}, function () {
                 eventName: "o-component-message-list-scrolled",
                 func: () => {
                     const messageList = document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
+                        ".o-mail-discuss-content .o-mail-thread"
                     );
                     messageList.scrollTop = messageList.scrollHeight - messageList.clientHeight;
                 },
                 message: "should wait until channel scrolled to bottom",
                 predicate: ({ scrollTop, thread }) => {
                     const messageList = document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
+                        `.o-mail-discuss-content .o-mail-thread`
                     );
                     return (
                         thread &&
@@ -419,16 +325,14 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
+                document.querySelectorAll(".o-mail-discuss-content .o-mail-thread .o-mail-message")
+                    .length,
                 25,
                 "should have 25 messages in channel 1"
             );
-            const initialMessageList = document.querySelector(`
-        .o-mail-discuss-content .o-mail-thread
-        .o_ThreadView_messageList
-    `);
+            const initialMessageList = document.querySelector(
+                ".o-mail-discuss-content .o-mail-thread"
+            );
             assert.ok(
                 isScrolledToBottom(initialMessageList),
                 "should have scrolled to bottom of channel 1 initially"
@@ -438,7 +342,7 @@ QUnit.module("mail", {}, function () {
                 eventName: "o-component-message-list-scrolled",
                 func: () =>
                     (document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
+                        ".o-mail-discuss-content .o-mail-thread"
                     ).scrollTop = 0),
                 message: "should wait until channel 1 changed its scroll position to top",
                 predicate: ({ thread }) => {
@@ -446,9 +350,7 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelector(
-                    `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-                ).scrollTop,
+                document.querySelector(".o-mail-discuss-content .o-mail-thread").scrollTop,
                 0,
                 "should have scrolled to top of channel 1"
             );
@@ -472,7 +374,7 @@ QUnit.module("mail", {}, function () {
                 },
                 message: "should wait until channel 2 scrolled to its last message",
                 predicate: ({ scrollTop, thread }) => {
-                    const messageList = document.querySelector(".o_ThreadView_messageList");
+                    const messageList = document.querySelector(".o-mail-thread");
                     return (
                         thread &&
                         thread.channel &&
@@ -482,9 +384,8 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
+                document.querySelectorAll(".o-mail-discuss-content .o-mail-thread .o-mail-message")
+                    .length,
                 24,
                 "should have 24 messages in channel 2"
             );
@@ -513,9 +414,7 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelector(
-                    `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-                ).scrollTop,
+                document.querySelector(".o-mail-discuss-content .o-mail-thread").scrollTop,
                 0,
                 "should have recovered scroll position of channel 1 (scroll to top)"
             );
@@ -535,7 +434,7 @@ QUnit.module("mail", {}, function () {
                 },
                 message: "should wait until channel 2 recovered its scroll position (to bottom)",
                 predicate: ({ scrollTop, thread }) => {
-                    const messageList = document.querySelector(".o_ThreadView_messageList");
+                    const messageList = document.querySelector(".o-mail-thread");
                     return (
                         thread &&
                         thread.channel &&
@@ -544,7 +443,7 @@ QUnit.module("mail", {}, function () {
                     );
                 },
             });
-            const messageList = document.querySelector(".o_ThreadView_messageList");
+            const messageList = document.querySelector(".o-mail-thread");
             assert.ok(
                 isScrolledToBottom(messageList),
                 "should have recovered scroll position of channel 2 (scroll to bottom)"

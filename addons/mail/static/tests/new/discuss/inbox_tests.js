@@ -542,3 +542,63 @@ QUnit.test(
         assert.verifySteps(["do-action"]);
     }
 );
+
+QUnit.test("inbox messages are never squashed", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "test" });
+    const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+        {
+            author_id: resPartnerId1,
+            body: "<p>body1</p>",
+            date: "2019-04-20 10:00:00",
+            message_type: "comment",
+            model: "mail.channel",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: mailChannelId1,
+        },
+        {
+            author_id: resPartnerId1,
+            body: "<p>body2</p>",
+            date: "2019-04-20 10:00:30",
+            message_type: "comment",
+            model: "mail.channel",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: mailChannelId1,
+        },
+    ]);
+    pyEnv["mail.notification"].create([
+        {
+            mail_message_id: mailMessageId1,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+        {
+            mail_message_id: mailMessageId2,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+    ]);
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsN(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message", 2);
+    const message1 = target.querySelector(
+        `.o-mail-discuss-content .o-mail-thread .o-mail-message[data-message-id="${mailMessageId1}"]`
+    );
+    const message2 = target.querySelector(
+        `.o-mail-discuss-content .o-mail-thread .o-mail-message[data-message-id="${mailMessageId2}"]`
+    );
+    assert.doesNotHaveClass(message1, "o-mail-message-is-squashed");
+    assert.doesNotHaveClass(message2, "o-mail-message-is-squashed");
+    await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.hasClass(
+        target.querySelector(
+            `.o-mail-discuss-content .o-mail-thread .o-mail-message[data-message-id="${mailMessageId2}"]`
+        ),
+        "o-mail-message-is-squashed"
+    );
+});
