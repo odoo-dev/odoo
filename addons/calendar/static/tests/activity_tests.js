@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "addons/web/static/tests/helpers/utils";
+import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
 
