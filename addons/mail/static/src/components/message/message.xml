@@ -36,7 +36,6 @@
                         <PersonaImStatusIconView t-if="personaImStatusIconView"
                             className="'o_MessageView_personaImStatusIcon position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center text-white'"
                             classNameObj="{
-                                'o-message-selected': isSelected,
                                 'o_MessageView_personaImStatusIcon-mobile': messaging.device.isSmall,
                                 'small': !messaging.device.isSmall,
                                 'text-100': message.is_note and !isSelected,
@@ -66,11 +65,11 @@
                         <strong t-else="" class="o_MessageView_authorName me-2 text-truncate text-muted">
                             Anonymous
                         </strong>
-                        <small t-if="message.date" class="o_MessageView_date o_MessageView_headerDate text-muted opacity-50" t-att-class="{ 'o-message-selected': isSelected, 'me-2': !(isInChatWindowAndIsAlignedRight) }" t-att-title="message.datetime">
+                        <small t-if="message.date" class="o_MessageView_date o_MessageView_headerDate text-muted opacity-50" t-att-class="{ 'me-2': !(isInChatWindowAndIsAlignedRight) }" t-att-title="message.datetime">
                             <span t-if="isShowingAuthorName">-</span> <t t-esc="dateFromNow"/>
                         </small>
                         <MessageSeenIndicatorView t-if="messageSeenIndicatorView" className="'o_MessageView_seenIndicator ms-1'" record="messageSeenIndicatorView"/>
-                        <small t-if="messageListViewItemOwner and message.originThread and message.originThread !== messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread" class="o_MessageView_originThread me-2" t-att-class="{ 'o-message-selected text-600': isSelected, 'text-500': !isSelected }">
+                        <small t-if="messageListViewItemOwner and message.originThread and message.originThread !== messageListViewItemOwner.messageListViewOwner.threadViewOwner.thread" class="o_MessageView_originThread me-2" t-att-class="{ 'text-600': isSelected, 'text-500': !isSelected }">
                             <t t-if="message.originThread.model === 'mail.channel'">
                                 (from <a class="o_MessageView_originThreadLink fs-6" t-att-href="message.originThread.url" t-on-click="onClickOriginThread"><t t-if="message.originThread.displayName">#<t t-esc="message.originThread.displayName"/></t><t t-else="">channel</t></a>)
                             </t>
