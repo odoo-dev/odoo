@@ -301,16 +301,16 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageView_authorAvatar",
+                    ".o-mail-message-author-avatar",
                     "message should have the author avatar"
                 );
                 assert.hasClass(
-                    document.querySelector(".o_MessageView_authorAvatar"),
+                    document.querySelector(".o-mail-message-author-avatar"),
                     "o_redirect",
                     "author avatar should have the redirect style"
                 );
 
-                await click(".o_MessageView_authorAvatar");
+                await click(".o-mail-message-author-avatar");
                 assert.containsOnce(
                     document.body,
                     ".o_ChatWindow_thread",
@@ -453,16 +453,16 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageView_authorAvatar",
+                    ".o-mail-message-author-avatar",
                     "message should have the author avatar"
                 );
                 assert.doesNotHaveClass(
-                    document.querySelector(".o_MessageView_authorAvatar"),
+                    document.querySelector(".o-mail-message-author-avatar"),
                     "o_redirect",
                     "author avatar should not have the redirect style"
                 );
 
-                document.querySelector(".o_MessageView_authorAvatar").click();
+                document.querySelector(".o-mail-message-author-avatar").click();
                 await nextAnimationFrame();
                 assert.containsNone(
                     document.body,
@@ -530,74 +530,6 @@ QUnit.module("mail", {}, function () {
                     document.body,
                     ".o_ChatWindow_thread",
                     "chat window with thread should be opened after clicking on channel mention"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
-            'message should not be considered as "clicked" after clicking on its author avatar',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
-                pyEnv["mail.message"].create({
-                    author_id: partnerId,
-                    body: "<p>Test</p>",
-                    model: "res.partner",
-                    res_id: threadId,
-                });
-                const { openView } = await start();
-                await openView({
-                    res_id: threadId,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
-                document.querySelector(`.o_MessageView_authorAvatar`).click();
-                await nextAnimationFrame();
-                assert.doesNotHaveClass(
-                    document.querySelector(`.o-mail-message`),
-                    "o-clicked",
-                    "message should not be considered as 'clicked' after clicking on its author avatar"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
-            'message should not be considered as "clicked" after clicking on notification failure icon',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const threadId = pyEnv["res.partner"].create({});
-                const mailMessageId = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "res.partner",
-                    res_id: threadId,
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId,
-                    notification_status: "exception",
-                    notification_type: "email",
-                });
-                const { env, openView } = await start();
-                await openView({
-                    res_id: threadId,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
-                patchWithCleanup(env.services.action, {
-                    // intercept the action: this action is not relevant in the context of this test.
-                    doAction() {},
-                });
-                document
-                    .querySelector(".o-mail-message-notification-icon-clickable.o-error")
-                    .click();
-                await nextAnimationFrame();
-                assert.doesNotHaveClass(
-                    document.querySelector(`.o-mail-message`),
-                    "o-clicked",
-                    "message should not be considered as 'clicked' after clicking on notification failure icon"
                 );
             }
         );

@@ -7,7 +7,15 @@ import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { convertBrToLineBreak } from "@mail/new/utils/format";
 import { onExternalClick } from "@mail/new/utils/hooks";
-import { Component, onPatched, useChildSubEnv, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onPatched,
+    toRaw,
+    useChildSubEnv,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { useMessaging, useStore } from "../core/messaging_hook";
@@ -185,6 +193,10 @@ export class Message extends Component {
         );
     }
 
+    get isClicked() {
+        return toRaw(this.store.clickedMessage) === this;
+    }
+
     get isOriginThread() {
         if (!this.props.thread) {
             return false;
@@ -232,7 +244,8 @@ export class Message extends Component {
         removeFromArrayWithPredicate(this.message.attachments, ({ id }) => id === attachment.id);
     }
 
-    openChatAvatar() {
+    openChatAvatar(ev) {
+        markEventHandled(ev, "Message.ClickAuthor");
         if (!this.hasOpenChatFeature) {
             return;
         }
@@ -248,6 +261,17 @@ export class Message extends Component {
             const partnerId = Number(ev.target.dataset.oeId);
             if (this.user.partnerId !== partnerId) {
                 this.threadService.openChat({ partnerId });
+            }
+            return;
+        }
+        if (
+            !isEventHandled(ev, "Message.ClickAuthor") &&
+            !isEventHandled(ev, "Message.ClickFailure")
+        ) {
+            if (this.isClicked) {
+                this.store.clickedMessage = null;
+            } else {
+                this.store.clickedMessage = this;
             }
         }
     }
@@ -285,7 +309,8 @@ export class Message extends Component {
         );
     }
 
-    onClickFailure() {
+    onClickFailure(ev) {
+        markEventHandled(ev, "Message.ClickFailure");
         this.env.services.action.doAction("mail.mail_resend_message_action", {
             additionalContext: {
                 mail_message_to_resend: this.message.id,
