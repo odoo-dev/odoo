@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Thread } from "../thread/thread";
-import { useMessaging } from "../core/messaging_hook";
+import { useMessaging, useStore } from "../core/messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { Composer } from "../composer/composer";
@@ -55,7 +55,7 @@ export class Chatter extends Component {
         this.attachment = useService("mail.attachment");
         this.chatter = useState(useService("mail.chatter"));
         this.threadService = useService("mail.thread");
-        this.store = useService("mail.store");
+        this.store = useStore();
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
