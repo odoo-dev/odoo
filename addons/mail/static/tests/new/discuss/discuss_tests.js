@@ -523,6 +523,7 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
     );
 
     await click("i[aria-label='Reply']");
+    assert.hasClass(target.querySelector(".o-mail-message"), "o-mail-message-is-selected");
     assert.ok(target.querySelector(".o-mail-composer"));
     assert.strictEqual(
         target.querySelector(".o-mail-composer-origin-thread").textContent,
@@ -539,7 +540,7 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
         parseInt(target.querySelector(".o-mail-message").dataset.messageId),
         mailMessageId1
     );
-    assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-selected");
+    assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-mail-message-is-selected");
 });
 
 QUnit.test("Can reply to starred message", async function (assert) {

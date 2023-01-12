@@ -8,6 +8,7 @@
                 'o-mail-message-highlighted-from-mention': message.isHighlightedFromMention,
                 'o-mail-message-highlighted bg-view shadow-lg': props.highlighted,
                 'o-mail-is-author': message.isSelfAuthored,
+                'o-mail-message-is-selected': !props.grayedOut,
                 'o-mail-message-is-squashed pt-1': props.squashed,
                 'px-3': !props.isInChatWindow,
                 'px-1': props.isInChatWindow,
