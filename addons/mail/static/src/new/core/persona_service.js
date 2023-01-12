@@ -37,9 +37,9 @@ export class PersonaService {
             persona.type === "partner" &&
             persona.im_status !== "im_partner" &&
             !persona.is_public &&
-            !this.store.registeredImStatusPartners.includes(persona.id)
+            !this.store.registeredImStatusPartners?.includes(persona.id)
         ) {
-            this.store.registeredImStatusPartners.push(persona.id);
+            this.store.registeredImStatusPartners?.push(persona.id);
         }
         // return reactive version
         return persona;

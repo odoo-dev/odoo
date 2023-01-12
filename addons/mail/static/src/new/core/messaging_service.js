@@ -79,12 +79,7 @@ export class Messaging {
             });
         });
         const user = services.user;
-        Object.assign(this.store.user, {
-            partnerId: user.partnerId,
-            uid: user.context.uid,
-            avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
-            isAdmin: user.isAdmin,
-        });
+        this.persona.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.store.registeredImStatusPartners = this.registeredImStatusPartners;
         this.store.discuss.threadLocalId = initialThreadLocalId;
@@ -122,10 +117,10 @@ export class Messaging {
 
     initMessagingCallback(data) {
         if (data.current_partner) {
-            this.persona.insert({ ...data.current_partner, type: "partner" });
+            this.store.user = this.persona.insert({ ...data.current_partner, type: "partner" });
         }
         if (data.currentGuest) {
-            this.store.currentGuest = this.persona.insert({
+            this.store.guest = this.persona.insert({
                 ...data.currentGuest,
                 type: "guest",
             });
@@ -169,9 +164,7 @@ export class Messaging {
                     // implicit: failures are sent by the server at
                     // initialization only if the current partner is
                     // author of the message
-                    author: this.store.personas[
-                        createLocalId("partner", this.store.user.partnerId)
-                    ],
+                    author: this.store.user,
                 })
             );
             this.store.notificationGroups.sort((n1, n2) => n2.lastMessage.id - n1.lastMessage.id);
@@ -423,7 +416,7 @@ export class Messaging {
                         },
                         type: channel.channel.channel_type,
                     });
-                    if (invitedByUserId !== this.store.user.uid) {
+                    if (invitedByUserId !== this.store.user.user?.id) {
                         this.notification.add(
                             sprintf(_t("You have been invited to #%s"), thread.displayName),
                             { type: "info" }
@@ -476,7 +469,7 @@ export class Messaging {
                         }
                         // move messages from Inbox to history
                         const partnerIndex = message.needaction_partner_ids.find(
-                            (p) => p === this.store.user.partnerId
+                            (p) => p === this.store.user.id
                         );
                         removeFromArray(message.needaction_partner_ids, partnerIndex);
                         removeFromArray(this.store.discuss.inbox.messages, messageId);
@@ -512,7 +505,7 @@ export class Messaging {
                         // knowledge of the channel
                         return;
                     }
-                    if (this.store.user.partnerId === partner_id) {
+                    if (this.store.user.id === partner_id) {
                         channel.serverLastSeenMsgByCurrentUser = last_message_id;
                     }
                     const seenInfo = channel.seenInfos.find(

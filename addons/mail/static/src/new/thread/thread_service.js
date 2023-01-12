@@ -54,7 +54,8 @@ export class ThreadService {
         const isUnread = last_message_id !== seen_message_id;
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
-        const isAdmin = channelType !== "group" && serverData.create_uid === this.store.user.uid;
+        const isAdmin =
+            channelType !== "group" && serverData.create_uid === this.store.user.user?.id;
         const thread = this.insert({
             id,
             model: "mail.channel",
@@ -295,7 +296,7 @@ export class ThreadService {
 
     async joinChannel(id, name) {
         await this.orm.call("mail.channel", "add_members", [[id]], {
-            partner_ids: [this.store.user.partnerId],
+            partner_ids: [this.store.user.id],
         });
         const thread = this.insert({
             id,
@@ -415,9 +416,9 @@ export class ThreadService {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
                     this.persona.insert({ ...elem.persona.partner, type: "partner" });
                     if (
-                        elem.persona.partner.id !== thread._store.user.partnerId ||
+                        elem.persona.partner.id !== thread._store.user.id ||
                         (serverData.channel.channelMembers[0][1].length === 1 &&
-                            elem.persona.partner.id === thread._store.user.partnerId)
+                            elem.persona.partner.id === thread._store.user.id)
                     ) {
                         thread.chatPartnerId = elem.persona.partner.id;
                     }

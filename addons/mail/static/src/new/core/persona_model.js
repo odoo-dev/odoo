@@ -5,12 +5,17 @@ export class Persona {
     localId;
     /** @type {number} */
     id;
+    /** @type {'partner' | 'guest'} */
+    type;
     /** @type {string} */
     name;
     /** @type {string} */
     email;
+    /** @type {Array | undefined} */
+    user;
     /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
     im_status;
+    isAdmin;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 

@@ -25,7 +25,7 @@ export class WelcomePage extends Component {
     }
 
     async joinChannel() {
-        if (this.store.currentGuest) {
+        if (this.store.guest) {
             await this.personaService.updateGuestName(this.store.self, this.state.userName.trim());
         }
         if (this.props.data?.discussPublicViewData.addGuestAsMemberOnJoin) {
