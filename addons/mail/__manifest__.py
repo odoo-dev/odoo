@@ -248,6 +248,8 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/new/composer/emoji_data.js',
         ],
         'mail.assets_public': [
+            ('include', 'web._assets_helpers'),
+            ('include', 'web._assets_backend_helpers'),
             ('include', 'web.assets_common'),
             ('include', 'web._assets_bootstrap'),
             'web/static/src/scss/bootstrap_overridden.scss',
@@ -268,6 +270,7 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/new/views/**/*'),
             ('remove', 'mail/static/src/new/backend/**/*',),
             ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+            ('remove', 'mail/static/src/new/**/*.dark.scss'),
         ]
     },
     'license': 'LGPL-3',
