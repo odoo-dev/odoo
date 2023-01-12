@@ -10,7 +10,6 @@
                 'o-not-discussion': !message.isDiscussionOrNotification,
                 'o-mail-message-is-selected': isSelected,
                 'o-mail-message-is-squashed pt-1': isSquashed,
-                'o-starred': message.isStarred,
                 'mt-1': !isSquashed and messageListViewItemOwner,
                 'px-3': !isInChatWindow,
                 'px-1': isInChatWindow,
