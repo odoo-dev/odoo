@@ -26,6 +26,7 @@ QUnit.test("simplest layout", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -54,6 +55,7 @@ QUnit.test("layout with card details and filename and extension", async function
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -78,6 +80,7 @@ QUnit.test(
             body: "<p>Test</p>",
             model: "mail.channel",
             res_id: channelId,
+            message_type: "comment",
         });
         const { openDiscuss } = await start({
             async mockRPC(route, args) {
@@ -112,6 +115,7 @@ QUnit.test("view attachment", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -135,6 +139,7 @@ QUnit.test("close attachment viewer", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -173,6 +178,7 @@ QUnit.test(
             body: "<p>Test</p>",
             model: "mail.channel",
             res_id: channelId,
+            message_type: "comment",
         });
         const { openDiscuss } = await start();
         await openDiscuss(channelId);
@@ -207,6 +213,7 @@ QUnit.test("plain text file is viewable", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -228,6 +235,7 @@ QUnit.test("HTML file is viewable", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -249,6 +257,7 @@ QUnit.test("ODT file is not viewable", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -270,6 +279,7 @@ QUnit.test("DOCX file is not viewable", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
@@ -299,6 +309,7 @@ QUnit.test(
             body: "<p>Test</p>",
             model: "mail.channel",
             res_id: channelId,
+            message_type: "comment",
         });
         const { openDiscuss } = await start();
         await openDiscuss(channelId);
@@ -339,6 +350,7 @@ QUnit.test("img file has proper src in mail.channel", async function (assert) {
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: channelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(channelId);

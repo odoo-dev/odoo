@@ -157,15 +157,15 @@ export class Message extends Component {
         return Boolean(!this.message.isTransient && this.message.resId);
     }
 
-    get canBeDeleted() {
-        return this.canBeEdited;
+    get deletable() {
+        return this.editable;
     }
 
-    get canBeEdited() {
+    get editable() {
         if (!this.props.hasActions) {
             return false;
         }
-        return this.message.canBeEdited;
+        return this.message.editable;
     }
 
     get canReplyTo() {

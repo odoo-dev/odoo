@@ -137,7 +137,7 @@ export class Thread {
     get lastEditableMessageOfSelf() {
         const messages = this.messages.map((id) => this._store.messages[id]);
         const editableMessagesBySelf = messages.filter(
-            (message) => message.isSelfAuthored && message.canBeEdited
+            (message) => message.isSelfAuthored && message.editable
         );
         if (editableMessagesBySelf.length > 0) {
             return editableMessagesBySelf.at(-1);

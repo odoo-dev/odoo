@@ -1034,6 +1034,7 @@ QUnit.test("allow attachment delete on authored message", async function (assert
         body: "<p>Test</p>",
         model: "mail.channel",
         res_id: mailChannelId,
+        message_type: "comment",
     });
     const { openDiscuss } = await start();
     await openDiscuss(mailChannelId);
@@ -1050,3 +1051,34 @@ QUnit.test("allow attachment delete on authored message", async function (assert
     await click(".modal-footer .btn-primary");
     assert.containsNone(target, ".o-mail-attachment-card");
 });
+
+QUnit.test(
+    "prevent attachment delete on non-authored message in channels",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({});
+        const mailChannelId = pyEnv["mail.channel"].create({ name: "test" });
+        pyEnv["mail.message"].create({
+            attachment_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        mimetype: "image/jpeg",
+                        name: "BLAH",
+                        res_id: mailChannelId,
+                        res_model: "mail.channel",
+                    },
+                ],
+            ],
+            author_id: partnerId,
+            body: "<p>Test</p>",
+            model: "mail.channel",
+            res_id: mailChannelId,
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId);
+        assert.containsOnce(target, ".o-mail-attachment-image");
+        assert.containsNone(target, ".o-mail-attachment-unlink");
+    }
+);
