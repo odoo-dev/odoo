@@ -1005,15 +1005,48 @@ QUnit.test(
             partner_ids: [resPartnerId1],
             res_id: mailChannelId1,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: mailChannelId1 },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.doesNotHaveClass(
             target.querySelector(`.o-mail-message`),
             "o-mail-message-highlighted-from-mention"
         );
     }
 );
+
+QUnit.test("allow attachment delete on authored message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "test" });
+    pyEnv["mail.message"].create({
+        attachment_ids: [
+            [
+                0,
+                0,
+                {
+                    mimetype: "image/jpeg",
+                    name: "BLAH",
+                    res_id: mailChannelId,
+                    res_model: "mail.channel",
+                },
+            ],
+        ],
+        author_id: pyEnv.currentPartnerId,
+        body: "<p>Test</p>",
+        model: "mail.channel",
+        res_id: mailChannelId,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId);
+    assert.containsOnce(target, ".o-mail-attachment-image");
+    assert.containsOnce(target, ".o-mail-attachment-unlink");
+
+    await click(".o-mail-attachment-unlink");
+    assert.containsOnce(target, ".modal-dialog");
+    assert.strictEqual(
+        target.querySelector(".modal-body").textContent,
+        'Do you really want to delete "BLAH"?'
+    );
+
+    await click(".modal-footer .btn-primary");
+    assert.containsNone(target, ".o-mail-attachment-card");
+});
