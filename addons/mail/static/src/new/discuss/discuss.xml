@@ -41,7 +41,7 @@
                         <i class="fa fa-lg fa-gear text-700"/>
                     </button>
                     <div t-if="store.guest and !env.isSmall" class="d-flex align-items-center">
-                        <img class="o-mail-discuss-guest-avatar mx-1 rounded-circle o_object_fit_cover flex-shrink-0" alt="Avatar" t-att-src="store.guest.avatarUrl"/>
+                        <img class="o-mail-discuss-guest-avatar mx-1 rounded-circle o_object_fit_cover flex-shrink-0" alt="Avatar" t-att-src="guestAvatarUrl"/>
                         <AutoresizeInput
                             className="'o-mail-discuss-thread-guest-name lead fw-bold flex-shrink-1 text-dark'"
                             onValidate.bind="renameGuest"
