@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.notification_item" owl="1">
-    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !props.isLast, 'o-muted': !props.hasMarkAsReadButton }" t-on-click="onClick">
+    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center p-1" t-att-class="{ 'border-bottom': !props.isLast, 'o-muted': !props.hasMarkAsReadButton }" t-on-click="onClick">
         <div class="position-relative o-mail-background-inherit m-1 flex-shrink-0" style="width:40px;height:40px;">
             <img class="w-100 h-100 rounded-circle" alt="Notification Item Image" t-att-src="props.iconSrc" />
             <t t-slot="icon"/>

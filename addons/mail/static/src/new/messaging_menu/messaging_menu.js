@@ -29,13 +29,6 @@ export class MessagingMenu extends Component {
         return createLocalId(...args);
     }
 
-    activateTab(ev) {
-        const target = ev.target.dataset.tabId;
-        if (target) {
-            this.state.filter = target;
-        }
-    }
-
     get displayedPreviews() {
         /** @type {import("@mail/new/core/thread_model").Thread[]} **/
         const threads = Object.values(this.store.threads);

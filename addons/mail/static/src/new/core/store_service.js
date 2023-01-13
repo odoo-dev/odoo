@@ -7,10 +7,7 @@ import { registry } from "@web/core/registry";
 export class Store {
     constructor(env) {
         this.env = env;
-    }
-
-    get isSmall() {
-        return this.env.isSmall;
+        this.isSmall = env.isSmall;
     }
 
     get self() {
@@ -102,8 +99,12 @@ export class Store {
 }
 
 export const storeService = {
-    start(env) {
-        return reactive(new Store(env));
+    dependencies: ["ui"],
+
+    start(env, { ui }) {
+        const res = reactive(new Store(env));
+        ui.bus.addEventListener("resize", () => (res.isSmall = ui.isSmall));
+        return res;
     },
 };
 
