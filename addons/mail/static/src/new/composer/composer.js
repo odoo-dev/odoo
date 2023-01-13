@@ -221,10 +221,13 @@ export class Composer extends Component {
      * This doesn't work on firefox https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
      */
     onPaste(ev) {
-        ev.preventDefault();
         if (!ev.clipboardData?.items) {
             return;
         }
+        if (ev.clipboardData.files.length === 0) {
+            return;
+        }
+        ev.preventDefault();
         for (const file of ev.clipboardData.files) {
             this.attachmentUploader.uploadFile(file);
         }
