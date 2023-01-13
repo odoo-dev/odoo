@@ -56,7 +56,6 @@ class TestImLivechatMessage(TransactionCase):
             'id': message.id,
             'is_discussion': False,
             'is_note': True,
-            'is_notification': False,
             'linkPreviews': [],
             'message_type': 'notification',
             'messageReactionGroups': [],

@@ -276,7 +276,9 @@ Model({
             }
             this.message.originThread.update({
                 composer: {
-                    isLog: !this.message.is_discussion && !this.message.is_notification,
+                    isLog:
+                        !this.message.is_discussion &&
+                        this.message.message_type !== "user_notification",
                 },
             });
             this.messageListViewItemOwner.messageListViewOwner.threadViewOwner.update({
