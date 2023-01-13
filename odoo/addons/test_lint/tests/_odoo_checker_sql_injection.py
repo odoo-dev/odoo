@@ -76,10 +76,7 @@ class OdooBaseChecker(BaseChecker):
             return True
         if  name not in func_called_for_query:
             func_called_for_query.append((name, position))
-            cst_args = True
-            for arg in node.args:
-                if not self._is_constexpr(arg, args_allowed):
-                    cst_args = False
+            cst_args = self.all_const(node.args, args_allowed=args_allowed)
         if  name in func_call.keys():
             for fun in func_call[name]:
                 func_call[name].pop(func_call[name].index(fun))
@@ -91,55 +88,44 @@ class OdooBaseChecker(BaseChecker):
         return True
 
     def _is_fstring_cst(self, node: astroid.JoinedStr, args_allowed=False, position=None):
-        formatted_string = []
-        for format_node in node.values:
-            if isinstance(format_node, astroid.FormattedValue):
-                if isinstance(format_node.value, astroid.Attribute) and format_node.value.attrname.startswith('_'):
-                    formatted_string.append('table_name')
-                    continue
-                operand = self._is_constexpr(format_node.value, args_allowed=args_allowed, position=position)
-                if not operand:
-                    return False
-                else:
-                    formatted_string += [operand]
-            elif isinstance(format_node, astroid.Const):
-                formatted_string += format_node.value
-        return True
+        # an fstring is constant if all its FormattedValue are constant, or
+        # are access to private attributes (nb: whitelist?)
+        return self.all_const((
+            node.value for node in node.values
+            if isinstance(node, astroid.FormattedValue)
+            if not (isinstance(node.value, astroid.Attribute) and node.value.attrname.startswith('_'))
+        ),
+            args_allowed=args_allowed,
+            position=position
+        )
+
+    def all_const(self, nodes, args_allowed=False, position=None):
+        return all(
+            self._is_constexpr(node, args_allowed=args_allowed, position=position)
+            for node in nodes
+        )
 
     def _is_constexpr(self, node: NodeNG, args_allowed=False, position=None):
         if isinstance(node, astroid.Const): # astroid.const is always safe
             return True
         elif isinstance(node, astroid.List):
-            for l in node.elts:
-                value = self._is_constexpr(l, args_allowed=args_allowed)
-                if not value:
-                    return False
-            return True
+            return self.all_const(node.elts, args_allowed=args_allowed)
         elif isinstance(node, astroid.Tuple):
             if position is None:
-                for child in node.get_children():
-                    if not self._is_constexpr(child, args_allowed=args_allowed):
-                        return False
-                return True
+                return self.all_const(node.elts, args_allowed=args_allowed)
             else:
                 return self._is_constexpr(node.elts[position], args_allowed=args_allowed)
         elif isinstance(node, astroid.Set):
-            for elem in node.elts:
-                if not self._is_constexpr(elem, args_allowed=args_allowed):
-                    return False
-            return True
+            return self.all_const(node.elts, args_allowed=args_allowed)
         elif isinstance(node, astroid.BinOp): # recusively infer both side of the operation. Failing if either side is not inferable
             if (isinstance(node.left, astroid.Const) and node.left.value == '') or (isinstance(node.right, astroid.Const) and node.right.value == ''):
                 return False
             elif isinstance(node.right, astroid.Dict): #case only for %(var)s
-                dic = {}
                 for value in node.right.items:
                     key = self._is_constexpr(value[0], args_allowed=args_allowed)
                     value = self._is_constexpr(value[1], args_allowed=args_allowed)
                     if not key or not value:
                         return False
-                    else:
-                        dic[key] = value
                 left = self._is_constexpr(node.left, args_allowed=args_allowed)
                 if not left:
                     return False
@@ -190,17 +176,13 @@ class OdooBaseChecker(BaseChecker):
             if node.func.attrname == 'append':
                 return self._is_constexpr(node.args[0])
             elif node.func.attrname == 'format':
-                key_value_arg = []
                 if not node.keywords: # no args in format
                     return self._is_constexpr(node.func.expr, args_allowed=args_allowed)
                 else:
-                    for key in node.keywords:
-                        inferred_value = self._is_constexpr(key.value, args_allowed=args_allowed)
-                        if not inferred_value:
-                            return False
-                        else:
-                            key_value_arg += [True]
-                return True
+                    return self.all_const(
+                        (key.value for key in node.keywords),
+                        args_allowed=args_allowed,
+                    )
             elif node.func.attrname == 'substitute':
                 return False #Never used in code
             else:
@@ -217,16 +199,7 @@ class OdooBaseChecker(BaseChecker):
         elif isinstance(node, astroid.Subscript):
             return self._is_constexpr(node.value, args_allowed=args_allowed)
         elif isinstance(node, astroid.BoolOp):
-            if node.op == 'or':
-                for val in node.values:
-                    cst = self._is_constexpr(val, args_allowed=args_allowed)
-                    if not cst:
-                        return False
-                return True
-            elif node.op == 'and':
-                return self._is_constexpr(node.values[1], args_allowed=args_allowed)
-            else:
-                return False
+            return self.all_const(node.values, args_allowed=args_allowed)
 
         elif isinstance(node, astroid.Attribute):
             attr_chain = self._get_attribute_chain(node)
