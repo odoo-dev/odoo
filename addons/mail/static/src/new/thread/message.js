@@ -31,10 +31,10 @@ import { MessageSeenIndicator } from "./message_seen_indicator";
 /**
  * @typedef {Object} Props
  * @property {boolean} [hasActions]
- * @property {boolean} [grayedOut]
  * @property {boolean} [highlighted]
  * @property {function} [onParentMessageClick]
  * @property {import("@mail/new/core/message_model").Message} message
+ * @property {import("@mail/new/utils/hooks").MessageToReplyTo} [messageToReplyTo]
  * @property {boolean} [squashed]
  * @property {import("@mail/new/core/thread_model").Thread} [thread]
  * @extends {Component<Props, Env>}
@@ -58,11 +58,11 @@ export class Message extends Component {
     static props = [
         "hasActions?",
         "isInChatWindow?",
-        "grayedOut?",
         "highlighted?",
         "onParentMessageClick?",
         "message",
         "messageEdition?",
+        "messageToReplyTo?",
         "squashed?",
         "thread?",
     ];
@@ -159,7 +159,10 @@ export class Message extends Component {
     }
 
     get canReplyTo() {
-        return this.message.needaction || this.message.resModel === "mail.channel";
+        return (
+            this.props.messageToReplyTo &&
+            (this.message.needaction || this.message.resModel === "mail.channel")
+        );
     }
 
     /**
@@ -250,7 +253,7 @@ export class Message extends Component {
 
     onClickReplyTo(ev) {
         markEventHandled(ev, "message.replyTo");
-        this.messaging.toggleReplyTo(this.message);
+        this.props.messageToReplyTo.toggle(this.props.thread, this.props.message);
     }
 
     async onClickAttachmentUnlink(attachment) {

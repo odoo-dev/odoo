@@ -5,7 +5,6 @@ import {
     onPatched,
     onWillPatch,
     onWillUnmount,
-    reactive,
     status,
     useComponent,
     useEnv,
@@ -200,7 +199,7 @@ export function useScrollSnapshot(refName, { onWillPatch: p_onWillPatch, onPatch
  */
 export function useMessageHighlight(duration = 2000) {
     let timeout;
-    const state = reactive({
+    const state = useState({
         async highlightMessage(msgId) {
             const lastHighlightedMessageId = state.highlightedMessageId;
             clearHighlight();
@@ -459,7 +458,7 @@ export function useScrollPosition(refName, model, clearOn) {
  * @returns {MessageEdition}
  */
 export function useMessageEdition() {
-    const state = reactive({
+    const state = useState({
         composerOfThread: null,
         editingMessage: null,
         exitEditMode() {
@@ -470,4 +469,53 @@ export function useMessageEdition() {
         },
     });
     return state;
+}
+
+/**
+ * @typedef {Object} MessageToReplyTo
+ * @property {function} cancel
+ * @property {function} isNotSelected
+ * @property {function} isSelected
+ * @property {import("@mail/new/core/message_model").Message|null} message
+ * @property {import("@mail/new/core/thread_model").Thread|null} thread
+ * @property {function} toggle
+ * @returns {MessageToReplyTo}
+ */
+export function useMessageToReplyTo() {
+    return useState({
+        cancel() {
+            Object.assign(this, { message: null, thread: null });
+        },
+        /**
+         * @param {import("@mail/new/core/thread_model").Thread} thread
+         * @param {import("@mail/new/core/message_model").Message} message
+         * @returns {boolean}
+         */
+        isNotSelected(thread, message) {
+            return this.thread === thread && this.message !== message;
+        },
+        /**
+         * @param {import("@mail/new/core/thread_model").Thread} thread
+         * @param {import("@mail/new/core/message_model").Message} message
+         * @returns {boolean}
+         */
+        isSelected(thread, message) {
+            return this.thread === thread && this.message === message;
+        },
+        /** @type {import("@mail/new/core/message_model").Message|null} */
+        message: null,
+        /** @type {import("@mail/new/core/thread_model").Thread|null} */
+        thread: null,
+        /**
+         * @param {import("@mail/new/core/thread_model").Thread} thread
+         * @param {import("@mail/new/core/message_model").Message} message
+         */
+        toggle(thread, message) {
+            if (this.message === message) {
+                this.cancel();
+            } else {
+                Object.assign(this, { message, thread });
+            }
+        },
+    });
 }

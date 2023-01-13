@@ -6,7 +6,7 @@ import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
-import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
+import { useMessageEdition, useMessageHighlight, useMessageToReplyTo } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Call } from "../rtc/call";
 import { ChannelMemberList } from "./channel_member_list";
@@ -51,6 +51,7 @@ export class Discuss extends Component {
         this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.messageEdition = useMessageEdition();
+        this.messageToReplyTo = useMessageToReplyTo();
         this.contentRef = useRef("content");
         this.popover = usePopover();
         this.closePopover = null;

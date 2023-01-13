@@ -16,14 +16,14 @@
             <div class="o-mail-composer-sidebar-main flex-shrink-0" t-if="!compact">
                 <img class="o-mail-composer-avatar mt-1 rounded-circle" t-att-src="avatarUrl" alt="Avatar of user"/>
             </div>
-            <div class="o-mail-composer-core-header text-truncate small p-2" t-if="hasReplyToHeader">
-                <span class="cursor-pointer" t-on-click="() => props.highlightReplyTo and props.highlightReplyTo(store.discuss.messageToReplyTo.id)">
-                    Replying to <b t-esc="messageToReplyTo.author.name"/>
+            <div class="o-mail-composer-core-header text-truncate small p-2" t-if="props.composer.thread and props.messageToReplyTo?.thread === props.composer.thread">
+                <span class="cursor-pointer" t-on-click="() => props.highlightReplyTo and props.highlightReplyTo(props.messageToReplyTo.message.id)">
+                    Replying to <b t-esc="props.messageToReplyTo.message.author.name"/>
                 </span>
-                <span t-if="thread and thread.type === 'mailbox'" class="o-mail-composer-origin-thread">
-                    on: <b><t t-esc="messageToReplyTo.originThread.displayName"/></b>
+                <span t-if="props.messageToReplyTo.message.originThread !== thread" class="o-mail-composer-origin-thread">
+                    on: <b><t t-esc="props.messageToReplyTo.message.originThread.displayName"/></b>
                 </span>
-                <i t-if="!messageToReplyTo.needaction" class="fa fa-lg fa-times-circle rounded-circle p-0 ms-1 cursor-pointer" title="Stop replying" t-on-click="() => messaging.cancelReplyTo()"/>
+                <i class="fa fa-lg fa-times-circle rounded-circle p-0 ms-1 cursor-pointer" title="Stop replying" t-on-click="() => props.messageToReplyTo.cancel()"/>
             </div>
             <div class="o-mail-composer-core-main d-flex flex-nowrap flex-grow-1"
                 t-att-class="{

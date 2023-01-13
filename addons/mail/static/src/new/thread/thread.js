@@ -18,13 +18,21 @@ import { useService } from "@web/core/utils/hooks";
  * @property {boolean} [isInChatWindow=false]
  * @property {import("@mail/new/utils/hooks").MessageEdition} [messageEdition]
  * @property {import("@mail/new/utils/hooks").MessageHighlight} [messageHighlight]
+ * @property {import("@mail/new/utils/hooks").MessageToReplyTo} [messageToReplyTo]
  * @property {"asc"|"desc"} [order="asc"]
  * @property {import("@mail/new/core/thread_model").Thread} thread
  * @extends {Component<Props, Env>}
  */
 export class Thread extends Component {
     static components = { Message, Transition };
-    static props = ["isInChatWindow?", "thread", "messageEdition?", "messageHighlight?", "order?"];
+    static props = [
+        "isInChatWindow?",
+        "thread",
+        "messageEdition?",
+        "messageHighlight?",
+        "messageToReplyTo?",
+        "order?",
+    ];
     static defaultProps = {
         isInChatWindow: false,
         order: "asc", // 'asc' or 'desc'
@@ -34,6 +42,7 @@ export class Thread extends Component {
     setup() {
         this.messaging = useMessaging();
         this.store = useStore();
+        this.state = useState({ isReplyingTo: false });
         this.threadService = useState(useService("mail.thread"));
         if (!this.env.inChatter) {
             useAutoScroll("messages", () => {
@@ -103,15 +112,6 @@ export class Thread extends Component {
         // does not return the promise, so the thread is immediately rendered
         // then updated whenever messages get here
         this.threadService.fetchNewMessages(thread);
-    }
-
-    isGrayedOut(msg) {
-        const { messageToReplyTo } = this.store.discuss;
-        return (
-            messageToReplyTo &&
-            messageToReplyTo.id !== msg.id &&
-            messageToReplyTo.resId === msg.resId
-        );
     }
 
     isSquashed(msg, prevMsg) {

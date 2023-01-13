@@ -5,7 +5,7 @@ import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
-import { useMessageEdition, useMessageHighlight } from "@mail/new/utils/hooks";
+import { useMessageEdition, useMessageHighlight, useMessageToReplyTo } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallSettings } from "../rtc/call_settings";
@@ -42,6 +42,7 @@ export class ChatWindow extends Component {
         this.rtc = useRtc();
         this.messageEdition = useMessageEdition();
         this.messageHighlight = useMessageHighlight();
+        this.messageToReplyTo = useMessageToReplyTo();
         this.state = useState({
             /**
              * activeMode:
