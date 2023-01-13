@@ -170,7 +170,11 @@ export class Discuss extends Component {
         }
     }
 
-    get guestAvatarUrl() {
-        return `/mail/channel/${this.thread.id}/guest/${this.store.guest.id}/avatar_128?unique=${this.store.guest.name}`;
+    get avatarUrl() {
+        if (this.store.guest) {
+            return `/mail/channel/${this.thread.id}/guest/${this.store.guest.id}/avatar_128?unique=${this.store.guest.name}`;
+        } else {
+            return this.store.user.avatarUrl;
+        }
     }
 }
