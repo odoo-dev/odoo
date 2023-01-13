@@ -23,7 +23,7 @@
         </t>
         <div t-if="showOverlay or !isControllerFloating" class="o-mail-call-main-controls d-flex justify-content-center w-100 pb-1" t-att-class="{ 'o-isFloating position-absolute bottom-0 pb-3': isControllerFloating }">
             <div class="o-mail-call-main-controlsOverlayContainer" t-on-mousemove="onMouseMoveOverlay">
-                <CallActionList thread="props.thread"/>
+                <CallActionList thread="props.thread" fullscreen="props.fullscreen"/>
             </div>
         </div>
     </div>

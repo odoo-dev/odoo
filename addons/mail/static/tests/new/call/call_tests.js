@@ -27,10 +27,7 @@ QUnit.test("basic rendering", async function (assert) {
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Deafen']");
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Turn camera on']");
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Share screen']");
-    assert.containsOnce(
-        target,
-        ".o-mail-call-action-list button[aria-label='Activate Full Screen']"
-    );
+    assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Enter Full Screen']");
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Disconnect']");
 });
 

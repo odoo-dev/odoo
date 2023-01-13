@@ -7,7 +7,7 @@ const { Component, useState, useRef, onMounted, onPatched, onWillUnmount } = owl
 
 export class CallMain extends Component {
     static components = { CallActionList, CallParticipantCard };
-    static props = ["thread"];
+    static props = ["thread", "fullscreen"];
     static template = "mail.call_main";
 
     setup() {

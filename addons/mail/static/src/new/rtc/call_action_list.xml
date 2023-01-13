@@ -67,21 +67,21 @@
                             <i class="fa fa-desktop fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendScreen }"/>
                         </div>
                     </button>
-                    <button t-if="!callView.isFullScreen" class="o-mail-call-action-list-button btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
-                        aria-label="Activate Full Screen"
-                        title="Activate Full Screen"
+                    <button t-if="!props.fullscreen.isActive" class="o-mail-call-action-list-button btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
+                        aria-label="Enter Full Screen"
+                        title="Enter Full Screen"
                         t-att-class="{ 'o-isSmall p-2': isSmall, 'p-3': !isSmall }"
-                        t-on-click="callView.activateFullScreen"
+                        t-on-click="props.fullscreen.enter"
                     >
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
                             <i class="fa fa-arrows-alt fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall }"/>
                         </div>
                     </button>
-                    <button t-if="callView.isFullScreen" class="o-mail-call-action-list-button btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
-                        aria-label="Deactivate Full Screen"
-                        title="Deactivate Full Screen"
+                    <button t-if="props.fullscreen.isActive" class="o-mail-call-action-list-button btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
+                        aria-label="Exit Full Screen"
+                        title="Exit Full Screen"
                         t-att-class="{ 'o-isSmall p-2': isSmall, 'p-3': !isSmall }"
-                        t-on-click="callView.deactivateFullScreen"
+                        t-on-click="props.fullscreen.exit"
                     >
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
                             <i class="fa fa-compress fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall }"/>
