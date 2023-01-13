@@ -67,7 +67,7 @@ export class Message {
         if (this.isEmpty) {
             return false;
         }
-        if (!this._store.user.isAdmin && !this.isSelfAuthored) {
+        if (!this._store.user?.isAdmin && !this.isSelfAuthored) {
             return false;
         }
         if (this.type !== "comment") {
@@ -112,14 +112,14 @@ export class Message {
     }
 
     get isNeedaction() {
-        return this.needaction_partner_ids.includes(this._store.user.id);
+        return this.needaction_partner_ids.includes(this._store.user?.id);
     }
 
     /**
      * @returns {boolean}
      */
     get isHistory() {
-        return this.history_partner_ids.includes(this._store.user.id);
+        return this.history_partner_ids.includes(this._store.user?.id);
     }
 
     /**
