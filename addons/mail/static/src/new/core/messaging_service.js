@@ -417,7 +417,7 @@ export class Messaging {
                         },
                         type: channel.channel.channel_type,
                     });
-                    if (invitedByUserId !== this.store.user.user?.id) {
+                    if (invitedByUserId !== this.store.user?.user.id) {
                         this.notification.add(
                             sprintf(_t("You have been invited to #%s"), thread.displayName),
                             { type: "info" }
