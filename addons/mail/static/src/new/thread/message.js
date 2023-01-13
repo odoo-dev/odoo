@@ -140,6 +140,16 @@ export class Message extends Component {
         return this.props.message;
     }
 
+    get messageTypeText() {
+        if (this.props.message.type === "notification") {
+            return this.env._t("System notification");
+        }
+        if (!this.props.message.isDiscussion && this.props.message.type !== "user_notification") {
+            return this.env._t("Note");
+        }
+        return this.env._t("Message");
+    }
+
     /**
      * @returns {boolean}
      */

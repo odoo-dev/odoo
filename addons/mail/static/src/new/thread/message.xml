@@ -15,6 +15,8 @@
                 'px-1': props.isInChatWindow,
                 'opacity-50': props.messageToReplyTo?.isNotSelected(props.thread, props.message),
             }"
+            role="group"
+            t-att-aria-label="messageTypeText"
             t-att-data-message-id="message.id"
             t-on-click="onClick"
             t-on-mouseenter="onMouseenter"
