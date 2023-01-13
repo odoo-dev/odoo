@@ -7,7 +7,6 @@ import {
     onWillUnmount,
     status,
     useComponent,
-    useEnv,
     useRef,
     useState,
 } from "@odoo/owl";
@@ -227,9 +226,8 @@ function dataUrlToBlob(data, type) {
     return new Blob([uiArr], { type });
 }
 
-export function useAttachmentUploader(pThread, message) {
+export function useAttachmentUploader(pThread, message, isPending = false) {
     const component = useComponent();
-    const env = useEnv();
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
     const messaging = useService("mail.messaging");
@@ -253,7 +251,7 @@ export function useAttachmentUploader(pThread, message) {
                 buildFormData(formData) {
                     formData.append("thread_id", thread.id);
                     formData.append("thread_model", thread.model);
-                    formData.append("is_pending", Boolean(env.inComposer));
+                    formData.append("is_pending", Boolean(isPending));
                     formData.append("temporary_id", tmpId);
                 },
             }).catch((e) => {

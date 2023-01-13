@@ -62,7 +62,8 @@ export class Composer extends Component {
         this.store = useStore();
         this.attachmentUploader = useAttachmentUploader(
             this.props.messageToReplyTo?.message?.originThread ?? this.props.composer.thread,
-            this.props.composer.message
+            this.props.composer.message,
+            true
         );
         this.messageService = useState(useService("mail.message"));
         this.threadService = useService("mail.thread");
