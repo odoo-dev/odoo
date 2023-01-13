@@ -396,18 +396,6 @@ Model({
          * render. Scrolls into view and briefly highlights it.
          */
         doHighlight: attr(),
-        /**
-         * Determines which extra class this message view component should have.
-         */
-        extraClass: attr({
-            default: "",
-            compute() {
-                if (this.messageListViewItemOwner) {
-                    return "";
-                }
-                return clear();
-            },
-        }),
         failureNotificationIconClassName: attr({
             default: "fa fa-envelope",
             compute() {
