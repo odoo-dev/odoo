@@ -15,7 +15,7 @@
                 'px-1': isInChatWindow,
                 'opacity-50': (messageListViewItemOwner and messageListViewItemOwner.messageListViewOwner.threadViewOwner.replyingToMessageView) and !isSelected,
             }"
-            t-attf-class="{{ extraClass }} {{ className }}"
+            t-attf-class="{{ extraClass }}"
             role="group"
             t-att-aria-label="message.messageTypeText"
             t-att-data-message-id="message.id"
