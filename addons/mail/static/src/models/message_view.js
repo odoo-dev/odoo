@@ -403,7 +403,7 @@ Model({
             default: "",
             compute() {
                 if (this.messageListViewItemOwner) {
-                    return "o_MessageListView_item";
+                    return "";
                 }
                 return clear();
             },
