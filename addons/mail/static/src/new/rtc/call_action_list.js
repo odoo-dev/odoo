@@ -5,7 +5,7 @@ import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
 export class CallActionList extends Component {
-    static props = ["thread"];
+    static props = ["thread", "fullscreen"];
     static template = "mail.call_action_list";
 
     setup() {
@@ -19,7 +19,7 @@ export class CallActionList extends Component {
     get isSmall() {
         /*
         return Boolean(
-            this.callView && this.callView.threadView.compact && !this.callView.isFullScreen
+            this.threadView.compact && !this.props.fullscreen.isActive
         );
         */
         return false;
@@ -31,15 +31,6 @@ export class CallActionList extends Component {
 
     get isDebug() {
         return false; // TODO
-    }
-
-    // discuss refactor: TODO get data from parent of parent somehow.
-    get callView() {
-        return {
-            isFullScreen: false,
-            activateFullScreen: () => {},
-            deactivateFullScreen: () => {},
-        };
     }
 
     /**

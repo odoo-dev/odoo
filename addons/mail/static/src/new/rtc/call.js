@@ -1,8 +1,10 @@
 /* @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 import { useMessaging } from "../core/messaging_hook";
 import { CallMain } from "@mail/new/rtc/call_main";
+import { _t } from "@web/core/l10n/translation";
 
 export class Call extends Component {
     static components = { CallMain };
@@ -11,8 +13,9 @@ export class Call extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.notification = useService("notification");
         this.state = useState({
-            isFullScreen: false,
+            isFullscreen: false,
         });
     }
 
@@ -24,7 +27,7 @@ export class Call extends Component {
         return false;
     }
 
-    async activateFullScreen() {
+    async enterFullScreen() {
         const el = document.body;
         try {
             if (el.requestFullscreen) {
@@ -34,21 +37,18 @@ export class Call extends Component {
             } else if (el.webkitRequestFullscreen) {
                 await el.webkitRequestFullscreen();
             }
-            this.state.isFullScreen = true;
+            this.state.isFullscreen = true;
         } catch {
-            this.state.isFullScreen = false;
-            // TODO
-            /*
-            this.notification.add(_t("The FullScreen mode was denied by the browser"), {
+            this.state.isFullscreen = false;
+            this.notification.add(_t("The Fullscreen mode was denied by the browser"), {
                 type: "warning",
             });
-            */
         }
     }
 
-    async deactivateFullScreen() {
-        const fullScreenElement = document.webkitFullscreenElement || document.fullscreenElement;
-        if (fullScreenElement) {
+    async exitFullScreen() {
+        const fullscreenElement = document.webkitFullscreenElement || document.fullscreenElement;
+        if (fullscreenElement) {
             if (document.exitFullscreen) {
                 await document.exitFullscreen();
             } else if (document.mozCancelFullScreen) {
@@ -57,6 +57,6 @@ export class Call extends Component {
                 await document.webkitCancelFullScreen();
             }
         }
-        this.isFullScreen = false;
+        this.state.isFullscreen = false;
     }
 }
