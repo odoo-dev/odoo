@@ -1,5 +1,9 @@
 import os
 import astroid
+try:
+    from astroid import NodeNG
+except ImportError:
+    from astroid.node_classes import NodeNG
 from pylint import checkers, interfaces
 from pylint.checkers import BaseChecker, utils
 from collections import deque
@@ -63,7 +67,7 @@ class OdooBaseChecker(BaseChecker):
         elif isinstance(node, astroid.Name):
             return node.name
         elif isinstance(node, astroid.Call):
-            return node.func.name
+            return self._get_attribute_chain(node.func)
         return '' #FIXME
 
     def _evaluate_function_call(self, node, args_allowed, position):
@@ -86,7 +90,7 @@ class OdooBaseChecker(BaseChecker):
             return True
         return True
 
-    def _is_fstring_cst(self, node, args_allowed=False, position=None):
+    def _is_fstring_cst(self, node: astroid.JoinedStr, args_allowed=False, position=None):
         formatted_string = []
         for format_node in node.values:
             if isinstance(format_node, astroid.FormattedValue):
@@ -102,7 +106,7 @@ class OdooBaseChecker(BaseChecker):
                 formatted_string += format_node.value
         return True
 
-    def _is_constexpr(self, node, args_allowed=False, position=None):
+    def _is_constexpr(self, node: NodeNG, args_allowed=False, position=None):
         if isinstance(node, astroid.Const): # astroid.const is always safe
             return True
         elif isinstance(node, astroid.List):
