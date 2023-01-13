@@ -62,6 +62,7 @@
                     t-if="attachmentUploader.attachments.length > 0"
                     attachments="attachmentUploader.attachments"
                     unlinkAttachment="attachmentUploader.unlink"
+                    editable="true"
                     imagesHeight="50" />
                 <div t-if="thread and !compact" class="o-mail-composer-is-typing">
                     <Typing channel="thread" size="'medium'" />

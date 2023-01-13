@@ -97,6 +97,7 @@
                     <AttachmentList
                         attachments="attachmentUploader.attachments.concat(state.attachments)"
                         unlinkAttachment.bind="unlinkAttachment"
+                        editable="true"
                         imagesHeight="160"
                     />
                     <FileUploader multiUpload="true" onUploaded="(data) => attachmentUploader.uploadData(data)">

@@ -14,10 +14,11 @@ import { _t } from "@web/core/l10n/translation";
  * @property {import("@mail/new/core/attachment_model").Attachment[]} attachments
  * @property {function} unlinkAttachment
  * @property {number} imagesHeight
+ * @property {boolean} editable
  * @extends {Component<Props, Env>}
  */
 export class AttachmentList extends Component {
-    static props = ["attachments", "unlinkAttachment", "imagesHeight"];
+    static props = ["attachments", "unlinkAttachment", "imagesHeight", "editable?"];
     static template = "mail.attachment_list";
 
     setup() {
@@ -50,7 +51,7 @@ export class AttachmentList extends Component {
     }
 
     canDelete(attachment) {
-        return !attachment.uploading;
+        return !attachment.uploading && this.props.editable;
     }
 
     canDownload(attachment) {

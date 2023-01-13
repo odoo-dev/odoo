@@ -8,14 +8,14 @@ import { LinkPreviewVideo } from "./link_preview_video";
 /**
  * @typedef {Object} Props
  * @property {import("@mail/new/core/link_preview_model").LinkPreview[]} linkPreviews
- * @property {boolean} [canBeDeleted]
+ * @property {boolean} [deletable]
  * @extends {Component<Props, Env>}
  */
 export class LinkPreviewList extends Component {
     static components = { LinkPreviewCard, LinkPreviewImage, LinkPreviewVideo };
-    static props = ["linkPreviews", "canBeDeleted?"];
+    static props = ["linkPreviews", "deletable?"];
     static defaultProps = {
-        canBeDeleted: false,
+        deletable: false,
     };
     static template = "mail.link_preview_list";
 

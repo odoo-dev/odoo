@@ -14,54 +14,6 @@ QUnit.module("mail", {}, function () {
         QUnit.module("message_tests.js");
 
         QUnit.skipRefactoring(
-            "prevent attachment delete on non-authored message in channels",
-            async function (assert) {
-                assert.expect(2);
-
-                const pyEnv = await startServer();
-                const partnerId = pyEnv["res.partner"].create({});
-                const mailChannelId = pyEnv["mail.channel"].create({});
-                pyEnv["mail.message"].create({
-                    attachment_ids: [
-                        [
-                            0,
-                            0,
-                            {
-                                mimetype: "image/jpeg",
-                                name: "BLAH",
-                                res_id: mailChannelId,
-                                res_model: "mail.channel",
-                            },
-                        ],
-                    ],
-                    author_id: partnerId,
-                    body: "<p>Test</p>",
-                    model: "mail.channel",
-                    res_id: mailChannelId,
-                });
-                const { openDiscuss } = await start({
-                    discuss: {
-                        params: {
-                            default_active_id: `mail.channel_${mailChannelId}`,
-                        },
-                    },
-                });
-                await openDiscuss();
-
-                assert.containsOnce(
-                    document.body,
-                    ".o_AttachmentImage",
-                    "should have an attachment"
-                );
-                assert.containsNone(
-                    document.body,
-                    ".o_AttachmentImage_actionUnlink",
-                    "delete attachment button should not be printed"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
             "allow attachment image download on message",
             async function (assert) {
                 assert.expect(1);

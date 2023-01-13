@@ -63,7 +63,7 @@ export class Message {
     /**
      * @returns {boolean}
      */
-    get canBeEdited() {
+    get editable() {
         if (this.isEmpty) {
             return false;
         }

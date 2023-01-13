@@ -20,7 +20,7 @@
                     </a>
                 </div>
             </div>
-            <div t-if="props.canBeDeleted" class="o-mail-link-preview-card-aside position-absolute top-0 end-0 small">
+            <div t-if="props.deletable" class="o-mail-link-preview-card-aside position-absolute top-0 end-0 small">
                 <LinkPreviewAside className="'fa fa-stack p-0 opacity-75 opacity-100-hover'" linkPreview="props.linkPreview"/>
             </div>
         </div>
