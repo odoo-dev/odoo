@@ -41,6 +41,36 @@ patch(MockServer.prototype, "mail/models/mail_message", {
                 message_id: messageId,
             });
         }
+        const reactions = this.pyEnv["mail.message.reaction"].search([
+            ["message_id", "=", messageId],
+            ["content", "=", content],
+        ]);
+        const currentPartner = this.pyEnv["res.partner"].searchRead([
+            ["id", "=", this.pyEnv.currentPartnerId],
+        ])[0];
+        const result = {
+            id: messageId,
+            messageReactionGroups: [
+                [
+                    reactions.length > 0 ? "insert" : "insert-and-unlink",
+                    {
+                        content,
+                        count: reactions.length,
+                        message: { id: messageId },
+                        partners: [
+                            [
+                                "insert",
+                                { id: this.pyEnv.currentPartnerId, name: currentPartner.name },
+                            ],
+                        ],
+                    },
+                ],
+            ],
+        };
+        this.pyEnv["bus.bus"]._sendone(this.pyEnv.currentPartnerId, "mail.record/insert", {
+            Message: result,
+        });
+        return result;
     },
     /**
      * Simulates `_message_add_reaction` on `mail.message`.
