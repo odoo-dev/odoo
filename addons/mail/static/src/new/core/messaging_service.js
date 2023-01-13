@@ -641,18 +641,6 @@ export class Messaging {
         }
     });
 
-    toggleReplyTo(message) {
-        if (this.store.discuss.messageToReplyTo === message) {
-            this.store.discuss.messageToReplyTo = null;
-        } else {
-            this.store.discuss.messageToReplyTo = message;
-        }
-    }
-
-    cancelReplyTo() {
-        this.store.discuss.messageToReplyTo = null;
-    }
-
     async searchPartners(searchStr = "", limit = 10) {
         let partners = [];
         const searchTerm = cleanTerm(searchStr);

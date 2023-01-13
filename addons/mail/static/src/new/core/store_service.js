@@ -54,7 +54,6 @@ export class Store {
     // discuss app
     discuss = {
         isActive: false,
-        messageToReplyTo: null,
         threadLocalId: null,
         channels: {
             extraClass: "o-mail-category-channel",

@@ -25,10 +25,10 @@
                         <Message
                             isInChatWindow="props.isInChatWindow"
                             message="msg"
+                            messageToReplyTo="props.messageToReplyTo"
                             squashed="isSquashed(msg, prevMsg)"
                             highlighted="props.messageHighlight and props.messageHighlight.highlightedMessageId === msg.id"
                             onParentMessageClick="() => props.messageHighlight and msg.parentMessage and props.messageHighlight.highlightMessage(msg.parentMessage.id)"
-                            grayedOut="isGrayedOut(msg)"
                             thread="props.thread"
                             messageEdition="props.messageEdition"
                         />

@@ -31,6 +31,12 @@ import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
 
+/**
+ * @typedef {Object} Props
+ * @property {import("@mail/new/core/composer_model").Composer} composer
+ * @property {import("@mail/new/utils/hooks").MessageToReplyTo} messageToReplyTo
+ * @extends {Component<Props, Env>}
+ */
 export class Composer extends Component {
     static components = { NavigableList, AttachmentList, FileUploader, Typing };
     static defaultProps = {
@@ -40,6 +46,7 @@ export class Composer extends Component {
         "composer",
         "autofocus?",
         "highlightReplyTo?",
+        "messageToReplyTo?",
         "onDiscardCallback?",
         "onPostCallback?",
         "mode?",
@@ -54,7 +61,7 @@ export class Composer extends Component {
         this.messaging = useMessaging();
         this.store = useStore();
         this.attachmentUploader = useAttachmentUploader(
-            this.messageToReplyTo?.originThread ?? this.props.composer.thread,
+            this.props.messageToReplyTo?.message?.originThread ?? this.props.composer.thread,
             this.props.composer.message
         );
         this.messageService = useState(useService("mail.message"));
@@ -115,12 +122,12 @@ export class Composer extends Component {
             () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
         );
         useEffect(
-            (messageToReplyTo) => {
-                if (messageToReplyTo && messageToReplyTo.resId === this.props.composer.thread?.id) {
+            (rThread, cThread) => {
+                if (cThread && rThread === cThread) {
                     this.state.autofocus++;
                 }
             },
-            () => [this.store.discuss.messageToReplyTo]
+            () => [this.props.messageToReplyTo?.thread, this.props.composer.thread]
         );
         useEffect(
             () => {
@@ -150,7 +157,7 @@ export class Composer extends Component {
             if (isEventHandled(ev, "message.replyTo") || isEventHandled(ev, "emoji.selectEmoji")) {
                 return;
             }
-            this.messaging.cancelReplyTo();
+            this.props.messageToReplyTo?.cancel();
         });
         onWillDestroy(() => this.attachmentUploader.unlinkAll());
     }
@@ -175,21 +182,6 @@ export class Composer extends Component {
 
     get hasSuggestions() {
         return this.suggestion.state.items.length > 0;
-    }
-
-    get hasReplyToHeader() {
-        const thread = this.props.composer.thread;
-        if (!this.messageToReplyTo || !thread) {
-            return false;
-        }
-        return (
-            this.messageToReplyTo.resId === thread.id ||
-            (thread.type === "mailbox" && thread.messages.includes(this.messageToReplyTo.id))
-        );
-    }
-
-    get messageToReplyTo() {
-        return this.store.discuss.messageToReplyTo;
     }
 
     get placeholder() {
@@ -389,13 +381,15 @@ export class Composer extends Component {
 
     async sendMessage() {
         return this.processMessage(async (value) => {
-            const { messageToReplyTo } = this.store.discuss;
-            const thread = messageToReplyTo?.originThread ?? this.props.composer.thread;
+            const thread =
+                this.props.messageToReplyTo?.message?.originThread ?? this.props.composer.thread;
             const postData = {
                 attachments: this.attachmentUploader.attachments,
-                isNote: this.props.composer.type === "note" || messageToReplyTo?.isNote,
+                isNote:
+                    this.props.composer.type === "note" ||
+                    this.props.messageToReplyTo?.message?.isNote,
                 rawMentions: this.suggestion.rawMentions,
-                parentId: messageToReplyTo?.id,
+                parentId: this.props.messageToReplyTo?.message?.id,
             };
             const message = await this.threadService.post(thread, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
@@ -405,7 +399,7 @@ export class Composer extends Component {
                 );
             }
             this.suggestion.clearRawMentions();
-            this.messaging.cancelReplyTo();
+            this.props.messageToReplyTo?.cancel();
             if (this.typingNotified) {
                 this.typingNotified = false;
                 this.notifyIsTyping(false);
