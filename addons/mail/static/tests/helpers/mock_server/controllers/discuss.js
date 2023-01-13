@@ -240,33 +240,7 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
      * Simulates `/mail/message/add_reaction` route.
      */
     _mockRouteMailMessageAddReaction({ content, message_id: messageId }) {
-        this._mockMailMessage_messageAddReaction(content, messageId);
-        const reactions = this.pyEnv["mail.message.reaction"].search([
-            ["message_id", "=", messageId],
-            ["content", "=", content],
-        ]);
-        const currentPartner = this.pyEnv["res.partner"].searchRead([
-            ["id", "=", this.pyEnv.currentPartnerId],
-        ])[0];
-        return {
-            id: messageId,
-            messageReactionGroups: [
-                [
-                    reactions.length > 0 ? "insert" : "insert-and-unlink",
-                    {
-                        content,
-                        count: reactions.length,
-                        message: { id: messageId },
-                        partners: [
-                            [
-                                "insert",
-                                { id: this.pyEnv.currentPartnerId, name: currentPartner.name },
-                            ],
-                        ],
-                    },
-                ],
-            ],
-        };
+        return this._mockMailMessage_messageAddReaction(content, messageId);
     },
     /**
      * Simulates `/mail/message/remove_reaction` route.

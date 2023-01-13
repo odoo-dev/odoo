@@ -215,7 +215,7 @@ export class MessageService {
             subtype_description: subtypeDescription = message.subtypeDescription,
             ...remainingData
         } = data;
-        Object.assign(message, remainingData);
+        assignDefined(message, remainingData);
         assignDefined(message, {
             attachments: attachments.map((attachment) => this.attachment.insert(attachment)),
             isDiscussion,
@@ -324,23 +324,23 @@ export class MessageService {
             reaction._store = this.store;
         }
         const personasToUnlink = new Set();
-        const alreadyKnownPartnerIds = new Set(reaction.partnerIds);
+        const alreadyKnownPersonaIds = new Set(reaction.personaLocalIds);
         for (const rawPartner of data.partners) {
             const [command, partnerData] = Array.isArray(rawPartner)
                 ? rawPartner
                 : ["insert", rawPartner];
             const persona = this.persona.insert({ ...partnerData, type: "partner" });
-            if (command === "insert" && !alreadyKnownPartnerIds.has(persona.id)) {
+            if (command === "insert" && !alreadyKnownPersonaIds.has(persona.localId)) {
                 reaction.personaLocalIds.push(persona.localId);
             } else if (command !== "insert") {
-                personasToUnlink.add(persona);
+                personasToUnlink.add(persona.localId);
             }
         }
         Object.assign(reaction, {
             count: data.count,
             content: data.content,
             messageId: data.message.id,
-            partnerIds: reaction.personas.filter((persona) => !personasToUnlink.has(persona)),
+            personaLocalIds: reaction.personaLocalIds.filter((localId) => !personasToUnlink.has(localId)),
         });
         return reaction;
     }
