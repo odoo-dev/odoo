@@ -14,6 +14,7 @@ import {
     onWillStart,
     onWillUpdateProps,
     useChildSubEnv,
+    useEffect,
     useRef,
     useState,
 } from "@odoo/owl";
@@ -26,6 +27,27 @@ import { useAttachmentUploader, useHover, useScrollPosition } from "@mail/new/ut
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { _t } from "@web/core/l10n/translation";
 
+// todo: maybe move this to some utility file. it's not the first time we need
+// something like this
+function useAfterNextRender() {
+    let n = 1;
+    let resolves = [];
+    useEffect(
+        () => {
+            for (const r of resolves) {
+                r();
+            }
+            resolves = [];
+        },
+        () => [n]
+    );
+    return () => {
+        n++;
+        return new Promise((resolve) => {
+            resolves.push(resolve);
+        });
+    };
+}
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
     static defaultProps = {
@@ -36,6 +58,7 @@ export class Chatter extends Component {
         "hasActivity",
         "resId",
         "resModel",
+        "saveRecord",
         "displayName?",
         "isAttachmentBoxOpenedInitially?",
     ];
@@ -82,6 +105,7 @@ export class Chatter extends Component {
                 this.state.isAttachmentBoxOpened = true;
             }
         });
+        this.afternextRender = useAfterNextRender();
 
         onMounted(this.scrollPosition.restore);
         onPatched(this.scrollPosition.restore);
@@ -233,7 +257,16 @@ export class Chatter extends Component {
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 
-    toggleComposer(mode = false) {
+    async toggleComposer(mode = false) {
+        if (!this.props.resId) {
+            await this.props.saveRecord();
+            await this.afternextRender();
+            if (!this.props.resId) {
+                // the save operation did not result in a resId => it failed,
+                // probably because some required field is not set
+                return;
+            }
+        }
         if (this.thread.composer.type === mode) {
             this.thread.composer.type = false;
         } else {

@@ -28,6 +28,7 @@ patch(FormController.prototype, "mail/new", {
             rootT.setAttribute("chatter", "");
             rootT.setAttribute("t-if", "this.env.hasChatter()");
             const chatterTag = doc.createElement("Chatter");
+            chatterTag.setAttribute("saveRecord.bind", "saveButtonClicked");
             chatterTag.setAttribute("resId", "this.props.record.resId");
             chatterTag.setAttribute("resModel", "this.props.record.resModel");
             chatterTag.setAttribute("displayName", "this.props.record.data.display_name");
