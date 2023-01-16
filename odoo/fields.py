@@ -19,10 +19,11 @@ import logging
 import uuid
 import warnings
 
-from markupsafe import Markup
 import psycopg2
-from psycopg2.extras import Json as PsycopgJson
 import pytz
+from markupsafe import Markup
+from psycopg2.extras import Json as PsycopgJson, execute_values
+from psycopg2.sql import SQL, Identifier
 from difflib import get_close_matches
 from hashlib import sha256
 
@@ -4818,10 +4819,12 @@ class Many2many(_RelationalMulti):
         pairs = [(x, y) for x, ys in new_relation.items() for y in ys - old_relation[x]]
         if pairs:
             if self.store:
-                query = "INSERT INTO {} ({}, {}) VALUES {} ON CONFLICT DO NOTHING".format(
-                    self.relation, self.column1, self.column2, ", ".join(["%s"] * len(pairs)),
+                query = SQL("INSERT INTO {} ({}, {}) VALUES %s ON CONFLICT DO NOTHING").format(
+                    Identifier(self.relation),
+                    Identifier(self.column1),
+                    Identifier(self.column2),
                 )
-                cr.execute(query, pairs)
+                execute_values(cr._obj, query, pairs)
 
             # update the cache of inverse fields
             y_to_xs = defaultdict(set)
@@ -4857,9 +4860,13 @@ class Many2many(_RelationalMulti):
                 for y, xs in y_to_xs.items():
                     xs_to_ys[frozenset(xs)].add(y)
                 # delete the rows where (id1 IN xs AND id2 IN ys) OR ...
-                COND = "{} IN %s AND {} IN %s".format(self.column1, self.column2)
-                query = "DELETE FROM {} WHERE {}".format(
-                    self.relation, " OR ".join([COND] * len(xs_to_ys)),
+                COND = SQL("{} IN %s AND {} IN %s").format(
+                    Identifier(self.column1),
+                    Identifier(self.column2),
+                )
+                query = SQL("DELETE FROM {} WHERE {}").format(
+                    Identifier(self.relation),
+                    SQL(" OR ").join([COND] * len(xs_to_ys)),
                 )
                 params = [arg for xs, ys in xs_to_ys.items() for arg in [tuple(xs), tuple(ys)]]
                 cr.execute(query, params)
