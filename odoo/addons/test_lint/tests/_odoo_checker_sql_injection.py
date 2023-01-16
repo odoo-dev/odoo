@@ -216,19 +216,20 @@ class OdooBaseChecker(BaseChecker):
         """
         :type node: NodeNG
         """
+        scope = node.scope()
+        if isinstance(scope, astroid.FunctionDef) and (scope.name.startswith("_") or scope.name == 'init'):
+            return True
+
         infered = utils.safe_infer(node)
-        infered_value = self._is_constexpr(node)
         # The package 'psycopg2' must be installed to infer
         # ignore sql.SQL().format or variable that can be infered as constant
         if infered and infered.pytype().startswith('psycopg2'):
             return True
-        if infered_value: # If we can infer the value at compile time, it cannot be injected
+        if self._is_constexpr(node):  # If we can infer the value at compile time, it cannot be injected
             return True
+
         if isinstance(node, astroid.Call):
             node = node.func
-        scope = node.scope()
-        if isinstance(scope, astroid.FunctionDef) and scope.name.startswith("_"):
-            return True
         # self._thing is OK (mostly self._table), self._thing() also because
         # it's a common pattern of reports (self._select, self._group_by, ...)
         return (isinstance(node, astroid.Attribute)
