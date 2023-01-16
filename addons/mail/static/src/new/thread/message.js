@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
-import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { AttachmentList } from "@mail/new/attachments/attachment_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
 import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
