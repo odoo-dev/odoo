@@ -284,24 +284,6 @@ class OdooBaseChecker(BaseChecker):
     def _check_sql_injection_risky(self, node):
         # Inspired from OCA/pylint-odoo project
         # Thanks @moylop260 (Moisés López) & @nilshamerlinck (Nils Hamerlinck)
-        scope = node.scope()
-        fun_name = scope.name if isinstance(scope, astroid.FunctionDef) else None
-        if fun_name and not fun_name.startswith('__') and fun_name not in FUNCTION_WHITELIST:
-            if  fun_name not in  func_call.keys():#the fun prefix is to avoid overriding __init__ of the dict
-                func_call[fun_name] = [scope]
-            else:
-                if scope not in func_call[fun_name]:
-                    func_call[fun_name].append(scope)
-        if isinstance(scope, astroid.FunctionDef) and not  fun_name.startswith('__') and fun_name not in FUNCTION_WHITELIST:
-            mapped_func_called_for_query = list(map(lambda x: x[0], func_called_for_query))
-            if  fun_name in mapped_func_called_for_query:
-                index = mapped_func_called_for_query.index(fun_name)
-                position = func_called_for_query[index][1]
-                func_called_for_query.pop(index)
-                for return_node in self._get_return_node(scope):
-                    if not self._is_constexpr(return_node.value, position=position):
-                        return True
-
         current_file_bname = os.path.basename(self.linter.current_file)
         if not (
             # .execute() or .executemany()
@@ -325,6 +307,31 @@ class OdooBaseChecker(BaseChecker):
     @checkers.utils.check_messages('sql-injection')
     def visit_call(self, node):
         if self._check_sql_injection_risky(node):
+            self.add_message('sql-injection', node=node)
+
+    @checkers.utils.check_messages('sql-injection')
+    def visit_functiondef(self, node):
+        if os.path.basename(self.linter.current_file).startswith('test_'):
+            return
+
+        if node.name.startswith('__') or node.name in FUNCTION_WHITELIST:
+            return
+
+        nodes = func_call.setdefault(node.name, [])
+        if node not in nodes:
+            nodes.append(node)
+
+        mapped_func_called_for_query = [x[0] for x in func_called_for_query]
+        if node.name not in mapped_func_called_for_query:
+            return
+
+        index = mapped_func_called_for_query.index(node.name)
+        position = func_called_for_query[index][1]
+        func_called_for_query.pop(index)
+        if not all(
+            self._is_constexpr(return_node.value, position=position)
+            for return_node in self._get_return_node(node)
+        ):
             self.add_message('sql-injection', node=node)
 
 
