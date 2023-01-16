@@ -184,6 +184,7 @@ class OdooBaseChecker(BaseChecker):
                 else:
                     break
             return False
+        return False
 
     def _get_cursor_name(self, node):
         expr_list = []
