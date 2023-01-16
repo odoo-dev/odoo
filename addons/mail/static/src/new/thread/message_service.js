@@ -239,6 +239,7 @@ export class MessageService {
             message.author = this.persona.insert({
                 ...data.guestAuthor,
                 type: "guest",
+                channelId: message.originThread.id,
             });
         }
         if (data.recipients) {

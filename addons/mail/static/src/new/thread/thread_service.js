@@ -105,6 +105,7 @@ export class ThreadService {
                     persona: this.persona.insert({
                         ...channelMember.persona.guest,
                         type: "guest",
+                        channelId: thread.id,
                     }),
                     threadId: thread.id,
                 });
@@ -427,7 +428,11 @@ export class ThreadService {
                         this.persona.insert({ ...elem.persona.partner, type: "partner" });
                     }
                     if (elem.persona?.guest) {
-                        this.persona.insert({ ...elem.persona.guest, type: "guest" });
+                        this.persona.insert({
+                            ...elem.persona.guest,
+                            type: "guest",
+                            channelId: serverData.channel.id,
+                        });
                     }
                 });
             }

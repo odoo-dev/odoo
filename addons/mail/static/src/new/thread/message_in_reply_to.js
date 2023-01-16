@@ -20,12 +20,12 @@ export class MessageInReplyTo extends Component {
         const parentMessage = this.props.message.parentMessage;
         if (
             parentMessage.author &&
-            (parentMessage.resModel === "mail.channel" || !parentMessage.resModel)
+            (parentMessage.resModel !== "mail.channel" || !parentMessage.resModel)
         ) {
             return `/web/image/res.partner/${parentMessage.author.id}/avatar_128`;
         }
         if (parentMessage.author && parentMessage.resModel === "mail.channel") {
-            return `/mail/channel/${parentMessage.resId}/partner/${parentMessage.author.id}/avatar_128`;
+            return parentMessage.author.avatarUrl;
         }
         if (parentMessage.type === "email") {
             return "/mail/static/src/img/email_icon.png";

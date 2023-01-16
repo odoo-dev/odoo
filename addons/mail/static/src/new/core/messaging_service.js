@@ -124,6 +124,7 @@ export class Messaging {
             this.store.guest = this.persona.insert({
                 ...data.currentGuest,
                 type: "guest",
+                channelId: data.channels[0]?.id,
             });
         }
         if (session.user_context.uid) {
@@ -540,6 +541,7 @@ export class Messaging {
                             ...notif.payload.persona.partner,
                             ...notif.payload.persona.guest,
                             type: notif.payload.persona.partner ? "partner" : "guest",
+                            channelId: notif.payload.persona.guest ? channel.id : null,
                         }),
                         threadId: channel.id,
                     });

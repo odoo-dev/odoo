@@ -24,16 +24,6 @@ export class ChannelMember {
         this.personaLocalId = persona?.localId;
     }
 
-    get avatarUrl() {
-        if (this.persona.type === "partner") {
-            return `/mail/channel/${this.thread.id}/partner/${this.persona.id}/avatar_128`;
-        }
-        if (this.persona.type === "guest") {
-            return `/mail/channel/${this.thread.id}/guest/${this.persona.id}/avatar_128?unique=${this.persona.name}`;
-        }
-        return "";
-    }
-
     get thread() {
         return this._store.threads[createLocalId("mail.channel", this.threadId)];
     }
