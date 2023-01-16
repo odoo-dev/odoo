@@ -36,6 +36,9 @@ export class AttachmentService {
         if ("url" in data) {
             attachment.url = data.url;
         }
+        if ("extension" in data) {
+            attachment.extension = data.extension;
+        }
         if ("accessToken" in data) {
             attachment.accessToken = data.accessToken;
         }
