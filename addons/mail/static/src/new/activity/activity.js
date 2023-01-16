@@ -9,7 +9,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { ActivityMailTemplate } from "@mail/new/activity/activity_mail_template";
 import { ActivityMarkAsDone } from "./activity_markasdone_popover";
 import { computeDelay } from "@mail/new/utils/dates";
-import { useAttachmentUploader } from "@mail/new/utils/hooks";
+import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
 
 import { _t } from "@web/core/l10n/translation";
 

@@ -22,7 +22,8 @@ import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
-import { useAttachmentUploader, useHover, useScrollPosition } from "@mail/new/utils/hooks";
+import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
+import { useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { _t } from "@web/core/l10n/translation";
 
