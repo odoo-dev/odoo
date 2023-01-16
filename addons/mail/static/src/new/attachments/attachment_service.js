@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Attachment } from "./attachment_model";
-import { createLocalId } from "../utils/misc";
+import { assignDefined, createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
 
 export class AttachmentService {
@@ -14,33 +14,19 @@ export class AttachmentService {
     insert(data) {
         const attachment = new Attachment();
         attachment._store = this.store;
-        if ("id" in data) {
-            attachment.id = data.id;
-        }
-        if ("checksum" in data) {
-            attachment.checksum = data.checksum;
-        }
-        if ("filename" in data) {
-            attachment.filename = data.filename;
-        }
-        if ("mimetype" in data) {
-            attachment.mimetype = data.mimetype;
-        }
-        if ("name" in data) {
-            attachment.name = data.name;
+        assignDefined(attachment, data, [
+            "id",
+            "checksum",
+            "filename",
+            "mimetype",
+            "name",
+            "type",
+            "url",
+            "extension",
+            "accessToken",
+        ]);
+        if (!("extension" in data) && "name" in data) {
             attachment.extension = attachment.name.split(".").pop();
-        }
-        if ("type" in data) {
-            attachment.type = data.type;
-        }
-        if ("url" in data) {
-            attachment.url = data.url;
-        }
-        if ("extension" in data) {
-            attachment.extension = data.extension;
-        }
-        if ("accessToken" in data) {
-            attachment.accessToken = data.accessToken;
         }
         if ("originThread" in data) {
             const threadData = Array.isArray(data.originThread)

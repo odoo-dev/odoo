@@ -5,7 +5,7 @@ import { ChannelMember } from "../core/channel_member_model";
 import { Thread } from "../core/thread_model";
 import { _t } from "@web/core/l10n/translation";
 import { removeFromArray } from "@mail/new/utils/arrays";
-import { createLocalId } from "../utils/misc";
+import { assignDefined, createLocalId } from "../utils/misc";
 import { Composer } from "../core/composer_model";
 import { prettifyMessageContent } from "../utils/format";
 import { registry } from "@web/core/registry";
@@ -386,31 +386,20 @@ export class ThreadService {
         }
         if (data.serverData) {
             const { serverData } = data;
-            if ("uuid" in serverData) {
-                thread.uuid = serverData.uuid;
-            }
-            if ("authorizedGroupFullName" in serverData) {
-                thread.authorizedGroupFullName = serverData.authorizedGroupFullName;
-            }
-            if ("hasWriteAccess" in serverData) {
-                thread.hasWriteAccess = serverData.hasWriteAccess;
-            }
-            if ("is_pinned" in serverData) {
-                thread.is_pinned = serverData.is_pinned;
-            }
-            if ("message_needaction_counter" in serverData) {
-                thread.message_needaction_counter = serverData.message_needaction_counter;
-            }
+            assignDefined(thread, serverData, [
+                "uuid",
+                "authorizedGroupFullName",
+                "hasWriteAccess",
+                "is_pinned",
+                "message_needaction_counter",
+                "state",
+            ]);
 
             if (serverData.channel && "serverMessageUnreadCounter" in serverData.channel) {
                 thread.serverMessageUnreadCounter = serverData.channel.serverMessageUnreadCounter;
             }
-
             if ("seen_message_id" in serverData) {
                 thread.serverLastSeenMsgBySelf = serverData.seen_message_id;
-            }
-            if ("state" in serverData) {
-                thread.state = serverData.state;
             }
             if ("defaultDisplayMode" in serverData) {
                 thread.defaultDisplayMode = serverData.defaultDisplayMode;

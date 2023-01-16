@@ -4,12 +4,11 @@ export function createLocalId(...args) {
     return args.join(",");
 }
 
-export function assignDefined(obj, data) {
-    for (const key in data) {
-        if (data[key] === undefined) {
-            continue;
+export function assignDefined(obj, data, keys = Object.keys(data)) {
+    for (const key of keys) {
+        if (data[key] !== undefined) {
+            obj[key] = data[key];
         }
-        obj[key] = data[key];
     }
 }
 
