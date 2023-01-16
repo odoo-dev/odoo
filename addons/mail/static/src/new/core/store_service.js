@@ -63,7 +63,6 @@ export class Store {
             canView: true,
             canAdd: true,
             addTitle: _t("Add or join a channel"),
-            counter: 0,
             threads: [], // list of ids
         },
         chats: {
@@ -74,7 +73,6 @@ export class Store {
             canView: false,
             canAdd: true,
             addTitle: _t("Start a conversation"),
-            counter: 0,
             threads: [], // list of ids
         },
         // mailboxes in sidebar

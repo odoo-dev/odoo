@@ -646,6 +646,17 @@ export class ThreadService {
         }
         return lastSeenMessageId;
     }
+
+    getDiscussCategoryCounter(categoryId) {
+        return this.store.discuss[categoryId].threads.reduce((acc, threadLocalId) => {
+            const channel = this.store.threads[threadLocalId];
+            if (categoryId === "channels") {
+                return channel.message_needaction_counter > 0 ? acc + 1 : acc;
+            } else {
+                return this.localMessageUnreadCounter(channel) > 0 ? acc + 1 : acc;
+            }
+        }, 0);
+    }
 }
 
 export const threadService = {

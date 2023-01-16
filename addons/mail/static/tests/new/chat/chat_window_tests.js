@@ -723,7 +723,7 @@ QUnit.test("chat window should open when receiving a new DM", async function (as
     });
     const { env } = await start();
     // simulate receiving the first message on chat
-    afterNextRender(() =>
+    await afterNextRender(() =>
         env.services.rpc("/mail/chat_post", {
             context: {
                 mockedUserId: userId,

@@ -441,3 +441,243 @@ QUnit.test("mark channel as seen on last message visible", async function (asser
         "o-unread"
     );
 });
+
+QUnit.test(
+    "channel - counter: should not have a counter if the category is unfolded and without needaction messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_channel_open: true,
+        });
+        pyEnv["mail.channel"].create({ name: "general" });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Channels) .badge");
+    }
+);
+
+QUnit.test(
+    "channel - counter: should not have a counter if the category is unfolded and with needaction messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_channel_open: true,
+        });
+        const [channelId_1, channelId_2] = pyEnv["mail.channel"].create([
+            { name: "channel1" },
+            { name: "channel2" },
+        ]);
+        const [messageId_1, messageId_2] = pyEnv["mail.message"].create([
+            {
+                body: "message 1",
+                model: "mail.channel",
+                res_id: channelId_1,
+            },
+            {
+                body: "message_2",
+                model: "mail.channel",
+                res_id: channelId_2,
+            },
+        ]);
+        pyEnv["mail.notification"].create([
+            {
+                mail_message_id: messageId_1,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+            {
+                mail_message_id: messageId_2,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+        ]);
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Channels) .badge");
+    }
+);
+
+QUnit.test(
+    "channel - counter: should not have a counter if category is folded and without needaction messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create({});
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_channel_open: false,
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Channels) .badge");
+    }
+);
+
+QUnit.test(
+    "channel - counter: should have correct value of needaction threads if category is folded and with needaction messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const [channelId_1, channelId_2] = pyEnv["mail.channel"].create([
+            { name: "mailChannel1" },
+            { name: "mailChannel2" },
+        ]);
+        const [messageId_1, messageId_2] = pyEnv["mail.message"].create([
+            {
+                body: "message 1",
+                model: "mail.channel",
+                res_id: channelId_1,
+            },
+            {
+                body: "message_2",
+                model: "mail.channel",
+                res_id: channelId_2,
+            },
+        ]);
+        pyEnv["mail.notification"].create([
+            {
+                mail_message_id: messageId_1,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+            {
+                mail_message_id: messageId_2,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+        ]);
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_channel_open: false,
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-category:contains(Channels) .badge:contains(2)");
+    }
+);
+
+QUnit.test(
+    "chat - counter: should not have a counter if the category is unfolded and without unread messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_chat_open: true,
+        });
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        message_unread_counter: 0,
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Direct messages) .badge");
+    }
+);
+
+QUnit.test(
+    "chat - counter: should not have a counter if the category is unfolded and with unread messagens",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_chat_open: true,
+        });
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        message_unread_counter: 10,
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Direct messages) .badge");
+    }
+);
+
+QUnit.test(
+    "chat - counter: should not have a counter if category is folded and without unread messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_chat_open: false,
+        });
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        message_unread_counter: 0,
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-category:contains(Direct messages) .badge");
+    }
+);
+
+QUnit.test(
+    "chat - counter: should have correct value of unread threads if category is folded and with unread messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["res.users.settings"].create({
+            user_id: pyEnv.currentUserId,
+            is_discuss_sidebar_category_chat_open: false,
+        });
+        pyEnv["mail.channel"].create([
+            {
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            message_unread_counter: 10,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [
+                        0,
+                        0,
+                        {
+                            message_unread_counter: 20,
+                            partner_id: pyEnv.currentPartnerId,
+                        },
+                    ],
+                ],
+                channel_type: "chat",
+            },
+        ]);
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        assert.containsOnce(
+            target,
+            ".o-mail-category:contains(Direct messages) .badge:contains(2)"
+        );
+    }
+);
