@@ -549,12 +549,19 @@ export class ThreadService {
         let tmpMsg;
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions = this.message.getMentionsFromText(rawMentions, body);
+        const partner_ids = validMentions.partners.map((partner) => partner.id);
+        if (!isNote) {
+            const suggestedRecipients = thread.suggestedRecipients
+                .filter((recipient) => recipient.persona && recipient.checked)
+                .map((recipient) => recipient.persona.id);
+            partner_ids.push(...suggestedRecipients);
+        }
         const params = {
             post_data: {
                 body: await prettifyMessageContent(body, validMentions),
                 attachment_ids: attachments.map(({ id }) => id),
                 message_type: "comment",
-                partner_ids: validMentions.partners.map((partner) => partner.id),
+                partner_ids,
                 subtype_xmlid: subtype,
             },
             thread_id: thread.id,

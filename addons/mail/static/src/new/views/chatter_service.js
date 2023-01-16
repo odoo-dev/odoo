@@ -4,6 +4,7 @@ import { Follower } from "@mail/new/core/follower_model";
 import { _t } from "@web/core/l10n/translation";
 import { createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
+import { parseEmail } from "@mail/js/utils";
 
 export class ChatterService {
     constructor(env, services) {
@@ -18,12 +19,46 @@ export class ChatterService {
         this.orm = services.orm;
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];
+        /** @type {import("@mail/new/core/messaging_service").Messaging} */
+        this.messaging = services["mail.messaging"];
     }
 
+    /**
+     * @param {import("@mail/new/core/thread_model").Thread} thread
+     * @param {import("@mail/new/core/thread_model").SuggestedReciptient[]} suggestedRecipients
+     */
+    async loadSuggestedRecipients(thread, suggestedRecipients) {
+        const recipients = [];
+        for (const suggestedRecipient of suggestedRecipients) {
+            const [partner_id, emailInfo, lang, reason] = suggestedRecipient;
+            const [name, email] = emailInfo && parseEmail(emailInfo);
+            recipients.push({
+                id: this.messaging.nextId++,
+                name,
+                email,
+                lang,
+                reason,
+                persona: partner_id
+                    ? this.persona.insert({
+                          type: "partner",
+                          id: partner_id,
+                      })
+                    : false,
+                checked: partner_id ? true : false,
+            });
+        }
+        thread.suggestedRecipients = recipients;
+    }
+
+    /**
+     * @param {number} resId
+     * @param {string} resModel
+     * @param {['activities'|'followers'|'attachments'|'messages'|'suggestedRecipients']} requestList
+     */
     async fetchData(
         resId,
         resModel,
-        requestList = ["activities", "followers", "attachments", "messages"]
+        requestList = ["activities", "followers", "attachments", "messages", "suggestedRecipients"]
     ) {
         if (requestList.includes("messages")) {
             this.thread.fetchNewMessages(this.thread.insert({ model: resModel, id: resId }));
@@ -112,7 +147,15 @@ export class ChatterService {
 }
 
 export const chatterService = {
-    dependencies: ["mail.store", "mail.thread", "mail.message", "rpc", "orm", "mail.persona"],
+    dependencies: [
+        "mail.store",
+        "mail.thread",
+        "mail.message",
+        "rpc",
+        "orm",
+        "mail.persona",
+        "mail.messaging",
+    ],
     start(env, services) {
         return new ChatterService(env, services);
     },

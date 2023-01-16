@@ -26,6 +26,7 @@ import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader
 import { useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { ComposerSuggestedRecipientsList } from "../composer/composer_suggested_recipient_list";
 
 /**
  * @typedef {Object} Props
@@ -33,16 +34,26 @@ import { _t } from "@web/core/l10n/translation";
  * @extends {Component<Props, Env>}
  */
 export class Chatter extends Component {
-    static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
+    static components = {
+        AttachmentList,
+        Dropdown,
+        Thread,
+        Composer,
+        Activity,
+        FileUploader,
+        ComposerSuggestedRecipientsList,
+    };
     static defaultProps = {
         compactHeight: false,
         hasActivity: true,
         resId: false,
+        hasFollowers: true,
     };
     static props = [
         "close?",
         "compactHeight?",
         "hasActivity?",
+        "hasFollowers?",
         "resId?",
         "resModel",
         "displayName?",
@@ -52,9 +63,7 @@ export class Chatter extends Component {
 
     /** @type {import("@mail/new/core/messaging_service").Messaging} */
     messaging;
-    /**
-     * @type {import("@mail/new/core/thread_model").Thread}
-     */
+    /** @type {import("@mail/new/core/thread_model").Thread} */
     thread;
 
     setup() {
@@ -62,8 +71,11 @@ export class Chatter extends Component {
         this.messaging = useMessaging();
         this.activity = useState(useService("mail.activity"));
         this.attachment = useService("mail.attachment");
+        /** @type {import("@mail/new/views/chatter_service").ChatterService} */
         this.chatter = useState(useService("mail.chatter"));
         this.threadService = useService("mail.thread");
+        /** @type {import('@mail/new/core/persona_service').PersonaService} */
+        this.personaService = useService("mail.persona");
         this.store = useStore();
         this.orm = useService("orm");
         this.rpc = useService("rpc");
@@ -94,11 +106,13 @@ export class Chatter extends Component {
 
         onMounted(this.scrollPosition.restore);
         onPatched(this.scrollPosition.restore);
-        onWillStart(() => this.load(this.props.resId, ["followers", "attachments"]));
+        onWillStart(() =>
+            this.load(this.props.resId, ["followers", "attachments", "suggestedRecipients"])
+        );
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
                 this.state.isLoadingAttachments = false;
-                this.load(nextProps.resId, ["followers", "attachments"]);
+                this.load(nextProps.resId, ["followers", "attachments", "suggestedRecipients"]);
                 if (nextProps.resId === false) {
                     this.thread.composer.type = false;
                 }
@@ -132,7 +146,14 @@ export class Chatter extends Component {
         return !this.props.resId || !this.thread.hasReadAccess;
     }
 
-    load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
+    /**
+     * @param {number} resId
+     * @param {['activities'|'followers'|'attachments'|'messages'|'suggestedRecipients']} requestList
+     */
+    load(
+        resId = this.props.resId,
+        requestList = ["followers", "attachments", "messages", "suggestedRecipients"]
+    ) {
         const { resModel } = this.props;
         const thread = this.chatter.getThread(resModel, resId);
         this.thread = thread;
@@ -175,6 +196,9 @@ export class Chatter extends Component {
                         ...followerData,
                     });
                 }
+            }
+            if ("suggestedRecipients" in result) {
+                this.chatter.loadSuggestedRecipients(this.thread, result.suggestedRecipients);
             }
         });
     }

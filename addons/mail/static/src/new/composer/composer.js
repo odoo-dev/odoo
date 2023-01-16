@@ -39,7 +39,12 @@ export const LONG_TYPING = 50000;
  * @extends {Component<Props, Env>}
  */
 export class Composer extends Component {
-    static components = { NavigableList, AttachmentList, FileUploader, Typing };
+    static components = {
+        NavigableList,
+        AttachmentList,
+        FileUploader,
+        Typing,
+    };
     static defaultProps = {
         mode: "normal",
     }; // mode = compact, normal, extended
