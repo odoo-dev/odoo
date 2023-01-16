@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Attachment } from "../core/attachment_model";
+import { Attachment } from "./attachment_model";
 import { createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
 
