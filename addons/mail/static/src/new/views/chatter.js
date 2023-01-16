@@ -3,7 +3,7 @@
 import { Thread } from "../thread/thread";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
-import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { AttachmentList } from "@mail/new/attachments/attachment_list";
 import { Composer } from "../composer/composer";
 import { Activity } from "@mail/new/activity/activity";
 import {
