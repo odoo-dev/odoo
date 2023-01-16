@@ -20,6 +20,9 @@ patch(FormController.prototype, "mail/new", {
         this.hasChatter = Boolean(xmlDocChatter);
         this.hasActivity =
             this.hasChatter && Boolean(xmlDocChatter.querySelector("field[name='activity_ids']"));
+        this.hasFollowers =
+            this.hasChatter &&
+            Boolean(xmlDocChatter.querySelector("field[name='message_follower_ids']"));
         this.isAttachmentBoxOpenedInitially =
             this.hasChatter && this._isAttachmentBoxOpenedInitially(xmlDocChatter);
         if (xmlDocChatter) {
@@ -32,6 +35,7 @@ patch(FormController.prototype, "mail/new", {
             chatterTag.setAttribute("resModel", "this.props.record.resModel");
             chatterTag.setAttribute("displayName", "this.props.record.data.display_name");
             chatterTag.setAttribute("hasActivity", this.hasActivity);
+            chatterTag.setAttribute("hasFollowers", this.hasFollowers);
             chatterTag.setAttribute(
                 "isAttachmentBoxOpenedInitially",
                 this.isAttachmentBoxOpenedInitially

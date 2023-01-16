@@ -6,6 +6,19 @@ import { sprintf } from "@web/core/utils/strings";
 import { ScrollPosition } from "@mail/new/core/scroll_position_model";
 import { createLocalId } from "../utils/misc";
 
+/**
+ * @typedef SeenInfo
+ * @property {{id: number|undefined}} lastFetchedMessage
+ * @property {{id: number|undefined}} lastSeenMessage
+ * @property {{id: number}} partner
+ * @typedef SuggestedReciptient
+ * @property {string} email
+ * @property {import('@mail/new/core/persona_model').Persona|false} persona
+ * @property {string} lang
+ * @property {string} reason
+ * @property {boolean} checked
+ */
+
 export class Thread {
     /** @type {number} */
     id;
@@ -51,15 +64,11 @@ export class Thread {
     _store;
     /** @type {string} */
     defaultDisplayMode;
-    /**
-     * @typedef SeenInfo
-     * @property {{id: number|undefined}} lastFetchedMessage
-     * @property {{id: number|undefined}} lastSeenMessage
-     * @property {{id: number}} partner
-     */
     /** @type {SeenInfo[]} */
     seenInfos = [];
     serverMessageUnreadCounter = 0;
+    /** @type {SuggestedReciptient[]} */
+    suggestedRecipients = [];
 
     constructor(store, data) {
         Object.assign(this, {
