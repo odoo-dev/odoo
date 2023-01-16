@@ -6,6 +6,10 @@
     display: none;
 }
 
+.o-mail-chatter-topbar-close-button {
+    width: $o-statusbar-height;
+}
+
 .o-mail-chatter-topbar-follower-list-button:focus {
     background-color: $gray-200;
 }

@@ -27,6 +27,11 @@ import { useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { _t } from "@web/core/l10n/translation";
 
+/**
+ * @typedef {Object} Props
+ * @property {function} [close]
+ * @extends {Component<Props, Env>}
+ */
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
     static defaultProps = {
@@ -34,6 +39,7 @@ export class Chatter extends Component {
         hasActivity: true,
     };
     static props = [
+        "close?",
         "compactHeight?",
         "hasActivity?",
         "resId",

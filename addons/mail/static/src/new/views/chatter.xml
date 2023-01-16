@@ -70,6 +70,9 @@
                 </button>
                 <button t-if="!thread.followerOfSelf" class="o-mail-chatter-topbar-follow btn btn-link text-600" t-on-click="onClickFollow">Follow</button>
             </div>
+            <button t-if="props.close" class="o-mail-chatter-topbar-close-button btn btn-dark flex-shrink-0 rounded-bottom-3" aria-label="Close" t-on-click="props.close">
+                <i class="oi oi-large oi-close"/>
+            </button>
         </div>
         <t t-if="thread.composer.type">
             <t t-if="thread.composer.type === 'message'">
