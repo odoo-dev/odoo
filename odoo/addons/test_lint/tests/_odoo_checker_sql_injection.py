@@ -1,4 +1,9 @@
+import contextlib
+import contextvars
 import os
+from contextlib import ExitStack
+from typing import Optional
+
 import astroid
 try:
     from astroid import NodeNG
@@ -26,6 +31,15 @@ FUNCTION_WHITELIST = [
 
 func_call = {}
 func_called_for_query = []
+root_call: contextvars.ContextVar[Optional[astroid.Call]] =\
+    contextvars.ContextVar('root_call', default=None)
+@contextlib.contextmanager
+def push_call(node: astroid.Call):
+    with ExitStack() as s:
+        if root_call.get() is None:
+            t = root_call.set(node)
+            s.callback(root_call.reset, t)
+        yield
 
 class OdooBaseChecker(BaseChecker):
     __implements__ = interfaces.IAstroidChecker
@@ -75,7 +89,7 @@ class OdooBaseChecker(BaseChecker):
         if name == node.scope().name:
             return True
         if  name not in func_called_for_query:
-            func_called_for_query.append((name, position))
+            func_called_for_query.append((name, position, root_call.get()))
             cst_args = self.all_const(node.args, args_allowed=args_allowed)
         if  name in func_call:
             for fun in func_call[name]:
@@ -164,7 +178,8 @@ class OdooBaseChecker(BaseChecker):
                     and self.all_const(node.args, args_allowed=args_allowed)
                     and self.all_const((key.value for key in node.keywords or []), args_allowed=args_allowed)
                     )
-            return self._evaluate_function_call(node, args_allowed=args_allowed, position=position)
+            with push_call(node):
+                return self._evaluate_function_call(node, args_allowed=args_allowed, position=position)
         elif isinstance(node, astroid.IfExp):
             body = self._is_constexpr(node.body, args_allowed=args_allowed)
             orelse = self._is_constexpr(node.orelse, args_allowed=args_allowed)
@@ -327,13 +342,12 @@ class OdooBaseChecker(BaseChecker):
             return
 
         index = mapped_func_called_for_query.index(node.name)
-        position = func_called_for_query[index][1]
-        func_called_for_query.pop(index)
+        _, position, call = func_called_for_query.pop(index)
         if not all(
             self._is_constexpr(return_node.value, position=position)
             for return_node in self._get_return_node(node)
         ):
-            self.add_message('sql-injection', node=node)
+            self.add_message('sql-injection', node=call)
 
 
 def register(linter):
