@@ -629,52 +629,6 @@ QUnit.module("mail", {}, function () {
         );
 
         QUnit.skipRefactoring(
-            "chat window should open when receiving a new DM",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                const resUsersId1 = pyEnv["res.users"].create({ partner_id: resPartnerId1 });
-                pyEnv["mail.channel"].create({
-                    channel_member_ids: [
-                        [
-                            0,
-                            0,
-                            {
-                                is_pinned: false,
-                                partner_id: pyEnv.currentPartnerId,
-                            },
-                        ],
-                        [0, 0, { partner_id: resPartnerId1 }],
-                    ],
-                    channel_type: "chat",
-                    uuid: "channel11uuid",
-                });
-                const { messaging } = await start();
-
-                // simulate receiving the first message on channel 11
-                await afterNextRender(() =>
-                    messaging.rpc({
-                        route: "/mail/chat_post",
-                        params: {
-                            context: {
-                                mockedUserId: resUsersId1,
-                            },
-                            message_content: "new message",
-                            uuid: "channel11uuid",
-                        },
-                    })
-                );
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-chat-window",
-                    "a chat window should be open now that current user received a new message"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
             "chat window should remain folded when new message is received",
             async function (assert) {
                 assert.expect(1);

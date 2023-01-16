@@ -701,3 +701,36 @@ QUnit.test(
         assert.containsNone(target, "hr + span:contains(New messages)");
     }
 );
+
+QUnit.test("chat window should open when receiving a new DM", async function (assert) {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId });
+    pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    is_pinned: false,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+            [0, 0, { partner_id: partnerId }],
+        ],
+        channel_type: "chat",
+        uuid: "channel-uuid",
+    });
+    const { env } = await start();
+    // simulate receiving the first message on chat
+    afterNextRender(() =>
+        env.services.rpc("/mail/chat_post", {
+            context: {
+                mockedUserId: userId,
+            },
+            message_content: "new message",
+            uuid: "channel-uuid",
+        })
+    );
+    assert.containsOnce(target, ".o-mail-chat-window");
+});
