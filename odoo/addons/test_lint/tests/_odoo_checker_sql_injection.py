@@ -159,13 +159,11 @@ class OdooBaseChecker(BaseChecker):
                 if node.func.attrname == 'append':
                     return self._is_constexpr(node.args[0])
                 elif node.func.attrname == 'format':
-                    if not node.keywords: # no args in format
-                        return self._is_constexpr(node.func.expr, args_allowed=args_allowed)
-                    else:
-                        return self.all_const(
-                            (key.value for key in node.keywords),
-                            args_allowed=args_allowed,
-                        )
+                    return (
+                        self._is_constexpr(node.func.expr, args_allowed=args_allowed)
+                    and self.all_const(node.args, args_allowed=args_allowed)
+                    and self.all_const((key.value for key in node.keywords or []), args_allowed=args_allowed)
+                    )
             return self._evaluate_function_call(node, args_allowed=args_allowed, position=position)
         elif isinstance(node, astroid.IfExp):
             body = self._is_constexpr(node.body, args_allowed=args_allowed)
