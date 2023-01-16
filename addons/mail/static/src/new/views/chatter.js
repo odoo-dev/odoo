@@ -36,12 +36,13 @@ export class Chatter extends Component {
     static defaultProps = {
         compactHeight: false,
         hasActivity: true,
+        resId: false,
     };
     static props = [
         "close?",
         "compactHeight?",
         "hasActivity?",
-        "resId",
+        "resId?",
         "resModel",
         "displayName?",
         "isAttachmentBoxOpenedInitially?",
