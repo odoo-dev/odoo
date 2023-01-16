@@ -235,6 +235,7 @@ export function useAttachmentUploader(pThread, message) {
     const messaging = useService("mail.messaging");
     const store = useService("mail.store");
     const threadService = useService("mail.thread");
+    const attachmentService = useService("mail.attachment");
     let abortByUploadId = {};
     let deferredByUploadId = {};
     const uploadingAttachmentIds = new Set();
@@ -299,16 +300,16 @@ export function useAttachmentUploader(pThread, message) {
         const threadModel = upload.data.get("thread_model");
         const originThread = threadService.insert({ model: threadModel, id: threadId });
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
-        state.attachments.push({
-            extension: upload.title.split(".").pop(),
+        const attachment = attachmentService.insert({
             filename: upload.title,
             id: upload.id,
             mimetype: upload.type,
             name: upload.title,
             originThread,
-            size: upload.total,
+            extension: upload.title.split(".").pop(),
             uploading: true,
         });
+        state.attachments.push(attachment);
     });
     useBus(bus, "FILE_UPLOAD_LOADED", ({ detail: { upload } }) => {
         const tmpId = parseInt(upload.data.get("temporary_id"));
@@ -325,11 +326,11 @@ export function useAttachmentUploader(pThread, message) {
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
         const originThread = store.threads[createLocalId(threadModel, threadId)];
-        const attachment = {
+        const attachment = attachmentService.insert({
             ...response,
             extension: upload.title.split(".").pop(),
             originThread,
-        };
+        });
         const index = state.attachments.findIndex(({ id }) => id === upload.id);
         if (index >= 0) {
             state.attachments[index] = attachment;
