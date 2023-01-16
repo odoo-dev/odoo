@@ -24,7 +24,7 @@ export class AttachmentList extends Component {
         // Arbitrary high value, this is effectively a max-width.
         this.imagesWidth = 1920;
         this.dialog = useService("dialog");
-        this.attachmentViewerService = useAttachmentViewer();
+        this.attachmentViewer = useAttachmentViewer();
     }
 
     get nonImagesAttachments() {

@@ -19,7 +19,7 @@
                     aria-label="View image"
                     role="menuitem"
                     t-att-data-mimetype="attachment.mimetype"
-                    t-on-click="() => this.attachmentViewerService.open(attachment, props.attachments)"
+                    t-on-click="() => this.attachmentViewer.open(attachment, props.attachments)"
                 >
                     <img t-if="!attachment.uploading" class="img img-fluid my-0 mx-auto o-mail-viewable" t-att-src="getImageUrl(attachment)" t-att-alt="attachment.name" t-attf-style="max-width: min(100%, {{ imagesWidth }}px); max-height: {{ props.imagesHeight }}px;"/>
                     <div t-if="attachment.uploading" class="position-absolute top-0 bottom-0 start-0 end-0 d-flex align-items-center justify-content-center" title="Uploading">
@@ -46,7 +46,7 @@
                         'o-mail-viewable': attachment.isViewable,
                         'o-mail-is-uploading': attachment.uploading,
                     }" t-att-title="attachment.name ? attachment.name : undefined" role="menu" t-att-aria-label="attachment.name"
-                     t-on-click="() => this.attachmentViewerService.open(attachment, props.attachments)"
+                     t-on-click="() => this.attachmentViewer.open(attachment, props.attachments)"
                 >
                     <!-- o_image from mimetype.scss -->
                     <div class="o-mail-attachment-image o_image flex-shrink-0 m-1" role="menuitem" aria-label="Preview" t-att-tabindex="-1" t-att-aria-disabled="false" t-att-data-mimetype="attachment.mimetype" />

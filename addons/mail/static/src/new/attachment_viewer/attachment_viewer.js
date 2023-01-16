@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
-import { useAttachmentViewer } from "./attachment_viewer_hook";
 
 /**
  * @typedef {Object} Props
@@ -11,7 +10,7 @@ import { useAttachmentViewer } from "./attachment_viewer_hook";
 export class AttachmentViewer extends Component {
     static template = "mail.attachment_viewer";
     static components = {};
-    static props = ["attachments"];
+    static props = ["attachments", "startIndex", "close"];
 
     setup() {
         this.imageRef = useRef("image");
@@ -31,10 +30,10 @@ export class AttachmentViewer extends Component {
             y: 0,
         };
 
-        this.attachmentViewerService = useAttachmentViewer();
         useExternalListener(window, "keydown", this.onKeydown);
         this.state = useState({
-            attachment: this.props.attachments[this.attachmentViewerService.state.startIndex],
+            index: this.props.startIndex,
+            attachment: this.props.attachments[this.props.startIndex],
             imageLoaded: false,
             scale: 1,
             angle: 0,
@@ -46,23 +45,22 @@ export class AttachmentViewer extends Component {
     }
 
     close() {
-        this.attachmentViewerService.close();
+        this.props.close();
     }
 
     next() {
-        const index = this.props.attachments.findIndex(
-            (document) => document === this.state.attachment
-        );
-        const nextIndex = index === this.props.attachments.length - 1 ? 0 : index + 1;
-        this.state.attachment = this.props.attachments[nextIndex];
+        const last = this.props.attachments.length - 1;
+        this.activateAttachment(this.state.index === last ? 0 : this.state.index + 1);
     }
 
     previous() {
-        const index = this.props.attachments.findIndex(
-            (document) => document === this.state.attachment
-        );
-        const prevIndex = index === 0 ? this.props.attachments.length - 1 : index - 1;
-        this.state.attachment = this.props.attachments[prevIndex];
+        const last = this.props.attachments.length - 1;
+        this.activateAttachment(this.state.index === 0 ? last : this.state.index - 1);
+    }
+
+    activateAttachment(index) {
+        this.state.index = index;
+        this.state.attachment = this.props.attachments[index];
     }
 
     onKeydown(ev) {
