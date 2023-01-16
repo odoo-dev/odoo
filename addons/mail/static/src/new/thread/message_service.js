@@ -23,7 +23,7 @@ export class MessageService {
         this.presence = services.presence;
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];
-        /** @type {import("@mail/new/attachment_viewer/attachment_service").AttachmentService} */
+        /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
         this.attachment = services["mail.attachment"];
     }
 
@@ -340,7 +340,9 @@ export class MessageService {
             count: data.count,
             content: data.content,
             messageId: data.message.id,
-            personaLocalIds: reaction.personaLocalIds.filter((localId) => !personasToUnlink.has(localId)),
+            personaLocalIds: reaction.personaLocalIds.filter(
+                (localId) => !personasToUnlink.has(localId)
+            ),
         });
         return reaction;
     }

@@ -32,7 +32,7 @@ import { activityService } from "@mail/new/activity/activity_service";
 import { chatterService } from "@mail/new/views/chatter_service";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
 import { personaService } from "@mail/new/core/persona_service";
-import { attachmentService } from "@mail/new/attachment_viewer/attachment_service";
+import { attachmentService } from "@mail/new/attachments/attachment_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
