@@ -26,6 +26,7 @@ export class Persona {
     /** @type {ImStatus} */
     im_status;
     isAdmin = false;
+    channelId;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
@@ -34,7 +35,7 @@ export class Persona {
             case "partner":
                 return `/mail/channel/1/partner/${this.id}/avatar_128`;
             case "guest":
-                return `/web/image/mail.guest/${this.id}/avatar_128?unique=${this.name}`;
+                return `/mail/channel/${this.channelId}/guest/${this.id}/avatar_128?unique=${this.name}`;
             default:
                 return "";
         }

@@ -169,12 +169,4 @@ export class Discuss extends Component {
             await this.personaService.updateGuestName(this.store.self, newName);
         }
     }
-
-    get avatarUrl() {
-        if (this.store.guest) {
-            return `/mail/channel/${this.thread.id}/guest/${this.store.guest.id}/avatar_128?unique=${this.store.guest.name}`;
-        } else {
-            return this.store.user.avatarUrl;
-        }
-    }
 }

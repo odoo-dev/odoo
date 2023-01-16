@@ -23,7 +23,7 @@
                         'o-isInvitation': !props.session,
                         }"
                         class="o-mail-call-participant-card-avatarImage h-100 rounded-circle border-5 o_object_fit_cover"
-                        t-att-src="avatarUrl"
+                        t-att-src="props.session.channelMember?.persona.avatarUrl"
                         draggable="false"
                 />
             </div>

@@ -175,13 +175,6 @@ export class Composer extends Component {
         this.stopTyping();
     }
 
-    get avatarUrl() {
-        if (this.store.self?.type === "guest") {
-            return `/mail/channel/${this.props.composer.thread.id}/guest/${this.store.self.id}/avatar_128?unique=${this.store.self.name}`;
-        }
-        return this.store.user.avatarUrl;
-    }
-
     get hasSuggestions() {
         return this.suggestion.state.items.length > 0;
     }

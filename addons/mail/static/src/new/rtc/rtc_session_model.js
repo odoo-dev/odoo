@@ -36,13 +36,6 @@ export class RtcSession {
         return this._store.threads[createLocalId("mail.channel", this.channelId)];
     }
 
-    /**
-     * @returns {string}
-     */
-    get avatarUrl() {
-        return this.channelMember?.avatarUrl;
-    }
-
     get isMute() {
         return this.isSelfMuted || this.isDeaf;
     }

@@ -128,14 +128,6 @@ export class Message extends Component {
         }
     }
 
-    get avatarUrl() {
-        if (this.message.author?.type === "guest") {
-            return `/mail/channel/${this.message.originThread.id}/guest/${this.message.author.id}/avatar_128?unique=${this.message.author.name}`;
-        } else {
-            return this.message.author?.avatarUrl;
-        }
-    }
-
     get message() {
         return this.props.message;
     }

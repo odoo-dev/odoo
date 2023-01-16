@@ -41,10 +41,6 @@ export class CallParticipantCard extends Component {
         return this.props.session.channelMember?.persona.name;
     }
 
-    get avatarUrl() {
-        return this.props.session.channelMember?.avatarUrl;
-    }
-
     get hasVideo() {
         return Boolean(this.props.session.videoStream);
     }

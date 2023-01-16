@@ -1160,6 +1160,7 @@ export class Rtc {
                     ...channelMember.persona.partner,
                     ...channelMember.persona.guest,
                     type: channelMember.persona.partner ? "partner" : "guest",
+                    channelId: channelMember.persona.guest && channelMember.channel.id,
                 }),
                 threadId: channelMember.channel.id,
             });
