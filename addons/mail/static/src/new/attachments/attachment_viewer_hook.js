@@ -12,7 +12,7 @@ export function useAttachmentViewer() {
      * @param {import("@mail/new/core/attachment_model").Attachment} attachment
      * @param {import("@mail/new/core/attachment_model").Attachment[]} attachments
      */
-    function open(attachment, attachments = []) {
+    function open(attachment, attachments = [attachment]) {
         if (!attachment.isViewable) {
             return;
         }
