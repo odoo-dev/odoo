@@ -31,10 +31,11 @@ export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
     static defaultProps = {
         compactHeight: false,
+        hasActivity: true,
     };
     static props = [
         "compactHeight?",
-        "hasActivity",
+        "hasActivity?",
         "resId",
         "resModel",
         "displayName?",
