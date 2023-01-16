@@ -1,6 +1,7 @@
 /* @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, onMounted, onWillUnmount } from "@odoo/owl";
+import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { useMessaging } from "../core/messaging_hook";
 import { CallMain } from "@mail/new/rtc/call_main";
@@ -16,6 +17,13 @@ export class Call extends Component {
         this.notification = useService("notification");
         this.state = useState({
             isFullscreen: false,
+        });
+        this.onFullScreenChange = this.onFullScreenChange.bind(this);
+        onMounted(() => {
+            browser.addEventListener("fullscreenchange", this.onFullScreenChange);
+        });
+        onWillUnmount(() => {
+            browser.removeEventListener("fullscreenchange", this.onFullScreenChange);
         });
     }
 
@@ -58,5 +66,14 @@ export class Call extends Component {
             }
         }
         this.state.isFullscreen = false;
+    }
+
+    /**
+     * @private
+     */
+    onFullScreenChange() {
+        this.state.isFullscreen = Boolean(
+            document.webkitFullscreenElement || document.fullscreenElement
+        );
     }
 }
