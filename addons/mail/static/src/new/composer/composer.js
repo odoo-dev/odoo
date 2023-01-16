@@ -1,7 +1,8 @@
 /* @odoo-module */
 
 import { AttachmentList } from "@mail/new/attachments/attachment_list";
-import { onExternalClick, useAttachmentUploader, useSelection } from "@mail/new/utils/hooks";
+import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
+import { onExternalClick, useSelection } from "@mail/new/utils/hooks";
 import { isDragSourceExternalFile, isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import {
     Component,

@@ -8,7 +8,7 @@ import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
 
 import { computeDelay } from "@mail/new/utils/dates";
-import { useAttachmentUploader } from "@mail/new/utils/hooks";
+import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
 
 import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
