@@ -1,4 +1,26 @@
 /* @odoo-module */
+import { assignDefined, createLocalId } from "../utils/misc";
+import { registry } from "@web/core/registry";
+
+const textMimeTypes = [
+    "application/javascript",
+    "application/json",
+    "text/css",
+    "text/html",
+    "text/plain",
+];
+
+const imageMimetypes = [
+    "image/bmp",
+    "image/gif",
+    "image/jpeg",
+    "image/png",
+    "image/svg+xml",
+    "image/tiff",
+    "image/x-icon",
+];
+
+const videoMimeTypes = ["audio/mpeg", "video/x-matroska", "video/mp4", "video/webm"];
 
 export class Attachment {
     /** @type {import("@mail/new/core/store_service").Store} */
@@ -24,14 +46,7 @@ export class Attachment {
     }
 
     get isText() {
-        const textMimeType = [
-            "application/javascript",
-            "application/json",
-            "text/css",
-            "text/html",
-            "text/plain",
-        ];
-        return textMimeType.includes(this.mimetype);
+        return textMimeTypes.includes(this.mimetype);
     }
 
     get isPdf() {
@@ -39,15 +54,6 @@ export class Attachment {
     }
 
     get isImage() {
-        const imageMimetypes = [
-            "image/bmp",
-            "image/gif",
-            "image/jpeg",
-            "image/png",
-            "image/svg+xml",
-            "image/tiff",
-            "image/x-icon",
-        ];
         return imageMimetypes.includes(this.mimetype);
     }
 
@@ -60,7 +66,6 @@ export class Attachment {
     }
 
     get isVideo() {
-        const videoMimeTypes = ["audio/mpeg", "video/x-matroska", "video/mp4", "video/webm"];
         return videoMimeTypes.includes(this.mimetype);
     }
 
@@ -118,3 +123,46 @@ export class Attachment {
         return `/web/content/ir.attachment/${this.id}/datas?${accessToken}download=true`;
     }
 }
+
+export class AttachmentService {
+    constructor(env, services) {
+        this.env = env;
+        /** @type {import("@mail/new/core/store_service").Store} */
+        this.store = services["mail.store"];
+    }
+
+    insert(data) {
+        const attachment = new Attachment();
+        attachment._store = this.store;
+        assignDefined(attachment, data, [
+            "id",
+            "checksum",
+            "filename",
+            "mimetype",
+            "name",
+            "type",
+            "url",
+            "extension",
+            "accessToken",
+        ]);
+        if (!("extension" in data) && "name" in data) {
+            attachment.extension = attachment.name.split(".").pop();
+        }
+        if ("originThread" in data) {
+            const threadData = Array.isArray(data.originThread)
+                ? data.originThread[0][1]
+                : data.originThread;
+            attachment.originThreadLocalId = createLocalId(threadData.model, threadData.id);
+        }
+        return attachment;
+    }
+}
+
+export const attachmentService = {
+    dependencies: ["mail.store"],
+    start(env, services) {
+        return new AttachmentService(env, services);
+    },
+};
+
+registry.category("services").add("mail.attachment", attachmentService);
