@@ -120,9 +120,9 @@ QUnit.test('click on "add followers" button', async function (assert) {
 
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-dropdown");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-add-follower");
+    assert.containsOnce(target, "a:contains(Add Followers)");
 
-    await click(".o-mail-chatter-topbar-follower-list-add-follower");
+    await click("a:contains(Add Followers)");
     assert.containsNone(target, ".o-mail-chatter-topbar-follower-list-dropdown");
     assert.verifySteps(["action:open_view"]);
     assert.strictEqual(
@@ -220,7 +220,7 @@ QUnit.test(
         });
 
         await click(".o-mail-chatter-topbar-follower-list-button");
-        assert.containsNone(target, ".o-mail-chatter-topbar-follower-list-add-follower");
+        assert.containsNone(target, "a:contains(Add Followers)");
         const followersList = document.querySelectorAll(
             ".o-mail-chatter-topbar-follower-list-follower"
         );
@@ -284,7 +284,7 @@ QUnit.test(
         });
 
         await click(".o-mail-chatter-topbar-follower-list-button");
-        assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-add-follower");
+        assert.containsOnce(target, "a:contains(Add Followers)");
         const followersList = document.querySelectorAll(
             ".o-mail-chatter-topbar-follower-list-follower"
         );
@@ -331,7 +331,7 @@ QUnit.test(
         await click(".o-mail-chatter-topbar-follower-list-button");
         assert.containsOnce(
             target,
-            ".o-mail-chatter-topbar-follower-list-no-followers.disabled",
+            "div:contains(No Followers).disabled",
             "should display 'No Followers' dropdown-item"
         );
     }

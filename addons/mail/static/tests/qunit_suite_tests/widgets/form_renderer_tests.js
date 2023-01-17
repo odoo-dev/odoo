@@ -307,12 +307,12 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o-mail-chatter-topbar-add-attachments",
+                "button[aria-label='Attach files']",
                 "there should be an attachment button"
             );
             assert.containsOnce(
                 document.body,
-                ".o-mail-chatter-topbar-schedule-activity-button",
+                "button:contains(Activities)",
                 "there should be a schedule activity button"
             );
             assert.containsNone(
@@ -363,12 +363,12 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o-mail-chatter-topbar-add-attachments",
+                    "button[aria-label='Attach files']",
                     "there should be an attachment button"
                 );
                 assert.containsNone(
                     document.body,
-                    ".o-mail-chatter-topbar-schedule-activity-button",
+                    "button:contains(Activities)",
                     "there should be no schedule activity button because the 'activity_ids' field is not present in 'oe_chatter'"
                 );
                 assert.containsOnce(
@@ -416,12 +416,12 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o-mail-chatter-topbar-add-attachments",
+                "button[aria-label='Attach files']",
                 "there should be an attachment button"
             );
             assert.containsOnce(
                 document.body,
-                ".o-mail-chatter-topbar-schedule-activity-button",
+                "button:contains(Activities)",
                 "there should be a schedule activity button"
             );
             assert.containsOnce(
@@ -520,29 +520,29 @@ QUnit.module("mail", {}, function () {
                 assert.containsOnce(document.body, ".o-mail-chatter", "there should be a chatter");
                 assert.containsOnce(
                     document.body,
-                    ".o-mail-chatter-topbar-send-message-button",
+                    "button:contains(Send message)",
                     "there should be a send message button"
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o-mail-chatter-topbar-log-note-button",
+                    "button:contains(Log note)",
                     "there should be a log note button"
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o-mail-chatter-topbar-log-note-button",
+                    "button:contains(Log note)",
                     "there should be an attachments button"
                 );
                 assert.ok(
-                    document.querySelector(`.o-mail-chatter-topbar-send-message-button`).disabled,
+                    $(`button:contains(Send message)`)[0].disabled,
                     "send message button should be disabled"
                 );
                 assert.ok(
-                    document.querySelector(`.o-mail-chatter-topbar-log-note-button`).disabled,
+                    $(`button:contains(Log note)`)[0].disabled,
                     "log note button should be disabled"
                 );
                 assert.ok(
-                    document.querySelector(`.o-mail-chatter-topbar-add-attachments`).disabled,
+                    $(`button[aria-label='Attach files']`)[0].disabled,
                     "attachments button should be disabled"
                 );
 
@@ -550,15 +550,15 @@ QUnit.module("mail", {}, function () {
                 document.execCommand("insertText", false, "hello");
                 await click(".o_form_button_save");
                 assert.notOk(
-                    document.querySelector(`.o-mail-chatter-topbar-send-message-button`).disabled,
+                    $(`button:contains(Send message)`)[0].disabled,
                     "send message button should now be enabled"
                 );
                 assert.notOk(
-                    document.querySelector(`.o-mail-chatter-topbar-log-note-button`).disabled,
+                    $(`button:contains(Log note)`)[0].disabled,
                     "log note button should now be enabled"
                 );
                 assert.notOk(
-                    document.querySelector(`.o-mail-chatter-topbar-add-attachments`).disabled,
+                    $(`button[aria-label='Attach files']`)[0].disabled,
                     "attachments button should now be enabled"
                 );
             }

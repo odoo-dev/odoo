@@ -36,7 +36,7 @@ QUnit.test("with 3 or less suggested recipients: no 'show more' button", async f
         res_id: fakeId,
         res_model: "res.fake",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsNone(target, "button:contains(Show more)");
 });
 
@@ -60,7 +60,7 @@ QUnit.test(
             res_id: fakeId,
             res_model: "res.fake",
         });
-        await click(".o-mail-chatter-topbar-send-message-button");
+        await click("button:contains(Send message)");
         assert.containsOnce(target, "button:contains(Show more)");
     }
 );
@@ -85,7 +85,7 @@ QUnit.test(
             res_id: fakeId,
             res_model: "res.fake",
         });
-        await click(".o-mail-chatter-topbar-send-message-button");
+        await click("button:contains(Send message)");
         await click("button:contains(Show more)");
         assert.containsN(target, ".o-mail-suggested-recipient", 4);
     }
@@ -111,7 +111,7 @@ QUnit.test(
             res_id: fakeId,
             res_model: "res.fake",
         });
-        await click(".o-mail-chatter-topbar-send-message-button");
+        await click("button:contains(Send message)");
         await click("button:contains(Show more)");
         assert.containsOnce(target, "button:contains(Show less)");
     }
@@ -137,7 +137,7 @@ QUnit.test(
             res_id: fakeId,
             res_model: "res.fake",
         });
-        await click(".o-mail-chatter-topbar-send-message-button");
+        await click("button:contains(Send message)");
         await click("button:contains(Show more)");
         await click("button:contains(Show less)");
         assert.containsN(target, ".o-mail-suggested-recipient", 3);
@@ -162,7 +162,7 @@ QUnit.test("suggest recipient on 'Send message' composer", async function (asser
         res_id: fakeId,
         res_model: "res.fake",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-suggested-recipient input:checked");
 });
 
@@ -180,7 +180,7 @@ QUnit.test("display reason for suggested recipient on mouse over", async functio
         res_id: fakeId,
         res_model: "res.fake",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     const partnerTitle = target
         .querySelector(`.o-mail-suggested-recipient[data-partner-id="${partnerId}"]`)
         .getAttribute("title");
@@ -197,7 +197,7 @@ QUnit.test("suggested recipient without partner are unchecked by default", async
         res_id: fakeId,
         res_model: "res.fake",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     const checkboxUnchecked = target.querySelector(
         ".o-mail-suggested-recipient:not([data-partner-id]) input[type=checkbox]"
     );
@@ -218,7 +218,7 @@ QUnit.test("suggested recipient with partner are checked by default", async func
         res_id: fakeId,
         res_model: "res.fake",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     const checkboxChecked = document.querySelector(
         `.o-mail-suggested-recipient[data-partner-id="${partnerId}"] input[type=checkbox]`
     );
@@ -250,7 +250,7 @@ QUnit.test(
             res_id: fakeId,
             res_model: "res.fake",
         });
-        await click(".o-mail-chatter-topbar-log-note-button");
+        await click("button:contains(Log note)");
         await insertText(".o-mail-composer-textarea", "Dummy Message");
         await click(".o-mail-composer-send-button");
     }

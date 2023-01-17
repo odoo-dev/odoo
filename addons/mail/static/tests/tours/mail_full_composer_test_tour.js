@@ -18,7 +18,7 @@ tour.register(
     [
         {
             content: "Click on Send Message",
-            trigger: ".o-mail-chatter-topbar-send-message-button",
+            trigger: "button:contains(Send message)",
         },
         {
             content: "Write something in composer",

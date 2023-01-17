@@ -144,12 +144,8 @@ QUnit.test("No attachment loading spinner when creating records", async (assert)
     await openFormView({
         res_model: "res.partner",
     });
-    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
-    assert.containsOnce(
-        target,
-        ".o-mail-chatter-topbar-add-attachments:contains(0)",
-        "Should show attachment count of 0"
-    );
+    assert.containsOnce(target, "button[aria-label='Attach files']");
+    assert.containsNone(target, "button[aria-label='Attach files'] .fa-spin");
 });
 
 QUnit.test(
@@ -170,9 +166,9 @@ QUnit.test(
             },
             { waitUntilDataLoaded: false }
         );
-        assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
+        assert.containsOnce(target, "button[aria-label='Attach files'] .fa-spin");
         await click(".o_form_button_create");
-        assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
+        assert.containsNone(target, "button[aria-label='Attach files'] .fa-spin");
     }
 );
 
@@ -186,7 +182,7 @@ QUnit.test(
             res_model: "res.partner",
             res_id: partnerId,
         });
-        await click(".o-mail-chatter-topbar-send-message-button");
+        await click("button:contains(Send message)");
         patchUiSize({ size: SIZES.LG });
         await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
             resId: partnerId,
@@ -204,7 +200,7 @@ QUnit.test("Textarea content is kept when switching from aside to bottom", async
         res_model: "res.partner",
         res_id: partnerId,
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     await editInput(target, ".o-mail-composer-textarea", "Hello world !");
     patchUiSize({ size: SIZES.LG });
     await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
@@ -222,21 +218,18 @@ QUnit.test("Composer type is kept when switching from aside to bottom", async fu
         res_model: "res.partner",
         res_id: partnerId,
     });
-    await click(".o-mail-chatter-topbar-log-note-button");
+    await click("button:contains(Log note)");
     patchUiSize({ size: SIZES.LG });
     await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
         resId: partnerId,
         resModel: "res.partner",
     });
     assert.hasClass(
-        target.querySelector(".o-mail-chatter-topbar-log-note-button"),
+        $(target).find("button:contains(Log note)"),
         "btn-odoo",
         "Active button should be the log note button"
     );
-    assert.doesNotHaveClass(
-        target.querySelector(".o-mail-chatter-topbar-send-message-button"),
-        "btn-odoo"
-    );
+    assert.doesNotHaveClass($(target).find("button:contains(Send message)"), "btn-odoo");
 });
 
 QUnit.test("chatter: drop attachments", async function (assert) {
@@ -336,7 +329,7 @@ QUnit.test('post message with "CTRL-Enter" keyboard shortcut in chatter', async 
     });
     assert.containsNone(target, ".o-mail-message");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     await insertText(".o-mail-composer-textarea", "Test");
     await afterNextRender(() => triggerHotkey("control+Enter"));
     assert.containsOnce(target, ".o-mail-message");
@@ -439,11 +432,11 @@ QUnit.test("show attachment box", async function (assert) {
     });
     assert.containsOnce(target, ".o-mail-chatter");
     assert.containsOnce(target, ".o-mail-chatter-topbar");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(2)");
+    assert.containsOnce(target, "button[aria-label='Attach files']");
+    assert.containsOnce(target, "button[aria-label='Attach files']:contains(2)");
     assert.containsNone(target, ".o-mail-attachment-box");
 
-    await click(".o-mail-chatter-topbar-add-attachments");
+    await click("button[aria-label='Attach files']");
     assert.containsOnce(target, ".o-mail-attachment-box");
 });
 
@@ -456,31 +449,31 @@ QUnit.test("composer show/hide on log note/send message [REQUIRE FOCUS]", async 
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
+    assert.containsOnce(target, "button:contains(Send message)");
+    assert.containsOnce(target, "button:contains(Log note)");
     assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
     assert.strictEqual(
         document.activeElement,
         target.querySelector(".o-mail-chatter .o-mail-composer-textarea")
     );
 
-    await click(".o-mail-chatter-topbar-log-note-button");
+    await click("button:contains(Log note)");
     assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
     assert.strictEqual(
         document.activeElement,
         target.querySelector(".o-mail-chatter .o-mail-composer-textarea")
     );
 
-    await click(".o-mail-chatter-topbar-log-note-button");
+    await click("button:contains(Log note)");
     assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
 });
 
@@ -495,7 +488,7 @@ QUnit.test('do not post message with "Enter" keyboard shortcut', async function 
     });
     assert.containsNone(target, ".o-mail-message");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     await insertText(".o-mail-composer-textarea", "Test");
     await triggerHotkey("Enter");
     assert.containsNone(target, ".o-mail-message");

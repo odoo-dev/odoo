@@ -50,7 +50,7 @@
                         </button>
                         <FileUploader multiUpload="true" onUploaded="(data) => attachmentUploader.uploadData(data)">
                             <t t-set-slot="toggler">
-                                <button t-att-disabled="!state.active" class="btn fa fa-paperclip border-0 rounded-pill" title="Add attachment" aria-label="Add attachment" type="button" t-on-click="onClickAddAttachment"/>
+                                <button t-att-disabled="!state.active" class="btn fa fa-paperclip border-0 rounded-pill" title="Attach files" aria-label="Attach files" type="button" t-on-click="onClickAddAttachment"/>
                             </t>
                         </FileUploader>
                     </div>

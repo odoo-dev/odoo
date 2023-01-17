@@ -38,25 +38,17 @@ QUnit.test("hover following button", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
-    assert.strictEqual(
-        document.querySelector(".o-mail-chatter-topbar-unfollow-text").textContent.trim(),
-        "Following"
-    );
-    assert.containsNone(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-times");
-    assert.containsOnce(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-check");
+    assert.containsOnce(target, "button:contains(Following)");
+    assert.containsNone(target, ".fa-times + span:contains(Following)");
+    assert.containsOnce(target, ".fa-check + span:contains(Following)");
 
     await afterNextRender(() => {
-        document
-            .querySelector(".o-mail-chatter-topbar-unfollow")
+        $("button:contains(Following)")[0]
             .dispatchEvent(new window.MouseEvent("mouseenter"));
     });
-    assert.strictEqual(
-        document.querySelector(".o-mail-chatter-topbar-unfollow-text").textContent.trim(),
-        "Unfollow"
-    );
-    assert.containsOnce(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-times");
-    assert.containsNone(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-check");
+    assert.containsOnce(target, "button:contains(Unfollow)");
+    assert.containsOnce(target, ".fa-times + span:contains(Unfollow)");
+    assert.containsNone(target, ".fa-check + span:contains(Unfollow)");
 });
 
 QUnit.test('click on "follow" button', async function (assert) {
@@ -66,11 +58,10 @@ QUnit.test('click on "follow" button', async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follow");
+    assert.containsOnce(target, "button:contains(Follow)");
 
-    await click(".o-mail-chatter-topbar-follow");
-    assert.containsNone(target, ".o-mail-chatter-topbar-follow");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
+    await click("button:contains(Follow)");
+    assert.containsOnce(target, "button:contains(Following)");
 });
 
 QUnit.test('click on "unfollow" button', async function (assert) {
@@ -88,10 +79,8 @@ QUnit.test('click on "unfollow" button', async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsNone(target, ".o-mail-chatter-topbar-follow");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
+    assert.containsOnce(target, "button:contains(Following)");
 
-    await click(".o-mail-chatter-topbar-unfollow");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follow");
-    assert.containsNone(target, ".o-mail-chatter-topbar-unfollow");
+    await click("button:contains(Following)");
+    assert.containsOnce(target, "button:contains(Follow)");
 });

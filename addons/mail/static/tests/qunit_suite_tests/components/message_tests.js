@@ -375,7 +375,7 @@ QUnit.module("mail", {}, function () {
                     res_id: resPartnerId,
                 });
 
-                await click(".o-mail-chatter-topbar-send-message-button");
+                await click("button:contains(Send message)");
                 await insertText(".o-mail-composer-textarea", "@Te");
                 await click(".o_ComposerSuggestionView");
                 await click(".o-mail-composer-send-button");
@@ -407,7 +407,7 @@ QUnit.module("mail", {}, function () {
                     res_id: resPartnerId,
                 });
 
-                await click(".o-mail-chatter-topbar-send-message-button");
+                await click("button:contains(Send message)");
                 await insertText(".o-mail-composer-textarea", "#my-channel");
                 await click(".o_ComposerSuggestionView");
                 await click(".o-mail-composer-send-button");
