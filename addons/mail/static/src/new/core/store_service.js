@@ -89,7 +89,7 @@ export class Store {
     activities = {};
     activityCounter = 0;
 
-    /** @type {import("@mail/new/core/chat_window_model").ChatWindow[]} */
+    /** @type {import("@mail/new/chat/chat_window_model").ChatWindow[]} */
     chatWindows = [];
 
     /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */

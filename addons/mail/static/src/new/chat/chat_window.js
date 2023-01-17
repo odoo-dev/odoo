@@ -17,7 +17,7 @@ import { ChannelSelector } from "@mail/new/discuss/channel_selector";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/chat_window_model").ChatWindow} chatWindow
+ * @property {import("@mail/new/chat/chat_window_model").ChatWindow} chatWindow
  * @property {boolean} [right]
  * @extends {Component<Props, Env>}
  */
