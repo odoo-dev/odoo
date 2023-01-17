@@ -23,7 +23,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { Typing } from "./typing";
 import { useDebounced } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
-import { useSuggestion } from "../suggestion/suggestion_hook";
+import { useSuggestion } from "./suggestion_hook";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
