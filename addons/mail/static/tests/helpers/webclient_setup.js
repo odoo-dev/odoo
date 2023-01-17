@@ -23,7 +23,7 @@ import { effectService } from "@web/core/effects/effect_service";
 import { soundEffects } from "@mail/new/core/sound_effects_service";
 import { userSettingsService } from "@mail/new/core/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
-import { suggestionService } from "@mail/new/suggestion/suggestion_service";
+import { suggestionService } from "@mail/new/composer/suggestion_service";
 import { storeService } from "@mail/new/core/store_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
