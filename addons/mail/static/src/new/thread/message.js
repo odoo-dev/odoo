@@ -23,7 +23,7 @@ import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
 import { MessageReactions } from "@mail/new/thread/message_reactions";
-import { useEmojiPicker } from "../composer/emoji_picker";
+import { useEmojiPicker } from "../emoji_picker/emoji_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { MessageNotificationPopover } from "./message_notification_popover";
 import { MessageSeenIndicator } from "./message_seen_indicator";

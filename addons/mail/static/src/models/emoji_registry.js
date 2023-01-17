@@ -10,7 +10,7 @@ Model({
             this.update({ isLoading: true });
             await getBundle("mail.assets_emoji").then(loadBundle);
             const { categories, emojis } = await odoo.runtimeImport(
-                "@mail/new/composer/emoji_data"
+                "@mail/new/emoji_picker/emoji_data"
             );
             if (!this.exists()) {
                 return;
