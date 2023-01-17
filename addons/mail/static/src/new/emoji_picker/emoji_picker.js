@@ -61,11 +61,11 @@ export function useEmojiPicker(refName, props) {
 const _loadEmoji = memoize(() => getBundle("mail.assets_emoji").then(loadBundle));
 
 /**
- * @returns {import("@mail/new/composer/emoji_data")}
+ * @returns {import("@mail/new/emoji_picker/emoji_data")}
  */
 export async function loadEmoji() {
     await _loadEmoji();
-    return odoo.runtimeImport("@mail/new/composer/emoji_data");
+    return odoo.runtimeImport("@mail/new/emoji_picker/emoji_data");
 }
 
 export class EmojiPicker extends Component {

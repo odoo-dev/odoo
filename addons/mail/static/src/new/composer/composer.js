@@ -16,7 +16,7 @@ import {
 import { useDropzone } from "../dropzone/dropzone_hook";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { NavigableList } from "./navigable_list";
-import { useEmojiPicker } from "./emoji_picker";
+import { useEmojiPicker } from "../emoji_picker/emoji_picker";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
