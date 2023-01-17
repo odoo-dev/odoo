@@ -78,7 +78,7 @@ tour.register('hr_recruitment_tour',{
     position: "bottom",
     width: 195
 }, {
-    trigger: ".o-mail-chatter-topbar-send-message-button",
+    trigger: "button:contains(Send message)",
     extra_trigger: '.o_applicant_form',
     content: Markup(_t("<div><b>Try to send an email</b> to the applicant.</div><div><i>Tips: All emails sent or received are saved in the history here</i>")),
     position: "bottom"
@@ -88,7 +88,7 @@ tour.register('hr_recruitment_tour',{
     content: _t("Send your email. Followers will get a copy of the communication."),
     position: "bottom"
 }, {
-    trigger: ".o-mail-chatter-topbar-log-note-button",
+    trigger: "button:contains(Log note)",
     extra_trigger: '.o_applicant_form',
     content: _t("Or talk about this applicant privately with your colleagues."),
     position: "bottom"

@@ -22,10 +22,10 @@ QUnit.test("base rendering", async function (assert) {
     });
 
     assert.containsOnce(target, ".o-mail-chatter-topbar");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-schedule-activity-button");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
+    assert.containsOnce(target, "button:contains(Send message)");
+    assert.containsOnce(target, "button:contains(Log note)");
+    assert.containsOnce(target, "button:contains(Activities)");
+    assert.containsOnce(target, "button[aria-label='Attach files']");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list");
 });
 
@@ -36,10 +36,10 @@ QUnit.test("base disabled rendering", async function (assert) {
         views: [[false, "form"]],
     });
     assert.containsOnce(target, ".o-mail-chatter-topbar");
-    assert.ok(document.querySelector(".o-mail-chatter-topbar-send-message-button").disabled);
-    assert.ok(document.querySelector(".o-mail-chatter-topbar-log-note-button").disabled);
-    assert.ok(document.querySelector(".o-mail-chatter-topbar-schedule-activity-button").disabled);
-    assert.ok(document.querySelector(".o-mail-chatter-topbar-add-attachments").disabled);
+    assert.ok($(target).find("button:contains(Send message)")[0].disabled);
+    assert.ok($(target).find("button:contains(Log note)")[0].disabled);
+    assert.ok($(target).find("button:contains(Activities)")[0].disabled);
+    assert.ok($(target).find("button[aria-label='Attach files']")[0].disabled);
 });
 
 QUnit.test("rendering with multiple partner followers", async function (assert) {
@@ -97,19 +97,19 @@ QUnit.test("log note toggling", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
-    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsOnce(target, "button:contains(Log note)");
+    assert.doesNotHaveClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsNone(target, ".o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-log-note-button");
-    assert.hasClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    await click("button:contains(Log note)");
+    assert.hasClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsOnce(
         target,
         ".o-mail-composer .o-mail-composer-textarea[placeholder='Log an internal note...']"
     );
 
-    await click(".o-mail-chatter-topbar-log-note-button");
-    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    await click("button:contains(Log note)");
+    assert.doesNotHaveClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsNone(target, ".o-mail-composer");
 });
 
@@ -122,25 +122,19 @@ QUnit.test("send message toggling", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
-    assert.doesNotHaveClass(
-        $(target).find(".o-mail-chatter-topbar-send-message-button"),
-        "o-active"
-    );
+    assert.containsOnce(target, "button:contains(Send message)");
+    assert.doesNotHaveClass($(target).find("button:contains(Send message)"), "o-active");
     assert.containsNone(target, ".o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
-    assert.hasClass($(target).find(".o-mail-chatter-topbar-send-message-button"), "o-active");
+    await click("button:contains(Send message)");
+    assert.hasClass($(target).find("button:contains(Send message)"), "o-active");
     assert.containsOnce(
         target,
         ".o-mail-composer .o-mail-composer-textarea[placeholder='Send a message to followers...']"
     );
 
-    await click(".o-mail-chatter-topbar-send-message-button");
-    assert.doesNotHaveClass(
-        $(target).find(".o-mail-chatter-topbar-send-message-button"),
-        "o-active"
-    );
+    await click("button:contains(Send message)");
+    assert.doesNotHaveClass($(target).find("button:contains(Send message)"), "o-active");
     assert.containsNone(target, ".o-mail-composer");
 });
 
@@ -153,29 +147,23 @@ QUnit.test("log note/send message switching", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
-    assert.doesNotHaveClass(
-        $(target).find(".o-mail-chatter-topbar-send-message-button"),
-        "o-active"
-    );
-    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
-    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    assert.containsOnce(target, "button:contains(Send message)");
+    assert.doesNotHaveClass($(target).find("button:contains(Send message)"), "o-active");
+    assert.containsOnce(target, "button:contains(Log note)");
+    assert.doesNotHaveClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsNone(target, ".o-mail-composer");
 
-    await click(".o-mail-chatter-topbar-send-message-button");
-    assert.hasClass($(target).find(".o-mail-chatter-topbar-send-message-button"), "o-active");
-    assert.doesNotHaveClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    await click("button:contains(Send message)");
+    assert.hasClass($(target).find("button:contains(Send message)"), "o-active");
+    assert.doesNotHaveClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsOnce(
         target,
         ".o-mail-composer .o-mail-composer-textarea[placeholder='Send a message to followers...']"
     );
 
-    await click(".o-mail-chatter-topbar-log-note-button");
-    assert.doesNotHaveClass(
-        $(target).find(".o-mail-chatter-topbar-send-message-button"),
-        "o-active"
-    );
-    assert.hasClass($(target).find(".o-mail-chatter-topbar-log-note-button"), "o-active");
+    await click("button:contains(Log note)");
+    assert.doesNotHaveClass($(target).find("button:contains(Send message)"), "o-active");
+    assert.hasClass($(target).find("button:contains(Log note)"), "o-active");
     assert.containsOnce(
         target,
         ".o-mail-composer .o-mail-composer-textarea[placeholder='Log an internal note...']"
@@ -191,8 +179,8 @@ QUnit.test("attachment counter without attachments", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+    assert.containsOnce(target, "button[aria-label='Attach files']");
+    assert.containsOnce(target, "button[aria-label='Attach files']:contains(0)");
 });
 
 QUnit.test("attachment counter with attachments", async function (assert) {
@@ -218,7 +206,7 @@ QUnit.test("attachment counter with attachments", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(2)");
+    assert.containsOnce(target, "button[aria-label='Attach files']:contains(2)");
 });
 
 QUnit.test("attachment counter while loading attachments", async function (assert) {
@@ -236,8 +224,8 @@ QUnit.test("attachment counter while loading attachments", async function (asser
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
-    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+    assert.containsOnce(target, "button[aria-label='Attach files'] .fa-spin");
+    assert.containsNone(target, "button[aria-label='Attach files']:contains(0)");
 });
 
 QUnit.test("attachment counter transition when attachments become loaded", async function (assert) {
@@ -256,10 +244,10 @@ QUnit.test("attachment counter transition when attachments become loaded", async
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
-    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+    assert.containsOnce(target, "button[aria-label='Attach files'] .fa-spin");
+    assert.containsNone(target, "button[aria-label='Attach files']:contains(0)");
 
     await afterNextRender(() => attachmentPromise.resolve());
-    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments:contains(0)");
+    assert.containsNone(target, "button[aria-label='Attach files'] .fa-spin");
+    assert.containsOnce(target, "button[aria-label='Attach files']:contains(0)");
 });

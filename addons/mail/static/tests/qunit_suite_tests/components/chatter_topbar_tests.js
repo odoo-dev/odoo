@@ -38,9 +38,9 @@ QUnit.module("mail", {}, function () {
                 1,
                 "should have a chatter topbar"
             );
-            assert.strictEqual(
-                document.querySelectorAll(`.o-mail-chatter-topbar-add-attachments`).length,
-                1,
+            assert.containsOnce(
+                document.body,
+                "button[aria-label='Attach files']",
                 "should have an attachments button in chatter menu"
             );
             assert.strictEqual(
@@ -78,42 +78,42 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    `.o-mail-chatter-topbar-send-message-button`,
+                    `button:contains(Send message)`,
                     "should have a send message button in chatter menu"
                 );
                 assert.containsOnce(
                     document.body,
-                    `.o-mail-chatter-topbar-log-note-button`,
+                    `button:contains(Log note)`,
                     "should have a log note button in chatter menu"
                 );
                 assert.containsOnce(
                     document.body,
-                    `.o-mail-chatter-topbar-add-attachments`,
+                    `button[aria-label='Attach files']`,
                     "should have an attachments button in chatter menu"
                 );
 
-                await click(`.o-mail-chatter-topbar-log-note-button`);
+                await click(`button:contains(Log note)`);
                 assert.containsOnce(
                     document.body,
-                    `.o-mail-chatter-topbar-log-note-button.o-active`,
+                    `button:contains(Log note).o-active`,
                     "log button should now be active"
                 );
                 assert.containsNone(
                     document.body,
-                    `.o-mail-chatter-topbar-send-message-button.o-active`,
+                    `button:contains(Send message)`,
                     "send message button should not be active"
                 );
 
-                document.querySelector(`.o-mail-chatter-topbar-add-attachments`).click();
+                $(`button[aria-label='Attach files']`)[0].click();
                 await nextAnimationFrame();
                 assert.containsOnce(
                     document.body,
-                    `.o-mail-chatter-topbar-log-note-button.o-active`,
+                    `button:contains(Log note).o-active`,
                     "log button should still be active"
                 );
                 assert.containsNone(
                     document.body,
-                    `.o-mail-chatter-topbar-send-message-button.o-active`,
+                    `button:contains(Send message).o-active`,
                     "send message button should still be not active"
                 );
             }

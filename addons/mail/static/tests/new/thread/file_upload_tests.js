@@ -29,7 +29,7 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     const file1 = await createFile({
         name: "text1.txt",
         content: "hello, world",

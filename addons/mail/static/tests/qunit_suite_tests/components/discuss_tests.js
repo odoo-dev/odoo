@@ -484,7 +484,7 @@ QUnit.module("mail", {}, function () {
                 });
                 // Switch to #special
                 await afterNextRender(() => channels[1].click());
-                // Add attachments in a message for #special
+                // Attach files in a message for #special
                 const files = [
                     await createFile({
                         content: "hello2, world",

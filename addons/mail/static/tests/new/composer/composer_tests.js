@@ -40,7 +40,7 @@ QUnit.test("composer text input: basic rendering when posting a message", async 
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-composer");
     assert.containsOnce(target, "textarea.o-mail-composer-textarea");
     assert.hasAttrValue(
@@ -57,7 +57,7 @@ QUnit.test("composer text input: basic rendering when logging note", async funct
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
     });
-    await click(".o-mail-chatter-topbar-log-note-button");
+    await click("button:contains(Log note)");
     assert.containsOnce(target, ".o-mail-composer");
     assert.containsOnce(target, "textarea.o-mail-composer-textarea");
     assert.hasAttrValue(

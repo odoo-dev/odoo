@@ -11,7 +11,7 @@
                 Log note
             </button>
             <div class="border-bottom flex-grow-1 d-flex" t-att-class="{ 'border-start ps-2': props.hasActivity }">
-                <button t-if="props.hasActivity" class="o-mail-chatter-topbar-schedule-activity-button btn btn-light text-nowrap" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" data-hotkey="shift+a" t-on-click="scheduleActivity">
+                <button t-if="props.hasActivity" class="btn btn-light text-nowrap" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" data-hotkey="shift+a" t-on-click="scheduleActivity">
                     <i class="fa fa-clock-o me-1"/>
                     <span>Activities</span>
                 </button>
@@ -29,7 +29,7 @@
                     </t>
                     <t t-set-slot="default">
                         <t t-if="this.props.resModel !== 'mail.channel' and thread.hasWriteAccess">
-                            <a class="o-mail-chatter-topbar-follower-list-add-follower dropdown-item" href="#" role="menuitem" t-on-click.prevent="onClickAddFollowers">
+                            <a class="dropdown-item" href="#" role="menuitem" t-on-click.prevent="onClickAddFollowers">
                                 Add Followers
                             </a>
                             <div t-if="thread.followers.length > 0" role="separator" class="dropdown-divider"/>
@@ -50,21 +50,21 @@
                                 </t>
                             </div>
                         </t>
-                        <div t-elif="!thread.hasWriteAccess" class="o-mail-chatter-topbar-follower-list-no-followers dropdown-item disabled">
+                        <div t-elif="!thread.hasWriteAccess" class="dropdown-item disabled">
                             No Followers
                         </div>
                     </t>
                 </Dropdown>
-                <button t-if="thread.followerOfSelf" class="o-mail-chatter-topbar-unfollow btn px-0" t-att-class="{ 'text-success': !unfollowHover.isHover, 'text-warning': unfollowHover.isHover, 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="onClickUnfollow" t-ref="unfollow">
+                <button t-if="thread.followerOfSelf" class="btn px-0" t-att-class="{ 'text-success': !unfollowHover.isHover, 'text-warning': unfollowHover.isHover, 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="onClickUnfollow" t-ref="unfollow">
                     <div class="position-relative">
                         <!-- Hidden element used to set the button maximum size -->
                         <span class="invisible">
                             <i class="fa fa-fw fa fa-eye-slash"/> <t t-out="followingText.length > unfollowText.length ? followingText : unfollowText"/>
                         </span>
-                        <span t-if="unfollowHover.isHover" class="o-mail-chatter-topbar-unfollow-text position-absolute end-0 top-0 bottom-0 text-warning">
+                        <span t-if="unfollowHover.isHover" class="position-absolute end-0 top-0 bottom-0 text-warning">
                             <i class="fa fa-fw fa-times"/> <span t-out="unfollowText"/>
                         </span>
-                        <span t-if="!unfollowHover.isHover" class="o-mail-chatter-topbar-unfollow-text d-block position-absolute end-0 top-0 bottom-0">
+                        <span t-if="!unfollowHover.isHover" class="d-block position-absolute end-0 top-0 bottom-0">
                             <i class="fa fa-fw fa-check"/> <span t-out="followingText"/>
                         </span>
                     </div>
@@ -140,7 +140,7 @@
 </t>
 
 <t t-name="mail.chatter.add_attachment_button" owl="1">
-    <button class="o-mail-chatter-topbar-add-attachments btn btn-light" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
+    <button class="o-mail-chatter-topbar-add-attachments btn btn-light" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
         <i class="fa fa-paperclip fa-lg me-1"/>
         <span t-if="!state.isLoadingAttachments" t-esc="state.attachments.length + attachmentUploader.attachments.length"/>
         <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>

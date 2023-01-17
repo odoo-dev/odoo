@@ -131,7 +131,7 @@ QUnit.module("mail", (hooks) => {
                     res_id: resPartnerId1,
                     views: [[false, "form"]],
                 });
-                await click(".o-mail-chatter-topbar-send-message-button");
+                await click("button:contains(Send message)");
                 assert.strictEqual(
                     document
                         .querySelector(".o_ComposerView_followers")
@@ -161,7 +161,7 @@ QUnit.module("mail", (hooks) => {
                     model: "res.partner",
                     name: "test name",
                 });
-                await click(".o-mail-chatter-topbar-send-message-button");
+                await click("button:contains(Send message)");
                 assert.strictEqual(
                     document
                         .querySelector(".o_ComposerView_followers")

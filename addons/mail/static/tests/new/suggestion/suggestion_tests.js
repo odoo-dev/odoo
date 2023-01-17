@@ -53,7 +53,7 @@ QUnit.test('display partner mention suggestions on typing "@" in chatter', async
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
     });
-    await click(".o-mail-chatter-topbar-send-message-button");
+    await click("button:contains(Send message)");
     assert.containsNone(target, ".o-composer-suggestion");
     await insertText(".o-mail-composer-textarea", "@");
     assert.containsOnce(target, ".o-composer-suggestion:contains(Mitchell Admin)");
