@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="mail.composer_suggested_recipients_list" owl="1">
+    <t t-name="mail.suggested_recipients_list" owl="1">
         <t t-if="props.hasFollowers and props.thread.composer.type !== 'note'">
             <div t-att-class="props.className" t-att-style="props.styleString">
-                <ComposerSuggestedRecipient
+                <SuggestedRecipient
                     t-foreach="suggestedRecipients"
                     t-as="suggestedRecipient"
                     t-key="suggestedRecipient.id"

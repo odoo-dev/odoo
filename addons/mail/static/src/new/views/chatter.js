@@ -26,7 +26,7 @@ import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader
 import { useHover, useScrollPosition } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { _t } from "@web/core/l10n/translation";
-import { ComposerSuggestedRecipientsList } from "../composer/composer_suggested_recipient_list";
+import { SuggestedRecipientsList } from "../composer/suggested_recipient_list";
 
 /**
  * @typedef {Object} Props
@@ -41,7 +41,7 @@ export class Chatter extends Component {
         Composer,
         Activity,
         FileUploader,
-        ComposerSuggestedRecipientsList,
+        SuggestedRecipientsList,
     };
     static defaultProps = {
         compactHeight: false,

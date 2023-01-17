@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="mail.composer_suggested_recipient" owl="1">
+    <t t-name="mail.suggested_recipient" owl="1">
         <div class="o-mail-suggested-recipient" t-att-data-partner-id="props.suggestedRecipient.persona?.id ? props.suggestedRecipient.persona.id : false" t-att-title="titleText">
             <div class="form-check">
                 <t t-if="props.suggestedRecipient.persona">

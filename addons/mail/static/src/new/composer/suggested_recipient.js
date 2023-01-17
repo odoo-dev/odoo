@@ -11,8 +11,8 @@ import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
  * @property {import("@mail/new/core/thread_model").SuggestedReciptient} suggestedRecipient
  * @extends {Component<Props, Env>}
  */
-export class ComposerSuggestedRecipient extends Component {
-    static template = "mail.composer_suggested_recipient";
+export class SuggestedRecipient extends Component {
+    static template = "mail.suggested_recipient";
     static props = ["thread", "suggestedRecipient"];
 
     setup() {

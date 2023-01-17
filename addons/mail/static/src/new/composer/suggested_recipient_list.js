@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { ComposerSuggestedRecipient } from "@mail/new/composer/composer_suggested_recipient";
+import { SuggestedRecipient } from "@mail/new/composer/suggested_recipient";
 
 /**
  * @typedef {Object} Props
@@ -11,9 +11,9 @@ import { ComposerSuggestedRecipient } from "@mail/new/composer/composer_suggeste
  * @property {boolean} hasFollowers
  * @extends {Component<Props, Env>}
  */
-export class ComposerSuggestedRecipientsList extends Component {
-    static template = "mail.composer_suggested_recipients_list";
-    static components = { ComposerSuggestedRecipient };
+export class SuggestedRecipientsList extends Component {
+    static template = "mail.suggested_recipients_list";
+    static components = { SuggestedRecipient };
     static props = ["thread", "className", "styleString", "hasFollowers?"];
 
     setup() {
