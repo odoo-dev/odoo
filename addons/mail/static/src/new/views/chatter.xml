@@ -81,7 +81,7 @@
             <t t-if="thread.composer.type === 'message'" t-set="placeholder">Send a message to followers...</t>
             <t t-else="" t-set="placeholder">Log an internal note...</t>
             <t t-set="type" t-value="thread.composer.type === 'message' ? 'message' : 'note'"/>
-            <SuggestedRecipientsList className="'px-3 pb-1 pt-2'" styleString="'margin-left:48px;'" thread="thread" hasFollowers="props.hasFollowers" />
+            <SuggestedRecipientsList t-if="props.hasFollowers and thread.composer.type !== 'note'" className="'px-3 pb-1 pt-2'" styleString="'margin-left:48px;'" thread="thread"/>
             <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="placeholder" dropzoneRef="rootRef"/>
             <hr/>
         </t>

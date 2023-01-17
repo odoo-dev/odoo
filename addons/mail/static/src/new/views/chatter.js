@@ -198,7 +198,7 @@ export class Chatter extends Component {
                 }
             }
             if ("suggestedRecipients" in result) {
-                this.chatter.loadSuggestedRecipients(this.thread, result.suggestedRecipients);
+                this.chatter.insertSuggestedRecipients(this.thread, result.suggestedRecipients);
             }
         });
     }

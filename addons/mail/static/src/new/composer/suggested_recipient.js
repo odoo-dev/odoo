@@ -8,12 +8,12 @@ import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 /**
  * @typedef {Object} Props
  * @property {import("@mail/new/core/thread_model").Thread} thread
- * @property {import("@mail/new/core/thread_model").SuggestedReciptient} suggestedRecipient
+ * @property {import("@mail/new/core/thread_model").SuggestedRecipient} recipient
  * @extends {Component<Props, Env>}
  */
 export class SuggestedRecipient extends Component {
     static template = "mail.suggested_recipient";
-    static props = ["thread", "suggestedRecipient"];
+    static props = ["thread", "recipient"];
 
     setup() {
         this.dialogService = useService("dialog");
@@ -24,18 +24,18 @@ export class SuggestedRecipient extends Component {
     get titleText() {
         return sprintf(
             this.env._t("Add as recipient and follower (reason: %s)"),
-            this.props.suggestedRecipient.reason
+            this.props.recipient.reason
         );
     }
 
     onChangeCheckbox() {
-        if (this.props.suggestedRecipient.persona) {
-            this.props.suggestedRecipient.checked = !this.props.suggestedRecipient.checked;
+        if (this.props.recipient.persona) {
+            this.props.recipient.checked = !this.props.recipient.checked;
         }
     }
 
     onClick() {
-        if (!this.props.suggestedRecipient.persona) {
+        if (!this.props.recipient.persona) {
             // Recipients must always be partners. On selecting a suggested
             // recipient that does not have a partner, the partner creation form
             // should be opened.
@@ -43,9 +43,9 @@ export class SuggestedRecipient extends Component {
                 context: {
                     active_id: this.props.thread.id,
                     active_model: "mail.compose.message",
-                    default_email: this.props.suggestedRecipient.email,
-                    default_name: this.props.suggestedRecipient.name,
-                    default_lang: this.props.suggestedRecipient.lang,
+                    default_email: this.props.recipient.email,
+                    default_name: this.props.recipient.name,
+                    default_lang: this.props.recipient.lang,
                     force_email: true,
                     ref: "compound_context",
                 },
@@ -57,14 +57,11 @@ export class SuggestedRecipient extends Component {
     }
 
     async _onDialogSaved() {
-        const suggestedRecipients = await this.chatterService.fetchData(
+        const data = await this.chatterService.fetchData(
             this.props.thread.id,
             this.props.thread.model,
             ["suggestedRecipients"]
         );
-        this.chatterService.loadSuggestedRecipients(
-            this.props.thread,
-            suggestedRecipients.suggestedRecipients
-        );
+        this.chatterService.insertSuggestedRecipients(this.props.thread, data.suggestedRecipients);
     }
 }

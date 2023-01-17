@@ -551,10 +551,10 @@ export class ThreadService {
         const validMentions = this.message.getMentionsFromText(rawMentions, body);
         const partner_ids = validMentions.partners.map((partner) => partner.id);
         if (!isNote) {
-            const suggestedRecipients = thread.suggestedRecipients
+            const recipientIds = thread.suggestedRecipients
                 .filter((recipient) => recipient.persona && recipient.checked)
                 .map((recipient) => recipient.persona.id);
-            partner_ids.push(...suggestedRecipients);
+            partner_ids.push(...recipientIds);
         }
         const params = {
             post_data: {

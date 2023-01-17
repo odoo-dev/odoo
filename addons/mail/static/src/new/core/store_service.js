@@ -17,6 +17,8 @@ export class Store {
         return this.guest ?? this.user;
     }
 
+    nextId = 1;
+
     // base data
     /** @type {Object.<number, import("@mail/new/core/persona_model").Persona>} */
     user = null;

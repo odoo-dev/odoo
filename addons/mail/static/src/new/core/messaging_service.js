@@ -62,7 +62,6 @@ export class Messaging {
         this.persona = services["mail.persona"];
         /** @type {import("@mail/new/rtc/rtc_service").Rtc} */
         this.rtc = services["mail.rtc"];
-        this.nextId = 1;
         this.router = services.router;
         this.bus = services.bus_service;
         this.multiTab = services.multi_tab;

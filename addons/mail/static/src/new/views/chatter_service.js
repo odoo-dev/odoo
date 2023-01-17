@@ -19,21 +19,19 @@ export class ChatterService {
         this.orm = services.orm;
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];
-        /** @type {import("@mail/new/core/messaging_service").Messaging} */
-        this.messaging = services["mail.messaging"];
     }
 
     /**
      * @param {import("@mail/new/core/thread_model").Thread} thread
-     * @param {import("@mail/new/core/thread_model").SuggestedReciptient[]} suggestedRecipients
+     * @param {import("@mail/new/core/thread_model").SuggestedRecipient[]} dataList
      */
-    async loadSuggestedRecipients(thread, suggestedRecipients) {
+    async insertSuggestedRecipients(thread, dataList) {
         const recipients = [];
-        for (const suggestedRecipient of suggestedRecipients) {
-            const [partner_id, emailInfo, lang, reason] = suggestedRecipient;
+        for (const data of dataList) {
+            const [partner_id, emailInfo, lang, reason] = data;
             const [name, email] = emailInfo && parseEmail(emailInfo);
             recipients.push({
-                id: this.messaging.nextId++,
+                id: this.store.nextId++,
                 name,
                 email,
                 lang,
@@ -147,15 +145,7 @@ export class ChatterService {
 }
 
 export const chatterService = {
-    dependencies: [
-        "mail.store",
-        "mail.thread",
-        "mail.message",
-        "rpc",
-        "orm",
-        "mail.persona",
-        "mail.messaging",
-    ],
+    dependencies: ["mail.store", "mail.thread", "mail.message", "rpc", "orm", "mail.persona"],
     start(env, services) {
         return new ChatterService(env, services);
     },

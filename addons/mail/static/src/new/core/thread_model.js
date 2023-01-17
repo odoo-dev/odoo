@@ -11,7 +11,7 @@ import { createLocalId } from "../utils/misc";
  * @property {{id: number|undefined}} lastFetchedMessage
  * @property {{id: number|undefined}} lastSeenMessage
  * @property {{id: number}} partner
- * @typedef SuggestedReciptient
+ * @typedef SuggestedRecipient
  * @property {string} email
  * @property {import('@mail/new/core/persona_model').Persona|false} persona
  * @property {string} lang
@@ -67,7 +67,7 @@ export class Thread {
     /** @type {SeenInfo[]} */
     seenInfos = [];
     serverMessageUnreadCounter = 0;
-    /** @type {SuggestedReciptient[]} */
+    /** @type {SuggestedRecipient[]} */
     suggestedRecipients = [];
 
     constructor(store, data) {

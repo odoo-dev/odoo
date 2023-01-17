@@ -32,7 +32,7 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
         },
         async uploadFile(file) {
             const thread = pThread ?? message.originThread;
-            const tmpId = messaging.nextId++;
+            const tmpId = store.nextId++;
             uploadingAttachmentIds.add(tmpId);
             const { id } = await upload("/mail/attachment/upload", [file], {
                 buildFormData(formData) {
