@@ -10,10 +10,10 @@ import {
 } from "../chat/chat_window_service";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { ChatWindow } from "./chat_window";
-import { ChatWindowHiddenMenu } from "./chat_window_hidden_menu";
+import { Dropdown } from "@web/core/dropdown/dropdown";
 
 export class ChatWindowContainer extends Component {
-    static components = { ChatWindow, ChatWindowHiddenMenu };
+    static components = { ChatWindow, Dropdown };
     static props = [];
     static template = "mail.chat_window_container";
 
@@ -51,5 +51,13 @@ export class ChatWindowContainer extends Component {
         ) {
             this.chatWindowService.show(this.chatWindowService.hidden[0]);
         }
+    }
+
+    get unread() {
+        let unreadCounter = 0;
+        for (const chatWindow of this.chatWindowService.hidden) {
+            unreadCounter += chatWindow.thread.message_unread_counter;
+        }
+        return unreadCounter;
     }
 }
