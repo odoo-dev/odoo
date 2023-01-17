@@ -259,3 +259,28 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test("many2many_avatar_user widget in form view", async function (assert) {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Partner 1" });
+    const userId = pyEnv["res.users"].create({ name: "Mario", partner_id: partnerId });
+    const avatarUserId = pyEnv["m2x.avatar.user"].create({ user_ids: [userId] });
+    const views = {
+        "m2x.avatar.user,false,form":
+            '<form js_class="legacy_form"><field name="user_ids" widget="many2many_avatar_user"/></form>',
+    };
+    const { openView } = await start({
+        serverData: { views },
+    });
+    await openView({
+        res_model: "m2x.avatar.user",
+        res_id: avatarUserId,
+        views: [[false, "form"]],
+    });
+    await click(target, ".o_field_many2manytags.avatar .badge .o_m2m_avatar");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.strictEqual(
+        target.querySelector(".o-mail-chat-window-header-name").textContent,
+        "Partner 1"
+    );
+});

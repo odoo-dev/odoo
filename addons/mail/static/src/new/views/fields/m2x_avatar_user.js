@@ -11,8 +11,6 @@ import {
 import session from "web.session";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component } from "@odoo/owl";
-
 // This module defines extensions of the Many2OneAvatar and Many2ManyAvatar
 // widgets, which are integrated with the messaging system. They are designed
 // to display people, and when the avatar of those people is clicked, it
@@ -53,8 +51,9 @@ const M2XAvatarMixin = {
      * @param {Object} params
      */
     async _openChat(params) {
-        const messaging = await Component.env.services.messaging.get();
-        messaging.openChat(params);
+        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
+        const threadService = await odoo.__WOWL_DEBUG__.root.env.services["mail.thread"];
+        threadService.openChat(params);
     },
 };
 
