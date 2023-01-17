@@ -2,8 +2,9 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.discuss" owl="1">
-    <div class="d-flex h-100 flex-grow-1">
-        <Sidebar t-if="!props.public"/>
+    <div class="d-flex h-100 flex-grow-1" t-att-class="{ 'o-mail-device-is-small flex-column align-items-center bg-view': env.isSmall }">
+        <Sidebar t-if="!props.public and !env.isSmall"/>
+        <div t-if="env.isSmall" class="o-mail-discuss-mobile-top-bar w-100 border-bottom" t-call="mail.discuss_mobile_top_bar"/>
         <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view overflow-auto" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}" t-ref="content">
             <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
                 <ThreadIcon className="'o-mail-discuss-thread-icon me-2 align-self-center'" thread="thread"/>
@@ -67,6 +68,28 @@
             <h4 class="text-muted"><b><i>No conversation selected.</i></b></h4>
         </div>
     </div>
+</t>
+
+<t t-name="mail.discuss_mobile_top_bar" owl="1">
+    <div class="d-flex w-100 ">
+        <t t-call="mail.discuss_mobile_mailbox" >
+            <t t-set="mailbox" t-value="store.discuss.inbox" />
+        </t>
+        <t t-call="mail.discuss_mobile_mailbox">
+            <t t-set="mailbox" t-value="store.discuss.starred" />
+        </t>
+        <t t-call="mail.discuss_mobile_mailbox">
+            <t t-set="mailbox" t-value="store.discuss.history" />
+        </t>
+    </div>
+</t>
+
+<t t-name="mail.discuss_mobile_mailbox" owl="1">
+    <button class="btn btn-secondary flex-grow-1 p-2"
+        t-att-class="{
+            'active o-active shadow-none': store.discuss.threadLocalId === mailbox.localId,
+        }" t-on-click="() => this.threadService.setDiscussThread(mailbox)" t-att-data-mailbox="mailbox.localId" t-esc="mailbox.name"
+    />
 </t>
 
 </templates>
