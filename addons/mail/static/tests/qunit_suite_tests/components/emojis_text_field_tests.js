@@ -1,22 +1,23 @@
 /**@odoo-module **/
 
 import { getFixture } from "@web/../tests/helpers/utils";
-import { start, startServer } from '@mail/../tests/helpers/test_utils';
-import { addFakeModel } from '@bus/../tests/helpers/model_definitions_helpers';
+import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { addFakeModel } from "@bus/../tests/helpers/model_definitions_helpers";
 
-import { testEmojiButton,
-         testEmojiButtonHidden,
-         testEmojiButtonVisible,
-        } from "./emojis_field_common_tests";
+import {
+    testEmojiButton,
+    testEmojiButtonHidden,
+    testEmojiButtonVisible,
+} from "./emojis_field_common_tests";
 
 QUnit.skipRefactoring("Field text emojis", (hooks) => {
     let target = undefined;
 
-    addFakeModel('fields.text.emojis.user', {
-        foo: {type: 'char', onChange: "1"},
+    addFakeModel("fields.text.emojis.user", {
+        foo: { type: "char", onChange: "1" },
     });
     const views = {
-        'fields.text.emojis.user,false,form': `
+        "fields.text.emojis.user,false,form": `
             <form>
                 <field name="foo" widget="text_emojis"/>
             </form>
@@ -24,15 +25,18 @@ QUnit.skipRefactoring("Field text emojis", (hooks) => {
     };
     const openTestView = async (readonly = false) => {
         const pyEnv = await startServer();
-        const recordId = pyEnv['fields.text.emojis.user'].create({ display_name: 'test record', foo: 'test' });
-        const startServerArgs = {serverData: { views }};
+        const recordId = pyEnv["fields.text.emojis.user"].create({
+            display_name: "test record",
+            foo: "test",
+        });
+        const startServerArgs = { serverData: { views } };
         const openViewArgs = {
             res_id: recordId,
-            res_model: 'fields.text.emojis.user',
-            views: [[false, 'form']],
+            res_model: "fields.text.emojis.user",
+            views: [[false, "form"]],
         };
         if (readonly) {
-            openViewArgs.context = { form_view_initial_mode: 'readonly' };
+            openViewArgs.context = { form_view_initial_mode: "readonly" };
         }
         const { openView } = await start(startServerArgs);
         await openView(openViewArgs);
@@ -60,5 +64,4 @@ QUnit.skipRefactoring("Field text emojis", (hooks) => {
 
         await testEmojiButton(assert, target, input, emojiButton);
     });
-
 });
