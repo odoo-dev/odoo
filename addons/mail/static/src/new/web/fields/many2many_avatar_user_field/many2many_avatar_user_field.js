@@ -6,8 +6,8 @@ import {
     Many2ManyTagsAvatarField,
     ListKanbanMany2ManyTagsAvatarField,
 } from "@web/views/fields/many2many_tags_avatar/many2many_tags_avatar_field";
-import { useOpenChat } from "@mail/new/views/open_chat_hook";
-import { useAssignUserCommand } from "@mail/new/views/fields/assign_user_command_hook";
+import { useOpenChat } from "@mail/new/web/open_chat_hook";
+import { useAssignUserCommand } from "@mail/new/web/fields/assign_user_command_hook";
 
 export class Many2ManyAvatarUserTagsList extends TagsList {}
 Many2ManyAvatarUserTagsList.template = "mail.Many2ManyAvatarUserTagsList";
