@@ -33,7 +33,7 @@ export class Call extends Component {
         if (this.state.isFullscreen || this.props.compact || this.props.thread.activeRtcSession) {
             return false;
         }
-        if (this.rtc.state.thread !== this.props.thread || this.props.thread.videoCount === 0) {
+        if (this.rtc.state.channel !== this.props.thread || this.props.thread.videoCount === 0) {
             return true;
         }
         return false;

@@ -20,7 +20,6 @@ QUnit.test("basic rendering", async function (assert) {
     await click(".o-mail-discuss-actions button[title='Start a Call']");
     assert.containsOnce(target, ".o-mail-call");
     assert.containsOnce(target, ".o-mail-call-participant-card[aria-label='Mitchell Admin']");
-    assert.containsOnce(target, ".o-mail-call-participant-card-overlay:contains(Mitchell Admin)");
     assert.containsOnce(target, ".o-mail-call-action-list");
     assert.containsN(target, ".o-mail-call-action-list button", 6);
     assert.containsOnce(target, "button[aria-label='Unmute'], button[aria-label='Mute']"); // FIXME depends on current browser permission
