@@ -9,7 +9,7 @@ const { Component, useState, useRef, onMounted, onPatched, onWillUnmount } = owl
 
 export class CallMain extends Component {
     static components = { CallActionList, CallParticipantCard };
-    static props = ["thread", "fullscreen"];
+    static props = ["thread", "fullscreen", "compact?", "minimized?"];
     static template = "mail.call_main";
 
     overlayTimeout;
@@ -35,6 +35,13 @@ export class CallMain extends Component {
         });
     }
 
+    get visibleSessions() {
+        if (this.props.thread.activeRtcSession) {
+            return [this.props.thread.activeRtcSession];
+        }
+        return [...Object.values(this.props.thread.rtcSessions)];
+    }
+
     get hasSidebarButton() {
         return false;
     }
@@ -44,7 +51,10 @@ export class CallMain extends Component {
     }
 
     get isControllerFloating() {
-        return this.props.fullscreen.isActive; // or (focus && !compact)
+        return (
+            this.props.fullscreen.isActive ||
+            (this.props.thread.activeRtcSession && !this.props.compact)
+        );
     }
 
     onMouseleave(ev) {

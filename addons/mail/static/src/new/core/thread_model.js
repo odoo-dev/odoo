@@ -26,6 +26,8 @@ export class Thread {
     uuid;
     /** @type {string} */
     model;
+    /** @type {integer} */
+    activeRtcSessionId;
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").ChannelMember[]} */
     channelMembers = [];
@@ -92,6 +94,14 @@ export class Thread {
         return sprintf(_t('Access restricted to group "%(groupFullName)s"'), {
             groupFullName: this.authorizedGroupFullName,
         });
+    }
+
+    get activeRtcSession() {
+        return this._store.rtcSessions[this.activeRtcSessionId];
+    }
+
+    set activeRtcSession(session) {
+        this.activeRtcSessionId = session.id;
     }
 
     get areAllMembersLoaded() {
@@ -268,5 +278,9 @@ export class Thread {
 
     get typingMembers() {
         return this.typingMemberIds.map((memberId) => this._store.channelMembers[memberId]);
+    }
+
+    get videoCount() {
+        return Object.values(this.rtcSessions).filter((session) => session.videoStream).length;
     }
 }
