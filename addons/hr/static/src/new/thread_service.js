@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { ThreadService } from "@mail/new/thread/thread_service";
+import { ThreadService } from "@mail/new/core/thread_service";
 import { patch } from "web.utils";
 
 patch(ThreadService.prototype, "hr", {

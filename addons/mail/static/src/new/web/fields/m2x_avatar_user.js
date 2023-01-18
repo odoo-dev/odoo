@@ -51,7 +51,7 @@ const M2XAvatarMixin = {
      * @param {Object} params
      */
     async _openChat(params) {
-        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/new/core/thread_service").ThreadService} */
         const threadService = await odoo.__WOWL_DEBUG__.root.env.services["mail.thread"];
         threadService.openChat(params);
     },

@@ -26,7 +26,7 @@ import { rtcService } from "@mail/new/rtc/rtc_service";
 import { suggestionService } from "@mail/new/composer/suggestion_service";
 import { storeService } from "@mail/new/core/store_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
-import { threadService } from "@mail/new/thread/thread_service";
+import { threadService } from "@mail/new/core/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { chatterService } from "@mail/new/web/chatter_service";
