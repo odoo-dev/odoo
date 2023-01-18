@@ -249,3 +249,44 @@ QUnit.test("attachment counter transition when attachments become loaded", async
     await afterNextRender(() => attachmentPromise.resolve());
     assert.containsNone(target, "button[aria-label='Attach files'] .fa-spin");
 });
+
+QUnit.test(
+    "attachment icon open directly the file uploader if there is no attachment yet",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({});
+        const { openView } = await start();
+        await openView({
+            res_id: partnerId,
+            res_model: "res.partner",
+            views: [[false, "form"]],
+        });
+        assert.containsOnce(target, ".o-mail-chatter-file-uploader");
+        assert.containsNone(target, ".o-mail-attachment-box");
+    }
+);
+
+QUnit.test(
+    "attachment icon open the attachment box when there is at least 1 attachment",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({});
+        pyEnv["ir.attachment"].create([
+            {
+                mimetype: "text/plain",
+                name: "Blah.txt",
+                res_id: partnerId,
+                res_model: "res.partner",
+            },
+        ]);
+        const { openView } = await start();
+        await openView({
+            res_id: partnerId,
+            res_model: "res.partner",
+            views: [[false, "form"]],
+        });
+        assert.containsNone(target, ".o-mail-chatter-file-uploader");
+        await click("button[aria-label='Attach files']");
+        assert.containsOnce(target, ".o-mail-attachment-box");
+    }
+);
