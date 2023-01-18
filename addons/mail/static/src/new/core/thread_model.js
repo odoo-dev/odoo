@@ -128,7 +128,7 @@ export class Thread {
         if (this.type === "chat") {
             return `/web/image/res.partner/${this.chatPartnerId}/avatar_128?unique=${avatarCacheKey}`;
         }
-        return false;
+        return "/mail/static/src/img/smiley/avatar.jpg";
     }
 
     get isDescriptionChangeable() {
