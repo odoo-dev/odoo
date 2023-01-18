@@ -43,7 +43,7 @@ export class ActivityListPopover extends Component {
     }
 
     get activities() {
-        /** @type {import("@mail/new/core/activity_model").Activity[]} */
+        /** @type {import("./activity_model").Activity[]} */
         const allActivities = Object.values(this.store.activities);
         return allActivities
             .filter((activity) => this.props.activityIds.includes(activity.id))

@@ -84,7 +84,7 @@ export class Store {
     };
     cannedResponses = [];
 
-    /** @type {Object.<number, import("@mail/new/core/activity_model").Activity>} */
+    /** @type {Object.<number, import("@mail/new/activity/activity_model").Activity>} */
     activities = {};
     activityCounter = 0;
 
