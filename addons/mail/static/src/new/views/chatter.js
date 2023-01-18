@@ -291,4 +291,9 @@ export class Chatter extends Component {
         await this.attachmentUploader.unlink(attachment);
         removeFromArrayWithPredicate(this.state.attachments, ({ id }) => attachment.id === id);
     }
+
+    onUploaded(data) {
+        this.attachmentUploader.uploadData(data);
+        this.state.isAttachmentBoxOpened = true;
+    }
 }

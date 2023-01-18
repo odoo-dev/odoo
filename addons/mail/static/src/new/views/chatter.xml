@@ -16,7 +16,14 @@
                     <span>Activities</span>
                 </button>
                 <span class="o-mail-chatter-topbar-grow flex-grow-1 border-start pe-2" t-att-class="{ 'ms-2': props.hasActivity }"/>
-                <button class="o-mail-chatter-topbar-add-attachments btn btn-light" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
+                <FileUploader t-if="attachmentUploader.attachments.concat(state.attachments).length === 0" multiUpload="true" onUploaded.bind="onUploaded">
+                    <t t-set-slot="toggler">
+                        <button class="btn btn-link" type="button" t-att-disabled="!thread.hasWriteAccess">
+                            <i class="fa fa-paperclip fa-lg me-1"/>
+                        </button>
+                    </t>
+                </FileUploader>
+                <button t-else="" class="o-mail-chatter-topbar-add-attachments btn btn-light" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
                     <i class="fa fa-paperclip fa-lg me-1"/>
                     <span t-if="!state.isLoadingAttachments" t-esc="state.attachments.length + attachmentUploader.attachments.length"/>
                     <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
@@ -104,7 +111,7 @@
                         editable="true"
                         imagesHeight="160"
                     />
-                    <FileUploader multiUpload="true" onUploaded="(data) => attachmentUploader.uploadData(data)">
+                    <FileUploader multiUpload="true" onUploaded.bind="onUploaded">
                         <t t-set-slot="toggler">
                             <button class="btn btn-link" type="button" t-att-disabled="!thread.hasWriteAccess">
                                 <i class="fa fa-plus-square"/>
