@@ -26,7 +26,7 @@ export class ThreadService {
         this.router = services.router;
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];
-        /** @type {import("@mail/new/thread/message_service").MessageService} */
+        /** @type {import("@mail/new/core/message_service").MessageService} */
         this.message = services["mail.message"];
         // FIXME this prevents cyclic dependencies between mail.thread and mail.message
         this.env.bus.addEventListener("MESSAGE-SERVICE:INSERT_THREAD", ({ detail }) => {

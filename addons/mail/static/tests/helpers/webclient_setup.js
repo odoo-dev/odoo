@@ -27,7 +27,7 @@ import { suggestionService } from "@mail/new/composer/suggestion_service";
 import { storeService } from "@mail/new/core/store_service";
 import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/core/thread_service";
-import { messageService } from "@mail/new/thread/message_service";
+import { messageService } from "@mail/new/core/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { chatterService } from "@mail/new/web/chatter_service";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";

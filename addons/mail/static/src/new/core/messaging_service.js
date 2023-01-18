@@ -56,7 +56,7 @@ export class Messaging {
         this.chatWindow = services["mail.chat_window"];
         /** @type {import("@mail/core/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
-        /** @type {import("@mail/new/thread/message_service").MessageService} */
+        /** @type {import("@mail/new/core/message_service").MessageService} */
         this.message = services["mail.message"];
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];
