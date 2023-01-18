@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Call } from "../rtc/call";
-import { Thread } from "../thread/thread";
+import { Thread } from "../core_ui/thread";
 import { Composer } from "../composer/composer";
 import { useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";

@@ -27,7 +27,7 @@ import { useSuggestion } from "./suggestion_hook";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { MessageDeleteDialog } from "../thread/message_delete_dialog";
+import { MessageDeleteDialog } from "../core_ui/message_delete_dialog";
 
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;

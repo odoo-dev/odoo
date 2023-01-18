@@ -23,7 +23,7 @@ export class Store {
 
     /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
     channelMembers = {};
-    /** @type {import("@mail/new/thread/message").Message|null} */
+    /** @type {import("@mail/new/core_ui/message").Message|null} */
     clickedMessage = null;
     companyName = "";
 

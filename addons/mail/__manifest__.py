@@ -177,7 +177,7 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web._assets_primary_variables': [
             'mail/static/src/scss/variables/primary_variables.scss',
-            'mail/static/src/new/core/primary_variables.scss',
+            'mail/static/src/new/core_ui/primary_variables.scss',
         ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
@@ -234,8 +234,6 @@ For more specific needs, you may also assign custom-defined actions
         ],
         # new bundles
         'mail.assets_backend': [
-            'mail/static/src/new/core/**/*',
-            'mail/static/src/new/thread/**/*',
             'mail/static/src/new/**/*',
             ('remove', 'mail/static/src/new/public/**/*'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),

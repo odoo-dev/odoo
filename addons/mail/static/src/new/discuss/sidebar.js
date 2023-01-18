@@ -25,7 +25,7 @@ export class Sidebar extends Component {
     setup() {
         this.messaging = useMessaging();
         this.store = useStore();
-        /** @type {import("@mail/core/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.threadService = useState(useService("mail.thread"));
         this.actionService = useService("action");
         this.dialogService = useService("dialog");

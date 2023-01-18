@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Thread } from "../thread/thread";
+import { Thread } from "../core_ui/thread";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
 import { AttachmentList } from "@mail/new/attachments/attachment_list";

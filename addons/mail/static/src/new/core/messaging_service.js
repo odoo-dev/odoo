@@ -54,7 +54,7 @@ export class Messaging {
         this.userSettings = services["mail.user_settings"];
         /** @type {import("@mail/new/chat/chat_window_service").ChatWindow} */
         this.chatWindow = services["mail.chat_window"];
-        /** @type {import("@mail/core/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
         /** @type {import("@mail/new/core/message_service").MessageService} */
         this.message = services["mail.message"];

@@ -2,7 +2,7 @@
 
 import { AutoresizeInput } from "./autoresize_input";
 import { Sidebar } from "./sidebar";
-import { Thread } from "../thread/thread";
+import { Thread } from "../core_ui/thread";
 import { ThreadIcon } from "./thread_icon";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { useRtc } from "../rtc/rtc_hook";
