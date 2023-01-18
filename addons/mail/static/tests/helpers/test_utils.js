@@ -8,8 +8,10 @@ import { getAdvanceTime } from "@mail/../tests/helpers/time_control";
 import { getWebClientReady } from "@mail/../tests/helpers/webclient_setup";
 
 import { registry } from "@web/core/registry";
+import { patch } from "@web/core/utils/patch";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { session as sessionInfo } from "@web/session";
+import { makeMockXHR } from "@web/../tests/helpers/mock_services";
 import { getFixture, makeDeferred, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { doAction, getActionManagerServerData } from "@web/../tests/webclient/helpers";
 
@@ -46,6 +48,47 @@ function _createFakeDataTransfer(files) {
         items: [],
         types: ["Files"],
     };
+}
+
+/**
+ * Patch the `XMLHttpRequest` constructor in order to get the answer from the
+ * mock server instead of the real one.
+ */
+function _patchXhr(mockServer) {
+    const mockedXHR = makeMockXHR();
+    patchWithCleanup(
+        window,
+        {
+            XMLHttpRequest() {
+                const xhr = mockedXHR();
+                let response = "";
+                let route = "";
+                patch(xhr, "mail", {
+                    open(method, dest) {
+                        route = dest;
+                        return this._super(method, dest);
+                    },
+                    async send(data) {
+                        const _super = this._super;
+                        await new Promise(setTimeout);
+                        response = JSON.stringify(
+                            await mockServer.performRPC(route, {
+                                body: data,
+                            })
+                        );
+                        return _super(data);
+                    },
+                    upload: new EventTarget(),
+                    abort() {},
+                    get response() {
+                        return response;
+                    },
+                });
+                return xhr;
+            },
+        },
+        { pure: true }
+    );
 }
 
 //------------------------------------------------------------------------------
@@ -384,6 +427,7 @@ async function start(param0 = {}) {
     const afterEvent = getAfterEvent({ messagingBus });
 
     const pyEnv = await getPyEnv();
+    _patchXhr(pyEnv.mockServer);
     patchWithCleanup(sessionInfo, {
         user_context: {
             ...sessionInfo.user_context,
