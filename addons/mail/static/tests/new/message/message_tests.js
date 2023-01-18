@@ -1082,3 +1082,24 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-attachment-unlink");
     }
 );
+
+QUnit.test("Toggle star should update starred counter on all tabs", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: pyEnv.currentPartnerId,
+        body: "Hello world",
+        model: "mail.channel",
+        res_id: mailChannelId,
+        message_type: "comment",
+    });
+    const tab1 = await start({ asTab: true });
+    const tab2 = await start({ asTab: true });
+    await tab1.openDiscuss(mailChannelId);
+    await tab2.openDiscuss();
+    await tab1.click(".o-mail-message-action-toggle-star");
+    assert.strictEqual(tab2.target.querySelector(".o-starred-box .badge").textContent, "1");
+});

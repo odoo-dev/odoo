@@ -489,10 +489,7 @@ export class Messaging {
                 case "mail.message/toggle_star": {
                     const { message_ids: messageIds, starred } = notif.payload;
                     for (const messageId of messageIds) {
-                        const message = this.store.messages[messageId];
-                        if (!message) {
-                            continue;
-                        }
+                        const message = this.message.insert({ id: messageId });
                         this.message.updateStarred(message, starred);
                         this.message.sortMessages(this.store.discuss.starred);
                     }
