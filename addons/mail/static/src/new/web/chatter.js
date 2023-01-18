@@ -146,6 +146,10 @@ export class Chatter extends Component {
         return !this.props.resId || !this.thread.hasReadAccess;
     }
 
+    get attachments() {
+        return this.attachmentUploader.attachments.concat(this.state.attachments);
+    }
+
     /**
      * @param {number} resId
      * @param {['activities'|'followers'|'attachments'|'messages'|'suggestedRecipients']} requestList
