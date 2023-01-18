@@ -13,7 +13,7 @@ export class ChatterService {
         this.store = services["mail.store"];
         /** @type {import("@mail/core/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
-        /** @type {import("@mail/new/thread/message_service").MessageService} */
+        /** @type {import("@mail/new/core/message_service").MessageService} */
         this.message = services["mail.message"];
         this.rpc = services.rpc;
         this.orm = services.orm;
