@@ -23,6 +23,7 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
             const attachment = this.getRecords("ir.attachment", [["id", "=", attachmentId]])[0];
             return {
                 filename: attachment.name,
+                name: attachment.name,
                 id: attachment.id,
                 mimetype: attachment.mimetype,
                 size: attachment.file_size,
