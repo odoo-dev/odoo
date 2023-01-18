@@ -18,7 +18,7 @@ export class LinkPreview {
     /** @type {string} */
     og_type;
     /** @type {string} */
-    og_source_url;
+    source_url;
 
     /**
      * @param {Object} data
@@ -29,7 +29,7 @@ export class LinkPreview {
     }
 
     get imageUrl() {
-        return this.og_image ? this.og_image : this.og_source_url;
+        return this.og_image ? this.og_image : this.source_url;
     }
 
     get isImage() {
