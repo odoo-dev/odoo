@@ -64,12 +64,12 @@ export class MessagingMenu extends Component {
             {
                 id: "chats",
                 icon: "fa fa-user",
-                label: _("Chats"),
+                label: _t("Chats"),
             },
             {
                 id: "channels",
                 icon: "fa fa-users",
-                label: _("Channels"),
+                label: _t("Channels"),
             },
         ];
     }
