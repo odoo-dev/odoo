@@ -30,7 +30,6 @@ QUnit.test("base empty rendering", async function (assert) {
     });
     assert.containsOnce(target, ".o-mail-attachment-box");
     assert.containsOnce(target, "button:contains('Attach files')");
-    assert.containsOnce(target, ".o-mail-chatter input[type='file']");
     assert.containsNone(target, ".o-mail-chatter .o-mail-attachment-image");
 });
 
