@@ -268,7 +268,6 @@ For more specific needs, you may also assign custom-defined actions
 
             'mail/static/src/new/**/*',
             ('remove', 'mail/static/src/new/web/**/*'),
-            ('remove', 'mail/static/src/new/backend/**/*',),
             ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),
         ]
