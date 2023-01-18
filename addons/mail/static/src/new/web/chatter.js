@@ -121,7 +121,7 @@ export class Chatter extends Component {
     }
 
     /**
-     * @returns {import("@mail/new/core/activity_model").Activity[]}
+     * @returns {import("@mail/new/activity/activity_model").Activity[]}
      */
     get activities() {
         return Object.values(this.store.activities).filter((activity) => {

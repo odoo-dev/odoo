@@ -90,8 +90,8 @@ export class Activity {
 
     /**
      * @param {import("@mail/new/core/store_service").Store} store
-     * @param {import("@mail/new/core/activity_model").Data} data
-     * @returns {import("@mail/new/core/activity_model").Activity}
+     * @param {Data} data
+     * @returns {Activity}
      */
     constructor(store, data) {
         Object.assign(this, {

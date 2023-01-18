@@ -15,7 +15,7 @@ import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/activity_model").Activity} activity
+ * @property {import("./activity_model").Activity} activity
  * @property {function} onActivityChanged
  * @property {function} [onClickDoneAndScheduleNext]
  * @property {function} onClickEditActivityButton
