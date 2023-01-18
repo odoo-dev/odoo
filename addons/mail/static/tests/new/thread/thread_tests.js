@@ -211,3 +211,37 @@ QUnit.test("thread is still scrolling after scrolling up then to bottom", async 
     await click(".o-mail-composer-send-button");
     assert.ok(isScrolledToBottom(thread));
 });
+
+QUnit.test("mention a channel with space in the name", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        name: "General good boy",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await insertText(".o-mail-composer-textarea", "#");
+    await click(".o-composer-suggestion");
+    await click(".o-mail-composer-send-button");
+    assert.containsOnce(document.querySelector(".o-mail-message-body"), ".o_channel_redirect");
+    assert.strictEqual(
+        document.querySelector(".o_channel_redirect").textContent,
+        "#General good boy"
+    );
+});
+
+QUnit.test('mention a channel with "&" in the name', async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        name: "General & good",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await insertText(".o-mail-composer-textarea", "#");
+    await click(".o-composer-suggestion");
+    await click(".o-mail-composer-send-button");
+    assert.containsOnce(document.querySelector(".o-mail-message-body"), ".o_channel_redirect");
+    assert.strictEqual(
+        document.querySelector(".o_channel_redirect").textContent,
+        "#General & good"
+    );
+});

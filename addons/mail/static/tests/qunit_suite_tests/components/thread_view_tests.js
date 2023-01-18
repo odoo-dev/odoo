@@ -874,63 +874,6 @@ QUnit.module("mail", (hooks) => {
             }
         );
 
-        QUnit.skipRefactoring("mention a channel with space in the name", async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({
-                name: "General good boy",
-            });
-            const { click, insertText, openDiscuss } = await start({
-                discuss: {
-                    context: { active_id: mailChannelId1 },
-                },
-            });
-            await openDiscuss();
-            await insertText(".o-mail-composer-textarea", "#");
-            await click(".o_ComposerSuggestionView");
-            await click(".o-mail-composer-send-button");
-            assert.containsOnce(
-                document.querySelector(".o-mail-message-body"),
-                ".o_channel_redirect",
-                "message must contain a link to the mentioned channel"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_channel_redirect").textContent,
-                "#General good boy",
-                "link to the channel must contains # + the channel name"
-            );
-        });
-
-        QUnit.skipRefactoring('mention a channel with "&" in the name', async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({
-                name: "General & good",
-            });
-            const { click, insertText, openDiscuss } = await start({
-                discuss: {
-                    context: { active_id: mailChannelId1 },
-                },
-            });
-            await openDiscuss();
-
-            await insertText(".o-mail-composer-textarea", "#");
-            await click(".o_ComposerSuggestionView");
-            await click(".o-mail-composer-send-button");
-            assert.containsOnce(
-                document.querySelector(".o-mail-message-body"),
-                ".o_channel_redirect",
-                "message should contain a link to the mentioned channel"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_channel_redirect").textContent,
-                "#General & good",
-                "link to the channel must contains # + the channel name"
-            );
-        });
-
         QUnit.skipRefactoring(
             "mention a channel on a second line when the first line contains #",
             async function (assert) {
