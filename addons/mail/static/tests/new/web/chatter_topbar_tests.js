@@ -180,7 +180,7 @@ QUnit.test("attachment counter without attachments", async function (assert) {
         views: [[false, "form"]],
     });
     assert.containsOnce(target, "button[aria-label='Attach files']");
-    assert.containsOnce(target, "button[aria-label='Attach files']:contains(0)");
+    assert.containsNone(target, "button[aria-label='Attach files']:contains(0)");
 });
 
 QUnit.test("attachment counter with attachments", async function (assert) {
@@ -245,9 +245,7 @@ QUnit.test("attachment counter transition when attachments become loaded", async
         views: [[false, "form"]],
     });
     assert.containsOnce(target, "button[aria-label='Attach files'] .fa-spin");
-    assert.containsNone(target, "button[aria-label='Attach files']:contains(0)");
 
     await afterNextRender(() => attachmentPromise.resolve());
     assert.containsNone(target, "button[aria-label='Attach files'] .fa-spin");
-    assert.containsOnce(target, "button[aria-label='Attach files']:contains(0)");
 });

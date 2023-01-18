@@ -16,7 +16,7 @@
                     <span>Activities</span>
                 </button>
                 <span class="o-mail-chatter-topbar-grow flex-grow-1 border-start pe-2" t-att-class="{ 'ms-2': props.hasActivity }"/>
-                <FileUploader t-if="attachmentUploader.attachments.concat(state.attachments).length === 0" multiUpload="true" onUploaded.bind="onUploaded">
+                <FileUploader t-if="attachments.length === 0" multiUpload="true" onUploaded.bind="onUploaded">
                     <t t-set-slot="toggler">
                         <t t-call="mail.chatter.add_attachment_button"/>
                     </t>
@@ -100,7 +100,7 @@
                 </div>
                 <div class="d-flex flex-column">
                     <AttachmentList
-                        attachments="attachmentUploader.attachments.concat(state.attachments)"
+                        attachments="attachments"
                         unlinkAttachment.bind="unlinkAttachment"
                         editable="true"
                         imagesHeight="160"
@@ -142,8 +142,10 @@
 <t t-name="mail.chatter.add_attachment_button" owl="1">
     <button class="o-mail-chatter-topbar-add-attachments btn btn-light" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
         <i class="fa fa-paperclip fa-lg me-1"/>
-        <span t-if="!state.isLoadingAttachments" t-esc="state.attachments.length + attachmentUploader.attachments.length"/>
-        <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
+        <t t-if="attachments.length > 0">
+            <span t-if="!state.isLoadingAttachments" t-esc="attachments.length"/>
+            <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
+        </t>
     </button>
 </t>
 
