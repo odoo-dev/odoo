@@ -1,9 +1,7 @@
 /* @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { LinkPreviewCard } from "./link_preview_card";
-import { LinkPreviewImage } from "./link_preview_image";
-import { LinkPreviewVideo } from "./link_preview_video";
+import { LinkPreview } from "./link_preview";
 
 /**
  * @typedef {Object} Props
@@ -12,22 +10,10 @@ import { LinkPreviewVideo } from "./link_preview_video";
  * @extends {Component<Props, Env>}
  */
 export class LinkPreviewList extends Component {
-    static components = { LinkPreviewCard, LinkPreviewImage, LinkPreviewVideo };
+    static template = "mail.link_preview_list";
     static props = ["linkPreviews", "deletable?"];
     static defaultProps = {
         deletable: false,
     };
-    static template = "mail.link_preview_list";
-
-    get linkPreviewsImage() {
-        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isImage);
-    }
-
-    get linkPreviewsVideo() {
-        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isVideo);
-    }
-
-    get linkPreviewsCard() {
-        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isCard);
-    }
+    static components = { LinkPreview };
 }

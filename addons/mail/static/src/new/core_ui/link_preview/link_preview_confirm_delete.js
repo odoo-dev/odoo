@@ -13,7 +13,7 @@ import { Dialog } from "@web/core/dialog/dialog";
  */
 export class LinkPreviewConfirmDelete extends Component {
     static components = { Dialog };
-    static props = ["linkPreview", "close", "LinkPreviewListComponent"];
+    static props = ["linkPreview", "close", "LinkPreview"];
     static template = "mail.link_preview_confirm_delete";
 
     setup() {
