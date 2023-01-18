@@ -83,7 +83,7 @@ QUnit.module('SmsWidget', (hooks) => {
         assert.strictEqual(target.querySelector('.o_sms_count').textContent, "71 characters, fits in 2 SMS (UNICODE) ");
     });
 
-    QUnit.skipRefactoring('SMS widgets update with emoji picker', async function (assert) {
+    QUnit.test('SMS widgets update with emoji picker', async function (assert) {
         assert.expect(3);
         await openTestView('fields.sms.emojis.partner', `<form><sheet><field name="message" widget="sms_widget"/></sheet></form>`);
 
@@ -95,7 +95,7 @@ QUnit.module('SmsWidget', (hooks) => {
 
         // insert an emoji
         await click(target, ".o_field_sms_widget button");
-        let emojiItem = target.querySelector(".o_EmojiGridRowView_item");
+        let emojiItem = target.querySelector(".o-mail-emoji-picker-content .o-emoji");
         let emojiItemCharacter = emojiItem.textContent;
         await click(emojiItem);
 
@@ -107,7 +107,7 @@ QUnit.module('SmsWidget', (hooks) => {
         // check insertion after selection (replacing selection)
         target.querySelector('.o_input').setSelectionRange(0, stringLength);
         await click(target, ".o_field_sms_widget button");
-        emojiItem = target.querySelector(".o_EmojiGridRowView_item");
+        emojiItem = target.querySelector(".o-mail-emoji-picker-content .o-emoji");
         emojiItemCharacter = emojiItem.textContent;
         await click(emojiItem);
         stringLength = emojiItemCharacter.length;

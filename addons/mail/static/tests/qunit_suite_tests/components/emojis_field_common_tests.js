@@ -40,9 +40,9 @@ export async function testEmojiButtonVisible(assert, target, emojiComponentSelec
 export async function testEmojiButton(assert, target, input, emojiButton) {
     // emoji picker opens
     await click(emojiButton);
-    assert.containsOnce(target, ".o_EmojiPickerView");
+    assert.containsOnce(target, ".o-mail-emoji-picker");
     // clicking an emoji adds it to the input field
-    const firstEmojiItem = target.querySelector(".o_EmojiGridRowView_item");
+    const firstEmojiItem = target.querySelector(".o-mail-emoji-picker-content .o-emoji");
     const firstEmojiItemCharacter = firstEmojiItem.textContent;
     await click(firstEmojiItem);
     assert.ok(
@@ -55,7 +55,7 @@ export async function testEmojiButton(assert, target, input, emojiButton) {
     input.setSelectionRange(2, inputTextLength - firstEmojiItemCharacter.length);
     // pick an emoji while the text is selected
     await click(emojiButton);
-    const secondEmojiItem = target.querySelector(".o_EmojiGridRowView_item");
+    const secondEmojiItem = target.querySelector(".o-mail-emoji-picker-content .o-emoji");
     const secondEmojiItemCharacter = secondEmojiItem.textContent;
     await click(secondEmojiItem);
     // the selected region is replaced and the rest stays in place

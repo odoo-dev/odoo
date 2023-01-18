@@ -20,11 +20,12 @@ import { escapeRegExp } from "@web/core/utils/strings";
 /**
  *
  * @param {string} refName
- * @param {object} props
+ * @param {Object} props
+ * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
  * @param {function} [props.onSelect]
  * @param {function} [props.onClose]
  */
-export function useEmojiPicker(refName, props) {
+export function useEmojiPicker(refName, props, options = {}) {
     const ref = useRef(refName);
     const popover = usePopover();
     let closePopover = false;
@@ -34,22 +35,29 @@ export function useEmojiPicker(refName, props) {
             closePopover = false;
         } else {
             closePopover = popover.add(ref.el, EmojiPicker, props, {
+                ...options,
                 onClose: () => (closePopover = false),
                 popoverClass: "o-fast-popover",
             });
         }
     };
     onMounted(() => {
-        ref.el.addEventListener("click", toggle);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        if (ref.el) {
+            ref.el.addEventListener("click", toggle);
+            ref.el.addEventListener("mouseenter", loadEmoji);
+        }
     });
     onWillPatch(() => {
-        ref.el.removeEventListener("click", toggle);
-        ref.el.removeEventListener("mouseenter", loadEmoji);
+        if (ref.el) {
+            ref.el.removeEventListener("click", toggle);
+            ref.el.removeEventListener("mouseenter", loadEmoji);
+        }
     });
     onPatched(() => {
-        ref.el.addEventListener("click", toggle);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        if (ref.el) {
+            ref.el.addEventListener("click", toggle);
+            ref.el.addEventListener("mouseenter", loadEmoji);
+        }
     });
     return {
         get isOpen() {
