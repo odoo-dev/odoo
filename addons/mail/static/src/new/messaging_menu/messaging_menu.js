@@ -6,6 +6,7 @@ import { useMessaging, useStore } from "../core/messaging_hook";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { NotificationItem } from "./notification_item";
 import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { createLocalId } from "../utils/misc";
 
@@ -21,7 +22,7 @@ export class MessagingMenu extends Component {
         this.threadService = useState(useService("mail.thread"));
         this.action = useService("action");
         this.state = useState({
-            filter: "all", // can be 'all', 'channels' or 'chats'
+            tab: "all", // can be 'all', 'channels' or 'chats'
         });
     }
 
@@ -29,17 +30,48 @@ export class MessagingMenu extends Component {
         return createLocalId(...args);
     }
 
+    /**
+     * @param {'all' | 'chat' | 'group'} tab
+     * @returns Thread types matching the given tab.
+     */
+    tabToThreadType(tab) {
+        return tab === "chats" ? ["chat", "group"] : tab;
+    }
+
     get displayedPreviews() {
         /** @type {import("@mail/new/core/thread_model").Thread[]} **/
         const threads = Object.values(this.store.threads);
         const previews = threads.filter((thread) => thread.is_pinned);
 
-        const filter = this.state.filter;
-        if (filter === "all") {
+        const tab = this.state.tab;
+        if (tab === "all") {
             return previews;
         }
-        const target = filter === "chats" ? ["chat", "group"] : "channel";
+        const target = this.tabToThreadType(tab);
         return previews.filter((preview) => target.includes(preview.type));
+    }
+
+    /**
+     * @type {{ id: string, icon: string, label: string }[]}
+     */
+    get tabs() {
+        return [
+            {
+                id: "all",
+                icon: "fa fa-user",
+                label: _t("All"),
+            },
+            {
+                id: "chats",
+                icon: "fa fa-user",
+                label: _("Chats"),
+            },
+            {
+                id: "channels",
+                icon: "fa fa-users",
+                label: _("Channels"),
+            },
+        ];
     }
 
     openDiscussion(thread) {

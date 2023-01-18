@@ -14,15 +14,15 @@
                     'flex-row-reverse text-uppercase': store.isSmall,
                 }">
                     <t t-if="!store.isSmall">
-                        <button class="btn btn-link" t-att-class="state.filter === 'all' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.filter = 'all'">All</button>
-                        <button class="btn btn-link" t-att-class="state.filter === 'chats' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.filter = 'chats'">Chats</button>
-                        <button class="btn btn-link" t-att-class="state.filter === 'channels' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.filter = 'channels'">Channels</button>
+                        <button class="btn btn-link" t-att-class="state.tab === 'all' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.tab = 'all'">All</button>
+                        <button class="btn btn-link" t-att-class="state.tab === 'chats' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.tab = 'chats'">Chats</button>
+                        <button class="btn btn-link" t-att-class="state.tab === 'channels' ? 'fw-bolder' : 'text-500'" type="button" role="tab" t-on-click="() => this.state.tab = 'channels'">Channels</button>
                     </t>
                     <div class="flex-grow-1"></div>
                     <button t-if="!store.discuss.isActive or store.isSmall" class="btn btn-link o-mail-messaging-menu-new-message" t-att-class="{ 'text-uppercase': store.isSmall }" type="button" t-on-click.stop="onClickNewMessage">New Message</button>
                 </div>
                 <div class="d-flex flex-column overflow-auto flex-grow-1">
-                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0 and (failures.length === 0 or state.filter !== 'all')">
+                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0 and (failures.length === 0 or state.tab !== 'all')">
                         No conversation yet...
                     </div>
                     <t t-foreach="displayedPreviews" t-as="preview" t-key="preview.id">
@@ -48,7 +48,7 @@
                             </t>
                         </NotificationItem>
                     </t>
-                    <t t-if="state.filter === 'all'">
+                    <t t-if="state.tab === 'all'">
                         <NotificationItem
                             t-foreach="failures" t-as="failure" t-key="failure.id"
                             body="failure.body"
@@ -63,24 +63,13 @@
                     </t>
                 </div>
             </div>
-            <div t-if="store.isSmall" class="d-flex border-top bg-view shadow-lg">
-                <div class="d-flex flex-column align-items-center flex-grow-1 p-2 border-end" t-att-class="{
-                    'text-primary fw-bolder': state.filter === 'all',
-                }" t-on-click="() => this.state.filter = 'all'">
-                    <span class="fs-4 fa fa-envelope"/>
-                    <span class="small">All</span>
-                </div>
-                <div class="d-flex flex-column align-items-center flex-grow-1 p-2 border-end" t-att-class="{
-                    'text-primary fw-bolder': state.filter === 'chats',
-                }" t-on-click="() => this.state.filter = 'chats'">
-                    <span class="fs-4 fa fa-user"/>
-                    <span class="small">Chats</span>
-                </div>
-                <div class="d-flex flex-column align-items-center flex-grow-1 p-2" t-att-class="{
-                    'text-primary fw-bolder': state.filter === 'channels',
-                }" t-on-click="() => this.state.filter = 'channels'">
-                    <span class="fs-4 fa fa-users"/>
-                    <span class="small">Channels</span>
+            <div t-if="store.isSmall" class="o-mail-messaging-menu-navbar d-flex border-top bg-view shadow-lg">
+                <div t-foreach="tabs" t-key="tab.id" t-as="tab" class="d-flex flex-column align-items-center flex-grow-1 p-2" t-att-class="{
+                    'text-primary fw-bolder': state.tab === tab.tab,
+                    'border-end': !tab_last,
+                }" t-on-click="() => this.state.tab = tab.id">
+                    <span t-attf-class="fs-4 {{ tab.icon }}"/>
+                    <span class="small" t-esc="tab.label"/>
                 </div>
             </div>
         </t>
