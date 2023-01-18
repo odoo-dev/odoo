@@ -82,7 +82,6 @@ export class Message extends Component {
         this.messageService = useState(useService("mail.message"));
         this.user = useService("user");
         useChildSubEnv({
-            LinkPreviewListComponent: LinkPreviewList,
             alignedRight: this.isAlignedRight,
         });
         useEffect(
