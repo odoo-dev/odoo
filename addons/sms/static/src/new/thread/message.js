@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Message } from "@mail/new/thread/message";
+import { Message } from "@mail/new/core_ui/message";
 import { patch } from "@web/core/utils/patch";
 
 patch(Message.prototype, "sms", {

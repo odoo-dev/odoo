@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
-import { Message } from "@mail/new/thread/message";
+import { Message } from "@mail/new/core_ui/message";
 import { useService } from "@web/core/utils/hooks";
 import { format } from "web.field_utils";
 import { deserializeDateTime } from "@web/core/l10n/dates";

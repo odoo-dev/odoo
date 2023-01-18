@@ -2,7 +2,7 @@
 
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { AttachmentList } from "@mail/new/attachments/attachment_list";
-import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
+import { MessageInReplyTo } from "./message_in_reply_to";
 import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { convertBrToLineBreak } from "@mail/new/utils/format";
@@ -19,10 +19,10 @@ import {
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { useMessaging, useStore } from "../core/messaging_hook";
-import { MessageDeleteDialog } from "../thread/message_delete_dialog";
+import { MessageDeleteDialog } from "./message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
-import { MessageReactions } from "@mail/new/thread/message_reactions";
+import { MessageReactions } from "./message_reactions";
 import { useEmojiPicker } from "../emoji_picker/emoji_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { MessageNotificationPopover } from "./message_notification_popover";

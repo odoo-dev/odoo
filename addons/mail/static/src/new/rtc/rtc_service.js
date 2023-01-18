@@ -73,7 +73,7 @@ export class Rtc {
         this.rpc = services.rpc;
         this.soundEffects = services["mail.sound_effects"];
         this.userSettings = services["mail.user_settings"];
-        /** @type {import("@mail/core/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
         this.persona = services["mail.persona"];
         this.state = reactive({
