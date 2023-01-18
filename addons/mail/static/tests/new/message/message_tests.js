@@ -1103,3 +1103,21 @@ QUnit.test("Toggle star should update starred counter on all tabs", async functi
     await tab1.click(".o-mail-message-action-toggle-star");
     assert.strictEqual(tab2.target.querySelector(".o-starred-box .badge").textContent, "1");
 });
+
+QUnit.test("allow attachment image download on message", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "test" });
+    const attachmentId = pyEnv["ir.attachment"].create({
+        name: "Blah.jpg",
+        mimetype: "image/jpeg",
+    });
+    pyEnv["mail.message"].create({
+        attachment_ids: [attachmentId],
+        body: "<p>Test</p>",
+        model: "mail.channel",
+        res_id: channelId,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    assert.containsOnce(target, ".o-mail-attachment-image .fa-download");
+});
