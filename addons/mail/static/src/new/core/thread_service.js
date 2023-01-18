@@ -137,40 +137,40 @@ export class ThreadService {
      */
     async fetchMessages(thread, { min, max }) {
         thread.status = "loading";
-        let rawMessages;
-        switch (thread.type) {
-            case "mailbox":
-                rawMessages = await this.rpc(`/mail/${thread.id}/messages`, {
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            case "chatter":
-                if (thread.id === false) {
-                    return [];
-                }
-                rawMessages = await this.rpc("/mail/thread/messages", {
+        if (thread.type === "chatter" && !thread.id) {
+            return [];
+        }
+        const route = (() => {
+            if (thread.model === "mail.channel") {
+                return "/mail/channel/messages";
+            }
+            switch (thread.type) {
+                case "chatter":
+                    return "/mail/thread/messages";
+                case "mailbox":
+                    return `/mail/${thread.id}/messages`;
+                default:
+                    throw new Error(`Unknown thread type: ${thread.type}`);
+            }
+        })();
+        const params = (() => {
+            if (thread.model === "mail.channel") {
+                return { channel_id: thread.id };
+            }
+            if (thread.type === "chatter") {
+                return {
                     thread_id: thread.id,
                     thread_model: thread.model,
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            case "channel":
-            case "group":
-            case "chat":
-                rawMessages = await this.rpc("/mail/channel/messages", {
-                    channel_id: thread.id,
-                    limit: FETCH_MSG_LIMIT,
-                    max_id: max,
-                    min_id: min,
-                });
-                break;
-            default:
-                throw new Error("Unknown thread type");
-        }
+                };
+            }
+            return {};
+        })();
+        const rawMessages = await this.rpc(route, {
+            ...params,
+            limit: FETCH_MSG_LIMIT,
+            max_id: max,
+            min_id: min,
+        });
         thread.status = "ready";
         const messages = rawMessages.reverse().map((data) => {
             if (data.parentMessage) {
