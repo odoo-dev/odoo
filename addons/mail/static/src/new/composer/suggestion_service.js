@@ -11,7 +11,7 @@ class SuggestionService {
         this.orm = services.orm;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
-        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/core/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
         /** @type {import("@mail/new/core/persona_service").PersonaService} */
         this.persona = services["mail.persona"];

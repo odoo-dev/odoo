@@ -11,7 +11,7 @@ export class ChatterService {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
-        /** @type {import("@mail/new/thread/thread_service").ThreadService} */
+        /** @type {import("@mail/core/thread/thread_service").ThreadService} */
         this.thread = services["mail.thread"];
         /** @type {import("@mail/new/thread/message_service").MessageService} */
         this.message = services["mail.message"];
