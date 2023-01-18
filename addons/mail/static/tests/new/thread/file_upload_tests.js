@@ -23,7 +23,6 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         res_id: channelId,
     });
     const { openView } = await start();
-
     // Uploading file in the first thread: res.partner chatter.
     await openView({
         res_id: resPartnerId1,
@@ -36,8 +35,7 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         content: "hello, world",
         contentType: "text/plain",
     });
-    await afterNextRender(() => editInput(target, ".o-mail-chatter input[type=file]", file1));
-
+    await afterNextRender(() => editInput(target, ".o-mail-chatter .o-mail-composer input[type=file]", file1));
     // Uploading file in the second thread: mail.channel in chatWindow.
     await click("i[aria-label='Messages']");
     await click(".o-mail-notification-item");
@@ -46,7 +44,6 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         content: "hello, world",
         contentType: "text/plain",
     });
-
     await afterNextRender(() => editInput(target, ".o-mail-chat-window input[type=file]", file2));
     assert.containsOnce(target, ".o-mail-chatter .o-mail-attachment-image");
     assert.containsOnce(target, ".o-mail-chat-window .o-mail-attachment-image");
