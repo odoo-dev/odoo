@@ -38,7 +38,7 @@ QUnit.test("activity upload document is available", async function (assert) {
     });
     assert.containsOnce(target, ".o-mail-activity-name:contains('Upload Document')");
     assert.containsOnce(target, ".fa-upload", "Should have activity upload button");
-    assert.containsOnce(target, ".o_input_file", "Should have a file uploader");
+    assert.containsOnce(target, ".o-mail-activity .o_input_file", "Should have a file uploader");
 });
 
 QUnit.test("activity simplest layout", async function (assert) {
