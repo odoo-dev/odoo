@@ -300,4 +300,11 @@ export class Chatter extends Component {
         this.attachmentUploader.uploadData(data);
         this.state.isAttachmentBoxOpened = true;
     }
+
+    onClickAddAttachments() {
+        if (this.attachments.length === 0) {
+            return;
+        }
+        this.state.isAttachmentBoxOpened = !this.state.isAttachmentBoxOpened;
+    }
 }
