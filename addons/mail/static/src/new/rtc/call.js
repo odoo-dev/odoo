@@ -4,6 +4,7 @@ import { Component, useState, onMounted, onWillUnmount } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { useMessaging } from "../core/messaging_hook";
+import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { CallMain } from "@mail/new/rtc/call_main";
 import { _t } from "@web/core/l10n/translation";
 
@@ -15,6 +16,7 @@ export class Call extends Component {
     setup() {
         this.messaging = useMessaging();
         this.notification = useService("notification");
+        this.rtc = useRtc();
         this.state = useState({
             isFullscreen: false,
         });
@@ -27,7 +29,13 @@ export class Call extends Component {
         });
     }
 
-    get isMinimized() {
+    get minimized() {
+        if (this.state.isFullscreen || this.props.compact || this.props.thread.activeRtcSession) {
+            return false;
+        }
+        if (this.rtc.state.thread !== this.props.thread || this.props.thread.videoCount === 0) {
+            return true;
+        }
         return false;
     }
 

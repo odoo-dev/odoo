@@ -4,9 +4,10 @@ import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { CallParticipantVideo } from "@mail/new/rtc/call_participant_video";
 import { useService } from "@web/core/utils/hooks";
+import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 
 export class CallParticipantCard extends Component {
-    static props = ["session", "className"];
+    static props = ["session", "className", "minimized?"];
     static components = { CallParticipantVideo };
     static template = "mail.call_participant_card";
 
@@ -45,25 +46,34 @@ export class CallParticipantCard extends Component {
         return Boolean(this.props.session.videoStream);
     }
 
-    get isMinimized() {
-        return this.callView?.isMinimized; // should be in sub env?
-    }
-
     get isTalking() {
         return Boolean(
             this.props.session && this.props.session.isTalking && !this.props.session.isMute
         );
     }
 
-    onClick() {
-        return; // TODO
+    onClick(ev) {
+        if (isEventHandled(ev, "CallParticipantCard.clickVolumeAnchor")) {
+            return;
+        }
+        if (this.props.session) {
+            const channel = this.props.session.channel;
+            if (channel.activeRtcSession === this.props.session) {
+                channel.activeRtcSession = undefined;
+            } else {
+                channel.activeRtcSession = this.props.session;
+            }
+            return;
+        }
+        // TODO else if invitation => cancel invitation
     }
 
     onContextMenu() {
-        return; // TODO
+        return; // TODO redirect click to volume menu anchor
     }
 
-    onClickVolumeAnchor() {
-        return; // TODO
+    onClickVolumeAnchor(ev) {
+        markEventHandled(ev, "CallParticipantCard.clickVolumeAnchor");
+        // TODO volume popover
     }
 }
