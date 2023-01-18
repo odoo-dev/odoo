@@ -17,7 +17,7 @@ export class SuggestedRecipient extends Component {
 
     setup() {
         this.dialogService = useService("dialog");
-        /** @type {import("@mail/new/views/chatter_service").ChatterService)}*/
+        /** @type {import("@mail/new/web/chatter_service").ChatterService)}*/
         this.chatterService = useService("mail.chatter");
     }
 

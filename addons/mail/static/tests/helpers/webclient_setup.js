@@ -29,7 +29,7 @@ import { chatWindowService } from "@mail/new/chat/chat_window_service";
 import { threadService } from "@mail/new/thread/thread_service";
 import { messageService } from "@mail/new/thread/message_service";
 import { activityService } from "@mail/new/activity/activity_service";
-import { chatterService } from "@mail/new/views/chatter_service";
+import { chatterService } from "@mail/new/web/chatter_service";
 import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
 import { personaService } from "@mail/new/core/persona_service";
 import { attachmentService } from "@mail/new/attachments/attachment_service";
