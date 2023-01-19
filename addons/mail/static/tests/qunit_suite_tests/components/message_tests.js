@@ -1,11 +1,6 @@
 /** @odoo-module **/
 
-import {
-    afterNextRender,
-    nextAnimationFrame,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
+import { nextAnimationFrame, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
@@ -128,60 +123,6 @@ QUnit.module("mail", {}, function () {
                 assert.verifySteps(
                     ["do-action:openFormView_some.model_250"],
                     "should have open form view on related record after click on link"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
-            "chat with author should be opened after clicking on their im status icon",
-            async function (assert) {
-                assert.expect(4);
-
-                const pyEnv = await startServer();
-                const [threadId, resPartnerId] = pyEnv["res.partner"].create([
-                    {},
-                    { im_status: "online" },
-                ]);
-                pyEnv["res.users"].create({
-                    im_status: "online",
-                    partner_id: resPartnerId,
-                });
-                pyEnv["mail.message"].create({
-                    author_id: resPartnerId,
-                    body: "not empty",
-                    model: "res.partner",
-                    res_id: threadId,
-                });
-                const { advanceTime, click, openView } = await start({
-                    hasTimeControl: true,
-                });
-                await openView({
-                    res_id: threadId,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
-                await afterNextRender(() => advanceTime(50 * 1000)); // next fetch of im_status
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessageView_personaImStatusIcon",
-                    "message should have the author im status icon"
-                );
-                assert.hasClass(
-                    document.querySelector(".o_MessageView_personaImStatusIcon"),
-                    "o-has-open-chat",
-                    "author im status icon should have the open chat style"
-                );
-
-                await click(".o_MessageView_personaImStatusIcon");
-                assert.containsOnce(
-                    document.body,
-                    ".o_ChatWindow_thread",
-                    "chat window with thread should be opened after clicking on author im status icon"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ChatWindow_thread").dataset.correspondentId,
-                    resPartnerId.toString(),
-                    "chat with author should be opened after clicking on their im status icon"
                 );
             }
         );
