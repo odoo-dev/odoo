@@ -846,3 +846,21 @@ QUnit.test("composer: paste attachments", async function (assert) {
     );
     assert.containsOnce(target, ".o-mail-attachment-list .o-mail-attachment-card");
 });
+
+QUnit.test("Replying on a channel should focus composer initially", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        channel_type: "channel",
+        name: "general",
+    });
+    pyEnv["mail.message"].create({
+        body: "Hello world",
+        res_id: channelId,
+        message_type: "comment",
+        model: "mail.channel",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("i[aria-label='Reply']");
+    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
+});
