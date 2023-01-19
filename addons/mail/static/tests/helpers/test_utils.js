@@ -51,44 +51,38 @@ function _createFakeDataTransfer(files) {
 }
 
 /**
- * Patch the `XMLHttpRequest` constructor in order to get the answer from the
- * mock server instead of the real one.
+ * @returns function that returns an `XMLHttpRequest`-like object whose response
+ * is computed by the given mock server.
  */
-function _patchXhr(mockServer) {
+function getCreateXHR(mockServer) {
     const mockedXHR = makeMockXHR();
-    patchWithCleanup(
-        window,
-        {
-            XMLHttpRequest: function () {
-                const xhr = mockedXHR();
-                let response = "";
-                let route = "";
-                patch(xhr, "mail", {
-                    open(method, dest) {
-                        route = dest;
-                        return this._super(method, dest);
-                    },
-                    async send(data) {
-                        const _super = this._super;
-                        await new Promise(setTimeout);
-                        response = JSON.stringify(
-                            await mockServer.performRPC(route, {
-                                body: data,
-                            })
-                        );
-                        return _super(data);
-                    },
-                    upload: new EventTarget(),
-                    abort() {},
-                    get response() {
-                        return response;
-                    },
-                });
-                return xhr;
+    return function () {
+        const xhr = mockedXHR();
+        let response = "";
+        let route = "";
+        patch(xhr, "mail", {
+            open(method, dest) {
+                route = dest;
+                return this._super(method, dest);
             },
-        },
-        { pure: true }
-    );
+            async send(data) {
+                const _super = this._super;
+                await new Promise(setTimeout);
+                response = JSON.stringify(
+                    await mockServer.performRPC(route, {
+                        body: data,
+                    })
+                );
+                return _super(data);
+            },
+            upload: new EventTarget(),
+            abort() {},
+            get response() {
+                return response;
+            },
+        });
+        return xhr;
+    };
 }
 
 //------------------------------------------------------------------------------
@@ -427,7 +421,6 @@ async function start(param0 = {}) {
     const afterEvent = getAfterEvent({ messagingBus });
 
     const pyEnv = await getPyEnv();
-    _patchXhr(pyEnv.mockServer);
     patchWithCleanup(sessionInfo, {
         user_context: {
             ...sessionInfo.user_context,
@@ -442,6 +435,8 @@ async function start(param0 = {}) {
     let webClient;
     await afterNextRender(async () => {
         webClient = await getWebClientReady({ ...param0, messagingBus });
+        const { file_upload: fileUpload } = webClient.env.services;
+        fileUpload.createXhr = getCreateXHR(pyEnv.mockServer);
     });
 
     const openView = async (action, options) => {
