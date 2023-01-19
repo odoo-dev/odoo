@@ -102,6 +102,7 @@
                                 }">
                                     <em t-if="message.subject and !message.isSubjectSimilarToOriginThreadName" class="o-mail-message-subject mb-1 me-2">Subject: <t t-esc="message.subject"/></em>
                                     <t t-out="message.body"/>
+                                    <t t-if="showSubtypeDescription" t-out="message.subtypeDescription"
                                 </div>
                             </div>
                         </t>

@@ -5,7 +5,7 @@ import { AttachmentList } from "@mail/new/attachments/attachment_list";
 import { MessageInReplyTo } from "./message_in_reply_to";
 import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
-import { convertBrToLineBreak } from "@mail/new/utils/format";
+import { convertBrToLineBreak, htmlToTextContentInline } from "@mail/new/utils/format";
 import { onExternalClick } from "@mail/new/utils/hooks";
 import {
     Component,
@@ -129,6 +129,14 @@ export class Message extends Component {
 
     get message() {
         return this.props.message;
+    }
+
+    get showSubtypeDescription() {
+        return (
+            this.message.subtypeDescription &&
+            this.message.subtypeDescription.toLowerCase() !==
+                htmlToTextContentInline(this.message.body).toLowerCase()
+        );
     }
 
     get messageTypeText() {
