@@ -335,4 +335,12 @@ export class Message extends Component {
             },
         });
     }
+
+    get partnerImStatusClassName() {
+        let res = "position-absolute bottom-0 end-0";
+        if (this.hasOpenChatFeature) {
+            res += " cursor-pointer";
+        }
+        return res;
+    }
 }

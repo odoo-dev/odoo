@@ -26,12 +26,11 @@
             <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
             <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
                 <div class="o-mail-message-sidebar d-flex flex-shrink-0" t-att-class="{ 'justify-content-end': isAlignedRight }">
-                    <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
+                    <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view" t-on-click="openChatAvatar">
                         <img class="o-mail-message-author-avatar w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
                             t-att-src="message.author?.avatarUrl"
-                            t-att-class="{ 'cursor-pointer': hasOpenChatFeature }"
-                            t-on-click="openChatAvatar" />
-                        <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>
+                            t-att-class="{ 'cursor-pointer': hasOpenChatFeature }" />
+                        <PartnerImStatus t-if="message.author" partner="message.author" className="partnerImStatusClassName"/>
                     </div>
                     <t t-elif="!message.isTransient">
                         <small t-if="isActive" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
