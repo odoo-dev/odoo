@@ -1121,3 +1121,29 @@ QUnit.test("allow attachment image download on message", async function (assert)
     await openDiscuss(channelId);
     assert.containsOnce(target, ".o-mail-attachment-image .fa-download");
 });
+
+QUnit.test(
+    "chat with author should be opened after clicking on their avatar",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
+        pyEnv["res.users"].create({ partner_id: partnerId });
+        pyEnv["mail.message"].create({
+            author_id: partnerId,
+            body: "not empty",
+            model: "res.partner",
+            res_id: threadId,
+        });
+        const { openView } = await start();
+        await openView({
+            res_id: threadId,
+            res_model: "res.partner",
+            views: [[false, "form"]],
+        });
+        assert.containsOnce(document.body, ".o-mail-message-author-avatar");
+        assert.hasClass(document.querySelector(".o-mail-message-author-avatar"), "o_redirect");
+        await click(".o-mail-message-author-avatar");
+        assert.containsOnce(target, ".o-mail-chat-window-content");
+        assert.containsOnce(target, `.o-mail-thread[data-thread-id='${threadId.toString()}']`);
+    }
+);

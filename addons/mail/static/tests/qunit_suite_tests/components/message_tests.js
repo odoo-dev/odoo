@@ -133,51 +133,6 @@ QUnit.module("mail", {}, function () {
         );
 
         QUnit.skipRefactoring(
-            "chat with author should be opened after clicking on their avatar",
-            async function (assert) {
-                assert.expect(4);
-
-                const pyEnv = await startServer();
-                const [threadId, resPartnerId] = pyEnv["res.partner"].create([{}, {}]);
-                pyEnv["res.users"].create({ partner_id: resPartnerId });
-                pyEnv["mail.message"].create({
-                    author_id: resPartnerId,
-                    body: "not empty",
-                    model: "res.partner",
-                    res_id: threadId,
-                });
-                const { click, openView } = await start();
-                await openView({
-                    res_id: threadId,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-message-author-avatar",
-                    "message should have the author avatar"
-                );
-                assert.hasClass(
-                    document.querySelector(".o-mail-message-author-avatar"),
-                    "o_redirect",
-                    "author avatar should have the redirect style"
-                );
-
-                await click(".o-mail-message-author-avatar");
-                assert.containsOnce(
-                    document.body,
-                    ".o_ChatWindow_thread",
-                    "chat window with thread should be opened after clicking on author avatar"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ChatWindow_thread").dataset.correspondentId,
-                    resPartnerId.toString(),
-                    "chat with author should be opened after clicking on their avatar"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
             "chat with author should be opened after clicking on their name",
             async function (assert) {
                 assert.expect(4);
