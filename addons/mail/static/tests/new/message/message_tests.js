@@ -937,12 +937,8 @@ QUnit.test(
             partner_ids: [pyEnv.currentPartnerId],
             res_id: mailChannelId1,
         });
-        const { openDiscuss } = await start({
-            discuss: {
-                context: { active_id: mailChannelId1 },
-            },
-        });
-        await openDiscuss();
+        const { openDiscuss } = await start();
+        await openDiscuss(mailChannelId1);
         assert.hasClass(
             target.querySelector(`.o-mail-message`),
             "o-mail-message-highlighted-from-mention"
