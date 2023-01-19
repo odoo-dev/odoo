@@ -59,7 +59,7 @@ function _patchXhr(mockServer) {
     patchWithCleanup(
         window,
         {
-            XMLHttpRequest() {
+            XMLHttpRequest: function () {
                 const xhr = mockedXHR();
                 let response = "";
                 let route = "";
