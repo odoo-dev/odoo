@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
+import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
 patch(MessagingMenu.prototype, "sms/messaging_menu", {
@@ -9,7 +10,7 @@ patch(MessagingMenu.prototype, "sms/messaging_menu", {
             return this._super(failure);
         }
         this.env.services.action.doAction({
-            name: this.env._t("SMS Failures"),
+            name: _t("SMS Failures"),
             type: "ir.actions.act_window",
             view_mode: "kanban,list,form",
             views: [

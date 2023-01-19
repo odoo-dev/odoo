@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { Component } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
@@ -23,7 +24,7 @@ export class SuggestedRecipient extends Component {
 
     get titleText() {
         return sprintf(
-            this.env._t("Add as recipient and follower (reason: %s)"),
+            _t("Add as recipient and follower (reason: %s)"),
             this.props.recipient.reason
         );
     }
@@ -51,7 +52,7 @@ export class SuggestedRecipient extends Component {
                 },
                 onRecordSaved: () => this._onDialogSaved(),
                 resModel: "res.partner",
-                title: this.env._t("Please complete customer's information"),
+                title: _t("Please complete customer's information"),
             });
         }
     }

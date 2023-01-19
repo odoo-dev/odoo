@@ -27,6 +27,7 @@ import { useEmojiPicker } from "../emoji_picker/emoji_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { MessageNotificationPopover } from "./message_notification_popover";
 import { MessageSeenIndicator } from "./message_seen_indicator";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} Props
@@ -141,12 +142,12 @@ export class Message extends Component {
 
     get messageTypeText() {
         if (this.props.message.type === "notification") {
-            return this.env._t("System notification");
+            return _t("System notification");
         }
         if (!this.props.message.isDiscussion && this.props.message.type !== "user_notification") {
-            return this.env._t("Note");
+            return _t("Note");
         }
-        return this.env._t("Message");
+        return _t("Message");
     }
 
     /**

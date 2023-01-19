@@ -123,7 +123,7 @@ export class MessagingMenu extends Component {
             return;
         }
         this.action.doAction({
-            name: this.env._t("Mail Failures"),
+            name: _t("Mail Failures"),
             type: "ir.actions.act_window",
             view_mode: "kanban,list,form",
             views: [
