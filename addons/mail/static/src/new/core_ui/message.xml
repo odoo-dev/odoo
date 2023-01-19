@@ -46,7 +46,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
-                        <span t-if="message.author and shouldDisplayAuthorName" t-att-class="{ 'cursor-pointer o_redirect': hasOpenChatFeature }" t-on-click="openChatAvatar">
+                        <span t-if="message.author and shouldDisplayAuthorName" class="o-mail-own-name" t-att-class="{ 'cursor-pointer o_redirect': hasOpenChatFeature }" t-on-click="openChatAvatar">
                             <strong class="me-1 text-truncate">
                             <t t-esc="message.author.name"/>
                             </strong>
