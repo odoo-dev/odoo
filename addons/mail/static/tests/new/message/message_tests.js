@@ -1203,3 +1203,45 @@ QUnit.test(
         assert.containsOnce(target, `.o-mail-thread[data-thread-id=${threadId}]`);
     }
 );
+
+QUnit.test(
+    "subtype description should be displayed if it is different than body",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const threadId = pyEnv["res.partner"].create({});
+        const subtypeId = pyEnv["mail.message.subtype"].create({ description: "Bonjour" });
+        pyEnv["mail.message"].create({
+            body: "<p>Hello</p>",
+            model: "res.partner",
+            res_id: threadId,
+            subtype_id: subtypeId,
+        });
+        const { openFormView } = await start();
+        await openFormView({
+            res_id: threadId,
+            res_model: "res.partner",
+        });
+        assert.strictEqual($(target).find(".o-mail-message-body").text(), "HelloBonjour");
+    }
+);
+
+QUnit.test(
+    "subtype description should not be displayed if it is similar to body",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const threadId = pyEnv["res.partner"].create({});
+        const subtypeId = pyEnv["mail.message.subtype"].create({ description: "hello" });
+        pyEnv["mail.message"].create({
+            body: "<p>Hello</p>",
+            model: "res.partner",
+            res_id: threadId,
+            subtype_id: subtypeId,
+        });
+        const { openFormView } = await start();
+        await openFormView({
+            res_id: threadId,
+            res_model: "res.partner",
+        });
+        assert.strictEqual($(target).find(".o-mail-message-body").text(), "Hello");
+    }
+);
