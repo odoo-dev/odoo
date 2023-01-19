@@ -84,6 +84,7 @@ export class Message extends Component {
             // Let event be handled by bubbling handlers first.
             await new Promise(setTimeout);
             if (isEventHandled(ev, "emoji.selectEmoji")) {
+                console.log("open1?");
                 return;
             }
             // Stop editing the message on click away.

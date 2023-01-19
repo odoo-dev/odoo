@@ -11,6 +11,8 @@ import {
     useState,
     onPatched,
     onWillPatch,
+    onWillUnmount,
+    onWillDestroy,
 } from "@odoo/owl";
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -25,10 +27,21 @@ import { escapeRegExp } from "@web/core/utils/strings";
  * @param {function} [props.onClose]
  */
 export function useEmojiPicker(refName, props) {
+    console.log("UseEmojiPicker rn");
+    console.log(props);
+    console.log(refName);
     const ref = useRef(refName);
+    console.log(ref);
+    console.log(ref.el);
     const popover = usePopover();
     let closePopover = false;
+    let scrollValueRemember = 0;
+    const setScrollPosition = (xpos) => {
+        console.log("SETTING SCROLL POSITION: " + xpos);
+    };
     const toggle = () => {
+        console.log("PROPS AT CLOSING TIME");
+        console.log(props);
         if (closePopover) {
             closePopover();
             closePopover = false;
@@ -64,12 +77,17 @@ export async function loadEmoji() {
 }
 
 export class EmojiPicker extends Component {
-    static props = ["onSelect", "close", "onClose?"];
+    static props = ["onSelect", "close", "onClose?", "myprop"];
+    //Donner en props une fonction setScrollPosition
+    //Sinon, redemander à géry si je suis encore bloqué
+    //Je dois trouver un moyen de créer cette nouvelle prop, et de la passer avec un callback d'une fonction dedans, et cette fonction de callback sera dans UseEmojiPicker, et modifieras la varialbe dans useEmojiPicker
+    //Peut etre qu'il faut que la props apparaisse dans le xml? Le xml template qui contient <EmojiPicker, et qui envoie props dedans, à explorer. 
     static defaultProps = { onClose: () => {} };
     static template = "mail.emoji_picker";
 
     setup() {
         this.categories = null;
+        console.log(this.useEmojiPicker);
         this.emojis = null;
         this.inputRef = useRef("input");
         this.gridRef = useRef("emoji-grid");
@@ -77,18 +95,31 @@ export class EmojiPicker extends Component {
         this.state = useState({
             categoryId: null,
             searchStr: "",
+            currentScroll: 0,
         });
+        console.log("setup");
         onWillStart(async () => {
+            console.log("WillStart");
             const { categories, emojis } = await loadEmoji();
             this.categories = categories;
             this.emojis = emojis;
             this.state.categoryId = this.categories[0].sortId;
+            console.log(this.state.currentScroll);
         });
         onMounted(() => {
+            console.log("Mounted");
             this.inputRef.el.focus();
             this.highlightActiveCategory();
+            this.gridRef.el.onscroll = () => {
+                console.log("Scrolling");
+                console.log(this.gridRef.el.scrollTop);
+                this.state.currentScroll = this.gridRef.el.scrollTop;
+                console.log(this.state.currentScroll);
+            };
+            console.log(this.state.currentScroll);
         });
         onPatched(() => {
+            console.log("Patched");
             if (this.shouldScrollElem) {
                 this.shouldScrollElem = false;
                 const getElement = () =>
@@ -113,9 +144,22 @@ export class EmojiPicker extends Component {
             },
             () => [this.state.searchStr]
         );
+        onWillUnmount(() => {
+            console.log("Unmounting emoji picker");
+            console.log(this.state.currentScroll);
+            console.log("this is setScrollPosition");
+            console.log(this.props.setScrollPosition);
+            this.props.setScrollPosition(100);
+        });
+        onWillDestroy(() => {
+            console.log("Destroying emoji picker");
+            console.log(this.state.currentScroll);
+            console.log(this.props);
+        });
     }
 
     onClick(ev) {
+        console.log("open3");
         markEventHandled(ev, "emoji.selectEmoji");
     }
 

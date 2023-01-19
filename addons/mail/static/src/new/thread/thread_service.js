@@ -146,6 +146,8 @@ export class ThreadService {
             .map((data) =>
                 Message.insert(this.state, Object.assign(data, { body: markup(data.body) }), thread)
             );
+        console.log("MESSAGES");
+        messages.forEach((m) => console.log(m.body));
         return messages;
     }
 

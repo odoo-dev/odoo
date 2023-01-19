@@ -98,7 +98,7 @@ export class Composer extends Component {
             inComposer: true,
         });
         useEmojiPicker("emoji-picker", {
-            onSelect: (str) => this.addEmoji(str),
+            onSelect: (str) => console.log("adding emoji"),//this.addEmoji(str),
             onClose: () => this.state.autofocus++,
         });
         useEffect(
