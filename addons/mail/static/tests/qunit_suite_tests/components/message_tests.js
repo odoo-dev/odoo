@@ -133,50 +133,6 @@ QUnit.module("mail", {}, function () {
         );
 
         QUnit.skipRefactoring(
-            "chat with author should be opened after clicking on their name",
-            async function (assert) {
-                assert.expect(4);
-
-                const pyEnv = await startServer();
-                const resPartnerId = pyEnv["res.partner"].create({});
-                pyEnv["res.users"].create({ partner_id: resPartnerId });
-                pyEnv["mail.message"].create({
-                    author_id: resPartnerId,
-                    body: "not empty",
-                    model: "res.partner",
-                    res_id: resPartnerId,
-                });
-                const { click, openFormView } = await start();
-                await openFormView({
-                    res_model: "res.partner",
-                    res_id: resPartnerId,
-                });
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessageView_authorName",
-                    "message should have the author name"
-                );
-                assert.hasClass(
-                    document.querySelector(".o_MessageView_authorName"),
-                    "o_redirect",
-                    "author name should have the redirect style"
-                );
-
-                await click(".o_MessageView_authorName");
-                assert.containsOnce(
-                    document.body,
-                    ".o_ChatWindow_thread",
-                    "chat window with thread should be opened after clicking on author name"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ChatWindow_thread").dataset.correspondentId,
-                    resPartnerId.toString(),
-                    "chat with author should be opened after clicking on their name"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
             "chat with author should be opened after clicking on their im status icon",
             async function (assert) {
                 assert.expect(4);

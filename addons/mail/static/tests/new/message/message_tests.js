@@ -1134,16 +1134,40 @@ QUnit.test(
             model: "res.partner",
             res_id: threadId,
         });
-        const { openView } = await start();
-        await openView({
+        const { openFormView } = await start();
+        await openFormView({
             res_id: threadId,
             res_model: "res.partner",
-            views: [[false, "form"]],
         });
         assert.containsOnce(document.body, ".o-mail-message-author-avatar");
         assert.hasClass(document.querySelector(".o-mail-message-author-avatar"), "o_redirect");
         await click(".o-mail-message-author-avatar");
         assert.containsOnce(target, ".o-mail-chat-window-content");
-        assert.containsOnce(target, `.o-mail-thread[data-thread-id='${threadId.toString()}']`);
+        assert.containsOnce(target, `.o-mail-thread[data-thread-id='${threadId}']`);
+    }
+);
+
+QUnit.test(
+    "chat with author should be opened after clicking on their name",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({ name: "Demo User" });
+        pyEnv["res.users"].create({ partner_id: partnerId });
+        pyEnv["mail.message"].create({
+            author_id: partnerId,
+            body: "not empty",
+            model: "res.partner",
+            res_id: partnerId,
+        });
+        const { openFormView } = await start();
+        await openFormView({
+            res_model: "res.partner",
+            res_id: partnerId,
+        });
+        assert.containsOnce(target, ".o-mail-message span:contains(Demo User)");
+
+        await click(".o-mail-message span:contains(Demo User)");
+        assert.containsOnce(target, ".o-mail-chat-window");
+        assert.containsOnce(target, `.o-mail-thread[data-thread-id=${partnerId}]`);
     }
 );
