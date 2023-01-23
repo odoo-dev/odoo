@@ -1150,7 +1150,7 @@ QUnit.test(
     "chat with author should be opened after clicking on their im status icon",
     async function (assert) {
         const pyEnv = await startServer();
-        const [threadId, partnerId] = pyEnv["res.partner"].create([{}, { im_status: "online" }]);
+        const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
         pyEnv["res.users"].create({
             im_status: "online",
             partner_id: partnerId,
@@ -1163,6 +1163,9 @@ QUnit.test(
         });
         const { advanceTime, openFormView } = await start({ hasTimeControl: true });
         await openFormView("res.partner", threadId);
+        pyEnv["bus.bus"]._sendone("channel-1", "mail.record/insert", {
+            Partner: { im_status: "online", id: partnerId },
+        });
         await afterNextRender(() => advanceTime(50 * 1000)); // next fetch of im_status
         assert.containsOnce(target, ".o-mail-partner-im-status");
         assert.hasClass(target.querySelector(".o-mail-partner-im-status"), "cursor-pointer");

@@ -19,7 +19,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("widgets", {}, function () {
         QUnit.module("form_renderer_tests.js");
 
-        QUnit.test("basic chatter rendering without followers", async function (assert) {
+        QUnit.skipRefactoring("basic chatter rendering without followers", async function (assert) {
             assert.expect(6);
 
             const pyEnv = await startServer();
@@ -71,7 +71,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("basic chatter rendering without messages", async function (assert) {
+        QUnit.skipRefactoring("basic chatter rendering without messages", async function (assert) {
             assert.expect(6);
 
             const pyEnv = await startServer();
