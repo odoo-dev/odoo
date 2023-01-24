@@ -47,13 +47,17 @@ class OdooBaseChecker(BaseChecker):
 
     msgs = {
         'E8501': (
-            'Possible SQL injection risk.',
+            'Possible SQL injection risk %s.',
             'sql-injection',
             'See http://www.bobby-tables.com try using '
             'execute(query, tuple(params))',
         )
     }
 
+    def _infer_filename(self, node): 
+        while 'file' not in dir(node):
+            node = node.parent
+        return node.file
     def _get_return_node(self, node):
         ret = []
         nodes = deque([node])
@@ -324,7 +328,7 @@ class OdooBaseChecker(BaseChecker):
     @checkers.utils.check_messages('sql-injection')
     def visit_call(self, node):
         if self._check_sql_injection_risky(node):
-            self.add_message('sql-injection', node=node)
+            self.add_message('sql-injection', node=node, args='')
 
     @checkers.utils.check_messages('sql-injection')
     def visit_functiondef(self, node):
@@ -348,7 +352,7 @@ class OdooBaseChecker(BaseChecker):
             self._is_constexpr(return_node.value, position=position)
             for return_node in self._get_return_node(node)
         ):
-            self.add_message('sql-injection', node=call)
+            self.add_message('sql-injection', node=node, args='because it is used to build a query in file %(file)s:%(line)s'% {'file': self._infer_filename(call), 'funcname':call.scope().name, 'line':str(call.lineno)} )
 
 
 def register(linter):
