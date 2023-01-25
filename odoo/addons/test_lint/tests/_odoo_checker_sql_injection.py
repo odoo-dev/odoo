@@ -318,20 +318,22 @@ class OdooBaseChecker(BaseChecker):
         ):
             return False
         first_arg = node.args[0]
-
         is_concatenation = self._check_concatenation(first_arg)
         if is_concatenation is not None:
             return is_concatenation
-
         return True
 
     @checkers.utils.check_messages('sql-injection')
     def visit_call(self, node):
+        if not self.linter.is_message_enabled('E8501', node.lineno, node.lineno):
+            return 
         if self._check_sql_injection_risky(node):
             self.add_message('sql-injection', node=node, args='')
 
     @checkers.utils.check_messages('sql-injection')
     def visit_functiondef(self, node):
+        if not self.linter.is_message_enabled('E8501', node.lineno, node.lineno):
+            return
         if os.path.basename(self.linter.current_file).startswith('test_'):
             return
 
@@ -353,7 +355,6 @@ class OdooBaseChecker(BaseChecker):
             for return_node in self._get_return_node(node)
         ):
             self.add_message('sql-injection', node=node, args='because it is used to build a query in file %(file)s:%(line)s'% {'file': self._infer_filename(call), 'funcname':call.scope().name, 'line':str(call.lineno)} )
-
 
 def register(linter):
     linter.register_checker(OdooBaseChecker(linter))
