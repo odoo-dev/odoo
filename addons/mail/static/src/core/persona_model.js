@@ -15,6 +15,10 @@ export class Persona {
     localId;
     /** @type {number} */
     id;
+    /** @type {string} */
+    landlineNumber;
+    /** @type {string} */
+    mobileNumber;
     /** @type {'partner' | 'guest'} */
     type;
     /** @type {string} */
@@ -33,6 +37,13 @@ export class Persona {
     channelId;
     /** @type {import("@mail/core/store_service").Store} */
     _store;
+
+    /**
+     * @returns {boolean}
+     */
+    get hasPhoneNumber() {
+        return Boolean(this.mobileNumber || this.landlineNumber);
+    }
 
     get nameOrDisplayName() {
         return this.name || this.displayName;

@@ -113,6 +113,7 @@ insertModelFields("res.users.settings", {
 
 insertRecords("mail.activity.type", [
     { icon: "fa-envelope", id: 1, name: "Email" },
+    { icon: "fa-phone", id: 2, name: "Call", category: "phonecall" },
     { icon: "fa-upload", id: 28, name: "Upload Document" },
 ]);
 insertRecords("mail.message.subtype", [
