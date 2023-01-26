@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.Avatar" owl="1">
+        <div class="o_clickable_m2x_avatar o_field_many2one_avatar o_field_widget">
+            <div class="o_m2o_avatar">
+                <img t-attf-src="/web/image/{{props.resModel}}/{{props.id}}/avatar_128" t-on-click.stop.prevent="onClickAvatar"/>
+                <span t-esc="props.displayName"/>
+            </div>
+        </div>
+    </t>
+
+</templates>
