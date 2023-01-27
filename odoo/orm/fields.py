@@ -1679,9 +1679,6 @@ class Field[T]:
         :param records:
         :param value: a value in any format
         """
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
         records = self._filter_not_equal(records, cache_value)
@@ -2001,6 +1998,17 @@ class Field[T]:
         if new_ids:
             # new records: no business logic
             recs = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
+
+            if self.compute and self.store:
+                fields_ = records.pool.field_computed[self]
+                if len(fields_) > 1 or any(field.type in ('one2many', 'many2many') for field in fields_):
+                    # force the computation of fields that are computed with self,
+                    # and x2many fields, too (see method BaseModel.write() for a
+                    # complete explanation)
+                    recs._recompute_recordset([self.name])
+                else:
+                    # discard recomputation of self on records
+                    records.env.remove_to_compute(self, recs)
 
             # important: protect all assigned records, not just the ones that are modified
             with records.env.protecting(records.pool.field_computed.get(self) or [self], records):

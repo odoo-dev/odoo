@@ -179,9 +179,6 @@ class Binary(Field[BinaryValue]):
             super().write(records, value)
             return
 
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # update the cache, and discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
         records = self._filter_not_equal(records, cache_value)
