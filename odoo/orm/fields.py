@@ -1687,9 +1687,6 @@ class Field[T]:
         :param records:
         :param value: a value in any format
         """
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
         records = self._filter_not_equal(records, cache_value)

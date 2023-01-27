@@ -394,9 +394,6 @@ class Many2one(_Relational):
         return value.display_name
 
     def write(self, records, value):
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
 
@@ -799,8 +796,6 @@ class _RelationalMulti(_Relational):
         self.write_batch(record_values, create=True)
 
     def write(self, records: BaseModel, value):
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
         self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list: list[tuple[BaseModel, typing.Any]], create: bool = False) -> None:

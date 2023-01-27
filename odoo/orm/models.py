@@ -3930,6 +3930,22 @@ class BaseModel(metaclass=MetaModel):
             ids, field_vals = new_updates.popitem()
             records = self.__class__(env, ids, self._prefetch_ids)
 
+            # discard recomputations of fields being written; see method write()
+            # below for a complete explanation
+            fields_to_compute = OrderedSet(
+                f
+                for field in field_vals
+                if field.compute and field.store
+                for f in env.registry.field_computed[field]
+            )
+            records._recompute_recordset([
+                field.name
+                for field in fields_to_compute
+                if field not in field_vals or field.type in ('one2many', 'many2many')
+            ])
+            for field in fields_to_compute:
+                env.remove_to_compute(field, records)
+
             # since new records are only in memory, protect all fields being
             # written in order to avoid losing field values from cache
             fields_to_protect = OrderedSet(
@@ -3937,14 +3953,6 @@ class BaseModel(metaclass=MetaModel):
                 for field in field_vals
                 for f in env.registry.field_computed.get(field) or (field,)
             )
-
-            # force the computation of fields that are computed with some
-            # assigned fields, but are not assigned themselves
-            records._recompute_recordset([
-                field.name
-                for field in fields_to_protect
-                if field.compute and field not in field_vals
-            ])
 
             with env.protecting(fields_to_protect, records):
                 records.modified(
@@ -4044,11 +4052,54 @@ class BaseModel(metaclass=MetaModel):
             key=lambda item: self._fields_update_order__[item[0]],
         ))
 
-        # determine what to protect, what to update
+        # Discard recomputations of fields being written.  Note that it is a bit
+        # tricky when several fields F1, ..., Fn are computed by the same
+        # method:
+        #  - If all fields are assigned, we can simply discard the recomputation
+        #    and apply the updates.
+        #  - If not all fields are assigned, we actually cannot discard the
+        #    recomputation, since accessing a non-assigned of those fields will
+        #    recompute them all.  In that case, we recompute the fields before
+        #    applying updates.
+        #
+        # Stored x2many fields must be recomputed as well, since the value being
+        # written is a list of commands to be applied on the field's "current"
+        # value, which is the field's value after recomputation.
+        fields_to_compute = OrderedSet(
+            f
+            for field in field_values
+            if field.compute and field.store
+            for f in env.registry.field_computed[field]
+        )
+        self._recompute_recordset([
+            field.name
+            for field in fields_to_compute
+            if field not in field_values or field.type in ('one2many', 'many2many')
+        ])
+        for field in fields_to_compute:
+            env.remove_to_compute(field, self)
+
+        # determine what to protect
+        fields_to_protect = OrderedSet(
+            f
+            for field in field_values
+            if (field.inverse or (field.compute and not field.readonly)) and (
+                # In the case of non-stored x2many fields, the field's value may
+                # contain unexpected new records (created by command 0). Those
+                # new records are necessary for inversing the field, but should
+                # no longer appear if the field is recomputed afterwards. Not
+                # protecting the field will automatically invalidate the field
+                # from the cache, forcing its value to be recomputed once
+                # dependencies are up-to-date.
+                field.store or field.type not in ('one2many', 'many2many')
+            )
+            for f in env.registry.field_computed.get(field) or (field,)
+        )
+
+        # determine what to update
         field_updates = {}
         field_inverses = {}
         fnames_modifying_relations = []
-        fields_to_protect = OrderedSet()
         for field, value in field_values.items():
             field_updates[field] = value
             if field.inverse:
@@ -4063,26 +4114,6 @@ class BaseModel(metaclass=MetaModel):
                 field_inverses[field] = value
             if env.registry.is_modifying_relations(field):
                 fnames_modifying_relations.append(field.name)
-            if field.inverse or (field.compute and not field.readonly):
-                if field.store or field.type not in ('one2many', 'many2many'):
-                    # Protect the field from being recomputed while being
-                    # inversed. In the case of non-stored x2many fields, the
-                    # field's value may contain unexpeced new records (created
-                    # by command 0). Those new records are necessary for
-                    # inversing the field, but should no longer appear if the
-                    # field is recomputed afterwards. Not protecting the field
-                    # will automatically invalidate the field from the cache,
-                    # forcing its value to be recomputed once dependencies are
-                    # up-to-date.
-                    fields_to_protect.update(env.registry.field_computed.get(field, [field]))
-
-        # force the computation of fields that are computed with some assigned
-        # fields, but are not assigned themselves
-        to_compute = [field.name
-                      for field in fields_to_protect
-                      if field.compute and field not in field_values]
-        if to_compute:
-            self._recompute_recordset(to_compute)
 
         # protect fields being written against recomputation
         with env.protecting(fields_to_protect, self):
