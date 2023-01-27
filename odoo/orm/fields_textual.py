@@ -324,7 +324,6 @@ class BaseString(Field[str | typing.Literal[False]]):
             super().write(records, value)
             return
 
-        records.env.remove_to_compute(self, records)
         lang = records.env.lang or 'en_US'
         if isinstance(value, StoredTranslations):
             assert any(records._ids)
