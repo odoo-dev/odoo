@@ -1,7 +1,6 @@
 odoo.define('web_tour.tour', function (require) {
 "use strict";
 
-var rootWidget = require('root.widget');
 var rpc = require('web.rpc');
 var session = require('web.session');
 var TourManager = require('web_tour.TourManager');
@@ -34,7 +33,7 @@ return session.is_bound.then(function () {
     return Promise.all(defs).then(function (results) {
         var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
         const disabled = session.tour_disable || device.isMobile;
-        var tour_manager = new TourManager(rootWidget, consumed_tours, disabled);
+        var tour_manager = new TourManager(null, consumed_tours, disabled);
 
         // The tests can be loaded inside an iframe. The tour manager should
         // not run in that context, as it will already run in its parent

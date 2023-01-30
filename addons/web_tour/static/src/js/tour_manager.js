@@ -30,7 +30,6 @@ var get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
 return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     init: function(parent, consumed_tours, disabled = false) {
         mixins.EventDispatcherMixin.init.call(this);
-        this.setParent(parent);
 
         this.$body = $('body');
         this.active_tooltips = {};
