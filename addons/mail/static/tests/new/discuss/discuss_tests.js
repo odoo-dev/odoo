@@ -1513,13 +1513,7 @@ QUnit.test(
                 res_id: mailChannelId2,
             },
         ]);
-        const { openDiscuss } = await start({
-            discuss: {
-                context: {
-                    active_id: `mail.channel_${mailChannelId2}`,
-                },
-            },
-        });
+        const { openDiscuss } = await start();
         await openDiscuss(mailChannelId2);
         await click("button:contains(Bla)");
         assert.containsNone(target, ".o-unread");
@@ -1562,3 +1556,125 @@ QUnit.test(
         assert.verifySteps(["notification"]);
     }
 );
+
+QUnit.test("new messages separator [REQUIRE FOCUS]", async function (assert) {
+    // this test requires several messages so that the last message is not
+    // visible. This is necessary in order to display 'new messages' and not
+    // remove from DOM right away from seeing last message.
+    // AKU TODO: thread specific test
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Foreigner partner" });
+    const resUsersId1 = pyEnv["res.users"].create({
+        name: "Foreigner user",
+        partner_id: resPartnerId1,
+    });
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "test", uuid: "randomuuid" });
+    let lastMessageId;
+    for (let i = 1; i <= 25; i++) {
+        lastMessageId = pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        });
+    }
+    const [mailChannelMemberId] = pyEnv["mail.channel.member"].search([
+        ["channel_id", "=", mailChannelId1],
+        ["partner_id", "=", pyEnv.currentPartnerId],
+    ]);
+    pyEnv["mail.channel.member"].write([mailChannelMemberId], {
+        seen_message_id: lastMessageId,
+    });
+    const { env, openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
+
+    assert.containsN(target, ".o-mail-message", 25);
+    assert.containsNone(target, "hr + span:contains(New messages)");
+
+    document.querySelector(`.o-mail-discuss-content .o-mail-thread`).scrollTop = 0;
+    // composer is focused by default, we remove that focus
+    document.querySelector(".o-mail-composer-textarea").blur();
+    // simulate receiving a message
+    await afterNextRender(async () =>
+        env.services.rpc("/mail/chat_post", {
+            context: {
+                mockedUserId: resUsersId1,
+            },
+            message_content: "hu",
+            uuid: "randomuuid",
+        })
+    );
+
+    assert.containsN(target, ".o-mail-message", 26);
+    assert.containsOnce(target, "hr + span:contains(New messages)");
+    const messageList = target.querySelector(".o-mail-discuss-content .o-mail-thread");
+    messageList.scrollTop = messageList.scrollHeight - messageList.clientHeight;
+    assert.containsOnce(target, "hr + span:contains(New messages)");
+
+    await afterNextRender(() => document.querySelector(".o-mail-composer-textarea").focus());
+    assert.containsNone(target, "hr + span:contains(New messages)");
+});
+
+QUnit.debug("composer state: attachments save and restore", async function (assert) {
+    const pyEnv = await startServer();
+    const [mailChannelId1] = pyEnv["mail.channel"].create([
+        { name: "General" },
+        { name: "Special" },
+    ]);
+    const { openDiscuss } = await start();
+    await openDiscuss(mailChannelId1);
+    // Add attachment in a message for #general
+    await afterNextRender(async () => {
+        const file = await createFile({
+            content: "hello, world",
+            contentType: "text/plain",
+            name: "text.txt",
+        });
+        editInput(target, ".o-mail-composer input[type=file]", [file]);
+    });
+    // Switch to #special
+    // await click("button:contains(Special)");
+    // Attach files in a message for #special
+    // const files = [
+    //     await createFile({
+    //         content: "hello2, world",
+    //         contentType: "text/plain",
+    //         name: "text2.txt",
+    //     }),
+    //     await createFile({
+    //         content: "hello3, world",
+    //         contentType: "text/plain",
+    //         name: "text3.txt",
+    //     }),
+    //     await createFile({
+    //         content: "hello4, world",
+    //         contentType: "text/plain",
+    //         name: "text4.txt",
+    //     }),
+    // ];
+    // await afterNextRender(() => editInput(target, ".o-mail-composer input[type=file]", files));
+    // Switch back to #general
+    // await click("button:contains(General)");
+    // Check attachment is reloaded
+    // assert.containsOnce(target, ".o-mail-composer .o-mail-attachment-card");
+    // assert.strictEqual(
+    //     document.querySelector(".o-mail-composer .o-mail-attachment-card").dataset.id,
+    //     messaging.models["Attachment"].findFromIdentifyingData({ id: 1 }).localId
+    // );
+
+    // Switch back to #special
+    // await click("button:contains(Special)");
+    // Check attachments are reloaded
+    // assert.strictEqual(document.querySelectorAll(".o-mail-attachment-card").length, 3);
+    // assert.strictEqual(
+    //     document.querySelectorAll(".o_ComposerView .o_AttachmentCard")[0].dataset.id,
+    //     messaging.models["Attachment"].findFromIdentifyingData({ id: 2 }).localId
+    // );
+    // assert.strictEqual(
+    //     document.querySelectorAll(".o_ComposerView .o_AttachmentCard")[1].dataset.id,
+    //     messaging.models["Attachment"].findFromIdentifyingData({ id: 3 }).localId
+    // );
+    // assert.strictEqual(
+    //     document.querySelectorAll(".o_ComposerView .o_AttachmentCard")[2].dataset.id,
+    //     messaging.models["Attachment"].findFromIdentifyingData({ id: 4 }).localId
+    // );
+});
