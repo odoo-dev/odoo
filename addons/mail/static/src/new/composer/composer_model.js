@@ -5,7 +5,7 @@ export class Composer {
     message;
     /** @type {string} */
     textInputContent;
-    /** @type {Thread} */
+    /** @type {import("@mail/new/core/thread_model").Thread */
     thread;
     /** @type {{ start: number, end: number, direction: "forward" | "backward" | "none"}}*/
     selection = {
@@ -20,6 +20,8 @@ export class Composer {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
     isFocused = false;
+    /** @type {import("@mail/new/attachments/attachment_model").Attachment[]} */
+    attachments = [];
 
     constructor(store, data) {
         const { message, thread } = data;

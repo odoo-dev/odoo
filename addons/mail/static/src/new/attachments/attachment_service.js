@@ -52,7 +52,10 @@ export class AttachmentService {
             });
             attachment.originThreadLocalId = createLocalId(threadData.model, threadData.id);
             const originThread = this.store.threads[attachment.originThreadLocalId];
-            if (!originThread.attachments.some((a) => a.id === attachment.id)) {
+            if (
+                !attachment.uploading &&
+                !originThread.attachments.some((a) => a.id === attachment.id)
+            ) {
                 originThread.attachments.push(attachment);
             }
         }

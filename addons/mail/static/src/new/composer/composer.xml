@@ -69,7 +69,7 @@
                 <AttachmentList
                     t-if="allowUpload and attachmentUploader.attachments.length > 0"
                     attachments="attachmentUploader.attachments"
-                    unlinkAttachment="attachmentUploader.unlink"
+                    unlinkAttachment.bind="onClickUnlink"
                     editable="true"
                     imagesHeight="50" />
                 <div t-if="thread and thread.type !== 'chatter' and !compact" class="o-mail-composer-is-typing">
