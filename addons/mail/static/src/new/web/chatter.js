@@ -359,7 +359,7 @@ export class Chatter extends Component {
     }
 
     async unlinkAttachment(attachment) {
-        await this.attachmentUploader.unlink(attachment);
+        await this.attachment.delete(attachment);
     }
 
     onUploaded(data) {

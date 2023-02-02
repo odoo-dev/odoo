@@ -4,7 +4,7 @@ import { markup } from "@odoo/owl";
 import { ChannelMember } from "../core/channel_member_model";
 import { Thread } from "../core/thread_model";
 import { _t } from "@web/core/l10n/translation";
-import { removeFromArray, replaceArrayWithCompare } from "@mail/new/utils/arrays";
+import { removeFromArray } from "@mail/new/utils/arrays";
 import { assignDefined, createLocalId } from "../utils/misc";
 import { Composer } from "../composer/composer_model";
 import { prettifyMessageContent } from "../utils/format";
@@ -393,11 +393,12 @@ export class ThreadService {
         }
         if (attachments) {
             // smart process to avoid triggering reactives when there is no change between the 2 arrays
-            replaceArrayWithCompare(
-                thread.attachments,
-                attachments.map((attachment) => this.attachments.insert(attachment)),
-                (a1, a2) => a1.id === a2.id
-            );
+            for (const attachment of attachments) {
+                const att = this.attachments.insert(attachment);
+                if (!(att.id in thread.attachmentIds)) {
+                    thread.attachmentIds.push(att.id);
+                }
+            }
         }
         if (data.serverData) {
             const { serverData } = data;
@@ -499,7 +500,6 @@ export class ThreadService {
                 !thread.message_needaction_counter &&
                 !thread.serverData.group_based_subscription;
         }
-        this.insertComposer({ thread });
     }
 
     /**
@@ -522,6 +522,7 @@ export class ThreadService {
         let thread = new Thread(this.store, data);
         thread = this.store.threads[thread.localId] = thread;
         this.update(thread, data);
+        this.insertComposer({ thread });
         return thread;
     }
 
@@ -609,7 +610,8 @@ export class ThreadService {
             const tmpId = lastMessageId + 0.01;
             const tmpData = {
                 id: tmpId,
-                attachments: attachments,
+                author: { id: this.store.self.id },
+                attachmentIds: attachments,
                 res_id: thread.id,
                 model: "mail.channel",
             };

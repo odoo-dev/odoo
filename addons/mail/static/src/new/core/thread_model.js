@@ -26,8 +26,8 @@ export class Thread {
     uuid;
     /** @type {string} */
     model;
-    /** @type {import("@mail/new/attachments/attachment_model").Attachment[]} */
-    attachments = [];
+    /** @type {number[]} */
+    attachmentIds = [];
     /** @type {integer} */
     activeRtcSessionId;
     canLeave = false;
@@ -40,7 +40,7 @@ export class Thread {
     invitedPartners = [];
     /** @type {integer} */
     chatPartnerId;
-    /** @type {Composer} */
+    /** @type {import("@mail/new/composer/composer_model").Composer} */
     composer;
     counter = 0;
     /** @type {string} */
@@ -116,6 +116,10 @@ export class Thread {
 
     get areAllMembersLoaded() {
         return this.memberCount === this.channelMembers.length;
+    }
+
+    get attachments() {
+        return this.attachmentIds.map((id) => this._store.attachments[id]);
     }
 
     get attachmentsInWebClientView() {

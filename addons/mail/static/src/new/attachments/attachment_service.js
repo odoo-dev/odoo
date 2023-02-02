@@ -3,12 +3,14 @@
 import { Attachment } from "./attachment_model";
 import { assignDefined, createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
+import { removeFromArray } from "../utils/arrays";
 
 export class AttachmentService {
     constructor(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
+        this.rpc = services["rpc"];
     }
 
     insert(data) {
@@ -52,15 +54,38 @@ export class AttachmentService {
             });
             attachment.originThreadLocalId = createLocalId(threadData.model, threadData.id);
             const originThread = this.store.threads[attachment.originThreadLocalId];
-            if (!originThread.attachments.some((a) => a.id === attachment.id)) {
+            if (
+                !attachment.uploading &&
+                !originThread.attachments.some((a) => a.id === attachment.id)
+            ) {
                 originThread.attachments.push(attachment);
             }
+        }
+    }
+
+    /**
+     * @param {Attachment} attachment
+     */
+    async delete(attachment) {
+        for (const message of Object.values(this.store.messages)) {
+            removeFromArray(message.attachmentIds, attachment.id);
+        }
+        for (const thread of Object.values(this.store.threads)) {
+            removeFromArray(thread.composer.attachmentIds);
+        }
+        if (attachment.originThread) {
+            removeFromArray(attachment.originThread.attachmentIds, attachment.id);
+        }
+        if (attachment.id > 0) {
+            await this.rpc("/mail/attachment/delete", {
+                attachment_id: attachment.id,
+            });
         }
     }
 }
 
 export const attachmentService = {
-    dependencies: ["mail.store"],
+    dependencies: ["rpc", "mail.store"],
     start(env, services) {
         return new AttachmentService(env, services);
     },

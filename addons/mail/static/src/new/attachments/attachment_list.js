@@ -26,6 +26,8 @@ export class AttachmentList extends Component {
         this.imagesWidth = 1920;
         this.dialog = useService("dialog");
         this.attachmentViewer = useAttachmentViewer();
+        /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
+        this.attachmentService = useService("mail.attachment");
     }
 
     get nonImagesAttachments() {

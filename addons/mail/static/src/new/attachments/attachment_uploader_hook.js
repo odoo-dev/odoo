@@ -16,21 +16,25 @@ function dataUrlToBlob(data, type) {
 
 let nextId = -1;
 
+/**
+ * @param {import("@mail/new/core/thread_model").Thread} pThread
+ * @param {import("@mail/new/core/message_model").Message} message
+ */
 export function useAttachmentUploader(pThread, message, isPending = false) {
     const component = useComponent();
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
-    /** @type {import("@mail/new/core/messaging_service").Messaging} */
-    const messaging = useService("mail.messaging");
     /** @type {import("@mail/new/core/store_service").Store} */
     const store = useService("mail.store");
+    /** @type {import("@mail/new/core/thread_service").ThreadService} */
     const threadService = useService("mail.thread");
+    /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
     const attachmentService = useService("mail.attachment");
     const abortByAttachmentId = new Map();
     const deferredByAttachmentId = new Map();
     const uploadingAttachmentIds = new Set();
     const state = useState({
-        attachments: [],
+        attachments: pThread ? [...pThread.composer.attachments] : [],
         uploadData({ data, name, type }) {
             const file = new File([dataUrlToBlob(data, type)], name, { type });
             return this.uploadFile(file);
@@ -63,7 +67,6 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
                 abort();
                 return;
             }
-            await messaging.unlinkAttachment(attachment);
             removeFromArrayWithPredicate(state.attachments, ({ id }) => id === attachment.id);
         },
         async unlinkAll() {
@@ -130,13 +133,16 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             extension: upload.title.split(".").pop(),
             originThread: isPending ? undefined : originThread,
         });
-        const index = state.attachments.findIndex(({ id }) => id === tmpId);
         const def = deferredByAttachmentId.get(tmpId);
+
+        const index = state.attachments.findIndex(({ id }) => id === tmpId);
         if (index >= 0) {
-            state.unlink(state.attachments[index]);
             state.attachments[index] = attachment;
         } else {
             state.attachments.push(attachment);
+        }
+        if (originThread.composer) {
+            originThread.composer.attachmentIds.push(attachment.id);
         }
         if (def) {
             def.resolve(attachment);

@@ -49,7 +49,7 @@ export class MessageService {
             removeFromArray(this.store.discuss.starred.messageIds, message.id);
         }
         message.body = "";
-        message.attachments = [];
+        message.attachmentIds = [];
         return this.rpc("/mail/message/update_content", {
             attachment_ids: [],
             body: "",
@@ -219,7 +219,9 @@ export class MessageService {
         } = data;
         assignDefined(message, remainingData);
         assignDefined(message, {
-            attachments: attachments.map((attachment) => this.attachment.insert(attachment)),
+            attachmentIds: attachments.map(
+                (attachment) => this.attachment.insert({ messageId: message.id, ...attachment }).id
+            ),
             defaultSubject,
             isDiscussion,
             isNote,

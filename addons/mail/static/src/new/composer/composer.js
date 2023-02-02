@@ -27,6 +27,7 @@ import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { MessageDeleteDialog } from "../core_ui/message_delete_dialog";
+import { removeFromArray } from "../utils/arrays";
 
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
@@ -74,6 +75,8 @@ export class Composer extends Component {
         this.messageService = useState(useService("mail.message"));
         /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.threadService = useService("mail.thread");
+        /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
+        this.attachmentService = useService("mail.attachment");
         this.ref = useRef("textarea");
         this.typingNotified = false;
         this.state = useState({
@@ -326,7 +329,7 @@ export class Composer extends Component {
         if (
             el.value.trim() ||
             (attachments.length > 0 && attachments.every(({ uploading }) => !uploading)) ||
-            (this.message && this.message.attachments.length > 0)
+            (this.message && this.message.attachmentIds.length > 0)
         ) {
             if (!this.state.active) {
                 return;
@@ -338,6 +341,7 @@ export class Composer extends Component {
             }
             this.state.active = true;
             this.attachmentUploader?.clear();
+            this.props.composer.attachmentIds = [];
             this.props.composer.textInputContent = "";
             el.focus();
         } else if (attachments.some(({ uploading }) => Boolean(uploading))) {
@@ -423,5 +427,11 @@ export class Composer extends Component {
         if (this.props.composer.thread) {
             this.threadService.markAsRead(this.props.composer.thread);
         }
+    }
+
+    async onClickUnlink(attachment) {
+        await this.attachmentUploader.unlink(attachment);
+        await this.attachmentService.delete(attachment);
+        removeFromArray(this.props.composer.attachmentIds, attachment.id);
     }
 }
