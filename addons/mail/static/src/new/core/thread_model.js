@@ -28,6 +28,8 @@ export class Thread {
     model;
     /** @type {import("@mail/new/attachments/attachment_model").Attachment[]} */
     attachments = [];
+    /** @type {import("@mail/new/attachments/attachment_model").Attachment[]} */
+    pendingAttachments = [];
     /** @type {integer} */
     activeRtcSessionId;
     canLeave = false;

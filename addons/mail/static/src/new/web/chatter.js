@@ -108,12 +108,17 @@ export class Chatter extends Component {
         useChildSubEnv({
             inChatter: true,
         });
-        useDropzone(this.rootRef, (ev) => {
+        useDropzone(this.rootRef, async (ev) => {
             if (this.state.thread.composer.type) {
                 return;
             }
             if (isDragSourceExternalFile(ev.dataTransfer)) {
-                [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
+                const proms = [];
+                for (const file of ev.dataTransfer.files) {
+                    proms.push(this.attachmentUploader.uploadFile(file));
+                }
+                await Promise.all(proms);
+                this.attachmentUploader.clear();
                 this.state.isAttachmentBoxOpened = true;
             }
         });
@@ -359,7 +364,7 @@ export class Chatter extends Component {
     }
 
     async unlinkAttachment(attachment) {
-        await this.attachmentUploader.unlink(attachment);
+        await this.attachment.delete(attachment);
     }
 
     onUploaded(data) {

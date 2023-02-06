@@ -4,15 +4,7 @@ import { AttachmentList } from "@mail/new/attachments/attachment_list";
 import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
 import { onExternalClick, useSelection } from "@mail/new/utils/hooks";
 import { isDragSourceExternalFile, isEventHandled, markEventHandled } from "@mail/new/utils/misc";
-import {
-    Component,
-    onMounted,
-    onWillDestroy,
-    useChildSubEnv,
-    useEffect,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onMounted, useChildSubEnv, useEffect, useRef, useState } from "@odoo/owl";
 import { useDropzone } from "../dropzone/dropzone_hook";
 import { useMessaging, useStore } from "../core/messaging_hook";
 import { useEmojiPicker } from "../emoji_picker/emoji_picker";
@@ -33,7 +25,7 @@ export const LONG_TYPING = 50000;
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/composer_model").Composer} composer
+ * @property {import("@mail/new/composer/composer_model").Composer} composer
  * @property {import("@mail/new/utils/hooks").MessageToReplyTo} messageToReplyTo
  * @extends {Component<Props, Env>}
  */
@@ -164,7 +156,6 @@ export class Composer extends Component {
             }
             this.props.messageToReplyTo?.cancel();
         });
-        onWillDestroy(() => this.attachmentUploader?.unlinkAll());
     }
 
     onInput(ev) {
@@ -199,6 +190,14 @@ export class Composer extends Component {
         return this.props.composer.thread ?? null;
     }
 
+    get attachments() {
+        return (
+            this.props.messageToReplyTo?.message?.originThread.pendingAttachments ??
+            this.thread?.pendingAttachments ??
+            []
+        );
+    }
+
     get allowUpload() {
         return true;
     }
@@ -208,7 +207,7 @@ export class Composer extends Component {
     }
 
     get isSendButtonDisabled() {
-        const attachments = this.attachmentUploader?.attachments ?? [];
+        const attachments = this.thread?.pendingAttachments ?? [];
         return (
             (!this.props.composer.textInputContent && attachments.length === 0) ||
             attachments.some(({ uploading }) => Boolean(uploading))
@@ -272,9 +271,7 @@ export class Composer extends Component {
     }
 
     async onClickFullComposer(ev) {
-        const attachmentIds = this.attachmentUploader?.attachments.map(
-            (attachment) => attachment.id
-        );
+        const attachmentIds = this.thread?.pendingAttachments.map((attachment) => attachment.id);
         const context = {
             default_attachment_ids: attachmentIds,
             default_body: escapeAndCompactTextContent(this.props.composer.textInputContent),
@@ -322,7 +319,7 @@ export class Composer extends Component {
 
     async processMessage(cb) {
         const el = this.ref.el;
-        const attachments = this.attachmentUploader?.attachments ?? [];
+        const attachments = this.thread?.pendingAttachments ?? [];
         if (
             el.value.trim() ||
             (attachments.length > 0 && attachments.every(({ uploading }) => !uploading)) ||
@@ -353,7 +350,7 @@ export class Composer extends Component {
             const thread =
                 this.props.messageToReplyTo?.message?.originThread ?? this.props.composer.thread;
             const postData = {
-                attachments: this.attachmentUploader?.attachments ?? [],
+                attachments: this.thread?.pendingAttachments ?? [],
                 isNote:
                     this.props.composer.type === "note" ||
                     this.props.messageToReplyTo?.message?.isNote,
@@ -398,7 +395,7 @@ export class Composer extends Component {
                 this.messageService.update(
                     this.props.composer.message,
                     value,
-                    this.attachmentUploader?.attachments
+                    this.thread?.pendingAttachments
                 )
             );
         } else {

@@ -34,7 +34,6 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
     const deferredByAttachmentId = new Map();
     const uploadingAttachmentIds = new Set();
     const state = useState({
-        attachments: [],
         uploadData({ data, name, type }) {
             const file = new File([dataUrlToBlob(data, type)], name, { type });
             return this.uploadFile(file);
@@ -60,6 +59,7 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             return uploadDoneDeferred;
         },
         async unlink(attachment) {
+            const thread = pThread ?? message.originThread;
             const abort = abortByAttachmentId.get(attachment.id);
             abortByAttachmentId.delete(attachment.id);
             deferredByAttachmentId.delete(attachment.id);
@@ -68,21 +68,26 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
                 return;
             }
             await attachmentService.delete(attachment);
-            removeFromArrayWithPredicate(state.attachments, ({ id }) => id === attachment.id);
+            removeFromArrayWithPredicate(
+                thread.pendingAttachments,
+                ({ id }) => id === attachment.id
+            );
         },
         async unlinkAll() {
+            const thread = pThread ?? message.originThread;
             const proms = [];
-            this.attachments.forEach((attachment) => proms.push(this.unlink(attachment)));
+            thread.pendingAttachments.forEach((attachment) => proms.push(this.unlink(attachment)));
             await Promise.all(proms);
             this.clear();
         },
         clear() {
+            const thread = pThread ?? message.originThread;
             abortByAttachmentId.clear();
             deferredByAttachmentId.clear();
             uploadingAttachmentIds.clear();
             // prevent queuing of a render that will never be resolved.
             if (status(component) !== "destroyed") {
-                state.attachments = [];
+                thread.pendingAttachments = [];
             }
         },
     });
@@ -104,7 +109,7 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             extension: upload.title.split(".").pop(),
             uploading: true,
         });
-        state.attachments.push(attachment);
+        originThread.pendingAttachments.push(attachment);
     });
     useBus(bus, "FILE_UPLOAD_LOADED", ({ detail: { upload } }) => {
         const tmpId = parseInt(upload.data.get("temporary_id"));
@@ -134,13 +139,13 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             extension: upload.title.split(".").pop(),
             originThread: isPending ? undefined : originThread,
         });
-        const index = state.attachments.findIndex(({ id }) => id === tmpId);
+        const index = originThread.pendingAttachments.findIndex(({ id }) => id === tmpId);
         const def = deferredByAttachmentId.get(tmpId);
         if (index >= 0) {
-            state.unlink(state.attachments[index]);
-            state.attachments[index] = attachment;
+            state.unlink(originThread.pendingAttachments[index]);
+            originThread.pendingAttachments[index] = attachment;
         } else {
-            state.attachments.push(attachment);
+            originThread.pendingAttachments.push(attachment);
         }
         if (def) {
             def.resolve(attachment);
