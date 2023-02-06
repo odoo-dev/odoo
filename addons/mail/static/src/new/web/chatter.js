@@ -346,6 +346,7 @@ export class Chatter extends Component {
     onUploaded(data) {
         this.attachmentUploader.uploadData(data);
         this.state.isAttachmentBoxOpened = true;
+        this.scrollPosition.ref.el.scrollTop = 0;
     }
 
     onClickAddAttachments() {
@@ -353,5 +354,6 @@ export class Chatter extends Component {
             return;
         }
         this.state.isAttachmentBoxOpened = !this.state.isAttachmentBoxOpened;
+        this.scrollPosition.ref.el.scrollTop = 0;
     }
 }
