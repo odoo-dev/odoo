@@ -18,9 +18,8 @@ let nextId = -1;
 
 /**
  * @param {import("@mail/new/core/thread_model").Thread} pThread
- * @param {import("@mail/new/core/message_model").Message} message
  */
-export function useAttachmentUploader(pThread, message, isPending = false) {
+export function useAttachmentUploader(pThread, isPending = false) {
     const component = useComponent();
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
@@ -39,7 +38,7 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             return this.uploadFile(file);
         },
         async uploadFile(file) {
-            const thread = pThread ?? message.originThread;
+            const thread = pThread;
             const tmpId = nextId--;
             uploadingAttachmentIds.add(tmpId);
             await upload("/mail/attachment/upload", [file], {
@@ -59,7 +58,7 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             return uploadDoneDeferred;
         },
         async unlink(attachment) {
-            const thread = pThread ?? message.originThread;
+            const thread = pThread;
             const abort = abortByAttachmentId.get(attachment.id);
             abortByAttachmentId.delete(attachment.id);
             deferredByAttachmentId.delete(attachment.id);
@@ -74,14 +73,14 @@ export function useAttachmentUploader(pThread, message, isPending = false) {
             );
         },
         async unlinkAll() {
-            const thread = pThread ?? message.originThread;
+            const thread = pThread;
             const proms = [];
             thread.pendingAttachments.forEach((attachment) => proms.push(this.unlink(attachment)));
             await Promise.all(proms);
             this.clear();
         },
         clear() {
-            const thread = pThread ?? message.originThread;
+            const thread = pThread;
             abortByAttachmentId.clear();
             deferredByAttachmentId.clear();
             uploadingAttachmentIds.clear();
