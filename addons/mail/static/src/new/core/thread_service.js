@@ -4,7 +4,7 @@ import { markup } from "@odoo/owl";
 import { ChannelMember } from "../core/channel_member_model";
 import { Thread } from "../core/thread_model";
 import { _t } from "@web/core/l10n/translation";
-import { removeFromArray, replaceArrayWithCompare } from "@mail/new/utils/arrays";
+import { removeFromArray } from "@mail/new/utils/arrays";
 import { assignDefined, createLocalId } from "../utils/misc";
 import { Composer } from "../composer/composer_model";
 import { prettifyMessageContent } from "../utils/format";
@@ -392,11 +392,11 @@ export class ThreadService {
         }
         if (attachments) {
             // smart process to avoid triggering reactives when there is no change between the 2 arrays
-            replaceArrayWithCompare(
-                thread.attachments,
-                attachments.map((attachment) => this.attachments.insert(attachment)),
-                (a1, a2) => a1.id === a2.id
-            );
+            for (const attachment of attachments) {
+                if (!(attachment.id in thread.attachmentIds)) {
+                    thread.attachmentIds.push(this.attachments.insert(attachment).id);
+                }
+            }
         }
         if (data.serverData) {
             const { serverData } = data;

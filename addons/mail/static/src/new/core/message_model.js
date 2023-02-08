@@ -12,8 +12,8 @@ import { createLocalId } from "../utils/misc";
 const { DateTime } = luxon;
 
 export class Message {
-    /** @type {Object[]} */
-    attachments = [];
+    /** @type {number[]} */
+    attachmentIds = [];
     /** @type {import("@mail/new/core/persona_model").Persona} */
     author;
     /** @type {string} */
@@ -61,6 +61,10 @@ export class Message {
     now = DateTime.now();
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
+
+    get attachments() {
+        return this.attachmentIds.map((id) => this._store.attachments[id]);
+    }
 
     /**
      * @returns {string}

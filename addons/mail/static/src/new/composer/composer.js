@@ -64,6 +64,7 @@ export class Composer extends Component {
                 this.props.composer
             );
         }
+        /** @type {import("@mail/new/core/message_service").MessageService} */
         this.messageService = useState(useService("mail.message"));
         /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.threadService = useService("mail.thread");

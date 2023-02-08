@@ -40,7 +40,7 @@ export class MessageService {
             message_id: message.id,
         });
         message.body = markup(data.body);
-        message.attachments.push(...attachments);
+        message.attachmentIds.push(...attachments.map((a) => a.id));
     }
 
     async delete(message) {
@@ -49,7 +49,7 @@ export class MessageService {
             removeFromArray(this.store.discuss.starred.messageIds, message.id);
         }
         message.body = "";
-        message.attachments = [];
+        message.attachmentIds = [];
         return this.rpc("/mail/message/update_content", {
             attachment_ids: [],
             body: "",
@@ -217,9 +217,10 @@ export class MessageService {
             subtype_description: subtypeDescription = message.subtypeDescription,
             ...remainingData
         } = data;
+        delete remainingData.attachments;
         assignDefined(message, remainingData);
         assignDefined(message, {
-            attachments: attachments.map((attachment) => this.attachment.insert(attachment)),
+            attachmentIds: attachments.map((attachment) => this.attachment.insert(attachment).id),
             defaultSubject,
             isDiscussion,
             isNote,

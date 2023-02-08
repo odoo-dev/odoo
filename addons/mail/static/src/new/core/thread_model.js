@@ -26,8 +26,8 @@ export class Thread {
     uuid;
     /** @type {string} */
     model;
-    /** @type {import("@mail/new/attachments/attachment_model").Attachment[]} */
-    attachments = [];
+    /** @type {number[]} */
+    attachmentIds = [];
     /** @type {integer} */
     activeRtcSessionId;
     /** @type {import("@mail/new/core/channel_member_model").ChannelMember[]} */
@@ -95,6 +95,10 @@ export class Thread {
 
     get messages() {
         return this.messageIds.map((id) => this._store.messages[id]);
+    }
+
+    get attachments() {
+        return this.attachmentIds.map((id) => this._store.attachments[id]);
     }
 
     get accessRestrictedToGroupText() {

@@ -3,7 +3,7 @@
 import { Attachment } from "./attachment_model";
 import { assignDefined, createLocalId } from "../utils/misc";
 import { registry } from "@web/core/registry";
-import { removeFromArrayWithPredicate } from "../utils/arrays";
+import { removeFromArray, removeFromArrayWithPredicate } from "../utils/arrays";
 
 export class AttachmentService {
     constructor(env, services) {
@@ -66,13 +66,10 @@ export class AttachmentService {
     async delete(attachment) {
         delete this.store.attachments[attachment.id];
         if (attachment.originThread) {
-            removeFromArrayWithPredicate(
-                attachment.originThread.attachments,
-                ({ id }) => id === attachment.id
-            );
+            removeFromArray(attachment.originThread.attachmentIds, attachment.id);
         }
         for (const message of Object.values(this.store.messages)) {
-            removeFromArrayWithPredicate(message.attachments, ({ id }) => id === attachment.id);
+            removeFromArray(message.attachmentIds, attachment.id);
             if (message.composer) {
                 removeFromArrayWithPredicate(
                     message.composer.attachments,

@@ -5,6 +5,7 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { createLocalId } from "@mail/new/utils/misc";
 import { _t } from "@web/core/l10n/translation";
+import { removeFromArray } from "../utils/arrays";
 
 function dataUrlToBlob(data, type) {
     const binData = window.atob(data);
@@ -91,6 +92,8 @@ export function useAttachmentUploader(thread, composer) {
         });
         if (composer) {
             composer.attachments.push(attachment);
+        } else {
+            thread.attachmentIds.push(attachment.id);
         }
     });
     useBus(bus, "FILE_UPLOAD_LOADED", ({ detail: { upload } }) => {
@@ -127,6 +130,12 @@ export function useAttachmentUploader(thread, composer) {
                 composer.attachments[index] = attachment;
             } else {
                 composer.attachments.push(attachment);
+            }
+        } else {
+            if (tmpId in thread.attachmentIds) {
+                removeFromArray(thread.attachmentIds, tmpId);
+            } else {
+                thread.attachmentIds.push(attachment.id);
             }
         }
         const def = deferredByAttachmentId.get(tmpId);
