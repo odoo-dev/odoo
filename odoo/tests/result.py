@@ -91,12 +91,6 @@ class OdooTestResult(object):
         self.time_start = time.time()
         self.queries_start = sql_db.sql_counter
 
-    def startTestRun(self):
-        """Called once before any tests are executed.
-
-        See startTest for a method called before each test.
-        """
-
     def stopTest(self, test):
         """Called when the given test has been run"""
         if stats_logger.isEnabledFor(logging.INFO):
@@ -104,12 +98,6 @@ class OdooTestResult(object):
                 time=time.time() - self.time_start,
                 queries=sql_db.sql_counter - self.queries_start,
             )
-
-    def stopTestRun(self):
-        """Called once after all tests are executed.
-
-        See stopTest for a method called after each test.
-        """
 
     def addError(self, test, err):
         """Called when an error has occurred. 'err' is a tuple of values as

@@ -58,24 +58,22 @@ class TestSuite(BaseTestSuite):
 
         currentClass._classSetupFailed = False
 
-        setUpClass = getattr(currentClass, 'setUpClass', None)
-        if setUpClass is not None:
-            try:
-                setUpClass()
-            except Exception as e:
-                currentClass._classSetupFailed = True
-                className = util.strclass(currentClass)
-                self._createClassOrModuleLevelException(result, e,
-                                                        'setUpClass',
-                                                        className)
-            finally:
-                if currentClass._classSetupFailed is True:
-                    currentClass.doClassCleanups()
-                    if len(currentClass.tearDown_exceptions) > 0:
-                        for exc in currentClass.tearDown_exceptions:
-                            self._createClassOrModuleLevelException(
-                                    result, exc[1], 'setUpClass', className,
-                                    info=exc)
+        try:
+            currentClass.setUpClass()
+        except Exception as e:
+            currentClass._classSetupFailed = True
+            className = util.strclass(currentClass)
+            self._createClassOrModuleLevelException(result, e,
+                                                    'setUpClass',
+                                                    className)
+        finally:
+            if currentClass._classSetupFailed is True:
+                currentClass.doClassCleanups()
+                if len(currentClass.tearDown_exceptions) > 0:
+                    for exc in currentClass.tearDown_exceptions:
+                        self._createClassOrModuleLevelException(
+                                result, exc[1], 'setUpClass', className,
+                                info=exc)
 
     def _createClassOrModuleLevelException(self, result, exception, method_name,
                                            parent, info=None):
@@ -90,33 +88,32 @@ class TestSuite(BaseTestSuite):
                 result.addError(error, info)
 
     def _tearDownPreviousClass(self, test, result):
-        previousClass = getattr(result, '_previousTestClass', None)
+        previousClass = result._previousTestClass
         currentClass = test.__class__
         if currentClass == previousClass:
+            return
+        if not previousClass:
             return
         if getattr(previousClass, '_classSetupFailed', False):
             return
         if getattr(previousClass, "__unittest_skip__", False):
             return
-
-        tearDownClass = getattr(previousClass, 'tearDownClass', None)
-        if tearDownClass is not None:
-            try:
-                tearDownClass()
-            except Exception as e:
-                className = util.strclass(previousClass)
-                self._createClassOrModuleLevelException(result, e,
-                                                        'tearDownClass',
-                                                        className)
-            finally:
-                previousClass.doClassCleanups()
-                if len(previousClass.tearDown_exceptions) > 0:
-                    for exc in previousClass.tearDown_exceptions:
-                        className = util.strclass(previousClass)
-                        self._createClassOrModuleLevelException(result, exc[1],
-                                                                'tearDownClass',
-                                                                className,
-                                                                info=exc)
+        try:
+            previousClass.tearDownClass()
+        except Exception as e:
+            className = util.strclass(previousClass)
+            self._createClassOrModuleLevelException(result, e,
+                                                    'tearDownClass',
+                                                    className)
+        finally:
+            previousClass.doClassCleanups()
+            if len(previousClass.tearDown_exceptions) > 0:
+                for exc in previousClass.tearDown_exceptions:
+                    className = util.strclass(previousClass)
+                    self._createClassOrModuleLevelException(result, exc[1],
+                                                            'tearDownClass',
+                                                            className,
+                                                            info=exc)
 
 
 class _ErrorHolder(object):
@@ -160,7 +157,7 @@ class _ErrorHolder(object):
 
 class OdooSuite(TestSuite):
     def _handleClassSetUp(self, test, result):
-        previous_test_class = getattr(result, '_previousTestClass', None)
+        previous_test_class = result._previousTestClass
         if not (
             previous_test_class != type(test)
             and hasattr(result, 'stats')
@@ -175,7 +172,7 @@ class OdooSuite(TestSuite):
             super()._handleClassSetUp(test, result)
 
     def _tearDownPreviousClass(self, test, result):
-        previous_test_class = getattr(result, '_previousTestClass', None)
+        previous_test_class = result._previousTestClass
         if not (
                 previous_test_class
             and previous_test_class != type(test)

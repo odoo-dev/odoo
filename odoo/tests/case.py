@@ -18,21 +18,17 @@ class _Outcome(object):
     def __init__(self, test, result):
         self.result = result
         self.success = True
-        self.skipped = []
-        self.errors = []
         self.test = test
 
     @contextlib.contextmanager
     def testPartExecutor(self, test_case, isTest=False):
-        old_success = self.success
-        self.success = True
         try:
             yield
         except KeyboardInterrupt:
             raise
         except SkipTest as e:
             self.success = False
-            self.skipped.append((test_case, str(e)))
+            self.result.addSkip(test_case, str(e))
         # pylint: disable=bare-except
         except:
             exc_info = sys.exc_info()
@@ -47,11 +43,6 @@ class _Outcome(object):
             # explicitly break a reference cycle:
             # exc_info -> frame -> exc_info
             exc_info = None
-        else:
-            if self.success:
-                self.errors.append((test_case, None))
-        finally:
-            self.success = self.success and old_success
 
     def _complete_traceback(self, initial_tb):
         Traceback = type(initial_tb)
@@ -102,6 +93,8 @@ class _Outcome(object):
 
 class TestCase(_TestCase):
     _class_cleanups = []  # needed, backport for versions < 3.8
+    __unittest_skip_why__ = None
+    __unittest_skip__ = None
 
     # pylint: disable=super-init-not-called
     def __init__(self, methodName='runTest'):
@@ -195,25 +188,23 @@ class TestCase(_TestCase):
         function(*args, **kwargs)
 
     def run(self, result):
-        orig_result = result
-        if result is None:
-            startTestRun = getattr(result, 'startTestRun', None)
-            if startTestRun is not None:
-                startTestRun()
-
         result.startTest(self)
 
         testMethod = getattr(self, self._testMethodName)
-        if (getattr(self.__class__, "__unittest_skip__", False) or
-            getattr(testMethod, "__unittest_skip__", False)):
-            # If the class or method was skipped.
-            try:
-                skip_why = (getattr(self.__class__, '__unittest_skip_why__', '')
-                            or getattr(testMethod, '__unittest_skip_why__', ''))
+
+        skip = False
+        skip_why = ''
+        try:
+            skip = self.__class__.__unittest_skip__ or testMethod.__unittest_skip__
+            skip_why = self.__class__.__unittest_skip_why__ or testMethod.__unittest_skip_why__ or ''
+        except AttributeError:  # testMethod may not have a __unittest_skip__ or __unittest_skip_why__
+            pass
+        finally:
+            if skip:
                 result.addSkip(self, skip_why)
-            finally:
                 result.stopTest(self)
-            return
+                return
+
         outcome = _Outcome(self, result)
         try:
             self._outcome = outcome
@@ -226,21 +217,11 @@ class TestCase(_TestCase):
                     self._callTearDown()
 
             self.doCleanups()
-            for test, reason in outcome.skipped:
-                result.addSkip(test, reason)
             if outcome.success:
                 result.addSuccess(self)
             return result
         finally:
             result.stopTest(self)
-            if orig_result is None:
-                stopTestRun = getattr(result, 'stopTestRun', None)
-                if stopTestRun is not None:
-                    stopTestRun()
-
-            # explicitly break reference cycles:
-            # outcome.errors -> frame -> outcome -> outcome.errors
-            outcome.errors.clear()
 
             # clear the outcome, no more needed
             self._outcome = None

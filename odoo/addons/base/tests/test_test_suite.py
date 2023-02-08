@@ -6,7 +6,7 @@ import logging
 import re
 import sys
 from contextlib import contextmanager
-from unittest import TestCase, SkipTest
+from unittest import TestCase, SkipTest, skip
 from unittest.mock import patch
 
 from odoo.tests.common import BaseCase, TransactionCase
@@ -514,3 +514,15 @@ class Test02ClassCleanupsCheck(BaseCase):
     def test_classcleanups(self):
         self.assertTrue(Test01ClassCleanups.executed, "This test only makes sence when executed after Test01ClassCleanups")
         self.assertTrue(Test01ClassCleanups.cleanup, "TestClassCleanup shoudl have been cleanuped")
+
+
+@skip
+class TestSkipClass(BaseCase):
+    def test_classcleanups(self):
+        raise Exception('This should be skipped')
+
+
+class TestSkipMethof(BaseCase):
+    @skip
+    def test_skip_method(self):
+        raise Exception('This should be skipped')
