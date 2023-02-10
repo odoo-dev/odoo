@@ -7,7 +7,7 @@ import { formatText } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 
 import { CodeEditor } from "@web/core/code_editor/code_editor";
-import { Component, onWillUpdateProps, useState } from "@odoo/owl";
+import { Component, onWillRender, useState } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 
 export class AceField extends Component {
@@ -31,8 +31,7 @@ export class AceField extends Component {
             theme: this.theme,
         });
 
-        this.updateCodeEditor(this.props);
-        onWillUpdateProps(this.updateCodeEditor);
+        onWillRender(this.updateCodeEditor);
 
         const { model } = this.props.record;
         useBus(model.bus, "WILL_SAVE_URGENTLY", () => this.commitChanges());
@@ -50,7 +49,8 @@ export class AceField extends Component {
         this.debouncedCommit();
     }
 
-    updateCodeEditor({ record, mode, readonly }) {
+    updateCodeEditor() {
+        const { record, mode, readonly } = this.props;
         this.state.value = formatText(record.data[this.props.name]);
         this.state.mode = mode === "xml" ? "qweb" : mode;
         this.state.readonly = readonly;
