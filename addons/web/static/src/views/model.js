@@ -82,8 +82,6 @@ function getSearchParams(props) {
  * @param {Object} params
  * @param {Object} [options]
  * @param {Function} [options.onUpdate]
- * @param {Function} [options.onWillStart] callback executed before the first load of the model
- * @param {boolean} [options.ignoreUseSampleModel]
  * @returns {InstanceType<T>}
  */
 export function useModel(ModelClass, params, options = {}) {
@@ -108,42 +106,37 @@ export function useModel(ModelClass, params, options = {}) {
     );
 
     const globalState = component.props.globalState || {};
+    const localState = component.props.state || {};
     let useSampleModel = Boolean(
         "useSampleModel" in globalState
             ? globalState.useSampleModel
             : component.props.useSampleModel
     );
-    model.useSampleModel = !options.ignoreUseSampleModel ? useSampleModel : false;
+    model.useSampleModel = useSampleModel;
     const orm = model.orm;
-    let sampleORM = globalState.sampleORM;
+    let sampleORM = localState.sampleORM;
     const user = useService("user");
     let started = false;
+
     async function load(props) {
         const searchParams = getSearchParams(props);
         await model.load(searchParams);
-        if (!options.ignoreUseSampleModel) {
-            if (useSampleModel && !model.hasData()) {
-                sampleORM =
-                    sampleORM ||
-                    buildSampleORM(component.props.resModel, component.props.fields, user);
-                sampleORM.setGroups(model.getGroups());
-                // Load data with sampleORM then restore real ORM.
-                model.orm = sampleORM;
-                await model.load(searchParams);
-                model.orm = orm;
-            } else {
-                useSampleModel = false;
-                model.useSampleModel = useSampleModel;
-            }
+        if (useSampleModel && !model.hasData()) {
+            sampleORM =
+                sampleORM || buildSampleORM(component.props.resModel, component.props.fields, user);
+            // Load data with sampleORM then restore real ORM.
+            model.orm = sampleORM;
+            await model.load(searchParams);
+            model.orm = orm;
+        } else {
+            useSampleModel = false;
+            model.useSampleModel = useSampleModel;
         }
         if (started) {
             model.notify();
         }
     }
     onWillStart(async () => {
-        if (options.onWillStart) {
-            await options.onWillStart();
-        }
         await load(component.props);
         if (options.onWillStartAfterLoad) {
             await options.onWillStartAfterLoad();
@@ -151,15 +144,16 @@ export function useModel(ModelClass, params, options = {}) {
         started = true;
     });
     onWillUpdateProps((nextProps) => {
-        if (!options.ignoreUseSampleModel) {
-            useSampleModel = false;
-        }
+        useSampleModel = false;
         load(nextProps);
     });
 
     useSetupView({
         getGlobalState() {
-            return { sampleORM, useSampleModel };
+            return { useSampleModel };
+        },
+        getLocalState: () => {
+            return { sampleORM };
         },
     });
 
