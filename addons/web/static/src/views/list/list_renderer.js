@@ -490,7 +490,7 @@ export class ListRenderer extends Component {
 
     createKeyOptionalFields() {
         let keyParts = {
-            fields: this.props.list.fieldNames,
+            fields: this.props.list.fieldNames, // FIXME: use something else?
             model: this.props.list.resModel,
             viewMode: "list",
             viewId: this.env.config.viewId,
@@ -695,9 +695,8 @@ export class ListRenderer extends Component {
     }
 
     isSortable(column) {
-        const { hasLabel, name } = column;
+        const { hasLabel, name, options } = column;
         const { sortable } = this.fields[name];
-        const { options } = this.props.list.activeFields[name];
         return (sortable || options.allow_order) && hasLabel;
     }
 
