@@ -81,6 +81,10 @@ export class KanbanRenderer extends Component {
         }
         this.ghostColumns = this.generateGhostColumns();
 
+        owl.onWillRender(() => {
+            console.log("render kanban renderer");
+        });
+
         // Sortable
         let dataRecordId;
         let dataGroupId;

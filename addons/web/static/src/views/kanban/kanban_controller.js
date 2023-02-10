@@ -9,8 +9,9 @@ import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { useSetupView } from "@web/views/view_hook";
 import { KanbanRenderer } from "./kanban_renderer";
+import { getActiveFieldsFromArchInfo } from "../relational_model/utils";
 
-import { Component, reactive, useRef } from "@odoo/owl";
+import { Component, reactive, useRef, useState } from "@odoo/owl";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -21,13 +22,13 @@ export class KanbanController extends Component {
         this.actionService = useService("action");
         const { Model, resModel, fields, archInfo, limit, defaultGroupBy, state } = this.props;
         const { rootState } = state || {};
-        this.model = useModel(Model, {
-            activeFields: archInfo.activeFields,
+        const model = useModel(Model, {
+            activeFields: getActiveFieldsFromArchInfo(archInfo, fields),
             progressAttributes: archInfo.progressAttributes,
             fields,
             resModel,
             handleField: archInfo.handleField,
-            limit: archInfo.limit || limit,
+            limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
             onCreate: archInfo.onCreate,
             defaultGroupBy,
@@ -37,6 +38,7 @@ export class KanbanController extends Component {
             tooltipInfo: archInfo.tooltipInfo,
             rootState,
         });
+        this.model = useState(model);
         this.headerButtons = archInfo.headerButtons;
 
         const self = this;
@@ -53,6 +55,10 @@ export class KanbanController extends Component {
                 this._groupId = groupId;
             },
             view: archInfo.quickCreateView,
+        });
+
+        owl.onWillRender(() => {
+            console.log("render kanban controller");
         });
 
         this.rootRef = useRef("root");
@@ -82,11 +88,8 @@ export class KanbanController extends Component {
                     limit: limit,
                     total: count,
                     onUpdate: async ({ offset, limit }) => {
-                        this.model.root.offset = offset;
-                        this.model.root.limit = limit;
-                        await this.model.root.load();
+                        await this.model.load({ offset, limit });
                         await this.onUpdatedPager();
-                        this.render(true); // FIXME WOWL reactivity
                     },
                     updateTotal: hasLimitedCount ? () => root.fetchCount() : undefined,
                 };
@@ -174,7 +177,10 @@ KanbanController.template = `web.KanbanView`;
 KanbanController.components = { Layout, KanbanRenderer, MultiRecordViewButton };
 KanbanController.props = {
     ...standardViewProps,
-    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
+    defaultGroupBy: {
+        validate: (dgb) => !dgb || typeof dgb === "string",
+        optional: true,
+    },
     editable: { type: Boolean, optional: true },
     forceGlobalClick: { type: Boolean, optional: true },
     onSelectionChanged: { type: Function, optional: true },
