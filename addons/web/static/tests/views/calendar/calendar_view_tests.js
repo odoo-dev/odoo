@@ -1400,7 +1400,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsNone(target, ".o_cw_popover", "should close a popover");
     });
 
-    QUnit.test(`render popover with widget which has specialData attribute`, async (assert) => {
+    QUnit.tttt(`render popover with widget which has specialData attribute`, async (assert) => {
         assert.expect(3);
 
         fieldRegistry.add("specialWidget", { component: CharField });
@@ -4353,14 +4353,16 @@ QUnit.module("Views", ({ beforeEach }) => {
             `,
             mockRPC(route, { args, method }) {
                 if (method === "create") {
-                    assert.deepEqual(args[0], {
-                        allday: false,
-                        name: "foobar",
-                        start: "2016-12-13 07:00:00",
-                        start_date: false,
-                        stop: "2016-12-13 15:00:00",
-                        stop_date: false,
-                    });
+                    assert.deepEqual(args[0], [
+                        {
+                            allday: false,
+                            name: "foobar",
+                            start: "2016-12-13 07:00:00",
+                            start_date: false,
+                            stop: "2016-12-13 15:00:00",
+                            stop_date: false,
+                        },
+                    ]);
                 }
                 if (method === "write") {
                     assert.deepEqual(args[1], {

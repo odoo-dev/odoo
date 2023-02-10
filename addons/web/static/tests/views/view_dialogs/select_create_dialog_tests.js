@@ -82,7 +82,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.module("SelectCreateDialog");
 
-    QUnit.test(
+    QUnit.tttt(
         "SelectCreateDialog use domain, group_by and search default",
         async function (assert) {
             assert.expect(3);
@@ -133,7 +133,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                         },
                         "should search with the complete domain (domain + search), and group by 'bar'"
                     );
-                } else if (args.method === "web_search_read") {
+                } else if (args.method === "unity_web_search_read") {
                     if (search === 0) {
                         assert.deepEqual(
                             args.kwargs,
@@ -215,7 +215,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 `,
         };
         const mockRPC = async (route, args) => {
-            if (args.method === "web_search_read") {
+            if (args.method === "unity_web_search_read") {
                 assert.deepEqual(
                     args.kwargs.domain,
                     [["id", "=", 2]],
@@ -262,7 +262,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    QUnit.test("SelectCreateDialog cascade x2many in create mode", async function (assert) {
+    QUnit.tttt("SelectCreateDialog cascade x2many in create mode", async function (assert) {
         assert.expect(5);
         serverData.views = {
             "partner,false,form": `

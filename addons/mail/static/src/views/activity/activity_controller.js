@@ -25,17 +25,13 @@ export class ActivityController extends Component {
 
     setup() {
         const { rootState } = this.props.state || {};
-        this.model = useModel(
-            this.props.Model,
-            {
-                activeFields: this.props.archInfo.activeFields,
-                resModel: this.props.resModel,
-                fields: this.props.fields,
-                viewMode: "activity",
-                rootState,
-            },
-            { ignoreUseSampleModel: true }
-        );
+        this.model = useModel(this.props.Model, {
+            activeFields: this.props.archInfo.activeFields,
+            resModel: this.props.resModel,
+            fields: this.props.fields,
+            viewMode: "activity",
+            rootState,
+        });
 
         this.dialog = useService("dialog");
         this.action = useService("action");

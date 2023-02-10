@@ -69,7 +69,7 @@ export function addDependencies(deps, activeFields, fields) {
             };
         }
         if (!(name in fields)) {
-            fields[name] = { ...dependency };
+            fields[name] = { ...dependency, name };
         }
     }
 }

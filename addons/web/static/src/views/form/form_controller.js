@@ -11,22 +11,31 @@ import { omit } from "@web/core/utils/objects";
 import { createElement } from "@web/core/utils/xml";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
-import { isX2Many } from "@web/views/utils";
+import { evalDomain, isX2Many } from "@web/views/utils";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { useSetupView } from "@web/views/view_hook";
-import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
-import { ButtonBox } from "./button_box/button_box";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { Field } from "@web/views/fields/field";
+import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/views/relational_model/utils";
+import { useViewCompiler } from "@web/views/view_compiler";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { ActionMenusItems } from "@web/search/cog_menu/action_menus_items";
 
-import { Component, onRendered, useEffect, useRef } from "@odoo/owl";
-import { useViewCompiler } from "../view_compiler";
+import { ButtonBox } from "./button_box/button_box";
 import { FormCompiler } from "./form_compiler";
-import { evalDomain } from "../utils";
+import { FormErrorDialog } from "./form_error_dialog/form_error_dialog";
+import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
+
+import {
+    Component,
+    onRendered,
+    onWillStart,
+    onWillUpdateProps,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 
 const viewRegistry = registry.category("views");
 
@@ -111,7 +120,13 @@ export class FormController extends Component {
         useBus(this.ui.bus, "resize", this.render);
 
         this.archInfo = this.props.archInfo;
-        const activeFields = this.archInfo.activeFields;
+        const { activeFields, fields } = extractFieldsFromArchInfo(
+            this.archInfo,
+            this.props.fields
+        );
+        addFieldDependencies(activeFields, fields, [
+            { name: "display_name", type: "char", readonly: true },
+        ]);
 
         const { create, edit } = this.archInfo.activeActions;
         this.canCreate = create && !this.props.preventCreate;
@@ -120,39 +135,52 @@ export class FormController extends Component {
         this.disabledButtons = null;
 
         let mode = this.props.mode || "edit";
-        if (!this.canEdit) {
+        if (!this.canEdit && this.props.resId) {
             mode = "readonly";
         }
 
-        this.model = useModel(
-            this.props.Model,
-            {
+        const modelServices = Object.fromEntries(
+            this.props.Model.services.map((servName) => {
+                return [servName, useService(servName)];
+            })
+        );
+        modelServices.orm = useService("orm");
+        const modelParams = {
+            config: {
                 resModel: this.props.resModel,
                 resId: this.props.resId || false,
-                resIds: this.props.resIds,
-                fields: this.props.fields,
+                resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
+                fields,
                 activeFields,
-                viewMode: "form",
-                rootType: "record",
+                isMonoRecord: true,
                 mode,
-                component: this,
+                context: this.props.context,
+            },
+            state: this.props.state?.modelState,
+            hooks: {
                 onRecordSaved: this.onRecordSaved.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
             },
-            {
-                ignoreUseSampleModel: true,
-                onWillStart: () =>
-                    loadSubViews(
-                        this.archInfo.activeFields,
-                        this.props.fields,
-                        this.props.context,
-                        this.props.resModel,
-                        this.viewService,
-                        this.user,
-                        this.env.isSmall
-                    ),
+        };
+        this.model = useState(new this.props.Model(this.env, modelParams, modelServices));
+
+        onWillStart(async () => {
+            await loadSubViews(
+                this.archInfo.activeFields,
+                this.props.fields,
+                this.props.context,
+                this.props.resModel,
+                this.viewService,
+                this.user,
+                this.env.isSmall
+            );
+            return this.model.load();
+        });
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.resId !== this.model.root.resId) {
+                return this.model.root.load(nextProps.resId);
             }
-        );
+        });
 
         this.cpButtonsRef = useRef("cpButtons");
 
@@ -216,9 +244,9 @@ export class FormController extends Component {
             beforeLeave: () => this.beforeLeave(),
             beforeUnload: (ev) => this.beforeUnload(ev),
             getLocalState: () => {
-                // TODO: export the whole model?
                 return {
                     activeNotebookPages: !this.model.root.isNew ? activeNotebookPages : {},
+                    modelState: this.model.exportState(),
                     resId: this.model.root.resId,
                 };
             },
@@ -280,32 +308,40 @@ export class FormController extends Component {
      */
     async onWillSaveRecord(record) {}
 
+    async onSaveError(error, { discard }) {
+        const proceed = await new Promise((resolve) => {
+            this.model.dialog.add(FormErrorDialog, {
+                message: error.data.message,
+                onDiscard: () => {
+                    discard();
+                    resolve(true);
+                },
+                onStayHere: () => resolve(false),
+            });
+        });
+        return proceed;
+    }
+
     displayName() {
         return this.model.root.data.display_name || this.env._t("New");
     }
 
     async onPagerUpdate({ offset, resIds }) {
-        await this.model.root.askChanges(); // ensures that isDirty is correct
-        let canProceed = true;
-        if (this.model.root.isDirty) {
-            canProceed = await this.model.root.save({
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        const canProceed = await this.model.root.save({
+            stayInEdition: true,
+            onError: this.onSaveError.bind(this),
+        });
         if (canProceed) {
-            return this.model.load({ resId: resIds[offset] });
+            return this.model.root.load(resIds[offset]);
         }
     }
 
     async beforeLeave() {
-        if (this.model.root.isDirty) {
-            return this.model.root.save({
-                noReload: true,
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        return this.model.root.save({
+            noReload: true,
+            stayInEdition: true,
+            onError: this.onSaveError.bind(this),
+        });
     }
 
     async beforeUnload(ev) {
@@ -374,7 +410,10 @@ export class FormController extends Component {
 
     async shouldExecuteAction(item) {
         if ((this.model.root.isDirty || this.model.root.isNew) && !item.skipSave) {
-            return this.model.root.save({ stayInEdition: true, useSaveErrorDialog: true });
+            return this.model.root.save({
+                stayInEdition: true,
+                onError: this.onSaveError.bind(this),
+            });
         }
         return true;
     }
@@ -416,14 +455,20 @@ export class FormController extends Component {
     async beforeExecuteActionButton(clickParams) {
         if (clickParams.special !== "cancel") {
             const noReload = this.env.inDialog && clickParams.close;
-            return this.model.root
-                .save({ stayInEdition: true, useSaveErrorDialog: !this.env.inDialog, noReload })
-                .then((saved) => {
-                    if (saved && this.props.onSave) {
-                        this.props.onSave(this.model.root);
-                    }
-                    return saved;
-                });
+            const params = {
+                force: true,
+                stayInEdition: true,
+                noReload,
+            };
+            if (!this.env.inDialog) {
+                params.onError = this.onSaveError.bind(this);
+            }
+            return this.model.root.save(params).then((saved) => {
+                if (saved && this.props.onSave) {
+                    this.props.onSave(this.model.root);
+                }
+                return saved;
+            });
         } else if (this.props.onDiscard) {
             this.props.onDiscard(this.model.root);
         }
@@ -431,22 +476,15 @@ export class FormController extends Component {
 
     async afterExecuteActionButton(clickParams) {}
 
-    async edit() {
-        await this.model.root.switchMode("edit");
-    }
-
     async create() {
-        await this.model.root.askChanges(); // ensures that isDirty is correct
-        let canProceed = true;
-        if (this.model.root.isDirty) {
-            canProceed = await this.model.root.save({
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        const canProceed = await this.model.root.save({
+            stayInEdition: true,
+            onError: this.onSaveError.bind(this),
+        });
+        // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
             this.disableButtons();
-            await this.model.load({ resId: null });
+            await this.model.root.load(false);
             this.enableButtons();
         }
     }
@@ -455,17 +493,18 @@ export class FormController extends Component {
         this.disableButtons();
         const record = this.model.root;
         let saved = false;
-
-        if (this.props.saveRecord) {
-            saved = await this.props.saveRecord(record, params);
-        } else {
-            saved = await record.save(params);
+        try {
+            if (this.props.saveRecord) {
+                saved = await this.props.saveRecord(record, params);
+            } else {
+                saved = await record.save({ ...params, force: true });
+            }
+        } finally {
+            this.enableButtons();
         }
-        this.enableButtons();
         if (saved && this.props.onSave) {
             this.props.onSave(record, params);
         }
-
         return saved;
     }
 
