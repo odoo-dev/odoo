@@ -18,6 +18,9 @@ export class CalendarCommonPopover extends Component {
         this.computeDateTimeAndDuration();
     }
 
+    get activeFields() {
+        return this.props.model.popoverFields;
+    }
     get isEventEditable() {
         return true;
     }
@@ -28,9 +31,8 @@ export class CalendarCommonPopover extends Component {
         return this.isEventEditable || this.isEventDeletable;
     }
 
-    isInvisible(fieldName, record) {
-        const { invisible } = this.props.model.popoverFields[fieldName].modifiers;
-        return evalDomain(invisible, record.evalContext);
+    isInvisible(fieldNode, record) {
+        return evalDomain(fieldNode.modifiers.invisible, record.evalContext);
     }
 
     computeDateTimeAndDuration() {

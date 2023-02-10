@@ -13,8 +13,7 @@ export const settingsRadioField = {
     ...radioField,
     component: SettingsRadioField,
     extractStringExpr(fieldName, record) {
-        const radioItems = SettingsRadioField.getItems(fieldName, record);
-        return radioItems.map((r) => r[1]);
+        return record.fields[fieldName].selection.map((r) => r[1]);
     },
 };
 

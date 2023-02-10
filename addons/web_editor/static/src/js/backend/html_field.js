@@ -25,6 +25,7 @@ import { toInline } from 'web_editor.convertInline';
 import { loadJS } from '@web/core/assets';
 import {
     Component,
+    markup,
     useRef,
     useSubEnv,
     useState,
@@ -319,7 +320,7 @@ export class HtmlField extends Component {
         ) {
             this.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
             this.currentEditingValue = value;
-            await this.props.record.update({ [this.props.name]: value });
+            await this.props.record.update({ [this.props.name]: markup(value) });
         }
     }
     async startWysiwyg(wysiwyg) {
@@ -354,7 +355,7 @@ export class HtmlField extends Component {
             if (this.state.showCodeView) {
                 this.wysiwyg.odooEditor.toolbarHide();
                 const value = this.wysiwyg.getValue();
-                this.props.record.update({ [this.props.name]: value });
+                this.props.record.update({ [this.props.name]: markup(value) });
             } else {
                 this.wysiwyg.odooEditor.observerActive('toggleCodeView');
             }
@@ -362,7 +363,7 @@ export class HtmlField extends Component {
         if (!this.state.showCodeView) {
             const $codeview = $(this.codeViewRef.el);
             const value = $codeview.val();
-            this.props.record.update({ [this.props.name]: value });
+            this.props.record.update({ [this.props.name]: markup(value) });
 
         }
     }
@@ -624,7 +625,7 @@ export class HtmlField extends Component {
             checked: !checked,
         });
         if (value) {
-            this.props.record.update({ [this.props.name]: value });
+            this.props.record.update({ [this.props.name]: markup(value) });
         }
     }
     async _onReadonlyClickStar(ev) {
@@ -652,7 +653,7 @@ export class HtmlField extends Component {
             rating,
         });
         if (value) {
-            this.props.record.update({ [this.props.name]: value });
+            this.props.record.update({ [this.props.name]: markup(value) });
         }
     }
 }

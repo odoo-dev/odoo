@@ -150,12 +150,12 @@ export class KanbanHeader extends Component {
     }
 
     editGroup() {
-        const { context, displayName, resModel, value } = this.group;
+        const { context, displayName, groupByField, value } = this.group;
         this.props.dialogClose.push(
             this.dialog.add(FormViewDialog, {
                 context,
                 resId: value,
-                resModel,
+                resModel: groupByField.relation,
                 title: sprintf(this.env._t("Edit: %s"), displayName),
                 onRecordSaved: async () => {
                     await this.props.list.load();
