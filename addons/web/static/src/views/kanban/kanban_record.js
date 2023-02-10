@@ -186,6 +186,10 @@ export class KanbanRecord extends Component {
             this.showMenu = true;
         }
 
+        owl.onWillRender(() => {
+            console.log("render kanban record");
+        });
+
         if (KANBAN_TOOLTIP_ATTRIBUTE in templates) {
             useTooltip("root", {
                 info: { ...this, record: getFormattedRecord(this.props.record) },
@@ -305,6 +309,7 @@ export class KanbanRecord extends Component {
                         cancel: () => {},
                     });
                 } else {
+                    // FIXME: uniformize APIs...
                     // static list case
                     listOrGroup.removeRecord(record);
                 }

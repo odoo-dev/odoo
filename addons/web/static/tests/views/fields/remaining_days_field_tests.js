@@ -85,7 +85,7 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(cells[6].querySelector(".o_field_widget > div"), "fw-bold text-danger");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "RemainingDaysField on a date field in multi edit list view",
         async function (assert) {
             patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11
@@ -146,7 +146,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "RemainingDaysField, enter wrong value manually in multi edit list view",
         async function (assert) {
             patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11

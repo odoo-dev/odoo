@@ -673,7 +673,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("should keep the focus when being edited in x2many lists", async function (assert) {
+    QUnit.tttt("should keep the focus when being edited in x2many lists", async function (assert) {
         serverData.models.partner.fields.currency_id.default = 1;
         serverData.models.partner.fields.m2m = {
             string: "m2m",

@@ -8,7 +8,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { formatText } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, onWillStart, onWillUpdateProps, useEffect, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillStart, useEffect, useRef } from "@odoo/owl";
 
 export class AceField extends Component {
     static template = "web.AceField";
@@ -36,15 +36,10 @@ export class AceField extends Component {
             return Promise.all(proms);
         });
 
-        onWillUpdateProps(this.updateAce);
-
+        onMounted(() => this.setupAce());
         useEffect(
-            () => {
-                this.setupAce();
-                this.updateAce(this.props);
-                return () => this.destroyAce();
-            },
-            () => [this.editorRef.el]
+            () => this.updateAce(),
+            () => [this.props.record.data[this.props.name]]
         );
 
         const { model } = this.props.record;
@@ -76,7 +71,8 @@ export class AceField extends Component {
         this.aceEditor.on("blur", this.commitChanges.bind(this));
     }
 
-    updateAce({ mode, readonly, record }) {
+    updateAce() {
+        const { mode, readonly, record } = this.props;
         if (!this.aceEditor) {
             return;
         }

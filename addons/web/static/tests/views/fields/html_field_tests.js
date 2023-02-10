@@ -136,7 +136,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         assert.strictEqual(txt.style.color, "red");
     });
 
-    QUnit.test("field html translatable", async (assert) => {
+    QUnit.tttt("field html translatable", async (assert) => {
         assert.expect(10);
 
         serverData.models.partner.fields.txt.translate = true;

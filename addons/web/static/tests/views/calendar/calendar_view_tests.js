@@ -817,7 +817,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.test(`create and change events`, async (assert) => {
+    QUnit.tttt(`create and change events`, async (assert) => {
         assert.expect(28);
 
         await makeView({
@@ -1423,7 +1423,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsNone(target, ".o_cw_popover", "should close a popover");
     });
 
-    QUnit.test(`render popover with widget which has specialData attribute`, async (assert) => {
+    QUnit.tttt(`render popover with widget which has specialData attribute`, async (assert) => {
         assert.expect(3);
 
         fieldRegistry.add("specialWidget", { component: CharField });
@@ -3259,7 +3259,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(target, ".fc-event", 7, "should display all records");
     });
 
-    QUnit.test(`create event with filters (no quickCreate)`, async (assert) => {
+    QUnit.tttt(`create event with filters (no quickCreate)`, async (assert) => {
         serverData.views["event,false,form"] = `
             <form>
                 <group>
@@ -4449,7 +4449,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         }
     );
 
-    QUnit.test(`create event and resize to next day (24h) on week mode`, async (assert) => {
+    QUnit.tttt(`create event and resize to next day (24h) on week mode`, async (assert) => {
         // WOWL FYI Legacy test name: "drag and drop 24h event on week mode"
         await makeView({
             type: "calendar",

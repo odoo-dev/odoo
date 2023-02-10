@@ -4,6 +4,7 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { utils } from "@web/core/ui/ui_service";
 import {
     archParseBoolean,
     evalDomain,
@@ -13,6 +14,8 @@ import {
 import { getTooltipInfo } from "./field_tooltip";
 
 import { Component, xml } from "@odoo/owl";
+
+const isSmall = utils.isSmall;
 
 const viewRegistry = registry.category("views");
 const fieldRegistry = registry.category("fields");
@@ -55,7 +58,7 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     return {
         readonly,
         required: evalDomain(modifiers.required, record.evalContext),
-        invalid: record.isInvalid(fieldName),
+        invalid: record.isFieldInvalid(fieldName),
         empty,
     };
 }
@@ -68,6 +71,10 @@ export class Field extends Component {
             const fieldType = this.props.record.fields[this.props.name].type;
             this.field = getFieldFromRegistry(fieldType, this.props.type);
         }
+
+        owl.onWillRender(() => {
+            console.log("render Field");
+        });
     }
 
     get classNames() {
@@ -134,10 +141,6 @@ export class Field extends Component {
 
                 const dynamicInfo = {
                     get context() {
-                        const evalContext = record.getEvalContext
-                            ? record.getEvalContext(false)
-                            : record.evalContext;
-
                         const context = {};
                         for (const key in record.context) {
                             if (!key.startsWith("default_") && !key.endsWith("_view_ref")) {
@@ -147,17 +150,15 @@ export class Field extends Component {
 
                         return {
                             ...context,
-                            ...makeContext([fieldInfo.context], evalContext),
+                            ...makeContext([fieldInfo.context], record.evalContext),
                         };
                     },
                     get domain() {
-                        const evalContext = record.getEvalContext
-                            ? record.getEvalContext(true)
-                            : record.evalContext;
-
-                        return fieldInfo.domain
-                            ? new Domain(evaluateExpr(fieldInfo.domain, evalContext)).toList()
-                            : undefined;
+                        if (!fieldInfo.domain) {
+                            return undefined;
+                        }
+                        const evalContext = record.evalContext;
+                        return new Domain(evaluateExpr(fieldInfo.domain, evalContext)).toList();
                     },
                     readonly: readonlyFromModifiers,
                     get required() {
@@ -255,40 +256,49 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
 
     if (X2M_TYPES.includes(fields[name].type)) {
         const views = {};
-        for (const child of node.children) {
-            const viewType = child.tagName === "tree" ? "list" : child.tagName;
-            const { ArchParser } = viewRegistry.get(viewType);
-            const xmlSerializer = new XMLSerializer();
-            const subArch = xmlSerializer.serializeToString(child);
-            const archInfo = new ArchParser().parse(subArch, models, fields[name].relation);
-            views[viewType] = {
-                ...archInfo,
-                fields: models[fields[name].relation],
-            };
-            fieldInfo.relatedFields = models[fields[name].relation];
-        }
-
-        let viewMode = node.getAttribute("mode");
-        if (!viewMode) {
-            if (views.list && !views.kanban) {
-                viewMode = "list";
-            } else if (!views.list && views.kanban) {
-                viewMode = "kanban";
-            } else if (views.list && views.kanban) {
-                viewMode = "list,kanban";
-            }
-        } else {
-            viewMode = viewMode.replace("tree", "list");
-        }
-        fieldInfo.viewMode = viewMode;
-        fieldInfo.views = views;
-
-        let relatedFields = field.relatedFields;
+        let relatedFields = fieldInfo.field.relatedFields;
         if (relatedFields) {
             if (relatedFields instanceof Function) {
                 relatedFields = relatedFields(fieldInfo);
             }
-            fieldInfo.relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+            relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+            views.default = { fieldNodes: relatedFields, fields: relatedFields };
+            fieldInfo.viewMode = "default";
+        } else {
+            for (const child of node.children) {
+                const viewType = child.tagName === "tree" ? "list" : child.tagName;
+                const { ArchParser } = viewRegistry.get(viewType);
+                const xmlSerializer = new XMLSerializer();
+                const subArch = xmlSerializer.serializeToString(child);
+                const archInfo = new ArchParser().parse(subArch, models, fields[name].relation);
+                views[viewType] = {
+                    ...archInfo,
+                    limit: archInfo.limit || 40,
+                    fields: models[fields[name].relation],
+                };
+            }
+
+            let viewMode = node.getAttribute("mode");
+            if (!viewMode) {
+                if (views.list && !views.kanban) {
+                    viewMode = "list";
+                } else if (!views.list && views.kanban) {
+                    viewMode = "kanban";
+                } else if (views.list && views.kanban) {
+                    viewMode = isSmall() ? "kanban" : "list";
+                }
+            } else {
+                if (viewMode.split(",").length !== 1) {
+                    viewMode = isSmall() ? "kanban" : "list";
+                } else {
+                    viewMode = viewMode === "tree" ? "list" : viewMode;
+                }
+            }
+            fieldInfo.viewMode = viewMode;
+        }
+        if (Object.keys(views).length) {
+            fieldInfo.relatedFields = models[field.relation];
+            fieldInfo.views = views;
         }
     }
 

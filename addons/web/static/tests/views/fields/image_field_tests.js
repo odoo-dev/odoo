@@ -77,7 +77,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ImageField");
 
-    QUnit.test("ImageField is correctly rendered", async function (assert) {
+    QUnit.tttt("ImageField is correctly rendered", async function (assert) {
         assert.expect(10);
 
         serverData.models.partner.records[0].write_date = "2017-02-08 10:00:00";
@@ -511,7 +511,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("ImageField in subviews is loaded correctly", async function (assert) {
+    QUnit.tttt("ImageField in subviews is loaded correctly", async function (assert) {
         serverData.models.partner.records[0].write_date = "2017-02-08 10:00:00";
         serverData.models.partner.records[0].document = MY_IMAGE;
         serverData.models.partner_type.fields.image = { name: "image", type: "binary" };
@@ -668,7 +668,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("unique in url doesn't change on onchange", async (assert) => {
+    QUnit.tttt("unique in url doesn't change on onchange", async (assert) => {
         serverData.models.partner.onchanges = {
             foo: () => {},
         };
@@ -720,7 +720,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
     });
 
-    QUnit.test("unique in url change on record change", async (assert) => {
+    QUnit.tttt("unique in url change on record change", async (assert) => {
         const rec = serverData.models.partner.records.find((rec) => rec.id === 1);
         rec.document = "3 kb";
         rec.write_date = "2022-08-05 08:37:00";

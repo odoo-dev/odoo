@@ -38,7 +38,7 @@ QUnit.test("defaults", (assert) => {
         quickCreateFormViewId: false,
         isDateHidden: false,
         isTimeHidden: false,
-        popoverFields: {},
+        popoverFieldNodes: {},
         scale: "week",
         scales: ["day", "week", "month", "year"],
         showUnusualDays: false,
