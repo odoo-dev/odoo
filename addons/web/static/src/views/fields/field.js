@@ -4,6 +4,7 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { utils } from "@web/core/ui/ui_service";
 import {
     archParseBoolean,
     evalDomain,
@@ -13,6 +14,8 @@ import {
 import { getTooltipInfo } from "./field_tooltip";
 
 import { Component, xml } from "@odoo/owl";
+
+const isSmall = utils.isSmall;
 
 const viewRegistry = registry.category("views");
 const fieldRegistry = registry.category("fields");
@@ -55,11 +58,63 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     return {
         readonly,
         required: evalDomain(modifiers.required, record.evalContext),
-        invalid: record.isInvalid(fieldName),
+        invalid: record.isFieldInvalid(fieldName),
         empty,
     };
 }
 
+export function getPropertyFieldInfo(propertyField) {
+    const { name, relatedPropertyField, string, type } = propertyField;
+
+    const fieldInfo = {
+        name,
+        string,
+        type,
+        widget: type,
+        options: {},
+        modifiers: {},
+        attrs: {},
+        relatedPropertyField,
+
+        // ??? We don t use it ? But it s in the fieldInfo of the field
+        context: "{}",
+        help: undefined,
+        onChange: false,
+        forceSave: false,
+        alwaysInvisible: false,
+        decorations: {},
+        // ???
+    };
+
+    if (type === "many2one" || type === "many2many") {
+        const { domain, relation } = propertyField;
+        fieldInfo.relation = relation;
+        fieldInfo.domain = domain;
+
+        if (relation === "res.users" || relation === "res.partner") {
+            fieldInfo.widget =
+                propertyField.type === "many2one" ? "many2one_avatar" : "many2many_tags_avatar";
+        } else {
+            fieldInfo.widget = propertyField.type === "many2one" ? type : "many2many_tags";
+        }
+    } else if (type === "tags") {
+        fieldInfo.tags = propertyField.tags;
+        fieldInfo.widget = `property_tags`;
+    } else if (type === "selection") {
+        fieldInfo.selection = propertyField.selection;
+    }
+
+    fieldInfo.field = getFieldFromRegistry(propertyField.type, fieldInfo.widget);
+    let { relatedFields } = fieldInfo.field;
+    if (relatedFields) {
+        if (relatedFields instanceof Function) {
+            relatedFields = relatedFields({ options: {}, attrs: {} });
+        }
+        fieldInfo.relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+    }
+
+    return fieldInfo;
+}
 export class Field extends Component {
     setup() {
         if (this.props.fieldInfo) {
@@ -134,10 +189,6 @@ export class Field extends Component {
                 }
                 const dynamicInfo = {
                     get context() {
-                        const evalContext = record.getEvalContext
-                            ? record.getEvalContext(false)
-                            : record.evalContext;
-
                         const context = {};
                         for (const key in record.context) {
                             if (!key.startsWith("default_") && !key.endsWith("_view_ref")) {
@@ -147,7 +198,7 @@ export class Field extends Component {
 
                         return {
                             ...context,
-                            ...makeContext([fieldInfo.context], evalContext),
+                            ...makeContext([fieldInfo.context], record.evalContext),
                         };
                     },
                     domain() {
@@ -257,40 +308,49 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
 
     if (X2M_TYPES.includes(fields[name].type)) {
         const views = {};
-        for (const child of node.children) {
-            const viewType = child.tagName === "tree" ? "list" : child.tagName;
-            const { ArchParser } = viewRegistry.get(viewType);
-            const xmlSerializer = new XMLSerializer();
-            const subArch = xmlSerializer.serializeToString(child);
-            const archInfo = new ArchParser().parse(subArch, models, fields[name].relation);
-            views[viewType] = {
-                ...archInfo,
-                fields: models[fields[name].relation],
-            };
-            fieldInfo.relatedFields = models[fields[name].relation];
-        }
-
-        let viewMode = node.getAttribute("mode");
-        if (!viewMode) {
-            if (views.list && !views.kanban) {
-                viewMode = "list";
-            } else if (!views.list && views.kanban) {
-                viewMode = "kanban";
-            } else if (views.list && views.kanban) {
-                viewMode = "list,kanban";
-            }
-        } else {
-            viewMode = viewMode.replace("tree", "list");
-        }
-        fieldInfo.viewMode = viewMode;
-        fieldInfo.views = views;
-
-        let relatedFields = field.relatedFields;
+        let relatedFields = fieldInfo.field.relatedFields;
         if (relatedFields) {
             if (relatedFields instanceof Function) {
                 relatedFields = relatedFields(fieldInfo);
             }
-            fieldInfo.relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+            relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+            views.default = { fieldNodes: relatedFields, fields: relatedFields };
+            fieldInfo.viewMode = "default";
+        } else {
+            for (const child of node.children) {
+                const viewType = child.tagName === "tree" ? "list" : child.tagName;
+                const { ArchParser } = viewRegistry.get(viewType);
+                const xmlSerializer = new XMLSerializer();
+                const subArch = xmlSerializer.serializeToString(child);
+                const archInfo = new ArchParser().parse(subArch, models, fields[name].relation);
+                views[viewType] = {
+                    ...archInfo,
+                    limit: archInfo.limit || 40,
+                    fields: models[fields[name].relation],
+                };
+            }
+
+            let viewMode = node.getAttribute("mode");
+            if (!viewMode) {
+                if (views.list && !views.kanban) {
+                    viewMode = "list";
+                } else if (!views.list && views.kanban) {
+                    viewMode = "kanban";
+                } else if (views.list && views.kanban) {
+                    viewMode = isSmall() ? "kanban" : "list";
+                }
+            } else {
+                if (viewMode.split(",").length !== 1) {
+                    viewMode = isSmall() ? "kanban" : "list";
+                } else {
+                    viewMode = viewMode === "tree" ? "list" : viewMode;
+                }
+            }
+            fieldInfo.viewMode = viewMode;
+        }
+        if (Object.keys(views).length) {
+            fieldInfo.relatedFields = models[field.relation];
+            fieldInfo.views = views;
         }
     }
 

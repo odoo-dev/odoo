@@ -1,21 +1,21 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
+import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
+import { SearchBar } from "@web/search/search_bar/search_bar";
+import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
+import { useSetupView } from "@web/views/view_hook";
 import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
-import { useSetupView } from "@web/views/view_hook";
+import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/views/relational_model/utils";
 import { KanbanRenderer } from "./kanban_renderer";
 import { useProgressBar } from "./progress_bar_hook";
-import { SearchBar } from "@web/search/search_bar/search_bar";
-import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
-import { CogMenu } from "@web/search/cog_menu/cog_menu";
 
-import { Component, reactive, useRef } from "@odoo/owl";
-import { addDependencies } from "../utils";
+import { Component, reactive, useRef, useState } from "@odoo/owl";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -25,7 +25,7 @@ export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
         const { Model, archInfo } = this.props;
-        this.model = useModel(Model, this.modelParams);
+        this.model = useState(useModel(Model, this.modelParams));
         if (archInfo.progressAttributes) {
             const { activeBars } = this.props.state || {};
             this.progressBarState = useProgressBar(
@@ -68,7 +68,8 @@ export class KanbanController extends Component {
             getLocalState: () => {
                 return {
                     activeBars: this.progressBarState?.activeBars,
-                    rootState: this.model.root.exportState(),
+                    modelConfig: this.model.exportConfig(),
+                    modelState: this.model.exportState(),
                 };
             },
         });
@@ -76,16 +77,14 @@ export class KanbanController extends Component {
             const root = this.model.root;
             const { count, hasLimitedCount, isGrouped, limit, offset } = root;
             if (!isGrouped) {
+                console.log(root);
                 return {
                     offset: offset,
                     limit: limit,
                     total: count,
                     onUpdate: async ({ offset, limit }) => {
-                        this.model.root.offset = offset;
-                        this.model.root.limit = limit;
-                        await this.model.root.load();
+                        await this.model.root.load({ offset, limit });
                         await this.onUpdatedPager();
-                        this.render(true); // FIXME WOWL reactivity
                     },
                     updateTotal: hasLimitedCount ? () => root.fetchCount() : undefined,
                 };
@@ -95,25 +94,28 @@ export class KanbanController extends Component {
     }
 
     get modelParams() {
-        const { resModel, fields, archInfo, limit, defaultGroupBy, state } = this.props;
-        const { rootState } = state || {};
-
-        const activeFields = archInfo.activeFields;
-        addDependencies(this.progressBarAggregateFields, activeFields, fields);
-
-        return {
-            activeFields,
-            fields: { ...fields },
+        const { resModel, archInfo, limit, defaultGroupBy } = this.props;
+        const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
+        addFieldDependencies(activeFields, fields, this.progressBarAggregateFields);
+        const modelConfig = this.props.state?.modelConfig || {
             resModel,
+            activeFields,
+            fields,
+            openGroupsByDefault: true,
+        };
+        return {
+            config: modelConfig,
+            state: this.props.state?.modelState,
             handleField: archInfo.handleField,
-            limit: archInfo.limit || limit,
+            limit: archInfo.limit || limit || 40,
+            groupsLimit: Number.MAX_SAFE_INTEGER, // no limit
             countLimit: archInfo.countLimit,
             defaultGroupBy,
-            defaultOrder: archInfo.defaultOrder,
-            viewMode: "kanban",
-            openGroupsByDefault: true,
-            onRecordSaved: this.onRecordSaved.bind(this),
-            rootState,
+            defaultOrderBy: archInfo.defaultOrder,
+            maxGroupByDepth: 1,
+            hooks: {
+                onRecordSaved: this.onRecordSaved.bind(this),
+            },
         };
     }
 
@@ -215,7 +217,10 @@ KanbanController.template = `web.KanbanView`;
 KanbanController.components = { Layout, KanbanRenderer, MultiRecordViewButton, SearchBar, CogMenu };
 KanbanController.props = {
     ...standardViewProps,
-    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
+    defaultGroupBy: {
+        validate: (dgb) => !dgb || typeof dgb === "string",
+        optional: true,
+    },
     editable: { type: Boolean, optional: true },
     forceGlobalClick: { type: Boolean, optional: true },
     onSelectionChanged: { type: Function, optional: true },
