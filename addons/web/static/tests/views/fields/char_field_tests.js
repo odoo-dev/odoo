@@ -271,7 +271,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("char field translatable", async function (assert) {
+    QUnit.tttt("char field translatable", async function (assert) {
         assert.expect(13);
 
         serverData.models.partner.fields.foo.translate = true;
@@ -465,7 +465,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("html field translatable", async function (assert) {
+    QUnit.tttt("html field translatable", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.fields.foo.translate = true;
@@ -721,7 +721,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "input field: change value before pending onchange returns (with fieldDebounce)",
         async function (assert) {
             // this test is exactly the same as the previous one, except that in

@@ -3,6 +3,7 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
+import { Cache } from "@web/core/utils/cache";
 import {
     useBus,
     useChildRef,
@@ -35,11 +36,12 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
 
 import {
     Component,
+    onWillStart,
+    onWillUpdateProps,
     useComponent,
     useEffect,
     useEnv,
     useSubEnv,
-    onWillUpdateProps,
 } from "@odoo/owl";
 
 //
@@ -135,6 +137,30 @@ export function useActiveActions({
     });
 
     return activeActions;
+}
+
+export function useSpecialData(loadFn) {
+    const component = useComponent();
+    const record = component.props.record;
+    const key = `${record.resModel}-${component.props.name}`;
+    const { specialDataCaches, orm } = record.model;
+    const ormWithCache = { ...orm };
+    if (!specialDataCaches[key]) {
+        specialDataCaches[key] = new Cache(
+            (...args) => orm.call(...args),
+            (...path) => JSON.stringify(path)
+        );
+    }
+    ormWithCache.call = (...args) => specialDataCaches[key].read(...args);
+
+    const result = {};
+    onWillStart(async () => {
+        result.data = await loadFn(ormWithCache, component.props);
+    });
+    onWillUpdateProps(async (props) => {
+        result.data = await loadFn(ormWithCache, props);
+    });
+    return result;
 }
 
 //
