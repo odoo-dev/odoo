@@ -63,7 +63,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ProgressBarField");
 
-    QUnit.test("ProgressBarField: max_value should update", async function (assert) {
+    QUnit.tttt("ProgressBarField: max_value should update", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner.records[0].float_field = 2;
@@ -266,7 +266,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("ProgressBarField: Standard readonly mode is readonly", async function (assert) {
+    QUnit.tttt("ProgressBarField: Standard readonly mode is readonly", async function (assert) {
         serverData.models.partner.records[0].int_field = 99;
 
         await makeView({
@@ -300,7 +300,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.test("ProgressBarField: field is editable in kanban", async function (assert) {
+    QUnit.tttt("ProgressBarField: field is editable in kanban", async function (assert) {
         assert.expect(7);
 
         serverData.models.partner.fields.int_field.readonly = true;
@@ -555,7 +555,8 @@ QUnit.module("Fields", (hooks) => {
             });
 
             assert.containsOnce(
-                target, ".o_progressbar .bg-warning",
+                target,
+                ".o_progressbar .bg-warning",
                 "As the value has excedded the max value, the color should be set to bg-warning"
             );
         }

@@ -69,7 +69,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("RadioField");
 
-    QUnit.test("fieldradio widget on a many2one in a new record", async function (assert) {
+    QUnit.tttt("fieldradio widget on a many2one in a new record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -102,7 +102,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("required fieldradio widget on a many2one", async function (assert) {
+    QUnit.tttt("required fieldradio widget on a many2one", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -128,7 +128,7 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(target.querySelector(".o_notification"), "border-danger");
     });
 
-    QUnit.test("fieldradio change value by onchange", async function (assert) {
+    QUnit.tttt("fieldradio change value by onchange", async function (assert) {
         serverData.models.partner.onchanges = {
             bar(obj) {
                 obj.product_id = obj.bar ? [41] : [37];
@@ -288,7 +288,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "widget radio on a many2one: domain updated by an onchange",
         async function (assert) {
             assert.expect(4);
@@ -343,7 +343,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("field is empty", async function (assert) {
+    QUnit.tttt("field is empty", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

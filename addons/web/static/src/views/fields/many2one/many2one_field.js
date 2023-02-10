@@ -107,9 +107,6 @@ export class Many2OneField extends Component {
                 const { context } = this.props;
                 const records = await this.orm.read(this.relation, [resId], fields, { context });
                 await this.updateRecord(m2oTupleFromData(records[0]));
-                if (this.props.record.model.root.id !== this.props.record.id) {
-                    this.props.record.switchMode("readonly");
-                }
             },
             onClose: () => this.focusInput(),
             fieldString: this.string,
@@ -144,6 +141,10 @@ export class Many2OneField extends Component {
     }
 
     updateRecord(value) {
+        if (value && this.value && value[0] === this.value[0] && value[1] === this.value[1]) {
+            // the value is the same, do not update the record
+            return;
+        }
         const changes = { [this.props.name]: value };
         if (this.props.update) {
             return this.props.update(changes);

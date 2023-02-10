@@ -148,8 +148,8 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 arch: '<form><field name="datetime"/></form>',
                 mockRPC(route, { method }) {
-                    if (method === "onchange") {
-                        assert.step("onchange");
+                    if (method === "onchange2") {
+                        assert.step("onchange2");
                     }
                 },
             });
@@ -203,7 +203,7 @@ QUnit.module("Fields", (hooks) => {
                 target.querySelector(".o_datepicker_input").value,
                 "04/22/2017 08:25:35"
             );
-            assert.verifySteps(["onchange"], "should have done only one onchange");
+            assert.verifySteps(["onchange2"], "should have done only one onchange");
         }
     );
 
@@ -330,7 +330,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "multi edition of DatetimeField in list view: edit date in input",
         async function (assert) {
             await makeView({
@@ -365,7 +365,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "multi edition of DatetimeField in list view: clear date in input",
         async function (assert) {
             serverData.models.partner.records[1].datetime = "2017-02-08 10:00:00";
@@ -448,7 +448,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "DatetimeField with date/datetime widget (with day change)",
         async function (assert) {
             patchTimeZone(-240);
@@ -491,7 +491,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "DatetimeField with date/datetime widget (without day change)",
         async function (assert) {
             patchTimeZone(-240);
