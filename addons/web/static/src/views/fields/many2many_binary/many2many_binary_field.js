@@ -30,7 +30,7 @@ export class Many2ManyBinaryField extends Component {
         return this.props.record.fields[this.props.name].string;
     }
     get files() {
-        return this.props.record.data[this.props.name].records.map((record) => record.data);
+        return this.props.record.data[this.props.name].records.map((record) => record);
     }
 
     getUrl(id) {
@@ -38,7 +38,7 @@ export class Many2ManyBinaryField extends Component {
     }
 
     getExtension(file) {
-        return file.name.replace(/^.*\./, "");
+        return file.data.name.replace(/^.*\./, "");
     }
 
     async onFileUploaded(files) {
@@ -55,7 +55,7 @@ export class Many2ManyBinaryField extends Component {
 
     async onFileRemove(deleteId) {
         const record = this.props.record.data[this.props.name].records.find(
-            (record) => record.data.id === deleteId
+            (record) => record.resId === deleteId
         );
         this.operations.removeRecord(record);
     }

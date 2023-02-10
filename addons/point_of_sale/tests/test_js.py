@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import tagged, HttpCase
-
+import unittest
 
 @tagged("post_install", "-at_install")
 class WebSuite(HttpCase):

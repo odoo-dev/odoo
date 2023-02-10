@@ -39,7 +39,7 @@ patch(SaleOrderLineProductField.prototype, 'event_booth_sale', {
             if (recordData.event_booth_pending_ids) {
                 actionContext.default_event_booth_ids = recordData.event_booth_pending_ids.records.map(
                     record => {
-                        return [4, record.data.id];
+                        return [4, record.resId];
                     }
                 );
             }

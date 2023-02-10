@@ -1,9 +1,8 @@
 /** @odoo-module */
 
+import { makeServerError } from "@web/../tests/helpers/mock_server";
 import { click, editInput, getFixture, nextTick, triggerHotkey } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-
-import { makeServerError } from "@web/../tests/helpers/mock_server";
 
 QUnit.module("QuestionPageOneToManyField", (hooks) => {
     let serverData;

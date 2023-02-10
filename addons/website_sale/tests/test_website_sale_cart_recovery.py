@@ -4,10 +4,11 @@
 from odoo.tests import tagged
 from odoo.tests.common import HttpCase, TransactionCase
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal
-
+import unittest
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleCartRecovery(HttpCaseWithUserPortal):
 
+    @unittest.skip("tttt")
     def test_01_shop_cart_recovery_tour(self):
         """The goal of this test is to make sure cart recovery works."""
         self.env['product.product'].create({

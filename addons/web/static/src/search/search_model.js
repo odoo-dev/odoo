@@ -28,7 +28,7 @@ import { getOperatorInfo } from "@web/core/domain_selector/domain_selector_opera
 const { DateTime } = luxon;
 
 /** @typedef {import("@web/core/domain").DomainRepr} DomainRepr */
-/** @typedef {import("../views/relational_model").OrderTerm} OrderTerm */
+/** @typedef {import("../views/utils").OrderTerm} OrderTerm */
 
 /**
  * @typedef {Object} ComparisonDomain

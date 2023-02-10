@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo.tests import HttpCase, tagged
-
+import unittest
 
 @tagged('-at_install', 'post_install')
 class TestUi(HttpCase):

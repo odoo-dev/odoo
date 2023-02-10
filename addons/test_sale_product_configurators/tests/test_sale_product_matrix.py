@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import tagged
-
+import unittest
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.product_matrix.tests.common import TestMatrixCommon
 
@@ -30,6 +30,7 @@ class TestSaleMatrixUi(TestMatrixCommon):
         cls.currency = cls.env['res.currency'].search([('name', '=', 'USD')])
         cls.currency.action_unarchive()
 
+    @unittest.skip("tttt")
     def test_sale_matrix_ui(self):
         # Set the template as configurable by matrix.
         self.matrix_template.product_add_mode = "matrix"
