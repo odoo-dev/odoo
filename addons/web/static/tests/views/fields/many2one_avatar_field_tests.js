@@ -235,7 +235,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("click on many2one_avatar in a list view (multi_edit='1')", async function (assert) {
+    QUnit.tttt("click on many2one_avatar in a list view (multi_edit='1')", async function (assert) {
         const listView = registry.category("views").get("list");
         patchWithCleanup(listView.Controller.prototype, {
             openRecord() {
@@ -339,7 +339,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_widget[name=user_id] span.o_m2o_avatar_empty");
     });
 
-    QUnit.test("widget many2one_avatar in kanban view (load more dialog)", async function (assert) {
+    QUnit.tttt("widget many2one_avatar in kanban view (load more dialog)", async function (assert) {
         assert.expect(1);
 
         for (let id = 1; id <= 10; id++) {

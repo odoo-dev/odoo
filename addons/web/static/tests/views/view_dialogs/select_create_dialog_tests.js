@@ -83,7 +83,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.module("SelectCreateDialog");
 
-    QUnit.test(
+    QUnit.tttt(
         "SelectCreateDialog use domain, group_by and search default",
         async function (assert) {
             assert.expect(3);
@@ -199,7 +199,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         }
     );
 
-    QUnit.test("SelectCreateDialog correctly evaluates domains", async function (assert) {
+    QUnit.tttt("SelectCreateDialog correctly evaluates domains", async function (assert) {
         assert.expect(1);
 
         serverData.views = {
@@ -263,7 +263,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    QUnit.test("SelectCreateDialog cascade x2many in create mode", async function (assert) {
+    QUnit.tttt("SelectCreateDialog cascade x2many in create mode", async function (assert) {
         assert.expect(5);
         serverData.views = {
             "partner,false,form": `

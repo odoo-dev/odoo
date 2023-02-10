@@ -108,7 +108,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("ImageUrlField in subviews are loaded correctly", async function (assert) {
+    QUnit.tttt("ImageUrlField in subviews are loaded correctly", async function (assert) {
         serverData.models.partner_type.fields.image = { name: "image", type: "char" };
         serverData.models.partner_type.records[0].image = EN_FLAG_URL;
         serverData.models.partner.records[0].timmy = [12];

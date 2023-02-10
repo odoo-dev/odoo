@@ -3,14 +3,15 @@
 import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
+import { useSetupView } from "@web/views/view_hook";
 import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
-import { useSetupView } from "@web/views/view_hook";
+import { extractFieldsFromArchInfo } from "../relational_model/utils";
 import { KanbanRenderer } from "./kanban_renderer";
 
-import { Component, reactive, useRef } from "@odoo/owl";
+import { Component, reactive, useRef, useState } from "@odoo/owl";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -19,22 +20,25 @@ const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "m
 export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
-        const { Model, resModel, fields, archInfo, limit, defaultGroupBy, state } = this.props;
-        const { rootState } = state || {};
-        this.model = useModel(Model, {
-            activeFields: archInfo.activeFields,
-            progressAttributes: archInfo.progressAttributes,
-            fields,
+        const { Model, resModel, archInfo, limit, defaultGroupBy, state } = this.props;
+        const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
+        const modelConfig = state?.modelConfig || {
             resModel,
+            activeFields,
+            fields,
+            openGroupsByDefault: true,
+        };
+        const model = useModel(Model, {
+            config: modelConfig,
+            progressAttributes: archInfo.progressAttributes,
             handleField: archInfo.handleField,
-            limit: archInfo.limit || limit,
+            limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
             defaultGroupBy,
-            defaultOrder: archInfo.defaultOrder,
-            viewMode: "kanban",
-            openGroupsByDefault: true,
-            rootState,
+            defaultOrderBy: archInfo.defaultOrder,
+            maxGroupByDepth: 1,
         });
+        this.model = useState(model);
         this.headerButtons = archInfo.headerButtons;
 
         const self = this;
@@ -53,6 +57,10 @@ export class KanbanController extends Component {
             view: archInfo.quickCreateView,
         });
 
+        owl.onWillRender(() => {
+            console.log("render kanban controller");
+        });
+
         this.rootRef = useRef("root");
         useViewButtons(this.model, this.rootRef, {
             beforeExecuteAction: this.beforeExecuteActionButton.bind(this),
@@ -67,7 +75,7 @@ export class KanbanController extends Component {
             },
             getLocalState: () => {
                 return {
-                    rootState: this.model.root.exportState(),
+                    modelConfig: this.model.exportConfig(),
                 };
             },
         });
@@ -75,16 +83,14 @@ export class KanbanController extends Component {
             const root = this.model.root;
             const { count, hasLimitedCount, isGrouped, limit, offset } = root;
             if (!isGrouped) {
+                console.log(root);
                 return {
                     offset: offset,
                     limit: limit,
                     total: count,
                     onUpdate: async ({ offset, limit }) => {
-                        this.model.root.offset = offset;
-                        this.model.root.limit = limit;
-                        await this.model.root.load();
+                        await this.model.root.load({ offset, limit });
                         await this.onUpdatedPager();
-                        this.render(true); // FIXME WOWL reactivity
                     },
                     updateTotal: hasLimitedCount ? () => root.fetchCount() : undefined,
                 };
@@ -172,7 +178,10 @@ KanbanController.template = `web.KanbanView`;
 KanbanController.components = { Layout, KanbanRenderer, MultiRecordViewButton };
 KanbanController.props = {
     ...standardViewProps,
-    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
+    defaultGroupBy: {
+        validate: (dgb) => !dgb || typeof dgb === "string",
+        optional: true,
+    },
     editable: { type: Boolean, optional: true },
     forceGlobalClick: { type: Boolean, optional: true },
     onSelectionChanged: { type: Function, optional: true },

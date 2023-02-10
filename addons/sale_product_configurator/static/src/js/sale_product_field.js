@@ -158,7 +158,7 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                 // FIXME: update sets the field dirty otherwise on the next edit and click out it gets deleted
                 line.update({ sequence: line.data.sequence });
             }
-            saleOrderRecord.data.order_line.unselectRecord();
+            saleOrderRecord.data.order_line.leaveEditMode();
         });
         optionalProductsModal.on("closed", null, () => {
             if (confirmed) {

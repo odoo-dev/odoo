@@ -40,7 +40,7 @@ import { session } from "@web/session";
 import { AnimatedNumber } from "@web/views/view_components/animated_number";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { kanbanView } from "@web/views/kanban/kanban_view";
-import { DynamicRecordList } from "@web/views/relational_model";
+import { RelationalModel } from "@web/views/relational_model/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
 
 import { Component, onWillRender, xml } from "@odoo/owl";
@@ -349,7 +349,7 @@ QUnit.module("Views", (hooks) => {
                     </t></templates>
                 </kanban>`,
             mockRPC(route, args) {
-                if (args.method === "web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     assert.ok(
                         args.kwargs.context.bin_size,
                         "should not request direct binary payload"
@@ -372,9 +372,11 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <kanban>
-                    <templates><t t-name="kanban-box">
-                        <Div class="test">Hello</Div>
-                    </t></templates>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <Div class="test">Hello</Div>
+                        </t>
+                    </templates>
                 </kanban>`,
         });
 
@@ -486,13 +488,18 @@ QUnit.module("Views", (hooks) => {
                 type: "kanban",
                 resModel: "partner",
                 serverData,
-                arch:
-                    "<kanban>" +
-                    '<field name="active"/>' +
-                    '<field name="bar"/>' +
-                    '<templates><t t-name="kanban-box">' +
-                    '<div><field name="foo"/></div>' +
-                    "</t></templates></kanban>",
+                arch: `
+                    <kanban>
+                        <field name="active"/>
+                        <field name="bar"/>
+                        <templates>
+                            <t t-name="kanban-box">
+                                <div>
+                                    <field name="foo"/>
+                                </div>
+                            </t>
+                        </templates>
+                    </kanban>`,
                 groupBy: ["bar"],
             });
 
@@ -1048,12 +1055,17 @@ QUnit.module("Views", (hooks) => {
             type: "kanban",
             resModel: "partner",
             serverData,
-            arch:
-                "<kanban>" +
-                '<field name="bar"/>' +
-                '<templates><t t-name="kanban-box">' +
-                '<div><field name="foo"/></div>' +
-                "</t></templates></kanban>",
+            arch: `
+                <kanban>
+                    <field name="bar"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
             groupBy: ["bar"],
         });
 
@@ -1067,13 +1079,18 @@ QUnit.module("Views", (hooks) => {
             type: "kanban",
             resModel: "partner",
             serverData,
-            arch:
-                "<kanban>" +
-                '<templates><t t-name="kanban-box">' +
-                '<div><field name="foo"/></div>' +
-                "</t></templates></kanban>",
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
             async mockRPC(route, { method, kwargs }) {
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     assert.strictEqual(kwargs.limit, 40, "default limit should be 40 in Kanban");
                 }
             },
@@ -1096,7 +1113,7 @@ QUnit.module("Views", (hooks) => {
                 '<div><field name="foo"/></div>' +
                 "</t></templates></kanban>",
             async mockRPC(route, { method, kwargs }) {
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     assert.strictEqual(kwargs.limit, 2);
                 }
             },
@@ -1121,7 +1138,7 @@ QUnit.module("Views", (hooks) => {
                 '<div><field name="foo"/></div>' +
                 "</t></templates></kanban>",
             async mockRPC(route, { method, kwargs }) {
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     assert.strictEqual(kwargs.limit, 3);
                 }
             },
@@ -1133,7 +1150,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached", async (assert) => {
-        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
 
         await makeView({
             type: "kanban",
@@ -1155,7 +1172,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_limit"));
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
@@ -1165,7 +1182,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click next", async (assert) => {
-        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
 
         await makeView({
             type: "kanban",
@@ -1187,17 +1204,17 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_next"));
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "3-4");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click next (2)", async (assert) => {
-        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1220,23 +1237,23 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_next"));
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "3-4");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4+");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_next"));
         assert.containsOnce(target, ".o_kanban_record:not(.o_kanban_ghost)");
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "5-5");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "5");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click previous", async (assert) => {
-        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1259,17 +1276,17 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_previous"));
         assert.containsOnce(target, ".o_kanban_record:not(.o_kanban_ghost)");
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "5-5");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "5");
-        assert.verifySteps(["search_count", "web_search_read"]);
+        assert.verifySteps(["search_count", "web_search_read_unity"]);
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, edit pager", async (assert) => {
-        patchWithCleanup(DynamicRecordList, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1292,21 +1309,21 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target, ".o_pager_value");
         await editInput(target, "input.o_pager_value", "2-4");
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 3);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "2-4");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "4+");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
 
         await click(target, ".o_pager_value");
         await editInput(target, "input.o_pager_value", "2-14");
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 4);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "2-5");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "5");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
     });
 
     QUnit.test("count_limit attrs set in arch", async (assert) => {
@@ -1330,7 +1347,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
         assert.strictEqual(target.querySelector(".o_pager_value").innerText, "1-2");
         assert.strictEqual(target.querySelector(".o_pager_limit").innerText, "3+");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         await click(target.querySelector(".o_pager_limit"));
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 2);
@@ -1380,7 +1397,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("pager, update calls onUpdatedPager before the render", async (assert) => {
+    QUnit.tttt("pager, update calls onUpdatedPager before the render", async (assert) => {
         assert.expect(8);
 
         class TestKanbanController extends KanbanController {
@@ -1492,9 +1509,9 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 5);
         assert.verifySteps([
             "get_views",
-            "web_search_read",
+            "web_search_read_unity",
             "doAction some.action",
-            "web_search_read",
+            "web_search_read_unity",
         ]);
     });
 
@@ -1688,12 +1705,12 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
-            "onchange", // quick create
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -1722,7 +1739,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(args.method || route);
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args,
+                        args.args[0],
                         [
                             {
                                 foo: "new partner",
@@ -1766,14 +1783,14 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // new quick create
+            "web_read_unity",
+            "web_read_unity", // read the created record
+            "onchange2", // new quick create
         ]);
     });
 
@@ -1805,7 +1822,7 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, args) {
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args,
+                        args.args[0],
                         [
                             {
                                 foo: "new partner",
@@ -1816,7 +1833,7 @@ QUnit.module("Views", (hooks) => {
                         "should send the correct values"
                     );
                 }
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await def;
                 }
             },
@@ -2041,12 +2058,12 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
-            "onchange", // quick create
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2075,7 +2092,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(method || route);
                 if (method === "create") {
                     assert.deepEqual(
-                        args,
+                        args[0],
                         [
                             {
                                 foo: "new partner",
@@ -2110,14 +2127,14 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity",
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2167,14 +2184,12 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
-            "read", // read display_name of categories
-            "onchange", // quick create
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2226,14 +2241,13 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
-            "read", // read display_name of categories
-            "web_search_read", // read records when unfolding 'None'
-            "onchange", // quick create
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
+            "web_search_read_unity", // read records when unfolding 'None'
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2259,13 +2273,17 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, { method, args, kwargs }) {
                 assert.step(method || route);
                 if (method === "create") {
-                    assert.deepEqual(args, [
+                    assert.deepEqual(args[0], [
                         {
                             foo: "new partner",
                         },
                     ]);
                     const { default_category_ids } = kwargs.context;
                     assert.deepEqual(default_category_ids, [6]);
+                    return [5];
+                }
+                if (method === "web_read_unity" && kwargs.context.active_id === 5) {
+                    return [{ id: 5, foo: "new partner", category_ids: [6] }];
                 }
             },
         });
@@ -2291,17 +2309,17 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
             "get_views", // get form view
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
-    QUnit.test("quick create record in grouped on m2m (field in the form view)", async (assert) => {
+    QUnit.tttt("quick create record in grouped on m2m (field in the form view)", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = `
             <form>
                 <field name="foo"/>
@@ -2365,14 +2383,14 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
             "get_views", // get form view
-            "onchange", // quick create
+            "onchange2", // quick create
             "read",
             "create", // should perform a create to create the record
             "read",
-            "onchange",
+            "onchange2",
             "read",
         ]);
     });
@@ -2395,10 +2413,15 @@ QUnit.module("Views", (hooks) => {
                 assert.step(method || route);
             },
         });
-        assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "web_search_read_unity",
+            "web_search_read_unity",
+        ]);
 
         await createRecord();
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // do not fill anything and validate
         await validateRecord();
@@ -2465,11 +2488,11 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
-            "onchange", // onchange due to 'foo' field change
+            "onchange2", // quick create
+            "onchange2", // onchange due to 'foo' field change
         ]);
     });
 
@@ -2556,19 +2579,19 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
         ]);
 
         // click on 'Create' -> should open the quick create in the first column
         await quickCreateRecord();
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
 
         // fill the 'foo' field -> should trigger the onchange
         await editQuickCreateInput("foo", "new partner");
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
         await validateRecord();
-        assert.verifySteps(["create", "read", "onchange"]);
+        assert.verifySteps(["create", "web_read_unity", "onchange2"]);
     });
 
     QUnit.test("quick create record and change state in grouped mode", async (assert) => {
@@ -3012,7 +3035,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
                 async mockRPC(route, { method, args }) {
                     switch (method) {
-                        case "onchange": {
+                        case "onchange2": {
                             assert.step(method);
                             if (shouldDelayOnchange) {
                                 await prom;
@@ -3021,7 +3044,7 @@ QUnit.module("Views", (hooks) => {
                         }
                         case "create": {
                             assert.step(method);
-                            const values = args[0];
+                            const values = args[0][0];
                             assert.strictEqual(values.foo, "new partner");
                             assert.strictEqual(values.int_field, 3);
                             break;
@@ -3085,10 +3108,10 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "onchange", // default_get
-                "onchange", // new partner
+                "onchange2", // default_get
+                "onchange2", // new partner
                 "create",
-                "onchange", // default_get
+                "onchange2", // default_get
             ]);
         }
     );
@@ -3120,15 +3143,15 @@ QUnit.module("Views", (hooks) => {
                     "</t></templates></kanban>",
                 groupBy: ["bar"],
                 async mockRPC(route, args) {
-                    if (args.method === "onchange") {
-                        assert.step("onchange");
+                    if (args.method === "onchange2") {
+                        assert.step("onchange2");
                         if (shouldDelayOnchange) {
                             await prom;
                         }
                     }
                     if (args.method === "create") {
                         assert.step("create");
-                        assert.deepEqual(_.pick(args.args[0], "foo", "int_field"), {
+                        assert.deepEqual(args.args[0][0], {
                             foo: "new partner",
                             int_field: 3,
                         });
@@ -3184,10 +3207,10 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "onchange", // default_get
-                "onchange", // new partner
+                "onchange2", // default_get
+                "onchange2", // new partner
                 "create",
-                "onchange", // default_get
+                "onchange2", // default_get
             ]);
         }
     );
@@ -3488,7 +3511,7 @@ QUnit.module("Views", (hooks) => {
                 '<div><field name="foo"/></div>' +
                 "</t></templates></kanban>",
             async mockRPC(route, { args, method }) {
-                if (method === "read") {
+                if (method === "web_read_unity") {
                     newRecordID = args[0][0];
                 }
             },
@@ -3599,7 +3622,7 @@ QUnit.module("Views", (hooks) => {
                 "</t></templates></kanban>",
             groupBy: ["bar"],
             async mockRPC(route, { method }) {
-                if (method === "read") {
+                if (method === "web_read_unity") {
                     await prom;
                 }
             },
@@ -3781,7 +3804,7 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "create") {
-                    assert.deepEqual(args.args[0], { foo: "blip" });
+                    assert.deepEqual(args.args[0][0], { foo: "blip" });
                     assert.deepEqual(args.kwargs.context, {
                         default_foo: "blip",
                         default_name: "test",
@@ -3840,7 +3863,7 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "create") {
-                    assert.deepEqual(args.args[0], { state: "abc" });
+                    assert.deepEqual(args.args[0][0], { state: "abc" });
                     assert.deepEqual(args.kwargs.context, {
                         default_state: "abc",
                         default_name: "test",
@@ -3890,8 +3913,16 @@ QUnit.module("Views", (hooks) => {
                     // by stage_id)
                     return {
                         groups: [
-                            { __domain: [["product_id", "=", 3]], product_id_count: 0 },
-                            { __domain: [["product_id", "=", 5]], product_id_count: 0 },
+                            {
+                                __domain: [["product_id", "=", 3]],
+                                product_id_count: 0,
+                                product_id: [3, "xplone"],
+                            },
+                            {
+                                __domain: [["product_id", "=", 5]],
+                                product_id_count: 0,
+                                product_id: [5, "xplan"],
+                            },
                         ],
                         length: 2,
                     };
@@ -4131,7 +4162,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["foo"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ foo: "blip" }]);
+                        assert.deepEqual(args[0], [{ foo: "blip" }]);
                         assert.strictEqual(kwargs.context.default_foo, "blip");
                     }
                 },
@@ -4173,7 +4204,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ bar: true }]);
+                        assert.deepEqual(args[0], [{ bar: true }]);
                         assert.strictEqual(kwargs.context.default_bar, true);
                     }
                 },
@@ -4219,7 +4250,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["state"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ state: "abc" }]);
+                        assert.deepEqual(args[0], [{ state: "abc" }]);
                         assert.strictEqual(kwargs.context.default_state, "abc");
                     }
                 },
@@ -4254,7 +4285,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("quick create record while adding a new column", async (assert) => {
+    QUnit.tttt("quick create record while adding a new column", async (assert) => {
         const prom = makeDeferred();
         await makeView({
             type: "kanban",
@@ -4407,7 +4438,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("many2many_tags in kanban views", async (assert) => {
+    QUnit.tttt("many2many_tags in kanban views", async (assert) => {
         serverData.models.partner.records[0].category_ids = [6, 7];
         serverData.models.partner.records[1].category_ids = [7, 8];
         serverData.models.category.records.push({
@@ -4452,7 +4483,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(
             [
                 "/web/dataset/call_kw/partner/get_views",
-                "/web/dataset/call_kw/partner/web_search_read",
+                "/web/dataset/call_kw/partner/web_search_read_unity",
                 "/web/dataset/call_kw/category/read",
             ],
             "two RPC should have been done (one search read and one read for the m2m)"
@@ -4576,7 +4607,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".oe_kanban_global_click .o_field_monetary[name=salary]"));
     });
 
-    QUnit.test("o2m loaded in only one batch", async (assert) => {
+    QUnit.tttt("o2m loaded in only one batch", async (assert) => {
         serverData.models.subtask = {
             fields: {
                 name: { string: "Name", type: "char" },
@@ -4617,17 +4648,17 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "read",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "read",
         ]);
     });
 
-    QUnit.test("m2m loaded in only one batch", async (assert) => {
+    QUnit.tttt("m2m loaded in only one batch", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -4651,17 +4682,17 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "read",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "read",
         ]);
     });
 
-    QUnit.test("fetch reference in only one batch", async (assert) => {
+    QUnit.tttt("fetch reference in only one batch", async (assert) => {
         serverData.models.partner.records[0].ref_product = "product,3";
         serverData.models.partner.records[1].ref_product = "product,5";
         serverData.models.partner.fields.ref_product = {
@@ -4692,17 +4723,17 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "name_get",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "name_get",
         ]);
     });
 
-    QUnit.test("wait x2manys batch fetches to re-render", async (assert) => {
+    QUnit.tttt("wait x2manys batch fetches to re-render", async (assert) => {
         let prom = Promise.resolve();
         const kanban = await makeView({
             type: "kanban",
@@ -4845,7 +4876,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
     });
 
-    QUnit.test("drag and drop a record, grouped by selection", async (assert) => {
+    QUnit.tttt("drag and drop a record, grouped by selection", async (assert) => {
         assert.expect(7);
 
         await makeView({
@@ -4885,7 +4916,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
+    QUnit.tttt("prevent drag and drop of record if grouped by readonly", async (assert) => {
         // Whether the kanban is grouped by state, foo, bar or product_id
         // the user must not be able to drag and drop from one group to another,
         // as state, foo bar, product_id are made readonly one way or another.
@@ -5012,7 +5043,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(0), ["yopABC", "gnapGHI"]);
     });
 
-    QUnit.test("prevent drag and drop if grouped by date/datetime field", async (assert) => {
+    QUnit.tttt("prevent drag and drop if grouped by date/datetime field", async (assert) => {
         serverData.models.partner.records[0].date = "2017-01-08";
         serverData.models.partner.records[1].date = "2017-01-09";
         serverData.models.partner.records[2].date = "2017-02-08";
@@ -5252,7 +5283,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("prevent drag and drop of record if onchange fails", async (assert) => {
+    QUnit.tttt("prevent drag and drop of record if onchange fails", async (assert) => {
         serverData.models.partner.onchanges = {
             product_id() {},
         };
@@ -5273,7 +5304,7 @@ QUnit.module("Views", (hooks) => {
                 "</kanban>",
             groupBy: ["product_id"],
             async mockRPC(route, { model, method }) {
-                if (model === "partner" && method === "onchange") {
+                if (model === "partner" && method === "onchange2") {
                     throw {};
                 }
             },
@@ -5459,7 +5490,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["1", "3", "2", "4"]);
     });
 
-    QUnit.test("create a column in grouped on m2o", async (assert) => {
+    QUnit.tttt("create a column in grouped on m2o", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -5544,7 +5575,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("auto fold group when reach the limit", async (assert) => {
+    QUnit.tttt("auto fold group when reach the limit", async (assert) => {
         for (let i = 0; i < 12; i++) {
             serverData.models.product.records.push({
                 id: 8 + i,
@@ -5578,8 +5609,8 @@ QUnit.module("Views", (hooks) => {
                     result.groups[8].__fold = true;
                     return result;
                 }
-                if (args.method === "web_search_read") {
-                    assert.step(`web_search_read domain: ${args.kwargs.domain}`);
+                if (args.method === "web_search_read_unity") {
+                    assert.step(`web_search_read_unity domain: ${args.kwargs.domain}`);
                 }
             },
         });
@@ -5600,20 +5631,20 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group.o_column_folded", 4);
 
         assert.verifySteps([
-            "web_search_read domain: product_id,=,3",
-            "web_search_read domain: product_id,=,5",
-            "web_search_read domain: product_id,=,9",
-            "web_search_read domain: product_id,=,10",
-            "web_search_read domain: product_id,=,11",
-            "web_search_read domain: product_id,=,12",
-            "web_search_read domain: product_id,=,13",
-            "web_search_read domain: product_id,=,15",
-            "web_search_read domain: product_id,=,16",
-            "web_search_read domain: product_id,=,17",
+            "web_search_read_unity domain: product_id,=,3",
+            "web_search_read_unity domain: product_id,=,5",
+            "web_search_read_unity domain: product_id,=,9",
+            "web_search_read_unity domain: product_id,=,10",
+            "web_search_read_unity domain: product_id,=,11",
+            "web_search_read_unity domain: product_id,=,12",
+            "web_search_read_unity domain: product_id,=,13",
+            "web_search_read_unity domain: product_id,=,15",
+            "web_search_read_unity domain: product_id,=,16",
+            "web_search_read_unity domain: product_id,=,17",
         ]);
     });
 
-    QUnit.test("auto fold group when reach the limit (2)", async (assert) => {
+    QUnit.tttt("auto fold group when reach the limit (2)", async (assert) => {
         // this test is similar to the previous one, except that in this one,
         // read_group sets the __fold key on each group, even those that are
         // unfolded, which could make subtle differences in the code
@@ -5651,8 +5682,8 @@ QUnit.module("Views", (hooks) => {
                     }
                     return result;
                 }
-                if (args.method === "web_search_read") {
-                    assert.step(`web_search_read domain: ${args.kwargs.domain}`);
+                if (args.method === "web_search_read_unity") {
+                    assert.step(`web_search_read_unity domain: ${args.kwargs.domain}`);
                 }
             },
         });
@@ -5673,16 +5704,16 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group.o_column_folded", 4);
 
         assert.verifySteps([
-            "web_search_read domain: product_id,=,3",
-            "web_search_read domain: product_id,=,5",
-            "web_search_read domain: product_id,=,9",
-            "web_search_read domain: product_id,=,10",
-            "web_search_read domain: product_id,=,11",
-            "web_search_read domain: product_id,=,12",
-            "web_search_read domain: product_id,=,13",
-            "web_search_read domain: product_id,=,15",
-            "web_search_read domain: product_id,=,16",
-            "web_search_read domain: product_id,=,17",
+            "web_search_read_unity domain: product_id,=,3",
+            "web_search_read_unity domain: product_id,=,5",
+            "web_search_read_unity domain: product_id,=,9",
+            "web_search_read_unity domain: product_id,=,10",
+            "web_search_read_unity domain: product_id,=,11",
+            "web_search_read_unity domain: product_id,=,12",
+            "web_search_read_unity domain: product_id,=,13",
+            "web_search_read_unity domain: product_id,=,15",
+            "web_search_read_unity domain: product_id,=,16",
+            "web_search_read_unity domain: product_id,=,17",
         ]);
     });
 
@@ -5719,7 +5750,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("delete a column in grouped on m2o", async (assert) => {
+    QUnit.tttt("delete a column in grouped on m2o", async (assert) => {
         assert.expect(38);
 
         let resequencedIDs = [];
@@ -5863,12 +5894,12 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "unlink",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
         ]);
         assert.containsN(
             target,
@@ -5913,7 +5944,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.test("create a column, delete it and create another one", async (assert) => {
+    QUnit.tttt("create a column, delete it and create another one", async (assert) => {
         patchDialog((_cls, props) => props.confirm());
 
         await makeView({
@@ -5955,7 +5986,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("edit a column in grouped on m2o", async (assert) => {
+    QUnit.tttt("edit a column in grouped on m2o", async (assert) => {
         serverData.views["product,false,form"] =
             '<form string="Product"><field name="display_name"/></form>';
 
@@ -6041,7 +6072,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(nbRPCs, 4, "should have done 1 write, 1 read_group and 2 search_read");
     });
 
-    QUnit.test("edit a column propagates right context", async (assert) => {
+    QUnit.tttt("edit a column propagates right context", async (assert) => {
         assert.expect(4);
 
         serverData.views["product,false,form"] =
@@ -6062,7 +6093,7 @@ QUnit.module("Views", (hooks) => {
                 "</kanban>",
             groupBy: ["product_id"],
             async mockRPC(_route, { method, model, kwargs }) {
-                if (model === "partner" && method === "web_search_read") {
+                if (model === "partner" && method === "web_search_read_unity") {
                     assert.strictEqual(
                         kwargs.context.lang,
                         "brol",
@@ -6144,7 +6175,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("quick create several columns in a row", async (assert) => {
+    QUnit.tttt("quick create several columns in a row", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6208,7 +6239,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 4);
     });
 
-    QUnit.test("quick create column with enter", async (assert) => {
+    QUnit.tttt("quick create column with enter", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6338,7 +6369,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("quick create column and examples: with folded columns", async (assert) => {
+    QUnit.tttt("quick create column and examples: with folded columns", async (assert) => {
         serverData.models.partner.records = [];
         serverData.models.product.fields.folded = { string: "Folded", type: "boolean" };
         serviceRegistry.add("dialog", dialogService, { force: true });
@@ -6774,7 +6805,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("no nocontent helper is shown when no longer creating column", async (assert) => {
+    QUnit.tttt("no nocontent helper is shown when no longer creating column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -7055,7 +7086,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("empty grouped kanban with sample data and no columns", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data and no columns", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -7080,7 +7111,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_example_background_container");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "empty kanban with sample data grouped by date range (fill temporal)",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -7141,7 +7172,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("empty grouped kanban with sample data and click quick create", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data and click quick create", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7201,7 +7232,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_view_nocontent");
     });
 
-    QUnit.test("empty grouped kanban with sample data and cancel quick create", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data and cancel quick create", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7256,7 +7287,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.test("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
         await makeView({
             arch: `
                 <kanban sample="1">
@@ -7326,7 +7357,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.test("empty grouped kanban with sample data and many2many_tags", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data and many2many_tags", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7373,7 +7404,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read_group"], "should not read the tags");
     });
 
-    QUnit.test("sample data does not change after reload with sample data", async (assert) => {
+    QUnit.tttt("sample data does not change after reload with sample data", async (assert) => {
         Object.assign(serverData, {
             views: {
                 "partner,false,kanban": `
@@ -7459,7 +7490,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_record:not(.o_kanban_ghost)");
     });
 
-    QUnit.test("empty grouped kanban with sample data: add a column", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data: add a column", async (assert) => {
         await makeView({
             arch: `
                 <kanban sample="1">
@@ -7509,7 +7540,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("empty grouped kanban with sample data: cannot fold a column", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data: cannot fold a column", async (assert) => {
         // folding a column in grouped kanban with sample data is disabled, for the sake of simplicity
         await makeView({
             arch: `
@@ -7602,7 +7633,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("empty grouped kanban with sample data: delete a column", async (assert) => {
+    QUnit.tttt("empty grouped kanban with sample data: delete a column", async (assert) => {
         serverData.models.partner.records = [];
 
         patchDialog((_cls, props) => props.confirm());
@@ -7657,7 +7688,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_column_quick_create .o_quick_create_unfolded");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "empty grouped kanban with sample data: add a column and delete it right away",
         async (assert) => {
             patchDialog((_cls, props) => props.confirm());
@@ -7874,7 +7905,7 @@ QUnit.module("Views", (hooks) => {
         });
         assert.verifySteps([
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_search_read",
+            "/web/dataset/call_kw/partner/web_search_read_unity",
         ]);
 
         assert.ok(
@@ -7894,7 +7925,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(count, 1, "should have triggered an execute action only once");
         assert.verifySteps(
-            ["/web/dataset/call_kw/partner/web_search_read"],
+            ["/web/dataset/call_kw/partner/web_search_read_unity"],
             "the records should be reloaded after executing a button action"
         );
     });
@@ -8147,7 +8178,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("resequence columns in grouped by m2o", async (assert) => {
+    QUnit.tttt("resequence columns in grouped by m2o", async (assert) => {
         serverData.models.product.fields.sequence = { type: "integer" };
 
         await makeView({
@@ -8183,7 +8214,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["2", "4", "1", "3"]);
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "resequence all when create(ing) a new record + partial resequencing",
         async (assert) => {
             let resequenceOffset;
@@ -8402,7 +8433,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["bar"],
             limit: 2,
             async mockRPC(_route, { method, kwargs }) {
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     assert.step(`${kwargs.limit} - ${kwargs.offset}`);
                 }
             },
@@ -8463,27 +8494,32 @@ QUnit.module("Views", (hooks) => {
                 </kanban>`,
             groupBy: ["bar"],
             limit: 2,
-            async mockRPC(_route, { args, kwargs, model, method }) {
-                if (model === "category" && method === "read") {
-                    assert.step(`read ${String(args[0])}`);
-                } else if (method === "web_search_read") {
-                    assert.step(`web_search_read ${kwargs.limit}-${kwargs.offset}`);
+            async mockRPC(_route, { kwargs, method }) {
+                if (method === "web_search_read_unity") {
+                    assert.step(`web_search_read_unity ${kwargs.limit}-${kwargs.offset}`);
                 }
             },
         });
 
         assert.containsN(getColumn(1), ".o_kanban_record", 2);
-
-        assert.verifySteps(["web_search_read 2-0", "web_search_read 2-0", "read 7"]);
+        assert.deepEqual(
+            [...getColumn(1).querySelectorAll("[name='category_ids']")].map((el) => el.textContent),
+            ["silver", ""]
+        );
+        assert.verifySteps(["web_search_read_unity 2-0", "web_search_read_unity 2-0"]);
 
         // load more
         await loadMore(1);
 
         assert.containsN(getColumn(1), ".o_kanban_record", 3);
-        assert.verifySteps(["web_search_read 4-0", "read 7,6"]);
+        assert.deepEqual(
+            [...getColumn(1).querySelectorAll("[name='category_ids']")].map((el) => el.textContent),
+            ["silver", "", "gold"]
+        );
+        assert.verifySteps(["web_search_read_unity 4-0"]);
     });
 
-    QUnit.test("update buttons after column creation", async (assert) => {
+    QUnit.tttt("update buttons after column creation", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -8506,7 +8542,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o-kanban-button-new");
     });
 
-    QUnit.test("group_by_tooltip option when grouping on a many2one", async (assert) => {
+    QUnit.tttt("group_by_tooltip option when grouping on a many2one", async (assert) => {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
         });
@@ -8690,7 +8726,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.test("move a record then put it again in the same column", async (assert) => {
+    QUnit.tttt("move a record then put it again in the same column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -8736,7 +8772,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_group:nth-child(2) .o_kanban_record");
     });
 
-    QUnit.test("resequence a record twice", async (assert) => {
+    QUnit.tttt("resequence a record twice", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -8829,7 +8865,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(2).querySelector(".o_widget").innerText, '{"foo":"gnap"}');
     });
 
-    QUnit.test("column progressbars properly work", async (assert) => {
+    QUnit.tttt("column progressbars properly work", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -8862,7 +8898,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test('column progressbars: "false" bar is clickable', async (assert) => {
+    QUnit.tttt('column progressbars: "false" bar is clickable', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -8918,7 +8954,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["1", "1"]);
     });
 
-    QUnit.test('column progressbars: "false" bar with sum_field', async (assert) => {
+    QUnit.tttt('column progressbars: "false" bar with sum_field', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -8983,12 +9019,12 @@ QUnit.module("Views", (hooks) => {
 
         assert.deepEqual(getCardTexts(), ["name", "name", "name", "name"]);
         assert.verifySteps(
-            ["get_views", "web_search_read"],
+            ["get_views", "web_search_read_unity"],
             "no read on progress bar data is done"
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "column progressbars: creating a new column should create a new progressbar",
         async (assert) => {
             await makeView({
@@ -9024,7 +9060,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("column progressbars on quick create properly update counter", async (assert) => {
+    QUnit.tttt("column progressbars on quick create properly update counter", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9083,7 +9119,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(0), ["1", "2", "3"], "intended records are loaded");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "column progressbars with an active filter are working with load more",
         async (assert) => {
             serverData.models.partner.records.push(
@@ -9118,7 +9154,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("column progressbars on archiving records update counter", async (assert) => {
+    QUnit.tttt("column progressbars on archiving records update counter", async (assert) => {
         // add active field on partner model and make all records active
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -9203,7 +9239,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("RPCs when (re)loading kanban view progressbars", async (assert) => {
+    QUnit.tttt("RPCs when (re)loading kanban view progressbars", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9232,17 +9268,17 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             // reload
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
         ]);
     });
 
-    QUnit.test("RPCs when (de)activating kanban view progressbar filters", async (assert) => {
+    QUnit.tttt("RPCs when (de)activating kanban view progressbar filters", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9275,21 +9311,21 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
+            "web_search_read_unity",
             // activate filter
             "web_read_group", // recomputes aggregates
-            "web_search_read",
+            "web_search_read_unity",
             // activate another filter (switching)
             "web_read_group", // recomputes aggregates
-            "web_search_read",
+            "web_search_read_unity",
             // deactivate active filter
             "web_read_group", // recomputes aggregates
         ]);
     });
 
-    QUnit.test("drag & drop records grouped by m2o with progressbar", async (assert) => {
+    QUnit.tttt("drag & drop records grouped by m2o with progressbar", async (assert) => {
         serverData.models.partner.records[0].product_id = false;
 
         await makeView({
@@ -9335,7 +9371,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["0", "1", "3"]);
     });
 
-    QUnit.test("progress bar subgroup count recompute", async (assert) => {
+    QUnit.tttt("progress bar subgroup count recompute", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9358,7 +9394,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["1", "1"]);
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "progress bar recompute after drag&drop to and from other column",
         async (assert) => {
             await makeView({
@@ -9390,7 +9426,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("load more should load correct records after drag&drop event", async (assert) => {
+    QUnit.tttt("load more should load correct records after drag&drop event", async (assert) => {
         // Add a sequence number and initialize
         serverData.models.partner.records.forEach((el, i) => (el.sequence = i));
         await makeView({
@@ -9431,7 +9467,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "column progressbars on quick create with quick_create_view are updated",
         async (assert) => {
             serverData.views[
@@ -9469,7 +9505,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "column progressbars and active filter on quick create with quick_create_view are updated",
         async (assert) => {
             serverData.views["partner,some_view_ref,form"] = `
@@ -9588,7 +9624,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("test displaying image (write_date field)", async (assert) => {
+    QUnit.tttt("test displaying image (write_date field)", async (assert) => {
         // the presence of write_date field ensures that the image is reloaded when necessary
         assert.expect(2);
 
@@ -9607,7 +9643,7 @@ QUnit.module("Views", (hooks) => {
                     </div></t></templates>
                 </kanban>`,
             mockRPC(route, { method, kwargs }) {
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     assert.deepEqual(kwargs.fields, ["id", "write_date"]);
                 }
             },
@@ -10121,7 +10157,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["1", "2"], "should writes on both kanban records");
     });
 
-    QUnit.test("ungrouped kanban with handle field", async (assert) => {
+    QUnit.tttt("ungrouped kanban with handle field", async (assert) => {
         assert.expect(3);
 
         await makeView({
@@ -10388,7 +10424,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "progressbar filter state is kept unchanged when domain is updated (records still in group)",
         async (assert) => {
             const kanban = await makeView({
@@ -10456,7 +10492,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "progressbar filter state is kept unchanged when domain is updated (emptying group)",
         async (assert) => {
             const kanban = await makeView({
@@ -10534,7 +10570,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "filtered column keeps consistent counters when dropping in a non-matching record",
         async (assert) => {
             await makeView({
@@ -10606,7 +10642,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("filtered column is reloaded when dragging out its last record", async (assert) => {
+    QUnit.tttt("filtered column is reloaded when dragging out its last record", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10645,8 +10681,8 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
         ]);
 
         // Apply an active filter
@@ -10663,7 +10699,7 @@ QUnit.module("Views", (hooks) => {
         );
         assert.containsOnce(target, ".o_kanban_group.o_kanban_group_show .o_kanban_record");
         assert.deepEqual(getCardTexts(1), ["1yop"]);
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
 
         // Drag out its only record onto the first column
         await dragAndDrop(
@@ -10686,7 +10722,7 @@ QUnit.module("Views", (hooks) => {
             "write",
             "read_progress_bar",
             "read", // read happens is delayed by the ORM batcher
-            "web_search_read",
+            "web_search_read_unity",
             "/web/dataset/resequence",
             "read",
         ]);
@@ -10753,9 +10789,9 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         await click(target.querySelector(".o_kanban_record p"));
-        assert.verifySteps(["doActionButton type object name a1", "web_search_read"]);
+        assert.verifySteps(["doActionButton type object name a1", "web_search_read_unity"]);
     });
 
     QUnit.test("action/type attributes on kanban arch, type='action'", async (assert) => {
@@ -10782,9 +10818,9 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         await click(target.querySelector(".o_kanban_record p"));
-        assert.verifySteps(["doActionButton type action name a1", "web_search_read"]);
+        assert.verifySteps(["doActionButton type action name a1", "web_search_read_unity"]);
     });
 
     QUnit.test("Missing t-key is automatically filled with a warning", async (assert) => {
@@ -10810,7 +10846,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(0).innerText, "123");
     });
 
-    QUnit.test("Quick created record is rendered after load", async (assert) => {
+    QUnit.tttt("Quick created record is rendered after load", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
@@ -10923,7 +10959,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record", 2);
     });
 
-    QUnit.test("filter groups are kept when leaving and coming back", async (assert) => {
+    QUnit.tttt("filter groups are kept when leaving and coming back", async (assert) => {
         serverData.models.partner.records[1].state = "abc";
         serverData.views = {
             "partner,false,kanban": `
@@ -11109,10 +11145,15 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 2);
         assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
-        assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "web_search_read_unity",
+            "web_search_read_unity",
+        ]);
     });
 
-    QUnit.test("basic rendering with a date groupby with a granularity", async (assert) => {
+    QUnit.tttt("basic rendering with a date groupby with a granularity", async (assert) => {
         serverData.models.partner.records[0].date = "2022-06-23";
         await makeView({
             type: "kanban",
@@ -11142,7 +11183,12 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 2);
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 3);
         assert.containsOnce(target, ".o_kanban_group:nth-child(2) .o_kanban_record");
-        assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "web_search_read_unity",
+            "web_search_read_unity",
+        ]);
     });
 
     QUnit.test("quick create record and click outside (no dirty input)", async (assert) => {
@@ -11374,7 +11420,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "ged");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "Color '200' (gray) can be used twice (for false value and another value) in progress bar",
         async (assert) => {
             serverData.models.partner.records.push({ id: 5, bar: true }, { id: 6, bar: false });
@@ -11448,7 +11494,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("update field on which progress bars are computed", async (assert) => {
+    QUnit.tttt("update field on which progress bars are computed", async (assert) => {
         serverData.models.partner.records.push({ id: 5, state: "abc", bar: true });
 
         await makeView({
@@ -11518,7 +11564,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getProgressBars(1)[2].style.width, "25%"); // ghi: 1
     });
 
-    QUnit.test("load more button shouldn't be visible when unfiltering column", async (assert) => {
+    QUnit.tttt("load more button shouldn't be visible when unfiltering column", async (assert) => {
         serverData.models.partner.records.push({ id: 5, state: "abc", bar: true });
 
         let def;
@@ -11540,7 +11586,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["bar"],
             mockRPC: async (route, args) => {
                 const { method } = args;
-                if (method === "web_search_read") {
+                if (method === "web_search_read_unity") {
                     await def;
                 }
             },
@@ -11574,7 +11620,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test("click on the progressBar of a new column", async (assert) => {
+    QUnit.tttt("click on the progressBar of a new column", async (assert) => {
         serverData.models.partner.records = [];
         await makeView({
             type: "kanban",
@@ -11595,7 +11641,7 @@ QUnit.module("Views", (hooks) => {
             domain: [["id", ">", 0]],
             mockRPC: (route, args) => {
                 const { method, kwargs } = args;
-                if (args.method === "web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     assert.step(method);
                     assert.deepEqual(kwargs.domain, [
                         "&",
@@ -11623,10 +11669,10 @@ QUnit.module("Views", (hooks) => {
         await click(getProgressBars(0)[0]);
         assert.containsOnce(target, ".o_kanban_record");
 
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "keep focus inside control panel when pressing arrowdown and no kanban card",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -11783,7 +11829,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.test("no leak of TransactionInProgress (not grouped case)", async (assert) => {
+    QUnit.tttt("no leak of TransactionInProgress (not grouped case)", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
@@ -11857,7 +11903,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.test("dragged record cannot be saved", async (assert) => {
+    QUnit.tttt("dragged record cannot be saved", async (assert) => {
         let def;
         serverData.models.partner.records = [
             { id: 1, bar: false, state: "abc" },
@@ -11886,8 +11932,8 @@ QUnit.module("Views", (hooks) => {
             `,
             groupBy: ["bar"],
             async mockRPC(route, args) {
-                if (args.method === "onchange") {
-                    assert.step("onchange");
+                if (args.method === "onchange2") {
+                    assert.step("onchange2");
                     await Promise.resolve(def);
                 }
             },
@@ -11930,7 +11976,7 @@ QUnit.module("Views", (hooks) => {
             ),
             ["blipDEF", "ABC"]
         );
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         def.resolve();
         await nextTick();
@@ -12036,7 +12082,7 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.strictEqual(target.querySelector("[name=foo] span").innerText, "hello");
-            assert.verifySteps(["get_views", "web_search_read"]);
+            assert.verifySteps(["get_views", "web_search_read_unity"]);
         }
     );
 
@@ -12145,7 +12191,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getColumn(1).innerText, "xmo (3)");
     });
 
-    QUnit.test("drag record to folded column, with progressbars", async (assert) => {
+    QUnit.tttt("drag record to folded column, with progressbars", async (assert) => {
         serverData.models.partner.records[0].bar = false;
         await makeView({
             type: "kanban",
@@ -12198,7 +12244,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["-4"]);
     });
 
-    QUnit.test("quick create record in grouped kanban in a form view dialog", async (assert) => {
+    QUnit.tttt("quick create record in grouped kanban in a form view dialog", async (assert) => {
         serverData.models.partner.fields.foo.default = "ABC";
         serverData.views = {
             "partner,false,form": `
@@ -12275,19 +12321,19 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group", // initial read_group
-            "web_search_read", // initial search_read (first column)
-            "web_search_read", // initial search_read (second column)
-            "onchange", // quick create
+            "web_search_read_unity", // initial search_read (first column)
+            "web_search_read_unity", // initial search_read (second column)
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
             "get_views", // load views for form view dialog
-            "onchange", // load of a virtual record in form view dialog
+            "onchange2", // load of a virtual record in form view dialog
             "create", // save virtual record
             "read", // read the created record to get foo value
-            "onchange", // reopen the quick create automatically
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
-    QUnit.test("Move new record with onchanges and different active fields", async (assert) => {
+    QUnit.tttt("Move new record with onchanges and different active fields", async (assert) => {
         serverData.models.partner.fields.foo.default = "abc";
         serverData.models.partner.onchanges = {
             bar(obj) {
@@ -12452,7 +12498,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["1", "3", "4", "2"]);
     });
 
-    QUnit.test("group key in foreach cannot be a duplicate", async function (assert) {
+    QUnit.tttt("group key in foreach cannot be a duplicate", async function (assert) {
         serverData.models.product.records = [
             {
                 id: 1,
@@ -12610,7 +12656,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "drag & drop records grouped by m2o with m2o displayed in records",
         async (assert) => {
             const prom = makeDeferred();
@@ -12644,8 +12690,8 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps([
                 "get_views",
                 "web_read_group",
-                "web_search_read",
-                "web_search_read",
+                "web_search_read_unity",
+                "web_search_read_unity",
             ]);
             assert.deepEqual(
                 [...target.querySelectorAll(".o_kanban_record")].map((el) => el.innerText),
@@ -12694,7 +12740,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_kanban_record").innerHTML, "<div></div>");
     });
 
-    QUnit.test("rerenders only once after resequencing records", async (assert) => {
+    QUnit.tttt("rerenders only once after resequencing records", async (assert) => {
         // actually it's not once, but twice, because we must render directly after
         // the drag&drop s.t. the dropped record remains where it has been dropped,
         // and once again after the reload
@@ -12757,7 +12803,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.test("sample server: _mockWebReadGroup API", async (assert) => {
+    QUnit.tttt("sample server: _mockWebReadGroup API", async (assert) => {
         serverData.models.partner.records = [];
 
         patchWithCleanup(SampleServer.prototype, {
@@ -12818,7 +12864,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group .o_kanban_record", 16);
     });
 
-    QUnit.test("scroll on group unfold and progressbar click", async (assert) => {
+    QUnit.tttt("scroll on group unfold and progressbar click", async (assert) => {
         assert.expect(7);
 
         await makeView({

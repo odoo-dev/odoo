@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import {
-    addFieldDependencies,
     archParseBoolean,
     getActiveActions,
     getDecoration,
@@ -37,11 +36,7 @@ export class GroupListArchParser extends XMLParser {
                 return false;
             }
         });
-        const activeFields = {};
-        for (const fieldNode of Object.values(fieldNodes)) {
-            activeFields[fieldNode.name] = fieldNode;
-        }
-        return { fieldNodes, activeFields, buttons };
+        return { fieldNodes, buttons };
     }
 }
 
@@ -82,7 +77,6 @@ export class ListArchParser extends XMLParser {
         let handleField = null;
         const treeAttr = {};
         let nextId = 0;
-        const activeFields = {};
         const fieldNextIds = {};
         this.visitXML(arch, (node) => {
             if (node.tagName !== "button") {
@@ -120,11 +114,6 @@ export class ListArchParser extends XMLParser {
                 if (fieldInfo.widget === "handle") {
                     handleField = fieldInfo.name;
                 }
-                addFieldDependencies(
-                    activeFields,
-                    models[modelName],
-                    fieldInfo.field.fieldDependencies
-                );
                 if (this.isColumnVisible(fieldInfo.modifiers.column_invisible)) {
                     const label = fieldInfo.field.label;
                     columns.push({
@@ -145,11 +134,6 @@ export class ListArchParser extends XMLParser {
                 const widgetId = `widget_${++widgetNextId}`;
                 widgetNodes[widgetId] = widgetInfo;
                 node.setAttribute("widget_id", widgetId);
-                addFieldDependencies(
-                    activeFields,
-                    models[modelName],
-                    widgetInfo.widget.fieldDependencies
-                );
 
                 const widgetProps = {
                     name: widgetInfo.name,
@@ -172,7 +156,6 @@ export class ListArchParser extends XMLParser {
                 const groupByArchInfo = groupListArchParser.parse(groupByArch, models, coModelName);
                 groupBy.buttons[fieldName] = groupByArchInfo.buttons;
                 groupBy.fields[fieldName] = {
-                    activeFields: groupByArchInfo.activeFields,
                     fieldNodes: groupByArchInfo.fieldNodes,
                     fields: models[coModelName],
                 };
@@ -247,21 +230,6 @@ export class ListArchParser extends XMLParser {
             treeAttr.defaultOrder = stringToOrderBy(handleField);
         }
 
-        for (const fieldNode of Object.values(fieldNodes)) {
-            const fieldName = fieldNode.name;
-            if (activeFields[fieldName]) {
-                const { alwaysInvisible } = fieldNode;
-                activeFields[fieldName] = {
-                    ...fieldNode,
-                    // a field can only be considered to be always invisible
-                    // if all its nodes are always invisible
-                    alwaysInvisible: activeFields[fieldName].alwaysInvisible && alwaysInvisible,
-                };
-            } else {
-                activeFields[fieldName] = fieldNode;
-            }
-        }
-
         return {
             className,
             creates,
@@ -269,7 +237,6 @@ export class ListArchParser extends XMLParser {
             headerButtons,
             fieldNodes,
             widgetNodes,
-            activeFields,
             columns,
             groupBy,
             __rawArch: arch,

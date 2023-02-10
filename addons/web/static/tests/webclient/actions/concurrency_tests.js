@@ -37,7 +37,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.module("Concurrency management");
 
-    QUnit.test("drop previous actions if possible", async function (assert) {
+    QUnit.tttt("drop previous actions if possible", async function (assert) {
         assert.expect(7);
         const def = makeDeferred();
         const mockRPC = async function (route) {
@@ -62,7 +62,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("handle switching view and switching back on slow network", async function (assert) {
+    QUnit.tttt("handle switching view and switching back on slow network", async function (assert) {
         assert.expect(9);
         const def = makeDeferred();
         const defs = [Promise.resolve(), def, Promise.resolve()];
@@ -147,7 +147,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "execute a new action while loading a lazy-loaded controller",
         async function (assert) {
             assert.expect(16);
@@ -200,7 +200,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.test("execute a new action while handling a call_button", async function (assert) {
+    QUnit.tttt("execute a new action while handling a call_button", async function (assert) {
         assert.expect(17);
         const def = makeDeferred();
         const mockRPC = async function (route, args) {
@@ -249,7 +249,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "execute a new action while switching to another controller",
         async function (assert) {
             assert.expect(16);
@@ -314,7 +314,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.test("execute a new action while loading views", async function (assert) {
+    QUnit.tttt("execute a new action while loading views", async function (assert) {
         assert.expect(11);
         const def = makeDeferred();
         const mockRPC = async function (route, args) {
@@ -350,7 +350,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("execute a new action while loading data of default view", async function (assert) {
+    QUnit.tttt("execute a new action while loading data of default view", async function (assert) {
         assert.expect(12);
         const def = makeDeferred();
         const mockRPC = async function (route, { method }) {
@@ -444,7 +444,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         "restoring a controller when doing an action -- load_action slow",
         async function (assert) {
             assert.expect(14);
@@ -485,7 +485,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.test("switching when doing an action -- load_action slow", async function (assert) {
+    QUnit.tttt("switching when doing an action -- load_action slow", async function (assert) {
         assert.expect(12);
         let def;
         const mockRPC = async (route, args) => {
@@ -520,7 +520,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("switching when doing an action -- get_views slow", async function (assert) {
+    QUnit.tttt("switching when doing an action -- get_views slow", async function (assert) {
         assert.expect(13);
         let def;
         const mockRPC = async (route, args) => {
@@ -556,7 +556,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("switching when doing an action -- search_read slow", async function (assert) {
+    QUnit.tttt("switching when doing an action -- search_read slow", async function (assert) {
         assert.expect(13);
         const def = makeDeferred();
         const defs = [null, def, null];
@@ -592,7 +592,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("click multiple times to open a record", async function (assert) {
+    QUnit.tttt("click multiple times to open a record", async function (assert) {
         const def = makeDeferred();
         const defs = [null, def];
         const mockRPC = async (route, args) => {

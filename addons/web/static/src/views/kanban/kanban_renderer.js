@@ -83,6 +83,10 @@ export class KanbanRenderer extends Component {
         }
         this.ghostColumns = this.generateGhostColumns();
 
+        owl.onWillRender(() => {
+            console.log("render kanban renderer");
+        });
+
         // Sortable
         let dataRecordId;
         let dataGroupId;
@@ -390,7 +394,7 @@ export class KanbanRenderer extends Component {
     }
 
     loadMore(group) {
-        return group.list.loadMore();
+        return group.list.load({ limit: group.list.records.length + group.model.initialLimit });
     }
 
     /**
