@@ -24,10 +24,12 @@ export class CalendarCommonPopover extends Component {
     get isEventDeletable() {
         return this.props.model.canDelete;
     }
+    get activeFields() {
+        return this.props.model.popoverFields;
+    }
 
-    isInvisible(fieldName, record) {
-        const { invisible } = this.props.model.popoverFields[fieldName].modifiers;
-        return evalDomain(invisible, record.evalContext);
+    isInvisible(fieldNode, record) {
+        return evalDomain(fieldNode.modifiers.invisible, record.evalContext);
     }
 
     computeDateTimeAndDuration() {

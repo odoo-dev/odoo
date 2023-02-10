@@ -12,15 +12,24 @@ import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
 import { session } from "@web/session";
 import { useModel } from "@web/views/model";
-import { DynamicRecordList } from "@web/views/relational_model";
+import { DynamicRecordList } from "@web/views/relational_model/dynamic_record_list";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
 import { useSetupView } from "@web/views/view_hook";
+import { extractFieldsFromArchInfo } from "../relational_model/utils";
 
-import { Component, onMounted, onWillStart, useEffect, useRef, useSubEnv } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillStart,
+    useEffect,
+    useRef,
+    useState,
+    useSubEnv,
+} from "@odoo/owl";
 
 // -----------------------------------------------------------------------------
 
@@ -37,28 +46,32 @@ export class ListController extends Component {
         this.editable = this.props.editable ? this.archInfo.editable : false;
         this.multiEdit = this.archInfo.multiEdit;
         this.activeActions = this.archInfo.activeActions;
-        const fields = { ...this.props.fields };
-        const { rootState } = this.props.state || {};
         const { defaultGroupBy, rawExpand } = this.archInfo;
-        this.model = useModel(this.props.Model, {
+        const { activeFields, fields } = extractFieldsFromArchInfo(
+            this.archInfo,
+            this.props.fields
+        );
+        const modelConfig = this.props.state?.modelConfig || {
             resModel: this.props.resModel,
             fields,
-            activeFields: this.archInfo.activeFields,
-            fieldNodes: this.archInfo.fieldNodes,
+            activeFields,
+        };
+
+        const model = useModel(this.props.Model, {
+            config: modelConfig,
             handleField: this.archInfo.handleField,
-            viewMode: "list",
             groupByInfo: this.archInfo.groupBy.fields,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,
-            defaultOrder: this.archInfo.defaultOrder,
+            defaultOrderBy: this.archInfo.defaultOrder,
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
-            expand: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
+            openGroupsByDefault: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
             groupsLimit: this.archInfo.groupsLimit,
             multiEdit: this.multiEdit,
-            rootState,
             onRecordSaved: this.onRecordSaved.bind(this),
             onWillSaveRecord: this.onWillSaveRecord.bind(this),
         });
+        this.model = useState(model);
 
         onWillStart(async () => {
             this.isExportEnable = await this.userService.hasGroup("base.group_allow_export");
@@ -108,8 +121,11 @@ export class ListController extends Component {
             getLocalState: () => {
                 const renderer = this.rootRef.el.querySelector(".o_list_renderer");
                 return {
-                    rootState: this.model.root.exportState(),
-                    rendererScrollPositions: { left: renderer.scrollLeft, top: renderer.scrollTop },
+                    modelConfig: this.model.exportConfig(), //TODOPRO: rename everywhere
+                    rendererScrollPositions: {
+                        left: renderer.scrollLeft,
+                        top: renderer.scrollTop,
+                    },
                 };
             },
             getOrderBy: () => {
@@ -118,8 +134,7 @@ export class ListController extends Component {
         });
 
         usePager(() => {
-            const list = this.model.root;
-            const { count, hasLimitedCount, isGrouped, limit, offset } = list;
+            const { count, hasLimitedCount, isGrouped, limit, offset } = this.model.root;
             return {
                 offset: offset,
                 limit: limit,
@@ -130,13 +145,13 @@ export class ListController extends Component {
                             return;
                         }
                     }
-                    await list.load({ limit, offset });
-                    this.render(true); // FIXME WOWL reactivity
+                    await this.model.root.load({ limit, offset });
                     if (hasNavigated) {
                         this.onPageChangeScroll();
                     }
                 },
-                updateTotal: !isGrouped && hasLimitedCount ? () => list.fetchCount() : undefined,
+                updateTotal:
+                    !isGrouped && hasLimitedCount ? () => this.model.root.fetchCount() : undefined,
             };
         });
 
@@ -218,8 +233,11 @@ export class ListController extends Component {
         }
     }
 
-    onClickSave() {
-        this.model.root.editedRecord.save();
+    async onClickSave() {
+        const saved = await this.model.root.editedRecord.save();
+        if (saved) {
+            this.model.root.editedRecord.switchMode("readonly");
+        }
     }
 
     onMouseDownDiscard(mouseDownEvent) {
@@ -379,7 +397,10 @@ export class ListController extends Component {
             type: field.field_type || field.type,
         }));
         if (import_compat) {
-            exportedFields.unshift({ name: "id", label: this.env._t("External ID") });
+            exportedFields.unshift({
+                name: "id",
+                label: this.env._t("External ID"),
+            });
         }
         await download({
             data: {
@@ -512,7 +533,12 @@ export class ListController extends Component {
 }
 
 ListController.template = `web.ListView`;
-ListController.components = { ActionMenus, Layout, ViewButton, MultiRecordViewButton };
+ListController.components = {
+    ActionMenus,
+    Layout,
+    ViewButton,
+    MultiRecordViewButton,
+};
 ListController.props = {
     ...standardViewProps,
     allowSelectors: { type: Boolean, optional: true },

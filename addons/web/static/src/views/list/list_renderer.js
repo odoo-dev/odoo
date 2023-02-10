@@ -186,7 +186,7 @@ export class ListRenderer extends Component {
             () => {
                 this.freezeColumnWidths();
             },
-            () => [this.state.columns, this.isEmpty]
+            () => [this.state.columns, this.isEmpty, this.props.list.offset, this.props.list.limit]
         );
         useExternalListener(window, "resize", () => {
             this.columnWidths = null;
@@ -490,7 +490,7 @@ export class ListRenderer extends Component {
 
     createKeyOptionalFields() {
         let keyParts = {
-            fields: this.props.list.fieldNames,
+            fields: this.props.list.fieldNames, // FIXME: use something else?
             model: this.props.list.resModel,
             viewMode: "list",
             viewId: this.env.config.viewId,
@@ -768,7 +768,7 @@ export class ListRenderer extends Component {
             if (required && evalDomain(required, record.evalContext)) {
                 classNames.push("o_required_modifier");
             }
-            if (record.isInvalid(column.name)) {
+            if (record.isFieldInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
             if (this.isCellReadonly(column, record)) {

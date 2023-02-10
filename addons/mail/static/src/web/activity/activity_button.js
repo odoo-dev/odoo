@@ -63,7 +63,7 @@ export class ActivityButton extends Component {
                 {
                     activityIds: this.props.record.data.activity_ids.currentIds,
                     onActivityChanged: () => {
-                        this.props.record.model.load({ resId: this.props.record.resId });
+                        this.props.record.load(this.props.record.resId);
                     },
                     resId: this.props.record.resId,
                     resModel: this.props.record.resModel,
