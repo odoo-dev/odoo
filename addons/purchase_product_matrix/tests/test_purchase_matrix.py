@@ -3,7 +3,7 @@
 
 import odoo.tests
 from odoo.addons.product_matrix.tests.common import TestMatrixCommon
-
+import unittest
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPurchaseMatrixUi(TestMatrixCommon):

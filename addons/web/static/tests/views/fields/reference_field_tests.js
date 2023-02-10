@@ -12,6 +12,7 @@ import {
     clickSave,
     triggerHotkey,
     nextTick,
+    makeDeferred,
 } from "@web/../tests/helpers/utils";
 import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 
@@ -247,13 +248,12 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(
             [
                 "get_views",
-                "onchange",
+                "onchange2",
                 "name_search", // for the select
                 "name_search", // for the spawned many2one
                 "name_create",
                 "create",
-                "read",
-                "read",
+                "web_read",
             ],
             "The name_create method should have been called"
         );
@@ -528,10 +528,12 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
                 mockRPC(route, { args, method }) {
                     if (method === "create") {
-                        assert.deepEqual(args[0], {
-                            bar: false,
-                            reference_char: "False,0",
-                        });
+                        assert.deepEqual(args[0], [
+                            {
+                                bar: false,
+                                reference_char: "False,0",
+                            },
+                        ]);
                     }
                 },
             });
@@ -565,10 +567,12 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             mockRPC(route, { args, method }) {
                 if (method === "create") {
-                    assert.deepEqual(args[0], {
-                        bar: false,
-                        reference: "partner,4",
-                    });
+                    assert.deepEqual(args[0], [
+                        {
+                            bar: false,
+                            reference: "partner,4",
+                        },
+                    ]);
                 }
             },
         });
@@ -612,14 +616,8 @@ QUnit.module("Fields", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { method, model, args }) {
-                if (method === "read" && args[1].length === 1 && args[1][0] === "display_name") {
-                    assert.step(model);
-                }
-            },
         });
 
-        assert.verifySteps(["product"], "the first display_name read should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "product",
@@ -634,7 +632,6 @@ QUnit.module("Fields", (hooks) => {
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 12);
 
-        assert.verifySteps(["partner_type"], "the second display_name read should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "partner_type",
@@ -689,7 +686,6 @@ QUnit.module("Fields", (hooks) => {
                 obj.foo = "product," + obj.int_field;
             },
         };
-
         let nbNameGet = 0;
         await makeView({
             type: "form",
@@ -711,18 +707,15 @@ QUnit.module("Fields", (hooks) => {
                 }
             },
         });
-
-        assert.strictEqual(nbNameGet, 1, "the first display_name read should have been done");
+        assert.strictEqual(nbNameGet, 1, "the first name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
             "xphone",
             "foo field should be correctly set"
         );
-
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 41);
-
-        assert.strictEqual(nbNameGet, 2, "the second display_name read should have been done");
+        assert.strictEqual(nbNameGet, 2, "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
             "xpad",
@@ -774,7 +767,6 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference" options="{'model_field': 'model_id'}" />
                 </form>`,
         });
-
         assert.containsNone(
             target,
             "select",
@@ -863,9 +855,14 @@ QUnit.module("Fields", (hooks) => {
                     <field name="display_name"/>
                 </tree>`,
             mockRPC: (route, { method, args }) => {
-                if (method === "onchange") {
+                if (method === "onchange2") {
                     return {
-                        value: { reference: "partner,2" },
+                        value: {
+                            reference: {
+                                id: { id: 2, model: "partner" },
+                                display_name: "second record",
+                            },
+                        },
                     };
                 } else if (method === "create") {
                     assert.strictEqual(args.length, 1);
@@ -1022,5 +1019,34 @@ QUnit.module("Fields", (hooks) => {
             "select",
             "the selection list of the reference field should exist when hide_model=False and no model_field specified."
         );
+    });
+
+    QUnit.test("reference field should await fetch model before render", async function (assert) {
+        serverData.models.partner.records[0].model_id = 20;
+
+        const def = makeDeferred();
+        makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="model_id" invisible="1"/>
+                    <field name="reference" options="{'model_field': 'model_id'}" />
+                </form>`,
+            async mockRPC(route, args) {
+                if (args.method === "read" && args.model === "ir.model") {
+                    await def;
+                }
+            },
+        });
+        await nextTick();
+        await nextTick();
+        assert.containsNone(target, ".o_form_view");
+        def.resolve();
+
+        await nextTick();
+        assert.containsOnce(target, ".o_form_view");
     });
 });

@@ -3,7 +3,7 @@
 from odoo import Command
 from odoo.tests import Form, HttpCase, tagged
 
-
+import unittest
 @tagged('post_install', '-at_install')
 class TestSubcontractingPortalUi(HttpCase):
 

@@ -5,7 +5,6 @@ import odoo.tests
 from odoo.tools import mute_logger
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 
-
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(HttpCaseWithUserDemo):
 
