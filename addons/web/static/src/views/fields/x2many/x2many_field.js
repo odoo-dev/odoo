@@ -164,8 +164,8 @@ export class X2ManyField extends Component {
             total: list.count,
             onUpdate: async ({ offset, limit }) => {
                 const initialLimit = this.list.limit;
-                const unselected = await list.unselectRecord(true);
-                if (unselected) {
+                const leaved = await list.leaveEditMode();
+                if (leaved) {
                     if (initialLimit === limit && initialLimit === this.list.limit + 1) {
                         // Unselecting the edited record might have abandonned it. If the page
                         // size was reached before that record was created, the limit was temporarily
@@ -256,9 +256,7 @@ export class X2ManyField extends Component {
                 const proms = [];
                 this.list.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
                 await Promise.all([...proms, this.list.editedRecord._updatePromise]);
-                if (this.list.editedRecord) {
-                    await this.list.editedRecord.switchMode("readonly", { checkValidity: true });
-                }
+                this.list.leaveEditMode();
             }
             if (!this.list.editedRecord) {
                 return this.addInLine({ context, editable });

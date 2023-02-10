@@ -126,6 +126,8 @@ export class SampleServer {
                 return this._mockSearchReadController(params);
             case "web_search_read":
                 return this._mockWebSearchRead(params);
+            case "unity_web_search_read":
+                return this._mockWebSearchReadUnity(params);
             case "web_read_group":
                 return this._mockWebReadGroup(params);
             case "read_group":
@@ -629,6 +631,33 @@ export class SampleServer {
             args: [rawRecords.map((r) => r.id), params.fields],
         });
         return { records, length: records.length };
+    }
+
+    _mockWebSearchReadUnity(params) {
+        const fields = Object.keys(params.specification);
+        const result = this._mockWebSearchRead({ ...params, fields });
+        // populate x2many values
+        for (const fieldName in params.specification) {
+            const field = this.data[params.model].fields[fieldName];
+            if (field.type === "one2many" || field.type === "many2many") {
+                const relFields = Object.keys(params.specification[fieldName].fields || {});
+                if (relFields.length) {
+                    const relIds = result.records.map((r) => r[fieldName]).flat();
+                    const relRecords = {};
+                    const _relRecords = this._mockRead({
+                        model: field.relation,
+                        args: [relIds, relFields],
+                    });
+                    for (const relRecord of _relRecords) {
+                        relRecords[relRecord.id] = relRecord;
+                    }
+                    for (const record of result.records) {
+                        record[fieldName] = record[fieldName].map((resId) => relRecords[resId]);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**

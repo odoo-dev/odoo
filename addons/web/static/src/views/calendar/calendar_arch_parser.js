@@ -36,7 +36,7 @@ export class CalendarArchParser extends XMLParser {
         let isTimeHidden = false;
         let formViewId = false;
         let quickCreateFormViewId = false;
-        const popoverFields = {};
+        const popoverFieldNodes = {};
         const filtersInfo = {};
 
         this.visitXML(arch, (node) => {
@@ -122,7 +122,7 @@ export class CalendarArchParser extends XMLParser {
                         "calendar",
                         jsClass
                     );
-                    popoverFields[fieldName] = fieldInfo;
+                    popoverFieldNodes[fieldName] = fieldInfo;
 
                     const field = fields[fieldName];
                     if (!node.hasAttribute("invisible") || node.hasAttribute("filters")) {
@@ -194,7 +194,7 @@ export class CalendarArchParser extends XMLParser {
             hasQuickCreate,
             isDateHidden,
             isTimeHidden,
-            popoverFields,
+            popoverFieldNodes,
             scale,
             scales,
             showUnusualDays,

@@ -214,15 +214,19 @@ export class KanbanRenderer extends Component {
         if (!this.canResequenceRecords) {
             return false;
         }
-        const { fields, groupByField } = this.props.list;
+        const groupByField = this.props.list.groupByField;
         if (!groupByField) {
             return true;
         }
-        const { name, modifiers } = groupByField;
-        const isReadonly =
-            modifiers && "readonly" in modifiers
-                ? modifiers.readonly === true
-                : fields[name].readonly;
+        const fieldNodes = Object.values(this.props.archInfo.fieldNodes).filter(
+            (fieldNode) => fieldNode.name === groupByField.name
+        );
+        let isReadonly;
+        if (fieldNodes.length) {
+            isReadonly = fieldNodes.every((fieldNode) => fieldNode.modifiers.readonly === true);
+        } else {
+            isReadonly = this.props.list.fields[groupByField.name].readonly;
+        }
         return !isReadonly && this.isMovableField(groupByField);
     }
 
@@ -391,7 +395,7 @@ export class KanbanRenderer extends Component {
     }
 
     loadMore(group) {
-        return group.list.loadMore();
+        return group.list.load({ limit: group.list.records.length + group.model.initialLimit });
     }
 
     /**

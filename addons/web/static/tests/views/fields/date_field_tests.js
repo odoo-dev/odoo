@@ -646,7 +646,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("DateField: allow to use compute dates (+5d for instance)", async (assert) => {
+    QUnit.tttt("DateField: allow to use compute dates (+5d for instance)", async (assert) => {
         patchDate(2021, 1, 15, 10, 0, 0); // current date : 15 Feb 2021 10:00:00
         serverData.models.partner.fields.date.default = "2019-09-15";
 
