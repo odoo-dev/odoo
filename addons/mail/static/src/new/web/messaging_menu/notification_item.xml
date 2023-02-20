@@ -20,7 +20,7 @@
             <div class="d-flex">
                 <div class="o-mail-notification-item-inlineText text-truncate">
                     <t t-slot="body-icon"/>
-                    <t t-if="props.body" t-esc="props.body"/>
+                    <t t-if="props.body" t-esc="props.body" name="notificationBody"/>
                 </div>
                 <div class="flex-grow-1"/>
                 <i t-if="props.hasMarkAsReadButton" class="o-mail-notification-item-markAsRead fa fa-check d-flex ms-2 text-600 opacity-50 opacity-100-hover" title="Mark As Read" t-ref="markAsRead"/>

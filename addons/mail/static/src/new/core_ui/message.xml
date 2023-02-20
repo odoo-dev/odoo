@@ -82,7 +82,7 @@
                             <t t-if="message.trackingValues.length">
                                 <t t-call="mail.tracking_values"/>
                             </t>
-                            <div t-if="message.body" class="o-mail-message-body text-break mb-0 bg-view">
+                            <div t-if="message.body" class="o-mail-message-body text-break mb-0 bg-view w-100">
                                 <t t-out="message.body"/>
                             </div>
                         </t>
@@ -99,7 +99,7 @@
                                 }">
                                     <em t-if="message.subject and !message.isSubjectSimilarToOriginThreadName and !message.isSubjectDefault" class="mb-1 me-2">Subject: <t t-esc="message.subject"/></em>
                                     <t t-if="message.body" t-out="message.body"/>
-                                    <t t-if="showSubtypeDescription" t-out="message.subtypeDescription"
+                                    <t t-if="showSubtypeDescription" t-out="message.subtypeDescription"/>
                                 </div>
                             </div>
                         </t>

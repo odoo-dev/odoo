@@ -78,8 +78,8 @@
                         <t t-if="preview.mostRecentMsg.isSelfAuthored">
                             <i class="fa fa-mail-reply me-1"/>You:
                         </t>
-                        <t t-else="">
-                            <t t-esc="preview.mostRecentMsg.author?.name"/>:
+                        <t t-elif="preview.mostRecentMsg.author">
+                            <t t-esc="preview.mostRecentMsg.author.name"/>:
                         </t>
                     </t>
                 </NotificationItem>
