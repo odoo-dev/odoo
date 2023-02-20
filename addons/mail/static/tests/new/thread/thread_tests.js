@@ -807,3 +807,45 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test(
+    "[technical] opening a non-channel chat window should not call channel_fold",
+    async function (assert) {
+        // channel_fold should not be called when opening non-channels in chat
+        // window, because there is no server sync of fold state for them.
+
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "test" });
+        const mailMessageId1 = pyEnv["mail.message"].create({
+            author_id: resPartnerId1,
+            body: "not empty",
+            model: "res.partner",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: resPartnerId1,
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: mailMessageId1,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        });
+        await start({
+            async mockRPC(route, args) {
+                if (route.includes("channel_fold")) {
+                    const message =
+                        "should not call channel_fold when opening a non-channel chat window";
+                    assert.step(message);
+                    console.error(message);
+                    throw Error(message);
+                }
+            },
+        });
+        await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
+        assert.containsOnce(target, ".o-mail-notification-item");
+        assert.containsNone(target, ".o-mail-chat-window");
+
+        await click(".o-mail-notification-item");
+        assert.containsOnce(target, ".o-mail-chat-window");
+    }
+);
