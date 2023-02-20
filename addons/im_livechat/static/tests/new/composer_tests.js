@@ -96,6 +96,6 @@ QUnit.test('Receives visitor typing status "is typing"', async function (assert)
     );
     assert.containsOnce(
         target,
-        ".o-mail-composer-is-typing-space-holder:contains(Visitor 20 is typing...)",
+        ".o-mail-composer-is-typing-space-holder:contains(Visitor 20 is typing...)"
     );
 });

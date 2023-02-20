@@ -21,7 +21,7 @@ tour.register("im_livechat_request_chat_and_send_message", { test: true }, [
         run: "text Hello, I need help please !",
     },
     {
-        trigger: '.o_composer_text_field',
+        trigger: ".o_composer_text_field",
         run() {
             $(".o_composer_text_field").trigger($.Event("keydown", { which: 13 }));
         },
