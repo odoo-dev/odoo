@@ -7,10 +7,10 @@ import { ImStatus } from "./im_status";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
-export class ChannelInvitationForm extends Component {
+export class ChannelInvitation extends Component {
     static components = { ImStatus };
     static props = ["thread", "close?", "chatState?"];
-    static template = "mail.channel_invitation_form";
+    static template = "mail.channel_invitation";
 
     setup() {
         this.messaging = useMessaging();

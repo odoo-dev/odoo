@@ -22,7 +22,7 @@ import {
 import { CallSettings } from "../rtc/call_settings";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
-import { ChannelInvitationForm } from "./channel_invitation_form";
+import { ChannelInvitation } from "./channel_invitation";
 import { _t } from "@web/core/l10n/translation";
 
 export class Discuss extends Component {
@@ -110,7 +110,7 @@ export class Discuss extends Component {
             const el = this.addUsersRef.el;
             this.closePopover = this.popover.add(
                 el,
-                ChannelInvitationForm,
+                ChannelInvitation,
                 {
                     thread: this.thread,
                 },

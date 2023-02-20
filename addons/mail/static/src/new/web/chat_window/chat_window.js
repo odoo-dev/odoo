@@ -12,7 +12,7 @@ import { localization } from "@web/core/l10n/localization";
 import { CallSettings } from "@mail/new/rtc/call_settings";
 import { ChannelMemberList } from "@mail/new/discuss/channel_member_list";
 import { ChatWindowIcon } from "@mail/new/web/chat_window/chat_window_icon";
-import { ChannelInvitationForm } from "@mail/new/discuss/channel_invitation_form";
+import { ChannelInvitation } from "@mail/new/discuss/channel_invitation";
 import { isEventHandled } from "@mail/new/utils/misc";
 import { ChannelSelector } from "@mail/new/discuss/channel_selector";
 
@@ -31,7 +31,7 @@ export class ChatWindow extends Component {
         CallSettings,
         ChannelMemberList,
         ChatWindowIcon,
-        ChannelInvitationForm,
+        ChannelInvitation,
     };
     static props = ["chatWindow", "right?"];
     static template = "mail.chat_window";
