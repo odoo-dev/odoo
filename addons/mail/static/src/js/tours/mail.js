@@ -21,7 +21,7 @@ tour.register(
             position: "bottom",
         },
         {
-            trigger: ".o-mail-channel-selector .o_input",
+            trigger: ".o-mail-channel-selector input",
             content: Markup(_t("<p>Create a channel here.</p>")),
             position: "bottom",
             auto: true,
@@ -31,11 +31,12 @@ tour.register(
             },
         },
         {
-            trigger: ".o-mail-channel-selector .o-autocomplete--dropdown-menu",
+            trigger: ".o-mail-channel-selector-suggestion-list",
+            extra_trigger: ".o-mail-channel-selector-suggestion",
             content: Markup(_t("<p>Create a public or private channel.</p>")),
             position: "right",
             run() {
-                this.$consumeEventAnchors.find("li:first").click();
+                document.querySelector(".o-mail-channel-selector-suggestion").click();
             },
         },
         {
@@ -62,9 +63,8 @@ tour.register(
             content: _t("Click on your message"),
             position: "top",
         },
-        // TODO race condition to fix here, clicking on star while the message is still pending leads to a crash
         {
-            trigger: ".o-mail-message-toggle-star",
+            trigger: ".o-mail-message i[aria-label='Mark as Todo']",
             content: Markup(
                 _t("Messages can be <b>starred</b> to remind you to check back later.")
             ),
