@@ -259,7 +259,7 @@ export class Thread {
     get mostRecentNeedactionMsgId() {
         const needactionMessages = this.needactionMessages;
         return needactionMessages.length > 0
-            ? Math.max(needactionMessages.map(({ id }) => id))
+            ? Math.max(...needactionMessages.map(({ id }) => id))
             : undefined;
     }
 
