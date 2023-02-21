@@ -779,7 +779,7 @@ QUnit.test(
         await click(".o-mail-notification-item-name:contains(Channel-3)");
         // simulate resize to go into mobile
         await afterNextRender(() => (env.services["mail.store"].isSmall = true));
-        assert.containsNone(document.body, ".o-mail-chat-window-hidden-menu");
+        assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
     }
 );
 
@@ -792,7 +792,7 @@ QUnit.test("chat window: composer state conservation on toggle discuss", async f
     // Set content of the composer of the chat window
     await insertText(".o-mail-composer-textarea", "XDU for the win !");
     assert.containsNone(
-        document.body,
+        target,
         ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card"
     );
     // Set attachments of the composer
@@ -816,13 +816,13 @@ QUnit.test("chat window: composer state conservation on toggle discuss", async f
         "XDU for the win !"
     );
     assert.containsN(
-        document.body,
+        target,
         ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card",
         2
     );
 
     await openDiscuss();
-    assert.containsNone(document.body, ".o-mail-chat-window");
+    assert.containsNone(target, ".o-mail-chat-window");
 
     await openView({
         res_id: channelId,
@@ -834,7 +834,7 @@ QUnit.test("chat window: composer state conservation on toggle discuss", async f
         "XDU for the win !"
     );
     assert.containsN(
-        document.body,
+        target,
         ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card",
         2
     );
@@ -891,5 +891,92 @@ QUnit.test(
         assert.containsOnce(target, "hr + span:contains(New messages)");
         await afterNextRender(() => target.querySelector(".o-mail-composer-textarea").focus());
         assert.containsNone(target, "hr + span:contains(New messages)");
+    }
+);
+
+QUnit.test("chat window: scroll conservation on toggle discuss", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({});
+    for (let i = 0; i < 100; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: channelId,
+        });
+    }
+    const { openDiscuss, openView } = await start();
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
+    await click(".o-mail-notification-item");
+    document.querySelector(".o-mail-thread").scrollTop = 142;
+    await openDiscuss(null, { waitUntilMessagesLoaded: false });
+    assert.containsNone(target, ".o-mail-chat-window");
+
+    await openView({
+        res_id: channelId,
+        res_model: "mail.channel",
+        views: [[false, "list"]],
+    });
+    assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 142);
+});
+
+QUnit.test(
+    "chat window with a thread: keep scroll position in message list on folded",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({});
+        for (let i = 0; i < 100; i++) {
+            pyEnv["mail.message"].create({
+                body: "not empty",
+                model: "mail.channel",
+                res_id: channelId,
+            });
+        }
+        await start();
+        await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
+        await click(".o-mail-notification-item");
+        // Set a scroll position to chat window
+        document.querySelector(".o-mail-thread").scrollTop = 142;
+        assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 142);
+
+        // fold chat window
+        await click(".o-mail-chat-window-header");
+        assert.containsNone(target, ".o-mail-thread");
+        // unfold chat window
+        await click(".o-mail-chat-window-header");
+        assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 142);
+    }
+);
+
+QUnit.test(
+    "chat window with a thread: keep scroll position in message list on toggle discuss when folded",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({});
+        for (let i = 0; i < 100; i++) {
+            pyEnv["mail.message"].create({
+                body: "not empty",
+                model: "mail.channel",
+                res_id: channelId,
+            });
+        }
+        const { openDiscuss, openView } = await start();
+        await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
+        await click(".o-mail-notification-item");
+
+        // Set a scroll position to chat window
+        document.querySelector(".o-mail-thread").scrollTop = 142;
+        // fold chat window
+        await click(".o-mail-chat-window-header");
+        await openDiscuss(null, { waitUntilMessagesLoaded: false });
+        assert.containsNone(target, ".o-mail-chat-window");
+
+        await openView({
+            res_id: channelId,
+            res_model: "mail.channel",
+            views: [[false, "list"]],
+        });
+        // unfold chat window
+        await click(".o-mail-chat-window-header");
+        assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 142);
     }
 );
