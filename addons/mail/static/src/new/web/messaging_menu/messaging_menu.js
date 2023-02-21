@@ -216,26 +216,26 @@ export class MessagingMenu extends Component {
         );
         if (originThreadIds.size === 1) {
             const message = failure.notifications[0].message;
-            if (!message.originThread.type) {
-                this.threadService.update(message.originThread, { type: "chatter" });
-            }
-            if (this.store.discuss.isActive) {
-                this.action.doAction({
-                    type: "ir.actions.act_window",
-                    res_model: message.originThread.model,
-                    views: [[false, "form"]],
-                    res_id: message.originThread.id,
-                });
-                // Close the related chat window as having both the form view
-                // and the chat window does not look good.
-                this.store.chatWindows
-                    .find(({ thread }) => thread === message.originThread)
-                    ?.close();
-            } else {
-                this.threadService.open(message.originThread);
-            }
+            this.openThread(message.originThread);
         } else {
             this.openFailureView(failure);
+            this.close();
+        }
+    }
+
+    openThread(thread) {
+        if (this.store.discuss.isActive) {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                res_model: thread.model,
+                views: [[false, "form"]],
+                res_id: thread.id,
+            });
+            // Close the related chat window as having both the form view
+            // and the chat window does not look good.
+            this.store.chatWindows.find(({ thr }) => thr === thread)?.close();
+        } else {
+            this.threadService.open(thread);
         }
         this.close();
     }

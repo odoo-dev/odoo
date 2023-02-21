@@ -3,6 +3,7 @@
     <t t-inherit="mail.messaging_menu.content" t-inherit-mode="extension">
         <xpath expr="//NotificationItem[@body='preview.body']" position="attributes">
             <attribute name="rating">preview.mostRecentMsg?.rating</attribute>
+            <attribute name="onClick">(isMarkAsRead) => preview.mostRecentMsg?.rating and !isMarkAsRead ? this.openThread(preview.mostRecentMsg) : this.onClickPreview(isMarkAsRead, preview)</attribute>
         </xpath>
     </t>
 </templates>
