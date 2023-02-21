@@ -11,6 +11,7 @@ import {
     useState,
     onPatched,
     onWillPatch,
+    onWillUnmount,
 } from "@odoo/owl";
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -29,6 +30,15 @@ export function useEmojiPicker(refName, props, options = {}) {
     const ref = useRef(refName);
     const popover = usePopover();
     let closePopover = false;
+    props["storeScroll"] = {
+        scrollValue: 0,
+        set: (value) => {
+            props.storeScroll.scrollValue = value;
+        },
+        get: () => {
+            return props.storeScroll.scrollValue;
+        },
+    };
     const toggle = () => {
         if (closePopover) {
             closePopover();
@@ -77,7 +87,7 @@ export async function loadEmoji() {
 }
 
 export class EmojiPicker extends Component {
-    static props = ["onSelect", "close", "onClose?"];
+    static props = ["onSelect", "close", "onClose?", "storeScroll?"];
     static defaultProps = { onClose: () => {} };
     static template = "mail.emoji_picker";
 
@@ -100,6 +110,9 @@ export class EmojiPicker extends Component {
         onMounted(() => {
             this.inputRef.el.focus();
             this.highlightActiveCategory();
+            if (this.props.storeScroll) {
+                this.gridRef.el.scrollTop = this.props.storeScroll.get();
+            }
         });
         onPatched(() => {
             if (this.shouldScrollElem) {
@@ -126,6 +139,11 @@ export class EmojiPicker extends Component {
             },
             () => [this.state.searchStr]
         );
+        onWillUnmount(() => {
+            if (this.props.storeScroll) {
+                this.props.storeScroll.set(this.gridRef.el.scrollTop);
+            }
+        });
     }
 
     onClick(ev) {
@@ -171,6 +189,7 @@ export class EmojiPicker extends Component {
         const codepoints = ev.target.dataset.codepoints;
         if (codepoints) {
             this.props.onSelect(codepoints);
+            this.gridRef.el.scrollTop = 0;
             this.props.close();
             this.props.onClose();
         }
