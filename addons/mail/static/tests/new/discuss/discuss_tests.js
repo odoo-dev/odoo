@@ -4,6 +4,7 @@ import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
 import { patchUiSize } from "@mail/../tests/helpers/patch_ui_size";
 
 import {
+    isScrolledToBottom,
     afterNextRender,
     click,
     createFile,
@@ -1819,3 +1820,47 @@ QUnit.test(
         assert.containsNone(target, "div[title='Leave this channel']");
     }
 );
+
+QUnit.test("restore thread scroll position", async function (assert) {
+    const pyEnv = await startServer();
+    const [channelId_1, channelId_2] = pyEnv["mail.channel"].create([
+        { name: "Channel1" },
+        { name: "Channel2" },
+    ]);
+    for (let i = 1; i <= 25; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: channelId_1,
+        });
+    }
+    for (let i = 1; i <= 24; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: channelId_2,
+        });
+    }
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId_1);
+    assert.containsN(target, ".o-mail-message", 25);
+    let thread = document.querySelector(".o-mail-thread");
+    assert.ok(isScrolledToBottom(thread));
+
+    document.querySelector(".o-mail-thread").scrollTop = 0;
+    assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 0);
+
+    // Ensure scrollIntoView of channel 2 has enough time to complete before
+    // going back to channel 1. Await is needed to prevent the scrollIntoView
+    // initially planned for channel 2 to actually apply on channel 1.
+    // task-2333535
+    await click("button:contains(Channel2)");
+    assert.containsN(target, ".o-mail-message", 24);
+
+    await click("button:contains(Channel1)");
+    assert.strictEqual(document.querySelector(".o-mail-thread").scrollTop, 0);
+
+    await click("button:contains(Channel2)");
+    thread = document.querySelector(".o-mail-thread");
+    assert.ok(isScrolledToBottom(thread));
+});
