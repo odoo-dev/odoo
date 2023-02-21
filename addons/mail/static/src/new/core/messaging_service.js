@@ -135,8 +135,8 @@ export class Messaging {
         this.store.internalUserGroupId = data.internalUserGroupId;
         this.store.discuss.starred.counter = data.starred_counter;
         this.store.discuss.isActive =
-            data.menu_id === this.router.current.hash.menu_id ||
-            this.router.hash.action === "mail.action_discuss";
+            data.menu_id === this.router.current.hash?.menu_id ||
+            this.router.hash?.action === "mail.action_discuss";
         (data.shortcodes ?? []).forEach((code) => {
             this.insertCannedResponse(code);
         });
