@@ -390,10 +390,10 @@ export class MessageService {
             notification_status: data.notification_status,
             notification_type: data.notification_type,
             failure_type: data.failure_type,
-            partner: data.res_partner_id
+            persona: data.res_partner_id
                 ? this.personaService.insert({
                       id: data.res_partner_id[0],
-                      name: data.res_partner_id[1],
+                      displayName: data.res_partner_id[1],
                       type: "partner",
                   })
                 : undefined,

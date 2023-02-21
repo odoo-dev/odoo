@@ -14,7 +14,7 @@ export class Notification {
     /** @type {string} */
     failure_type;
     /** @type {import("@mail/new/core/persona_model").Persona} */
-    partner;
+    persona;
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
