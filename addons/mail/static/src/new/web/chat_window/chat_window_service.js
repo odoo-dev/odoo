@@ -71,7 +71,7 @@ export class ChatWindowService {
      * @returns {ChatWindow}
      */
     insert(data = {}) {
-        const chatWindow = this.store.chatWindows.find((c) => c.thread === data.thread);
+        const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === data.thread.localId);
         if (!chatWindow) {
             const chatWindow = new ChatWindow(this.store, data);
             assignDefined(chatWindow, data);
