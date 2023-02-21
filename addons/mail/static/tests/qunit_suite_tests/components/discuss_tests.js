@@ -15,43 +15,6 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("discuss_tests.js");
 
-        QUnit.skipRefactoring(
-            "discuss should be marked as opened if the component is already rendered and messaging becomes created afterwards",
-            async function (assert) {
-                assert.expect(1);
-
-                const messagingBeforeCreationDeferred = makeTestPromise();
-                const { env, openDiscuss } = await start({
-                    messagingBeforeCreationDeferred,
-                    waitUntilMessagingCondition: "none",
-                });
-                await openDiscuss(null, { waitUntilMessagesLoaded: false });
-
-                await afterNextRender(() => messagingBeforeCreationDeferred.resolve());
-                const { messaging } = env.services.messaging.modelManager;
-                assert.ok(
-                    messaging.discuss.discussView,
-                    "discuss should be marked as opened if the component is already rendered and messaging becomes created afterwards"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
-            "discuss should be marked as closed when the component is unmounted",
-            async function (assert) {
-                assert.expect(1);
-
-                const { messaging, openDiscuss, webClient } = await start();
-                await openDiscuss();
-
-                await afterNextRender(() => destroy(webClient));
-                assert.notOk(
-                    messaging.discuss.discussView,
-                    "discuss should be marked as closed when the component is unmounted"
-                );
-            }
-        );
-
         QUnit.skipRefactoring("restore thread scroll position", async function (assert) {
             assert.expect(6);
 
