@@ -12,7 +12,7 @@
                             <select name="inputDevice" class="form-select" t-att-value="userSettings.audioInputDeviceId" t-on-change="onChangeSelectAudioInput">
                                 <option value="">Browser default</option>
                                 <t t-foreach="state.userDevices" t-as="device" t-key="device_index" device="device">
-                                    <option t-if="device.kind === 'audioinput'" t-att-value="device.deviceId"><t t-esc="device.label"/></option>
+                                    <option t-if="device.kind === 'audioinput'" t-att-value="device.deviceId"><t t-esc="device.label || 'audio device ' + device_index"/></option>
                                 </t>
                             </select>
                         </div>
