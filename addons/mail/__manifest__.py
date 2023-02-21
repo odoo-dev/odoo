@@ -226,9 +226,6 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/tests/qunit_suite_tests/**/*.js',
             'mail/static/tests/new/**/*.js',
         ],
-        'web.qunit_mobile_suite_tests': [
-            'mail/static/tests/qunit_mobile_suite_tests/**/*.js',
-        ],
         # new bundles
         'mail.assets_backend': [
             'mail/static/src/new/**/*',
