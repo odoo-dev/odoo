@@ -1,15 +1,6 @@
 /** @odoo-module **/
 
-import {
-    afterNextRender,
-    isScrolledToBottom,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
-
-import { destroy } from "@web/../tests/helpers/utils";
-
-import { makeTestPromise } from "web.test_utils";
+import { isScrolledToBottom, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
