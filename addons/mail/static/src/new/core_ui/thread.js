@@ -60,8 +60,11 @@ export class Thread extends Component {
             });
         }
         this.messagesRef = useRef("messages");
-        this.pendingLoadMore = false;
-        this.loadMoreState = useVisible("load-more", () => this.loadMore());
+        this.loadMoreState = useVisible("load-more", () => {
+            if (this.loadMoreState.isVisible) {
+                this.threadService.fetchMoreMessages(this.props.thread);
+            }
+        });
         this.oldestNonTransientMessageId = null;
         this.scrollPosition = useScrollPosition(
             "messages",
@@ -78,20 +81,14 @@ export class Thread extends Component {
             },
             onPatched: ({ hasMoreMsgsAbove, scrollTop, scrollHeight }) => {
                 const el = this.messagesRef.el;
-                const wasPendingLoadMore = this.pendingLoadMore;
                 if (hasMoreMsgsAbove) {
                     el.scrollTop = scrollTop + el.scrollHeight - scrollHeight;
-                    this.pendingLoadMore = false;
                 }
                 this.oldestNonTransientMessage = this.props.thread.oldestNonTransientMessage?.id;
-                if (!wasPendingLoadMore) {
-                    this.loadMore();
-                }
             },
         });
         onMounted(() => {
             this.oldestNonTransientMessage = this.props.thread.oldestNonTransientMessage?.id;
-            this.loadMore();
             this.scrollPosition.restore();
         });
         onWillStart(() => {
@@ -104,17 +101,6 @@ export class Thread extends Component {
 
     onClickLoadMore() {
         this.threadService.fetchMoreMessages(this.props.thread);
-    }
-
-    loadMore() {
-        if (
-            this.loadMoreState.isVisible &&
-            this.props.thread.status !== "loading" &&
-            !this.pendingLoadMore
-        ) {
-            this.threadService.fetchMoreMessages(this.props.thread);
-            this.pendingLoadMore = true;
-        }
     }
 
     isSquashed(msg, prevMsg) {

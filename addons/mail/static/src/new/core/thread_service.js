@@ -165,32 +165,41 @@ export class ThreadService {
             }
             return {};
         })();
-        const rawMessages = await this.rpc(route, {
-            ...params,
-            limit: FETCH_MSG_LIMIT,
-            max_id: max,
-            min_id: min,
-        });
-        thread.status = "ready";
-        const messages = rawMessages.reverse().map((data) => {
-            if (data.parentMessage) {
-                data.parentMessage.body = data.parentMessage.body
-                    ? markup(data.parentMessage.body)
-                    : data.parentMessage.body;
-            }
-            return this.messageService.insert(
-                Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
-                true
-            );
-        });
-        this.update(thread, { isLoaded: true });
-        return messages;
+        try {
+            const rawMessages = await this.rpc(route, {
+                ...params,
+                limit: FETCH_MSG_LIMIT,
+                max_id: max,
+                min_id: min,
+            });
+            const messages = rawMessages.reverse().map((data) => {
+                if (data.parentMessage) {
+                    data.parentMessage.body = data.parentMessage.body
+                        ? markup(data.parentMessage.body)
+                        : data.parentMessage.body;
+                }
+                return this.messageService.insert(
+                    Object.assign(data, { body: data.body ? markup(data.body) : data.body }),
+                    true
+                );
+            });
+            this.update(thread, { isLoaded: true });
+            return messages;
+        } catch (e) {
+            thread.hasLoadingFailed = true;
+            throw e;
+        } finally {
+            thread.status = "ready";
+        }
     }
 
     /**
      * @param {Thread} thread
      */
     async fetchNewMessages(thread) {
+        if (thread.status === "loading") {
+            return;
+        }
         const min = thread.isLoaded ? thread.mostRecentNonTransientMessage?.id : undefined;
         try {
             const fetchedMsgs = await this.fetchMessages(thread, { min });
@@ -203,7 +212,7 @@ export class ThreadService {
                         : thread.loadMore,
             });
         } catch {
-            thread.hasLoadingFailed = true;
+            // handled in fetchMessages
         }
     }
 
@@ -211,6 +220,9 @@ export class ThreadService {
      * @param {Thread} thread
      */
     async fetchMoreMessages(thread) {
+        if (thread.status === "loading") {
+            return;
+        }
         try {
             const fetchedMsgs = await this.fetchMessages(thread, {
                 max: thread.oldestNonTransientMessage?.id,
@@ -219,7 +231,7 @@ export class ThreadService {
                 thread.loadMore = false;
             }
         } catch {
-            thread.hasLoadingFailed = true;
+            // handled in fetchMessages
         }
     }
 

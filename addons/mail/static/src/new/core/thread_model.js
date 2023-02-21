@@ -49,7 +49,7 @@ export class Thread {
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
     followers = [];
     isAdmin = false;
-    loadMore = true;
+    loadMore = false;
     isLoadingAttachments = false;
     isLoaded = false;
     /** @type {import("@mail/new/attachments/attachment_model").Attachment} */

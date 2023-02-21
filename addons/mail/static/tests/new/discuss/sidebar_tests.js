@@ -1026,7 +1026,7 @@ QUnit.test("chat - avatar: should have correct avatar", async function (assert) 
     );
 });
 
-QUnit.test("chat - sorting: should be sorted by last activity time", async function (assert) {
+QUnit.test("chat should be sorted by last activity time [REQUIRE FOCUS]", async function (assert) {
     const pyEnv = await startServer();
     const [demo_id, yoshi_id] = pyEnv["res.partner"].create([{ name: "Demo" }, { name: "Yoshi" }]);
     pyEnv["res.users"].create([{ partner_id: demo_id }, { partner_id: yoshi_id }]);

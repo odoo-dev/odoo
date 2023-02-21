@@ -43,7 +43,6 @@ QUnit.test("simple chatter on a record", async (assert) => {
         "/mail/load_message_failures",
         "/mail/thread/data",
         "/mail/thread/messages",
-        "/mail/thread/messages",
     ]);
 });
 
