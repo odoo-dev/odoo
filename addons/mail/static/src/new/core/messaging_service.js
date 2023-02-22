@@ -396,7 +396,8 @@ export class Messaging {
                     }
                     break;
                 case "mail.channel/last_interest_dt_changed":
-                    return this._handleNotificationLastInterestDtChanged(notif);
+                    this._handleNotificationLastInterestDtChanged(notif);
+                    break;
             }
         }
     }

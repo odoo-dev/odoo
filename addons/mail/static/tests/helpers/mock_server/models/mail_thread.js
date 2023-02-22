@@ -232,14 +232,6 @@ patch(MockServer.prototype, "mail/models/mail_thread", {
             // members
             const channels = this.getRecords("mail.channel", [["id", "=", message.res_id]]);
             for (const channel of channels) {
-                notifications.push([
-                    channel,
-                    "mail.channel/new_message",
-                    {
-                        id: channel.id,
-                        message: messageFormat,
-                    },
-                ]);
                 // notify update of last_interest_dt
                 const now = datetime_to_str(new Date());
                 const members = this.getRecords("mail.channel.member", [
@@ -260,6 +252,14 @@ patch(MockServer.prototype, "mail/models/mail_thread", {
                         },
                     ]);
                 }
+                notifications.push([
+                    channel,
+                    "mail.channel/new_message",
+                    {
+                        id: channel.id,
+                        message: messageFormat,
+                    },
+                ]);
             }
         }
         const channelMemberOfCurrentUser = this.pyEnv["mail.channel.member"].search([

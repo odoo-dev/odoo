@@ -305,6 +305,7 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
     const zIndexMainTab = 100000;
     let dropdownDiv = rootTarget.querySelector(".o-mail-multi-tab-dropdown");
     if (!dropdownDiv) {
+        tabTarget.style.zIndex = zIndexMainTab;
         dropdownDiv = document.createElement("div");
         dropdownDiv.style.zIndex = zIndexMainTab + 1;
         dropdownDiv.style.top = "10%";
