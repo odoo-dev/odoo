@@ -53,9 +53,9 @@ export class FollowerSubtypeDialog extends Component {
             await this.env.services["mail.thread"].removeFollower(this.props.follower);
         } else {
             await this.env.services.orm.call(
-                this.props.follower.followedThread.resModel,
+                this.props.follower.followedThread.model,
                 "message_subscribe",
-                [[this.props.follower.followedThread.resId]],
+                [[this.props.follower.followedThread.id]],
                 {
                     partner_ids: [this.props.follower.partner.id],
                     subtype_ids: selectedSubtypes.map((subtype) => subtype.id),
