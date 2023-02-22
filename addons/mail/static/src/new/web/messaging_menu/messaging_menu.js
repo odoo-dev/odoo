@@ -119,28 +119,25 @@ export class MessagingMenu extends Component {
         for (const thread of threads) {
             const { mostRecentMsg, mostRecentNeedactionMsg } = thread;
             if (thread.is_pinned) {
+                const message = mostRecentMsg;
                 previews.push({
                     id: `preview-${thread.localId}`,
-                    body: mostRecentMsg?.inlineBody,
-                    datetime: mostRecentMsg?.datetime,
-                    displayName: thread.displayName,
+                    count: this.threadService.localMessageUnreadCounter(thread),
                     imgUrl: thread.imgUrl,
                     hasMarkAsReadButton: this.threadService.isUnread(thread),
-                    mostRecentMsg,
+                    message,
                     thread: thread,
                     isNeedaction: false,
                 });
             }
             if (mostRecentNeedactionMsg) {
+                const message = mostRecentNeedactionMsg;
                 previews.push({
                     id: `preview-needaction-${thread.localId}`,
-                    body: mostRecentNeedactionMsg.inlineBody,
                     count: thread.needactionMessages.length,
-                    datetime: mostRecentNeedactionMsg.datetime,
-                    displayName: thread.displayName,
-                    imgUrl: mostRecentNeedactionMsg.module_icon,
+                    imgUrl: message.module_icon,
                     hasMarkAsReadButton: true,
-                    mostRecentMsg,
+                    message,
                     thread: thread,
                     isNeedaction: true,
                 });

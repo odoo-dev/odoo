@@ -62,10 +62,10 @@
             </NotificationItem>
             <t t-foreach="displayedPreviews" t-as="preview" t-key="preview.id">
                 <NotificationItem
-                    body="preview.body"
-                    count="preview.count || threadService.getCounter(preview.thread)"
-                    datetime="preview.datetime"
-                    displayName="preview.displayName"
+                    body="preview.message?.inlineBody"
+                    count="preview.count"
+                    datetime="message?.datetime"
+                    displayName="preview.thread.displayName"
                     iconSrc="preview.imgUrl"
                     hasMarkAsReadButton="preview.hasMarkAsReadButton"
                     isLast="preview_last and failures.length === 0"
@@ -74,12 +74,12 @@
                     <t t-set-slot="icon">
                         <ImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.personas[createLocalId('partner', preview.chatPartnerId)]"/>
                     </t>
-                    <t t-if="preview.mostRecentMsg" t-set-slot="body-icon">
-                        <t t-if="preview.mostRecentMsg.isSelfAuthored">
+                    <t t-if="preview.message" t-set-slot="body-icon">
+                        <t t-if="preview.message.isSelfAuthored">
                             <i class="fa fa-mail-reply me-1"/>You:
                         </t>
-                        <t t-elif="preview.mostRecentMsg.author">
-                            <t t-esc="preview.mostRecentMsg.author.name"/>:
+                        <t t-elif="preview.message.author">
+                            <t t-esc="preview.message.author.name"/>:
                         </t>
                     </t>
                 </NotificationItem>

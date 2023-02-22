@@ -843,3 +843,41 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test(
+    "two previews for channel if it has non needaction and needaction messages",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({ name: "Partner1" });
+        const channelId = pyEnv["mail.channel"].create({ name: "Test" });
+        const messageId = pyEnv["mail.message"].create({
+            author_id: partnerId,
+            body: "Message with needaction",
+            model: "mail.channel",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: channelId,
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: messageId,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        });
+        pyEnv["mail.message"].create({
+            author_id: partnerId,
+            body: "Message without needaction",
+            model: "mail.channel",
+            res_id: channelId,
+        });
+
+        await start();
+        await click(".o_menu_systray i[aria-label='Messages']");
+        assert.containsN(target, ".o-mail-notification-item", 2);
+        const items = target.querySelectorAll(".o-mail-notification-item");
+        assert.ok(items[0].textContent.includes("Test (2)"));
+        assert.ok(items[0].textContent.includes("Message without needaction"));
+        assert.ok(items[1].textContent.includes("Test"));
+        assert.ok(items[1].textContent.includes("Message with needaction"));
+    }
+);
