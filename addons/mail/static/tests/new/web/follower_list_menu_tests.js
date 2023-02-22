@@ -170,9 +170,9 @@ QUnit.test("click on remove follower", async function (assert) {
 
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-remove-button");
+    assert.containsOnce(target, "button[title='Remove this follower']");
 
-    await click(".o-mail-chatter-topbar-follower-list-follower-remove-button");
+    await click("button[title='Remove this follower']");
     assert.verifySteps(["message_unsubscribe"]);
     assert.containsNone(target, ".o-mail-chatter-topbar-follower-list-follower");
 });
@@ -220,22 +220,10 @@ QUnit.test(
         const followersList = document.querySelectorAll(
             ".o-mail-chatter-topbar-follower-list-follower"
         );
-        assert.containsOnce(
-            followersList[0],
-            ".o-mail-chatter-topbar-follower-list-follower-edit-button"
-        );
-        assert.containsOnce(
-            followersList[0],
-            ".o-mail-chatter-topbar-follower-list-follower-remove-button"
-        );
-        assert.containsNone(
-            followersList[1],
-            ".o-mail-chatter-topbar-follower-list-follower-edit-button"
-        );
-        assert.containsNone(
-            followersList[1],
-            ".o-mail-chatter-topbar-follower-list-follower-remove-button"
-        );
+        assert.containsOnce(followersList[0], "button[title='Edit subscription']");
+        assert.containsOnce(followersList[0], "button[title='Remove this follower']");
+        assert.containsNone(followersList[1], "button[title='Edit subscription']");
+        assert.containsNone(followersList[1], "button[title='Remove this follower']");
     }
 );
 
@@ -282,22 +270,10 @@ QUnit.test(
         const followersList = document.querySelectorAll(
             ".o-mail-chatter-topbar-follower-list-follower"
         );
-        assert.containsOnce(
-            followersList[0],
-            ".o-mail-chatter-topbar-follower-list-follower-edit-button"
-        );
-        assert.containsOnce(
-            followersList[0],
-            ".o-mail-chatter-topbar-follower-list-follower-remove-button"
-        );
-        assert.containsOnce(
-            followersList[1],
-            ".o-mail-chatter-topbar-follower-list-follower-edit-button"
-        );
-        assert.containsOnce(
-            followersList[1],
-            ".o-mail-chatter-topbar-follower-list-follower-remove-button"
-        );
+        assert.containsOnce(followersList[0], "button[title='Edit subscription']");
+        assert.containsOnce(followersList[0], "button[title='Remove this follower']");
+        assert.containsOnce(followersList[1], "button[title='Edit subscription']");
+        assert.containsOnce(followersList[1], "button[title='Remove this follower']");
     }
 );
 

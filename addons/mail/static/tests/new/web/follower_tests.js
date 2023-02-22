@@ -63,8 +63,8 @@ QUnit.test("base rendering editable", async function (assert) {
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-details");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-avatar");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-edit-button");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-remove-button");
+    assert.containsOnce(target, "button[title='Edit subscription']");
+    assert.containsOnce(target, "button[title='Remove this follower']");
 });
 
 QUnit.test("click on partner follower details", async function (assert) {
@@ -124,9 +124,9 @@ QUnit.test("click on edit follower", async function (assert) {
     });
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-edit-button");
+    assert.containsOnce(target, "button[title='Edit subscription']");
 
-    await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
+    await click("button[title='Edit subscription']");
     assert.verifySteps(["fetch_subtypes"]);
     assert.containsOnce(target, ".o-mail-follower-subtype-dialog");
 });
@@ -154,13 +154,13 @@ QUnit.test("edit follower and close subtype dialog", async function (assert) {
     });
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
-    assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower-edit-button");
+    assert.containsOnce(target, "button[title='Edit subscription']");
 
-    await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
+    await click("button[title='Edit subscription']");
     assert.verifySteps(["fetch_subtypes"]);
     assert.containsOnce(target, ".o-mail-follower-subtype-dialog");
 
-    await click(".o-mail-follower-subtype-dialog-close");
+    await click(".o-mail-follower-subtype-dialog button:contains(Cancel)");
     assert.containsNone(target, ".o-mail-follower-subtype-dialog");
 });
 
@@ -191,7 +191,7 @@ QUnit.test("remove a follower in a dirty form view", async function (assert) {
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
 
-    await click(".o-mail-chatter-topbar-follower-list-follower-remove-button");
+    await click("button[title='Remove this follower']");
     assert.strictEqual(
         target.querySelector(".o-mail-chatter-topbar-followers-count").innerText,
         "0"
