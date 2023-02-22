@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Persona } from "@mail/new/core/persona_model";
-import { assignDefined, createLocalId } from "../utils/misc";
+import { assignDefined, createLocalId, nullifyClearCommands } from "../utils/misc";
 import { registry } from "@web/core/registry";
 
 export class PersonaService {
@@ -29,11 +29,17 @@ export class PersonaService {
         if (!persona) {
             persona = new Persona();
             persona._store = this.store;
+            persona.localId = localId;
             this.store.personas[localId] = persona;
-            // Get reactive version.
-            persona = this.store.personas[localId];
         }
-        assignDefined(persona, { ...data, localId });
+        this.update(persona, data);
+        // return reactive version
+        return this.store.personas[localId];
+    }
+
+    update(persona, data) {
+        nullifyClearCommands(data);
+        assignDefined(persona, { ...data });
         if (
             persona.type === "partner" &&
             persona.im_status !== "im_partner" &&
@@ -42,8 +48,6 @@ export class PersonaService {
         ) {
             this.store.registeredImStatusPartners?.push(persona.id);
         }
-        // return reactive version
-        return persona;
     }
 }
 
