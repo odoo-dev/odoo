@@ -864,3 +864,24 @@ QUnit.test("remove an uploading attachment", async function (assert) {
     await click(".o-mail-attachment-card-aside-unlink");
     assert.containsNone(target, ".o-mail-composer .o-mail-attachment-card");
 });
+
+QUnit.test(
+    "Show a default status in the recipient status text when the thread doesn't have a name.",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({});
+        const { openFormView } = await start();
+        await openFormView("res.partner", partnerId);
+        await click("button:contains(Send message)");
+        assert.containsOnce(target, ".o-mail-chatter:contains(To followers of:  this document)");
+    }
+);
+
+QUnit.test("Show a thread name in the recipient status text.", async function (assert) {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "test name" });
+    const { openFormView } = await start();
+    await openFormView("res.partner", partnerId);
+    await click("button:contains(Send message)");
+    assert.containsOnce(target, '.o-mail-chatter:contains(To followers of:  "test name")');
+});

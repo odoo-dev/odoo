@@ -113,9 +113,20 @@ export class Chatter extends Component {
 
         onMounted(this.scrollPosition.restore);
         onPatched(this.scrollPosition.restore);
-        onWillStart(() =>
-            this.load(this.props.threadId, ["followers", "attachments", "suggestedRecipients"])
-        );
+        onWillStart(() => {
+            if (this.props.threadId) {
+                this.state.thread = this.threadService.insert({
+                    id: this.props.threadId,
+                    model: this.props.threadModel,
+                    name: this.props.displayName || undefined,
+                });
+            }
+            return this.load(this.props.threadId, [
+                "followers",
+                "attachments",
+                "suggestedRecipients",
+            ]);
+        });
         onWillUpdateProps((nextProps) => {
             this.load(nextProps.threadId, ["followers", "attachments", "suggestedRecipients"]);
             if (nextProps.threadId === false) {

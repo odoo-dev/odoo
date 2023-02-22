@@ -77,7 +77,19 @@
         </div>
         <t t-if="state.thread.composer.type">
             <t t-if="state.thread.composer.type === 'message'">
-                <div class="flex-shrink-0 px-3 pb-1 pt-2 text-truncate" style="margin-left:48px;"><em class="text-muted">To followers of:</em> <b class="px-1">"<t t-esc="state.thread.displayName"/>"</b></div>
+                <div class="flex-shrink-0 px-3 pb-1 pt-2 text-truncate" style="margin-left:48px;">
+                    <em class="text-muted">
+                        To followers of:
+                    </em>
+                    <b class="px-1">
+                        <t t-if="state.thread.displayName or state.thread.name">
+                            "<t t-out="state.thread.displayName or state.thread.name"/>"
+                        </t>
+                        <t t-else="">
+                            this document
+                        </t>
+                    </b>
+                </div>
             </t>
             <t t-if="state.thread.composer.type === 'message'" t-set="placeholder">Send a message to followers...</t>
             <t t-else="" t-set="placeholder">Log an internal note...</t>
