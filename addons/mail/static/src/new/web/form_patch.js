@@ -75,6 +75,9 @@ patch(FormController.prototype, "mail/new", {
             const doc = archXml.ownerDocument;
             const rootT = doc.createElement("div");
             rootT.setAttribute("chatter", "");
+            if (hasMessageList) {
+                rootT.setAttribute("messages", "");
+            }
             rootT.setAttribute("class", "o_FormRenderer_chatterContainer");
             const chatterTag = doc.createElement("Chatter");
             chatterTag.setAttribute(
