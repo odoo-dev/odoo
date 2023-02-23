@@ -182,9 +182,10 @@ patch(FormCompiler.prototype, "mail/new", {
                 return result;
             }
             if (el.hasAttribute("chatter")) {
-                // we don't want to the form compiler to interact with mail
-                // fields
-                return el;
+                // We don't want the form compiler to interact with mail fields,
+                // but make a copy to ensure the node is transfered to the
+                // compiled DOM without being removed from arch.
+                return el.cloneNode(true);
             }
         }
         return this._super(el, params);
