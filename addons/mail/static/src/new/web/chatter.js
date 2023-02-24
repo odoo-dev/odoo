@@ -118,7 +118,7 @@ export class Chatter extends Component {
                 this.state.thread = this.threadService.insert({
                     id: this.props.threadId,
                     model: this.props.threadModel,
-                    name: this.props.displayName || undefined,
+                    name: this.props.webRecord?.data?.display_name || undefined,
                 });
             }
             return this.load(this.props.threadId, [
