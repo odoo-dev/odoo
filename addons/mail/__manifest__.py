@@ -116,13 +116,13 @@ For more specific needs, you may also assign custom-defined actions
     'application': True,
     'assets': {
         'mail.assets_core_messaging': [
-            'mail/static/src/model.js',
-            'mail/static/src/model/*.js',
-            'mail/static/src/core_models/*.js',
+            # 'mail/static/src/model.js',
+            # 'mail/static/src/model/*.js',
+            # 'mail/static/src/core_models/*.js',
         ],
         'mail.assets_messaging': [
-            ('include', 'mail.assets_core_messaging'),
-            'mail/static/src/models/*.js',
+            # ('include', 'mail.assets_core_messaging'),
+            # 'mail/static/src/models/*.js',
             'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
         ],
         # Custom bundle in case we want to remove things that are later added to web.assets_common
