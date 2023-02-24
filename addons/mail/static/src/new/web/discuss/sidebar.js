@@ -9,7 +9,6 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "@mail/new/utils/misc";
-import { ChatWindowIcon } from "@mail/new/web/chat_window/chat_window_icon";
 
 import { _t } from "@web/core/l10n/translation";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
@@ -20,7 +19,7 @@ import { useRtc } from "@mail/new/rtc/rtc_hook";
  */
 export class Sidebar extends Component {
     static template = "mail.discuss_sidebar";
-    static components = { ChannelSelector, ThreadIcon, ImStatus, ChatWindowIcon };
+    static components = { ChannelSelector, ThreadIcon, ImStatus };
     static props = [];
 
     setup() {
