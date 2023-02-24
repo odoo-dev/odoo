@@ -1100,3 +1100,25 @@ QUnit.test("Unpinning chat should display notification", async function (assert)
     await click(".o-mail-category-item [title='Unpin Conversation']");
     assert.verifySteps(["You unpinned your conversation with Mitchell Admin"]);
 });
+
+QUnit.test("Can leave channel", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { env, openDiscuss } = await start();
+    await openDiscuss(channelId);
+    assert.containsOnce(target, ".o-mail-category-item:contains(General)");
+    const messageId = pyEnv["mail.message"].create({
+        body: '<div class="o_mail_notification">Mitchell Admin left the channel</div>',
+        model: "mail.channel",
+        res_id: channelId,
+        message_type: "comment",
+    });
+    const [message] = await env.services.orm.call("mail.message", "message_format", [[messageId]]);
+    await afterNextRender(() => {
+        pyEnv["bus.bus"]._sendmany([
+            [channelId, "mail.channel/leave", { id: channelId }],
+            [channelId, "mail.channel/new_message", { id: channelId, message }],
+        ]);
+    });
+    assert.containsNone(target, ".o-mail-category-item:contains(General)");
+});

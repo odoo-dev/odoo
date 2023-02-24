@@ -176,6 +176,14 @@ export class Messaging {
 
     handleNotification(notifications) {
         console.log("notifications received", notifications);
+        const channelsLeft = new Set(
+            notifications.reduce((channelIds, notification) => {
+                if (notification.type === "mail.channel/leave") {
+                    channelIds.push(notification.payload.id);
+                }
+                return channelIds;
+            }, [])
+        );
         for (const notif of notifications) {
             switch (notif.type) {
                 case "mail.activity/updated":
@@ -187,6 +195,14 @@ export class Messaging {
                     }
                     break;
                 case "mail.channel/new_message":
+                    if (channelsLeft.has(notif.payload.id)) {
+                        // Do not handle new message notification if the channel
+                        // was just left. This issue occurs because the
+                        // `mail.channel/leave` and the
+                        // `mail.channel/new_message` notifications come from
+                        // the bus as a batch.
+                        return;
+                    }
                     this._handleNotificationNewMessage(notif);
                     break;
                 case "mail.channel/leave":
@@ -195,6 +211,7 @@ export class Messaging {
                             ...notif.payload,
                             model: "mail.channel",
                         });
+                        delete this.store.threads[thread.localId];
                         removeFromArray(this.store.discuss.channels.threads, thread.localId);
                         if (thread.localId === this.store.discuss.threadLocalId) {
                             this.store.discuss.threadLocalId = undefined;
