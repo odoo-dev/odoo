@@ -73,7 +73,7 @@
                 <t t-if="userSettings.useBlur">
                     <div class="mb-3 d-flex align-items-center flex-wrap">
                         <label class="d-flex align-items-center flex-wrap mw-100 cursor-pointer" title="Background blur intensity" aria-label="Background blur intensity">
-                            <span class="me-2 text-truncate">Background blur intensity</span>
+                            <span class="me-2 text-truncate">Background blur intensity <t t-esc="userSettings.backgroundBlurAmount"/></span>
                             <div class="d-flex w-100">
                                 <input class="flex-grow-2 form-range" type="range" min="0" max="20" step="1" t-att-value="userSettings.backgroundBlurAmount" t-on-change="onChangeBackgroundBlurAmount"/>
                             </div>

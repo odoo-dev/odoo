@@ -3,13 +3,14 @@
 import { browser } from "@web/core/browser/browser";
 
 import { monitorAudio } from "./media_monitoring";
+import { BlurManager } from "./blur_manager";
 import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { reactive } from "@odoo/owl";
 
 import { RtcSession } from "./rtc_session_model";
 import { debounce } from "@web/core/utils/timing";
-import { createLocalId } from "../utils/misc";
+import { closeStream, createLocalId, onChange } from "../utils/misc";
 import { registry } from "@web/core/registry";
 
 const ORDERED_TRANSCEIVER_NAMES = ["audio", "video"];
@@ -110,36 +111,38 @@ export class Rtc {
              */
             outgoingSessions: new Set(),
             pttReleaseTimeout: undefined,
+            sourceCameraStream: null,
         });
-        // discuss refactor: use observe util when available
-        const proxyBlur = reactive(this.userSettingsService, () => {
-            if (!this.state.sendCamera) {
-                return;
-            }
-            this.toggleVideo("camera");
-            void proxyBlur.useBlur;
-        });
-        void proxyBlur.useBlur;
+        this.blur = undefined;
         this.ringingThreads = reactive([], () => this.onRingingThreadsChange());
         void this.ringingThreads.length;
         this.store.ringingThreads = this.ringingThreads;
-        const proxyVoiceActivation = reactive(this.userSettingsService, async () => {
-            await this.linkVoiceActivation();
-            void proxyVoiceActivation.voiceActivationThreshold;
-        });
-        void proxyVoiceActivation.voiceActivationThreshold;
-        const proxyPushToTalk = reactive(this.userSettingsService, async () => {
-            await this.linkVoiceActivation();
-            void proxyPushToTalk.usePushToTalk;
-        });
-        void proxyPushToTalk.usePushToTalk;
-        const proxyAudioInputDevice = reactive(this.userSettingsService, async () => {
-            if (this.state.selfSession) {
-                this.resetAudioTrack();
+        onChange(this.userSettingsService, "useBlur", () => {
+            if (this.state.sendCamera) {
+                this.toggleVideo("camera", true);
             }
-            void proxyAudioInputDevice.audioInputDeviceId;
         });
-        void proxyAudioInputDevice.audioInputDeviceId;
+        onChange(this.userSettingsService, "edgeBlurAmount", () => {
+            if (this.blurManager) {
+                this.blurManager.edgeBlur = this.userSettingsService.edgeBlurAmount;
+            }
+        });
+        onChange(this.userSettingsService, "backgroundBlurAmount", () => {
+            if (this.blurManager) {
+                this.blurManager.backgroundBlur = this.userSettingsService.backgroundBlurAmount;
+            }
+        });
+        onChange(this.userSettingsService, "voiceActivationThreshold", async () => {
+            await this.linkVoiceActivation();
+        });
+        onChange(this.userSettingsService, "usePushToTalk", async () => {
+            await this.linkVoiceActivation();
+        });
+        onChange(this.userSettingsService, "audioInputDeviceId", async () => {
+            if (this.state.selfSession) {
+                await this.resetAudioTrack();
+            }
+        });
         this.env.bus.addEventListener(
             "THREAD-SERVICE:UPDATE_RTC_SESSIONS",
             ({ detail: { commands = [], record, thread } }) => {
@@ -834,6 +837,12 @@ export class Rtc {
         this.state.audioTrack?.stop();
         this.state.videoTrack?.stop();
         this.state.notificationsToSend.clear();
+        closeStream(this.state.sourceCameraStream);
+        this.state.sourceCameraStream = null;
+        if (this.blurManager) {
+            this.blurManager.close();
+            this.blurManager = undefined;
+        }
         Object.assign(this.state, {
             updateAndBroadcastDebounce: undefined,
             disconnectAudioMonitor: undefined,
@@ -995,11 +1004,17 @@ export class Rtc {
     async setVideo(type, activateVideo = false) {
         this.state.sendScreen = false;
         this.state.sendCamera = false;
+        if (this.blurManager) {
+            this.blurManager.close();
+            this.blurManager = undefined;
+        }
         const stopVideo = () => {
             if (this.state.videoTrack) {
                 this.state.videoTrack.stop();
             }
             this.state.videoTrack = undefined;
+            closeStream(this.state.sourceCameraStream);
+            this.state.sourceCameraStream = null;
         };
         if (!activateVideo) {
             if (type === "screen") {
@@ -1008,15 +1023,19 @@ export class Rtc {
             stopVideo();
             return;
         }
-        let stream;
+        let sourceStream;
         try {
             if (type === "camera") {
-                stream = await browser.navigator.mediaDevices.getUserMedia({
-                    video: VIDEO_CONFIG,
-                });
+                if (this.state.sourceCameraStream) {
+                    sourceStream = this.state.sourceCameraStream;
+                } else {
+                    sourceStream = await browser.navigator.mediaDevices.getUserMedia({
+                        video: VIDEO_CONFIG,
+                    });
+                }
             }
             if (type === "screen") {
-                stream = await browser.navigator.mediaDevices.getDisplayMedia({
+                sourceStream = await browser.navigator.mediaDevices.getDisplayMedia({
                     video: VIDEO_CONFIG,
                 });
                 this.soundEffectsService.play("screen-sharing");
@@ -1030,16 +1049,40 @@ export class Rtc {
             stopVideo();
             return;
         }
-        const track = stream ? stream.getVideoTracks()[0] : undefined;
+        let videoStream = sourceStream;
+        if (this.userSettingsService.useBlur && type === "camera") {
+            try {
+                this.blurManager = new BlurManager(sourceStream, {
+                    backgroundBlur: this.userSettingsService.backgroundBlurAmount,
+                    edgeBlur: this.userSettingsService.edgeBlurAmount,
+                });
+                videoStream = await this.blurManager.stream;
+            } catch (_e) {
+                this.notification.add(
+                    sprintf(_t("%(name)s: %(message)s)"), {
+                        name: _e.name,
+                        message: _e.message,
+                    }),
+                    { type: "warning" }
+                );
+                this.userSettingsService.useBlur = false;
+            }
+        }
+        const track = videoStream ? videoStream.getVideoTracks()[0] : undefined;
         if (track) {
             track.addEventListener("ended", async () => {
                 await this.toggleVideo(type, false);
             });
         }
+        // ensures that the previous stream is stopped before overwriting it
+        if (this.state.sourceCameraStream && sourceStream.id !== this.state.sourceCameraStream.id) {
+            closeStream(this.state.sourceCameraStream);
+        }
         Object.assign(this.state, {
+            sourceCameraStream: sourceStream,
             videoTrack: track,
-            sendCamera: type === "camera" && track,
-            sendScreen: type === "screen" && track,
+            sendCamera: Boolean(type === "camera" && track),
+            sendScreen: Boolean(type === "screen" && track),
         });
     }
 
@@ -1262,15 +1305,10 @@ export class Rtc {
         if (track.kind === "video") {
             session.videoStream = stream;
         }
-        console.log("updateStream", session.id);
     }
 
     clearSession(session) {
-        if (session.audioStream) {
-            for (const track of session.audioStream.getTracks() || []) {
-                track.stop();
-            }
-        }
+        closeStream(session.audioStream);
         if (session.audioElement) {
             session.audioElement.pause();
             try {
@@ -1308,11 +1346,7 @@ export class Rtc {
     }
 
     removeVideoFromSession(session) {
-        if (session.videoStream) {
-            for (const track of session.videoStream.getTracks() || []) {
-                track.stop();
-            }
-        }
+        closeStream(session.videoStream);
         session.videoStream = undefined;
     }
 

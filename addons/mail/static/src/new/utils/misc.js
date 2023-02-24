@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { reactive } from "@odoo/owl";
+
 export function createLocalId(...args) {
     return args.join(",");
 }
@@ -65,4 +67,25 @@ export function markEventHandled(ev, markName) {
         eventHandledWeakMap.set(ev, []);
     }
     eventHandledWeakMap.get(ev).push(markName);
+}
+
+/**
+ * @param {Object} target
+ * @param {string} key
+ * @param {Function} callback
+ */
+export function onChange(target, key, callback) {
+    const proxy = reactive(target, () => {
+        void proxy[key];
+        callback();
+    });
+    void proxy[key];
+    return proxy;
+}
+
+/**
+ * @param {MediaStream} [stream]
+ */
+export function closeStream(stream) {
+    stream?.getTracks?.().forEach((track) => track.stop());
 }
