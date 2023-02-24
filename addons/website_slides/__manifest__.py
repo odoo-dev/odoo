@@ -261,7 +261,7 @@ Featuring
             'website_slides/static/tests/helpers/*.js',
         ],
         'web.qunit_suite_tests': [
-            'website_slides/static/tests/qunit_suite_tests/**/*.js',
+            'website_slides/static/tests/new/**/*.js',
         ],
     },
     'license': 'LGPL-3',

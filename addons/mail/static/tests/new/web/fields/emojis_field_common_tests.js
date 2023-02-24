@@ -45,10 +45,7 @@ export async function testEmojiButton(assert, target, input, emojiButton) {
     const firstEmojiItem = target.querySelector(".o-mail-emoji-picker-content .o-emoji");
     const firstEmojiItemCharacter = firstEmojiItem.textContent;
     await click(firstEmojiItem);
-    assert.ok(
-        input.value.endsWith(firstEmojiItemCharacter),
-        "Should have added the right emoji in the input field"
-    );
+    assert.ok(input.value.endsWith(firstEmojiItemCharacter));
     // add some text at the start and select from the second half of the word to right before the emoji we just inserted
     input.value = "test" + input.value;
     const inputTextLength = input.value.length;
@@ -59,9 +56,5 @@ export async function testEmojiButton(assert, target, input, emojiButton) {
     const secondEmojiItemCharacter = secondEmojiItem.textContent;
     await click(secondEmojiItem);
     // the selected region is replaced and the rest stays in place
-    assert.deepEqual(
-        input.value,
-        "te" + secondEmojiItemCharacter + firstEmojiItemCharacter,
-        "Should have replaced the selection with the emoji"
-    );
+    assert.deepEqual(input.value, "te" + secondEmojiItemCharacter + firstEmojiItemCharacter);
 }

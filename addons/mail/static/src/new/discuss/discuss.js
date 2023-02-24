@@ -98,10 +98,6 @@ export class Discuss extends Component {
         return this.store.threads[this.store.discuss.threadLocalId];
     }
 
-    unstarAll() {
-        this.messageService.unstarAll();
-    }
-
     toggleInviteForm() {
         if (this.closePopover) {
             this.closePopover();
@@ -111,12 +107,8 @@ export class Discuss extends Component {
             this.closePopover = this.popover.add(
                 el,
                 ChannelInvitation,
-                {
-                    thread: this.thread,
-                },
-                {
-                    onClose: () => (this.closePopover = null),
-                }
+                { thread: this.thread },
+                { onClose: () => (this.closePopover = null) }
             );
         }
     }
