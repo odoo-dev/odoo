@@ -86,6 +86,10 @@ export class CallSettings extends Component {
         this.userSettings.setThresholdValue(parseFloat(ev.target.value));
     }
 
+    onChangeBlur(ev) {
+        this.userSettings.useBlur = ev.target.checked;
+    }
+
     onChangeVideoFilterCheckbox(ev) {
         const showOnlyVideo = ev.target.checked;
         this.props.thread.showOnlyVideo = showOnlyVideo;
@@ -93,10 +97,6 @@ export class CallSettings extends Component {
         if (showOnlyVideo && activeRtcSession && !activeRtcSession.videoStream) {
             this.props.thread.activeRtcSession = undefined;
         }
-    }
-
-    onChangeBlur(ev) {
-        this.userSettings.useBlur = !this.userSettings.useBlur;
     }
 
     onChangeBackgroundBlurAmount(ev) {
