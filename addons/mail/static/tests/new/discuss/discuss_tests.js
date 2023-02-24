@@ -381,9 +381,9 @@ QUnit.test("sidebar: chat im_status rendering", async function (assert) {
     assert.strictEqual(chat1.textContent, "Partner1");
     assert.strictEqual(chat2.textContent, "Partner2");
     assert.strictEqual(chat3.textContent, "Partner3");
-    assert.containsOnce(chat1, ".o-mail-chatwindow-icon div[title='Offline']");
-    assert.containsOnce(chat2, ".o-mail-chatwindow-icon-online");
-    assert.containsOnce(chat3, ".o-mail-chatwindow-icon div[title='Away']");
+    assert.containsOnce(chat1, ".o-mail-thread-icon div[title='Offline']");
+    assert.containsOnce(chat2, ".o-mail-thread-icon-online");
+    assert.containsOnce(chat3, ".o-mail-thread-icon div[title='Away']");
 });
 
 QUnit.test("No load more when fetch below fetch limit of 30", async function (assert) {
@@ -1319,15 +1319,18 @@ QUnit.test(
         const { openDiscuss } = await start();
         await openDiscuss();
         await click(".o-mail-category-item:contains('Michel Online')");
-        assert.containsOnce(target, ".o-mail-thread-icon-online");
+        assert.containsOnce(target, ".o-mail-discuss-header .o-mail-thread-icon [title='Online']");
         await click(".o-mail-category-item:contains('Jacqueline Offline')");
-        assert.containsOnce(target, ".o-mail-thread-icon-offline");
+        assert.containsOnce(target, ".o-mail-discuss-header .o-mail-thread-icon [title='Offline']");
         await click(".o-mail-category-item:contains('Nabuchodonosor Away')");
-        assert.containsOnce(target, ".o-mail-thread-icon-away");
+        assert.containsOnce(target, ".o-mail-discuss-header .o-mail-thread-icon [title='Away']");
         await click(".o-mail-category-item:contains('Robert Fired')");
-        assert.containsOnce(target, ".o-mail-thread-icon-unknown");
+        assert.containsOnce(
+            target,
+            ".o-mail-discuss-header .o-mail-thread-icon [title='No IM status available']"
+        );
         await click(".o-mail-category-item:contains('OdooBot')");
-        assert.containsOnce(target, ".o-mail-thread-icon-bot");
+        assert.containsOnce(target, ".o-mail-discuss-header .o-mail-thread-icon [title='Bot']");
     }
 );
 

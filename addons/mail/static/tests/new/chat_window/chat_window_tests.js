@@ -105,7 +105,7 @@ QUnit.test("chat window: basic rendering", async function (assert) {
     await click(".o-mail-notification-item");
     assert.containsOnce(target, ".o-mail-chat-window");
     assert.containsOnce(target, ".o-mail-chat-window-header");
-    assert.containsOnce($(target).find(".o-mail-chat-window-header"), ".o-mail-chatwindow-icon");
+    assert.containsOnce($(target).find(".o-mail-chat-window-header"), ".o-mail-thread-icon");
     assert.containsOnce(target, ".o-mail-chat-window-header-name:contains(General)");
     assert.containsN(target, ".o-mail-command", 5);
     assert.containsOnce(target, ".o-mail-command[title='Start a Call']");

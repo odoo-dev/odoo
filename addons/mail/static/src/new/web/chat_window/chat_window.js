@@ -11,7 +11,7 @@ import { useService } from "@web/core/utils/hooks";
 import { localization } from "@web/core/l10n/localization";
 import { CallSettings } from "@mail/new/rtc/call_settings";
 import { ChannelMemberList } from "@mail/new/discuss/channel_member_list";
-import { ChatWindowIcon } from "@mail/new/web/chat_window/chat_window_icon";
+import { ThreadIcon } from "@mail/new/discuss/thread_icon";
 import { ChannelInvitation } from "@mail/new/discuss/channel_invitation";
 import { isEventHandled } from "@mail/new/utils/misc";
 import { ChannelSelector } from "@mail/new/discuss/channel_selector";
@@ -30,7 +30,7 @@ export class ChatWindow extends Component {
         Composer,
         CallSettings,
         ChannelMemberList,
-        ChatWindowIcon,
+        ThreadIcon,
         ChannelInvitation,
     };
     static props = ["chatWindow", "right?"];

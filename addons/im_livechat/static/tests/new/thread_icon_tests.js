@@ -24,11 +24,7 @@ QUnit.test("Public website visitor is typing", async function (assert) {
     });
     const { env, openDiscuss } = await start();
     await openDiscuss(channelId);
-    assert.containsOnce(
-        target,
-        ".o-mail-thread-icon.fa.fa-comments",
-        "should have default livechat icon"
-    );
+    assert.containsOnce(target, ".o-mail-thread-icon .fa.fa-comments");
     const channel = pyEnv["mail.channel"].searchRead([["id", "=", channelId]])[0];
     // simulate receive typing notification from livechat visitor "is typing"
     await afterNextRender(() =>

@@ -349,7 +349,7 @@ QUnit.test("chat: correspondent is typing", async function (assert) {
         document.body.querySelector(".o-mail-category-item"),
         ".o-mail-discuss-sidebar-threadIcon"
     );
-    assert.containsOnce(document.body, ".o-mail-chatwindow-icon-online");
+    assert.containsOnce(document.body, ".o-mail-thread-icon-online");
 
     // simulate receive typing notification from demo "is typing"
     await afterNextRender(() =>
@@ -370,5 +370,5 @@ QUnit.test("chat: correspondent is typing", async function (assert) {
             is_typing: false,
         })
     );
-    assert.containsOnce(document.body, ".o-mail-chatwindow-icon-online");
+    assert.containsOnce(document.body, ".o-mail-thread-icon-online");
 });
