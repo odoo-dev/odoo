@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
     getFixture,
@@ -22,8 +22,7 @@ QUnit.module("M2XAvatarUser", {
     },
 });
 
-// skipped due to popover showing being too slow for assertion to pass
-QUnit.skipRefactoring("many2many_avatar_user in kanban view", async function (assert) {
+QUnit.test("many2many_avatar_user in kanban view", async function (assert) {
     const pyEnv = await startServer();
     const userIds = pyEnv["res.users"].create([
         { name: "Mario" },
@@ -69,13 +68,14 @@ QUnit.skipRefactoring("many2many_avatar_user in kanban view", async function (as
         "+2"
     );
 
-    await mouseEnter(target, ".o_kanban_record .o_field_many2many_avatar_user .o_m2m_avatar_empty");
-    assert.containsOnce(target, ".popover");
-    assert.strictEqual(target.querySelector(".popover .o-tooltip > div").innerText.trim(), "Luigi");
-    assert.strictEqual(
-        target.querySelectorAll(".popover .o-tooltip > div")[1].innerText.trim(),
-        "Tapu"
-    );
+    await afterNextRender(async () => {
+        await mouseEnter(
+            target,
+            ".o_kanban_record .o_field_many2many_avatar_user .o_m2m_avatar_empty"
+        );
+    });
+    assert.containsOnce(target, ".popover .o-tooltip > div:contains(Luigi)");
+    assert.containsOnce(target, ".popover .o-tooltip > div:contains(Tapu)");
 });
 
 QUnit.test(
