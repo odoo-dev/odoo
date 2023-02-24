@@ -136,6 +136,10 @@ export const storeService = {
             res.isSmall = ui.isSmall;
             if (!res.isSmall) {
                 res.discuss.activeTab = "all";
+            } else {
+                res.discuss.activeTab = res.discuss.threadLocalId
+                    ? res.threads[res.discuss.threadLocalId].type
+                    : "all";
             }
         });
         return res;
