@@ -2,7 +2,6 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.chat_window" owl="1">
-    <t t-set="chatWindow" t-value="props.chatWindow"/>
     <div class="o-mail-chat-window"
         t-att-style="style"
         t-att-class="{
@@ -17,7 +16,7 @@
                 <i class="fa fa-arrow-left"/>
             </div>
             <ChatWindowIcon t-if="thread" thread="thread" className="'ms-3 me-1 my-0'" />
-            <span class="o-mail-chat-window-header-name text-truncate" t-att-title="chatWindow.displayName" t-esc="chatWindow.displayName" t-att-class="{
+            <span class="o-mail-chat-window-header-name text-truncate" t-att-title="props.chatWindow.displayName" t-esc="props.chatWindow.displayName" t-att-class="{
                     'ms-3 me-1 my-0': !thread,
                 }"
             />

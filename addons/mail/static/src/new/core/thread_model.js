@@ -162,7 +162,7 @@ export class Thread {
         if (this.type === "chat" && this.chatPartnerId) {
             return (
                 this.customName ||
-                this._store.personas[createLocalId("partner", this.chatPartnerId)].name
+                this._store.personas[createLocalId("partner", this.chatPartnerId)].nameOrDisplayName
             );
         }
         if (this.type === "group" && !this.name) {
