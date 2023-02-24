@@ -5,6 +5,10 @@
     margin-right: auto;
 }
 
+.o-mail-chatter .o-mail-message-body [summary~="o_mail_notification"] {
+    display: none;
+}
+
 .o-mail-chatter-topbar {
     padding-inline-start: 0;
 }
