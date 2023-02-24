@@ -28,11 +28,11 @@
         'mail.assets_backend': [
             'note/static/src/new/**/*',
         ],
-        'mail.assets_messaging': [
-            'note/static/src/models/*.js',
-        ],
+        # 'mail.assets_messaging': [
+        #     'note/static/src/models/*.js',
+        # ],
         'web.assets_backend': [
-            'note/static/src/components/**/*',
+            # 'note/static/src/components/**/*',
             'note/static/src/scss/note.scss',
         ],
         'web.qunit_suite_tests': [

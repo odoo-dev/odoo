@@ -8,7 +8,7 @@ import { escape } from "@web/core/utils/strings";
  * It's currently used to format text and wrap the emojis around <span class="o_mail_emoji"> to make them look nicer
  *
  */
-export default {
+export const emojiMixin = {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------

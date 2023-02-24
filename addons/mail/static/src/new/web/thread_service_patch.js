@@ -3,7 +3,6 @@
 import { Follower } from "@mail/new/core/follower_model";
 import { ThreadService, threadService } from "@mail/new/core/thread_service";
 import { createLocalId } from "@mail/new/utils/misc";
-import { parseEmail } from "@mail/js/utils";
 
 import { markup } from "@odoo/owl";
 
@@ -11,6 +10,21 @@ import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
 let nextId = 1;
+
+// Parses text to find email: Tagada <address@mail.fr> -> [Tagada, address@mail.fr] or False
+function parseEmail(text) {
+    if (text) {
+        var result = text.match(/(.*)<(.*@.*)>/);
+        if (result) {
+            return [_.str.trim(result[1]), _.str.trim(result[2])];
+        }
+        result = text.match(/(.*@.*)/);
+        if (result) {
+            return [_.str.trim(result[1]), _.str.trim(result[1])];
+        }
+        return [text, false];
+    }
+}
 
 patch(ThreadService.prototype, "mail/web", {
     setup(env, services) {

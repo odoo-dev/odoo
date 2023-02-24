@@ -142,10 +142,10 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/webclient/webclient.scss',
             'web/static/src/core/utils/*.scss',
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
-            'mail/static/src/scss/variables/derived_variables.scss',
+            # 'mail/static/src/scss/variables/derived_variables.scss',
             'mail/static/src/scss/composer.scss',
             # Dependency of notification_group, notification_request, thread_needaction_preview and thread_preview
-            'mail/static/src/components/notification_list/notification_list_item.scss',
+            # 'mail/static/src/components/notification_list/notification_list_item.scss',
             'mail/static/src/component_hooks/*.js',
             'mail/static/src/components/*/*',
             # Unused by guests and depends on ViewDialogs, better to remove it instead of pulling the whole view dependency tree
@@ -175,14 +175,14 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/legacy/xml/base.xml',
         ],
         'web._assets_primary_variables': [
-            'mail/static/src/scss/variables/primary_variables.scss',
+            # 'mail/static/src/scss/variables/primary_variables.scss',
             'mail/static/src/new/core_ui/primary_variables.scss',
         ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
-            'mail/static/src/scss/variables/derived_variables.scss',
+            # 'mail/static/src/scss/variables/derived_variables.scss',
             # defines mixins and variables used by multiple components
-            'mail/static/src/components/notification_list/notification_list_item.scss',
+            # 'mail/static/src/components/notification_list/notification_list_item.scss',
             'mail/static/src/js/**/*.js',
             'mail/static/src/utils/*.js',
             'mail/static/src/scss/*.scss',

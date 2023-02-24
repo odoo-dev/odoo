@@ -70,9 +70,9 @@
     'installable': True,
     'application': True,
     'assets': {
-        'mail.assets_messaging': [
-            'crm/static/src/models/*.js',
-        ],
+        # 'mail.assets_messaging': [
+        #     'crm/static/src/models/*.js',
+        # ],
         'web.assets_backend': [
             'crm/static/src/views/**/*.js',
             'crm/static/src/views/**/*.xml',
