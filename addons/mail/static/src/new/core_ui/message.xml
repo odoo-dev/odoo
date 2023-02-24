@@ -80,18 +80,7 @@
                             </span>
                         </div>
                     </div>
-                    <div t-if="!state.isEditing" class="o-mail-message-content d-flex position-relative">
-                        <t name="hasTrackingValue" t-if="(message.type === 'notification' or message.isTransient) and !message.isBodyEmpty">
-                            <t t-if="message.subtypeDescription">
-                                <p class="mb-0"><t t-esc="message.subtypeDescription"/></p>
-                            </t>
-                            <t t-if="message.trackingValues.length">
-                                <t t-call="mail.tracking_values"/>
-                            </t>
-                            <div t-if="message.body" class="o-mail-message-body text-break mb-0 bg-view w-100">
-                                <t t-out="message.body"/>
-                            </div>
-                        </t>
+                    <div t-if="!state.isEditing" class="o-mail-message-content position-relative" t-att-class="{'d-flex': env.inDiscussApp}">
                         <t t-if="message.type !== 'notification' and !message.isTransient and (!message.isBodyEmpty or message.subtypeDescription)">
                             <div class="position-relative">
                                 <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
@@ -171,18 +160,6 @@
                 </div>
             </div>
         </div>
-    </t>
-
-    <t t-name="mail.tracking_values" owl="1">
-        <ul class="mb-0 ps-4">
-            <t name="trackingValues" t-foreach="message.trackingValues" t-as="trackingValue" t-key="trackingValue.id">
-                <li>
-                    <span class="fw-bold" t-esc="trackingValue.oldValue.value"/>
-                    <i class="fa fa-long-arrow-right mx-1 text-600" />
-                    <span class="text-info fw-bold" t-esc="trackingValue.newValue.value"/> (<t t-esc="trackingValue.changedField"/>)
-                </li>
-            </t>
-        </ul>
     </t>
 
 </templates>
