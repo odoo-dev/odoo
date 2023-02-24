@@ -178,22 +178,10 @@ export class Message {
         if (!this.subject || !this.originThread || !this.originThread.name) {
             return false;
         }
-        const cleanedThreadName = this.originThread.name.trim().toLowerCase();
-        const cleanedSubject = this.subject.trim().toLowerCase();
-        if (cleanedSubject === cleanedThreadName) {
-            return true;
-        }
-        if (!cleanedSubject.endsWith(cleanedThreadName)) {
-            return false;
-        }
-        const subjectWithoutThreadName = cleanedSubject.slice(
-            0,
-            cleanedSubject.indexOf(cleanedThreadName)
-        );
-        const prefixList = ["re", "fw", "fwd"];
-        // match any prefix as many times as possible
-        const isSequenceOfPrefixes = new RegExp(`^((${prefixList.join("|")}):\\s*)+$`);
-        return isSequenceOfPrefixes.test(subjectWithoutThreadName);
+        const regexPrefix = /^((re|fw|fwd).?:.)*/gi;
+        const cleanedThreadName = this.originThread.name.replace(regexPrefix, "");
+        const cleanedSubject = this.subject.replace(regexPrefix, "");
+        return cleanedSubject === cleanedThreadName;
     }
 
     get isSubjectDefault() {
