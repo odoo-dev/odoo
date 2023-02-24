@@ -4,7 +4,7 @@ import { NotificationGroup } from "@mail/new/core/notification_group_model";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
-patch(NotificationGroup.prototype, "snailmail/notification_group_model", {
+patch(NotificationGroup.prototype, "snailmail", {
     get iconSrc() {
         if (this.type === "snail") {
             return "/snailmail/static/img/snailmail_failure.png";
