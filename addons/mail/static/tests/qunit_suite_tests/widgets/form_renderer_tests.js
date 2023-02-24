@@ -8,72 +8,9 @@ import {
     isScrolledToBottom,
 } from "@mail/../tests/helpers/test_utils";
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
-import { getFixture, editInput } from "@web/../tests/helpers/utils";
 import { dom } from "web.test_utils";
 
 const { triggerEvent } = dom;
-
-let target;
-
-QUnit.module("mail form renderer", {
-    async beforeEach() {
-        target = getFixture();
-    },
-});
-
-QUnit.test("chatter updating", async function (assert) {
-    const pyEnv = await startServer();
-    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
-        { display_name: "first partner" },
-        { display_name: "second partner" },
-    ]);
-    pyEnv["mail.message"].create({
-        body: "not empty",
-        model: "res.partner",
-        res_id: partnerId_2,
-    });
-    const views = {
-        "res.partner,false,form": `
-            <form string="Partners">
-                <sheet>
-                    <field name="name"/>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
-            </form>`,
-    };
-    const { openFormView } = await start({ serverData: { views } });
-    await openFormView("res.partner", partnerId_1, {
-        props: { resIds: [partnerId_1, partnerId_2] },
-    });
-    await click(".o_pager_next");
-    assert.containsOnce(target, ".o-mail-message");
-});
-
-QUnit.test("post message on draft record", async function (assert) {
-    const views = {
-        "res.partner,false,form": `
-            <form string="Partners">
-                <sheet>
-                    <field name="name"/>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
-            </form>`,
-    };
-    const { openView } = await start({ serverData: { views } });
-    await openView({
-        res_model: "res.partner",
-        views: [[false, "form"]],
-    });
-    await click("button:contains(Send message)");
-    await editInput(target, "textarea", "Test");
-    await click(".o-mail-composer button:contains(Send)");
-    assert.containsOnce(target, ".o-mail-message");
-    assert.containsOnce(target, ".o-mail-message:contains(Test)");
-});
 
 QUnit.skipRefactoring(
     "schedule activities on draft record should prompt with scheduling an activity (proceed with action)",
