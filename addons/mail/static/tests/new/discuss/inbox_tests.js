@@ -352,7 +352,7 @@ QUnit.test(
     }
 );
 
-QUnit.skipRefactoring(
+QUnit.test(
     "subject should be shown when the thread name has an extra prefix compared to subject",
     async function (assert) {
         const pyEnv = await startServer();
