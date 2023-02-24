@@ -133,8 +133,9 @@ export class Chatter extends Component {
                 this.state.thread.composer.type = false;
             }
             if (this.onNextUpdate) {
-                this.onNextUpdate(nextProps);
-                this.onNextUpdate = null;
+                if (!this.onNextUpdate(nextProps)) {
+                    this.onNextUpdate = null;
+                }
             }
         });
     }
@@ -280,10 +281,13 @@ export class Chatter extends Component {
             toggle();
         } else {
             this.onNextUpdate = (nextProps) => {
+                // @returns {boolean} retry on next update
                 // if there is no threadId, the save operation probably failed
                 // probably because some required field is not set
                 if (nextProps.threadId) {
                     toggle();
+                } else {
+                    return true;
                 }
             };
             if (this.props.saveRecord) {
