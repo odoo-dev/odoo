@@ -4,7 +4,8 @@ import { _t } from "@web/core/l10n/translation";
 import { ThreadService } from "@mail/new/core/thread_service";
 import { patch } from "web.utils";
 
-patch(ThreadService.prototype, "hr", {
+/** @type {import("@mail/new/core/thread_service").ThreadService} */
+const threadServicePatch = {
     async getChat(person) {
         const { employeeId } = person;
         const _super = this._super.bind(this);
@@ -34,6 +35,11 @@ patch(ThreadService.prototype, "hr", {
                     user = this.store.users[employee.user_id];
                 }
                 user.partner_id = employeeData.user_partner_id[0];
+                this.personaService.insert({
+                    displayName: employeeData.user_partner_id[1],
+                    id: employeeData.user_partner_id[0],
+                    type: "partner",
+                });
             }
         }
         if (!employee.user_id) {
@@ -45,4 +51,6 @@ patch(ThreadService.prototype, "hr", {
         }
         return _super({ userId: employee.user_id });
     },
-});
+};
+
+patch(ThreadService.prototype, "hr", threadServicePatch);

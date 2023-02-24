@@ -398,15 +398,18 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             partners_to.push(this.currentPartnerId);
         }
         const partners = this.getRecords("res.partner", [["id", "in", partners_to]]);
-        const channelMemberIds = this.pyEnv["mail.channel.member"].search([
-            ["partner_id", "in", partners_to],
-        ]);
-        const channel = this.pyEnv["mail.channel"].searchRead([
-            ["channel_type", "=", "chat"],
-            ["channel_member_ids", "in", channelMemberIds],
-        ])[0];
-        if (channel) {
-            return this._mockMailChannelChannelInfo([channel.id])[0];
+        const channels = this.pyEnv["mail.channel"].searchRead([["channel_type", "=", "chat"]]);
+        for (const channel of channels) {
+            const channelMemberIds = this.pyEnv["mail.channel.member"].search([
+                ["channel_id", "=", channel.id],
+                ["partner_id", "in", partners_to],
+            ]);
+            if (
+                channelMemberIds.length === partners.length &&
+                channel.channel_member_ids.length === partners.length
+            ) {
+                return this._mockMailChannelChannelInfo([channel.id])[0];
+            }
         }
         const id = this.pyEnv["mail.channel"].create({
             channel_member_ids: partners.map((partner) => [

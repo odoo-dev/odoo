@@ -44,4 +44,8 @@ export class Persona {
                 return "";
         }
     }
+
+    get nameOrDisplayName() {
+        return this.name || this.displayName;
+    }
 }

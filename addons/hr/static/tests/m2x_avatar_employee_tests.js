@@ -13,29 +13,27 @@ QUnit.module("M2XAvatarEmployee", {
     },
 });
 
-QUnit.skipRefactoring("many2one_avatar_employee widget in list view", async function (assert) {
-    assert.expect(13);
-
+QUnit.test("many2one_avatar_employee widget in list view", async function (assert) {
     const pyEnv = await startServer();
-    const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { display_name: "Mario" },
         { display_name: "Luigi" },
     ]);
-    const [resUsersId1, resUsersId2] = pyEnv["res.users"].create([
-        { partner_id: resPartnerId1 },
-        { partner_id: resPartnerId2 },
+    const [userId_1, userId_2] = pyEnv["res.users"].create([
+        { partner_id: partnerId_1 },
+        { partner_id: partnerId_2 },
     ]);
-    const [hrEmployeePublicId1, hrEmployeePublicId2] = pyEnv["hr.employee.public"].create([
-        { name: "Mario", user_id: resUsersId1, user_partner_id: resPartnerId1 },
-        { name: "Luigi", user_id: resUsersId2, user_partner_id: resPartnerId2 },
+    const [employeeId_1, employeeId_2] = pyEnv["hr.employee.public"].create([
+        { name: "Mario", user_id: userId_1, user_partner_id: partnerId_1 },
+        { name: "Luigi", user_id: userId_2, user_partner_id: partnerId_2 },
     ]);
     pyEnv["m2x.avatar.employee"].create([
         {
-            employee_id: hrEmployeePublicId1,
-            employee_ids: [hrEmployeePublicId1, hrEmployeePublicId2],
+            employee_id: employeeId_1,
+            employee_ids: [employeeId_1, employeeId_2],
         },
-        { employee_id: hrEmployeePublicId2 },
-        { employee_id: hrEmployeePublicId1 },
+        { employee_id: employeeId_2 },
+        { employee_id: employeeId_1 },
     ]);
     const views = {
         "m2x.avatar.employee,false,list":
@@ -53,7 +51,6 @@ QUnit.skipRefactoring("many2one_avatar_employee widget in list view", async func
         res_model: "m2x.avatar.employee",
         views: [[false, "list"]],
     });
-
     assert.strictEqual(
         document.querySelector(".o_data_cell span:not(.o_m2o_avatar) span").innerText,
         "Mario"
@@ -71,39 +68,22 @@ QUnit.skipRefactoring("many2one_avatar_employee widget in list view", async func
     await afterNextRender(() =>
         dom.click(document.querySelector(".o_data_cell .o_m2o_avatar > img"))
     );
-    assert.verifySteps(
-        [`read hr.employee.public ${hrEmployeePublicId1}`],
-        "first employee should have been read to find its partner"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chat-window-header-name",
-        "should have opened chat window"
-    );
+    assert.verifySteps([`read hr.employee.public ${employeeId_1}`]);
+    assert.containsOnce(document.body, ".o-mail-chat-window-header-name");
     assert.strictEqual(
         document.querySelector(".o-mail-chat-window-header-name").textContent,
-        "Mario",
-        "chat window should be with clicked employee"
+        "Mario"
     );
 
     // click on second employee
     await afterNextRender(() =>
         dom.click(document.querySelectorAll(".o_data_cell .o_m2o_avatar > img")[1])
     );
-    assert.verifySteps(
-        [`read hr.employee.public ${hrEmployeePublicId2}`],
-        "second employee should have been read to find its partner"
-    );
-    assert.containsN(
-        document.body,
-        ".o-mail-chat-window-header-name",
-        2,
-        "should have opened second chat window"
-    );
+    assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
+    assert.containsN(document.body, ".o-mail-chat-window-header-name", 2);
     assert.strictEqual(
         document.querySelectorAll(".o-mail-chat-window-header-name")[1].textContent,
-        "Luigi",
-        "chat window should be with clicked employee"
+        "Luigi"
     );
 
     // click on third employee (same as first)
@@ -123,18 +103,16 @@ QUnit.skipRefactoring("many2one_avatar_employee widget in list view", async func
 });
 
 QUnit.test("many2one_avatar_employee widget in kanban view", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
-    const resPartnerId1 = pyEnv["res.partner"].create({});
-    const resUsersId1 = pyEnv["res.users"].create({ partner_id: resPartnerId1 });
-    const hrEmployeePublicId1 = pyEnv["hr.employee.public"].create({
-        user_id: resUsersId1,
-        user_partner_id: resPartnerId1,
+    const partnerId = pyEnv["res.partner"].create({});
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId });
+    const employeeId = pyEnv["hr.employee.public"].create({
+        user_id: userId,
+        user_partner_id: partnerId,
     });
     pyEnv["m2x.avatar.employee"].create({
-        employee_id: hrEmployeePublicId1,
-        employee_ids: [hrEmployeePublicId1],
+        employee_id: employeeId,
+        employee_ids: [employeeId],
     });
     const views = {
         "m2x.avatar.employee,false,kanban": `<kanban>
@@ -147,32 +125,25 @@ QUnit.test("many2one_avatar_employee widget in kanban view", async function (ass
                 </templates>
             </kanban>`,
     };
-    const { openView } = await start({
-        serverData: { views },
-    });
+    const { openView } = await start({ serverData: { views } });
     await openView({
         res_model: "m2x.avatar.employee",
         views: [[false, "kanban"]],
     });
-
     assert.strictEqual(document.querySelector(".o_kanban_record").innerText.trim(), "");
     assert.containsOnce(document.body, ".o_m2o_avatar");
     assert.strictEqual(
         document.querySelector(".o_m2o_avatar > img").getAttribute("data-src"),
-        `/web/image/hr.employee.public/${hrEmployeePublicId1}/avatar_128`
+        `/web/image/hr.employee.public/${employeeId}/avatar_128`
     );
 });
 
 QUnit.test(
     "many2one_avatar_employee: click on an employee not associated with a user",
     async function (assert) {
-        assert.expect(6);
-
         const pyEnv = await startServer();
-        const hrEmployeePublicId1 = pyEnv["hr.employee.public"].create({ name: "Mario" });
-        const m2xHrAvatarUserId1 = pyEnv["m2x.avatar.employee"].create({
-            employee_id: hrEmployeePublicId1,
-        });
+        const employeeId = pyEnv["hr.employee.public"].create({ name: "Mario" });
+        const avatarId = pyEnv["m2x.avatar.employee"].create({ employee_id: employeeId });
         const views = {
             "m2x.avatar.employee,false,form":
                 '<form><field name="employee_id" widget="many2one_avatar_employee"/></form>',
@@ -186,22 +157,17 @@ QUnit.test(
             serverData: { views },
             services: {
                 notification: makeFakeNotificationService((message) => {
-                    assert.ok(
-                        true,
-                        "should display a toast notification after failing to open chat"
-                    );
+                    assert.step("notification");
                     assert.strictEqual(
                         message,
-                        "You can only chat with employees that have a dedicated user.",
-                        "should display the correct information in the notification"
+                        "You can only chat with employees that have a dedicated user."
                     );
                 }),
             },
         });
-
         await openView({
             res_model: "m2x.avatar.employee",
-            res_id: m2xHrAvatarUserId1,
+            res_id: avatarId,
             views: [[false, "form"]],
         });
         assert.strictEqual(
@@ -210,26 +176,27 @@ QUnit.test(
         );
 
         await dom.click(document.querySelector(".o_m2o_avatar > img"));
-
         assert.verifySteps([
-            `read m2x.avatar.employee ${m2xHrAvatarUserId1}`,
-            `read hr.employee.public ${hrEmployeePublicId1}`,
+            `read m2x.avatar.employee ${avatarId}`,
+            `read hr.employee.public ${employeeId}`,
+            "notification",
         ]);
     }
 );
 
-QUnit.skipRefactoring("many2many_avatar_employee widget in form view", async function (assert) {
-    assert.expect(8);
-
+QUnit.test("many2many_avatar_employee widget in form view", async function (assert) {
     const pyEnv = await startServer();
-    const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([{}, {}]);
-    const [resUsersId1, resUsersId2] = pyEnv["res.users"].create([{}, {}]);
-    const [hrEmployeePublicId1, hrEmployeePublicId2] = pyEnv["hr.employee.public"].create([
-        { user_id: resUsersId1, user_partner_id: resPartnerId1 },
-        { user_id: resUsersId2, user_partner_id: resPartnerId2 },
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([{}, {}]);
+    const [userId_1, userId_2] = pyEnv["res.users"].create([
+        { partner_id: partnerId_1 },
+        { partner_id: partnerId_2 },
     ]);
-    const m2xAvatarEmployeeId1 = pyEnv["m2x.avatar.employee"].create({
-        employee_ids: [hrEmployeePublicId1, hrEmployeePublicId2],
+    const [employeeId_1, employeeId_2] = pyEnv["hr.employee.public"].create([
+        { user_id: userId_1, user_partner_id: partnerId_1 },
+        { user_id: userId_2, user_partner_id: partnerId_2 },
+    ]);
+    const avatarId_1 = pyEnv["m2x.avatar.employee"].create({
+        employee_ids: [employeeId_1, employeeId_2],
     });
     const views = {
         "m2x.avatar.employee,false,form":
@@ -243,10 +210,9 @@ QUnit.skipRefactoring("many2many_avatar_employee widget in form view", async fun
         },
         serverData: { views },
     });
-
     await openView({
         res_model: "m2x.avatar.employee",
-        res_id: m2xAvatarEmployeeId1,
+        res_id: avatarId_1,
         views: [[false, "form"]],
     });
     assert.containsN(
@@ -259,8 +225,7 @@ QUnit.skipRefactoring("many2many_avatar_employee widget in form view", async fun
         document
             .querySelector(".o_field_many2many_avatar_employee .badge img")
             .getAttribute("data-src"),
-        `/web/image/hr.employee.public/${hrEmployeePublicId1}/avatar_128`,
-        "should have correct avatar image"
+        `/web/image/hr.employee.public/${employeeId_1}/avatar_128`
     );
 
     await dom.click(
@@ -269,37 +234,31 @@ QUnit.skipRefactoring("many2many_avatar_employee widget in form view", async fun
     await dom.click(
         document.querySelectorAll(".o_field_many2many_avatar_employee .badge .o_m2m_avatar")[1]
     );
-
     assert.verifySteps([
-        `read m2x.avatar.employee ${m2xAvatarEmployeeId1}`,
-        `read hr.employee.public ${hrEmployeePublicId1},${hrEmployeePublicId2}`,
-        `read hr.employee.public ${hrEmployeePublicId1}`,
-        `read hr.employee.public ${hrEmployeePublicId2}`,
+        `read m2x.avatar.employee ${avatarId_1}`,
+        `read hr.employee.public ${employeeId_1},${employeeId_2}`,
+        `read hr.employee.public ${employeeId_1}`,
+        `read hr.employee.public ${employeeId_2}`,
     ]);
-
-    assert.containsN(
-        document.body,
-        ".o-mail-chat-window-header-name",
-        2,
-        "should have 2 chat windows"
-    );
+    assert.containsN(document.body, ".o-mail-chat-window-header-name", 2);
 });
 
-QUnit.skipRefactoring("many2many_avatar_employee widget in list view", async function (assert) {
-    assert.expect(10);
-
+QUnit.test("many2many_avatar_employee widget in list view", async function (assert) {
     const pyEnv = await startServer();
-    const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { name: "Mario" },
         { name: "Yoshi" },
     ]);
-    const [resUsersId1, resUsersId2] = pyEnv["res.users"].create([{}, {}]);
-    const [hrEmployeePublicId1, hrEmployeePublicId2] = pyEnv["hr.employee.public"].create([
-        { user_id: resUsersId1, user_partner_id: resPartnerId1 },
-        { user_id: resUsersId2, user_partner_id: resPartnerId2 },
+    const [userId_1, userId_2] = pyEnv["res.users"].create([
+        { partner_id: partnerId_1 },
+        { partner_id: partnerId_2 },
+    ]);
+    const [employeeId_1, employeeId_2] = pyEnv["hr.employee.public"].create([
+        { user_id: userId_1, user_partner_id: partnerId_1 },
+        { user_id: userId_2, user_partner_id: partnerId_2 },
     ]);
     pyEnv["m2x.avatar.employee"].create({
-        employee_ids: [hrEmployeePublicId1, hrEmployeePublicId2],
+        employee_ids: [employeeId_1, employeeId_2],
     });
     const views = {
         "m2x.avatar.employee,false,list":
@@ -313,7 +272,6 @@ QUnit.skipRefactoring("many2many_avatar_employee widget in list view", async fun
         },
         serverData: { views },
     });
-
     await openView({
         res_model: "m2x.avatar.employee",
         views: [[false, "list"]],
@@ -327,57 +285,41 @@ QUnit.skipRefactoring("many2many_avatar_employee widget in list view", async fun
 
     // click on first employee badge
     await afterNextRender(() => dom.click(document.querySelector(".o_data_cell .o_m2m_avatar")));
-    assert.verifySteps(
-        [
-            `read hr.employee.public ${hrEmployeePublicId1},${hrEmployeePublicId2}`,
-            `read hr.employee.public ${hrEmployeePublicId1}`,
-        ],
-        "first employee should have been read to find its partner"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chat-window-header-name",
-        "should have opened chat window"
-    );
+    assert.verifySteps([
+        `read hr.employee.public ${employeeId_1},${employeeId_2}`,
+        `read hr.employee.public ${employeeId_1}`,
+    ]);
+    assert.containsOnce(document.body, ".o-mail-chat-window-header-name");
     assert.strictEqual(
         document.querySelector(".o-mail-chat-window-header-name").textContent,
-        "Mario",
-        "chat window should be with clicked employee"
+        "Mario"
     );
 
     // click on second employee
     await afterNextRender(() =>
         dom.click(document.querySelectorAll(".o_data_cell .o_m2m_avatar")[1])
     );
-    assert.verifySteps(
-        [`read hr.employee.public ${hrEmployeePublicId2}`],
-        "second employee should have been read to find its partner"
-    );
-    assert.containsN(
-        document.body,
-        ".o-mail-chat-window-header-name",
-        2,
-        "should have opened second chat window"
-    );
+    assert.verifySteps([`read hr.employee.public ${employeeId_2}`]);
+    assert.containsN(document.body, ".o-mail-chat-window-header-name", 2);
     assert.strictEqual(
         document.querySelectorAll(".o-mail-chat-window-header-name")[1].textContent,
-        "Yoshi",
-        "chat window should be with clicked employee"
+        "Yoshi"
     );
 });
 
 QUnit.test("many2many_avatar_employee widget in kanban view", async function (assert) {
-    assert.expect(7);
-
     const pyEnv = await startServer();
-    const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([{}, {}]);
-    const [resUsersId1, resUsersId2] = pyEnv["res.users"].create([{}, {}]);
-    const [hrEmployeePublicId1, hrEmployeePublicId2] = pyEnv["hr.employee.public"].create([
-        { user_id: resUsersId1, user_partner_id: resPartnerId1 },
-        { user_id: resUsersId2, user_partner_id: resPartnerId2 },
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([{}, {}]);
+    const [userId_1, userId_2] = pyEnv["res.users"].create([
+        { partner_id: partnerId_1 },
+        { partner_id: partnerId_2 },
+    ]);
+    const [employeeId_1, employeeId_2] = pyEnv["hr.employee.public"].create([
+        { user_id: userId_1, user_partner_id: partnerId_1 },
+        { user_id: userId_2, user_partner_id: partnerId_2 },
     ]);
     pyEnv["m2x.avatar.employee"].create({
-        employee_ids: [hrEmployeePublicId1, hrEmployeePublicId2],
+        employee_ids: [employeeId_1, employeeId_2],
     });
     const views = {
         "m2x.avatar.employee,false,kanban": `<kanban>
@@ -404,7 +346,6 @@ QUnit.test("many2many_avatar_employee widget in kanban view", async function (as
         },
         serverData: { views },
     });
-
     await openView({
         res_model: "m2x.avatar.employee",
         views: [[false, "kanban"]],
@@ -412,15 +353,13 @@ QUnit.test("many2many_avatar_employee widget in kanban view", async function (as
     assert.containsN(
         document.body,
         ".o_kanban_record:first .o_field_many2many_avatar_employee img.o_m2m_avatar",
-        2,
-        "should have 2 avatar images"
+        2
     );
     assert.strictEqual(
         document
             .querySelector(".o_kanban_record .o_field_many2many_avatar_employee img.o_m2m_avatar")
             .getAttribute("data-src"),
-        `/web/image/hr.employee.public/${hrEmployeePublicId1}/avatar_128`,
-        "should have correct avatar image"
+        `/web/image/hr.employee.public/${employeeId_1}/avatar_128`
     );
     assert.strictEqual(
         document
@@ -428,34 +367,30 @@ QUnit.test("many2many_avatar_employee widget in kanban view", async function (as
                 ".o_kanban_record .o_field_many2many_avatar_employee img.o_m2m_avatar"
             )[1]
             .getAttribute("data-src"),
-        `/web/image/hr.employee.public/${hrEmployeePublicId2}/avatar_128`,
-        "should have correct avatar image"
+        `/web/image/hr.employee.public/${employeeId_2}/avatar_128`
     );
 
     await dom.click(document.querySelector(".o_kanban_record .o_m2m_avatar"));
     await dom.click(document.querySelectorAll(".o_kanban_record .o_m2m_avatar")[1]);
-
     assert.verifySteps([
-        `read hr.employee.public ${hrEmployeePublicId1},${hrEmployeePublicId2}`,
-        `read hr.employee.public ${hrEmployeePublicId1}`,
-        `read hr.employee.public ${hrEmployeePublicId2}`,
+        `read hr.employee.public ${employeeId_1},${employeeId_2}`,
+        `read hr.employee.public ${employeeId_1}`,
+        `read hr.employee.public ${employeeId_2}`,
     ]);
 });
 
-QUnit.skipRefactoring(
+QUnit.test(
     "many2many_avatar_employee: click on an employee not associated with a user",
     async function (assert) {
-        assert.expect(10);
-
         const pyEnv = await startServer();
-        const resPartnerId1 = pyEnv["res.partner"].create({});
-        const resUsersId1 = pyEnv["res.users"].create({});
-        const [hrEmployeePublicId1, hrEmployeePublicId2] = pyEnv["hr.employee.public"].create([
+        const partnerId = pyEnv["res.partner"].create({});
+        const userId = pyEnv["res.users"].create({ partner_id: partnerId });
+        const [employeeId_1, employeeId_2] = pyEnv["hr.employee.public"].create([
             {},
-            { user_id: resUsersId1, user_partner_id: resPartnerId1 },
+            { user_id: userId, user_partner_id: partnerId },
         ]);
-        const m2xAvatarEmployeeId1 = pyEnv["m2x.avatar.employee"].create({
-            employee_ids: [hrEmployeePublicId1, hrEmployeePublicId2],
+        const avatarId = pyEnv["m2x.avatar.employee"].create({
+            employee_ids: [employeeId_1, employeeId_2],
         });
         const views = {
             "m2x.avatar.employee,false,form":
@@ -470,36 +405,25 @@ QUnit.skipRefactoring(
             serverData: { views },
             services: {
                 notification: makeFakeNotificationService((message) => {
-                    assert.ok(
-                        true,
-                        "should display a toast notification after failing to open chat"
-                    );
+                    assert.step("notification");
                     assert.strictEqual(
                         message,
-                        "You can only chat with employees that have a dedicated user.",
-                        "should display the correct information in the notification"
+                        "You can only chat with employees that have a dedicated user."
                     );
                 }),
             },
         });
         await openView({
             res_model: "m2x.avatar.employee",
-            res_id: m2xAvatarEmployeeId1,
+            res_id: avatarId,
             views: [[false, "form"]],
         });
-
-        assert.containsN(
-            document.body,
-            ".o_field_many2many_avatar_employee .badge",
-            2,
-            "should have 2 records"
-        );
+        assert.containsN(document.body, ".o_field_many2many_avatar_employee .badge", 2);
         assert.strictEqual(
             document
                 .querySelector(".o_field_many2many_avatar_employee .badge img")
                 .getAttribute("data-src"),
-            `/web/image/hr.employee.public/${hrEmployeePublicId1}/avatar_128`,
-            "should have correct avatar image"
+            `/web/image/hr.employee.public/${employeeId_1}/avatar_128`
         );
 
         await dom.click(
@@ -508,18 +432,14 @@ QUnit.skipRefactoring(
         await dom.click(
             document.querySelectorAll(".o_field_many2many_avatar_employee .badge .o_m2m_avatar")[1]
         );
-
         assert.verifySteps([
-            `read m2x.avatar.employee ${hrEmployeePublicId1}`,
-            `read hr.employee.public ${hrEmployeePublicId1},${hrEmployeePublicId2}`,
-            `read hr.employee.public ${hrEmployeePublicId1}`,
-            `read hr.employee.public ${hrEmployeePublicId2}`,
+            `read m2x.avatar.employee ${employeeId_1}`,
+            `read hr.employee.public ${employeeId_1},${employeeId_2}`,
+            `read hr.employee.public ${employeeId_1}`,
+            "notification",
+            `read hr.employee.public ${employeeId_2}`,
         ]);
 
-        assert.containsOnce(
-            document.body,
-            ".o-mail-chat-window-header-name",
-            "should have 1 chat window"
-        );
+        assert.containsOnce(document.body, ".o-mail-chat-window-header-name");
     }
 );

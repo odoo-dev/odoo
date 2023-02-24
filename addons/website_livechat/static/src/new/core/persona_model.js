@@ -10,18 +10,16 @@ patch(Persona.prototype, "website_livechat", {
         }
         return this._super();
     },
-
     get countryFlagUrl() {
         const country = this.partner?.country ?? this.country;
         return country
             ? `/base/static/img/country_flags/${country.code.toLowerCase()}.png`
             : undefined;
     },
-
     get nameOrDisplayName() {
         if (this.partner) {
-            return this.partner.name || this.partner.displayName;
+            return this.partner.nameOrDisplayName;
         }
-        return this.name;
+        return this._super();
     },
 });
