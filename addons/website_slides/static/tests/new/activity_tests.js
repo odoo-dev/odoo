@@ -2,6 +2,8 @@
 
 import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
+QUnit.module("activity");
+
 QUnit.test("grant course access", async function (assert) {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
