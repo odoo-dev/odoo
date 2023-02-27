@@ -155,7 +155,7 @@
                         editable="message.editable"
                         imagesHeight="300" />
                     <LinkPreviewList t-if="message.linkPreviews.length > 0" linkPreviews="message.linkPreviews" deletable="deletable" />
-                    <MessageReactions message="message"/>
+                    <MessageReactions message="message" t-if="message.reactions.length"/>
                 </div>
             </div>
         </div>
