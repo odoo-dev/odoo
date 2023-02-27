@@ -149,7 +149,13 @@ function canContinue(el, allowInvisible) {
     const isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
     // TODO: Take into account ".o_blockUI".
     const isBlocked = document.body.classList.contains("o_ui_blocked");
-    return isInDoc && isElement && !isBlocked && (!allowInvisible ? isVisible(el) : true);
+    return (
+        isInDoc &&
+        isElement &&
+        !isBlocked &&
+        (!allowInvisible ? isVisible(el) : true) &&
+        !el.disabled
+    );
 }
 
 /**
