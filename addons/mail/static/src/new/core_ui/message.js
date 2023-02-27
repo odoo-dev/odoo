@@ -10,6 +10,7 @@ import {
     Component,
     onMounted,
     onPatched,
+    onWillUnmount,
     toRaw,
     useChildSubEnv,
     useEffect,
@@ -79,6 +80,7 @@ export class Message extends Component {
             isReadMoreByIndex: new Map(),
         });
         this.root = useRef("root");
+        this.messageBody = useRef("body");
         this.messaging = useMessaging();
         this.store = useStore();
         /** @type {import("@mail/new/core/thread_service").ThreadService} */
@@ -133,8 +135,14 @@ export class Message extends Component {
             });
         }
         onMounted(() => {
-            if ($(".o-mail-message-body")) {
-                this.insertReadMoreLess($(".o-mail-message-body"));
+            if (this.messageBody.el) {
+                $(this.messageBody.el).find(".o-mail-read-more-less").remove();
+                this.insertReadMoreLess($(this.messageBody.el));
+            }
+        });
+        onWillUnmount(() => {
+            if (this.messageBody.el) {
+                $(this.messageBody.el).find(".o-mail-read-more-less").remove();
             }
         });
     }
