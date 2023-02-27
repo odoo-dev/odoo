@@ -731,3 +731,24 @@ QUnit.test("post message on draft record", async function (assert) {
     assert.containsOnce(target, ".o-mail-message");
     assert.containsOnce(target, ".o-mail-message:contains(Test)");
 });
+
+QUnit.test(
+    "schedule activities on draft record should prompt with scheduling an activity (proceed with action)",
+    async function (assert) {
+        const views = {
+            "res.partner,false,form": `
+                <form string="Partners">
+                    <sheet>
+                        <field name="name"/>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="activity_ids"/>
+                    </div>
+                </form>`,
+        };
+        const { openView } = await start({ serverData: { views } });
+        await openView({ res_model: "res.partner", views: [[false, "form"]] });
+        await click("button:contains(Activities)");
+        assert.containsOnce(document.body, ".o_dialog:contains(Schedule Activity)");
+    }
+);
