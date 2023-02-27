@@ -178,7 +178,7 @@ export class Message {
         if (!this.subject || !this.originThread || !this.originThread.name) {
             return false;
         }
-        const regexPrefix = /^((re|fw|fwd).?:.)*/gi;
+        const regexPrefix = /^((re|fw|fwd)\s*:\s*)*/i;
         const cleanedThreadName = this.originThread.name.replace(regexPrefix, "");
         const cleanedSubject = this.subject.replace(regexPrefix, "");
         return cleanedSubject === cleanedThreadName;
