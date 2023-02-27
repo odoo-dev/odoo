@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 <t t-name="mail.message_reactions" owl="1">
-    <div t-if="props.message.reactions.length > 0" class="position-relative d-flex flex-wrap"
+    <div class="position-relative d-flex flex-wrap"
         t-att-class="{
             'flex-row-reverse me-3': env.inChatWindow and env.alignedRight,
             'ms-3': !(env.inChatWindow and env.alignedRight) and props.message.isDiscussion,
