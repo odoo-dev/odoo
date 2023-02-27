@@ -120,7 +120,10 @@ export class Message {
     }
 
     get datetime() {
-        return toRaw(this.date ? deserializeDateTime(this.date) : this.now);
+        if (!this._datetime) {
+            this._datetime = toRaw(this.date ? deserializeDateTime(this.date) : this.now);
+        }
+        return this._datetime;
     }
 
     get scheduledDate() {
