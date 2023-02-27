@@ -11,7 +11,6 @@ import {
     onMounted,
     onPatched,
     onWillUnmount,
-    toRaw,
     useChildSubEnv,
     useEffect,
     useRef,
@@ -75,6 +74,7 @@ export class Message extends Component {
         this.state = useState({
             isEditing: false,
             isHovered: false,
+            isClicked: false,
             isActionListSquashed: this.env.inChatWindow,
             lastReadMoreIndex: 0,
             isReadMoreByIndex: new Map(),
@@ -235,23 +235,13 @@ export class Message extends Component {
     }
 
     get isActive() {
-        return this.state.isHovered || this.isClicked || this.emojiPicker?.isOpen;
+        return this.state.isHovered || this.state.isClicked || this.emojiPicker?.isOpen;
     }
 
     get isAlignedRight() {
         return Boolean(
             this.env.inChatWindow && this.user.partnerId === this.props.message.author?.id
         );
-    }
-
-    get isClicked() {
-        /**
-         * Depending on whether `isClicked` is called from the JS or from the
-         * template, `this` is either the component itself or an object which
-         * contains an extra `this` to refer the component.
-         */
-        const self = this.this ?? this;
-        return this.store.clickedMessage && toRaw(this.store.clickedMessage) === self;
     }
 
     get isOriginThread() {
@@ -274,7 +264,7 @@ export class Message extends Component {
 
     onMouseleave() {
         this.state.isHovered = false;
-        this.store.clickedMessage = null;
+        this.state.isClicked = null;
     }
 
     /**
@@ -363,10 +353,13 @@ export class Message extends Component {
             !isEventHandled(ev, "Message.ClickAuthor") &&
             !isEventHandled(ev, "Message.ClickFailure")
         ) {
-            if (this.isClicked) {
-                this.store.clickedMessage = null;
+            if (this.state.isClicked) {
+                this.state.isClicked = false;
             } else {
-                this.store.clickedMessage = this;
+                this.state.isClicked = true;
+                document.body.addEventListener("click", () => {
+                    this.state.isClicked = false;
+                }, { capture: true, once: true});
             }
         }
     }
