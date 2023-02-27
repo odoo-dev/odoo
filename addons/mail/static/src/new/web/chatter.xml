@@ -11,7 +11,7 @@
                 Log note
             </button>
             <div class="border-bottom flex-grow-1 d-flex" t-att-class="{ 'border-start ps-2': props.hasActivities }">
-                <button t-if="props.hasActivities" class="btn btn-light text-nowrap" t-att-class="{ 'my-2': !props.compactHeight }" t-att-disabled="!props.threadId" data-hotkey="shift+a" t-on-click="scheduleActivity">
+                <button t-if="props.hasActivities" class="btn btn-light text-nowrap" t-att-class="{ 'my-2': !props.compactHeight }" data-hotkey="shift+a" t-on-click="scheduleActivity">
                     <i class="fa fa-clock-o me-1"/>
                     <span>Activities</span>
                 </button>

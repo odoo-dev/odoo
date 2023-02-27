@@ -290,9 +290,7 @@ export class Chatter extends Component {
                     return true;
                 }
             };
-            if (this.props.saveRecord) {
-                this.props.saveRecord();
-            }
+            this.props.saveRecord?.();
         }
     }
 
@@ -301,8 +299,22 @@ export class Chatter extends Component {
     }
 
     async scheduleActivity() {
-        await this.activityService.schedule(this.props.threadModel, this.props.threadId);
-        this.load(this.props.threadId, ["activities"]);
+        const schedule = async (threadId) => {
+            await this.activityService.schedule(this.props.threadModel, threadId);
+            this.load(this.props.threadId, ["activities"]);
+        };
+        if (this.props.threadId) {
+            schedule(this.props.threadId);
+        } else {
+            this.onNextUpdate = (nextProps) => {
+                if (nextProps.threadId) {
+                    schedule(nextProps.threadId);
+                } else {
+                    return true;
+                }
+            };
+            this.props.saveRecord?.();
+        }
     }
 
     get unfollowText() {
