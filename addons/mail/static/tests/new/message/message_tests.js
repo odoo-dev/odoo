@@ -870,33 +870,6 @@ QUnit.test(
 );
 
 QUnit.test(
-    'message should not be considered as "clicked" after clicking on its author avatar',
-    async function (assert) {
-        const pyEnv = await startServer();
-        const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
-        pyEnv["mail.message"].create({
-            author_id: partnerId,
-            body: "<p>Test</p>",
-            model: "res.partner",
-            res_id: threadId,
-        });
-        const { openView } = await start();
-        await openView({
-            res_id: threadId,
-            res_model: "res.partner",
-            views: [[false, "form"]],
-        });
-        await click(".o-mail-message");
-        assert.hasClass(target.querySelector(".o-mail-message"), "o-clicked");
-        await click(".o-mail-message");
-        assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-clicked");
-        document.querySelector(".o-mail-message-author-avatar").click();
-        await nextTick();
-        assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-clicked");
-    }
-);
-
-QUnit.test(
     "highlight the message mentioning the current user inside the channel",
     async function (assert) {
         const pyEnv = await startServer();
@@ -916,41 +889,6 @@ QUnit.test(
         const { openDiscuss } = await start();
         await openDiscuss(channelId);
         assert.hasClass(target.querySelector(".o-mail-message"), "o-highlighted-from-mention");
-    }
-);
-
-QUnit.test(
-    'message should not be considered as "clicked" after clicking on notification failure icon',
-    async function (assert) {
-        const pyEnv = await startServer();
-        const threadId = pyEnv["res.partner"].create({});
-        const messageId = pyEnv["mail.message"].create({
-            body: "not empty",
-            model: "res.partner",
-            res_id: threadId,
-        });
-        pyEnv["mail.notification"].create({
-            mail_message_id: messageId,
-            notification_status: "exception",
-            notification_type: "email",
-        });
-        const { env, openView } = await start();
-        await openView({
-            res_id: threadId,
-            res_model: "res.partner",
-            views: [[false, "form"]],
-        });
-        patchWithCleanup(env.services.action, {
-            // intercept the action: this action is not relevant in the context of this test.
-            doAction() {},
-        });
-        await click(".o-mail-message");
-        assert.hasClass(target.querySelector(".o-mail-message"), "o-clicked");
-        await click(".o-mail-message");
-        assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-clicked");
-        target.querySelector(".o-mail-message-notification.text-danger").click();
-        await nextTick();
-        assert.doesNotHaveClass(target.querySelector(".o-mail-message"), "o-clicked");
     }
 );
 

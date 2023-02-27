@@ -4,7 +4,6 @@
     <t t-name="mail.message" owl="1">
         <div class="o-mail-message position-relative py-1"
             t-att-class="{
-                'o-clicked': isClicked,
                 'o-highlighted-from-mention': message.isHighlightedFromMention,
                 'o-highlighted bg-view shadow-lg': props.highlighted,
                 'o-self-author': message.isSelfAuthored,
@@ -34,7 +33,7 @@
                     </div>
                     <t t-elif="!message.isTransient">
                         <small t-if="isActive" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.datetimeStr">
-                            <t t-esc="message.datetimeSimple"/>
+                            <t t-esc="message.datetimeSimpleStr"/>
                         </small>
                         <div t-att-class="{ 'position-absolute bottom-0 mb-1': !env.inChatter }">
                             <MessageSeenIndicator
