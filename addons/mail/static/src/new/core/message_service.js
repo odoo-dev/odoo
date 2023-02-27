@@ -134,11 +134,11 @@ export class MessageService {
     }
 
     async toggleStar(message) {
-        await this.orm.call("mail.message", "toggle_message_starred", [[message.id]]);
+        await this.orm.silent.call("mail.message", "toggle_message_starred", [[message.id]]);
     }
 
     async setDone(message) {
-        await this.orm.call("mail.message", "set_message_done", [[message.id]]);
+        await this.orm.silent.call("mail.message", "set_message_done", [[message.id]]);
     }
 
     async unstarAll() {
@@ -152,7 +152,7 @@ export class MessageService {
         const messageData = await this.rpc("/mail/message/add_reaction", {
             content,
             message_id: message.id,
-        });
+        }, {silent: true});
         this.insert(messageData);
     }
 
@@ -160,7 +160,7 @@ export class MessageService {
         const messageData = await this.rpc("/mail/message/remove_reaction", {
             content: reaction.content,
             message_id: reaction.messageId,
-        });
+        }, {silent: true});
         this.insert(messageData);
     }
 
