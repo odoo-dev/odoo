@@ -6,6 +6,7 @@ const { registry } = require("@web/core/registry");
 
 registry.category("web_tour.tours").add('shop_wishlist', {
     test: true,
+    checkDelay: 250,
     url: '/shop?search=Customizable Desk',
     steps: [
         {

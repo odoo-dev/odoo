@@ -4,7 +4,7 @@ odoo.define('test_main_flows.tour', function (require) {
 const {_t} = require('web.core');
 const {Markup} = require('web.utils');
 const { registry } = require("@web/core/registry");
-const { stepUtils } = require('@web_tour/js/tour_step_utils');
+const { stepUtils } = require('@web_tour/tour_service/tour_utils');
 
 registry.category("web_tour.tours").add('main_flow_tour', {
     test: true,
@@ -109,6 +109,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
     content: _t("Click here to open kanban search mobile."),
     position: "bottom",
+    run: "click",
 }, {
     mobile: true,
     trigger: ".modal-dialog .btn:contains('New')",

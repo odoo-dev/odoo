@@ -1,7 +1,7 @@
 odoo.define('web.test.x2many', function (require) {
     'use strict';
 
-    const { stepUtils } = require('@web_tour/js/tour_step_utils');
+    const { stepUtils } = require('@web_tour/tour_service/tour_utils');
     const { registry } = require("@web/core/registry");
     var inc;
 
