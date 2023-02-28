@@ -83,7 +83,11 @@ function getCreateXHR() {
                 return _super(data);
             },
             upload: new EventTarget(),
-            abort() {},
+            abort() {
+                if (this._errorListener) {
+                    this._errorListener();
+                }
+            },
             get response() {
                 return response;
             },

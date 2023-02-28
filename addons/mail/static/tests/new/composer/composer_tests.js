@@ -922,3 +922,45 @@ QUnit.test(
         assert.containsN(target, ".o-mail-attachment-card-aside div[title='Uploading']", 2);
     }
 );
+
+QUnit.test(
+    "[technical] does not crash when an attachment is removed before its upload starts",
+    async function (assert) {
+        // Uploading multiple files uploads attachments one at a time, this test
+        // ensures that there is no crash when an attachment is destroyed before its
+        // upload started.
+        const pyEnv = await startServer();
+        // Promise to block attachment uploading
+        const uploadPromise = makeTestPromise();
+        const channelId = pyEnv["mail.channel"].create({ name: "test" });
+        const { openDiscuss } = await start({
+            async mockRPC(route, args) {
+                if (route === "/mail/attachment/upload") {
+                    await uploadPromise;
+                }
+            },
+        });
+        await openDiscuss(channelId);
+        const file1 = await createFile({
+            name: "text1.txt",
+            content: "hello, world",
+            contentType: "text/plain",
+        });
+        const file2 = await createFile({
+            name: "text2.txt",
+            content: "hello, world",
+            contentType: "text/plain",
+        });
+        await afterNextRender(() => {
+            inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
+                file1,
+                file2,
+            ]);
+        });
+        await click(".o-mail-attachment-card-aside-unlink");
+
+        // Simulates the completion of the upload of the first attachment
+        await afterNextRender(() => uploadPromise.resolve());
+        assert.containsOnce(target, '.o-mail-attachment-card:contains("text2.txt")');
+    }
+);
