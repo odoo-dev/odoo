@@ -171,10 +171,6 @@ patch(FormCompiler.prototype, "mail", {
         if (chatterContainerHookXml.parentNode.classList.contains("o_form_sheet")) {
             return res; // if chatter is inside sheet, keep it there
         }
-        // after sheet bg (standard position, below form)
-        setAttributes(chatterContainerHookXml, {
-            "t-if": `!__comp__.props.hasAttachmentViewer and __comp__.uiService.size < ${SIZES.XXL}`,
-        });
         const formSheetBgXml = res.querySelector(".o_form_sheet_bg");
         const parentXml = formSheetBgXml && formSheetBgXml.parentNode;
         if (!parentXml) {
@@ -194,6 +190,10 @@ patch(FormCompiler.prototype, "mail", {
                 isInFormSheetBg: "true",
             });
         }
+        // after sheet bg (standard position, below form)
+        setAttributes(chatterContainerHookXml, {
+            "t-if": `!__comp__.props.hasAttachmentViewer and __comp__.uiService.size < ${SIZES.XXL}`,
+        });
         append(parentXml, chatterContainerHookXml);
         return res;
     },

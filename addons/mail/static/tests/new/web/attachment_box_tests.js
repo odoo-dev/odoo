@@ -17,6 +17,7 @@ QUnit.test("base empty rendering", async function (assert) {
     const views = {
         "res.partner,false,form": `
             <form>
+                <sheet></sheet>
                 <div class="oe_chatter">
                     <field name="message_ids"  options="{'open_attachments': True}"/>
                 </div>
@@ -54,6 +55,7 @@ QUnit.test("base non-empty rendering", async function (assert) {
     const views = {
         "res.partner,false,form": `
             <form>
+                <sheet></sheet>
                 <div class="oe_chatter">
                     <field name="message_ids"  options="{'open_attachments': True}"/>
                 </div>
@@ -84,6 +86,7 @@ QUnit.test("remove attachment should ask for confirmation", async function (asse
     const views = {
         "res.partner,false,form": `
             <form>
+                <sheet></sheet>
                 <div class="oe_chatter">
                     <field name="message_ids"  options="{'open_attachments': True}"/>
                 </div>
@@ -129,6 +132,7 @@ QUnit.test("view attachments", async function (assert) {
     ]);
     const views = {
         "res.partner,false,form": `<form>
+            <sheet></sheet>
             <div class="oe_chatter">
                 <field name="message_ids"  options="{'open_attachments': True}"/>
             </div>
