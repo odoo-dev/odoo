@@ -139,12 +139,11 @@ function getAnchorEl(el, consumeEvent) {
 }
 
 /**
- * IMPROVEMENT: Consider disabled? Or transitioning (moving) elements?
+ * IMPROVEMENT: Consider transitioning (moving) elements?
  * @param {Element} el
- * @param {boolean} allowInvisible
- * @returns {boolean}
+ * @param {TourStep} step
  */
-function canContinue(el, allowInvisible) {
+function canContinue(el, step) {
     const isInDoc = el.ownerDocument.contains(el);
     const isElement = el instanceof el.ownerDocument.defaultView.Element || el instanceof Element;
     // TODO: Take into account ".o_blockUI".
@@ -153,8 +152,8 @@ function canContinue(el, allowInvisible) {
         isInDoc &&
         isElement &&
         !isBlocked &&
-        (!allowInvisible ? isVisible(el) : true) &&
-        !el.disabled
+        (!step.allowInvisible ? isVisible(el) : true) &&
+        (!el.disabled || step.isCheck)
     );
 }
 
@@ -230,7 +229,7 @@ export function compileStepManual(
 
                 const stepEl = extraTriggerOkay && (triggerEl || altEl);
 
-                if (stepEl && canContinue(stepEl, step.allowInvisible)) {
+                if (stepEl && canContinue(stepEl, step)) {
                     const consumeEvent = step.consumeEvent || getConsumeEventType(stepEl, step.run);
                     const anchorEl = getAnchorEl(stepEl, consumeEvent);
                     const debouncedToggleOpen = debounce(pointer.showContent, 50, true);
@@ -315,7 +314,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                     return false;
                 }
 
-                return canContinue(stepEl, step.allowInvisible) && stepEl;
+                return canContinue(stepEl, step) && stepEl;
             },
             action: async (stepEl) => {
                 tourState.set(tour.name, "currentIndex", stepIndex + 1);
@@ -352,7 +351,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                 } else if (step.run !== undefined) {
                     const m = step.run.match(/^([a-zA-Z0-9_]+) *(?:\(? *(.+?) *\)?)?$/);
                     actionHelper[m[1]](m[2]);
-                } else {
+                } else if (!step.isCheck) {
                     actionHelper.auto();
                 }
 

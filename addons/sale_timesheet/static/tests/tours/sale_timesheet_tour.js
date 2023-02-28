@@ -43,7 +43,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     content: 'Wait for the confirmation to finish. State should be "Sales Order"',
     trigger: '.o_field_widget[name=state] .o_arrow_button_current:contains("Sales Order")',
-    run() {},
+    isCheck: true,
 }, stepUtils.toggleHomeMenu(),
 ...stepUtils.goToAppSteps("project.menu_main_pm", 'Go to the Project app.'),
 {
@@ -225,32 +225,32 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: ".o_rightpanel_section[name='sales'] .o_rightpanel_title:contains('Sales')",
     content: 'Check the user sees Sales section',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='sales'] .o_rightpanel_data:contains('Prepaid Hours')",
     content: 'Check the user sees a line in the Sales section',
     // timer: 300,
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section .oe_button_box .o_stat_text:contains('Sales Orders')",
     content: 'Check the user sees Sales Orders Stat Button',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_title:contains('Profitability')",
     content: 'Check the user sees Profitability section',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(0) > table > thead > tr > th:eq(0):contains('Revenues')",
     content: 'Check the user sees Profitability subsection row',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(1) > table > thead > tr > th:eq(0):contains('Costs')",
     content: 'Check the user sees Profitability subsection row',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > .o_rightpanel_subsection:eq(2) > table > thead > tr > th:eq(0):contains('Margin')",
     content: 'Check the user sees Profitability subsection row',
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_rightpanel_section[name='milestones'] .o_rightpanel_title:contains('Milestones')",
     content: 'Check the user sees Milestones section',
@@ -278,19 +278,19 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: ".o_field_widget[name=description] h3:contains('Sales')",
     content: "Sales title must be in description in description",
-    run: function () {},
+    isCheck: true,
     }, {
     trigger: ".o_field_widget[name=description] td:contains('Prepaid Hours')",
     content: "Prepaid Hours title must be in description",
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_field_widget[name=description] h3:contains('Profitability')",
     content: "Profitability title must be in description",
-    run: function () {},
+    isCheck: true,
 }, {
     trigger: ".o_field_widget[name=description] h3:contains('Milestones')",
     content: "Milestones title must be in description",
-    run: function () {},
+    isCheck: true,
 },
 // Those steps are currently needed in order to prevent the following issue:
 // "Form views in edition mode are automatically saved when the page is closed, which leads to stray network requests and inconsistencies."
