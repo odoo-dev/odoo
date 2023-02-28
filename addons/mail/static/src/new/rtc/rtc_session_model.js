@@ -16,7 +16,17 @@ export class RtcSession {
     localVolume;
     isTalking;
     videoStream;
+    // RTC stats
     connectionState;
+    localCandidateType;
+    remoteCandidateType;
+    dataChannelState;
+    packetsReceived;
+    packetsSent;
+    dtlsState;
+    iceState;
+    iceGatheringState;
+    logStep;
     // "relational data"
     channelId;
     channelMemberId;
@@ -40,6 +50,16 @@ export class RtcSession {
         return this.isSelfMuted || this.isDeaf;
     }
 
+    get partnerId() {
+        const persona = this.channelMember?.persona;
+        return persona.type === "partner" ? persona.id : undefined;
+    }
+
+    get guestId() {
+        const persona = this.channelMember?.persona;
+        return persona.type === "guest" ? persona.id : undefined;
+    }
+
     /**
      * @returns {string}
      */
@@ -51,9 +71,54 @@ export class RtcSession {
      * @returns {number} float
      */
     get volume() {
+        return this.audioElement?.volume;
+    }
+
+    set volume(value) {
         if (this.audioElement) {
-            return this.audioElement.volume;
+            this.audioElement.volume = value;
         }
-        return undefined;
+    }
+
+    async updateStats() {
+        delete this.localCandidateType;
+        delete this.remoteCandidateType;
+        delete this.dataChannelState;
+        delete this.packetsReceived;
+        delete this.packetsSent;
+        delete this.dtlsState;
+        delete this.iceState;
+        delete this.iceGatheringState;
+        if (!this.peerConnection) {
+            return;
+        }
+        let stats;
+        try {
+            stats = await this.peerConnection.getStats();
+        } catch {
+            return;
+        }
+        this.iceGatheringState = this.peerConnection.iceGatheringState;
+        for (const value of stats.values() || []) {
+            switch (value.type) {
+                case "candidate-pair":
+                    if (value.state === "succeeded" && value.localCandidateId) {
+                        this.localCandidateType =
+                            stats.get(value.localCandidateId)?.candidateType || "";
+                        this.remoteCandidateType =
+                            stats.get(value.remoteCandidateId)?.candidateType || "";
+                    }
+                    break;
+                case "data-channel":
+                    this.dataChannelState = value.state;
+                    break;
+                case "transport":
+                    this.dtlsState = value.dtlsState;
+                    this.iceState = value.iceState;
+                    this.packetsReceived = value.packetsReceived;
+                    this.packetsSent = value.packetsSent;
+                    break;
+            }
+        }
     }
 }

@@ -26,12 +26,10 @@ export class UserSettings {
             return;
         }
         const volumeRecordSet = settings.volume_settings_ids?.[0][1] ?? [];
-        for (const volumeRecord of volumeRecordSet) {
-            this.partnerVolumes.set(volumeRecord.partner_id.id, volumeRecord.volume);
-        }
+        this.setVolumes(volumeRecordSet);
     }
-    // lookups at partner.volumeSetting.volume should now be settings.partnerVolumes.get(partnerId)
     partnerVolumes = new Map();
+    guestVolumes = new Map();
     /**
      * DeviceId of the audio input selected by the user
      */
@@ -66,6 +64,15 @@ export class UserSettings {
         return constraints;
     }
 
+    getVolume(rtcSession) {
+        return (
+            rtcSession.volume ||
+            this.partnerVolumes.get(rtcSession.partnerId) ||
+            this.guestVolumes.get(rtcSession.guestId) ||
+            0.5
+        );
+    }
+
     // "setters"
 
     /**
@@ -82,6 +89,16 @@ export class UserSettings {
         this.voiceActiveDuration = parseInt(value, 10);
         this._saveSettings();
     }
+
+    setVolumes(volumeRecordSet) {
+        for (const volumeRecord of volumeRecordSet) {
+            if (volumeRecord.partner_id) {
+                this.partnerVolumes.set(volumeRecord.partner_id.id, volumeRecord.volume);
+            } else if (volumeRecord.guest_id) {
+                this.guestVolumes.set(volumeRecord.guest_id.id, volumeRecord.volume);
+            }
+        }
+    }
     /**
      * @param {event} ev
      */
@@ -95,17 +112,18 @@ export class UserSettings {
     /**
      * @param {Object} param0
      * @param {number} [param0.partnerId]
+     * @param {number} [param0.guestId]
      * @param {number} param0.volume
      */
-    async saveVolumeSetting({ partnerId, volume }) {
-        const key = `${partnerId}`;
+    async saveVolumeSetting({ partnerId, guestId, volume }) {
+        const key = `${partnerId}_${guestId}`;
         if (this.volumeSettingsTimeouts.get(key)) {
             browser.clearTimeout(this.volumeSettingsTimeouts.get(key));
         }
         this.volumeSettingsTimeouts.set(
             key,
             browser.setTimeout(
-                this._onSaveVolumeSettingTimeout.bind(this, { key, partnerId, volume }),
+                this._onSaveVolumeSettingTimeout.bind(this, { key, partnerId, guestId, volume }),
                 5000
             )
         );
@@ -206,11 +224,14 @@ export class UserSettings {
      */
     async _onSaveVolumeSettingTimeout({ key, partnerId, guestId, volume }) {
         this.volumeSettingsTimeouts.delete(key);
-        await this.orm.call("res.users.settings", "set_volume_setting", [[this.id]], {
-            partner_id: partnerId,
-            volume,
-            guest_id: guestId,
-        });
+        await this.orm.call(
+            "res.users.settings",
+            "set_volume_setting",
+            [[this.id], partnerId, volume],
+            {
+                guest_id: guestId,
+            }
+        );
     }
     /**
      * @private

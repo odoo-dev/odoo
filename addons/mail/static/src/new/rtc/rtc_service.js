@@ -65,6 +65,27 @@ function getTransceiver(peerConnection, trackKind) {
     return transceivers[ORDERED_TRANSCEIVER_NAMES.indexOf(trackKind)];
 }
 
+/**
+ * @param {Array<RTCIceServer>} iceServers
+ * @returns {Boolean}
+ */
+function hasTurn(iceServers) {
+    return iceServers.some((server) => {
+        let hasTurn = false;
+        if (server.url) {
+            hasTurn = server.url.startsWith("turn:");
+        }
+        if (server.urls) {
+            if (Array.isArray(server.urls)) {
+                hasTurn = server.urls.some((url) => url.startsWith("turn:")) || hasTurn;
+            } else {
+                hasTurn = server.urls.startsWith("turn:") || hasTurn;
+            }
+        }
+        return hasTurn;
+    });
+}
+
 export class Rtc {
     constructor(env, services) {
         this.env = env;
@@ -459,12 +480,19 @@ export class Rtc {
      * @param {String} [param2.step] current step of the flow
      * @param {String} [param2.state] current state of the connection
      */
-    log(session, entry, { error, step, state } = {}) {
+    log(session, entry, { error, step, state, ...data } = {}) {
+        session.logStep = entry;
         if (!this.userSettingsService.logRtc) {
             return;
         }
-        if (!(session.id in this.state.logs)) {
+        if (!this.state.logs.has(session.id)) {
             this.state.logs.set(session.id, { step: "", state: "", logs: [] });
+        }
+        if (step) {
+            this.state.logs.get(session.id).step = step;
+        }
+        if (state) {
+            this.state.logs.get(session.id).state = state;
         }
         const trace = window.Error().stack || "";
         this.state.logs.get(session.id).logs.push({
@@ -475,13 +503,8 @@ export class Rtc {
                 stack: error.stack && error.stack.split("\n"),
             },
             trace: trace.split("\n"),
+            ...data,
         });
-        if (step) {
-            this.state.logs.get(session.id).step = step;
-        }
-        if (state) {
-            this.state.logs.get(session.id).state = state;
-        }
     }
 
     async connect(session) {
@@ -500,7 +523,6 @@ export class Rtc {
             if (session.peerConnection || session.id === this.state.selfSession.id) {
                 continue;
             }
-            session.connectionState = "Not connected: sending initial RTC offer";
             this.log(session, "init call", { step: "init call" });
             this.connect(session);
         }
@@ -545,6 +567,9 @@ export class Rtc {
                     break;
             }
         };
+        peerConnection.onicegatheringstatechange = (event) => {
+            this.log(session, `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
+        };
         peerConnection.onconnectionstatechange = async (event) => {
             this.log(session, `connection state changed: ${peerConnection.connectionState}`);
             switch (peerConnection.connectionState) {
@@ -583,12 +608,8 @@ export class Rtc {
         };
         peerConnection.ontrack = ({ transceiver, track }) => {
             this.log(session, `received ${track.kind} track`);
-            const volume = this.userSettingsService.partnerVolumes.get(
-                session.channelMember.persona.id
-            );
             this.updateStream(session, track, {
                 mute: this.state.selfSession.isDeaf,
-                volume: volume ?? 1,
             });
         };
         const dataChannel = peerConnection.createDataChannel("notifications", {
@@ -627,6 +648,7 @@ export class Rtc {
         Object.assign(session, {
             peerConnection,
             dataChannel,
+            connectionState: "connecting",
         });
         return peerConnection;
     }
@@ -663,6 +685,7 @@ export class Rtc {
         this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         this.state.logs.set("channelId", this.state.channel?.id);
         this.state.logs.set("selfSessionId", this.state.selfSession?.id);
+        this.state.logs.set("hasTURN", hasTurn(this.state.iceServers));
         const channelProxy = reactive(this.state.channel, () => {
             if (channel !== this.state.channel) {
                 throw new Error("channel has changed");
@@ -805,10 +828,20 @@ export class Rtc {
                 ) {
                     return;
                 }
-                this.log(
-                    session,
-                    `calling back to recover ${peerConnection.iceConnectionState} connection, reason: ${reason}`
-                );
+                if (this.userSettingsService.logRtc) {
+                    let stats;
+                    try {
+                        const iterableStats = await peerConnection.getStats();
+                        stats = iterableStats && [...iterableStats.values()];
+                    } catch {
+                        // ignore
+                    }
+                    this.log(
+                        session,
+                        `calling back to recover "${peerConnection.iceConnectionState}" connection`,
+                        { reason, stats }
+                    );
+                }
                 await this.notify([session], "disconnect");
                 this.disconnect(session);
                 this.connect(session);
@@ -1266,12 +1299,11 @@ export class Rtc {
 
     /**
      * @param {RtcSession} session
-     * @param {Track} [track]
-     * @param {Object} parm1
-     * @param {boolean} parm1.mute
-     * @param {number} parm1.volume
+     * @param {MediaStreamTrack} track
+     * @param {Object} [parm1]
+     * @param {boolean} [parm1.mute]
      */
-    async updateStream(session, track, { mute, volume } = {}) {
+    async updateStream(session, track, { mute } = {}) {
         const stream = new window.MediaStream();
         stream.addTrack(track);
         if (track.kind === "audio") {
@@ -1283,6 +1315,7 @@ export class Rtc {
             }
             audioElement.load();
             audioElement.muted = mute;
+            audioElement.volume = this.userSettingsService.getVolume(session);
             // Using both autoplay and play() as safari may prevent play() outside of user interactions
             // while some browsers may not support or block autoplay.
             audioElement.autoplay = true;
@@ -1317,7 +1350,16 @@ export class Rtc {
                 // ignore error during remove, the value will be overwritten at next usage anyway
             }
         }
-        session.audioStream = undefined;
+        delete session.audioStream;
+        delete session.connectionState;
+        delete session.localCandidateType;
+        delete session.remoteCandidateType;
+        delete session.dataChannelState;
+        delete session.packetsReceived;
+        delete session.packetsSent;
+        delete session.dtlsState;
+        delete session.iceState;
+        delete session.logStep;
         session.isAudioInError = false;
         session.isTalking = false;
         this.removeVideoFromSession(session);
