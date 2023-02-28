@@ -10,6 +10,7 @@ import {
     nextAnimationFrame,
     start,
     startServer,
+    waitUntil,
 } from "@mail/../tests/helpers/test_utils";
 import {
     CHAT_WINDOW_END_GAP_WIDTH,
@@ -808,17 +809,14 @@ QUnit.test("chat window: composer state conservation on toggle discuss", async f
             contentType: "text/plain",
         }),
     ];
-    await afterNextRender(() =>
-        inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), files)
+    await waitUntil(
+        () => inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), files),
+        ".o-mail-attachment-card",
+        2
     );
     assert.strictEqual(
         document.querySelector(`.o-mail-composer-textarea`).value,
         "XDU for the win !"
-    );
-    assert.containsN(
-        target,
-        ".o-mail-composer-footer .o-mail-attachment-list .o-mail-attachment-card",
-        2
     );
 
     await openDiscuss();
