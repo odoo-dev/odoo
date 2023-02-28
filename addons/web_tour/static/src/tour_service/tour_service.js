@@ -100,6 +100,7 @@ export const tourService = {
         const consumedTours = new Set(session.web_tours);
 
         const pointers = reactive({});
+        let shownPointerId = -1;
         let pointerId = 0;
 
         registry.category("main_components").add("TourPointerContainer", {
@@ -120,9 +121,23 @@ export const tourService = {
                 },
                 stop() {
                     delete pointers[id];
+                    shownPointerId = -1;
                     methods.destroy();
                 },
                 ...methods,
+                pointTo(anchor, step) {
+                    // If the pointer shown is this pointer,
+                    // we should still call pointTo to it for update.
+                    if (shownPointerId > -1 && shownPointerId !== id) {
+                        return;
+                    }
+                    shownPointerId = id;
+                    return methods.pointTo(anchor, step);
+                },
+                hide() {
+                    shownPointerId = -1;
+                    return methods.hide();
+                },
             };
         }
 
