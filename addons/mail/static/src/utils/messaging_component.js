@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { useModels } from "@mail/component_hooks/use_models";
+import { useModels } from "@mail/legacy/component_hooks/use_models";
 
 import { useRef } from "@odoo/owl";
 

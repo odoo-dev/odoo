@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Patch } from "@mail/model";
+import { Patch } from "@mail/legacy/model";
 
 Patch({
     name: "AutocompleteInputView",

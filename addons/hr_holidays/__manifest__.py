@@ -63,7 +63,7 @@ A synchronization with an internal agenda (Meetings of the CRM module) is also p
     'application': True,
     'assets': {
         'mail.assets_messaging': [
-            'hr_holidays/static/src/models/*.js',
+            'hr_holidays/static/src/legacy/models/**/*',
         ],
         'web.assets_backend': [
             'hr_holidays/static/src/views/**/*.js',

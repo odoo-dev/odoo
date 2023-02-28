@@ -25,10 +25,10 @@ Allows users to send documents by post
             'snailmail/static/src/new/**/*',
         ],
         'mail.assets_messaging': [
-            'snailmail/static/src/models/*.js',
+            'snailmail/static/src/legacy/models/**/*',
         ],
         'mail.assets_discuss_public': [
-            'snailmail/static/src/components/*/*',
+            'snailmail/static/src/legacy/components/*/*',
         ],
         'snailmail.report_assets_snailmail': [
             ('include', 'web._assets_helpers'),
@@ -38,8 +38,8 @@ Allows users to send documents by post
             'snailmail/static/src/js/snailmail_external_layout.js',
         ],
         'web.assets_backend': [
-            'snailmail/static/src/components/*/*.scss',
-            'snailmail/static/src/components/*/*.xml',
+            'snailmail/static/src/legacy/components/*/*.scss',
+            'snailmail/static/src/legacy/components/*/*.xml',
         ],
         'web.tests_assets': [
             'snailmail/static/tests/helpers/**/*.js',

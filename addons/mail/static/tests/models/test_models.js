@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { attr, many, one, Model } from "@mail/model";
+import { attr, many, one, Model } from "@mail/legacy/model";
 
 Model({
     name: "TestAddress",

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { ModelManager } from "@mail/model/model_manager";
+import { ModelManager } from "@mail/legacy/model/model_manager";
 
 export const messagingService = {
     dependencies: [

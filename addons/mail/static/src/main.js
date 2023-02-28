@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
-import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
+import { DialogManagerContainer } from "@mail/legacy/components/dialog_manager_container/dialog_manager_container";
+import { PopoverManagerContainer } from "@mail/legacy/components/popover_manager_container/popover_manager_container";
 import { messagingService } from "@mail/services/messaging_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
 

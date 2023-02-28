@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { one, Patch } from "@mail/model";
+import { one, Patch } from "@mail/legacy/model";
 
 Patch({
     name: "ClockWatcher",

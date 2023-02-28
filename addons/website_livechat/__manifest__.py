@@ -26,7 +26,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
     ],
     'assets': {
         'im_livechat.assets_public_livechat': [
-            'website_livechat/static/src/public_models/*.js',
+            'website_livechat/static/src/legacy/public_models/*',
             'website_livechat/static/src/legacy/widgets/*/*',
         ],
         'mail.assets_messaging': [

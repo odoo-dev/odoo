@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { one, Model } from "@mail/model";
+import { one, Model } from "@mail/legacy/model";
 
 Model({
     name: "QUnitTest",

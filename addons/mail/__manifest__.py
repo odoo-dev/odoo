@@ -116,13 +116,15 @@ For more specific needs, you may also assign custom-defined actions
     'application': True,
     'assets': {
         'mail.assets_core_messaging': [
-            'mail/static/src/model.js',
-            'mail/static/src/model/*.js',
-            'mail/static/src/core_models/*.js',
+            'mail/static/src/legacy/model.js',
+            'mail/static/src/legacy/model/*',
+            'mail/static/src/legacy/core_models/*',
         ],
         'mail.assets_messaging': [
             ('include', 'mail.assets_core_messaging'),
-            'mail/static/src/models/*.js',
+            'mail/static/src/legacy/core_models/**/*',
+            'mail/static/src/legacy/model/**/*',
+            'mail/static/src/legacy/models/**/*',
             'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
         ],
         # Custom bundle in case we want to remove things that are later added to web.assets_common
@@ -145,12 +147,12 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/scss/variables/derived_variables.scss',
             'mail/static/src/scss/composer.scss',
             # Dependency of notification_group, notification_request, thread_needaction_preview and thread_preview
-            'mail/static/src/components/notification_list/notification_list_item.scss',
-            'mail/static/src/component_hooks/*.js',
-            'mail/static/src/components/*/*',
+            'mail/static/src/legacy/components/notification_list/notification_list_item.scss',
+            'mail/static/src/legacy/component_hooks/*.js',
+            'mail/static/src/legacy/components/*/*',
             # Unused by guests and depends on ViewDialogs, better to remove it instead of pulling the whole view dependency tree
-            ('remove', 'mail/static/src/components/composer_suggested_recipient/*'),
-            ('remove', 'mail/static/src/components/activity_menu_container/*'),
+            ('remove', 'mail/static/src/legacy/components/composer_suggested_recipient/*'),
+            ('remove', 'mail/static/src/legacy/components/activity_menu_container/*'),
             'mail/static/src/js/utils.js',
             ('include', 'mail.assets_messaging'),
             'mail/static/src/services/*.js',
@@ -182,16 +184,16 @@ For more specific needs, you may also assign custom-defined actions
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
             # defines mixins and variables used by multiple components
-            'mail/static/src/components/notification_list/notification_list_item.scss',
+            'mail/static/src/legacy/components/notification_list/notification_list_item.scss',
             'mail/static/src/js/**/*.js',
             'mail/static/src/utils/*.js',
             'mail/static/src/scss/*.scss',
             'mail/static/src/xml/*.xml',
-            'mail/static/src/component_hooks/*.js',
-            'mail/static/src/backend_components/*/*',
-            'mail/static/src/components/*/*.js',
-            'mail/static/src/components/*/*.scss',
-            'mail/static/src/components/*/*.xml',
+            'mail/static/src/legacy/component_hooks/*.js',
+            'mail/static/src/legacy/backend_components/*/*',
+            'mail/static/src/legacy/components/*/*.js',
+            'mail/static/src/legacy/components/*/*.scss',
+            'mail/static/src/legacy/components/*/*.xml',
             'mail/static/src/views/*/*.xml',
             ('include', 'mail.assets_messaging'),
             'mail/static/src/services/*.js',
@@ -200,12 +202,12 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/views/**/*.xml',
 
             # Don't include dark mode files in light mode
-            ('remove', 'mail/static/src/components/*/*.dark.scss'),
+            ('remove', 'mail/static/src/legacy/components/*/*.dark.scss'),
 
             ('include', 'mail.assets_backend'),
         ],
         "web.dark_mode_assets_backend": [
-            'mail/static/src/components/*/*.dark.scss',
+            'mail/static/src/legacy/components/*/*.dark.scss',
             ('include', 'mail.assets_dark'),
         ],
         'web.assets_backend_prod_only': [

@@ -29,10 +29,10 @@
             'note/static/src/new/**/*',
         ],
         'mail.assets_messaging': [
-            'note/static/src/models/*.js',
+            'note/static/src/legacy/models/**/*',
         ],
         'web.assets_backend': [
-            'note/static/src/components/**/*',
+            'note/static/src/legacy/**/*',
             'note/static/src/scss/note.scss',
         ],
         'web.qunit_suite_tests': [
