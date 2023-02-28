@@ -33,6 +33,5 @@ class TestMailPublicPage(HttpCase):
     def test_mail_channel_public_page_as_internal(self):
         self._open_channel_page_as_user('demo')
 
-    @skip('skipRefactoring')
     def test_mail_channel_public_page_as_portal(self):
         self._open_channel_page_as_user('portal')
