@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import { click, insertText, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    click,
+    insertText,
+    start,
+    startServer,
+    waitUntil,
+} from "@mail/../tests/helpers/test_utils";
 
 import { getFixture } from "@web/../tests/helpers/utils";
 
@@ -205,5 +211,20 @@ QUnit.test(
         await click("button:contains(Log note)");
         await insertText(".o-mail-composer-textarea", "Dummy Message");
         await click(".o-mail-composer-send-button");
+    }
+);
+
+QUnit.test(
+    "suggested recipient without partner are unchecked when closing the dialog without creating partner",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const fakeId = pyEnv["res.fake"].create({ email_cc: "john@test.be" });
+        const { openFormView } = await start();
+        await openFormView("res.fake", fakeId);
+        await click("button:contains(Send message)");
+        await click("label:contains(john@test.be (john@test.be))");
+        await waitUntil(".modal-header");
+        await click(".modal-header > button.btn-close");
+        assert.containsNone(target, ".form-check-input:checked");
     }
 );
