@@ -589,9 +589,11 @@ export {
 export const click = getClick({ afterNextRender });
 
 /**
- * Function that wait until a selector is present in the DOM
+ * Function that wait until a selector is present in the DOM.
  *
+ * @param {Function} func
  * @param {string} selector
+ * @param {number} [expectedCount]
  */
 export function waitUntil(func, selector, expectedCount = 1) {
     return new Promise((resolve, reject) => {
