@@ -885,3 +885,40 @@ QUnit.test("Show a thread name in the recipient status text.", async function (a
     await click("button:contains(Send message)");
     assert.containsOnce(target, '.o-mail-chatter:contains(To followers of:  "test name")');
 });
+
+QUnit.test(
+    "Uploading multiple files in the composer create multiple temporary attachments",
+    async function (assert) {
+        const pyEnv = await startServer();
+        // Promise to block attachment uploading
+        const uploadPromise = makeTestPromise();
+        const channelId = pyEnv["mail.channel"].create({ name: "test" });
+        const { openDiscuss } = await start({
+            async mockRPC(route, args) {
+                if (route === "/mail/attachment/upload") {
+                    await uploadPromise;
+                }
+            },
+        });
+        await openDiscuss(channelId);
+        const file1 = await createFile({
+            name: "text1.txt",
+            content: "hello, world",
+            contentType: "text/plain",
+        });
+        const file2 = await createFile({
+            name: "text2.txt",
+            content: "hello, world",
+            contentType: "text/plain",
+        });
+        await afterNextRender(() => {
+            inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
+                file1,
+                file2,
+            ]);
+        });
+        assert.containsOnce(target, ".o-mail-attachment-card:contains(text1.txt)");
+        assert.containsOnce(target, ".o-mail-attachment-card:contains(text2.txt)");
+        assert.containsN(target, ".o-mail-attachment-card-aside div[title='Uploading']", 2);
+    }
+);
