@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.call" owl="1">
-        <div class="o-mail-call d-flex" t-att-class="{'o-fullscreen fixed-top vw-100 vh-100': state.isFullscreen, 'o-minimized': minimized, 'position-relative': !state.isFullscreen }">
+        <div class="o-mail-call user-select-none d-flex" t-att-class="{'o-fullscreen fixed-top vw-100 vh-100': state.isFullscreen, 'o-minimized': minimized, 'position-relative': !state.isFullscreen }">
             <!-- Used to make the component depend on the window size and trigger an update when the window size changes. -->
             <div class="o-mail-call-main d-flex flex-grow-1 flex-column align-items-center justify-content-center position-relative overflow-auto bg-black-50" t-on-mouseleave="onMouseleaveMain">
                 <div

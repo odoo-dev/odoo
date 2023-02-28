@@ -53,8 +53,8 @@
                     </span>
                 </div>
 
-                <!-- volume popover -->
-                <i t-if="!rtcSession === rtc.state.selfSession" class="position-absolute bottom-0 start-50" t-on-click="onClickVolumeAnchor" t-ref="volumeMenuAnchor"/>
+                <!-- context menu -->
+                <i t-if="isContextMenuAvailable" class="position-absolute bottom-0 start-50" t-ref="contextMenuAnchor"/>
             </t>
         </div>
     </t>

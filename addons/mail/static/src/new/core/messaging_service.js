@@ -555,6 +555,10 @@ export class Messaging {
                 settings.is_discuss_sidebar_category_channel_open ??
                 this.store.discuss.channels.isOpen;
         }
+        const {"res.users.settings.volumes": volumeSettings } = notif.payload;
+        if (volumeSettings) {
+            this.userSettingsService.setVolumes(volumeSettings);
+        }
     }
 
     _updateRtcSessions(channelId, sessionsData, command) {
