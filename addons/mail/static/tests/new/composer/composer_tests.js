@@ -11,6 +11,7 @@ import {
     start,
     startServer,
     pasteFiles,
+    waitUntil,
 } from "@mail/../tests/helpers/test_utils";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
@@ -917,6 +918,8 @@ QUnit.test(
                 file2,
             ]);
         });
+        await waitUntil('.o-mail-attachment-card:contains("text1.txt")');
+        await waitUntil('.o-mail-attachment-card:contains("text2.txt")');
         assert.containsOnce(target, ".o-mail-attachment-card:contains(text1.txt)");
         assert.containsOnce(target, ".o-mail-attachment-card:contains(text2.txt)");
         assert.containsN(target, ".o-mail-attachment-card-aside div[title='Uploading']", 2);
@@ -957,6 +960,8 @@ QUnit.test(
                 file2,
             ]);
         });
+        await waitUntil('.o-mail-attachment-card:contains("text1.txt")');
+        await waitUntil('.o-mail-attachment-card:contains("text2.txt")');
         await click(".o-mail-attachment-card-aside-unlink");
 
         // Simulates the completion of the upload of the first attachment

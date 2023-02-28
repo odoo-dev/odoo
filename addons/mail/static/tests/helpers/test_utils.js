@@ -587,3 +587,29 @@ export {
 };
 
 export const click = getClick({ afterNextRender });
+
+/**
+ * Function that wait until a selector is present in the DOM
+ *
+ * @param {string} selector
+ */
+export function waitUntil(selector) {
+    return new Promise((resolve) => {
+        const $selector = $(selector);
+        if ($(selector)) {
+            return resolve($selector);
+        }
+
+        const observer = new MutationObserver((mutations) => {
+            if ($selector) {
+                resolve($selector);
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+    });
+}
