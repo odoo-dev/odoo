@@ -81,11 +81,11 @@ function describeFailedStepSimple(step, tour) {
 
 /**
  * @param {TourStep} step
- * @param {number} stepIndex
  * @param {Tour} tour
  */
-function describeFailedStepDetailed(step, stepIndex, tour) {
+function describeFailedStepDetailed(step, tour) {
     const offset = 3;
+    const stepIndex = tour.steps.findIndex((s) => s === step);
     const start = stepIndex - offset >= 0 ? stepIndex - offset : 0;
     const end =
         stepIndex + offset + 1 <= tour.steps.length ? stepIndex + offset + 1 : tour.steps.length;
@@ -292,7 +292,7 @@ export function compileStepAuto(stepIndex, step, { tour, stepDelay, watch, point
                     tourTimeout = setTimeout(() => {
                         // The logged text shows the relative position of the failed step.
                         // Useful for finding the failed step.
-                        console.warn(describeFailedStepDetailed(step, stepIndex, tour));
+                        console.warn(describeFailedStepDetailed(step, tour));
                         // console.error notifies the test runner that the tour failed.
                         console.error(describeFailedStepSimple(step, tour));
                     }, (step.timeout || 10000) + stepDelay);
