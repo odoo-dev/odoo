@@ -912,16 +912,12 @@ QUnit.test(
             content: "hello, world",
             contentType: "text/plain",
         });
-        await waitUntil(
-            () => {
-                inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
-                    file1,
-                    file2,
-                ]);
-            },
-            ".o-mail-attachment-card",
-            2
-        );
+        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
+            file1,
+            file2,
+        ]);
+        await waitUntil(".o-mail-attachment-card:contains(text1.txt)");
+        await waitUntil(".o-mail-attachment-card:contains(text2.txt)");
         assert.containsN(target, ".o-mail-attachment-card-aside div[title='Uploading']", 2);
     }
 );
@@ -954,16 +950,12 @@ QUnit.test(
             content: "hello, world",
             contentType: "text/plain",
         });
-        await waitUntil(
-            () => {
-                inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
-                    file1,
-                    file2,
-                ]);
-            },
-            ".o-mail-attachment-card",
-            2
-        );
+        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [
+            file1,
+            file2,
+        ]);
+        await waitUntil(".o-mail-attachment-card:contains(text1.txt)");
+        await waitUntil(".o-mail-attachment-card:contains(text2.txt)");
         await click(".o-mail-attachment-card-aside-unlink");
 
         // Simulates the completion of the upload of the first attachment

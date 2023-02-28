@@ -593,18 +593,15 @@ export const click = getClick({ afterNextRender });
  *
  * @param {string} selector
  */
-export function waitUntil(func, selector, expectedCount = 1) {
+export function waitUntil(selector) {
     return new Promise((resolve, reject) => {
-        if ($(selector).length === expectedCount) {
-            return reject(new Error("selector already present in the DOM"));
+        if ($(selector).length) {
+            return resolve($(selector));
         }
 
-        const timer = setTimeout(
-            () => reject(new Error(`Waited 5 second for ${expectedCount} ${selector}`)),
-            5000
-        );
+        const timer = setTimeout(() => reject(new Error(`Waited 5 second for ${selector}`)), 5000);
         const observer = new MutationObserver((mutations) => {
-            if ($(selector).length === expectedCount) {
+            if ($(selector).length) {
                 resolve($(selector));
                 observer.disconnect();
                 clearTimeout(timer);
@@ -615,7 +612,5 @@ export function waitUntil(func, selector, expectedCount = 1) {
             childList: true,
             subtree: true,
         });
-
-        func();
     });
 }
