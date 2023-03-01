@@ -45,6 +45,22 @@ class ResConfigSettings(models.TransientModel):
     pos_module_pos_discount = fields.Boolean(related='pos_config_id.module_pos_discount', readonly=False)
     pos_module_pos_hr = fields.Boolean(related='pos_config_id.module_pos_hr', readonly=False)
     pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)
+    """
+    what we do here is kind of complicated...
+    we have the variable pos_module_pos_self_order. When this 
+    variable is set to True, the pos_self_order module is installed.
+    the problem is that we want to install the module when either the 
+    user clicks on "Self Ordering" setting from the "POS interface" section
+    or when the user clicks on "QR Code Menu" from the restaurant section.
+    We also have to know by which means did the user install the self_order module,
+    Because the module behaves differently depending on this info.
+    """
+    # Customer will be able to see the menu on their phone
+    pos_self_order_view_mode = fields.Boolean(related='pos_config_id.self_order_view_mode', readonly=False)
+    @api.onchange('pos_self_order_view_mode')
+    def _compute_self_order_view(self):
+        for record in self:
+            record.env["pos.config"].search([]).module_pos_self_order = record.pos_self_order_view_mode
 
     pos_allowed_pricelist_ids = fields.Many2many('product.pricelist', compute='_compute_pos_allowed_pricelist_ids')
     pos_amount_authorized_diff = fields.Float(related='pos_config_id.amount_authorized_diff', readonly=False)
