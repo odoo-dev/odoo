@@ -8,12 +8,20 @@ import {
 } from "@mail/new/web/chat_window/chat_window_service";
 import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 
-import { Component, onWillStart, useExternalListener, useState } from "@odoo/owl";
+import {
+    Component,
+    onWillStart,
+    useExternalListener,
+    useState,
+    onMounted,
+    useRef,
+} from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { localization } from "@web/core/l10n/localization";
 
 export class ChatWindowContainer extends Component {
     static components = { ChatWindow, Dropdown };
@@ -36,10 +44,27 @@ export class ChatWindowContainer extends Component {
         this.messaging = useMessaging();
         this.store = useStore();
         this.chatWindowService = useState(useService("mail.chat_window"));
+        this.hiddenMenuRef = useRef("hiddenMenu");
         onWillStart(() => this.messaging.isReady);
+        onMounted(() => {
+            this.setHiddenMenuOffset();
+        });
 
         this.onResize();
         useExternalListener(browser, "resize", this.onResize);
+    }
+
+    setHiddenMenuOffset() {
+        if (!this.hiddenMenuRef.el) {
+            return;
+        }
+        const textDirection = localization.direction;
+        const offsetFrom = textDirection === "rtl" ? "left" : "right";
+        const visibleOffset =
+            CHAT_WINDOW_END_GAP_WIDTH +
+            this.chatWindowService.maxVisible * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_END_GAP_WIDTH);
+        const oppositeFrom = offsetFrom === "right" ? "left" : "right";
+        this.hiddenMenuRef.el.style = `${offsetFrom}: ${visibleOffset}px; ${oppositeFrom}: auto`;
     }
 
     onResize() {
@@ -54,6 +79,7 @@ export class ChatWindowContainer extends Component {
         ) {
             this.chatWindowService.show(this.chatWindowService.hidden[0]);
         }
+        this.setHiddenMenuOffset();
     }
 
     get unread() {

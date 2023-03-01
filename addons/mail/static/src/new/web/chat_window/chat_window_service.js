@@ -48,9 +48,9 @@ export class ChatWindowService {
             ? CHAT_WINDOW_END_GAP_WIDTH + CHAT_WINDOW_HIDDEN_WIDTH
             : CHAT_WINDOW_END_GAP_WIDTH;
         const endGap = this.store.isSmall ? 0 : CHAT_WINDOW_END_GAP_WIDTH;
-        const awailable = browser.innerWidth - startGap - endGap;
+        const available = browser.innerWidth - startGap - endGap;
         const maxAmountWithoutHidden = Math.floor(
-            awailable / (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH)
+            available / (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH)
         );
         return maxAmountWithoutHidden;
     }
