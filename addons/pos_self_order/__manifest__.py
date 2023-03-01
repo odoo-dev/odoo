@@ -56,6 +56,7 @@
             'pos_self_order/static/src/**/*',
             'point_of_sale/static/src/utils.js',
         ],
+        'web.assests_tests':['pos_self_order/static/tests/tours/**/*'],
 
     }
 
