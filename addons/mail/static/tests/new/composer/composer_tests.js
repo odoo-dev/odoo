@@ -212,6 +212,56 @@ QUnit.test(
     }
 );
 
+QUnit.test("keep emoji picker scroll value when re-opening it", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "roblox-carsurfing" });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("button[aria-label='Emojis']");
+    document.querySelector(".o-mail-emoji-picker-content").scrollTop = 150;
+    await click("button[aria-label='Emojis']");
+    await click("button[aria-label='Emojis']");
+    assert.strictEqual(document.querySelector(".o-mail-emoji-picker-content").scrollTop, 150);
+});
+
+QUnit.test("reset emoji picker scroll value after an emoji is picked", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "roblox-fingerskating" });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("button[aria-label='Emojis']");
+    document.querySelector(".o-mail-emoji-picker-content").scrollTop = 150;
+    await click(".o-emoji:contains(😎)");
+    await click("button[aria-label='Emojis']");
+    assert.strictEqual(document.querySelector(".o-mail-emoji-picker-content").scrollTop, 0);
+});
+
+QUnit.test(
+    "keep emoji picker scroll value independent if two or more different emoji pickers are used",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({ name: "roblox-jaywalking" });
+        const { openDiscuss } = await start();
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "This is a message",
+            attachment_ids: [],
+            message_type: "comment",
+            model: "mail.channel",
+            res_id: channelId,
+        });
+        await openDiscuss(channelId);
+        await click("button[aria-label='Emojis']");
+        document.querySelector(".o-mail-emoji-picker-content").scrollTop = 150;
+        await click("i[title='Add a Reaction']");
+        document.querySelector(".o-mail-emoji-picker-content").scrollTop = 200;
+        await click("button[aria-label='Emojis']");
+        assert.strictEqual(document.querySelector(".o-mail-emoji-picker-content").scrollTop, 150);
+        await click("i[title='Add a Reaction']");
+        assert.strictEqual(document.querySelector(".o-mail-emoji-picker-content").scrollTop, 200);
+    }
+);
+
 QUnit.test('do not send typing notification on typing "/" command', async function (assert) {
     const pyEnv = await startServer();
     const channelId = pyEnv["mail.channel"].create({ name: "channel" });
