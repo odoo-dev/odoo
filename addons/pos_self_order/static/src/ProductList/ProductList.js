@@ -11,10 +11,6 @@ import { NavBar } from "../NavBar/NavBar";
  * @typedef {import("@pos_self_order/jsDocTypes").CartItem} CartItem
  */
 export class ProductList extends Component {
-    // static props = {
-    //     productList: Array,
-    //     cart: Object,
-    // };
     setup() {
         this.state = useState(this.env.state);
 

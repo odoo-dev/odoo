@@ -21,31 +21,11 @@ class SelfOrderRoot extends Component {
     Most of the business logic is done here
     The app has the folowing screens:
     0. LandingPage  -- the main screen of the app
-            -- it has a button that redirects to the menu
-            -- it shows the orders list
+                    -- it has a button that redirects to the menu
     1. ProductList -- the screen that shows the list of products ( the menu )
     2. ProductMainView  -- the screen that shows the details of a product ( the product page )
     */
     setup() {
-        /*
-        In local storage we store the following information:
-        - An object containing all the previous orders
-            (we will json.stringify it and save it to local storage)
-            for each order we save the following information:
-                1. the order id
-                2. access_token
-                3. Order state ( draft, paid )
-                4. Date
-                5. Amount
-                6. Order items 
-        - The current order details: object containing the following information:
-            1. order_id
-            2. access_token
-        - The current cart
-        - The current table id
-        - The current user name
-
-        */
         this.selfOrder = useSelfOrder();
         /**
          * @type {{
@@ -87,12 +67,6 @@ class SelfOrderRoot extends Component {
             this.result_from_get_menu = await this.rpc(`/pos-self-order/get-menu`, {
                 pos_id: this.selfOrder.config.pos_id,
             });
-            // we rename the "id" field to "product_id"
-            // the product.product model uses "id",
-            // but the pos.order.line model uses "product_id"
-            // TODO: this productlList should be available to all the components
-            // but there is no reason for it to be in the state, as it should never change
-            // what is the best way to do this?
             /**
              * @type {Product[]}
              */
@@ -126,11 +100,9 @@ class SelfOrderRoot extends Component {
                     .map((id) => this.selfOrder.config.attributes_by_ptal_id[id])
                     .filter((attr) => attr !== undefined);
             });
-            console.log("this.productList :>> ", this.productList);
         });
     }
 
-    // TODO: refactor functions to regular functions instead of arrow functions
     viewLandingPage() {
         this.state.currentScreen = 0;
     }

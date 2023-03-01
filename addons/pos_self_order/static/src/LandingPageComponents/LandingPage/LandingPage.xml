@@ -3,9 +3,6 @@
     <t t-name="LandingPage" owl="1">
         <div class="d-flex flex-column vh-100 justify-content-between align-items-center">
             <LandingPageHeader 
-                user_name="this.state.user_name"
-                table_id="this.state.table_id"
-                t-on-click="resetNameAndTableNumber"
             />
             <div class="d-flex flex-column w-75 justify-content-around">
                 <t t-if="props.message_to_display">

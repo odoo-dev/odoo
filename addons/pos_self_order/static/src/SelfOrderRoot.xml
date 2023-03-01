@@ -8,10 +8,7 @@
                 <LandingPage 
                     message_to_display="this.state.message_to_display" 
                     viewMenu.bind="viewMenu"
-                    viewOrder="viewOrder"
-                    getUpdatedOrdersListFromServer = "getUpdatedOrdersListFromServer"
                     productList="productList" 
-                    viewOrders="viewOrders"
                 />
             </t>
     <!-- Menu -->
@@ -20,9 +17,6 @@
                 <ProductList
                 productList="productList" 
                 viewProduct="viewProduct"
-                getTotalCartQty="getTotalCartQty"
-                getTotalCartCost="getTotalCartCost"
-                currencyType="currencyType"
                 viewCart="viewCart"
                 goBack.bind="viewLandingPage"
                 />
@@ -33,7 +27,6 @@
                 <ProductMainView 
                 product="productList.find(x => x.product_id === this.state.currentProduct)" 
                 goBack.bind="viewMenu" 
-                addToCart="addToCart"/>
             </t>
     </t>
 </templates>
