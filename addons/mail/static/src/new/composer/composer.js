@@ -98,13 +98,17 @@ export class Composer extends Component {
         });
         this.suggestion = this.store.user ? useSuggestion() : undefined;
         if (this.props.dropzoneRef && this.allowUpload) {
-            useDropzone(this.props.dropzoneRef, (ev) => {
-                if (isDragSourceExternalFile(ev.dataTransfer)) {
-                    for (const file of ev.dataTransfer.files) {
-                        this.attachmentUploader.uploadFile(file);
+            useDropzone(
+                this.props.dropzoneRef,
+                (ev) => {
+                    if (isDragSourceExternalFile(ev.dataTransfer)) {
+                        for (const file of ev.dataTransfer.files) {
+                            this.attachmentUploader.uploadFile(file);
+                        }
                     }
-                }
-            });
+                },
+                "o-mail-composer-dropzone"
+            );
         }
         if (this.props.messageEdition) {
             this.props.messageEdition.composerOfThread = this;

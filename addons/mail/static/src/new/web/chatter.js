@@ -101,15 +101,19 @@ export class Chatter extends Component {
         useChildSubEnv({
             inChatter: true,
         });
-        useDropzone(this.rootRef, (ev) => {
-            if (this.state.thread.composer.type) {
-                return;
-            }
-            if (isDragSourceExternalFile(ev.dataTransfer)) {
-                [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
-                this.state.isAttachmentBoxOpened = true;
-            }
-        });
+        useDropzone(
+            this.rootRef,
+            (ev) => {
+                if (this.state.thread.composer.type) {
+                    return;
+                }
+                if (isDragSourceExternalFile(ev.dataTransfer)) {
+                    [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
+                    this.state.isAttachmentBoxOpened = true;
+                }
+            },
+            "o-mail-chatter-dropzone"
+        );
 
         onMounted(this.scrollPosition.restore);
         onPatched(this.scrollPosition.restore);

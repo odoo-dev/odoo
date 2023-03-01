@@ -3,7 +3,11 @@
 import { Component, useRef, useState, useEffect } from "@odoo/owl";
 
 export class Dropzone extends Component {
-    static props = { ref: Object, onDrop: { type: Function, optional: true } };
+    static props = {
+        extraClass: { type: String, optional: true },
+        onDrop: { type: Function, optional: true },
+        ref: Object,
+    };
     static template = "mail.dropzone";
 
     setup() {

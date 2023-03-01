@@ -7,7 +7,7 @@ import { useExternalListener, useEffect } from "@odoo/owl";
 const componentRegistry = registry.category("main_components");
 
 let id = 1;
-export function useDropzone(targetRef, onDrop) {
+export function useDropzone(targetRef, onDrop, extraClass) {
     const dropzoneId = `mail.dropzone_${id++}`;
     let dragCount = 0;
     let hasTarget = false;
@@ -29,7 +29,7 @@ export function useDropzone(targetRef, onDrop) {
         if (shouldDisplayDropzone && !hasDropzone) {
             componentRegistry.add(dropzoneId, {
                 Component: Dropzone,
-                props: { onDrop, ref: targetRef },
+                props: { extraClass, onDrop, ref: targetRef },
             });
         }
         if (!shouldDisplayDropzone && hasDropzone) {
