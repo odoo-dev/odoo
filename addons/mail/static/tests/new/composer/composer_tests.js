@@ -697,7 +697,7 @@ QUnit.test("composer: add an attachment", async function (assert) {
         name: "text.txt",
     });
     inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
-    await waitUntil(".o-mail-attachment-card");
+    await waitUntil(".o-mail-attachment-card .fa-check");
 
     assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
     assert.containsOnce(
@@ -730,7 +730,7 @@ QUnit.test("composer: add an attachment in reply to message in history", async f
         name: "text.txt",
     });
     inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
-    await waitUntil(".o-mail-attachment-card");
+    await waitUntil(".o-mail-attachment-card .fa-check");
 
     assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
     assert.containsOnce(
@@ -759,9 +759,7 @@ QUnit.test(
             contentType: "text/plain",
             name: "text.txt",
         });
-        await afterNextRender(() =>
-            inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
-        );
+        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
         await waitUntil(".o-mail-attachment-card.o-mail-is-uploading");
         assert.containsOnce(target, ".o-mail-composer-send-button");
         assert.ok(target.querySelector(".o-mail-composer-send-button").attributes.disabled);
@@ -788,7 +786,7 @@ QUnit.test(
             name: "text.txt",
         });
         inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
-        await waitUntil(".o-mail-attachment-card");
+        await waitUntil(".o-mail-attachment-card .fa-check");
         assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
         assert.containsOnce(target, ".o-mail-attachment-list .o-mail-attachment-card");
 
