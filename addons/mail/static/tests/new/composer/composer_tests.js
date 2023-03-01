@@ -950,10 +950,11 @@ QUnit.test(
         ]);
         await waitUntil(".o-mail-attachment-card:contains(text1.txt)");
         await waitUntil(".o-mail-attachment-card:contains(text2.txt)");
-        await click(".o-mail-attachment-card-aside-unlink");
+        const unlinkLinks = target.querySelectorAll(".o-mail-attachment-card-aside-unlink");
+        await click(unlinkLinks[1]);
 
         // Simulates the completion of the upload of the first attachment
         await afterNextRender(() => uploadPromise.resolve());
-        assert.containsOnce(target, '.o-mail-attachment-card:contains("text2.txt")');
+        assert.containsOnce(target, '.o-mail-attachment-card:contains("text1.txt")');
     }
 );
