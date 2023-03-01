@@ -108,3 +108,30 @@ QUnit.test("Channel subscription is renewed when channel is left", async functio
     await click(".o-mail-category-item .btn[title='Leave this channel']");
     assert.verifySteps(["update-channels"]);
 });
+
+QUnit.test("Adding attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "Hogwarts Legacy" });
+    const messageId = pyEnv["mail.message"].create({
+        body: "Hello world!",
+        model: "mail.channel",
+        res_id: channelId,
+        message_type: "comment",
+    });
+    const tab1 = await start({ asTab: true });
+    const tab2 = await start({ asTab: true });
+    await tab1.openDiscuss(channelId);
+    await tab2.openDiscuss(channelId);
+    const attachmentId = pyEnv["ir.attachment"].create({
+        name: "test.txt",
+        mimetype: "text/plain",
+    });
+    await afterNextRender(() =>
+        tab1.env.services.rpc("/mail/message/update_content", {
+            body: "Hello world!",
+            attachment_ids: [attachmentId],
+            message_id: messageId,
+        })
+    );
+    assert.containsOnce(tab2.target, ".o-mail-attachment-card:contains(test.txt)");
+});

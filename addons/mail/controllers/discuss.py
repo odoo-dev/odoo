@@ -255,7 +255,7 @@ class DiscussController(http.Controller):
         return {
             'id': message_sudo.id,
             'body': message_sudo.body,
-            'attachments': message_sudo.attachment_ids._attachment_format(),
+            'attachment_ids': message_sudo.attachment_ids._attachment_format(),
         }
 
     @http.route('/mail/attachment/upload', methods=['POST'], type='http', auth='public')
