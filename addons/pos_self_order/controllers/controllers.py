@@ -8,6 +8,7 @@ from odoo.tools import format_amount
 
 from itertools import groupby
 
+
 class PosSelfOrder(http.Controller):
     """
     This is the controller for the POS Self Order App
@@ -25,12 +26,8 @@ class PosSelfOrder(http.Controller):
         the user will still be able to see the menu and even add items to the cart,
         but they will not be able to send the order
         """
-        # TODO: maybe add a new route where the user can choose the pos_id
-        # and then redirect to this route with the pos_id ( i don't think we need this for now )
         if not pos_id:
             raise werkzeug.exceptions.NotFound()
-        # FIXME: check if table_id and pos_id exist
-        # if not, send the user to the generic page where they can choose the POS and the table
         pos_sudo = request.env['pos.config'].sudo().search(
             [('id', '=', pos_id)])
 
@@ -47,7 +44,8 @@ class PosSelfOrder(http.Controller):
             'pos_id': pos_id,
             'pos_name': pos_sudo.name,
             'currency_id': pos_sudo.currency_id.id,
-            'pos_categories': request.env['pos.category'].sudo().search([]).read(['name', 'parent_id', 'child_id']),
+            # FIXME: not all categories are available to all pos configs; we need to filter them
+            'pos_categories': request.env['pos.category'].sudo().search([]).read(['name']),
             'message_to_display': message_to_display,
             'show_prices_with_tax_included': True,
             'custom_links': custom_links_list,
@@ -80,10 +78,19 @@ class PosSelfOrder(http.Controller):
             raise werkzeug.exceptions.NotFound()
         # TODO: only get the products that are available in THIS POS
         products_sudo = request.env['product.product'].sudo().search(
-            [('available_in_pos', '=', True)], order='pos_categ_id')
+                            [('available_in_pos', '=', True)], 
+                            order='pos_categ_id').filtered(
+                                    lambda product: 
+                                            product.pos_categ_id.id in [category['id'] for category in 
+                                                            pos_sudo.iface_available_categ_ids.read(['id'])]
+                                            or not pos_sudo.iface_available_categ_ids
+                            )
+        print(products_sudo[0].pos_categ_id.id)
+        print( pos_sudo.iface_available_categ_ids.read(['id']))
+        # print([categ.id for categ in pos_sudo.iface_available_categ_ids.read(['id'])])
 
         # for each of the items in products_sudo, we get the price with tax included
-        menu = [{
+        menu= [{
             **{
                 'price_info': product.get_product_info_pos(product.list_price, 1, int(pos_id))['all_prices'],
                 'attribute_line_ids': product.read(['attribute_line_ids'])[0].get('attribute_line_ids'),
@@ -93,9 +100,8 @@ class PosSelfOrder(http.Controller):
         return menu
 
     # FIXME: crop the images to be square -- maybe we want to do this in the frontend?
-    # TODO: maybe we want to lazy load the images
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
-    @http.route('/pos-self-order/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
+    @ http.route('/pos-self-order/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
     def pos_self_order_get_images(self, product_id):
         """
         This is the route that the POS Self Order App uses to GET THE PRODUCT IMAGES
@@ -105,7 +111,7 @@ class PosSelfOrder(http.Controller):
 
         """
         # We get the product with the specific id from the database
-        product_sudo = request.env['product.product'].sudo().browse(product_id)
+        product_sudo= request.env['product.product'].sudo().browse(product_id)
         # We return the image of the product in binary format
         # 'image_1920' is the name of the field that contains the image
         # If the product does not have an image, the function _get_image_stream_from will return the default image
@@ -114,20 +120,20 @@ class PosSelfOrder(http.Controller):
 
 # TODO: this is a function from"pos.session" <-- use the one from there instead of this one
 def get_attributes_by_ptal_id():
-        product_attributes = request.env['product.attribute'].sudo().search([('create_variant', '=', 'no_variant')])
-        product_attributes_by_id = {product_attribute.id: product_attribute for product_attribute in product_attributes}
-        domain = [('attribute_id', 'in', product_attributes.mapped('id'))]
-        product_template_attribute_values = request.env['product.template.attribute.value'].sudo().search(domain)
+        product_attributes= request.env['product.attribute'].sudo().search([('create_variant', '=', 'no_variant')])
+        product_attributes_by_id= {product_attribute.id: product_attribute for product_attribute in product_attributes}
+        domain= [('attribute_id', 'in', product_attributes.mapped('id'))]
+        product_template_attribute_values= request.env['product.template.attribute.value'].sudo().search(domain)
         # print("product_template_attribute_values:", json.dumps(product_template_attribute_values.read(), indent=4, sort_keys=True, default=str))
         # vlad = request.env['product.template.attribute.value'].sudo().browse(17)
         # print("vlad:", vlad.read(['price_extra']))
-        key = lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
-        res = {}
+        key= lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
+        res={}
         for key, group in groupby(sorted(product_template_attribute_values, key=key), key=key):
-            attribute_line_id, attribute_id = key
-            values = [{**ptav.product_attribute_value_id.read(['name', 'is_custom', 'html_color'])[0],
+            attribute_line_id, attribute_id=key
+            values=[{**ptav.product_attribute_value_id.read(['name', 'is_custom', 'html_color'])[0],
                        'price_extra': ptav.price_extra} for ptav in list(group)]
-            res[attribute_line_id] = {
+            res[attribute_line_id]= {
                 'id': attribute_line_id,
                 'name': product_attributes_by_id[attribute_id].name,
                 'display_type': product_attributes_by_id[attribute_id].display_type,
