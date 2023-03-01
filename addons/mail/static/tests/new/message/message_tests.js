@@ -870,6 +870,36 @@ QUnit.test(
 );
 
 QUnit.test(
+    "Clear message body should not open message delete dialog if it has attachments",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_type: "channel",
+        });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "not empty",
+            model: "mail.channel",
+            res_id: channelId,
+            message_type: "comment",
+            attachment_ids: [
+                pyEnv["ir.attachment"].create({ name: "test.txt", mimetype: "text/plain" }),
+            ],
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss(channelId);
+        await click(".o-mail-message-actions i[aria-label='Edit']");
+        await editInput(target, ".o-mail-message-editable .o-mail-composer-textarea", "");
+        await afterNextRender(() => triggerHotkey("Enter"));
+        assert.containsNone(
+            target,
+            ".modal-body p:contains('Are you sure you want to delete this message?')"
+        );
+    }
+);
+
+QUnit.test(
     "highlight the message mentioning the current user inside the channel",
     async function (assert) {
         const pyEnv = await startServer();
