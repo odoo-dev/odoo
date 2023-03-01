@@ -696,9 +696,9 @@ QUnit.test("composer: add an attachment", async function (assert) {
         contentType: "text/plain",
         name: "text.txt",
     });
-    await afterNextRender(() =>
-        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
-    );
+    inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
+    await waitUntil(".o-mail-attachment-card");
+
     assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
     assert.containsOnce(
         target,
@@ -729,9 +729,9 @@ QUnit.test("composer: add an attachment in reply to message in history", async f
         contentType: "text/plain",
         name: "text.txt",
     });
-    await afterNextRender(() =>
-        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
-    );
+    inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
+    await waitUntil(".o-mail-attachment-card");
+
     assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
     assert.containsOnce(
         target,
@@ -762,8 +762,7 @@ QUnit.test(
         await afterNextRender(() =>
             inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
         );
-        assert.containsOnce(target, ".o-mail-attachment-card");
-        assert.containsOnce(target, ".o-mail-attachment-card.o-mail-is-uploading");
+        await waitUntil(".o-mail-attachment-card.o-mail-is-uploading");
         assert.containsOnce(target, ".o-mail-composer-send-button");
         assert.ok(target.querySelector(".o-mail-composer-send-button").attributes.disabled);
 
@@ -788,10 +787,8 @@ QUnit.test(
             contentType: "text/plain",
             name: "text.txt",
         });
-        await afterNextRender(() =>
-            inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
-        );
-        await nextTick(); // wait for uploading
+        inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
+        await waitUntil(".o-mail-attachment-card");
         assert.containsOnce(target, ".o-mail-composer-footer .o-mail-attachment-list");
         assert.containsOnce(target, ".o-mail-attachment-list .o-mail-attachment-card");
 
@@ -855,11 +852,8 @@ QUnit.test("remove an uploading attachment", async function (assert) {
         contentType: "text/plain",
         name: "text.txt",
     });
-    await afterNextRender(() =>
-        inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file])
-    );
-    assert.containsOnce(target, ".o-mail-attachment-list");
-    assert.containsOnce(target, ".o-mail-attachment-card");
+    inputFiles(target.querySelector(".o-mail-composer-core-main .o_input_file"), [file]);
+    await waitUntil(".o-mail-attachment-card.o-mail-is-uploading");
     assert.containsOnce(target, ".o-mail-attachment-card.o-mail-is-uploading");
 
     await click(".o-mail-attachment-card-aside-unlink");
