@@ -59,10 +59,11 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/legacy/public_livechat_chatbot.js',
             'im_livechat/static/src/legacy/public_livechat.scss',
             'im_livechat/static/src/legacy/public_livechat_chatbot.scss',
+            'mail/static/src/legacy/utils/*.js',
             'mail/static/src/utils/*.js',
             'mail/static/src/js/utils.js',
             'mail/static/src/legacy/component_hooks/*.js',
-            'mail/static/src/services/messaging_service.js',
+            'mail/static/src/legacy/services/messaging_service.js',
         ],
         'web.assets_backend': [
             'im_livechat/static/src/js/colors_reset_button/*',
@@ -206,10 +207,11 @@ Help your customers with this chat, and analyse their feedback.
 
             'web/static/src/core/utils/transitions.scss',
 
+            'mail/static/src/legacy/utils/*.js',
             'mail/static/src/utils/*.js',
             'mail/static/src/legacy/component_hooks/*.js',
             ('include', 'im_livechat.assets_public_livechat'),
-            'mail/static/src/services/messaging_service.js',
+            'mail/static/src/legacy/services/messaging_service.js',
             # Framework JS
             'bus/static/src/*.js',
             'bus/static/src/services/presence_service.js',

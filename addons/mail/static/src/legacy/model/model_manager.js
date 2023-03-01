@@ -9,12 +9,12 @@ import { FieldCommand, unlinkAll } from "@mail/legacy/model/model_field_command"
 import { RelationSet } from "@mail/legacy/model/model_field_relation_set";
 import { Listener } from "@mail/legacy/model/model_listener";
 import { followRelations } from "@mail/legacy/model/model_utils";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 import {
     componentRegistry,
     registerMessagingComponent,
     unregisterMessagingComponent,
-} from "@mail/utils/messaging_component";
+} from "@mail/legacy/utils/messaging_component";
 
 import { LegacyComponent } from "@web/legacy/legacy_component";
 

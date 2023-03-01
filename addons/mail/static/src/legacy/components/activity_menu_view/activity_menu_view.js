@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useComponentToModel } from "@mail/legacy/component_hooks/use_component_to_model";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { registerMessagingComponent } from "@mail/legacy/utils/messaging_component";
 
 import { Component } from "@odoo/owl";
 

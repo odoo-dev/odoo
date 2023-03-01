@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 
 /**
  * Module that contains registry for adding new models or patching models.

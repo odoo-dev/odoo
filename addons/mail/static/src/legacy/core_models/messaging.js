@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { attr, many, one, Model } from "@mail/legacy/model";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 
 import { browser } from "@web/core/browser/browser";
 

@@ -12,8 +12,8 @@ import { ActivityMenu } from "@mail/new/web/activity/activity_menu";
 import { ChatWindowContainer } from "@mail/new/web/chat_window/chat_window_container";
 import { MessagingMenu } from "@mail/new/web/messaging_menu/messaging_menu";
 import { messagingService as newMessagingService } from "@mail/new/core/messaging_service";
-import { messagingService } from "@mail/services/messaging_service";
-import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
+import { messagingService } from "@mail/legacy/services/messaging_service";
+import { makeMessagingToLegacyEnv } from "@mail/legacy/utils/make_messaging_to_legacy_env";
 
 import { patch } from "@web/core/utils/patch";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";

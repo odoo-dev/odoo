@@ -2,7 +2,7 @@
 
 import { useComponentToModel } from "@mail/legacy/component_hooks/use_component_to_model";
 import { attr, clear, insert, link, many, one, Model } from "@mail/legacy/model";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 
 const getThreadNextTemporaryId = (function () {
     let tmpId = 0;

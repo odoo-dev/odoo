@@ -2,7 +2,7 @@
 
 // ensure components are registered beforehand.
 import "@mail/legacy/components/activity_menu_view/activity_menu_view";
-import { getMessagingComponent } from "@mail/utils/messaging_component";
+import { getMessagingComponent } from "@mail/legacy/utils/messaging_component";
 
 import { Component } from "@odoo/owl";
 

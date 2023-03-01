@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Composer } from "@mail/new/composer/composer";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 import { click, insertText, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture, nextTick, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
 

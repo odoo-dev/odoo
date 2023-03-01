@@ -155,7 +155,8 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/legacy/components/activity_menu_container/*'),
             'mail/static/src/js/utils.js',
             ('include', 'mail.assets_messaging'),
-            'mail/static/src/services/*.js',
+            'mail/static/src/legacy/services/*.js',
+            'mail/static/src/legacy/utils/*.js',
             'mail/static/src/utils/*.js',
             # Framework JS
             'web/static/lib/luxon/luxon.js',
@@ -186,6 +187,7 @@ For more specific needs, you may also assign custom-defined actions
             # defines mixins and variables used by multiple components
             'mail/static/src/legacy/components/notification_list/notification_list_item.scss',
             'mail/static/src/js/**/*.js',
+            'mail/static/src/legacy/utils/*.js',
             'mail/static/src/utils/*.js',
             'mail/static/src/scss/*.scss',
             'mail/static/src/xml/*.xml',
@@ -196,7 +198,7 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/legacy/components/*/*.xml',
             'mail/static/src/views/*/*.xml',
             ('include', 'mail.assets_messaging'),
-            'mail/static/src/services/*.js',
+            'mail/static/src/legacy/services/*.js',
             'mail/static/src/views/**/*.js',
             'mail/static/src/views/**/*.scss',
             'mail/static/src/views/**/*.xml',

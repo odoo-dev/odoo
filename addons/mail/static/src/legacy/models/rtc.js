@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 
 import { attr, clear, insert, many, one, Model, unlink } from "@mail/legacy/model";
-import { monitorAudio } from "@mail/utils/media_monitoring";
+import { monitorAudio } from "@mail/legacy/utils/media_monitoring";
 import { sprintf } from "@web/core/utils/strings";
 
 const getRTCPeerNotificationNextTemporaryId = (function () {

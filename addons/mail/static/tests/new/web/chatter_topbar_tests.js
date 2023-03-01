@@ -7,7 +7,7 @@ import {
     startServer,
     nextAnimationFrame,
 } from "@mail/../tests/helpers/test_utils";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;

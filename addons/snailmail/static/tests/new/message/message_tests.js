@@ -2,7 +2,7 @@
 
 import { start, startServer, click } from "@mail/../tests/helpers/test_utils";
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { makeDeferred } from "@mail/utils/deferred";
+import { makeDeferred } from "@mail/legacy/utils/deferred";
 
 let target;
 

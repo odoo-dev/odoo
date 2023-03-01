@@ -3,7 +3,7 @@
 import { useComponentToModel } from "@mail/legacy/component_hooks/use_component_to_model";
 import { useRefToModel } from "@mail/legacy/component_hooks/use_ref_to_model";
 import { useUpdateToModel } from "@mail/legacy/component_hooks/use_update_to_model";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { registerMessagingComponent } from "@mail/legacy/utils/messaging_component";
 
 import { Transition } from "@web/core/transition";
 
