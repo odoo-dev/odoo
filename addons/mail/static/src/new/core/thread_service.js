@@ -471,6 +471,7 @@ export class ThreadService {
                 "hasWriteAccess",
                 "is_pinned",
                 "message_needaction_counter",
+                "name",
                 "state",
             ]);
 

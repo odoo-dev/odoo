@@ -523,9 +523,14 @@ function pasteFiles(el, files) {
 /**
  * @param {string} selector
  * @param {string} content
+ * @param {Object} [param2 = {}]
+ * @param {boolean} [param2.replace = false]
  */
-export async function insertText(selector, content) {
+export async function insertText(selector, content, { replace = false } = {}) {
     await afterNextRender(() => {
+        if (replace) {
+            document.querySelector(selector).value = "";
+        }
         document.querySelector(selector).focus();
         for (const char of content) {
             document.execCommand("insertText", false, char);
