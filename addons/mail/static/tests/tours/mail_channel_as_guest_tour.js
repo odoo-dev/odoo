@@ -58,6 +58,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_channel_as
         {
             content: "Check the earlier provided attachment is listed",
             trigger: '.o-mail-attachment-card[title="text.txt"]',
+            extra_trigger: ".o-mail-attachment-card:not(.o-mail-is-uploading)", // waiting the attachment to be uploaded
             run() {},
         },
         {
