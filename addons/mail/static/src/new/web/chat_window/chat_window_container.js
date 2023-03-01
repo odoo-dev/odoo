@@ -15,6 +15,7 @@ import {
     useState,
     onMounted,
     useRef,
+    useEffect,
 } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
@@ -45,10 +46,12 @@ export class ChatWindowContainer extends Component {
         this.store = useStore();
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.hiddenMenuRef = useRef("hiddenMenu");
+        useEffect(
+            () => this.setHiddenMenuOffset(),
+            () => [this.chatWindowService.hidden]
+        );
         onWillStart(() => this.messaging.isReady);
-        onMounted(() => {
-            this.setHiddenMenuOffset();
-        });
+        onMounted(() => this.setHiddenMenuOffset());
 
         this.onResize();
         useExternalListener(browser, "resize", this.onResize);

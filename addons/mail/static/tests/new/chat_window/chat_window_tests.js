@@ -345,17 +345,17 @@ QUnit.test("open 3 different chat windows: not enough screen width", async funct
     await click("button i[aria-label='Messages']");
     await click(".o-mail-notification-item:contains(Channel_1)");
     assert.containsOnce(target, ".o-mail-chat-window");
-    assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
+    assert.containsNone(target, ".o-mail-chat-window-hidden-button");
 
     await click("button i[aria-label='Messages']");
     await click(".o-mail-notification-item:contains(Channel_2)");
     assert.containsN(target, ".o-mail-chat-window", 2);
-    assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
+    assert.containsNone(target, ".o-mail-chat-window-hidden-button");
 
     await click("button i[aria-label='Messages']");
     await click(".o-mail-notification-item:contains(Channel_3)");
     assert.containsN(target, ".o-mail-chat-window", 2);
-    assert.containsOnce(target, ".o-mail-chat-window-hidden-menu");
+    assert.containsOnce(target, ".o-mail-chat-window-hidden-button");
     assert.containsOnce(target, ".o-mail-chat-window-header:contains(Channel_1)");
     assert.containsOnce(target, ".o-mail-chat-window-header:contains(Channel_3)");
     assert.strictEqual(
@@ -780,7 +780,7 @@ QUnit.test(
         await click(".o-mail-notification-item-name:contains(Channel-3)");
         // simulate resize to go into mobile
         await afterNextRender(() => (env.services["mail.store"].isSmall = true));
-        assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
+        assert.containsNone(target, ".o-mail-chat-window-hidden-button");
     }
 );
 

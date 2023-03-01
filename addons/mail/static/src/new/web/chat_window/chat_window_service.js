@@ -77,14 +77,15 @@ export class ChatWindowService {
         if (!chatWindow) {
             const chatWindow = new ChatWindow(this.store, data);
             assignDefined(chatWindow, data);
-            if (this.maxVisible <= this.store.chatWindows.length) {
-                const swaped = this.visible[this.visible.length - 1];
-                swaped.hidden = true;
-                swaped.folded = true;
-            }
             let index;
             if (!data.replaceNewMessageChatWindow) {
-                index = this.store.chatWindows.length;
+                if (this.maxVisible <= this.store.chatWindows.length) {
+                    const swaped = this.visible[this.visible.length - 1];
+                    index = this.visible.length - 1;
+                    this.hide(swaped);
+                } else {
+                    index = this.store.chatWindows.length;
+                }
             } else {
                 const newMessageChatWindowIndex = this.store.chatWindows.findIndex(
                     (chatWindow) => !chatWindow.thread
@@ -94,7 +95,11 @@ export class ChatWindowService {
                         ? newMessageChatWindowIndex
                         : this.store.chatWindows.length;
             }
-            this.store.chatWindows.splice(index, 1, chatWindow);
+            this.store.chatWindows.splice(
+                index,
+                data.replaceNewMessageChatWindow ? 1 : 0,
+                chatWindow
+            );
             return this.store.chatWindows[index]; // return reactive version
         }
         assignDefined(chatWindow, data);
@@ -140,6 +145,11 @@ export class ChatWindowService {
             document.querySelector(".o_menu_systray i[aria-label='Messages']").click();
             // ensure messaging menu is opened before chat window is closed
             await Promise.resolve();
+        }
+        if (this.maxVisible < this.store.chatWindows.length) {
+            const swaped = this.hidden[0];
+            swaped.hidden = false;
+            swaped.folded = false;
         }
         const index = this.store.chatWindows.findIndex((c) => c === chatWindow);
         if (index > -1) {
