@@ -141,6 +141,7 @@ export class Messaging {
             this.insertCannedResponse(code);
         });
         this.isReady.resolve();
+        this.store.isMessagingReady = true;
     }
 
     loadFailures() {

@@ -3,6 +3,7 @@
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { onChange } from "@mail/new/utils/misc";
 
 export class Store {
     constructor(env) {
@@ -122,13 +123,32 @@ export class Store {
 
     /** @type {Object.<string, import("@mail/new/core/thread_model").Thread>} */
     threads = {};
+
+    isMessagingReady = false;
 }
 
 export const storeService = {
-    dependencies: ["ui"],
-
-    start(env, { ui }) {
+    dependencies: ["bus_service", "ui"],
+    start(env, { bus_service: busService, ui }) {
         const res = reactive(new Store(env));
+        let prevChannels;
+        onChange(res, "threads", async () => {
+            // sync bus channel sybscriptions
+            await new Promise(setTimeout); // Wait for thread fully inserted.
+            const channelIds = [];
+            const ids = Object.keys(res.threads).sort(); // Ensure channels processed in same order.
+            for (const id of ids) {
+                const thread = res.threads[id];
+                if (thread.model === "mail.channel" && thread.hasSelfAsMember) {
+                    channelIds.push(id);
+                }
+            }
+            const channels = JSON.stringify(channelIds);
+            if (res.isMessagingReady && prevChannels !== channels) {
+                busService.forceUpdateChannels();
+            }
+            prevChannels = channels;
+        });
         res.discuss.activeTab = res.isSmall ? "mailbox" : "all";
         ui.bus.addEventListener("resize", () => {
             res.isSmall = ui.isSmall;

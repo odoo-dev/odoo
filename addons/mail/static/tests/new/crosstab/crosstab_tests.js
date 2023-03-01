@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import { triggerHotkey } from "@web/../tests/helpers/utils";
+import { triggerHotkey, patchWithCleanup } from "@web/../tests/helpers/utils";
 
 QUnit.module("crosstab");
 
@@ -75,4 +75,36 @@ QUnit.test("Thread description update", async function (assert) {
         tab2.target,
         ".o-mail-discuss-thread-description[title='The very best channel']"
     );
+});
+
+QUnit.test("Channel subscription is renewed when channel is added", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "Sales", channel_member_ids: [] });
+    const { env, openDiscuss } = await start();
+    patchWithCleanup(env.services["bus_service"], {
+        forceUpdateChannels() {
+            assert.step("update-channels");
+        },
+    });
+    await openDiscuss();
+    await afterNextRender(() => {
+        env.services.orm.call("mail.channel", "add_members", [[channelId]], {
+            partner_ids: [pyEnv.currentPartnerId],
+        });
+    });
+    assert.verifySteps(["update-channels"]);
+});
+
+QUnit.test("Channel subscription is renewed when channel is left", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({ name: "Sales" });
+    const { env, openDiscuss } = await start();
+    patchWithCleanup(env.services["bus_service"], {
+        forceUpdateChannels() {
+            assert.step("update-channels");
+        },
+    });
+    await openDiscuss();
+    await click(".o-mail-category-item .btn[title='Leave this channel']");
+    assert.verifySteps(["update-channels"]);
 });

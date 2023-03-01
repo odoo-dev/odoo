@@ -11,7 +11,7 @@ export function nullifyClearCommands(data) {
         if (!Array.isArray(data[key])) {
             continue;
         }
-        data[key] = data[key].filter(val => val[0] !== "clear");
+        data[key] = data[key].filter((val) => val[0] !== "clear");
         if (data[key].length === 0) {
             data[key] = null;
         }
@@ -77,9 +77,15 @@ export function markEventHandled(ev, markName) {
 export function onChange(target, key, callback) {
     const proxy = reactive(target, () => {
         void proxy[key];
+        if (proxy[key] instanceof Object) {
+            void Object.keys(proxy[key]);
+        }
         callback();
     });
     void proxy[key];
+    if (proxy[key] instanceof Object) {
+        void Object.keys(proxy[key]);
+    }
     return proxy;
 }
 
