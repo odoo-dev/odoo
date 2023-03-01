@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="ProductMainView" owl="1">
+        <NavBar goBack="props.goBack"/>
+            <!-- this padding-bottom is important in order for the Cart button not to -->
+            <!-- appear over the last item -->
+            <div class="pb-5">
+                <div class="text-center m-4">
+                    <img class="img-fluid" t-attf-src="/pos-self-order/get-images/{{ props.product.product_id }}"  alt="Product image"/>
+                </div>
+                <div class="d-flex w-100 justify-content-around">
+    <!-- Product Name -->
+                    <h3><t t-esc="props.product.name"/></h3>
+    <!-- Price -->
+                    <h3 class="ml-auto text-secondary">
+                        <t t-esc="formatMonetary(props.product.list_price, {currencyId: selfOrder.config.currency_id})"/>
+                    </h3>
+                </div>
+    <!-- Product Description -->
+                <div class="p-3 text-center">
+
+                    <t t-if="props.product.description_sale != false">
+                        <t t-esc="props.product.description_sale"/>    
+                    </t>
+                </div>
+    <!-- Variants -->
+                <t t-if="props.product.attributes">
+                    <t t-foreach="props.product.attributes" t-as="attribute" t-key="attribute.id">
+                        <div class="attribute_name" t-esc="attribute.name"/>
+                        <t t-call="RadioProductAttribute" t-if="attribute.display_type === 'radio' or attribute.display_type === 'pills'" />
+                        <t t-call="SelectProductAttribute" t-elif="attribute.display_type === 'select'" />
+                        <t t-call="ColorProductAttribute" t-elif="attribute.display_type === 'color'" />
+                    </t>
+                </t>
+            </div>
+    </t>
+    <t t-name="RadioProductAttribute" owl="1">
+        <div class="configurator_radio" t-ref="root">
+            <div class="table">
+                <t t-log="attribute"/>
+                <t t-log="attribute.values"/>
+                <t t-foreach="attribute.values" t-as="value" t-key="value.id">
+                    <div class="attribute-name-cell">
+                        <input type="radio"  t-att-name="attribute.id"
+                                   t-attf-id="{{ attribute.id }}_{{ value.id }}" t-att-value="value.name"/>
+                        <span t-esc="value.name"/>
+                        <label t-att-name="value.name" t-attf-for="{{ attribute.id }}_{{ value.id }}"/>
+                    </div>
+                    <div t-if="value.price_extra" class="price-extra-cell">
+                        <span class="price_extra">
+                            + <t t-esc="formatMonetary(value.price_extra, {currencyId: selfOrder.config.currency_id})" />
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="SelectProductAttribute" owl="1">
+        <div>
+            <select class="configurator_select" >
+                <option t-foreach="attribute.values" t-as="value" t-key="value.id" t-att-value="value.name">
+                    <t t-esc="value.name"/>
+                    <t t-if="value.price_extra">
+                        + <t t-esc="formatMonetary(value.price_extra, {currencyId: selfOrder.config.currency_id})" />
+                    </t>
+                </option>
+            </select>
+
+        </div>
+    </t>
+
+    <t t-name="ColorProductAttribute" owl="1">
+        <div>
+
+            <ul class="color_attribute_list">
+                <li t-foreach="attribute.values" t-as="value" t-key="value.id" class="color_attribute_list_item">
+                    <label t-attf-class="configurator_color {{ value.id == state.selected_value ? 'active' : '' }}"
+                        t-attf-style="background-color: {{ value.html_color }};" t-att-data-color="value.name">
+                        <input type="radio" t-att-value="value.id" t-att-name="attribute.id"/>
+                    </label>
+                </li>
+            </ul>
+
+        </div>
+    </t>
+</templates>

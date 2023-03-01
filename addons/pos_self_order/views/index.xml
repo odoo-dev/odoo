@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- This contains the tour assets. They are included during testing. -->
+    <template id="pos_self_order_index" name="POS Self Order">&lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <title>Odoo Self Order</title>
+<!-- FIXME: the bootstrap included in manifest appears to not have the js -->
+<!-- this is a temp fix -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+                <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+                <meta http-equiv="content-type" content="text/html, charset=utf-8" />
+
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+
+                <link rel="shortcut icon" sizes="196x196" href="/point_of_sale/static/src/img/touch-icon-196.png"/>
+                <link rel="shortcut icon" sizes="128x128" href="/point_of_sale/static/src/img/touch-icon-128.png"/>
+                <link rel="apple-touch-icon" href="/point_of_sale/static/src/img/touch-icon-iphone.png"/>
+                <link rel="apple-touch-icon" sizes="76x76" href="/point_of_sale/static/src/img/touch-icon-ipad.png"/>
+                <link rel="apple-touch-icon" sizes="120x120" href="/point_of_sale/static/src/img/touch-icon-iphone-retina.png"/>
+                <link rel="apple-touch-icon" sizes="152x152" href="/point_of_sale/static/src/img/touch-icon-ipad-retina.png"/>
+                <link rel="stylesheet" type="text/css" href="/pos_self_order/static/src/pos_self_order_styles.css"/>
+
+                <style> body { background: #222; } </style>
+
+                <link rel="shortcut icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>
+                <script type="text/javascript">
+                    var odoo = {
+                        csrf_token: "<t t-nocache="The csrf token must always be up to date." t-esc="request.csrf_token(None)"/>",
+                        debug: "<t t-esc="debug"/>",
+                        __session_info__: <t t-esc="json.dumps(session_info)"/>,
+                    };
+                </script>
+                <t t-call-assets="pos_self_order.assets_self_order" />
+            </head>
+            <body>
+            </body>
+        </html>
+    </template>
+</odoo>
