@@ -4,7 +4,6 @@
     <t t-name="ProductList" owl="1">
             <!-- we only allow the user to go back if the pos is configured as "order at table" -->
             <NavBar goBack="props.goBack" />
-<!-- TODO:  -->
 <!-- tag and search bar -->
         <div class="d-flex align-items-center ">
     <!-- tag select -->
@@ -19,7 +18,6 @@
                 </t>
             </div>
             <div class="mx-2">
-                <!-- TODO: autofocus search -->
     <!-- search input -->
                 <t t-if="private_state.search_is_focused">
                     <div class="d-flex align-items-center">
