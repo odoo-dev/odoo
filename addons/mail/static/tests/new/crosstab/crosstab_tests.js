@@ -49,9 +49,7 @@ QUnit.test("Delete starred message updates counter", async function (assert) {
 
 QUnit.test("Thread rename", async function (assert) {
     const pyEnv = await startServer();
-    const channelId = pyEnv["mail.channel"].create({
-        name: "General",
-    });
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
     const tab1 = await start({ asTab: true });
     const tab2 = await start({ asTab: true });
     await tab1.openDiscuss(channelId);
@@ -60,4 +58,21 @@ QUnit.test("Thread rename", async function (assert) {
     await afterNextRender(() => triggerHotkey("Enter"));
     assert.containsOnce(tab2.target, ".o-mail-discuss-thread-name[title='Sales']");
     assert.containsOnce(tab2.target, ".o-mail-category-item:contains(Sales)");
+});
+
+QUnit.test("Thread description update", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const tab1 = await start({ asTab: true });
+    const tab2 = await start({ asTab: true });
+    await tab1.openDiscuss(channelId);
+    await tab2.openDiscuss(channelId);
+    await tab1.insertText(".o-mail-discuss-thread-description", "The very best channel", {
+        replace: true,
+    });
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsOnce(
+        tab2.target,
+        ".o-mail-discuss-thread-description[title='The very best channel']"
+    );
 });

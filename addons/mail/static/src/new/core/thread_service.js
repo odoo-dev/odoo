@@ -468,6 +468,7 @@ export class ThreadService {
             assignDefined(thread, serverData, [
                 "uuid",
                 "authorizedGroupFullName",
+                "description",
                 "hasWriteAccess",
                 "is_pinned",
                 "message_needaction_counter",
