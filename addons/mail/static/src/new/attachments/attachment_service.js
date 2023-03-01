@@ -61,9 +61,11 @@ export class AttachmentService {
     }
 
     /**
+     * Remove the given attachment globally.
+     *
      * @param {Attachment} attachment
      */
-    async delete(attachment) {
+    remove(attachment) {
         delete this.store.attachments[attachment.id];
         if (attachment.originThread) {
             removeFromArrayWithPredicate(
@@ -86,6 +88,16 @@ export class AttachmentService {
                 ({ id }) => id === attachment.id
             );
         }
+    }
+
+    /**
+     * Delete the given attachment on the server as well as removing it
+     * globally.
+     *
+     * @param {Attachment} attachment
+     */
+    async delete(attachment) {
+        this.remove(attachment);
         if (attachment.id > 0) {
             await this.rpc("/mail/attachment/delete", {
                 attachment_id: attachment.id,

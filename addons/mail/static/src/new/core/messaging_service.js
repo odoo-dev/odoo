@@ -46,6 +46,8 @@ export class Messaging {
         this.store = services["mail.store"];
         this.rpc = services.rpc;
         this.orm = services.orm;
+        /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
+        this.attachmentService = services["mail.attachment"];
         this.notificationService = services.notification;
         /** @type {import("@mail/new/core/sound_effects_service").SoundEffects} */
         this.soundEffectsService = services["mail.sound_effects"];
@@ -416,6 +418,15 @@ export class Messaging {
                 case "mail.channel/last_interest_dt_changed":
                     this._handleNotificationLastInterestDtChanged(notif);
                     break;
+                case "ir.attachment/delete":
+                    {
+                        const attachment = this.store.attachments[notif.payload.id];
+                        if (!attachment) {
+                            return;
+                        }
+                        this.attachmentService.remove(attachment);
+                    }
+                    break;
             }
         }
     }
@@ -660,6 +671,7 @@ export const messagingService = {
         "im_status",
         "notification",
         "presence",
+        "mail.attachment",
         "mail.sound_effects",
         "mail.user_settings",
         "mail.thread",

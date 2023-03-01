@@ -135,3 +135,27 @@ QUnit.test("Adding attachments", async function (assert) {
     );
     assert.containsOnce(tab2.target, ".o-mail-attachment-card:contains(test.txt)");
 });
+
+QUnit.test("Remove attachment from message", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const attachmentId = pyEnv["ir.attachment"].create({
+        name: "test.txt",
+        mimetype: "text/plain",
+    });
+    pyEnv["mail.message"].create({
+        attachment_ids: [attachmentId],
+        body: "Hello World!",
+        message_type: "comment",
+        model: "mail.channel",
+        res_id: channelId,
+    });
+    const tab1 = await start({ asTab: true });
+    const tab2 = await start({ asTab: true });
+    await tab1.openDiscuss(channelId);
+    await tab2.openDiscuss(channelId);
+    assert.containsOnce(tab1.target, ".o-mail-attachment-card:contains(test.txt)");
+    await tab2.click(".o-mail-attachment-card-aside-unlink");
+    await tab2.click(".modal-footer .btn:contains(Ok)");
+    assert.containsNone(tab1.target, ".o-mail-attachment-card:contains(test.txt)");
+});

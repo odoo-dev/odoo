@@ -116,11 +116,11 @@ function getAfterEvent({ messagingBus }) {
     };
 }
 
-function getClick({ afterNextRender }) {
+function getClick({ target, afterNextRender }) {
     return async function click(selector) {
         await afterNextRender(() => {
             if (typeof selector === "string") {
-                $(selector)[0].click();
+                $(target ?? document.body).find(selector)[0].click();
             } else if (selector instanceof HTMLElement) {
                 selector.click();
             } else {
@@ -420,7 +420,7 @@ async function start(param0 = {}) {
         advanceTime,
         afterEvent,
         afterNextRender,
-        click: getClick({ afterNextRender }),
+        click: getClick({ target, afterNextRender }),
         env: webClient.env,
         insertText,
         messaging: webClient.env.services.messaging.modelManager.messaging,
