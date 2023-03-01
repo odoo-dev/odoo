@@ -9,6 +9,8 @@
                     <AlertMessage alert_type="props.message_to_display" />
                 </t>
 <!-- View Menu Button -->
+
+<!-- no need to worry about styling this -view menu- button ;;; it will be removed -->
                 <button type="button" t-on-click="props.viewMenu" 
                 t-attf-class="my-2 btn btn-lg"
                 >
