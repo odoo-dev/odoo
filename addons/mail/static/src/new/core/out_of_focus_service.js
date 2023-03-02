@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { sprintf } from "@web/core/utils/strings";
+import { escape, sprintf } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline } from "../utils/format";
 
