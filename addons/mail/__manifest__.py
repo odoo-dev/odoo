@@ -225,7 +225,6 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web.tests_assets': [
             'mail/static/tests/helpers/**/*.js',
-            'mail/static/tests/models/*.js',
         ],
         'web.qunit_suite_tests': [
             'mail/static/tests/new/**/*.js',
