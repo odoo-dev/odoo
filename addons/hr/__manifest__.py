@@ -47,9 +47,6 @@
     'application': True,
     'post_init_hook': '_install_hr_localization',
     'assets': {
-        'mail.assets_messaging': [
-            'hr/static/src/legacy/**/*',
-        ],
         'web.assets_backend': [
             'hr/static/src/views/**/*.js',
             'hr/static/src/components/**/*',
