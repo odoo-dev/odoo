@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="ProductList" owl="1">
         <div class="sticky-top">
-            <NavBar previousPage="'/'" />
+            <NavBar previousPage="''" />
     <!-- tag and search bar -->
             <div class="d-flex align-items-center bg-secondary">
         <!-- tag select -->
@@ -60,7 +60,7 @@
                                 <t t-esc="Array.from(tag).join(' ')"/>
                             </t>
                             <div class="col-12 col-sm-6 col-md-4">
-                                <div t-on-click="() => props.viewProduct(product.product_id)" class="mt-2 bg-white d-flex align-items-center shadow-sm m-1" t-ref="product_{{product.product_id}}">
+                                <div t-on-click="() => env.navigate('products/' + product.product_id)" class="mt-2 bg-white d-flex align-items-center shadow-sm m-1" t-ref="product_{{product.product_id}}">
                                     <img class="w-25 img-fluid" t-attf-src="/pos-self-order/get-images/{{ product.product_id }}" alt="Product image"/>
                                     <div class="mt-4 mx-4">
                 <!-- Product NAME -->

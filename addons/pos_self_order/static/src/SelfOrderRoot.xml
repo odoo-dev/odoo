@@ -15,7 +15,7 @@
                 />
             </t>
             <t t-set-slot="/pos-self-order/products/{int:productId}" t-slot-scope="url">
-                <ProductMainView t-debug="" 
+                <ProductMainView 
                     product="productList.find(x => x.product_id === url.productId)" 
                 />
             </t>
