@@ -203,3 +203,14 @@ export function sections(array) {
 export function unique(array) {
     return Array.from(new Set(array));
 }
+
+/**
+ * FIXME DONTMERGE docstring
+ * // [1,2,3] => [[1, 4],
+    // [4,5,6]     [2, 5],
+    //             [3, 6]]
+ */
+export function zip(...arrays) {
+    const minLength = Math.min(...arrays.map((arr) => arr.length));
+    return [...Array(minLength)].map((_, i) => arrays.map((a) => a[i]));
+}

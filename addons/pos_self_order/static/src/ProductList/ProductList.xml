@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <!-- Here we show the list of all the available products -->
     <t t-name="ProductList" owl="1">
-            <!-- we only allow the user to go back if the pos is configured as "order at table" -->
         <div class="sticky-top">
-            <NavBar goBack="props.goBack" />
+            <NavBar previousPage="'/'" />
     <!-- tag and search bar -->
             <div class="d-flex align-items-center bg-secondary">
         <!-- tag select -->
@@ -46,7 +44,6 @@
 
             <div class="container mb-5">
                 <div class="row">
-<!-- Looping through all the available products -->
                         <t t-if="filteredProducts().length > 0">
                             <t t-set="tag" t-value="filteredProducts()[0].tagList"/>
                             <t t-esc="Array.from(tag).join(' ')"/>
@@ -56,6 +53,7 @@
                                 No products found
                             </p>
                         </t>
+<!-- Looping through all the available products -->
                         <t t-foreach="filteredProducts()" t-as="product" t-key="product.product_id">
                             <t t-if="!areSetsEqual(product.tagList, tag)">
                                 <t t-set="tag" t-value="product.tagList"/>

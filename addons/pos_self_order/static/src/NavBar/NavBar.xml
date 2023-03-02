@@ -2,14 +2,14 @@
 <templates id="template" xml:space="preserve">
     <t t-name="NavBar" owl="1">
     <nav class="sticky-top navbar navbar-dark bg-primary px-3">
-    <!-- we only show the back arrow if the goBack function is passed as a prop -->
+    <!-- we only show the back arrow if the previousPage function is passed as a prop -->
     <!-- this means that the component that called the NavBar intended for the button -->
     <!-- to be visible and to call this function when pressed -->
     <!-- to be clear: the back button only calls the function provided by the parent as a prop -->
     <!-- the logic of changing the shown page is done in the parent -->
-    <t t-if="props.goBack">
+    <t t-if="props.previousPage">
     <!-- back arrow  -->
-        <svg t-on-click = "() => props.goBack()"
+        <svg t-on-click = "() => env.navigate(props.previousPage)"
             xmlns="http://www.w3.org/2000/svg" 
             width="32" height="32" fill="currentColor" 
             class="bi bi-arrow-left text-white" viewBox="0 0 16 16">

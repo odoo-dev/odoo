@@ -13,8 +13,13 @@ class PosSelfOrder(http.Controller):
     """
     This is the controller for the POS Self Order App
     """
-    @http.route('/pos-self-order/', auth='public', website=True)
-    def pos_self_order_start(self, pos_id=None, message_to_display=None):
+    
+    @http.route([
+        '/pos-self-order/',
+        '/pos-self-order/products',
+        '/pos-self-order/products/<int:product_id>',
+    ], auth='public', website=True)
+    def pos_self_order_start(self, pos_id=None, product_id=None):
         """
         The user gets this route from the QR code that they scan at the table
         This START ROUTE will render the LANDING PAGE of the POS Self Order App

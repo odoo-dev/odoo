@@ -9,13 +9,18 @@ import { ProductMainView } from "@pos_self_order/ProductMainView/ProductMainView
 import { ProductList } from "@pos_self_order/ProductList/ProductList";
 import { useService } from "@web/core/utils/hooks";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
-import { effect } from "@point_of_sale/utils";
+import { Router } from "@pos_self_order/router";
 /**
- * @typedef {import("@pos_self_order/jsDocTypes").Product} Product
  * @typedef {import("@pos_self_order/jsDocTypes").Order} Order
- * @typedef {import("@pos_self_order/jsDocTypes").CartItem} CartItem
  */
 class SelfOrderRoot extends Component {
+    static components = {
+        LandingPage,
+        ProductMainView,
+        NavBar,
+        ProductList,
+        Router,
+    };
     /*
     This is the Root Component of the SelfOrder App
     Most of the business logic is done here
@@ -72,7 +77,7 @@ class SelfOrderRoot extends Component {
                 this.productList.map((product) => Array.from(product.tagList)).flat()
             );
 
-            console.log("this.tagList1", this.selfOrder.config.tagList);
+            console.log("this.tagList1", this.productList);
             this.productList.forEach((product) => {
                 if (
                     !product.attribute_line_ids.some(
@@ -88,23 +93,6 @@ class SelfOrderRoot extends Component {
         });
     }
 
-    viewLandingPage() {
-        this.state.currentScreen = 0;
-    }
-    viewMenu() {
-        this.state.currentScreen = 1;
-    }
-    viewProduct = (id) => {
-        this.state.currentScreen = 2;
-        this.state.currentProduct = id;
-    };
-
-    static components = {
-        LandingPage,
-        ProductMainView,
-        NavBar,
-        ProductList,
-    };
 }
 SelfOrderRoot.template = "SelfOrderRoot";
 export async function createPublicRoot() {

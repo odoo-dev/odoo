@@ -27,8 +27,8 @@
                 </script>
                     <!-- TODO: put t-if at the beggining -->
                 <t t-call-assets="pos_self_order.assets_self_order" />
-                <t t-if="'tests' in debug or test_mode_enabled" t-call-assets="pos_self_order.conditional_assets_tour" />
-                <t t-call="web.conditional_assets_tests" />
+                <!-- <t t-if="'tests' in debug or test_mode_enabled" t-call-assets="pos_self_order.conditional_assets_tour" />
+                <t t-call="web.conditional_assets_tests" /> -->
             </head>
             <body>
             </body>

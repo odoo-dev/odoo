@@ -2,32 +2,24 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="SelfOrderRoot" owl="1">
-    <!-- Landing Page at the start -->
-    <!-- This is the first page the users sees when they go on the website -->
-            <t t-if="state.currentScreen == 0">
+        <Router>
+            <t t-set-slot="default">
                 <LandingPage 
                     message_to_display="this.state.message_to_display" 
-                    viewMenu.bind="viewMenu"
                     productList="productList" 
                 />
             </t>
-    <!-- Menu -->
-    <!-- We go here after clicking VIEW MENU -->
-            <t t-elif="state.currentScreen == 1">
+            <t t-set-slot="/pos-self-order/products">
                 <ProductList
-                productList="productList" 
-                viewProduct="viewProduct"
-                viewCart="viewCart"
-                goBack.bind="viewLandingPage"
+                    productList="productList" 
                 />
             </t>
-    <!-- Product Main View -->
-    <!-- We go here when clicking on a product from the menu -->
-            <t t-elif="state.currentScreen == 2">
-                <ProductMainView 
-                product="productList.find(x => x.product_id === this.state.currentProduct)" 
-                goBack.bind="viewMenu" 
+            <t t-set-slot="/pos-self-order/products/{int:productId}" t-slot-scope="url">
+                <ProductMainView t-debug="" 
+                    product="productList.find(x => x.product_id === url.productId)" 
+                />
             </t>
+        </Router>
     </t>
 </templates>
 
