@@ -21,5 +21,6 @@ class PosSelfOrderCustomLink(models.Model):
             string='Style', default='primary')
     sequence = fields.Integer('Sequence', default=1)
 
-    
+    # TODO: sanitize url input; make sure it's a valid url
+    # remove http:// or https:// 
     # TODO: double check access rights

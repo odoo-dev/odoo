@@ -14,9 +14,8 @@ export class ProductList extends Component {
     setup() {
         this.state = useState(this.env.state);
 
-        // TODO: this set docstring does not work
         this.private_state = useState({
-            selected_tags: /** @type {Set<string>} */ new Set(),
+            selected_tags: new Set(),
             search_is_focused: false,
             search_input: "",
         });

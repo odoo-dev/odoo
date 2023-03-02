@@ -14,7 +14,7 @@ class ResConfigSettings(models.TransientModel):
         """
         business_url = request.env['ir.config_parameter'].sudo(
         ).get_param('web.base.url')
-        no_of_qr_codes_per_page = 12
+        no_of_qr_codes_per_page = 9
         qr_codes_to_print = [{
             'id': 0,
             'url': url_quote(f"{business_url}/pos-self-order?pos_id={self.pos_config_id.id}"),

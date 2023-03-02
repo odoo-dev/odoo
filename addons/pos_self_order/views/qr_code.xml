@@ -18,9 +18,8 @@
             <t t-call="web.external_layout">
                 <div class="page">
                     <t t-set="qr_code_size" t-value="200"/>
-                    <!-- FIXME: header margin is too large; the qrcodes spill onto the 2nd page -->
                     <div class="container text-center">
-                    <h2>
+                    <h2 class="mb-2">
                     QR Code Menu
                     </h2>
                         <t t-foreach="groups_of_tables" t-as="group_of_tables">

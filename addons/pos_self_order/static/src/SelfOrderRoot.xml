@@ -5,7 +5,6 @@
         <Router>
             <t t-set-slot="default">
                 <LandingPage 
-                    message_to_display="this.state.message_to_display" 
                     productList="productList" 
                 />
             </t>

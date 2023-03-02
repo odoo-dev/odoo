@@ -5,12 +5,7 @@
             <LandingPageHeader 
             />
             <div class="d-flex flex-column w-75 justify-content-around">
-                <t t-if="props.message_to_display">
-                    <AlertMessage alert_type="props.message_to_display" />
-                </t>
-<!-- View Menu Button -->
 
-<!-- no need to worry about styling this -view menu- button ;;; it will be removed -->
                 <button type="button" t-on-click="()=>env.navigate('products')"
                 t-attf-class="my-2 btn btn-lg"
                 >
@@ -18,7 +13,7 @@
                 </button>
 <!-- Custom Links -->
                 <t t-foreach="selfOrder.config.custom_links" t-as="link" t-key="link.id">
-                    <a t-attf-href="//{{link.url}}" t-attf-class="btn btn-lg my-2 btn-{{link.style}}" target="_blank">
+                    <a t-attf-href="//{{link.url}}" t-attf-class="btn btn-lg my-2 btn-{{link.style}}">
                         <t t-esc="link.name"/>
                     </a>
                 </t>

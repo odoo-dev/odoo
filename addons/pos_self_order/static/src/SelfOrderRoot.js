@@ -36,15 +36,11 @@ class SelfOrderRoot extends Component {
          * @type {{
          * currentScreen: number,
          * currentProduct: number,
-         * message_to_display: string,
          * }}
          */
         this.state = useState({
             currentScreen: 0,
             currentProduct: 0,
-            // this is a message that will be displayed to the user on the landing page
-            // example: "Your order has been placed successfully", "Your order has been paid successfully"
-            message_to_display: this.selfOrder.config.message_to_display ?? "",
         });
         useSubEnv({ state: this.state });
         this.rpc = useService("rpc");
@@ -62,12 +58,6 @@ class SelfOrderRoot extends Component {
                     list_price: this.selfOrder.config.show_prices_with_tax_included
                         ? price_info["price_with_tax"]
                         : price_info["price_without_tax"],
-                    // We are using a system of tags to categorize products
-                    // the categories of a product will also be considered as tags
-                    // ex of tags: "Pizza", "Drinks", "Italian", "Vegetarian", "Vegan", "Gluten Free","healthy", "organic",
-                    // "Spicy", "Hot", "Cold", "Alcoholic", "Non Alcoholic", "Dessert", "Breakfast", "Lunch", "Dinner"
-                    // "pairs well with wine", "pairs well with beer", "pairs well with soda", "pairs well with water",
-                    // "HAPPY HOUR", "kids menu",  "local", "seasonal"
                     tagList: pos_categ_id ? new Set(pos_categ_id[1].split(" / ")) : new Set(),
                     attributes: [],
                     ...rest,
