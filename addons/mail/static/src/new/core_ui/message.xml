@@ -110,7 +110,7 @@
                                 'invisible': !isActive,
                             }"
                         >
-                            <div class="d-flex rounded-1 shadow-sm overflow-hidden alignedRight" t-att-class="{
+                            <div class="d-flex rounded-1 shadow-sm overflow-hidden alignedRight px-2" t-att-class="{
                                     'mt-3': env.inChatter and !(message.isDiscussion or message.isNotification),
                                     'flex-row-reverse': env.inChatWindow and isAlignedRight,
                                 }"

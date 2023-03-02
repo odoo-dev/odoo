@@ -48,6 +48,10 @@
 
 .o-mail-message-actions {
     z-index: $navigable-list-z-index - 1;
+
+    i:hover {
+        background-color: $o-gray-300;
+    }
 }
 
 .o-mail-message-starred {
