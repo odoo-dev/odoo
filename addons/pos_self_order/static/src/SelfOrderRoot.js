@@ -31,12 +31,7 @@ class SelfOrderRoot extends Component {
          * @type {{
          * currentScreen: number,
          * currentProduct: number,
-         * cart: CartItem[],
-         * currentOrderDetails: Object,
          * message_to_display: string,
-         * user_name: string,
-         * table_id: string,
-         * order_to_pay: Order,
          * }}
          */
         this.state = useState({
@@ -46,21 +41,6 @@ class SelfOrderRoot extends Component {
             // example: "Your order has been placed successfully", "Your order has been paid successfully"
             message_to_display: this.selfOrder.config.message_to_display ?? "",
         });
-        effect(
-            (state) => {
-                // it is possible to call the /pos-self-order route with the "message_to_display"
-                // query param; the controller will put the value of this param in the "this.selfOrder.config.message_to_display"
-                // variable; here we don't need this parameter anymore in the url so we remove it
-                const url = new URL(location.href);
-                url.searchParams.delete("message_to_display");
-                window.history.replaceState({}, "", url.href);
-                // we only want to display the message for 9 seconds
-                setTimeout(() => {
-                    state.message_to_display = "";
-                }, "9000");
-            },
-            [this.state]
-        );
         useSubEnv({ state: this.state });
         this.rpc = useService("rpc");
         onWillStart(async () => {

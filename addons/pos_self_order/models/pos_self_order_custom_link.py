@@ -22,3 +22,4 @@ class PosSelfOrderCustomLink(models.Model):
     sequence = fields.Integer('Sequence', default=1)
 
     
+    # TODO: double check access rights

@@ -23,9 +23,11 @@ export class ProductList extends Component {
         this.selfOrder = useSelfOrder();
         this.formatMonetary = formatMonetary;
         useAutofocus({ refName: "searchInput", mobile: true });
-        this.scrollToCurrentProduct(this.state.currentProduct);
+        const currentProductCard = useRef(`product_${this.state.currentProduct}`);
         onMounted(() => {
-            this.scrollToCurrentProduct(this.state.currentProduct);
+            if (this.state.currentProduct) {
+                currentProductCard.el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         });
     }
     filteredProducts = () => {
@@ -161,17 +163,6 @@ export class ProductList extends Component {
      */
     arearraysEqual(array1, array2) {
         return array1.size === array2.size && this.arrayIsSubarray(array1, array2);
-    }
-    scrollToElementWithRef(elementRef) {
-        setTimeout(() => {
-            elementRef.el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 0);
-    }
-    scrollToCurrentProduct(currentProduct) {
-        if (currentProduct) {
-            this.currentProductRef = useRef(currentProduct);
-            this.scrollToElementWithRef(this.currentProductRef);
-        }
     }
     static components = { NavBar };
 }

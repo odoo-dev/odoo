@@ -44,12 +44,9 @@ class PosSelfOrder(http.Controller):
             'pos_id': pos_id,
             'pos_name': pos_sudo.name,
             'currency_id': pos_sudo.currency_id.id,
-            # FIXME: not all categories are available to all pos configs; we need to filter them
-            # 'pos_categories': request.env['pos.category'].sudo().search([]).read(['name']),
-            'message_to_display': message_to_display,
             'show_prices_with_tax_included': True,
             'custom_links': custom_links_list,
-            'attributes_by_ptal_id': get_attributes_by_ptal_id(),
+            'attributes_by_ptal_id': request.env['pos.session'].sudo()._get_attributes_by_ptal_id(),
         }
         # TODO: make sure it is ok to send session_info to frontend
         session_info = request.env['ir.http'].session_info()
@@ -76,7 +73,7 @@ class PosSelfOrder(http.Controller):
             [('id', '=', pos_id)])
         if not pos_sudo.self_order_allow_view_menu():
             raise werkzeug.exceptions.NotFound()
-        # TODO: only get the products that are available in THIS POS
+        # we only get the products that are available in THIS POS
         products_sudo = request.env['product.product'].sudo().search(
                             [('available_in_pos', '=', True)], 
                             order='pos_categ_id').filtered(
@@ -87,9 +84,8 @@ class PosSelfOrder(http.Controller):
                             )
         print(products_sudo[0].pos_categ_id.id)
         print( pos_sudo.iface_available_categ_ids.read(['id']))
-        # print([categ.id for categ in pos_sudo.iface_available_categ_ids.read(['id'])])
 
-        # for each of the items in products_sudo, we get the price with tax included
+        # for each of the items in products_sudo, we get the price info and the attribute line ids
         menu= [{
             **{
                 'price_info': product.get_product_info_pos(product.list_price, 1, int(pos_id))['all_prices'],
@@ -124,9 +120,6 @@ def get_attributes_by_ptal_id():
         product_attributes_by_id= {product_attribute.id: product_attribute for product_attribute in product_attributes}
         domain= [('attribute_id', 'in', product_attributes.mapped('id'))]
         product_template_attribute_values= request.env['product.template.attribute.value'].sudo().search(domain)
-        # print("product_template_attribute_values:", json.dumps(product_template_attribute_values.read(), indent=4, sort_keys=True, default=str))
-        # vlad = request.env['product.template.attribute.value'].sudo().browse(17)
-        # print("vlad:", vlad.read(['price_extra']))
         key= lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
         res={}
         for key, group in groupby(sorted(product_template_attribute_values, key=key), key=key):

@@ -3,40 +3,42 @@
     <!-- Here we show the list of all the available products -->
     <t t-name="ProductList" owl="1">
             <!-- we only allow the user to go back if the pos is configured as "order at table" -->
+        <div class="sticky-top">
             <NavBar goBack="props.goBack" />
-<!-- tag and search bar -->
-        <div class="d-flex align-items-center ">
-    <!-- tag select -->
-            <div class="overflow-auto text-nowrap py-3">
-                <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
-                    <div class="mx-1 d-inline float-none"
-                        t-on-click="() => selectTag(tag)">
-                        <span t-attf-class="badge rounded-pill {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
-                            <t t-esc="tag"/>
-                        </span>
-                    </div>
-                </t>
-            </div>
-            <div class="mx-2">
-    <!-- search input -->
-                <t t-if="private_state.search_is_focused">
-                    <div class="d-flex align-items-center">
-                        <input type="text" class="" t-ref="searchInput" placeholder="Pizza"
-                                t-model="private_state.search_input"/>
+    <!-- tag and search bar -->
+            <div class="d-flex align-items-center bg-secondary">
+        <!-- tag select -->
+                <div class="overflow-auto text-nowrap py-3">
+                    <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
+                        <div class="mx-1 d-inline float-none"
+                            t-on-click="() => selectTag(tag)">
+                            <span t-attf-class="badge rounded-pill {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
+                                <t t-esc="tag"/>
+                            </span>
+                        </div>
+                    </t>
+                </div>
+                <div class="mx-2">
+        <!-- search input -->
+                    <t t-if="private_state.search_is_focused">
+                        <div class="d-flex align-items-center">
+                            <input type="text" class="" t-ref="searchInput" placeholder="Pizza"
+                                    t-model="private_state.search_input"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
+                                fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"
+                                t-on-click="() => closeSearch()">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </div>
+                    </t>
+                    <t t-else="">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
-                            fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"
-                            t-on-click="() => closeSearch()">
-                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"
+                            t-on-click="() => focusSearch()">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                         </svg>
-                    </div>
-                </t>
-                <t t-else="">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
-                        fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"
-                        t-on-click="() => focusSearch()">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                    </svg>
-                </t>
+                    </t>
+                </div>
             </div>
         </div>
 
@@ -60,7 +62,7 @@
                                 <t t-esc="Array.from(tag).join(' ')"/>
                             </t>
                             <div class="col-12 col-sm-6 col-md-4">
-                                <div t-on-click="() => props.viewProduct(product.product_id)" class="mt-2 bg-white d-flex align-items-center shadow-sm m-1" t-ref="{{product.product_id}}">
+                                <div t-on-click="() => props.viewProduct(product.product_id)" class="mt-2 bg-white d-flex align-items-center shadow-sm m-1" t-ref="product_{{product.product_id}}">
                                     <img class="w-25 img-fluid" t-attf-src="/pos-self-order/get-images/{{ product.product_id }}" alt="Product image"/>
                                     <div class="mt-4 mx-4">
                 <!-- Product NAME -->
