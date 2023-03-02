@@ -83,13 +83,16 @@ class SelfOrderRoot extends Component {
                     // "Spicy", "Hot", "Cold", "Alcoholic", "Non Alcoholic", "Dessert", "Breakfast", "Lunch", "Dinner"
                     // "pairs well with wine", "pairs well with beer", "pairs well with soda", "pairs well with water",
                     // "HAPPY HOUR", "kids menu",  "local", "seasonal"
-                    tag_list: pos_categ_id ? new Set(pos_categ_id[1].split(" / ")) : new Set(),
+                    tagList: pos_categ_id ? new Set(pos_categ_id[1].split(" / ")) : new Set(),
                     attributes: [],
                     ...rest,
                 })
             );
-            // this.tag_list1 = this.productList.forEach((product) => product.tab_list.forEach());
-            console.log("this.tag_list1", this.tag_list1);
+            this.selfOrder.config.tagList = new Set(
+                this.productList.map((product) => Array.from(product.tagList)).flat()
+            );
+
+            console.log("this.tagList1", this.selfOrder.config.tagList);
             this.productList.forEach((product) => {
                 if (
                     !product.attribute_line_ids.some(

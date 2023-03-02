@@ -18,5 +18,5 @@ export type Product = {
     name: string;
     list_price: number;
     description_sale: string;
-    tag_list: Set<string>;
+    tagList: Set<string>;
 };

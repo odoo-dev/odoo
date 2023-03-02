@@ -46,7 +46,7 @@ export class ProductList extends Component {
      * @description returns true if the set of selected tags is a subset of the item's tags
      */
     itemHasAllOfTheTags = (item, selected_tags) => {
-        return this.setIsSubset(selected_tags, item.tag_list);
+        return this.setIsSubset(selected_tags, item.tagList);
     };
     /**
      * @param {Product} item

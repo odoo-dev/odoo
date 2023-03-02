@@ -8,11 +8,11 @@
         <div class="d-flex align-items-center ">
     <!-- tag select -->
             <div class="overflow-auto text-nowrap py-3">
-                <t t-foreach="selfOrder.config.pos_categories" t-as="tag" t-key="tag.id">
+                <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
                     <div class="mx-1 d-inline float-none"
-                        t-on-click="() => selectTag(tag.name)">
-                        <span t-attf-class="badge rounded-pill {{private_state.selected_tags.has(tag.name) ? 'text-bg-primary' : 'text-bg-light'}}">
-                            <t t-esc="tag.name"/>
+                        t-on-click="() => selectTag(tag)">
+                        <span t-attf-class="badge rounded-pill {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
+                            <t t-esc="tag"/>
                         </span>
                     </div>
                 </t>
@@ -46,7 +46,7 @@
                 <div class="row">
 <!-- Looping through all the available products -->
                         <t t-if="filteredProducts().length > 0">
-                            <t t-set="tag" t-value="filteredProducts()[0].tag_list"/>
+                            <t t-set="tag" t-value="filteredProducts()[0].tagList"/>
                             <t t-esc="Array.from(tag).join(' ')"/>
                         </t>
                         <t t-else="">
@@ -55,8 +55,8 @@
                             </p>
                         </t>
                         <t t-foreach="filteredProducts()" t-as="product" t-key="product.product_id">
-                            <t t-if="!areSetsEqual(product.tag_list, tag)">
-                                <t t-set="tag" t-value="product.tag_list"/>
+                            <t t-if="!areSetsEqual(product.tagList, tag)">
+                                <t t-set="tag" t-value="product.tagList"/>
                                 <t t-esc="Array.from(tag).join(' ')"/>
                             </t>
                             <div class="col-12 col-sm-6 col-md-4">
