@@ -45,7 +45,7 @@ class PosSelfOrder(http.Controller):
             'pos_name': pos_sudo.name,
             'currency_id': pos_sudo.currency_id.id,
             # FIXME: not all categories are available to all pos configs; we need to filter them
-            'pos_categories': request.env['pos.category'].sudo().search([]).read(['name']),
+            # 'pos_categories': request.env['pos.category'].sudo().search([]).read(['name']),
             'message_to_display': message_to_display,
             'show_prices_with_tax_included': True,
             'custom_links': custom_links_list,

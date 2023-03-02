@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { formatMonetary } from "@web/views/fields/formatters";
@@ -14,6 +14,7 @@ export class ProductList extends Component {
     setup() {
         this.state = useState(this.env.state);
 
+        // TODO: this set docstring does not work
         this.private_state = useState({
             selected_tags: /** @type {Set<string>} */ new Set(),
             search_is_focused: false,
@@ -22,6 +23,10 @@ export class ProductList extends Component {
         this.selfOrder = useSelfOrder();
         this.formatMonetary = formatMonetary;
         useAutofocus({ refName: "searchInput", mobile: true });
+        this.scrollToCurrentProduct(this.state.currentProduct);
+        onMounted(() => {
+            this.scrollToCurrentProduct(this.state.currentProduct);
+        });
     }
     filteredProducts = () => {
         // here we only want to return the products
@@ -114,6 +119,30 @@ export class ProductList extends Component {
         return true;
     }
     /**
+     * @param {array} array1
+     * @param {array} array2
+     * @returns
+     * @description returns true if array1 is a subarray of array2
+     *
+     * example:
+     * array1 = {1, 2, 3}
+     * array2 = {1, 2, 3, 4}
+     * arrayIsSubarray(array1, array2) returns true
+     *
+     * array1 = {1, 2, 3}
+     * array2 = {1, 2, 4}
+     * arrayIsSubarray(array1, array2) returns false
+     *
+     */
+    arrayIsSubarray(array1, array2) {
+        for (const item of array1) {
+            if (!array2.includes(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
      * @param { Set } set1
      * @param { Set } set2
      * @returns { boolean }
@@ -122,6 +151,27 @@ export class ProductList extends Component {
      */
     areSetsEqual(set1, set2) {
         return set1.size === set2.size && this.setIsSubset(set1, set2);
+    }
+    /**
+     * @param { array } array1
+     * @param { array } array2
+     * @returns { boolean }
+     * @description returns true if the two arrays are equal;
+     * the order of the elements in the arrays does not matter
+     */
+    arearraysEqual(array1, array2) {
+        return array1.size === array2.size && this.arrayIsSubarray(array1, array2);
+    }
+    scrollToElementWithRef(elementRef) {
+        setTimeout(() => {
+            elementRef.el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+    }
+    scrollToCurrentProduct(currentProduct) {
+        if (currentProduct) {
+            this.currentProductRef = useRef(currentProduct);
+            this.scrollToElementWithRef(this.currentProductRef);
+        }
     }
     static components = { NavBar };
 }

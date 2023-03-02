@@ -88,6 +88,8 @@ class SelfOrderRoot extends Component {
                     ...rest,
                 })
             );
+            // this.tag_list1 = this.productList.forEach((product) => product.tab_list.forEach());
+            console.log("this.tag_list1", this.tag_list1);
             this.productList.forEach((product) => {
                 if (
                     !product.attribute_line_ids.some(
