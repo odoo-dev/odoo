@@ -194,7 +194,7 @@ export class Message extends Component {
         return (
             this.message.originThread?.allowReplies &&
             this.props.messageToReplyTo &&
-            (this.message.needaction || this.message.resModel === "mail.channel")
+            (this.message.isNeedaction || this.message.resModel === "mail.channel")
         );
     }
 
