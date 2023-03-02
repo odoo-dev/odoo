@@ -14,7 +14,6 @@ export function useAttachmentViewer() {
      */
     function open(attachment, attachments = [attachment]) {
         if (!attachment.isViewable) {
-            console.warn("Attachment viewer is trying to open a non viewable attachment");
             return;
         }
         if (attachments.length > 0) {
