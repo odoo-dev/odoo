@@ -214,8 +214,7 @@ export class Messaging {
                             ...notif.payload,
                             model: "mail.channel",
                         });
-                        delete this.store.threads[thread.localId];
-                        removeFromArray(this.store.discuss.channels.threads, thread.localId);
+                        this.threadService.remove(thread);
                         if (thread.localId === this.store.discuss.threadLocalId) {
                             this.store.discuss.threadLocalId = undefined;
                         }
