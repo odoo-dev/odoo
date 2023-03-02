@@ -113,6 +113,7 @@ export const tourService = {
             const { state: pointerState, methods } = createPointerState();
             return {
                 start() {
+                    shownPointerId = -1;
                     pointers[id] = {
                         id,
                         component: TourPointer,
