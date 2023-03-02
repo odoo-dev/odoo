@@ -12,7 +12,7 @@
                     'p-3': normal,
                     'o-has-current-partner-avatar px-3': !this.env.inChatWindow and thread,
                 }">
-            <div class="o-mail-composer-sidebar-main flex-shrink-0" t-if="!compact">
+            <div class="o-mail-composer-sidebar-main flex-shrink-0 bg-view" t-if="!compact">
                 <img class="o-mail-composer-avatar mt-1 rounded-circle" t-att-src="composerAvatarUrl" alt="Avatar of user"/>
             </div>
             <div class="o-mail-composer-core-header text-truncate small p-2" t-if="props.composer.thread and props.messageToReplyTo?.thread === props.composer.thread">
