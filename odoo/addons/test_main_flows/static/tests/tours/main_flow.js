@@ -11,7 +11,7 @@ registry.category("web_tour.tours").add('main_flow_tour', {
     url: "/web",
     steps: [
 ...stepUtils.goToAppSteps('sale.sale_menu_root', Markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
-stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"),
+stepUtils.openBurgerMenu("li.breadcrumb-item.active:contains('Quotations')"),
 {
 // Add Stockable product
     mobile: false,
@@ -614,7 +614,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: 'bottom',
 },
 ...stepUtils.goToAppSteps('stock.menu_stock_root', _t('Go to Inventory')),
-stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Overview')"),
+stepUtils.openBurgerMenu("li.breadcrumb-item.active:contains('Inventory Overview')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='stock.menu_stock_config_settings']",
@@ -675,7 +675,7 @@ stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Overview
     content: Markup(_t("<p>Save this reordering rule</p>")),
     position: "bottom"
 },
-stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
+stepUtils.openBurgerMenu("li.breadcrumb-item.active:contains('OP/')"),
 {
 //Go to purchase:
     edition: "enterprise",
@@ -728,7 +728,7 @@ stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
     position: 'bottom',
 },
 ...stepUtils.goToAppSteps('mrp.menu_mrp_root', _t('Go to Manufacturing')),
-stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing Orders'), li.breadcrumb-item.active:contains('Work Centers Overview')"),
+stepUtils.openBurgerMenu("li.breadcrumb-item.active:contains('Manufacturing Orders'), li.breadcrumb-item.active:contains('Work Centers Overview')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='mrp.menu_mrp_manufacturing']",
@@ -775,7 +775,7 @@ stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing Orde
     position: 'bottom',
 },
 ...stepUtils.goToAppSteps('sale.sale_menu_root', Markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
-stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"),
+stepUtils.openBurgerMenu("li.breadcrumb-item.active:contains('Quotations')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='sale.sale_order_menu']",

@@ -522,14 +522,14 @@ export const stepUtils = {
         );
     },
 
-    openBuggerMenu(extraTrigger) {
+    openBurgerMenu(extraTrigger) {
         return {
             mobile: true,
             trigger: ".o_mobile_menu_toggle",
             extra_trigger: extraTrigger,
             content: _t("Open bugger menu."),
             position: "bottom",
-            debugHelp: this._getHelpMessage("openBuggerMenu", extraTrigger),
+            debugHelp: this._getHelpMessage("openBurgerMenu", extraTrigger),
         };
     },
 
