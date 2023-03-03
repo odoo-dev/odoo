@@ -165,6 +165,7 @@ QUnit.test("Channel member count update after user joined", async function (asse
     assert.strictEqual(thread.memberCount, 1);
     await click("button[title='Show Member List']");
     await click("button[title='Add Users']");
+    await click(".o-mail-channel-invitation-selectablePartner:contains(Harry)");
     await click("button[title='Invite to Channel']");
     assert.strictEqual(thread.memberCount, 2);
 });
