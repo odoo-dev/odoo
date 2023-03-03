@@ -4,7 +4,7 @@
         <div class="sticky-top">
             <NavBar previousPage="''" />
             <!-- tag and search bar -->
-            <div class="d-flex justify-content-center align-items-center p-0 m-0 bg-100 shadow-sm">
+            <div class="d-flex justify-content-start align-items-center p-0 m-0 bg-100 shadow-sm">
                 <div class="h-100 p-3 border-end">
                     <!-- search input -->
                     <t t-if="private_state.search_is_focused">
