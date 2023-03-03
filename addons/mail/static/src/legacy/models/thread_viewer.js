@@ -65,7 +65,6 @@ Model({
          */
         compact: attr({ default: false }),
         discuss: one("Discuss", { identifying: true, inverse: "threadViewer" }),
-        discussPublicView: one("DiscussPublicView", { identifying: true, inverse: "threadViewer" }),
         /**
          * Determines which extra class this thread view component should have.
          */

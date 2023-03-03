@@ -102,10 +102,6 @@ Model({
          */
         channel: one("Thread", { readonly: true, required: true }),
         /**
-         * States discuss public view on which this welcome view is displayed.
-         */
-        discussPublicView: one("DiscussPublicView", { identifying: true, inverse: "welcomeView" }),
-        /**
          * States the OWL ref the to input element containing the
          * 'pendingGuestName'.
          */
