@@ -11,6 +11,7 @@ export class UserSettings {
         this.user = services.user;
         this.hasCanvasFilterSupport =
             typeof document.createElement("canvas").getContext("2d").filter !== "undefined";
+        this._loadLocalSettings();
     }
     /**
      * @param {Object} settings: the old model-style command with the settings from the server
@@ -184,13 +185,12 @@ export class UserSettings {
         const voiceActivationThresholdString = browser.localStorage.getItem(
             "mail_user_setting_voice_threshold"
         );
-        const audioInputDeviceId = browser.localStorage.getItem(
-            "mail_user_setting_audio_input_device_id"
-        );
         this.voiceActivationThreshold = voiceActivationThresholdString
             ? parseFloat(voiceActivationThresholdString)
-            : undefined;
-        this.audioInputDeviceId = audioInputDeviceId || undefined;
+            : this.voiceActivationThreshold;
+        this.audioInputDeviceId = browser.localStorage.getItem(
+            "mail_user_setting_audio_input_device_id"
+        );
     }
     /**
      * @private

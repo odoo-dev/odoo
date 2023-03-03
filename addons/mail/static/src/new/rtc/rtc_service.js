@@ -163,7 +163,7 @@ export class Rtc {
         });
         onChange(this.userSettingsService, "audioInputDeviceId", async () => {
             if (this.state.selfSession) {
-                await this.resetAudioTrack();
+                await this.resetAudioTrack({ force: true });
             }
         });
         this.env.bus.addEventListener(
@@ -465,7 +465,7 @@ export class Rtc {
         if (this.state.audioTrack) {
             await this.setMute(false);
         } else {
-            await this.resetAudioTrack(true);
+            await this.resetAudioTrack({ force: true });
         }
         this.soundEffectsService.play("unmute");
     }
@@ -733,7 +733,7 @@ export class Rtc {
         // discuss refactor: todo call channel.update below when availalbe and do the formatting in update
         this.call();
         this.soundEffectsService.play("channel-join");
-        await this.resetAudioTrack(true);
+        await this.resetAudioTrack({ force: true });
         if (startWithVideo) {
             await this.toggleVideo("camera");
         }
@@ -1164,7 +1164,7 @@ export class Rtc {
         }
     }
 
-    async resetAudioTrack(audio = false) {
+    async resetAudioTrack({ force = false }) {
         if (this.state.audioTrack) {
             this.state.audioTrack.stop();
             this.state.audioTrack = undefined;
@@ -1172,7 +1172,7 @@ export class Rtc {
         if (!this.state.channel.id) {
             return;
         }
-        if (audio) {
+        if (force) {
             let audioTrack;
             try {
                 const audioStream = await browser.navigator.mediaDevices.getUserMedia({
@@ -1199,7 +1199,7 @@ export class Rtc {
             }
             audioTrack.addEventListener("ended", async () => {
                 // this mostly happens when the user retracts microphone permission.
-                await this.resetAudioTrack(false);
+                await this.resetAudioTrack({ force: false });
                 this.updateAndBroadcast({ isSelfMuted: true });
                 await this.refreshAudioStatus();
             });
