@@ -26,7 +26,7 @@ class PosSelfOrder(http.Controller):
         pos_sudo = request.env['pos.config'].sudo().search(
             [('id', '=', pos_id)])
 
-        if not pos_sudo.self_order_allow_view_menu():
+        if not pos_sudo or not pos_sudo.self_order_allow_view_menu():
             raise werkzeug.exceptions.NotFound()
 
         # On the landing page of the app we can have a number of custom links
@@ -66,7 +66,7 @@ class PosSelfOrder(http.Controller):
             raise werkzeug.exceptions.NotFound()
         pos_sudo = request.env['pos.config'].sudo().search(
             [('id', '=', pos_id)])
-        if not pos_sudo.self_order_allow_view_menu():
+        if not pos_sudo or not pos_sudo.self_order_allow_view_menu():
             raise werkzeug.exceptions.NotFound()
         # we only get the products that are available in THIS POS
         products_sudo = request.env['product.product'].sudo().search(
