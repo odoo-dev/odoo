@@ -93,6 +93,8 @@ export class Rtc {
         this.store = services["mail.store"];
         this.notification = services.notification;
         this.rpc = services.rpc;
+        /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
+        this.channelMemberService = services["mail.channel.member"];
         /** @type {import("@mail/new/core/sound_effects_service").SoundEffects} */
         this.soundEffectsService = services["mail.sound_effects"];
         /** @type {import("@mail/new/core/user_settings_service").UserSettings} */
@@ -1273,7 +1275,7 @@ export class Rtc {
             session.channelId = channelMember.channel.id;
         }
         if (channelMember) {
-            const channelMemberRecord = this.threadService.insertChannelMember(channelMember);
+            const channelMemberRecord = this.channelMemberService.insert(channelMember);
             session.channelMemberId = channelMemberRecord.id;
             if (channelMemberRecord.thread) {
                 channelMemberRecord.thread.rtcSessions[session.id] = session;
@@ -1419,6 +1421,7 @@ export class Rtc {
 
 export const rtcService = {
     dependencies: [
+        "mail.channel.member",
         "mail.store",
         "notification",
         "rpc",
