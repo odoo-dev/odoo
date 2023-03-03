@@ -46,6 +46,8 @@ export class Messaging {
         this.store = services["mail.store"];
         this.rpc = services.rpc;
         this.orm = services.orm;
+        /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
+        this.channelMemberService = services["mail.channel.member"];
         /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
         this.attachmentService = services["mail.attachment"];
         this.notificationService = services.notification;
@@ -368,7 +370,7 @@ export class Messaging {
                     if (!channel) {
                         return;
                     }
-                    const member = this.threadService.insertChannelMember(notif.payload);
+                    const member = this.channelMemberService.insert(notif.payload);
                     if (member.persona === this.store.self) {
                         return;
                     }
@@ -502,7 +504,12 @@ export class Messaging {
             this.threadService.insert({
                 id: notif.payload.Channel.id,
                 model: "mail.channel",
-                serverData: { channel: { avatarCacheKey: notif.payload.Channel.avatarCacheKey } },
+                serverData: {
+                    channel: {
+                        avatarCacheKey: notif.payload.Channel.avatarCacheKey,
+                        ...notif.payload.Channel,
+                    },
+                },
             });
         }
         if (notif.payload.RtcSession) {
@@ -554,7 +561,7 @@ export class Messaging {
                 settings.is_discuss_sidebar_category_channel_open ??
                 this.store.discuss.channels.isOpen;
         }
-        const {"res.users.settings.volumes": volumeSettings } = notif.payload;
+        const { "res.users.settings.volumes": volumeSettings } = notif.payload;
         if (volumeSettings) {
             this.userSettingsService.setVolumes(volumeSettings);
         }
@@ -666,6 +673,7 @@ export class Messaging {
 export const messagingService = {
     dependencies: [
         "mail.store",
+        "mail.channel.member",
         "rpc",
         "orm",
         "user",

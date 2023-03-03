@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { markup } from "@odoo/owl";
-import { ChannelMember } from "../core/channel_member_model";
 import { Thread } from "../core/thread_model";
 import { _t } from "@web/core/l10n/translation";
 import {
@@ -25,6 +24,8 @@ export class ThreadService {
 
     setup(env, services) {
         this.env = env;
+        /** @type {import("@mail/new/core/channel_member_service").ChannelMemberService} */
+        this.channelMemberService = services["mail.channel.member"];
         /** @type {import("@mail/new/attachments/attachment_service").AttachmentService} */
         this.attachmentsService = services["mail.attachment"];
         /** @type {import("@mail/new/core/store_service").Store} */
@@ -89,10 +90,7 @@ export class ThreadService {
         thread.memberCount = results["memberCount"];
         for (const channelMember of channelMembers) {
             if (channelMember.persona || channelMember.partner) {
-                this.insertChannelMember({
-                    ...channelMember,
-                    threadId: thread.id,
-                });
+                this.channelMemberService.insert({ ...channelMember, threadId: thread.id });
             }
         }
     }
@@ -519,17 +517,20 @@ export class ThreadService {
                 thread.customName = serverData.channel.custom_channel_name;
             }
             if (serverData.channel?.channelMembers) {
-                for (const member of serverData.channel.channelMembers[0][1]) {
-                    this.insertChannelMember(member);
-                    if (thread.type !== "chat") {
-                        continue;
-                    }
-                    if (
-                        member.persona.partner.id !== thread._store.user?.id ||
-                        (serverData.channel.channelMembers[0][1].length === 1 &&
-                            member.persona.partner.id === thread._store.user?.id)
-                    ) {
-                        thread.chatPartnerId = member.persona.partner.id;
+                for (const [command, membersData] of serverData.channel.channelMembers) {
+                    const members = Array.isArray(membersData) ? membersData : [membersData];
+                    for (const memberData of members) {
+                        const member = this.channelMemberService.insert([command, memberData]);
+                        if (thread.type !== "chat") {
+                            continue;
+                        }
+                        if (
+                            member.persona.id !== thread._store.user?.id ||
+                            (serverData.channel.channelMembers[0][1].length === 1 &&
+                                member.persona.id === thread._store.user?.id)
+                        ) {
+                            thread.chatPartnerId = member.persona.id;
+                        }
                     }
                 }
             }
@@ -551,7 +552,7 @@ export class ThreadService {
                     case "insert":
                         if (members) {
                             for (const member of members) {
-                                const record = this.insertChannelMember(member);
+                                const record = this.channelMemberService.insert(member);
                                 thread.invitedMemberIds.add(record.id);
                             }
                         }
@@ -630,29 +631,6 @@ export class ThreadService {
             Object.assign(composer.selection, data.selection);
         }
         return composer;
-    }
-
-    insertChannelMember(data) {
-        let channelMember = this.store.channelMembers[data.id];
-        if (!channelMember) {
-            this.store.channelMembers[data.id] = new ChannelMember();
-            channelMember = this.store.channelMembers[data.id];
-            channelMember._store = this.store;
-        }
-        Object.assign(channelMember, {
-            id: data.id,
-            persona: this.personaService.insert({
-                ...(data.persona.partner ?? data.persona.guest),
-                type: data.persona.guest ? "guest" : "partner",
-                country: data.persona.partner?.country,
-                channelId: data.persona.guest ? data.channel.id : null,
-            }),
-            threadId: data.threadId ?? channelMember.threadId ?? data.channel.id,
-        });
-        if (channelMember.thread && !channelMember.thread.channelMembers.includes(channelMember)) {
-            channelMember.thread.channelMembers.push(channelMember);
-        }
-        return channelMember;
     }
 
     /**
@@ -861,6 +839,7 @@ export class ThreadService {
 
 export const threadService = {
     dependencies: [
+        "mail.channel.member",
         "mail.attachment",
         "mail.store",
         "orm",

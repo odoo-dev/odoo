@@ -2,9 +2,14 @@
 
 import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import { triggerHotkey, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { triggerHotkey, patchWithCleanup, getFixture } from "@web/../tests/helpers/utils";
 
-QUnit.module("crosstab");
+let target;
+QUnit.module("crosstab", {
+    beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("Messages are received cross-tab", async function (assert) {
     const pyEnv = await startServer();
@@ -158,4 +163,42 @@ QUnit.test("Remove attachment from message", async function (assert) {
     await tab2.click(".o-mail-attachment-card-aside-unlink");
     await tab2.click(".modal-footer .btn:contains(Ok)");
     assert.containsNone(tab1.target, ".o-mail-attachment-card:contains(test.txt)");
+});
+
+QUnit.test("Add member to channel", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const userId = pyEnv["res.users"].create({ name: "Harry" });
+    pyEnv["res.partner"].create({ name: "Harry", user_ids: [userId] });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("button[title='Show Member List']");
+    assert.containsOnce(target, ".o-mail-channel-member:contains(Mitchell Admin)");
+    await click("button[title='Add Users']");
+    await click(".o-mail-channel-invitation-selectablePartner:contains(Harry)");
+    await click("button[title='Invite to Channel']");
+    assert.containsOnce(target, ".o-mail-channel-member:contains(Harry)");
+});
+
+QUnit.test("Remove member from channel", async function (assert) {
+    const pyEnv = await startServer();
+    const userId = pyEnv["res.users"].create({ name: "Harry" });
+    const partnerId = pyEnv["res.partner"].create({
+        name: "Harry",
+        user_ids: [userId],
+    });
+    const channelId = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: partnerId }],
+        ],
+    });
+    const { env, openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("button[title='Show Member List']");
+    assert.containsOnce(target, ".o-mail-channel-member:contains(Harry)");
+    env.services.orm.call("mail.channel", "action_unfollow", [channelId], {
+        context: { mockedUserId: userId },
+    });
 });

@@ -37,6 +37,7 @@ import { personaService } from "@mail/new/core/persona_service";
 import { attachmentService } from "@mail/new/attachments/attachment_service";
 import { notificationPermissionService } from "@mail/new/core/notification_permission_service";
 import { session } from "@web/session";
+import { channelMemberService } from "@mail/new/core/channel_member_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -116,6 +117,7 @@ export const setupManager = {
             "bus.parameters": busParametersService,
             im_status: imStatusService,
             effect: effectService,
+            "mail.channel.member": channelMemberService,
             "mail.notification.permission": notificationPermissionService,
             "mail.suggestion": suggestionService,
             "mail.store": storeService,

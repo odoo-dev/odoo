@@ -9,7 +9,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
     async _performRPC(route, args) {
         if (args.model === "mail.channel" && args.method === "action_unfollow") {
             const ids = args.args[0];
-            return this._mockMailChannelActionUnfollow(ids);
+            return this._mockMailChannelActionUnfollow(ids, args.kwargs.context);
         }
         if (args.model === "mail.channel" && args.method === "channel_fetched") {
             const ids = args.args[0];
@@ -152,21 +152,44 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
      * @private
      * @param {integer[]} ids
      */
-    _mockMailChannelActionUnfollow(ids) {
+    _mockMailChannelActionUnfollow(ids, { mockedUserId } = {}) {
+        let partnerId = this.currentPartnerId;
+        if (mockedUserId) {
+            partnerId = this.pyEnv["res.partner"].search([["user_ids", "in", [mockedUserId]]])[0];
+        }
         const channel = this.getRecords("mail.channel", [["id", "in", ids]])[0];
         const [channelMember] = this.getRecords("mail.channel.member", [
             ["channel_id", "in", ids],
-            ["partner_id", "=", this.currentPartnerId],
+            ["partner_id", "=", partnerId],
         ]);
+        const formattedChannelMember = this._mockMailChannelMember_MailChannelMemberFormat([
+            channelMember.id,
+        ])[0];
         if (!channelMember) {
             return true;
         }
         this.pyEnv["mail.channel"].write([channel.id], {
             channel_member_ids: [[2, channelMember.id]],
         });
-        this.pyEnv["bus.bus"]._sendone(this.pyEnv.currentPartner, "mail.channel/leave", {
-            id: channel.id,
-        });
+        if (partnerId === this.currentPartnerId) {
+            this.pyEnv["bus.bus"]._sendone(this.pyEnv.currentPartner, "mail.channel/leave", {
+                id: channel.id,
+            });
+        }
+        const isSelfMember =
+            this.pyEnv["mail.channel.member"].searchCount([
+                ["partner_id", "=", this.pyEnv.currentPartnerId],
+                ["channel_id", "=", channel.id],
+            ]) > 0;
+        if (isSelfMember) {
+            this.pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
+                Channel: {
+                    channelMembers: [["insert-and-unlink", formattedChannelMember]],
+                    memberCount: channel.member_count,
+                },
+            });
+        }
+
         /**
          * Leave message not posted here because it would send the new message
          * notification on a separate bus notification list from the unsubscribe
@@ -197,16 +220,41 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             const subtype_xmlid = "mail.mt_comment";
             this._mockMailChannelMessagePost(channel.id, { body, message_type, subtype_xmlid });
         }
+        const insertedChannelMembers = [];
         for (const partner of partners) {
-            this.pyEnv["mail.channel.member"].create({
-                channel_id: channel.id,
-                partner_id: partner.id,
+            insertedChannelMembers.push(
+                this.pyEnv["mail.channel.member"].create({
+                    channel_id: channel.id,
+                    partner_id: partner.id,
+                })
+            );
+        }
+        if (partner_ids.includes(this.pyEnv.currentPartnerId)) {
+            this.pyEnv["bus.bus"]._sendone(channel, "mail.channel/joined", {
+                channel: this._mockMailChannelChannelInfo([channel.id])[0],
+                invited_by_user_id: context.mockedUserId ?? this.currentUserId,
             });
         }
-        this.pyEnv["bus.bus"]._sendone(channel, "mail.channel/joined", {
-            channel: this._mockMailChannelChannelInfo([channel.id])[0],
-            invited_by_user_id: context.mockedUserId ?? this.currentUserId,
-        });
+        const isSelfMember =
+            this.pyEnv["mail.channel.member"].searchCount([
+                ["partner_id", "=", this.pyEnv.currentPartnerId],
+                ["channel_id", "=", channel.id],
+            ]) > 0;
+        if (isSelfMember) {
+            this.pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
+                Channel: {
+                    channelMembers: [
+                        [
+                            "insert",
+                            this._mockMailChannelMember_MailChannelMemberFormat(
+                                insertedChannelMembers
+                            ),
+                        ],
+                    ],
+                    memberCount: channel.member_count,
+                },
+            });
+        }
     },
     /**
      * Simulates `_broadcast` on `mail.channel`.
