@@ -22,9 +22,6 @@ This module allows a customer to give rating.
         'mail.assets_backend': [
             'rating/static/src/new/**/*',
         ],
-        'mail.assets_messaging': [
-            'rating/static/src/legacy/models/**/*',
-        ],
         'web.assets_backend': [
             'rating/static/src/scss/rating_rating_views.scss',
             'rating/static/src/components/*/*.scss',
