@@ -39,14 +39,22 @@ export function useEmojiPicker(refName, props, options = {}) {
             return props.storeScroll.scrollValue;
         },
     };
-    const toggle = () => {
+    const toggle = (ev) => {
         if (closePopover) {
             closePopover();
             closePopover = false;
         } else {
-            closePopover = popover.add(ref.el, EmojiPicker, props, {
+            let el;
+            if (options.selector && ev.target.closest(options.selector)) {
+                el = ev.target;
+            } else {
+                el = ref.el;
+            }
+            closePopover = popover.add(el, EmojiPicker, props, {
                 ...options,
-                onClose: () => (closePopover = false),
+                onClose: () => {
+                    closePopover = false;
+                },
                 popoverClass: "o-fast-popover",
             });
         }
