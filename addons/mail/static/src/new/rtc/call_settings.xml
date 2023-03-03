@@ -9,10 +9,10 @@
                     <label class="d-flex align-items-center flex-wrap mw-100 cursor-pointer" title="Input device" aria-label="Input device">
                         <span class="me-2 text-truncate">Input device</span>
                         <div>
-                            <select name="inputDevice" class="form-select" t-att-value="userSettings.audioInputDeviceId" t-on-change="onChangeSelectAudioInput">
+                            <select name="inputDevice" class="form-select" t-on-change="onChangeSelectAudioInput">
                                 <option value="">Browser default</option>
                                 <t t-foreach="state.userDevices" t-as="device" t-key="device_index" device="device">
-                                    <option t-if="device.kind === 'audioinput'" t-att-value="device.deviceId"><t t-esc="device.label || 'audio device ' + device_index"/></option>
+                                    <option t-if="device.kind === 'audioinput'" t-att-selected="userSettings.audioInputDeviceId === device.deviceId" t-att-value="device.deviceId"><t t-esc="device.label || 'audio device ' + device_index"/></option>
                                 </t>
                             </select>
                         </div>
