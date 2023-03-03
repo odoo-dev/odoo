@@ -24,22 +24,12 @@ Allows users to send documents by post
         'mail.assets_backend': [
             'snailmail/static/src/new/**/*',
         ],
-        'mail.assets_messaging': [
-            'snailmail/static/src/legacy/models/**/*',
-        ],
-        'mail.assets_discuss_public': [
-            'snailmail/static/src/legacy/components/*/*',
-        ],
         'snailmail.report_assets_snailmail': [
             ('include', 'web._assets_helpers'),
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'snailmail/static/src/scss/snailmail_external_layout_asset.scss',
             'snailmail/static/src/js/snailmail_external_layout.js',
-        ],
-        'web.assets_backend': [
-            'snailmail/static/src/legacy/components/*/*.scss',
-            'snailmail/static/src/legacy/components/*/*.xml',
         ],
         'web.tests_assets': [
             'snailmail/static/tests/helpers/**/*.js',

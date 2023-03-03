@@ -40,16 +40,14 @@ The service is provided by the In App Purchase Odoo platform.
     'installable': True,
     'auto_install': True,
     'assets': {
-        'mail.assets_messaging': [
-            'sms/static/src/new/**/*.js',
-            'sms/static/src/legacy/**/*',
+        'mail.assets_backend': [
+            'sms/static/src/new/**/*',
         ],
         'mail.assets_discuss_public': [
             'sms/static/src/components/sms_button/*',
         ],
         'web.assets_backend': [
             'sms/static/src/components/*/*',
-            'sms/static/src/legacy/**/*',
         ],
         'web.qunit_suite_tests': [
             'sms/static/tests/new/**/*',
