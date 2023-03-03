@@ -418,8 +418,11 @@ QUnit.module("test_mail", {}, function () {
         await click($(".o-activity-list-popover button:contains(Schedule an activity)")[0]);
         await click(document.querySelector(".overdue .o-activity-cell-closest-deadline"));
         await click(document.querySelector(".o-activity-list-popover-item-mark-as-done"));
-        await editInput(document.body, ".o-mail-activity-mark-as-done-feedback", "feedback2");
-
+        await editInput(
+            document.body,
+            ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']",
+            "feedback2"
+        );
         await click(
             document.querySelector(
                 ".o-mail-activity-mark-as-done button[aria-label='Done and Schedule Next']"

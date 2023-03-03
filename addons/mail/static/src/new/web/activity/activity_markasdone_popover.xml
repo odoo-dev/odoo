@@ -4,7 +4,7 @@
         <div class="o-mail-activity-mark-as-done">
             <h6 t-if="props.hasHeader" class="p-2 fw-bolder bg-200 border-bottom">Mark Done</h6>
             <div class="py-2 px-3">
-                <textarea class="form-control o-mail-activity-mark-as-done-feedback" rows="3" placeholder="Write Feedback" t-model="props.activity.feedback" t-ref="textarea"/>
+                <textarea class="form-control" style="min-height: 70px" rows="3" placeholder="Write Feedback" t-model="props.activity.feedback" t-ref="textarea"/>
                 <div class="o-mail-activity-mark-as-done-buttons mt-2">
                     <button type="button" class="btn btn-sm btn-primary" aria-label="Done and Schedule Next" t-on-click="onClickDoneAndScheduleNext">
                         Done &amp; Schedule Next

@@ -29,7 +29,10 @@ QUnit.test("activity mark done popover simplest layout", async function (assert)
     });
     await click(".btn:contains('Mark Done')");
     assert.containsOnce(target, ".o-mail-activity-mark-as-done");
-    assert.containsOnce(target, ".o-mail-activity-mark-as-done-feedback");
+    assert.containsOnce(
+        target,
+        ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']"
+    );
     assert.containsOnce(target, ".o-mail-activity-mark-as-done-buttons");
     assert.containsOnce(
         target,
@@ -57,7 +60,10 @@ QUnit.test("activity with force next mark done popover simplest layout", async f
     });
     await click(".btn:contains('Mark Done')");
     assert.containsOnce(target, ".o-mail-activity-mark-as-done");
-    assert.containsOnce(target, ".o-mail-activity-mark-as-done-feedback");
+    assert.containsOnce(
+        target,
+        ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']"
+    );
     assert.containsOnce(target, ".o-mail-activity-mark-as-done-buttons");
     assert.containsOnce(
         target,
@@ -141,7 +147,10 @@ QUnit.test("activity mark done popover mark done with feedback", async function 
         views: [[false, "form"]],
     });
     await click(".btn:contains('Mark Done')");
-    insertText(".o-mail-activity-mark-as-done-feedback", "This task is done").catch(() => {}); // no render
+    insertText(
+        ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']",
+        "This task is done"
+    ).catch(() => {}); // no render
     await nextTick();
     await click(".o-mail-activity-mark-as-done button[aria-label='Done']");
     assert.verifySteps(["action_feedback"]);
@@ -188,7 +197,10 @@ QUnit.test("activity mark done popover mark done and schedule next", async funct
         },
     });
     await click(".btn:contains('Mark Done')");
-    insertText(".o-mail-activity-mark-as-done-feedback", "This task is done").catch(() => {}); // no render
+    insertText(
+        ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']",
+        "This task is done"
+    ).catch(() => {}); // no render
     await nextTick();
     await click(".o-mail-activity-mark-as-done button[aria-label='Done and Schedule Next']");
     assert.verifySteps(["action_feedback_schedule_next"]);

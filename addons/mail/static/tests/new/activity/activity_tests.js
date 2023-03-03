@@ -418,7 +418,9 @@ QUnit.test(
 
         await click(".btn:contains('Mark Done')");
         assert.strictEqual(
-            document.querySelector(".o-mail-activity-mark-as-done-feedback"),
+            document.querySelector(
+                ".o-mail-activity-mark-as-done textarea[placeholder='Write Feedback']"
+            ),
             document.activeElement
         );
     }
