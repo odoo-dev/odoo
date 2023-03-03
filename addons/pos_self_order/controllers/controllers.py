@@ -6,6 +6,11 @@ from odoo.http import request
 class PosSelfOrder(http.Controller):
     """
     This is the controller for the POS Self Order App
+    There is one main route that the client will use to access the POS Self Order App
+    -- /pos-self-order/--
+    This route will render the LANDING PAGE of the POS Self Order App
+    And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency...
+    After that the client wil
     """
     @http.route([
         '/pos-self-order/',

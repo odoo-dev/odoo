@@ -20,9 +20,6 @@
                             </div>
                         </div>
                     </setting>
-                    <setting string="Kitchen Notes" help="Add kitchen notes on order lines for the kitchen" id="iface_orderline_notes" attrs="{'invisible': [('pos_module_pos_restaurant', '=', False)]}">
-                        <field name="pos_iface_orderline_notes"/>
-                    </setting>
         <!-- QR Code Menu -->
                     <setting string="QR Code Menu" help="Allow customers to see the menu from their phone" 
                         id="pos_self_order_view_mode"
@@ -35,6 +32,9 @@
                                 Save this page and come back here to set up the feature.
                             </div>
                         </div>
+                    </setting>
+                    <setting string="Kitchen Notes" help="Add internal notes on order lines for the kitchen" id="iface_orderline_notes" attrs="{'invisible': [('pos_module_pos_restaurant', '=', False)]}">
+                        <field name="pos_iface_orderline_notes"/>
                     </setting>
                     <setting string="Early Receipt Printing" help="Allow to print receipt before payment" id="iface_printbill" attrs="{'invisible': [('pos_module_pos_restaurant', '=', False)]}">
                         <field name="pos_iface_printbill"/>
