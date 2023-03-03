@@ -20,17 +20,17 @@ import { escapeRegExp } from "@web/core/utils/strings";
 
 /**
  *
- * @param {string} refName
+ * @param {Object|string} [target] if string then it's a ref name, otherwise it's a ref
  * @param {Object} props
  * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
  * @param {function} [props.onSelect]
  * @param {function} [props.onClose]
  */
-export function useEmojiPicker(refName, props, options = {}) {
-    const ref = useRef(refName);
+export function useEmojiPicker(target, props, options = {}) {
+    const targets = [];
     const popover = usePopover();
     let closePopover = false;
-    props["storeScroll"] = {
+    props.storeScroll = {
         scrollValue: 0,
         set: (value) => {
             props.storeScroll.scrollValue = value;
@@ -39,37 +39,75 @@ export function useEmojiPicker(refName, props, options = {}) {
             return props.storeScroll.scrollValue;
         },
     };
-    const toggle = () => {
+
+    /**
+     * @param {string|Object} target a refName or an Object whose el is an HTMl element target
+     * @param {HTMLElement|Function} [target.el]
+     */
+    function add(target, onSelect, { show = false } = {}) {
+        const ref = typeof target === "string" ? useRef(target) : target;
+        const toggler = () => toggle(ref, onSelect);
+        targets.push([ref, toggler]);
+        if (!ref.el) {
+            return;
+        }
+        ref.el.addEventListener("click", toggler);
+        ref.el.addEventListener("mouseenter", loadEmoji);
+        if (show) {
+            ref.el.click();
+        }
+    }
+
+    function toggle(ref, onSelect = props.onSelect) {
         if (closePopover) {
             closePopover();
             closePopover = false;
         } else {
-            closePopover = popover.add(ref.el, EmojiPicker, props, {
-                ...options,
-                onClose: () => (closePopover = false),
-                popoverClass: "o-fast-popover",
-            });
+            closePopover = popover.add(
+                ref.el,
+                EmojiPicker,
+                { ...props, onSelect },
+                {
+                    ...options,
+                    onClose: () => (closePopover = false),
+                    popoverClass: "o-fast-popover",
+                }
+            );
         }
-    };
+    }
+
+    if (target) {
+        add(target);
+    }
     onMounted(() => {
-        if (ref.el) {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
             ref.el.addEventListener("click", toggle);
             ref.el.addEventListener("mouseenter", loadEmoji);
         }
     });
     onWillPatch(() => {
-        if (ref.el) {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
             ref.el.removeEventListener("click", toggle);
             ref.el.removeEventListener("mouseenter", loadEmoji);
         }
     });
     onPatched(() => {
-        if (ref.el) {
+        for (const [ref, toggle] of targets) {
+            if (!ref.el) {
+                continue;
+            }
             ref.el.addEventListener("click", toggle);
             ref.el.addEventListener("mouseenter", loadEmoji);
         }
     });
     return {
+        add,
         get isOpen() {
             return Boolean(closePopover);
         },
