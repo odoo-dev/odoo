@@ -49,9 +49,7 @@ class PosSelfOrder(http.Controller):
         :rtype: list of dict
         """
         pos_sudo = find_pos_config(pos_id) 
-        # we only get the products that are available in THIS POS
         products_sudo = get_products_that_are_available_in_this_pos(pos_sudo)
-        # for each of the items in products_sudo, we get the price info and the attribute line ids
         return add_price_and_attribute_info_to_products(products_sudo, pos_id)
 
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
@@ -67,26 +65,11 @@ class PosSelfOrder(http.Controller):
         """
         product_sudo= request.env['product.product'].sudo().browse(product_id)
         return request.env['ir.binary']._get_image_stream_from(product_sudo, field_name='image_1920').get_response()
-    # def find_pos_config(self, pos_id):
-    #     """ 
-    #     This function checks that the pos_id exists, and that the pos is configured to allow the menu to be viewed online
-        
-    #     :param pos_id: the id of the POS
-    #     :type pos_id: int
-    #     :return: the pos config object, if the pos_id is valid
-    #     """
-    #     print("pos_id", pos_id)
-    #     if not pos_id:
-    #         raise werkzeug.exceptions.NotFound()
-    #     pos_sudo = request.env['pos.config'].sudo().search(
-    #         [('id', '=', pos_id)])
-    #     if not pos_sudo or not pos_sudo.self_order_allow_view_menu():
-    #         raise werkzeug.exceptions.NotFound()
-    #     return pos_sudo
+
 def find_pos_config(pos_id):
     """ 
     This function checks that the pos_id exists, and that the pos is configured to allow the menu to be viewed online
-    
+
     :param pos_id: the id of the POS
     :type pos_id: int
     :return: the pos config object, if the pos_id is valid
@@ -105,7 +88,7 @@ def get_custom_links_list(pos_id):
     On the landing page of the app we can have a number of custom links
     that are defined by the restaurant employee in the backend.
     This function returns a list of dictionaries with the name, url and style of each link
-    that is available for the POS with id pos_id
+    that is available for the POS with id pos_id.
     :param pos_id: the id of the POS
     :type pos_id: int
     :return: a list of dictionaries with the name, url and style of each link
