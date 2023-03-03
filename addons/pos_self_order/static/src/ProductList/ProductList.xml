@@ -12,10 +12,10 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" t-ref="searchInput" placeholder="Pizza"
                                         t-model="private_state.search_input"/>
-                                <button class="btn btn-outline-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
-                                        fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"
+                                <button class="btn btn-outline-primary"
                                         t-on-click="() => closeSearch()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
+                                        fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                                         <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                                     </svg>
                                 </button>
@@ -23,6 +23,8 @@
                         </div>
                     </t>
                     <t t-else="">
+                    <!-- TODO: this focusearch() only gets called when you click on the very small svg icon
+                    we have to make it so it's called when you click on the div that holds it -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
                             fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"
                             t-on-click="() => focusSearch()">
@@ -47,7 +49,6 @@
 
 
             <div class="bg-300 p-2">
-                <!-- Looping through all the available products -->
                 <t t-if="filteredProducts().length > 0">
                     <t t-set="tag" t-value="filteredProducts()[0].tagList"/>
                     <t t-esc="Array.from(tag).join(' ')"/>
@@ -87,7 +88,6 @@
                     </div>
                 </t>
             </div>
-<!-- Go to Cart Button -->
     </t>
 </templates>
 

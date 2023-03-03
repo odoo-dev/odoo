@@ -3,7 +3,8 @@
     'name': "pos_self_order",
 
     'summary': """
-        Addon for the POS App that allows customers to order from their smartphone or from a kiosk""",
+        Addon for the POS App that allows customers to view the menu on their smartphone.
+        """,
 
     'description': """
     
@@ -28,10 +29,6 @@
         'views/qr_code.xml',    
         'views/custom_link_views.xml',
         'views/res_config_settings_views.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        # 'demo/demo.xml',
     ],
     'installable': True,
     'assets': {    

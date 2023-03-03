@@ -90,6 +90,7 @@ export class ProductList extends Component {
         // ( maybe you don't know exactly what you want ), while the search bar
         // is more precise; ex: you want a Coca Cola, not a soda in general
         this.private_state.selected_tags.clear();
+        console.log("focusSearch");
     };
     closeSearch = () => {
         this.private_state.search_is_focused = false;
