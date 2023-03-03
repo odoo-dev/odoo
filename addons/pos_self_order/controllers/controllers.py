@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 import werkzeug
-from odoo import fields, http, _
+from odoo import http, _
 from odoo.http import request
-from odoo.osv.expression import AND
-from odoo.tools import format_amount
-
-
-from itertools import groupby
-
 
 class PosSelfOrder(http.Controller):
     """
     This is the controller for the POS Self Order App
     """
-    
     @http.route([
         '/pos-self-order/',
         '/pos-self-order/products',
@@ -27,9 +20,6 @@ class PosSelfOrder(http.Controller):
 
         We get some details about this POS from the model "pos.config"
 
-        If the POS is not open, we display a message to the user, saying the restaurant is closed
-        the user will still be able to see the menu and even add items to the cart,
-        but they will not be able to send the order
         """
         if not pos_id:
             raise werkzeug.exceptions.NotFound()
@@ -87,9 +77,6 @@ class PosSelfOrder(http.Controller):
                                                             pos_sudo.iface_available_categ_ids.read(['id'])]
                                             or not pos_sudo.iface_available_categ_ids
                             )
-        print(products_sudo[0].pos_categ_id.id)
-        print( pos_sudo.iface_available_categ_ids.read(['id']))
-
         # for each of the items in products_sudo, we get the price info and the attribute line ids
         menu= [{
             **{
