@@ -20,7 +20,7 @@
 <!-- The NavBar gets this data from the selfOrder.config -->
 <!-- This is a global variable that is set in the POSController -->
 <!-- FIXME: this span is not centered -->
-        <span class="navbar-brand h1 text-center"><t t-esc="selfOrder.config.pos_name"/></span>
+        <h2 class="text-white m-0"><t t-esc="selfOrder.config.pos_name"/></h2>
     </nav>
     </t>
 </templates>

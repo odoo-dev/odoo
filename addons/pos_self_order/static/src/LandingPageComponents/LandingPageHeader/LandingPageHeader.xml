@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="LandingPageHeader" owl="1">
-            <div class="m-5 h-25">
-                <div class="m-3">
-                    <img src="/logo?company=#{pos.company.id}" alt="logo" class="rounded"/>
-                </div>
-            </div>
+        <div class="m-3">
+            <img src="/logo?company=#{pos.company.id}" alt="logo" class="rounded"/>
+        </div>
     </t>
 </templates>
 

@@ -1,0 +1,19 @@
+/* /* this is so the a <p> only takes 2 lines and gets cut off if it is too long */
+.break-line {
+    box-sizing: border-box;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.o_self_order_item_card--image {
+    height:110px;
+    width:110px;
+    min-width: 110px;
+    max-width: 110px;
+    
+    & img {
+        object-fit: cover;
+    }
+}
