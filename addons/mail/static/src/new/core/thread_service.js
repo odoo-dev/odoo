@@ -474,6 +474,7 @@ export class ThreadService {
                 "state",
             ]);
 
+            thread.memberCount = serverData.channel?.memberCount ?? thread.memberCount;
             if (serverData.last_interest_dt) {
                 thread.lastInterestDateTime = luxon.DateTime.fromISO(
                     new Date(serverData.last_interest_dt).toISOString()
