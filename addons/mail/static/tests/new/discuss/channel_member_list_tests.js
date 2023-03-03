@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { createLocalId } from "@mail/new/utils/misc";
+import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -151,4 +152,41 @@ QUnit.test("Load more button should load more members", async function (assert) 
     await click("button[title='Show Member List']");
     await click("button[title='Load more']");
     assert.containsN(target, ".o-mail-channel-member", 102);
+});
+
+QUnit.test("Channel member count update after user joined", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const userId = pyEnv["res.users"].create({ name: "Harry" });
+    pyEnv["res.partner"].create({ name: "Harry", user_ids: [userId] });
+    const { env, openDiscuss } = await start();
+    await openDiscuss(channelId);
+    const thread = env.services["mail.store"].threads[createLocalId("mail.channel", channelId)];
+    assert.strictEqual(thread.memberCount, 1);
+    await click("button[title='Show Member List']");
+    await click("button[title='Add Users']");
+    await click("button[title='Invite to Channel']");
+    assert.strictEqual(thread.memberCount, 2);
+});
+
+QUnit.test("Channel member count update after user left", async function (assert) {
+    const pyEnv = await startServer();
+    const userId = pyEnv["res.users"].create({ name: "Dobby" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Dobby", user_ids: [userId] });
+    const channelId = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: partnerId }],
+        ],
+    });
+    const { env, openDiscuss } = await start();
+    await openDiscuss(channelId);
+    const thread = env.services["mail.store"].threads[createLocalId("mail.channel", channelId)];
+    assert.strictEqual(thread.memberCount, 2);
+    await env.services.orm.call("mail.channel", "action_unfollow", [channelId], {
+        context: { mockedUserId: userId },
+    });
+    await nextTick();
+    assert.strictEqual(thread.memberCount, 1);
 });

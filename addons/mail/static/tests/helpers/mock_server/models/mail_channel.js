@@ -184,8 +184,11 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
         if (isSelfMember) {
             this.pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
                 Channel: {
+                    id: channel.id,
                     channelMembers: [["insert-and-unlink", formattedChannelMember]],
-                    memberCount: channel.member_count,
+                    memberCount: this.pyEnv["mail.channel.member"].searchCount([
+                        ["channel_id", "=", channel.id],
+                    ]),
                 },
             });
         }
@@ -243,6 +246,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
         if (isSelfMember) {
             this.pyEnv["bus.bus"]._sendone(channel, "mail.record/insert", {
                 Channel: {
+                    id: channel.id,
                     channelMembers: [
                         [
                             "insert",
@@ -251,7 +255,9 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
                             ),
                         ],
                     ],
-                    memberCount: channel.member_count,
+                    memberCount: this.pyEnv["mail.channel.member"].searchCount([
+                        ["channel_id", "=", channel.id],
+                    ]),
                 },
             });
         }
@@ -511,7 +517,9 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
                 avatarCacheKey: channel.avatarCacheKey,
                 channel_type: channel.channel_type,
                 id: channel.id,
-                memberCount: channel.member_count,
+                memberCount: this.pyEnv["mail.channel.member"].searchCount([
+                    ["channel_id", "=", channel.id],
+                ]),
             };
             const res = Object.assign({}, channel, {
                 last_message_id: lastMessageId,
