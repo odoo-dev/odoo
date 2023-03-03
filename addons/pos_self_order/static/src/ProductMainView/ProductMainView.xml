@@ -19,12 +19,11 @@
                     </div>
                 </div>
                 <!-- Product Description -->
-                <div class="px-3 py-3">
-
-                    <t t-if="props.product.description_sale != false">
-                        <t t-esc="props.product.description_sale"/>    
-                    </t>
-                </div>
+                <t t-if="props.product.description_sale">
+                    <div class="px-3 py-3">
+                            <t t-esc="props.product.description_sale"/>    
+                    </div>
+                </t>
                 <!-- Variants -->
                 <t t-if="props.product.attributes">
                     <t t-foreach="props.product.attributes" t-as="attribute" t-key="attribute.id">

@@ -10,7 +10,8 @@ class PosSelfOrder(http.Controller):
     -- /pos-self-order/--
     This route will render the LANDING PAGE of the POS Self Order App
     And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency...
-    After that the client wil
+    After that the client will be able to navigate ot the /products route w/o aditional requests
+    to the server, using client side routing.
     """
     @http.route([
         '/pos-self-order/',

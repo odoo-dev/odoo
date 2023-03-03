@@ -3,14 +3,14 @@
     <t t-name="ProductList" owl="1">
         <div class="sticky-top">
             <NavBar previousPage="''" />
-            <!-- tag and search bar -->
-            <div class="d-flex justify-content-start align-items-center p-0 m-0 bg-100 shadow-sm">
-                <div class="h-100 p-3 border-end">
-                    <!-- search input -->
+<!-- tag and search bar -->
+            <div class="d-flex justify-content-center align-items-center p-0 m-0 bg-100 shadow-sm">
+                <div class="h-100 p-3">
+    <!-- search input -->
                     <t t-if="private_state.search_is_focused">
                         <div class="w-100 d-flex align-items-center">
                             <div class="input-group">
-                                <input type="text" class="form-control" t-ref="searchInput" placeholder="Pizza"
+                                <input type="text" class="form-control " t-ref="searchInput" placeholder="Pizza"
                                         t-model="private_state.search_input"/>
                                 <button class="btn btn-outline-primary"
                                         t-on-click="() => closeSearch()">
@@ -25,24 +25,27 @@
                     <t t-else="">
                     <!-- TODO: this focusearch() only gets called when you click on the very small svg icon
                     we have to make it so it's called when you click on the div that holds it -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
+<i class="fa-solid fa-magnifying-glass"></i>
+                        <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
                             fill="currentColor" class="bi bi-search" viewBox="0 0 16 16"
                             t-on-click="() => focusSearch()">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                        </svg>
+                        </svg> -->
                     </t>
                 </div>
-                <!-- tag select -->
-                <div class="p-3 overflow-auto text-nowrap ">
-                    <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
-                        <div class="mx-1 d-inline float-none"
-                            t-on-click="() => selectTag(tag)">
-                            <span t-attf-class="badge px-2 py-2 rounded {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
-                                <t t-esc="tag"/>
-                            </span>
-                        </div>
-                    </t>
-                </div>
+    <!-- tag select -->
+                <t t-if="!private_state.search_is_focused">
+                    <div class="p-3 overflow-auto text-nowrap border-start">
+                        <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
+                            <div class="mx-1 d-inline float-none"
+                                t-on-click="() => selectTag(tag)">
+                                <span t-attf-class="badge px-2 py-2 rounded {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
+                                    <t t-esc="tag"/>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
+                </t>
             </div>
         </div>
 

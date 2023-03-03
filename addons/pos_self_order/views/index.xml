@@ -13,7 +13,8 @@
                 <meta name="apple-mobile-web-app-capable" content="yes"/>
                 <meta name="mobile-web-app-capable" content="yes"/>
 
-                <link rel="stylesheet" type="text/css" href="/pos_self_order/static/src/pos_self_order_styles.css"/>
+                <!-- <link rel="stylesheet" type="text/css" href="/pos_self_order/static/src/pos_self_order_styles.css"/> -->
+                <link rel="stylesheet" type="text/css" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
 
                 <style> body { background: #222; } </style>
 
