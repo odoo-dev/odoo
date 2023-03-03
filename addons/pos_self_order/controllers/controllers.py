@@ -87,7 +87,6 @@ class PosSelfOrder(http.Controller):
         } for product in products_sudo]
         return menu
 
-    # FIXME: crop the images to be square -- maybe we want to do this in the frontend?
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
     @ http.route('/pos-self-order/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
     def pos_self_order_get_images(self, product_id):

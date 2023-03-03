@@ -6,8 +6,8 @@ from odoo.exceptions import ValidationError
 class PosSelfOrderCustomLink(models.Model):
     _name = 'pos_self_order.custom_link'
     _description = 'Custom links that the restaurant can configure to be displayed on the self order screen'
-    url =  fields.Char(string='URL', required=True)
     name = fields.Char(string='Label', required=True, translate=True)
+    url =  fields.Char(string='URL', required=True)
     pos_config_id = fields.Many2many('pos.config', string='Point of Sale')
     style = fields.Selection([('primary', 'Primary'), 
                               ('secondary', 'Secondary'),
@@ -20,7 +20,15 @@ class PosSelfOrderCustomLink(models.Model):
                             ],      
             string='Style', default='primary')
     sequence = fields.Integer('Sequence', default=1)
+    @api.model
+    def findDefaultUrl(self):
+      print("salut")
+      print(self.env['ir.config_parameter'].sudo().get_param('web.base.url') + "/pos_self_order/products")
+      #  self.create({
+      #       'name': 'View Menu',
+      #       'url': self.env['ir.config_parameter'].sudo().get_param('web.base.url') + "/pos_self_order/products",
 
+      #  })
     # TODO: sanitize url input; make sure it's a valid url
     # remove http:// or https:// 
     # TODO: double check access rights

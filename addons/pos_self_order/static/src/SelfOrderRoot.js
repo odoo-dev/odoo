@@ -10,10 +10,8 @@ import { ProductList } from "@pos_self_order/ProductList/ProductList";
 import { useService } from "@web/core/utils/hooks";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { Router } from "@pos_self_order/router";
-/**
- * @typedef {import("@pos_self_order/jsDocTypes").Order} Order
- */
 class SelfOrderRoot extends Component {
+    static template = "SelfOrderRoot";
     static components = {
         LandingPage,
         ProductMainView,
@@ -48,9 +46,6 @@ class SelfOrderRoot extends Component {
             this.result_from_get_menu = await this.rpc(`/pos-self-order/get-menu`, {
                 pos_id: this.selfOrder.config.pos_id,
             });
-            /**
-             * @type {Product[]}
-             */
             this.productList = this.result_from_get_menu.map(
                 ({ id, pos_categ_id, price_info, ...rest }) => ({
                     product_id: id,
@@ -82,9 +77,7 @@ class SelfOrderRoot extends Component {
             });
         });
     }
-
 }
-SelfOrderRoot.template = "SelfOrderRoot";
 export async function createPublicRoot() {
     await whenReady();
     const wowlEnv = makeEnv();

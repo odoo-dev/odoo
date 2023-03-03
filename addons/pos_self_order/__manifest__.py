@@ -24,6 +24,7 @@
 
     # always loaded
     'data': [
+        'data/pos_self_order_custom_link_default.xml',
         'security/ir.model.access.csv',
         'views/index.xml',
         'views/qr_code.xml',    

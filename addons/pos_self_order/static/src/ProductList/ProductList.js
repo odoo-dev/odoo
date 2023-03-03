@@ -11,6 +11,8 @@ import { NavBar } from "../NavBar/NavBar";
  * @typedef {import("@pos_self_order/jsDocTypes").CartItem} CartItem
  */
 export class ProductList extends Component {
+    static template = "ProductList";
+    static components = { NavBar };
     setup() {
         this.state = useState(this.env.state);
 
@@ -29,6 +31,11 @@ export class ProductList extends Component {
             }
         });
     }
+    /**
+     * @returns {Product[]} the list of products that should be displayed
+     * @description this function returns the list of products that should be displayed;
+     *             it filters the products based on the selected tags and the search input
+     */
     filteredProducts = () => {
         // here we only want to return the products
         // that have the selected tags and that match the search input
@@ -69,6 +76,7 @@ export class ProductList extends Component {
 
     /**
      * @param {string} tag_name
+     * @description this function is called when a tag is clicked; it selects the chosen tag and deselects all the other tags
      */
     selectTag = (tag_name) => {
         // we make it so only one tag can be selected at a time
@@ -80,6 +88,11 @@ export class ProductList extends Component {
         this.private_state.selected_tags.clear();
         this.private_state.selected_tags.add(tag_name);
     };
+    /**
+     * @description This function is called when the search button is clicked.
+     * It sets the state so the search input is focused.
+     * It also deselects all the selected tags
+     */
     focusSearch = () => {
         this.private_state.search_is_focused = true;
         // we make it so tags are automatically deselected
@@ -90,8 +103,10 @@ export class ProductList extends Component {
         // ( maybe you don't know exactly what you want ), while the search bar
         // is more precise; ex: you want a Coca Cola, not a soda in general
         this.private_state.selected_tags.clear();
-        console.log("focusSearch");
     };
+    /**
+     * @description this function is called when the search input 'x' button is clicked
+     */
     closeSearch = () => {
         this.private_state.search_is_focused = false;
         this.private_state.search_input = "";
@@ -121,30 +136,6 @@ export class ProductList extends Component {
         return true;
     }
     /**
-     * @param {array} array1
-     * @param {array} array2
-     * @returns
-     * @description returns true if array1 is a subarray of array2
-     *
-     * example:
-     * array1 = {1, 2, 3}
-     * array2 = {1, 2, 3, 4}
-     * arrayIsSubarray(array1, array2) returns true
-     *
-     * array1 = {1, 2, 3}
-     * array2 = {1, 2, 4}
-     * arrayIsSubarray(array1, array2) returns false
-     *
-     */
-    arrayIsSubarray(array1, array2) {
-        for (const item of array1) {
-            if (!array2.includes(item)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    /**
      * @param { Set } set1
      * @param { Set } set2
      * @returns { boolean }
@@ -154,17 +145,5 @@ export class ProductList extends Component {
     areSetsEqual(set1, set2) {
         return set1.size === set2.size && this.setIsSubset(set1, set2);
     }
-    /**
-     * @param { array } array1
-     * @param { array } array2
-     * @returns { boolean }
-     * @description returns true if the two arrays are equal;
-     * the order of the elements in the arrays does not matter
-     */
-    arearraysEqual(array1, array2) {
-        return array1.size === array2.size && this.arrayIsSubarray(array1, array2);
-    }
-    static components = { NavBar };
 }
-ProductList.template = "ProductList";
 export default { ProductList };
