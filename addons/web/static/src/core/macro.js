@@ -162,18 +162,11 @@ class Macro {
 }
 
 export class MacroEngine {
-    constructor(params) {
-        const { target, defaultCheckDelay } = Object.assign(
-            {
-                target: document.body,
-                defaultCheckDelay: 750,
-            },
-            params
-        );
+    constructor(params = {}) {
         this.isRunning = false;
         this.timeout = null;
-        this.target = target;
-        this.defaultCheckDelay = defaultCheckDelay;
+        this.target = params.target || document.body;
+        this.defaultCheckDelay = params.defaultCheckDelay ?? 750;
         this.macros = new Set();
         this.observerOptions = {
             attributes: true,
