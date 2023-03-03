@@ -235,11 +235,13 @@ export class MacroEngine {
     }
 
     getCheckDelay() {
-        // if a macro has a checkDelay different from 0, use it. Select the maximum.
+        // If a macro has a checkDelay different from 0, use it. Select the minimum.
+        // For example knowledge has a macro with a delay of 10ms. We don't want to wait
+        // longer because of other running tours.
         return [...this.macros]
             .map((m) => m.checkDelay)
             .filter((delay) => delay > 0)
-            .reduce((m, v) => Math.max(m, v), 0);
+            .reduce((m, v) => Math.min(m, v), this.defaultCheckDelay);
     }
 
     async advanceMacros() {
