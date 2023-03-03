@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 {
+    # TODO: add a description
     'name': "pos_self_order",
 
     'summary': """
@@ -13,13 +14,9 @@
     'author': "My Company",
     'website': "https://www.yourcompany.com",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
     'category': 'Uncategorized',
     'version': '0.1',
 
-    # any module necessary for this one to work correctly
     'depends': ['pos_restaurant'],
 
     # always loaded
@@ -57,24 +54,6 @@
             'pos_self_order/static/src/**/*',
             'point_of_sale/static/src/utils.js',
         ],
-        # 'pos_self_order.conditional_assets_tour': [
-        #     'web/static/lib/jquery/jquery.js',
-        #     'web/static/lib/jquery.ui/jquery-ui.js',
-        #     'web_tour/static/src/js/running_tour_action_helper.js',
-        #     'web_tour/static/src/js/tip.js',
-        #     'web_tour/static/src/js/tour_manager.js',
-        #     'web_tour/static/src/js/tour_service.js',
-        #     'web_tour/static/src/js/tour_step_utils.js',
-        #     'web_tour/static/src/js/tour_utils.js',
-        #     'web_tour/static/src/xml/tip.xml',
-
-        #     # 'web/static/src/legacy/js/services/core.js',
-        #     # 'web/static/src/legacy/js/services/config.js',
-        #     'web/static/src/legacy/**/*.js',
-        #     'web/static/src/legacy/**/*.js',
-        # ],
-        # 'web.assets_tests':['pos_self_order/static/tests/tours/**/*'],
-
     }
 
 }
