@@ -40,6 +40,12 @@ export class Discuss extends Component {
     };
     static template = "mail.discuss";
 
+    MODES = Object.freeze({
+        MEMBER_LIST: "member-list",
+        SETTINGS: "settings",
+        NONE: "",
+    });
+
     setup() {
         this.messaging = useMessaging();
         this.store = useStore();
@@ -56,13 +62,7 @@ export class Discuss extends Component {
         this.settingsRef = useRef("settings");
         this.addUsersRef = useRef("addUsers");
         this.state = useState({
-            /**
-             * activeMode:
-             *   "member-list": channel member list is displayed
-             *   "": no action pannel
-             */
-            activeMode: "",
-            showSettings: false,
+            activeMode: this.MODES.NONE,
         });
         this.orm = useService("orm");
         this.effect = useService("effect");
@@ -119,11 +119,15 @@ export class Discuss extends Component {
     }
 
     toggleSettings() {
-        this.state.showSettings = !this.state.showSettings;
+        this.state.activeMode =
+            this.state.activeMode === this.MODES.SETTINGS ? this.MODES.NONE : this.MODES.SETTINGS;
     }
 
     toggleMemberList() {
-        this.state.activeMode = this.state.activeMode === "member-list" ? "" : "member-list";
+        this.state.activeMode =
+            this.state.activeMode === this.MODES.MEMBER_LIST
+                ? this.MODES.NONE
+                : this.MODES.MEMBER_LIST;
     }
 
     async renameThread({ value: name }) {

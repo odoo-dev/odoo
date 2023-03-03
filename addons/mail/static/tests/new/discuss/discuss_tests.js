@@ -1924,3 +1924,15 @@ QUnit.test(
         assert.containsOnce(target, ".o-mail-call");
     }
 );
+
+QUnit.test("Member list and settings menu are exclusive", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const { openDiscuss } = await start();
+    await openDiscuss(channelId);
+    await click("button[title='Show Member List']");
+    assert.containsOnce(target, ".o-mail-channel-member-list");
+    await click("button[title='Show Call Settings']");
+    assert.containsOnce(target, ".o-mail-call-settings");
+    assert.containsNone(target, ".o-mail-member-list");
+});

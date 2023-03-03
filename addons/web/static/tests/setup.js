@@ -160,6 +160,7 @@ function patchBrowserWithCleanup() {
                 return interval;
             },
             navigator: {
+                mediaDevices: browser.navigator.mediaDevices,
                 permissions: browser.navigator.permissions,
                 userAgent: browser.navigator.userAgent.replace(/\([^)]*\)/, "(X11; Linux x86_64)"),
             },
