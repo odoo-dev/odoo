@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef } from "@odoo/owl";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { CallContextMenu } from "@mail/new/rtc/call_context_menu";
 import { CallParticipantVideo } from "@mail/new/rtc/call_participant_video";
@@ -125,17 +125,7 @@ export class CallParticipantCard extends Component {
             this.contextMenuAnchorRef.el,
             CallContextMenu,
             {
-                onChangeVolume: (ev) => {
-                    const volume = Number(ev.target.value);
-                    this.userSettings.saveVolumeSetting({
-                        guestId: this.rtcSession?.guestId,
-                        partnerId: this.rtcSession?.partnerId,
-                        volume,
-                    });
-                    this.rtcSession.volume = volume;
-                },
                 rtcSession: this.rtcSession,
-                volume: this.userSettings.getVolume(this.rtcSession),
             },
             {
                 onClose: () => (this.closePopover = undefined),

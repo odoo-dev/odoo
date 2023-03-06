@@ -257,10 +257,9 @@ export class Rtc {
         await this.rpcLeaveCall(channel);
         this.endCall(channel);
     }
-    //
+
     /**
-     * discuss refactor: todo public because we need to end call without doing the rpc when the server notifies that we have been removed
-     * should only be called if the channel of the notification is the channel of this call
+     * @param {import("@mail/new/core/thread_model").Thread} [channel]
      */
     endCall(channel = this.state.channel) {
         channel.rtcInvitingSessionId = undefined;
@@ -731,7 +730,6 @@ export class Rtc {
             true
         );
         this.state.channel.rtcInvitingSessionId = undefined;
-        // discuss refactor: todo call channel.update below when availalbe and do the formatting in update
         this.call();
         this.soundEffectsService.play("channel-join");
         await this.resetAudioTrack({ force: true });

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="mail.call_context_menu" owl="1">
         <div class="d-flex flex-column p-3">
-            <input type="range" min="0.0" max="1" step="0.01" t-att-value="props.volume" t-on-change="props.onChangeVolume" class="form-range"/>
+            <input type="range" min="0.0" max="1" step="0.01" t-att-value="volume" t-on-change="onChangeVolume" class="form-range"/>
             <t t-if="env.debug">
                 <hr class="w-100 border-top"/>
                 <div><span class="fw-bolder">Connection: </span><t t-esc="props.rtcSession.connectionState"/></div>
