@@ -36,8 +36,14 @@ export class AttachmentList extends Component {
         return this.props.attachments.filter((attachment) => attachment.isImage);
     }
 
+    /**
+     * @param {import('@mail/new/attachments/attachment_model').Attachment} attachment
+     */
     getImageUrl(attachment) {
         const { imagesHeight } = this.props;
+        if (attachment.uploading && attachment.tmpUrl) {
+            return attachment.tmpUrl;
+        }
         if (
             !this.env.inComposer &&
             !this.env.inChatter &&

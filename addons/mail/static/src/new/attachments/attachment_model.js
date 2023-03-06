@@ -12,6 +12,9 @@ export class Attachment {
     name;
     originThreadLocalId;
     type;
+    /** @type {string} */
+    tmpUrl;
+    /** @type {string} */
     url;
     /** @type {boolean} */
     uploading;
