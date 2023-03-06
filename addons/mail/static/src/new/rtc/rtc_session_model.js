@@ -4,18 +4,30 @@ import { createLocalId } from "../utils/misc";
 
 export class RtcSession {
     // Server data
+    channelId;
+    channelMemberId;
     isCameraOn;
     id;
     isDeaf;
     isSelfMuted;
     isScreenSharingOn;
     // Client data
+    /** @type {HTMLAudioElement} */
     audioElement;
+    /** @type {MediaStream} */
     audioStream;
+    /** @type {RTCDataChannel} */
+    dataChannel;
     isAudioInError;
-    localVolume;
     isTalking;
+    localVolume;
+    /** @type {RTCPeerConnection} */
+    peerConnection;
+    videoComponentCount = 0;
+    /** @type {MediaStream} */
     videoStream;
+    /** @type {import("@mail/new/core/store_service").Store} */
+    _store;
     // RTC stats
     connectionState;
     localCandidateType;
@@ -27,16 +39,6 @@ export class RtcSession {
     iceState;
     iceGatheringState;
     logStep;
-    // "relational data"
-    channelId;
-    channelMemberId;
-    /** @type {RTCDataChannel} */
-    dataChannel;
-    /** @type {RTCPeerConnection} */
-    peerConnection;
-    /** @type {import("@mail/new/core/store_service").Store} */
-    _store;
-    videoComponentCount = 0;
 
     get channelMember() {
         return this._store.channelMembers[this.channelMemberId];
@@ -71,13 +73,14 @@ export class RtcSession {
      * @returns {number} float
      */
     get volume() {
-        return this.audioElement?.volume;
+        return this.audioElement?.volume || this.localVolume;
     }
 
     set volume(value) {
         if (this.audioElement) {
             this.audioElement.volume = value;
         }
+        this.localVolume = value;
     }
 
     async updateStats() {
