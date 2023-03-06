@@ -7,6 +7,9 @@ import { CallParticipantVideo } from "@mail/new/rtc/call_participant_video";
 import { useService } from "@web/core/utils/hooks";
 import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { useStore } from "@mail/new/core/messaging_hook";
+
+const HIDDEN_CONNECTION_STATES = new Set(["connected", "completed"]);
 
 export class CallParticipantCard extends Component {
     static props = ["className", "cardData", "thread", "minimized?"];
@@ -20,8 +23,8 @@ export class CallParticipantCard extends Component {
         this.popover = usePopover();
         this.rpc = useService("rpc");
         this.rtc = useRtc();
+        this.store = useStore();
         this.threadService = useService("mail.thread");
-        this.user = useService("user");
         this.userSettings = useState(useService("mail.user_settings"));
         onMounted(() => {
             if (!this.rtcSession) {
@@ -63,8 +66,8 @@ export class CallParticipantCard extends Component {
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
-                !(this.rtcSession.channelMember?.persona.id === this.user.partnerId) &&
-                !["connected", "completed"].includes(this.rtcSession.connectionState)
+                !(this.rtcSession.channelMember?.persona.localId === this.store.self?.localId) &&
+                !HIDDEN_CONNECTION_STATES.has(this.rtcSession.connectionState)
         );
     }
 

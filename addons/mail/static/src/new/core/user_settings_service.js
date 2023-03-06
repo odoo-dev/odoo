@@ -8,7 +8,7 @@ export class UserSettings {
 
     constructor(env, services) {
         this.orm = services.orm;
-        this.user = services.user;
+        this.store = services["mail.store"];
         this.hasCanvasFilterSupport =
             typeof document.createElement("canvas").getContext("2d").filter !== "undefined";
         this._loadLocalSettings();
@@ -117,6 +117,9 @@ export class UserSettings {
      * @param {number} param0.volume
      */
     async saveVolumeSetting({ partnerId, guestId, volume }) {
+        if (this.store.self?.type === "guest") {
+            return;
+        }
         const key = `${partnerId}_${guestId}`;
         if (this.volumeSettingsTimeouts.get(key)) {
             browser.clearTimeout(this.volumeSettingsTimeouts.get(key));
@@ -237,7 +240,9 @@ export class UserSettings {
      * @private
      */
     async _saveSettings() {
-        // return if guest, formerly !messaging.currentUser, could check user service at some point when guests are supported
+        if (this.store.self?.type === "guest") {
+            return;
+        }
         browser.clearTimeout(this.globalSettingsTimeout);
         this.globalSettingsTimeout = browser.setTimeout(
             () => this._onSaveGlobalSettingsTimeout(),
@@ -247,7 +252,7 @@ export class UserSettings {
 }
 
 export const userSettingsService = {
-    dependencies: ["orm", "user"],
+    dependencies: ["orm", "mail.store"],
     start(env, services) {
         return new UserSettings(env, services);
     },
