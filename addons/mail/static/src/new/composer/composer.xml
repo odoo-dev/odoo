@@ -50,7 +50,7 @@
                              the textarea properly without flicker.
                         -->
                         <textarea
-                            class="o-mail-composer-textarea o-mail-composer-fake position-absolute"
+                            class="o-mail-composer-fake position-absolute"
                             t-model="props.composer.textInputContent"
                             t-ref="fakeTextarea"
                             disabled="1"
