@@ -70,6 +70,8 @@
                     hasMarkAsReadButton="preview.hasMarkAsReadButton"
                     isLast="preview_last and failures.length === 0"
                     onClick="(isMarkAsRead) => this.onClickPreview(isMarkAsRead, preview)"
+                    onSwipeRight="hasTouch and preview.hasMarkAsReadButton ? { action: () => this.markAsRead(preview), icon: 'fa-check-circle', bgColor: 'bg-success' } : undefined"
+                    onSwipeLeft="hasTouch and threadService.canUnpin(preview.thread) ? { action: () => this.threadService.unpin(preview), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
                 >
                     <t t-set-slot="icon">
                         <ImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.personas[createLocalId('partner', preview.chatPartnerId)]"/>
@@ -95,6 +97,7 @@
                     isLast="failure_last"
                     hasMarkAsReadButton="true"
                     onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
+                    onSwipeRight="hasTouch ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
                 />
             </t>
         </div>

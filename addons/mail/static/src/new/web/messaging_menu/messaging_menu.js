@@ -14,6 +14,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { hasTouch } from "@web/core/browser/feature_detection";
 
 export class MessagingMenu extends Component {
     static components = { Dropdown, NotificationItem, ImStatus, ChannelSelector };
@@ -37,6 +38,10 @@ export class MessagingMenu extends Component {
         });
     }
 
+    get hasTouch() {
+        return hasTouch();
+    }
+
     beforeOpen() {
         this.messaging.fetchPreviews();
         if (
@@ -49,11 +54,16 @@ export class MessagingMenu extends Component {
     }
 
     onClickPreview(isMarkAsRead, preview) {
-        const { thread, isNeedaction } = preview;
+        const { thread } = preview;
         if (!isMarkAsRead) {
             this.openDiscussion(thread);
             return;
         }
+        this.markAsRead(preview);
+    }
+
+    markAsRead(preview) {
+        const { thread, isNeedaction } = preview;
         if (isNeedaction) {
             this.threadService.markAllMessagesAsRead(thread);
         } else {
