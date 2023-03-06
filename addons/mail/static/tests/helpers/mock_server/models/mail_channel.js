@@ -579,7 +579,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             res["rtcSessions"] = [
                 [
                     "insert",
-                    channel.rtc_session_ids.map((rtcSessionId) =>
+                    (channel.rtc_session_ids || []).map((rtcSessionId) =>
                         this._mockMailChannelRtcSession_MailChannelRtcSessionFormat(rtcSessionId)
                     ),
                 ],
