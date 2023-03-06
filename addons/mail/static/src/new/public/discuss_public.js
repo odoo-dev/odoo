@@ -21,6 +21,7 @@ export class DiscussPublic extends Component {
         useEffect(
             (welcome) => {
                 if (!welcome) {
+                    this.threadService.setDiscussThread(this.thread);
                     this.threadService.fetchChannelMembers(this.thread);
                     // Change the URL to avoid leaking the invitation link.
                     window.history.replaceState(
@@ -33,7 +34,6 @@ export class DiscussPublic extends Component {
             () => [this.state.welcome]
         );
         this.threadService = useService("mail.thread");
-        this.threadService.setDiscussThread(this.thread);
     }
 
     get thread() {
