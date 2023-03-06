@@ -23,9 +23,10 @@ patch(ThreadService.prototype, "im_livechat", {
     /**
      * @override
      * @param {import("@mail/new/core/thread_model").Thread} thread
+     * @param {boolean} pushState
      */
-    setDiscussThread(thread) {
-        this._super(thread);
+    setDiscussThread(thread, pushState) {
+        this._super(thread, pushState);
         if (this.store.isSmall && thread.type === "livechat") {
             this.store.discuss.activeTab = "livechat";
         }

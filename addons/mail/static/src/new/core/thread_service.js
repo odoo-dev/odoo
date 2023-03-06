@@ -414,8 +414,9 @@ export class ThreadService {
 
     /**
      * @param {import("@mail/new/core/thread_model").Thread} thread
+     * @param {boolean} pushState
      */
-    setDiscussThread(thread) {
+    setDiscussThread(thread, pushState = true) {
         this.store.discuss.threadLocalId = thread.localId;
         const activeId =
             typeof thread.id === "string" ? `mail.box_${thread.id}` : `mail.channel_${thread.id}`;
@@ -426,7 +427,9 @@ export class ThreadService {
             : ["chat", "group"].includes(thread.type)
             ? "chat"
             : "channel";
-        this.router.pushState({ active_id: activeId });
+        if (pushState) {
+            this.router.pushState({ active_id: activeId });
+        }
     }
 
     async createGroupChat({ default_display_mode, partners_to }) {
