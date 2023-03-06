@@ -30,14 +30,10 @@ export class WelcomePage extends Component {
         }
         if (this.props.data?.discussPublicViewData.addGuestAsMemberOnJoin) {
             await this.messaging.rpc("/mail/channel/add_guest_as_member", {
-                channel_id: this.thread.id,
-                channel_uuid: this.thread.uuid,
+                channel_id: this.props.data.channelData.id,
+                channel_uuid: this.props.data.channelData.uuid,
             });
         }
         this.props.proceed?.();
-    }
-
-    get thread() {
-        return this.store.threads[this.store.discuss.threadLocalId];
     }
 }
