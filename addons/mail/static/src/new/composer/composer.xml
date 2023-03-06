@@ -44,6 +44,17 @@
                             t-on-paste="onPaste"
                             t-model="props.composer.textInputContent"
                             t-att-placeholder="placeholder"/>
+                        <!--
+                             This is an invisible textarea used to compute the composer
+                             height based on the text content. We need it to downsize
+                             the textarea properly without flicker.
+                        -->
+                        <textarea
+                            class="o-mail-composer-textarea o-mail-composer-fake position-absolute"
+                            t-model="props.composer.textInputContent"
+                            t-ref="fakeTextarea"
+                            disabled="1"
+                        />
                     </div>
                     <div class="d-flex mx-3 bg-view"
                         t-att-class="{
