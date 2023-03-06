@@ -82,7 +82,7 @@ QUnit.test("can post a message on a record thread", async (assert) => {
     await click("button:contains(Send message)");
     assert.containsOnce(target, ".o-mail-composer");
 
-    await editInput(target, "textarea", "hey");
+    await editInput(target, ".o-mail-composer-textarea", "hey");
     assert.containsNone(target, ".o-mail-message");
 
     await click(".o-mail-composer button:contains(Send)");
@@ -118,7 +118,7 @@ QUnit.test("can post a note on a record thread", async (assert) => {
     await click("button:contains(Log note)");
     assert.containsOnce(target, ".o-mail-composer");
 
-    await editInput(target, "textarea", "hey");
+    await editInput(target, ".o-mail-composer-textarea", "hey");
     assert.containsNone(target, ".o-mail-message");
 
     await click(".o-mail-composer button:contains(Send)");
@@ -726,7 +726,7 @@ QUnit.test("post message on draft record", async function (assert) {
         views: [[false, "form"]],
     });
     await click("button:contains(Send message)");
-    await editInput(target, "textarea", "Test");
+    await editInput(target, ".o-mail-composer-textarea", "Test");
     await click(".o-mail-composer button:contains(Send)");
     assert.containsOnce(target, ".o-mail-message");
     assert.containsOnce(target, ".o-mail-message:contains(Test)");
