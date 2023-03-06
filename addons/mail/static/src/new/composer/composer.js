@@ -71,6 +71,7 @@ export class Composer extends Component {
         /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.threadService = useService("mail.thread");
         this.ref = useRef("textarea");
+        this.fakeTextarea = useRef("fakeTextarea");
         this.typingNotified = false;
         this.state = useState({
             autofocus: 0,
@@ -139,8 +140,7 @@ export class Composer extends Component {
         );
         useEffect(
             () => {
-                this.ref.el.style.height = "1px";
-                this.ref.el.style.height = this.ref.el.scrollHeight + "px";
+                this.ref.el.style.height = this.fakeTextarea.el.scrollHeight + "px";
             },
             () => [this.props.composer.textInputContent, this.ref.el]
         );
