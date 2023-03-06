@@ -13,6 +13,7 @@ export class DiscussPublic extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        /** @type {import('@mail/new/core/thread_service').ThreadService} */
         this.threadService = useService("mail.thread");
         this.store = useStore();
         this.state = useState({
@@ -33,7 +34,6 @@ export class DiscussPublic extends Component {
             },
             () => [this.state.welcome]
         );
-        this.threadService = useService("mail.thread");
     }
 
     get thread() {
