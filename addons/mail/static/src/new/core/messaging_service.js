@@ -241,13 +241,18 @@ export class Messaging {
                     const { channel, invited_by_user_id: invitedByUserId } = notif.payload;
                     const thread = this.threadService.insert({
                         ...channel,
-                        rtcSessions: channel.rtcSessions[0][1],
                         model: "mail.channel",
+                        rtcSessions: undefined,
                         serverData: {
                             channel: channel.channel,
                         },
                         type: channel.channel.channel_type,
                     });
+                    const rtcSessions = channel.rtcSessions;
+                    const sessionsData = rtcSessions[0][1];
+                    const command = rtcSessions[0][0];
+                    this._updateRtcSessions(thread.id, sessionsData, command);
+
                     if (invitedByUserId !== this.store.user?.user.id) {
                         this.notificationService.add(
                             sprintf(_t("You have been invited to #%s"), thread.displayName),

@@ -12,6 +12,7 @@ export class WelcomePage extends Component {
         this.messaging = useMessaging();
         this.store = useStore();
         this.rpc = useService("rpc");
+        /** @type {import('@mail/new/core/persona_service').PersonaService} */
         this.personaService = useService("mail.persona");
         this.state = useState({
             userName: "Guest",
@@ -29,7 +30,7 @@ export class WelcomePage extends Component {
             await this.personaService.updateGuestName(this.store.self, this.state.userName.trim());
         }
         if (this.props.data?.discussPublicViewData.addGuestAsMemberOnJoin) {
-            await this.messaging.rpc("/mail/channel/add_guest_as_member", {
+            await this.rpc("/mail/channel/add_guest_as_member", {
                 channel_id: this.props.data.channelData.id,
                 channel_uuid: this.props.data.channelData.uuid,
             });
