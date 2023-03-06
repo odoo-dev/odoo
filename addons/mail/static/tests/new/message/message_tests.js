@@ -209,7 +209,7 @@ QUnit.test("Edit and click save", async (assert) => {
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
     await click(".o-mail-message-actions i[aria-label='Edit']");
-    await editInput(target, ".o-mail-message textarea", "Goodbye World");
+    await editInput(target, ".o-mail-message .o-mail-composer-textarea", "Goodbye World");
     await click(".o-mail-message a:contains('save')");
     assert.strictEqual(target.querySelector(".o-mail-message-body").innerText, "Goodbye World");
 });
@@ -293,7 +293,7 @@ QUnit.test("Parent message body is displayed on replies", async function (assert
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
     await click(".o-mail-message i[aria-label='Reply']");
-    await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
+    await editInput(target, ".o-mail-composer-textarea", "FooBarFoo");
     await click(".o-mail-composer-send-button");
     assert.containsOnce(target, ".o-mail-message-in-reply-body");
     assert.ok(target.querySelector(".o-mail-message-in-reply-body").innerText, "Hello world");
@@ -316,10 +316,10 @@ QUnit.test(
         const { openDiscuss } = await start();
         await openDiscuss(channelId);
         await click("i[aria-label='Reply']");
-        await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
+        await editInput(target, ".o-mail-composer-textarea", "FooBarFoo");
         await triggerHotkey("Enter", false);
         await click("i[aria-label='Edit']");
-        await editInput(target, ".o-mail-message textarea", "Goodbye World");
+        await editInput(target, ".o-mail-message .o-mail-composer-textarea", "Goodbye World");
         await triggerHotkey("Enter", false);
         await nextTick();
         assert.strictEqual(
@@ -344,7 +344,7 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
     const { openDiscuss } = await start();
     await openDiscuss(channelId);
     await click("i[aria-label='Reply']");
-    await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
+    await editInput(target, ".o-mail-composer-textarea", "FooBarFoo");
     await triggerHotkey("Enter", false);
     await click("i[aria-label='Delete']");
     $('button:contains("Delete")').click();
