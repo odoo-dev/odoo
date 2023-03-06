@@ -15,23 +15,6 @@ import { registry } from "@web/core/registry";
 
 export const OTHER_LONG_TYPING = 60000;
 
-export const asyncMethods = [
-    "fetchPreviews",
-    "postMessage",
-    "scheduleActivity",
-    "updateMessage",
-    "createChannel",
-    "getChat",
-    "joinChannel",
-    "joinChat",
-    "leaveChannel",
-    "openChat",
-    "toggleStar",
-    "deleteMessage",
-    "unstarAll",
-    "notifyThreadNameToServer",
-];
-
 /**
  * @typedef {Messaging} Messaging
  */
@@ -696,7 +679,6 @@ export const messagingService = {
         "mail.rtc",
         "mail.out_of_focus",
     ],
-    async: asyncMethods,
     start(env, services) {
         // compute initial discuss thread
         let threadLocalId = createLocalId("mail.box", "inbox");
