@@ -81,10 +81,12 @@ export class AttachmentList extends Component {
         this.dialog.add(ConfirmationDialog, {
             body: sprintf(_t('Do you really want to delete "%s"?'), attachment.filename),
             cancel: () => {},
-            confirm: () => {
-                this.props.unlinkAttachment(attachment);
-            },
+            confirm: () => this.onConfirmUnlink(attachment),
         });
+    }
+
+    onConfirmUnlink(attachment) {
+        this.props.unlinkAttachment(attachment);
     }
 
     get isInChatWindowAndIsAlignedRight() {

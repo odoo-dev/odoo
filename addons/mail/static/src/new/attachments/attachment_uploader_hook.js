@@ -17,9 +17,11 @@ let nextId = -1;
 
 /**
  * @param {import("@mail/new/core/thread_model").Thread} thread
- * @param {import("@mail/new/composer/composer_model").Composer} composer
+ * @param {Object} [param1={}]
+ * @param {import("@mail/new/composer/composer_model").Composer} [param1.composer]
+ * @param {function} [param1.onFileUploaded]
  */
-export function useAttachmentUploader(thread, composer) {
+export function useAttachmentUploader(thread, { composer, onFileUploaded } = {}) {
     const { bus, upload } = useService("file_upload");
     const notificationService = useService("notification");
     /** @type {import("@mail/new/core/store_service").Store} */
@@ -139,6 +141,7 @@ export function useAttachmentUploader(thread, composer) {
             def.resolve(attachment);
             deferredByAttachmentId.delete(tmpId);
         }
+        onFileUploaded?.();
     });
     useBus(bus, "FILE_UPLOAD_ERROR", ({ detail: { upload } }) => {
         const tmpId = parseInt(upload.data.get("temporary_id"));

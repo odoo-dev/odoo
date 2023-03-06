@@ -64,7 +64,7 @@ export class Composer extends Component {
                 this.props.messageToReplyTo?.message?.originThread ??
                     this.props.composer.thread ??
                     this.props.composer.message.originThread,
-                this.props.composer
+                { composer: this.props.composer }
             );
         }
         this.messageService = useState(useService("mail.message"));

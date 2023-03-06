@@ -98,9 +98,7 @@ export class Chatter extends Component {
         );
         this.scrollPosition = useScrollPosition("scrollable", undefined, "top");
         this.rootRef = useRef("root");
-        useChildSubEnv({
-            inChatter: true,
-        });
+        useChildSubEnv({ inChatter: true });
         useDropzone(
             this.rootRef,
             (ev) => {
