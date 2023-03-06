@@ -42,6 +42,7 @@ export function useAttachmentUploader(thread, composer) {
             await upload("/mail/attachment/upload", [file], {
                 buildFormData(formData) {
                     formData.append("thread_id", thread.id);
+                    formData.append("tmp_url", URL.createObjectURL(file));
                     formData.append("thread_model", thread.model);
                     formData.append("is_pending", Boolean(composer));
                     formData.append("temporary_id", tmpId);
@@ -79,6 +80,7 @@ export function useAttachmentUploader(thread, composer) {
         }
         const threadId = parseInt(upload.data.get("thread_id"));
         const threadModel = upload.data.get("thread_model");
+        const tmpUrl = upload.data.get("tmp_url");
         const originThread = threadService.insert({ model: threadModel, id: threadId });
         abortByAttachmentId.set(tmpId, upload.xhr.abort.bind(upload.xhr));
         const attachment = attachmentService.insert({
@@ -89,6 +91,7 @@ export function useAttachmentUploader(thread, composer) {
             originThread: composer ? undefined : originThread,
             extension: upload.title.split(".").pop(),
             uploading: true,
+            tmpUrl,
         });
         if (composer) {
             composer.attachments.push(attachment);

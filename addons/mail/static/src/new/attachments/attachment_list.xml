@@ -21,7 +21,13 @@
                     t-att-data-mimetype="attachment.mimetype"
                     t-on-click="() => this.attachmentViewer.open(attachment, props.attachments)"
                 >
-                    <img t-if="!attachment.uploading" class="img img-fluid my-0 mx-auto o-mail-viewable" t-att-src="getImageUrl(attachment)" t-att-alt="attachment.name" t-attf-style="max-width: min(100%, {{ imagesWidth }}px); max-height: {{ props.imagesHeight }}px;"/>
+                    <img
+                        class="img img-fluid my-0 mx-auto o-mail-viewable"
+                        t-att-class="{ 'opacity-25': attachment.uploading }"
+                        t-att-src="getImageUrl(attachment)"
+                        t-att-alt="attachment.name"
+                        t-attf-style="max-width: min(100%, {{ imagesWidth }}px); max-height: {{ props.imagesHeight }}px;"
+                    />
                     <div t-if="attachment.uploading" class="position-absolute top-0 bottom-0 start-0 end-0 d-flex align-items-center justify-content-center" title="Uploading">
                         <i class="fa fa-spin fa-spinner" />
                     </div>
