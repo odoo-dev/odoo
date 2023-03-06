@@ -40,6 +40,37 @@ export class ActivityMenu extends Component {
         this.fetchSystrayActivities();
     }
 
+    availableViews(group) {
+        return [
+            [false, "kanban"],
+            [false, "list"],
+            [false, "form"],
+            [false, "activity"],
+        ];
+    }
+
+    onClickAction(action, group) {
+        document.body.click(); // hack to close dropdown
+        if (action.action_xmlid) {
+            this.env.services.action.doAction(action.action_xmlid);
+        } else {
+            let domain = [["activity_ids.user_id", "=", this.userId]];
+            if (group.domain) {
+                domain = domain.concat(group.domain);
+            }
+            this.action.doAction(
+                {
+                    domain,
+                    name: group.name,
+                    res_model: group.model,
+                    type: "ir.actions.act_window",
+                    views: this.availableViews(group),
+                },
+                { clearBreadcrumbs: true, viewType: "activity" }
+            );
+        }
+    }
+
     openActivityGroup(group, filter = "all") {
         document.body.click(); // hack to close dropdown
         const context = {
@@ -54,12 +85,7 @@ export class ActivityMenu extends Component {
             context["search_default_activities_" + filter] = 1;
         }
         const domain = [["activity_ids.user_id", "=", this.userId]];
-        const views = [
-            [false, "kanban"],
-            [false, "list"],
-            [false, "form"],
-            [false, "activity"],
-        ];
+        const views = this.availableViews(group);
 
         this.action.doAction(
             {

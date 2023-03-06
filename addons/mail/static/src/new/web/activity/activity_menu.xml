@@ -20,7 +20,7 @@
                                 <div class="d-flex px-2" name="activityTitle">
                                     <span class="flex-grow-1"><t t-esc="group.name"/></span>
                                     <t t-foreach="group.actions or []" t-as="action" t-key="action_index">
-                                        <button class="btn fa p-0" type="button" t-att-title="action.name" t-att-class="action.icon"/>
+                                        <button class="btn btn-link fa p-0" type="button" t-att-title="action.name" t-att-class="action.icon" t-on-click.stop="() => this.onClickAction(action, group)"/>
                                     </t>
                                 </div>
                                 <div t-if="group.type === 'activity'" class="d-flex">
