@@ -81,8 +81,8 @@ QUnit.test("activity can upload a document", async function (assert) {
     });
     assert.containsOnce(target, ".o-mail-activity-info:contains('Upload Document')");
     inputFiles(target.querySelector(".o-mail-activity .o_input_file"), [file]);
+    await waitUntil(".o-mail-activity-info:contains('Upload Document')", 0);
     await waitUntil("button[aria-label='Attach files']:contains(1)");
-    assert.containsNone(target, ".o-mail-activity-info:contains('Upload Document')");
 });
 
 QUnit.test("activity simplest layout", async function (assert) {

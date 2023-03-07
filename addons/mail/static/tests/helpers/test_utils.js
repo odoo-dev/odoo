@@ -598,15 +598,15 @@ export const click = getClick({ afterNextRender });
  *
  * @param {string} selector
  */
-export function waitUntil(selector) {
+export function waitUntil(selector, count = 1) {
     return new Promise((resolve, reject) => {
-        if ($(selector).length) {
+        if ($(selector).length === count) {
             return resolve($(selector));
         }
 
         const timer = setTimeout(() => reject(new Error(`Waited 5 second for ${selector}`)), 5000);
         const observer = new MutationObserver((mutations) => {
-            if ($(selector).length) {
+            if ($(selector).length === count) {
                 resolve($(selector));
                 observer.disconnect();
                 clearTimeout(timer);
