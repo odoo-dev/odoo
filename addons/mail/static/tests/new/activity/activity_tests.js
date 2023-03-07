@@ -1,6 +1,14 @@
 /** @odoo-module **/
 
-import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { file } from "web.test_utils";
+import {
+    afterNextRender,
+    click,
+    start,
+    startServer,
+    createFile,
+    waitUntil,
+} from "@mail/../tests/helpers/test_utils";
 import {
     getFixture,
     patchDate,
@@ -9,7 +17,20 @@ import {
 } from "@web/../tests/helpers/utils";
 import { date_to_str } from "web.time";
 
+const { inputFiles } = file;
+
 let target;
+
+const views = {
+    "res.fake,false,form": `
+    <form string="Fake">
+        <sheet></sheet>
+        <div class="oe_chatter">
+            <field name="activity_ids"/>
+            <field name="message_ids"/>
+        </div>
+    </form>`,
+};
 
 QUnit.module("activity", {
     async beforeEach() {
@@ -20,9 +41,7 @@ QUnit.module("activity", {
 QUnit.test("activity upload document is available", async function (assert) {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
-    const activityTypeId = pyEnv["mail.activity.type"].search([
-        ["name", "=", "Upload Document"],
-    ])[0];
+    const [activityTypeId] = pyEnv["mail.activity.type"].search([["name", "=", "Upload Document"]]);
     pyEnv["mail.activity"].create({
         activity_category: "upload_file",
         activity_type_id: activityTypeId,
@@ -39,6 +58,31 @@ QUnit.test("activity upload document is available", async function (assert) {
     assert.containsOnce(target, ".o-mail-activity-info:contains('Upload Document')");
     assert.containsOnce(target, ".btn .fa-upload");
     assert.containsOnce(target, ".o-mail-activity .o_input_file");
+});
+
+QUnit.test("activity can upload a document", async function (assert) {
+    const pyEnv = await startServer();
+    const fakeId = pyEnv["res.partner"].create({});
+    const [activityTypeId] = pyEnv["mail.activity.type"].search([["name", "=", "Upload Document"]]);
+    pyEnv["mail.activity"].create({
+        activity_category: "upload_file",
+        activity_type_id: activityTypeId,
+        can_write: true,
+        res_id: fakeId,
+        res_model: "res.partner",
+    });
+    const { openFormView } = await start({ serverData: { views } });
+    await openFormView("res.partner", fakeId);
+
+    const file = await createFile({
+        content: "hello, world",
+        contentType: "text/plain",
+        name: "text.txt",
+    });
+    assert.containsOnce(target, ".o-mail-activity-info:contains('Upload Document')");
+    inputFiles(target.querySelector(".o-mail-activity .o_input_file"), [file]);
+    await waitUntil("button[aria-label='Attach files']:contains(1)");
+    assert.containsNone(target, ".o-mail-activity-info:contains('Upload Document')");
 });
 
 QUnit.test("activity simplest layout", async function (assert) {

@@ -12,6 +12,7 @@ import { computeDelay } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
 
 import { _t } from "@web/core/l10n/translation";
+import { useMessaging } from "@mail/new/core/messaging_hook";
 
 /**
  * @typedef {Object} Props
@@ -30,9 +31,10 @@ export class Activity extends Component {
     closePopover;
 
     setup() {
+        this.messaging = useMessaging();
         /** @type {import("@mail/new/web/activity/activity_service").ActivityService} */
         this.activityService = useService("mail.activity");
-        this.messaging = useService("mail.messaging");
+        /** @type {import("@mail/new/core/thread_service").ThreadService} */
         this.threadService = useService("mail.thread");
         this.state = useState({
             showDetails: false,
@@ -78,9 +80,9 @@ export class Activity extends Component {
 
     async onFileUploaded(data) {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
-        await this.env.services["mail.thread"].markAsDone(this.props.data, [attachmentId]);
+        await this.activityService.markAsDone(this.props.data, [attachmentId]);
         this.props.onUpdate();
-        await this.env.services["mail.thread"].fetchNewMessages(this.thread);
+        await this.threadService.fetchNewMessages(this.thread);
     }
 
     async edit() {
