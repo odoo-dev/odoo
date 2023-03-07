@@ -17,7 +17,7 @@ export function useSuggestion() {
                 position: undefined,
                 term: undefined,
             });
-            self.state.items.length = [];
+            self.state.items.length = 0;
         },
         detect() {
             const selectionEnd = comp.props.composer.selection.end;
