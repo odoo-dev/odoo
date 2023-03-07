@@ -431,9 +431,10 @@ export class Rtc {
 
     /**
      * @param {import("@mail/new/core/thread_model").Thread} channel
-     * @param {boolean} startWithVideo
+     * @param {Object} [param1={}]
+     * @param {boolean} [param1.video]
      */
-    async toggleCall(channel, startWithVideo) {
+    async toggleCall(channel, { video } = {}) {
         if (this.state.hasPendingRequest) {
             return;
         }
@@ -443,7 +444,7 @@ export class Rtc {
             await this.leaveCall(this.state.channel);
         }
         if (!isActiveCall) {
-            await this.joinCall(channel, startWithVideo);
+            await this.joinCall(channel, { video });
         }
         this.state.hasPendingRequest = false;
     }
@@ -658,7 +659,7 @@ export class Rtc {
     /**
      * @param {import("@mail/new/core/thread_model").Thread}
      */
-    async joinCall(channel, startWithVideo = false) {
+    async joinCall(channel, { video = false } = {}) {
         if (!IS_CLIENT_RTC_COMPATIBLE) {
             this.notification.add(_t("Your browser does not support webRTC."), { type: "warning" });
             return;
@@ -734,7 +735,7 @@ export class Rtc {
         this.call();
         this.soundEffectsService.play("channel-join");
         await this.resetAudioTrack({ force: true });
-        if (startWithVideo) {
+        if (video) {
             await this.toggleVideo("camera");
         }
     }

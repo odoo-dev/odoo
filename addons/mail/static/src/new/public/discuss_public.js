@@ -15,6 +15,7 @@ export class DiscussPublic extends Component {
         this.messaging = useMessaging();
         /** @type {import('@mail/new/core/thread_service').ThreadService} */
         this.threadService = useService("mail.thread");
+        this.rtc = useService("mail.rtc");
         this.store = useStore();
         this.state = useState({
             welcome: this.props.data.discussPublicViewData.shouldDisplayWelcomeViewInitially,
@@ -30,6 +31,9 @@ export class DiscussPublic extends Component {
                         null,
                         `/discuss/channel/${this.thread.id}${window.location.search}`
                     );
+                    if (this.thread.defaultDisplayMode === "video_full_screen") {
+                        this.rtc.toggleCall(this.thread, { video: true });
+                    }
                 }
             },
             () => [this.state.welcome]

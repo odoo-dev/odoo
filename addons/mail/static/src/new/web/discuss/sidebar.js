@@ -144,6 +144,6 @@ export class Sidebar extends Component {
             default_display_mode: "video_full_screen",
             partners_to: [this.store.self.id],
         });
-        await this.rtc.toggleCall(thread, true);
+        await this.rtc.toggleCall(thread, { video: true });
     }
 }
