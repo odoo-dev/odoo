@@ -44,9 +44,7 @@ export class Activity extends Component {
         onWillUpdateProps((nextProps) => {
             this.delay = computeDelay(nextProps.data.date_deadline);
         });
-        if (this.props.data.activity_category === "upload_file") {
-            this.attachmentUploader = useAttachmentUploader(this.thread);
-        }
+        this.attachmentUploader = useAttachmentUploader(this.thread);
     }
 
     get displayName() {
