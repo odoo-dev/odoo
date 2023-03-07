@@ -810,7 +810,7 @@ QUnit.test("chat window: composer state conservation on toggle discuss", async f
         }),
     ];
     inputFiles(document.querySelector(".o-mail-composer-core-main .o_input_file"), files);
-    await waitUntil(".o-mail-attachment-card .fa-check");
+    await waitUntil(".o-mail-attachment-card .fa-check", 2);
     assert.strictEqual(
         document.querySelector(`.o-mail-composer-textarea`).value,
         "XDU for the win !"
