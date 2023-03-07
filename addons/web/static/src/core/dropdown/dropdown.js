@@ -282,17 +282,6 @@ export class Dropdown extends Component {
     }
 
     /**
-     * Opens the dropdown the mouse enters its toggler.
-     * NB: only if its siblings dropdown group is opened and if not a sub dropdown.
-     */
-    onTogglerMouseEnter() {
-        if (this.state.groupIsOpen && !this.state.open) {
-            this.togglerRef.el.focus();
-            this.open();
-        }
-    }
-
-    /**
      * Used to close ourself on outside click.
      *
      * @param {MouseEvent} ev

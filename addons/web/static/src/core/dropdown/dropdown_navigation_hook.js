@@ -48,15 +48,6 @@ export function useDropdownNavigation() {
         originalOnTogglerClick();
     };
 
-    // Needed to avoid unwanted mouseenter behavior on a subdropdown toggler.
-    const originalOnTogglerMouseEnter = comp.onTogglerMouseEnter.bind(comp);
-    comp.onTogglerMouseEnter = () => {
-        if (comp.parentDropdown) {
-            return;
-        }
-        originalOnTogglerMouseEnter();
-    };
-
     // Needed to avoid unwanted selection when the mouse pointer is not in use
     // but still somewhere in the middle of the dropdown menu list.
     let mouseSelectionActive = true;
