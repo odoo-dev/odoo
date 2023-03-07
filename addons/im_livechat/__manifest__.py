@@ -84,9 +84,6 @@ Help your customers with this chat, and analyse their feedback.
         'web.assets_tests': [
             'im_livechat/static/tests/tours/**/*',
         ],
-        'mail.assets_messaging': [
-            'im_livechat/static/src/legacy/models/*.js',
-        ],
         'im_livechat.assets_public_livechat': [
             ('include', 'mail.assets_core_messaging'),
             'im_livechat/static/src/livechat_data.js',

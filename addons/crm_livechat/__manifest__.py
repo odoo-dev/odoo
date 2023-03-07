@@ -19,8 +19,5 @@
     'auto_install': True,
     'license': 'LGPL-3',
     'assets': {
-        'mail.assets_messaging': [
-            'crm_livechat/static/src/legacy/models/**/*',
-        ],
     },
 }

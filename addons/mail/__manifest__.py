@@ -120,13 +120,6 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/legacy/model/*',
             'mail/static/src/legacy/core_models/*',
         ],
-        'mail.assets_messaging': [
-            ('include', 'mail.assets_core_messaging'),
-            'mail/static/src/legacy/core_models/**/*',
-            'mail/static/src/legacy/model/**/*',
-            'mail/static/src/legacy/models/**/*',
-            'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
-        ],
         # Custom bundle in case we want to remove things that are later added to web.assets_common
         'mail.assets_common_discuss_public': [
             ('include', 'web.assets_common'),
@@ -154,7 +147,7 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/legacy/components/composer_suggested_recipient/*'),
             ('remove', 'mail/static/src/legacy/components/activity_menu_container/*'),
             'mail/static/src/js/utils.js',
-            ('include', 'mail.assets_messaging'),
+            ('include', 'mail.assets_core_messaging'),
             'mail/static/src/legacy/services/*.js',
             'mail/static/src/legacy/utils/*.js',
             'mail/static/src/utils/*.js',
@@ -196,7 +189,7 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/legacy/components/*/*.scss',
             'mail/static/src/legacy/components/*/*.xml',
             'mail/static/src/views/*/*.xml',
-            ('include', 'mail.assets_messaging'),
+            ('include', 'mail.assets_core_messaging'),
             'mail/static/src/legacy/services/*.js',
             'mail/static/src/views/**/*.js',
             'mail/static/src/views/**/*.scss',
@@ -234,6 +227,7 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/new/public/**/*'),
             ('remove', 'mail/static/src/new/**/*.dark.scss'),
             ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
+            'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
         ],
         'mail.assets_dark': [
             'mail/static/src/new/**/*.dark.scss',
