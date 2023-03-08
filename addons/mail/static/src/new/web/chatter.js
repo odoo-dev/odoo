@@ -247,8 +247,6 @@ export class Chatter extends Component {
     }
 
     onFollowerChanged() {
-        // TODO condition to reload parent view (message_follower_ids / hasParentReloadOnFollowersUpdate)
-        this.reloadParentView();
         this.load(this.props.threadId, ["followers", "suggestedRecipients"]);
     }
 
