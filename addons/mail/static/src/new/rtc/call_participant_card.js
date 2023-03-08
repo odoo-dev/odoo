@@ -25,7 +25,6 @@ export class CallParticipantCard extends Component {
         this.rtc = useRtc();
         this.store = useStore();
         this.threadService = useService("mail.thread");
-        this.userSettings = useState(useService("mail.user_settings"));
         onMounted(() => {
             if (!this.rtcSession) {
                 return;
