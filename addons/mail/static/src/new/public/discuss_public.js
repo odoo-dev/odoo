@@ -23,14 +23,14 @@ export class DiscussPublic extends Component {
         useEffect(
             (welcome) => {
                 if (!welcome) {
-                    this.threadService.setDiscussThread(this.thread, false);
-                    this.threadService.fetchChannelMembers(this.thread);
                     // Change the URL to avoid leaking the invitation link.
                     window.history.replaceState(
                         window.history.state,
                         null,
                         `/discuss/channel/${this.thread.id}${window.location.search}`
                     );
+                    this.threadService.setDiscussThread(this.thread, false);
+                    this.threadService.fetchChannelMembers(this.thread);
                     if (this.thread.defaultDisplayMode === "video_full_screen") {
                         this.rtc.toggleCall(this.thread, { video: true });
                     }
