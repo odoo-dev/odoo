@@ -172,29 +172,15 @@ QUnit.test("remove a follower in a dirty form view", async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { openFormView } = await start({
-        async mockRPC(route, args) {
-            if (args.method === "read") {
-                assert.step(`read ${args.args[0][0]}`);
-            }
-        },
-    });
+    const { openFormView } = await start();
     await openFormView("res.partner", threadId);
-    assert.strictEqual(
-        target.querySelector(".o-mail-chatter-topbar-followers-count").innerText,
-        "1"
-    );
-    assert.verifySteps([`read ${threadId}`]);
+    assert.containsOnce(target, ".o-mail-chatter-topbar-followers-count:contains(1)");
 
     await editInput(target, ".o_field_char[name=name] input", "some value");
     await click(".o-mail-chatter-topbar-follower-list-button");
     assert.containsOnce(target, ".o-mail-chatter-topbar-follower-list-follower");
 
     await click("button[title='Remove this follower']");
-    assert.strictEqual(
-        target.querySelector(".o-mail-chatter-topbar-followers-count").innerText,
-        "0"
-    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-followers-count:contains(0)");
     assert.strictEqual(target.querySelector(".o_field_char[name=name] input").value, "some value");
-    assert.verifySteps([`read ${threadId}`]);
 });

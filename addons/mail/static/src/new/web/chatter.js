@@ -258,7 +258,6 @@ export class Chatter extends Component {
     }
 
     onFollowerChanged() {
-        this.reloadParentView();
         this.load(this.props.threadId, ["followers", "suggestedRecipients"]);
     }
 
