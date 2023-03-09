@@ -30,6 +30,7 @@ import { MessageSeenIndicator } from "./message_seen_indicator";
 import { _t } from "@web/core/l10n/translation";
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { hasTouch } from "@web/core/browser/feature_detection";
+import { url } from "@web/core/utils/urls";
 
 /**
  * @typedef {Object} Props
@@ -149,6 +150,16 @@ export class Message extends Component {
                 $(this.messageBody.el).find(".o-mail-read-more-less").remove();
             }
         });
+    }
+
+    get authorAvatarUrl() {
+        if (
+            this.message.type === "email" &&
+            !["partner", "guest"].includes(this.message.author.type)
+        ) {
+            return url("/mail/static/src/img/email_icon.png");
+        }
+        return this.threadService.avatarUrl(this.message.author, this.props.message.originThread);
     }
 
     get message() {
