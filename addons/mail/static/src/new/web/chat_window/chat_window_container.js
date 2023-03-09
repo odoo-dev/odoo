@@ -8,15 +8,7 @@ import {
 } from "@mail/new/web/chat_window/chat_window_service";
 import { useMessaging, useStore } from "@mail/new/core/messaging_hook";
 
-import {
-    Component,
-    onWillStart,
-    useExternalListener,
-    useState,
-    onMounted,
-    useRef,
-    useEffect,
-} from "@odoo/owl";
+import { Component, useExternalListener, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -50,7 +42,6 @@ export class ChatWindowContainer extends Component {
             () => this.setHiddenMenuOffset(),
             () => [this.chatWindowService.hidden]
         );
-        onWillStart(() => this.messaging.isReady);
         onMounted(() => this.setHiddenMenuOffset());
 
         this.onResize();

@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { markup, reactive } from "@odoo/owl";
-import { Deferred } from "@web/core/utils/concurrency";
 import { memoize } from "@web/core/utils/functions";
 import { cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray, removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
@@ -51,7 +50,6 @@ export class Messaging {
         this.router = services.router;
         this.bus = services.bus_service;
         this.presence = services.presence;
-        this.isReady = new Deferred();
         this.imStatusService = services.im_status;
         const user = services.user;
         this.personaService.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
@@ -127,7 +125,6 @@ export class Messaging {
         (data.shortcodes ?? []).forEach((code) => {
             this.insertCannedResponse(code);
         });
-        this.isReady.resolve();
         this.store.isMessagingReady = true;
     }
 
