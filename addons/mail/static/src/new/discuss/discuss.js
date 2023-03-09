@@ -98,11 +98,6 @@ export class Discuss extends Component {
         return this.store.threads[this.store.discuss.threadLocalId];
     }
 
-    get publicAvatarUrl() {
-        return this.thread.channelMembers.find((m) => m.personaLocalId === this.store.self.localId)
-            ?.avatarUrl;
-    }
-
     toggleInviteForm() {
         if (this.closePopover) {
             this.closePopover();

@@ -26,7 +26,9 @@ export class MessagingMenu extends Component {
         this.store = useStore();
         this.hasTouch = hasTouch;
         this.notification = useState(useService("mail.notification.permission"));
+        /** @type {import('@mail/new/web/chat_window/chat_window_service').ChatWindowService} */
         this.chatWindowService = useState(useService("mail.chat_window"));
+        /** @type {import('@mail/new/core/thread_service').ThreadService} */
         this.threadService = useState(useService("mail.thread"));
         this.action = useService("action");
         this.state = useState({
@@ -92,7 +94,7 @@ export class MessagingMenu extends Component {
         return {
             body: _t("Enable desktop notifications to chat"),
             displayName: sprintf(_t("%s has a request"), this.store.partnerRoot.name),
-            iconSrc: this.store.partnerRoot.avatarUrl,
+            iconSrc: this.threadService.avatarUrl(this.store.partnerRoot),
             partner: this.store.partnerRoot,
             isLast:
                 this.displayedPreviews.length === 0 && this.store.notificationGroups.length === 0,

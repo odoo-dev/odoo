@@ -4,6 +4,8 @@ import { Persona } from "@mail/new/core/persona_model";
 import { assignDefined, createLocalId, nullifyClearCommands } from "../utils/misc";
 import { registry } from "@web/core/registry";
 
+export const DEFAULT_AVATAR = "/mail/static/src/img/smiley/avatar.jpg";
+
 export class PersonaService {
     constructor(...args) {
         this.setup(...args);

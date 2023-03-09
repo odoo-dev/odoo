@@ -28,7 +28,7 @@
                         <div t-if="!props.squashed" class="o-mail-Message-avatarContainer position-relative bg-view" t-on-click="ev => this.onClickAuthor(ev)">
                             <img class="o-mail-Message-avatar w-100 h-100 rounded-circle o_object_fit_cover"
                                 t-att-title="authorText"
-                                t-att-src="message.authorAvatarUrl"
+                                t-att-src="authorAvatarUrl"
                                 t-att-class="{ 'o_redirect cursor-pointer': hasAuthorClickable }"/>
                             <ImStatus t-if="message.author" persona="message.author" className="imStatusClassName"/>
                         </div>

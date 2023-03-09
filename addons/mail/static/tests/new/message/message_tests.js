@@ -18,6 +18,7 @@ import {
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
+import { url } from "@web/core/utils/urls";
 
 QUnit.module("message");
 
@@ -503,7 +504,7 @@ QUnit.test("basic rendering of message", async (assert) => {
     assert.hasAttrValue(
         $message.find(".o-mail-Message-sidebar .o-mail-Message-avatarContainer img"),
         "data-src",
-        `/mail/channel/${channelId}/partner/${partnerId}/avatar_128`
+        url(`/mail/channel/${channelId}/partner/${partnerId}/avatar_128`)
     );
     assert.containsOnce($message, ".o-mail-Message-header");
     assert.containsOnce($message, ".o-mail-Message-header .o-mail-Message-author:contains(Demo)");

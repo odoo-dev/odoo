@@ -34,17 +34,6 @@ export class Persona {
     /** @type {import("@mail/new/core/store_service").Store} */
     _store;
 
-    get avatarUrl() {
-        switch (this.type) {
-            case "partner":
-                return `/web/image/res.partner/${this.id}/avatar_128`;
-            case "guest":
-                return `/web/image/mail.guest/${this.id}/avatar_128?unique=${this.name}`;
-            default:
-                return "";
-        }
-    }
-
     get nameOrDisplayName() {
         return this.name || this.displayName;
     }
