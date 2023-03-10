@@ -6,10 +6,10 @@ import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
+import { getOnChangeSpec } from "./utils";
 
 export class Record extends DataPoint {
     setup(params) {
-        console.log(params.data);
         this.resId = params.data.id || false;
         this.resIds = params.resIds || (this.resId ? [this.resId] : []);
         // multiple fields: we could loop here on activeFields and generate a
@@ -18,6 +18,7 @@ export class Record extends DataPoint {
             this._values = this._parseServerValues(params.data);
             this._changes = {};
         } else {
+            // FIXME: I'm wondering whereas these initial values shouldn't be in _values instead of _changes
             this._values = {};
             this._changes = this._parseServerValues(
                 Object.assign(this._getDefaultValues(), params.data)
@@ -44,7 +45,7 @@ export class Record extends DataPoint {
     }
 
     get isValid() {
-        return true;
+        return !this._invalidFields.size;
     }
 
     // -------------------------------------------------------------------------
@@ -55,14 +56,14 @@ export class Record extends DataPoint {
         return this._invalidFields.has(fieldName);
     }
 
-    // TODO: remove?
+    // TODO: remove
     isReadonly(fieldName) {
-        return true;
+        return this._isReadonly(fieldName);
     }
 
-    // TODO: remove?
+    // TODO: remove
     isRequired(fieldName) {
-        return false;
+        return this._isRequired(fieldName);
     }
 
     // TODO: remove (there's a subtask)
@@ -74,10 +75,24 @@ export class Record extends DataPoint {
         return new Domain();
     }
 
-    askChanges() {}
+    async askChanges() {}
 
-    update(changes) {
+    async update(changes) {
         this.isDirty = true;
+        const onChangeFields = Object.keys(changes).filter(
+            (fieldName) => this.activeFields[fieldName].onChange
+        );
+        if (onChangeFields.length) {
+            const otherChanges = await this.model._onchange({
+                resModel: this.resModel,
+                resIds: this.resId ? [this.resId] : [],
+                changes: this._getChanges({ ...this._changes, ...changes }),
+                fieldNames: onChangeFields,
+                spec: getOnChangeSpec(this.activeFields),
+                context: this.context,
+            });
+            Object.assign(changes, this._parseServerValues(otherChanges));
+        }
         Object.assign(this._changes, changes);
         Object.assign(this.data, changes);
         this._setEvalContext();
@@ -128,25 +143,30 @@ export class Record extends DataPoint {
             const items = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
             }, this);
-            this.model.notificationService.add(markup(`<ul>${items.join("")}</ul>`), {
+            this.model.notification.add(markup(`<ul>${items.join("")}</ul>`), {
                 title: _t("Invalid fields: "),
                 type: "danger",
             });
             return false;
         }
         const changes = this._getChanges();
+        delete changes.id; // id never changes, and should not be written
         if (!Object.keys(changes).length) {
             return true;
         }
         const kwargs = { context: this.context };
         let resId = this.resId;
-        if (!resId) {
+        const creation = !resId;
+        if (creation) {
             [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
         } else {
             await this.model.orm.write(this.resModel, [resId], changes, kwargs);
         }
         if (!noReload) {
             await this.load(resId);
+            if (creation) {
+                this.resIds.push(resId);
+            }
         } else {
             this._values = { ...this._values, ...this._changes };
             this._changes = {};
@@ -230,21 +250,21 @@ export class Record extends DataPoint {
         return !this._invalidFields.size;
     }
 
-    _getChanges() {
-        const changes = {};
-        for (const [fieldName, value] of Object.entries(this._changes)) {
+    _getChanges(changes = this._changes) {
+        const result = {};
+        for (const [fieldName, value] of Object.entries(changes)) {
             const type = this.fields[fieldName].type;
             if (type === "date") {
-                changes[fieldName] = value ? serializeDate(value) : false;
+                result[fieldName] = value ? serializeDate(value) : false;
             } else if (type === "datetime") {
-                changes[fieldName] = value ? serializeDateTime(value) : false;
+                result[fieldName] = value ? serializeDateTime(value) : false;
             } else if (type === "many2one") {
-                changes[fieldName] = value ? value[0] : false;
+                result[fieldName] = value ? value[0] : false;
             } else {
-                changes[fieldName] = value;
+                result[fieldName] = value;
             }
         }
-        return changes;
+        return result;
     }
 
     _getDefaultValues() {
@@ -278,6 +298,8 @@ export class Record extends DataPoint {
             if ([null].includes(value)) {
                 // simplify that?
                 evalContext[fieldName] = false;
+            } else if (["char", "text"].includes(field.type)) {
+                evalContext[fieldName] = value !== "" ? value : false;
             } else if (["one2many", "many2many"].includes(field.type)) {
                 evalContext[fieldName] = value.resIds;
             } else if (value && field.type === "date") {
@@ -297,6 +319,11 @@ export class Record extends DataPoint {
         //     evalContext.parent = this.getParentRecordContext();
         // }
         return evalContext;
+    }
+
+    _isReadonly(fieldName) {
+        const readonly = this.activeFields[fieldName].readonly;
+        return readonly ? evalDomain(readonly, this.evalContext) : false;
     }
 
     _isRequired(fieldName) {
