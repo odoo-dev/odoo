@@ -124,7 +124,7 @@ export class FormController extends Component {
         this.canEdit = edit && !this.props.preventEdit;
 
         let mode = this.props.mode || "edit";
-        if (!this.canEdit) {
+        if (!this.canEdit && this.props.resId) {
             mode = "readonly";
         }
 
@@ -447,7 +447,7 @@ export class FormController extends Component {
         // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
             this.disableButtons();
-            await this.model.load({ resId: null });
+            await this.model.load({ resId: null, mode: "edit" });
             this.enableButtons();
         }
     }

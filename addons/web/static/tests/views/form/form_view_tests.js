@@ -12495,7 +12495,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt('field "length" with value 0: can apply onchange', async function (assert) {
+    QUnit.test('field "length" with value 0: can apply onchange', async function (assert) {
         serverData.models.partner.fields.length = { string: "Length", type: "float", default: 0 };
         serverData.models.partner.fields.foo.default = "foo default";
 
@@ -12587,7 +12587,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("fieldDependencies support for fields", async (assert) => {
+    QUnit.test("fieldDependencies support for fields", async (assert) => {
         serverData.models.partner.records = [{ id: 1, int_field: 2 }];
 
         const customField = {
@@ -12613,7 +12613,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("[name=foo] span").innerText, "2");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "fieldDependencies support for fields: dependence on a relational field",
         async (assert) => {
             serverData.models.partner.records[0].product_id = 37;
@@ -12642,11 +12642,11 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.strictEqual(target.querySelector("[name=foo] span").innerText, "xphone");
-            assert.verifySteps(["get_views", "read"]);
+            assert.verifySteps(["get_views", "unity_read"]);
         }
     );
 
-    QUnit.tttt("Action Button clicked with failing action", async function (assert) {
+    QUnit.test("Action Button clicked with failing action", async function (assert) {
         const handler = (ev) => {
             assert.step("error");
             // need to preventDefault to remove error from console (so python test pass)
