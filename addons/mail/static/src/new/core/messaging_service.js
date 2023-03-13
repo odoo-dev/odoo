@@ -697,8 +697,6 @@ export const messagingService = {
             messaging.handleNotification(notifEvent.detail);
         });
         services.bus_service.start();
-        // debugging. remove this
-        window.messaging = messaging;
         return messaging;
     },
 };
