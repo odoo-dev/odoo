@@ -4,43 +4,11 @@ import { start, startServer, click } from "@mail/../tests/helpers/test_utils";
 
 import { session } from "@web/session";
 import { date_to_str } from "web.time";
-import { patchWithCleanup, getFixture } from "@web/../tests/helpers/utils";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
-let target;
+QUnit.module("activity menu");
 
-QUnit.module("test_mail", {
-    async beforeEach() {
-        target = getFixture();
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const pyEnv = await startServer();
-        const partnerId = pyEnv["res.partner"].create({});
-        const activityIds = pyEnv["mail.test.activity"].create([{}, {}, {}, {}]);
-        pyEnv["mail.activity"].create([
-            { res_id: partnerId, res_model: "res.partner" },
-            { res_id: activityIds[0], res_model: "mail.test.activity" },
-            {
-                date_deadline: date_to_str(tomorrow),
-                res_id: activityIds[1],
-                res_model: "mail.test.activity",
-            },
-            {
-                date_deadline: date_to_str(tomorrow),
-                res_id: activityIds[2],
-                res_model: "mail.test.activity",
-            },
-            {
-                date_deadline: date_to_str(yesterday),
-                res_id: activityIds[3],
-                res_model: "mail.test.activity",
-            },
-        ]);
-    },
-});
-
-QUnit.test("activity menu widget: menu with no records", async function (assert) {
+QUnit.test("menu with no records", async (assert) => {
     await start({
         async mockRPC(route, args) {
             if (args.method === "systray_get_activities") {
@@ -50,16 +18,62 @@ QUnit.test("activity menu widget: menu with no records", async function (assert)
     });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Activities'])");
     assert.containsOnce(
-        target,
+        $,
         ".o-mail-ActivityMenu:contains(Congratulations, you're done with your activities.)"
     );
 });
 
-QUnit.test("activity menu widget: activity menu with 2 models", async function (assert) {
+QUnit.test("do not show empty text when at least some future activities", async (assert) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const pyEnv = await startServer();
+    const activityId = pyEnv["mail.test.activity"].create({});
+    pyEnv["mail.activity"].create([
+        {
+            date_deadline: date_to_str(tomorrow),
+            res_id: activityId,
+            res_model: "mail.test.activity",
+        },
+    ]);
+    await start();
+    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Activities'])");
+    assert.containsNone(
+        $,
+        ".o-mail-ActivityMenu:contains(Congratulations, you're done with your activities.)"
+    );
+});
+
+QUnit.test("activity menu widget: activity menu with 2 models", async (assert) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    const activityIds = pyEnv["mail.test.activity"].create([{}, {}, {}, {}]);
+    pyEnv["mail.activity"].create([
+        { res_id: partnerId, res_model: "res.partner" },
+        { res_id: activityIds[0], res_model: "mail.test.activity" },
+        {
+            date_deadline: date_to_str(tomorrow),
+            res_id: activityIds[1],
+            res_model: "mail.test.activity",
+        },
+        {
+            date_deadline: date_to_str(tomorrow),
+            res_id: activityIds[2],
+            res_model: "mail.test.activity",
+        },
+        {
+            date_deadline: date_to_str(yesterday),
+            res_id: activityIds[3],
+            res_model: "mail.test.activity",
+        },
+    ]);
     const { env } = await start();
-    assert.containsOnce(target, ".o_menu_systray i[aria-label='Activities']");
-    assert.containsOnce(target, ".o-mail-ActivityMenu-counter");
-    assert.containsOnce(target, ".o-mail-ActivityMenu-counter:contains(5)");
+    assert.containsOnce($, ".o_menu_systray i[aria-label='Activities']");
+    assert.containsOnce($, ".o-mail-ActivityMenu-counter");
+    assert.containsOnce($, ".o-mail-ActivityMenu-counter:contains(5)");
     let context = {};
     patchWithCleanup(env.services.action, {
         doAction(action) {
@@ -71,10 +85,10 @@ QUnit.test("activity menu widget: activity menu with 2 models", async function (
         search_default_activities_overdue: 1,
     };
     await click(".o_menu_systray i[aria-label='Activities']");
-    assert.containsOnce(target, ".o-mail-ActivityMenu");
-    assert.containsN(target, ".o-mail-ActivityMenu .o-mail-ActivityGroup", 2);
+    assert.containsOnce($, ".o-mail-ActivityMenu");
+    assert.containsN($, ".o-mail-ActivityMenu .o-mail-ActivityGroup", 2);
     await click(".o-mail-ActivityMenu .o-mail-ActivityGroup button:contains('Late')");
-    assert.containsNone(target, ".o-mail-ActivityMenu");
+    assert.containsNone($, ".o-mail-ActivityMenu");
     context = {
         force_search_count: 1,
         search_default_activities_today: 1,
@@ -96,21 +110,45 @@ QUnit.test("activity menu widget: activity menu with 2 models", async function (
     await click(".o-mail-ActivityMenu .o-mail-ActivityGroup:contains('mail.test.activity')");
 });
 
-QUnit.test("activity menu widget: activity view icon", async function (assert) {
+QUnit.test("activity menu widget: activity view icon", async (assert) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    const activityIds = pyEnv["mail.test.activity"].create([{}, {}, {}, {}]);
+    pyEnv["mail.activity"].create([
+        { res_id: partnerId, res_model: "res.partner" },
+        { res_id: activityIds[0], res_model: "mail.test.activity" },
+        {
+            date_deadline: date_to_str(tomorrow),
+            res_id: activityIds[1],
+            res_model: "mail.test.activity",
+        },
+        {
+            date_deadline: date_to_str(tomorrow),
+            res_id: activityIds[2],
+            res_model: "mail.test.activity",
+        },
+        {
+            date_deadline: date_to_str(yesterday),
+            res_id: activityIds[3],
+            res_model: "mail.test.activity",
+        },
+    ]);
     const { env } = await start();
     await click(".o_menu_systray i[aria-label='Activities']");
-    assert.containsN(target, "button[title='Summary']", 2);
-    const first = $(target).find(
-        ".o-mail-ActivityGroup:contains('res.partner') button[title='Summary']"
-    );
-    const second = $(target).find(
+    assert.containsN($, "button[title='Summary']", 2);
+    const first = $(".o-mail-ActivityGroup:contains('res.partner') button[title='Summary']");
+    const second = $(
         ".o-mail-ActivityGroup:contains('mail.test.activity') button[title='Summary']"
     );
     assert.ok(first);
     assert.hasClass(first, "fa-clock-o");
     assert.ok(second);
     assert.hasClass(second, "fa-clock-o");
-    assert.strictEqual($(target).find(".dropdown-menu").parents(".show").length, 1);
+    assert.strictEqual($(".dropdown-menu").parents(".show").length, 1);
     patchWithCleanup(env.services.action, {
         doAction(action) {
             if (action.name) {
@@ -123,16 +161,16 @@ QUnit.test("activity menu widget: activity view icon", async function (assert) {
         },
     });
     await click(".o-mail-ActivityGroup:contains('mail.test.activity') button[title='Summary']");
-    assert.containsNone(target, ".o-dropdown-menu");
+    assert.containsNone($, ".o-dropdown-menu");
     await click(".o_menu_systray i[aria-label='Activities']");
     await click(".o-mail-ActivityGroup:contains('res.partner') button[title='Summary']");
     assert.verifySteps(["do_action:mail.test.activity", "do_action:res.partner"]);
 });
 
-QUnit.test("activity menu widget: close on messaging menu click", async function (assert) {
+QUnit.test("activity menu widget: close on messaging menu click", async (assert) => {
     await start();
     await click(".o_menu_systray i[aria-label='Activities']");
-    assert.containsOnce(target, ".o-mail-ActivityMenu");
+    assert.containsOnce($, ".o-mail-ActivityMenu");
     await click(".o_menu_systray i[aria-label='Messages']");
-    assert.containsNone(target, ".o-mail-ActivityMenu");
+    assert.containsNone($, ".o-mail-ActivityMenu");
 });
