@@ -168,12 +168,12 @@ export class FormController extends Component {
         });
 
         // enable the archive feature in Actions menu only if the active field is in the view
-        this.archiveEnabled = false;
-        "active" in activeFields
-            ? !this.props.fields.active.readonly
-            : "x_active" in activeFields
-            ? !this.props.fields.x_active.readonly
-            : false;
+        this.archiveEnabled =
+            "active" in activeFields
+                ? !this.props.fields.active.readonly
+                : "x_active" in activeFields
+                ? !this.props.fields.x_active.readonly
+                : false;
 
         // select footers that are not in subviews and move them to another arch
         // that will be moved to the dialog's footer (if we are in a dialog)

@@ -26,7 +26,8 @@ export class RelationalModel extends Model {
         return "Object";
     }
 
-    setup(params, { company, dialog, notification, user }) {
+    setup(params, { action, company, dialog, notification, user }) {
+        this.action = action;
         this.company = company;
         this.dialog = dialog;
         this.notification = notification;
@@ -250,7 +251,7 @@ export class RelationalModel extends Model {
     }
 }
 
-RelationalModel.services = ["company", "dialog", "notification", "user"];
+RelationalModel.services = ["action", "company", "dialog", "notification", "user"];
 RelationalModel.Record = Record;
 RelationalModel.Group = Group;
 RelationalModel.DynamicRecordList = DynamicRecordList;

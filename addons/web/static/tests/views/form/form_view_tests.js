@@ -3927,7 +3927,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("archive/unarchive a record", async function (assert) {
+    QUnit.test("archive/unarchive a record", async function (assert) {
         // add active field on partner model to have archive option
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -3963,15 +3963,15 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "read",
+            "unity_read",
             "action_archive",
-            "read",
+            "unity_read",
             "action_unarchive",
-            "read",
+            "unity_read",
         ]);
     });
 
-    QUnit.tttt("apply custom standard action menu (archive)", async function (assert) {
+    QUnit.test("apply custom standard action menu (archive)", async function (assert) {
         // add active field on partner model to have archive option
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -4012,7 +4012,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["customArchive"]);
     });
 
-    QUnit.tttt("add custom static action menu", async function (assert) {
+    QUnit.test("add custom static action menu", async function (assert) {
         const formView = registry.category("views").get("form");
         class CustomFormController extends formView.Controller {
             getStaticActionMenuItems() {
@@ -4074,7 +4074,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["Custom Default Available"]);
     });
 
-    QUnit.tttt("archive a record with intermediary action", async function (assert) {
+    QUnit.test("archive a record with intermediary action", async function (assert) {
         // add active field on partner model to have archive option
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -4107,14 +4107,9 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "do_archive") {
                     return false;
                 }
-                if (args.method === "read" && args.model === "partner") {
+                if (args.method === "unity_read" && args.model === "partner") {
                     if (readPartner === 1) {
-                        return [
-                            {
-                                id: 1,
-                                active: "archived",
-                            },
-                        ];
+                        return [[{ id: 1, active: "archived" }], {}]; // FIXME UNITY OLD API
                     }
                     readPartner++;
                 }
@@ -4129,7 +4124,11 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.strictEqual(target.querySelector("[name='active'] input").value, "true");
-        assert.verifySteps(["/web/webclient/load_menus", "get_views: partner", "read: partner"]);
+        assert.verifySteps([
+            "/web/webclient/load_menus",
+            "get_views: partner",
+            "unity_read: partner",
+        ]);
         await toggleActionMenu(target);
         assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
 
@@ -4137,19 +4136,19 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(document.body, ".modal");
         assert.verifySteps([]);
         await click(document.body.querySelector(".modal-footer .btn-primary"));
-        assert.verifySteps(["action_archive: partner", "get_views: product", "onchange: product"]);
+        assert.verifySteps(["action_archive: partner", "get_views: product", "onchange2: product"]);
         await click(target, ".modal footer .myButton");
         assert.verifySteps([
             "create: product",
-            "read: product",
+            "unity_read: product",
             "do_archive: product",
-            "read: partner",
+            "unity_read: partner",
         ]);
         assert.containsNone(target, ".modal");
         assert.strictEqual(target.querySelector("[name='active'] input").value, "archived");
     });
 
-    QUnit.tttt("archive action with active field not in view", async function (assert) {
+    QUnit.test("archive action with active field not in view", async function (assert) {
         // add active field on partner model, but do not put it in the view
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -4169,7 +4168,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_cp_action_menus span:contains(Unarchive)");
     });
 
-    QUnit.tttt("archive action not shown with readonly active field", async function (assert) {
+    QUnit.test("archive action not shown with readonly active field", async function (assert) {
         // add active field on partner model in readonly mode to do not have Archive option
         serverData.models.partner.fields.active = {
             string: "Active",
@@ -4193,7 +4192,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("can duplicate a record", async function (assert) {
+    QUnit.test("can duplicate a record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4220,7 +4219,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_form_editable");
     });
 
-    QUnit.tttt("duplicating a record preserves the context", async function (assert) {
+    QUnit.test("duplicating a record preserves the context", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4230,7 +4229,7 @@ QUnit.module("Views", (hooks) => {
             actionMenus: {},
             context: { hey: "hoy" },
             mockRPC(route, args) {
-                if (args.method === "read") {
+                if (args.method === "unity_read") {
                     assert.step(args.kwargs.context.hey);
                 }
             },
@@ -4243,7 +4242,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["hoy", "hoy"]);
     });
 
-    QUnit.tttt("cannot duplicate a record", async function (assert) {
+    QUnit.test("cannot duplicate a record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4267,7 +4266,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("clicking on stat buttons in edit mode", async function (assert) {
+    QUnit.test("clicking on stat buttons in edit mode", async function (assert) {
         let count = 0;
         const fakeActionService = {
             start() {
@@ -4319,10 +4318,10 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, ".o_form_editable", "form view should be in edit mode");
         assert.strictEqual(count, 2, "should have triggered a execute action");
-        assert.verifySteps(["get_views", "read", "write", "read"]);
+        assert.verifySteps(["get_views", "unity_read", "write", "unity_read"]);
     });
 
-    QUnit.tttt("clicking on stat buttons save and reload in edit mode", async function (assert) {
+    QUnit.test("clicking on stat buttons save and reload in edit mode", async function (assert) {
         const fakeActionService = {
             start() {
                 return {
@@ -4374,7 +4373,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt('buttons with attr "special" do not trigger a save', async function (assert) {
+    QUnit.test('buttons with attr "special" do not trigger a save', async function (assert) {
         let writeCount = 0;
         let doActionButtonCount = 0;
         const fakeActionService = {
@@ -4420,7 +4419,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(doActionButtonCount, 2, "should have triggered a execute action");
     });
 
-    QUnit.tttt('buttons with attr "special=save" save', async function (assert) {
+    QUnit.test('buttons with attr "special=save" save', async function (assert) {
         const fakeActionService = {
             start() {
                 return {
@@ -4448,10 +4447,10 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".o_field_widget[name=foo] input", "tralala");
         await click(target.querySelector(".o_content button.btn-primary"));
-        assert.verifySteps(["get_views", "read", "write", "read", "execute_action"]);
+        assert.verifySteps(["get_views", "unity_read", "write", "unity_read", "execute_action"]);
     });
 
-    QUnit.tttt("missing widgets do not crash", async function (assert) {
+    QUnit.test("missing widgets do not crash", async function (assert) {
         serverData.models.partner.fields.foo.type = "new field type without widget";
         await makeView({
             type: "form",
@@ -4463,7 +4462,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_field_widget");
     });
 
-    QUnit.tttt("nolabel", async function (assert) {
+    QUnit.test("nolabel", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9975,7 +9974,7 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("id is False in evalContext for new records", async function (assert) {
+    QUnit.test("id is False in evalContext for new records", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -10002,7 +10001,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("delete a duplicated record", async function (assert) {
+    QUnit.test("delete a duplicated record", async function (assert) {
         assert.expect(5);
 
         const newRecordID = 6; // ids from 1 to 5 are already taken so the new record will have id 6
