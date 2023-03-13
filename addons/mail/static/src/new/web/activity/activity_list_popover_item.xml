@@ -10,7 +10,7 @@
                 <t t-if="!props.activity.summary and props.activity.activity_type_id">
                     <b class="text-900 me-2 text-truncate flex-grow-1" t-esc="props.activity.activity_type_id[1]"/>
                 </t>
-                <button t-if="hasEditButton" class="o-mail-ActivityListPopoverItem-editbtn btn-sm btn-link" t-on-click="onClickEditActivityButton">
+                <button t-if="hasEditButton" class="o-mail-ActivityListPopoverItem-editbtn btn btn-sm btn-success btn-link" t-on-click="onClickEditActivityButton">
                     <i class="fa fa-pencil"/>
                 </button>
                 <t t-if="props.activity.can_write">
