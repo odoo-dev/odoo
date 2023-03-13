@@ -88,7 +88,7 @@
                     onSwipeLeft="hasTouch and threadService.canUnpin(preview.thread) ? { action: () => this.threadService.unpin(preview), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
                 >
                     <t t-set-slot="icon">
-                        <ImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="store.personas[createLocalId('partner', preview.chatPartnerId)]"/>
+                        <ImStatus t-if="preview.thread.type === 'chat'" className="'position-absolute bottom-0 end-0'" persona="preview.thread.correspondent"/>
                     </t>
                     <t t-if="preview.message" t-set-slot="body-icon">
                         <t t-if="preview.message.isSelfAuthored">

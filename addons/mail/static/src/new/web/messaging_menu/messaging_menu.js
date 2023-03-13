@@ -136,7 +136,7 @@ export class MessagingMenu extends Component {
                     imgUrl: thread.imgUrl,
                     hasMarkAsReadButton: this.threadService.isUnread(thread),
                     message,
-                    thread: thread,
+                    thread,
                     isNeedaction: false,
                 });
             }
@@ -148,7 +148,7 @@ export class MessagingMenu extends Component {
                     imgUrl: message.module_icon,
                     hasMarkAsReadButton: true,
                     message,
-                    thread: thread,
+                    thread,
                     isNeedaction: true,
                 });
             }

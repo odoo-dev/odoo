@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
-import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
+import { start, startServer, afterNextRender, click } from "@mail/../tests/helpers/test_utils";
 import { createLocalId } from "@mail/new/utils/misc";
 import { nextTick } from "@web/../tests/helpers/utils";
 
@@ -93,4 +93,22 @@ QUnit.test("Can handle im_status of unknown partner", async (assert) => {
     const persona = env.services["mail.store"].personas[createLocalId("partner", partnerId)];
     assert.ok(persona);
     assert.ok(persona.im_status === "online");
+});
+
+QUnit.test("show im status in messaging menu preview of chat", async (assert) => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", im_status: "online" });
+    pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: partnerId }],
+        ],
+        channel_type: "chat",
+    });
+    await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    assert.containsOnce(
+        $,
+        ".o-mail-NotificationItem:contains(Demo) i[aria-label='User is online']"
+    );
 });
