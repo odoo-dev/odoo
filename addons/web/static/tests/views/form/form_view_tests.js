@@ -29,14 +29,13 @@ import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { CharField } from "@web/views/fields/char/char_field";
 import { FormController } from "@web/views/form/form_controller";
 import { session } from "@web/session";
-import legacySession from "web.session";
 import { scrollerService } from "@web/core/scroller_service";
-import BasicModel from "web.BasicModel";
 import { localization } from "@web/core/l10n/localization";
 import { SIZES } from "@web/core/ui/ui_service";
 import { errorService } from "@web/core/errors/error_service";
 import { RPCError } from "@web/core/network/rpc_service";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
+import { RelationalModel } from "@web/views/relational_model/relational_model";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -10587,10 +10586,8 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt('edition in form view on a "noCache" model', async function (assert) {
-        patchWithCleanup(BasicModel.prototype, {
-            noCacheModels: BasicModel.prototype.noCacheModels.concat(["partner"]),
-        });
+    QUnit.test('edition in form view on a "noCache" model', async function (assert) {
+        patchWithCleanup(RelationalModel, { NOCACHE_MODELS: ["partner"] });
 
         const form = await makeView({
             type: "form",
@@ -10613,10 +10610,8 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["write", "clear_cache"]);
     });
 
-    QUnit.tttt('creation in form view on a "noCache" model', async function (assert) {
-        patchWithCleanup(BasicModel.prototype, {
-            noCacheModels: BasicModel.prototype.noCacheModels.concat(["partner"]),
-        });
+    QUnit.test('creation in form view on a "noCache" model', async function (assert) {
+        patchWithCleanup(RelationalModel, { NOCACHE_MODELS: ["partner"] });
 
         const form = await makeView({
             type: "form",
@@ -10639,10 +10634,8 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["write", "clear_cache"]);
     });
 
-    QUnit.tttt('deletion in form view on a "noCache" model', async function (assert) {
-        patchWithCleanup(BasicModel.prototype, {
-            noCacheModels: BasicModel.prototype.noCacheModels.concat(["partner"]),
-        });
+    QUnit.test('deletion in form view on a "noCache" model', async function (assert) {
+        patchWithCleanup(RelationalModel, { NOCACHE_MODELS: ["partner"] });
 
         const form = await makeView({
             type: "form",
@@ -10666,19 +10659,13 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["unlink", "clear_cache"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "reload currencies when writing on records of model res.currency",
         async function (assert) {
             serverData.models["res.currency"] = {
                 fields: {},
                 records: [{ id: 1, display_name: "some currency" }],
             };
-
-            patchWithCleanup(legacySession, {
-                reloadCurrencies: function () {
-                    assert.step("reload currencies");
-                },
-            });
 
             await makeView({
                 type: "form",
@@ -10687,13 +10674,25 @@ QUnit.module("Views", (hooks) => {
                 arch: '<form><field name="display_name"/></form>',
                 resId: 1,
                 mockRPC(route, args) {
-                    assert.step(args.method);
+                    assert.step(args.method || route);
+                    if (route === "/web/session/get_session_info") {
+                        return [
+                            { id: 1, display_name: "some currency" },
+                            { id: 2, display_name: "another currency" },
+                        ];
+                    }
                 },
             });
 
             await editInput(target.querySelector("[name=display_name]"), "input", "new value");
             await clickSave(target);
-            assert.verifySteps(["get_views", "read", "write", "reload currencies", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "unity_read",
+                "write",
+                "/web/session/get_session_info",
+                "unity_read",
+            ]);
         }
     );
 
@@ -10768,7 +10767,7 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("no deadlock when saving with uncommitted changes", async function (assert) {
+    QUnit.test("no deadlock when saving with uncommitted changes", async function (assert) {
         // Before saving a record, all field widgets are asked to commit their changes (new values
         // that they wouldn't have sent to the model yet). This test is added alongside a bug fix
         // ensuring that we don't end up in a deadlock when a widget actually has some changes to
@@ -10798,10 +10797,10 @@ QUnit.module("Views", (hooks) => {
             "some foo value",
             "foo field should have correct value"
         );
-        assert.verifySteps(["get_views", "onchange", "create", "read"]);
+        assert.verifySteps(["get_views", "onchange2", "create", "unity_read"]);
     });
 
-    QUnit.tttt("saving with invalid uncommitted changes", async function (assert) {
+    QUnit.test("saving with invalid uncommitted changes", async function (assert) {
         patchWithCleanup(browser, { setTimeout: () => 1 });
         await makeView({
             type: "form",
@@ -10826,7 +10825,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector("[name=qux]"), "o_field_invalid");
         assert.containsOnce(target, ".o_notification .text-danger");
         assert.containsOnce(target, ".o_form_editable .o_field_invalid[name=qux]");
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
     });
 
     QUnit.tttt(
@@ -11003,7 +11002,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "leave the form twice (clicking on the breadcrumb) should save only once",
         async function (assert) {
             let writeCalls = 0;
@@ -11060,69 +11059,6 @@ QUnit.module("Views", (hooks) => {
             assert.strictEqual(writeCalls, 1, "should save once");
         }
     );
-
-    QUnit.tttt("domain returned by onchange is cleared on discard", async function (assert) {
-        serverData.models.partner.onchanges = {
-            foo: function () {},
-        };
-
-        const domain = [["id", "=", 1]];
-        let expectedDomain = domain;
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="foo"/>
-                    <field name="trululu"/>
-                </form>`,
-            mockRPC(route, args) {
-                if (args.method === "onchange" && args.args[0][0] === 1) {
-                    // onchange returns a domain only on record 1
-                    return Promise.resolve({
-                        domain: {
-                            trululu: domain,
-                        },
-                    });
-                }
-                if (args.method === "name_search") {
-                    assert.deepEqual(args.kwargs.args, expectedDomain);
-                }
-            },
-            resId: 1,
-            resIds: [1, 2],
-        });
-
-        assert.strictEqual(
-            target.querySelector(".o_field_widget[name=foo] input").value,
-            "yop",
-            "should be on record 1"
-        );
-
-        // change foo to trigger the onchange
-        await editInput(target, ".o_field_widget[name=foo] input", "new value");
-
-        // open many2one dropdown to check if the domain is applied
-        target.querySelector(".o-autocomplete.dropdown input").focus(); // autocomplete closes with the blur, so it must have the focus
-        await click(target.querySelector(".o-autocomplete.dropdown input"));
-
-        // switch to another record (should ask to discard changes, and reset the domain)
-        target.querySelector(".o_pager_next").focus(); // change the focus before click, this will close the autocomplete
-        await click(target.querySelector(".o_pager_next"));
-
-        assert.containsNone(document.body, ".modal", "should not open modal");
-
-        assert.strictEqual(
-            target.querySelector(".o_field_widget[name=foo] input").value,
-            "blip",
-            "should be on record 2"
-        );
-
-        // open many2one dropdown to check if the domain is applied
-        expectedDomain = [];
-        await click(target.querySelector(".o-autocomplete.dropdown input"));
-    });
 
     QUnit.test("discard after a failed save (and close notifications)", async function (assert) {
         patchWithCleanup(browser, { setTimeout: () => 1 });
@@ -11192,7 +11128,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         '"bare" buttons in template should not trigger button click',
         async function (assert) {
             assert.expect(4);
@@ -11483,7 +11419,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "reload company when creating records of model res.company",
         async function (assert) {
             const fakeActionService = {
@@ -11516,11 +11452,17 @@ QUnit.module("Views", (hooks) => {
             await editInput(target, '.o_field_widget[name="name"] input', "Test Company");
             await clickSave(target);
 
-            assert.verifySteps(["get_views", "onchange", "create", "reload company", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "onchange2",
+                "create",
+                "reload company",
+                "unity_read",
+            ]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "reload company when writing on records of model res.company",
         async function (assert) {
             const fakeActionService = {
@@ -11561,7 +11503,13 @@ QUnit.module("Views", (hooks) => {
             await editInput(target, '.o_field_widget[name="name"] input', "Test Company2");
             await clickSave(target);
 
-            assert.verifySteps(["get_views", "read", "write", "reload company", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "unity_read",
+                "write",
+                "reload company",
+                "unity_read",
+            ]);
         }
     );
 

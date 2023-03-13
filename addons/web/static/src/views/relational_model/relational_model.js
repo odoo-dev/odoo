@@ -4,6 +4,7 @@ import { EventBus, markRaw } from "@odoo/owl";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { unique } from "@web/core/utils/arrays";
+import { session } from "@web/session";
 import { Model } from "@web/views/model";
 import { orderByToString } from "@web/views/utils";
 import { Record } from "./record";
@@ -26,12 +27,37 @@ export class RelationalModel extends Model {
         return "Object";
     }
 
-    setup(params, { action, company, dialog, notification, user }) {
+    setup(params, { action, company, dialog, notification, rpc, user }) {
         this.action = action;
         this.company = company;
         this.dialog = dialog;
         this.notification = notification;
+        this.rpc = rpc;
         this.user = user;
+        const _invalidateCache = (resModel, method) => {
+            if (!this.constructor.WRITE_METHODS.includes(method)) {
+                return;
+            }
+            if (resModel === "res.currency") {
+                return this.rpc("/web/session/get_session_info").then((result) => {
+                    // FIXME: we should handle currencies in a service, to be able to reload them
+                    // Also, reloading get_session_info only for currencies is a bit stupid
+                    session.currencies = result.currencies;
+                });
+            }
+            if (resModel === "res.company") {
+                this.action.doAction("reload_context");
+            }
+            if (this.constructor.NOCACHE_MODELS.includes(resModel)) {
+                this.env.bus.trigger("CLEAR-CACHES");
+            }
+        };
+        const ormCall = this.orm.call.bind(this.orm);
+        this.orm.call = async (model, method, args, kwargs) => {
+            const result = await ormCall(model, method, args, kwargs);
+            _invalidateCache(model, method);
+            return result;
+        };
 
         this.bus = new EventBus();
 
@@ -251,7 +277,14 @@ export class RelationalModel extends Model {
     }
 }
 
-RelationalModel.services = ["action", "company", "dialog", "notification", "user"];
+RelationalModel.services = ["action", "company", "dialog", "notification", "rpc", "user"];
+RelationalModel.WRITE_METHODS = ["create", "write", "unlink", "action_archive", "action_unarchive"];
+RelationalModel.NOCACHE_MODELS = [
+    "ir.actions.act_window",
+    "ir.filters",
+    "ir.ui.view",
+    "res.currency",
+];
 RelationalModel.Record = Record;
 RelationalModel.Group = Group;
 RelationalModel.DynamicRecordList = DynamicRecordList;
