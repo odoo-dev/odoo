@@ -10045,7 +10045,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("display tooltips for buttons (debug = false)", async function (assert) {
+    QUnit.test("display tooltips for buttons (debug = false)", async function (assert) {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
             clearTimeout: () => {},
@@ -10086,7 +10086,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("display tooltips for buttons (debug = true)", async function (assert) {
+    QUnit.test("display tooltips for buttons (debug = true)", async function (assert) {
         patchWithCleanup(odoo, {
             debug: true,
         });
@@ -10132,7 +10132,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("reload event is handled only once", async function (assert) {
+    QUnit.test("reload event is handled only once", async function (assert) {
         // In this test, several form controllers are nested (all of them are
         // opened in dialogs). When the users clicks on save in the last
         // opened dialog, a 'reload' event is triggered up to reload the (direct)
@@ -10181,14 +10181,14 @@ QUnit.module("Views", (hooks) => {
         );
         assert.verifySteps([
             "get_views",
-            "read", // main record
+            "unity_read", // main record
             "get_formview_id", // id of first form view opened in a dialog
             "get_views", // arch of first form view opened in a dialog
-            "read", // first dialog
+            "unity_read", // first dialog
             "get_formview_id", // id of second form view opened in a dialog
-            "read", // second dialog
+            "unity_read", // second dialog
             "write", // save second dialog
-            "read", // reload first dialog
+            "read", // reload the display_name (first dialog)
         ]);
     });
 
@@ -10283,7 +10283,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("rainbowman attributes correctly passed on button click", async function (assert) {
+    QUnit.test("rainbowman attributes correctly passed on button click", async function (assert) {
         assert.expect(1);
         const actionService = {
             start() {
@@ -10311,7 +10311,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_form_statusbar .btn-secondary"));
     });
 
-    QUnit.tttt("basic support for widgets", async function (assert) {
+    QUnit.test("basic support for widgets", async function (assert) {
         class MyComponent extends owl.Component {
             static template = owl.xml`<div t-esc="value"/>`;
             get value() {
@@ -10337,13 +10337,13 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(
             target.querySelector(".o_widget").textContent,
-            '{"foo":"My little Foo Value","bar":false}'
+            '{"foo":"My little Foo Value","bar":false,"display_name":""}'
         );
 
         widgetRegistry.remove("test_widget");
     });
 
-    QUnit.tttt("support header button as widgets on form statusbar", async function (assert) {
+    QUnit.test("support header button as widgets on form statusbar", async function (assert) {
         serviceRegistry.add("http", {
             start: () => ({}),
         });
@@ -10362,7 +10362,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("basic support for widgets: onchange update", async function (assert) {
+    QUnit.test("basic support for widgets: onchange update", async function (assert) {
         class MyWidget extends owl.Component {
             static template = owl.xml`<t t-esc="state.dataToDisplay" />`;
             setup() {
@@ -10398,7 +10398,7 @@ QUnit.module("Views", (hooks) => {
         widgetRegistry.remove("test_widget");
     });
 
-    QUnit.tttt("proper stringification in debug mode tooltip", async function (assert) {
+    QUnit.test("proper stringification in debug mode tooltip", async function (assert) {
         patchWithCleanup(odoo, { debug: true });
 
         patchWithCleanup(browser, {
@@ -10455,7 +10455,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("do not change pager when discarding current record", async function (assert) {
+    QUnit.test("do not change pager when discarding current record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

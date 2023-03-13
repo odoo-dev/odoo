@@ -314,12 +314,10 @@ export class Record extends DataPoint {
             const field = this.fields[fieldName];
             if (isNumeric(field)) {
                 defaultValues[fieldName] = 0;
-            } else if (["date", "datetime"].includes(field.type)) {
-                defaultValues[fieldName] = false;
             } else if (isX2Many(field)) {
                 defaultValues[fieldName] = [];
             } else {
-                defaultValues[fieldName] = null;
+                defaultValues[fieldName] = false;
             }
         }
         return defaultValues;
@@ -336,10 +334,7 @@ export class Record extends DataPoint {
         for (const fieldName in this.data) {
             const value = this.data[fieldName];
             const field = this.fields[fieldName];
-            if ([null].includes(value)) {
-                // simplify that?
-                evalContext[fieldName] = false;
-            } else if (["char", "text"].includes(field.type)) {
+            if (["char", "text"].includes(field.type)) {
                 evalContext[fieldName] = value !== "" ? value : false;
             } else if (["one2many", "many2many"].includes(field.type)) {
                 evalContext[fieldName] = value.resIds;
