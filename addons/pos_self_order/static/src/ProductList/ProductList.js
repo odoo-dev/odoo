@@ -70,13 +70,11 @@ export class ProductList extends Component {
                 item.description_sale.toLowerCase().includes(search_input.toLowerCase()))
         );
     };
-
     /**
      * @param {string} tag_name
      * @description this function is called when a tag is clicked; it selects the chosen tag and deselects all the other tags
      */
     selectTag = (tag_name) => {
-        // we make it so only one tag can be selected at a time
         if (this.private_state.selected_tags.has(tag_name)) {
             this.private_state.selected_tags.delete(tag_name);
             return;
