@@ -13,6 +13,12 @@ import { Group } from "./group";
 import { StaticList } from "./static_list";
 import { getFieldsSpec, getOnChangeSpec } from "./utils";
 
+// WOWL TOREMOVE BEFORE MERGE
+// Changes:
+// checkValidity/askChanges/save/isDirty:
+//  -> first two are now private and save checks if record isDirty -> can be
+//     called even is not dirty (+ option "force" to bypass isDirty check)
+
 export class RelationalModel extends Model {
     // FIXME: ask sad :D without this, can't make instance of model reactive.
     // EventTarget might be added to the list of supported types in SUPPORTED_RAW_TYPES (owl)

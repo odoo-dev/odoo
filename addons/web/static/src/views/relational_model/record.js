@@ -32,7 +32,7 @@ export class Record extends DataPoint {
             this.isInEdition = params.mode === "edit" || !this.resId;
         }
         this.selected = false; // TODO: rename into isSelected?
-        this.isDirty = false;
+        this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
     }
 
@@ -74,8 +74,6 @@ export class Record extends DataPoint {
     getFieldDomain() {
         return new Domain();
     }
-
-    async askChanges() {}
 
     async update(changes) {
         this.isDirty = true;
@@ -136,9 +134,13 @@ export class Record extends DataPoint {
         this._invalidFields.clear();
     }
 
-    async save({ noReload } = {}) {
+    async save({ noReload, force } = {}) {
         // TODO: mutexify
         // TODO: handle errors
+        await this._askChanges();
+        if (!this.isDirty && !force) {
+            return true;
+        }
         if (!this._checkValidity()) {
             const items = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
@@ -206,6 +208,7 @@ export class Record extends DataPoint {
     }
 
     async setInvalidField(fieldName) {
+        this.isDirty = true;
         this._invalidFields.add(fieldName);
     }
 
@@ -221,12 +224,17 @@ export class Record extends DataPoint {
     // Protected
     // -------------------------------------------------------------------------
 
+    async _askChanges() {
+        const proms = [];
+        this.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
+        await Promise.all(proms);
+    }
+
     _checkValidity() {
         for (const fieldName in this.activeFields) {
             const fieldType = this.fields[fieldName].type;
             const activeField = this.activeFields[fieldName];
-            if (activeField.alwaysInvisible || !this._isRequired(fieldName)) {
-                this._removeInvalidFields([fieldName]);
+            if (activeField.alwaysInvisible) {
                 continue;
             }
             switch (fieldType) {
@@ -237,12 +245,12 @@ export class Record extends DataPoint {
                     continue;
                 case "one2many":
                 case "many2many":
-                    if (!this.isX2ManyValid(fieldName)) {
+                    if (!this._isX2ManyValid(fieldName)) {
                         this.setInvalidField(fieldName);
                     }
                     break;
                 default:
-                    if (!this.data[fieldName]) {
+                    if (!this.data[fieldName] && this._isRequired(fieldName)) {
                         this.setInvalidField(fieldName);
                     }
             }

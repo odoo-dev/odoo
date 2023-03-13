@@ -288,27 +288,21 @@ export class FormController extends Component {
     }
 
     async onPagerUpdate({ offset, resIds }) {
-        await this.model.root.askChanges(); // ensures that isDirty is correct
-        let canProceed = true;
-        if (this.model.root.isDirty) {
-            canProceed = await this.model.root.save({
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        const canProceed = await this.model.root.save({
+            stayInEdition: true,
+            useSaveErrorDialog: true,
+        });
         if (canProceed) {
             return this.model.load({ resId: resIds[offset] });
         }
     }
 
     async beforeLeave() {
-        if (this.model.root.isDirty) {
-            return this.model.root.save({
-                noReload: true,
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        return this.model.root.save({
+            noReload: true,
+            stayInEdition: true,
+            useSaveErrorDialog: true,
+        });
     }
 
     async beforeUnload(ev) {
@@ -415,6 +409,7 @@ export class FormController extends Component {
             const noReload = this.env.inDialog && clickParams.close;
             return this.model.root
                 .save({
+                    force: true,
                     stayInEdition: true,
                     useSaveErrorDialog: !this.env.inDialog,
                     noReload,
@@ -437,14 +432,11 @@ export class FormController extends Component {
     }
 
     async create() {
-        await this.model.root.askChanges(); // ensures that isDirty is correct
-        let canProceed = true;
-        if (this.model.root.isDirty) {
-            canProceed = await this.model.root.save({
-                stayInEdition: true,
-                useSaveErrorDialog: true,
-            });
-        }
+        const canProceed = await this.model.root.save({
+            stayInEdition: true,
+            useSaveErrorDialog: true,
+        });
+        // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
             this.disableButtons();
             await this.model.load({ resId: null });
@@ -472,7 +464,7 @@ export class FormController extends Component {
         if (this.props.saveRecord) {
             saved = await this.props.saveRecord(record, params);
         } else {
-            saved = await record.save(params);
+            saved = await record.save({ ...params, force: true });
         }
         this.enableButtons();
         if (saved && this.props.onSave) {
