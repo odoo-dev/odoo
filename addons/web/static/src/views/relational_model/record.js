@@ -13,7 +13,7 @@ import { FormErrorDialog } from "@web/views/form/form_error_dialog/form_error_di
 export class Record extends DataPoint {
     setup(params) {
         this.resId = params.data.id || false;
-        this.resIds = params.resIds || (this.resId ? [this.resId] : []);
+        this.resIds = params.resIds || [];
         // multiple fields: we could loop here on activeFields and generate a
         // StaticList for each (and an entry in data), but we would have more datapoints
         if (this.resId) {
@@ -37,6 +37,7 @@ export class Record extends DataPoint {
         this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
         this._closeInvalidFieldsNotification = () => {};
+        this._urgentSave = false;
     }
 
     // -------------------------------------------------------------------------
@@ -83,37 +84,10 @@ export class Record extends DataPoint {
     }
 
     async update(changes) {
-        return this.model.mutex.exec(async () => {
-            this.isDirty = true;
-            const onChangeFields = Object.keys(changes).filter(
-                (fieldName) => this.activeFields[fieldName].onChange
-            );
-            if (onChangeFields.length) {
-                let context = this.context;
-                if (onChangeFields.length === 1) {
-                    const fieldContext = this.activeFields[onChangeFields[0]].context;
-                    context = makeContext([context, fieldContext], this.evalContext);
-                }
-                const otherChanges = await this.model._onchange({
-                    resModel: this.resModel,
-                    resIds: this.resId ? [this.resId] : [],
-                    changes: this._getChanges({ ...this._changes, ...changes }),
-                    fieldNames: onChangeFields,
-                    spec: getOnChangeSpec(this.activeFields),
-                    context,
-                });
-                Object.assign(changes, this._parseServerValues(otherChanges));
-            }
-            Object.assign(this._changes, changes);
-            Object.assign(this.data, changes);
-            this._setEvalContext();
-            this._removeInvalidFields(Object.keys(changes));
-            // FIXME: should we remove this from model? Only for standalone case
-            this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
-                record: this,
-                changes: this._getChanges(),
-            });
-        });
+        if (this._urgentSave) {
+            return this._update(changes);
+        }
+        return this.model.mutex.exec(() => this._update(changes));
     }
 
     async delete() {
@@ -157,73 +131,13 @@ export class Record extends DataPoint {
         });
     }
 
-    async save({ noReload, force, useSaveErrorDialog } = {}) {
-        await this._askChanges();
-        return this.model.mutex.exec(async () => {
-            if (!this.isDirty && !force) {
-                return true;
-            }
-            if (!this._checkValidity()) {
-                const items = [...this._invalidFields].map((fieldName) => {
-                    return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
-                }, this);
-                this._closeInvalidFieldsNotification = this.model.notification.add(
-                    markup(`<ul>${items.join("")}</ul>`),
-                    {
-                        title: _t("Invalid fields: "),
-                        type: "danger",
-                    }
-                );
-                return false;
-            }
-            const changes = this._getChanges();
-            delete changes.id; // id never changes, and should not be written
-            if (!Object.keys(changes).length) {
-                return true;
-            }
-            const kwargs = { context: this.context };
-            let resId = this.resId;
-            const creation = !resId;
-            try {
-                if (creation) {
-                    [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
-                } else {
-                    await this.model.orm.write(this.resModel, [resId], changes, kwargs);
-                }
-            } catch (e) {
-                if (useSaveErrorDialog) {
-                    return new Promise((resolve) => {
-                        this.model.dialog.add(FormErrorDialog, {
-                            message: e.data.message,
-                            onDiscard: () => {
-                                this._discard();
-                                resolve(true);
-                            },
-                            onStayHere: () => resolve(false),
-                        });
-                    });
-                }
-                if (!this.isInEdition) {
-                    await this._load(resId);
-                }
-                return false;
-            }
-            if (!noReload) {
-                await this._load(resId);
-                if (creation) {
-                    this.resIds.push(resId);
-                }
-            } else {
-                this._values = { ...this._values, ...this._changes };
-                this._changes = {};
-                this.isDirty = false;
-            }
-            return true;
-        });
-    }
-
     async load(resId = this.resId) {
         return this.model.mutex.exec(() => this._load(resId));
+    }
+
+    async save(options) {
+        await this._askChanges();
+        return this.model.mutex.exec(() => this._save(options));
     }
 
     async setInvalidField(fieldName) {
@@ -241,6 +155,14 @@ export class Record extends DataPoint {
 
     async unarchive() {
         return this.model.mutex.exec(() => this._toggleArchive(false));
+    }
+
+    // FIXME: should this be save({ urgent: true }) ?
+    urgentSave() {
+        this._urgentSave = true;
+        this.model.bus.trigger("WILL_SAVE_URGENTLY");
+        this._save({ noReload: true });
+        return this.isValid;
     }
 
     // -------------------------------------------------------------------------
@@ -404,6 +326,68 @@ export class Record extends DataPoint {
         }
     }
 
+    async _save({ noReload, force, useSaveErrorDialog } = {}) {
+        if (!this.isDirty && !force) {
+            return true;
+        }
+        if (!this._checkValidity()) {
+            const items = [...this._invalidFields].map((fieldName) => {
+                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
+            }, this);
+            this._closeInvalidFieldsNotification = this.model.notification.add(
+                markup(`<ul>${items.join("")}</ul>`),
+                {
+                    title: _t("Invalid fields: "),
+                    type: "danger",
+                }
+            );
+            return false;
+        }
+        const changes = this._getChanges();
+        delete changes.id; // id never changes, and should not be written
+        if (!Object.keys(changes).length) {
+            return true;
+        }
+        const kwargs = { context: this.context };
+        let resId = this.resId;
+        const creation = !resId;
+        try {
+            if (creation) {
+                [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
+            } else {
+                await this.model.orm.write(this.resModel, [resId], changes, kwargs);
+            }
+        } catch (e) {
+            if (useSaveErrorDialog) {
+                return new Promise((resolve) => {
+                    this.model.dialog.add(FormErrorDialog, {
+                        message: e.data.message,
+                        onDiscard: () => {
+                            this._discard();
+                            resolve(true);
+                        },
+                        onStayHere: () => resolve(false),
+                    });
+                });
+            }
+            if (!this.isInEdition) {
+                await this._load(resId);
+            }
+            return false;
+        }
+        if (!noReload) {
+            await this._load(resId);
+            if (creation) {
+                this.resIds.push(resId);
+            }
+        } else {
+            this._values = { ...this._values, ...this._changes };
+            this._changes = {};
+            this.isDirty = false;
+        }
+        return true;
+    }
+
     /**
      * For owl reactivity, it's better to only update the keys inside the evalContext
      * instead of replacing the evalContext itself, because a lot of components are
@@ -427,5 +411,37 @@ export class Record extends DataPoint {
         } else {
             return this._load(resId);
         }
+    }
+
+    async _update(changes) {
+        this.isDirty = true;
+        const onChangeFields = Object.keys(changes).filter(
+            (fieldName) => this.activeFields[fieldName].onChange
+        );
+        if (onChangeFields.length && !this._urgentSave) {
+            let context = this.context;
+            if (onChangeFields.length === 1) {
+                const fieldContext = this.activeFields[onChangeFields[0]].context;
+                context = makeContext([context, fieldContext], this.evalContext);
+            }
+            const otherChanges = await this.model._onchange({
+                resModel: this.resModel,
+                resIds: this.resId ? [this.resId] : [],
+                changes: this._getChanges({ ...this._changes, ...changes }),
+                fieldNames: onChangeFields,
+                spec: getOnChangeSpec(this.activeFields),
+                context,
+            });
+            Object.assign(changes, this._parseServerValues(otherChanges));
+        }
+        Object.assign(this._changes, changes);
+        Object.assign(this.data, changes);
+        this._setEvalContext();
+        this._removeInvalidFields(Object.keys(changes));
+        // FIXME: should we remove this from model? Only for standalone case
+        this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
+            record: this,
+            changes: this._getChanges(),
+        });
     }
 }

@@ -137,7 +137,7 @@ export class FormController extends Component {
             {
                 resModel: this.props.resModel,
                 resId: this.props.resId || false,
-                resIds: this.props.resIds,
+                resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
                 fields: this.props.fields,
                 activeFields,
                 viewMode: "form",
