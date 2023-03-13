@@ -605,6 +605,7 @@ export function waitUntil(selector, count = 1) {
         const timer = setTimeout(() => {
             observer.disconnect();
             reject(new Error(`Waited 5 second for ${selector}`));
+            console.error(`Waited 5 second for ${selector}`);
         }, 5000);
         const observer = new MutationObserver((mutations) => {
             if ($(selector).length === count) {
