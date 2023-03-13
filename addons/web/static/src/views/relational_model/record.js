@@ -262,7 +262,7 @@ export class Record extends DataPoint {
             } else if (type === "many2one") {
                 result[fieldName] = value ? value[0] : false;
             } else {
-                result[fieldName] = value;
+                result[fieldName] = value === null ? false : value;
             }
         }
         return result;

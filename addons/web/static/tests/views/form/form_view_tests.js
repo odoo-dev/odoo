@@ -6974,7 +6974,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".oe_stat_button"));
     });
 
-    QUnit.tttt("clicking on a stat button with no context", async function (assert) {
+    QUnit.test("clicking on a stat button with no context", async function (assert) {
         assert.expect(1);
 
         const actionService = {
@@ -7011,7 +7011,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".oe_stat_button"));
     });
 
-    QUnit.tttt("diplay a stat button outside a buttonbox", async function (assert) {
+    QUnit.test("diplay a stat button outside a buttonbox", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7044,7 +7044,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("diplay something else than a button in a buttonbox", async function (assert) {
+    QUnit.test("diplay something else than a button in a buttonbox", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7078,7 +7078,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "invisible fields are not considered as visible in a buttonbox",
         async function (assert) {
             await makeView({
@@ -7115,7 +7115,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("display correctly buttonbox, in large size class", async function (assert) {
+    QUnit.test("display correctly buttonbox, in large size class", async function (assert) {
         const uiService = {
             start(env) {
                 Object.defineProperty(env, "isSmall", {
@@ -7159,7 +7159,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty button box", async function (assert) {
+    QUnit.test("empty button box", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7175,7 +7175,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o-form-buttonbox");
     });
 
-    QUnit.tttt("button box accepts extra classes", async function (assert) {
+    QUnit.test("button box accepts extra classes", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7530,7 +7530,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.tttt("modifiers are considered on multiple <footer/> tags", async function (assert) {
+    QUnit.test("modifiers are considered on multiple <footer/> tags", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -7580,7 +7580,7 @@ QUnit.module("Views", (hooks) => {
         }
     });
 
-    QUnit.tttt("buttons in footer are moved to $buttons if necessary", async function (assert) {
+    QUnit.test("buttons in footer are moved to $buttons if necessary", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -7609,7 +7609,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target.querySelector(".o_form_view"), "button.infooter");
     });
 
-    QUnit.tttt("open new record even with warning message", async function (assert) {
+    QUnit.test("open new record even with warning message", async function (assert) {
         serverData.models.partner.onchanges = { foo: true };
 
         await makeView({
@@ -7619,12 +7619,13 @@ QUnit.module("Views", (hooks) => {
             arch: `<form><group><field name="foo"/></group></form>`,
             resId: 2,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     return Promise.resolve({
                         warning: {
                             title: "Warning",
                             message: "Any warning.",
                         },
+                        value: {},
                     });
                 }
             },
@@ -7650,7 +7651,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("render stat button with string inline", async function (assert) {
+    QUnit.test("render stat button with string inline", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7737,7 +7738,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("no field should be focused", async function (assert) {
+    QUnit.test("no field should be focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7749,7 +7750,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, document.body);
     });
 
-    QUnit.tttt("in create mode, first field is focused", async function (assert) {
+    QUnit.test("in create mode, first field is focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7768,7 +7769,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("autofocus fields are focused", async function (assert) {
+    QUnit.test("autofocus fields are focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7781,7 +7782,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("in create mode, autofocus fields are focused", async function (assert) {
+    QUnit.test("in create mode, autofocus fields are focused", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7794,7 +7795,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("autofocus first visible field", async function (assert) {
+    QUnit.test("autofocus first visible field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7807,7 +7808,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "no autofocus with disable_autofocus option [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -7829,7 +7830,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("In READ mode, focus the first primary button of the form", async function (assert) {
+    QUnit.test("In READ mode, focus the first primary button of the form", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7854,7 +7855,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("button.firstButton"), document.activeElement);
     });
 
-    QUnit.tttt("check scroll on small height screens", async function (assert) {
+    QUnit.test("check scroll on small height screens", async function (assert) {
         serverData.views = {
             "partner,false,list": '<tree><field name="display_name"/></tree>',
             "partner_type,false,list": '<tree><field name="name"/></tree>',
@@ -7909,7 +7910,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".modal-dialog");
     });
 
-    QUnit.tttt("correct amount of buttons", async function (assert) {
+    QUnit.test("correct amount of buttons", async function (assert) {
         let screenSize = 7;
         const uiService = {
             start(env) {
@@ -7971,7 +7972,7 @@ QUnit.module("Views", (hooks) => {
         await assertFormContainsNButtonsWithSizeClass(6, 7);
     });
 
-    QUnit.tttt("can set bin_size to false in context", async function (assert) {
+    QUnit.test("can set bin_size to false in context", async function (assert) {
         assert.expect(1);
         await makeView({
             type: "form",
@@ -7983,7 +7984,7 @@ QUnit.module("Views", (hooks) => {
                 bin_size: false,
             },
             mockRPC(route, args) {
-                if (args.method === "read") {
+                if (args.method === "unity_read") {
                     assert.strictEqual(
                         args.kwargs.context.bin_size,
                         false,
@@ -7994,16 +7995,16 @@ QUnit.module("Views", (hooks) => {
         });
     });
 
-    QUnit.tttt("create with false values", async function (assert) {
+    QUnit.test("create with false values", async function (assert) {
         assert.expect(1);
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
             arch: `<form><field name="bar"/></form>`,
-            mockRPC(route, args) {
-                if (args.method === "create") {
-                    assert.strictEqual(args.args[0].bar, false);
+            mockRPC(route, { method, args }) {
+                if (method === "create") {
+                    assert.deepEqual(args[0][0].bar, false);
                 }
             },
         });
@@ -8051,7 +8052,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "read", "read", "read"]);
     });
 
-    QUnit.tttt("onchanges are applied before checking if it can be saved", async function (assert) {
+    QUnit.test("onchanges are applied before checking if it can be saved", async function (assert) {
         serverData.models.partner.onchanges.foo = function (obj) {};
         serverData.models.partner.fields.foo.required = true;
 
@@ -8069,7 +8070,7 @@ QUnit.module("Views", (hooks) => {
             resId: 2,
             async mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await def;
                 }
             },
@@ -8081,10 +8082,10 @@ QUnit.module("Views", (hooks) => {
         def.resolve();
         await nextTick();
 
-        assert.verifySteps(["get_views", "read", "onchange", "danger"]);
+        assert.verifySteps(["get_views", "unity_read", "onchange2", "danger"]);
     });
 
-    QUnit.tttt("display toolbar", async function (assert) {
+    QUnit.test("display toolbar", async function (assert) {
         assert.expect(7);
 
         const actionService = {
@@ -8136,7 +8137,7 @@ QUnit.module("Views", (hooks) => {
         await toggleMenuItem(target, "Action partner");
     });
 
-    QUnit.tttt("execute ActionMenus actions", async function (assert) {
+    QUnit.test("execute ActionMenus actions", async function (assert) {
         const actionService = {
             start() {
                 return {
@@ -8177,13 +8178,13 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "read",
+            "unity_read",
             `{"action_id":29,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1],"active_model":"partner","active_domain":[]}}`,
-            "read",
+            "unity_read",
         ]);
     });
 
-    QUnit.tttt("execute ActionMenus actions (create)", async function (assert) {
+    QUnit.test("execute ActionMenus actions (create)", async function (assert) {
         const actionService = {
             start() {
                 return {
@@ -8228,17 +8229,17 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "onchange",
+            "onchange2",
             "create",
-            "read",
+            "unity_read",
             `{"action_id":29,"context":{"lang":"en","uid":7,"tz":"taht","active_id":6,"active_ids":[6],"active_model":"partner","active_domain":[]}}`,
-            "read",
+            "unity_read",
         ]);
 
         assert.strictEqual(target.querySelector(".o_field_widget[name='foo'] input").value, "test");
     });
 
-    QUnit.tttt("control panel is not present in FormViewDialogs", async function (assert) {
+    QUnit.test("control panel is not present in FormViewDialogs", async function (assert) {
         serverData.models.partner.records[0].product_id = 37;
         serverData.views = {
             "product,false,form": `
@@ -8365,7 +8366,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_widget[name=trululu] input"));
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "do not activate an hidden tab when switching between records",
         async function (assert) {
             await makeView({
@@ -8418,7 +8419,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("support anchor tags with action type", async function (assert) {
+    QUnit.test("support anchor tags with action type", async function (assert) {
         assert.expect(2);
 
         const actionService = {
@@ -8449,9 +8450,9 @@ QUnit.module("Views", (hooks) => {
     QUnit.tttt(
         "do not perform extra RPC to read invisible many2one fields",
         async function (assert) {
-            // This test isn't really meaningful anymore, since default_get and (first) onchange rpcs
-            // have been merged in a single onchange rpc, returning nameget for many2one fields. But it
-            // isn't really costly, and it still checks rpcs done when creating a new record with a m2o.
+            // WOWL TODO: use this test to check the unity spec:
+            // an invisible manyone should only requests the id, not the display_name
+            // -> invisible: { trululu: 1/{} }, visible: { trululu: { fields: { display_name }}}
             serverData.models.partner.fields.trululu.default = 2;
 
             await makeView({
@@ -8463,11 +8464,11 @@ QUnit.module("Views", (hooks) => {
                     assert.step(args.method);
                 },
             });
-            assert.verifySteps(["get_views", "onchange"]);
+            assert.verifySteps(["get_views", "onchange2"]);
         }
     );
 
-    QUnit.tttt("do not perform extra RPC to read invisible x2many fields", async function (assert) {
+    QUnit.test("do not perform extra RPC to read invisible x2many fields", async function (assert) {
         serverData.models.partner.records[0].p = [2]; // one2many
         serverData.models.partner.records[0].product_ids = [37]; // one2many
         serverData.models.partner.records[0].timmy = [12]; // many2many
@@ -8484,13 +8485,21 @@ QUnit.module("Views", (hooks) => {
                         </field>
                         <field name="timmy" invisible="1" widget="many2many_tags"/>
                     </form>`,
-            mockRPC(route, args) {
-                assert.step(args.method);
+            mockRPC(route, { method, kwargs }) {
+                assert.step(method);
+                if (method === "unity_read") {
+                    assert.deepEqual(kwargs.fields, {
+                        p: 1,
+                        product_ids: 1,
+                        timmy: 1,
+                        display_name: 1,
+                    });
+                }
             },
             resId: 1,
         });
 
-        assert.verifySteps(["get_views", "read"]);
+        assert.verifySteps(["get_views", "unity_read"]);
     });
 
     QUnit.tttt("default_order on x2many embedded view", async function (assert) {
@@ -8568,7 +8577,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector('.o_field_widget[name="trululu"] input'));
     });
 
-    QUnit.tttt("form rendering with groups with col/colspan", async function (assert) {
+    QUnit.test("form rendering with groups with col/colspan", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -8784,7 +8793,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "form rendering innergroup: separator should take one line",
         async function (assert) {
             await makeView({
@@ -8817,7 +8826,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("outer and inner groups string attribute", async function (assert) {
+    QUnit.test("outer and inner groups string attribute", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -8864,7 +8873,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("inner group with invisible cells", async (assert) => {
+    QUnit.test("inner group with invisible cells", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -8895,7 +8904,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_wrap_field .cell2");
     });
 
-    QUnit.tttt("form group with newline tag inside", async function (assert) {
+    QUnit.test("form group with newline tag inside", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
