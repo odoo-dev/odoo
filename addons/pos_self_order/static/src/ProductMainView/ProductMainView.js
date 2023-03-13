@@ -11,6 +11,7 @@ export class ProductMainView extends Component {
     };
     setup() {
         this.state = useState(this.env.state);
+        this.state.currentProduct = this.props.product.product_id;
         this.selfOrder = useSelfOrder();
         this.formatMonetary = formatMonetary;
     }

@@ -15,7 +15,6 @@ export class ProductList extends Component {
     static components = { NavBar };
     setup() {
         this.state = useState(this.env.state);
-
         this.private_state = useState({
             selected_tags: new Set(),
             search_is_focused: false,
@@ -37,8 +36,6 @@ export class ProductList extends Component {
      *             it filters the products based on the selected tags and the search input
      */
     filteredProducts = () => {
-        // here we only want to return the products
-        // that have the selected tags and that match the search input
         return this.props.productList.filter((product) => {
             return (
                 this.itemHasAllOfTheTags(product, this.private_state.selected_tags) &&
@@ -63,7 +60,6 @@ export class ProductList extends Component {
      * @description returns true if the item matches the search input
      */
     itemMatchesSearch = (item, search_input) => {
-        // TODO: maybe there is a smarter function we could use here
         if (!search_input) {
             return true;
         }

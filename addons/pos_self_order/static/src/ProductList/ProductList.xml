@@ -36,7 +36,7 @@
     </t>
 
     <t t-name="ProductCard" owl="1">
-        <div class="o_self_order_item_card d-flex flex-row card my-2 rounded shadow-sm overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="{{product.product_id}}">
+        <div class="o_self_order_item_card d-flex flex-row card my-2 rounded shadow-sm overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
             <div class="o_self_order_item_card--image">
                 <img class="h-100 w-100" t-attf-src="/pos-self-order/get-images/{{ product.product_id }}" alt="Product image"/>
             </div>

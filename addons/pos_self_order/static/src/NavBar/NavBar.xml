@@ -9,18 +9,11 @@
     <!-- the logic of changing the shown page is done in the parent -->
     <t t-if="props.previousPage">
     <!-- back arrow  -->
-        <svg t-on-click = "() => env.navigate(props.previousPage)"
-            xmlns="http://www.w3.org/2000/svg" 
-            width="32" height="32" fill="currentColor" 
-            class="bi bi-arrow-left text-white" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-        </svg>
+        <i class="fa fa-arrow-left fa-lg fa-inverse"
+            t-on-click = "() => env.navigate(props.previousPage)"
+        >
     </t>
-<!-- Restaurant NAME and Table NUMBER appear in the NAVBAR-->
-<!-- The NavBar gets this data from the selfOrder.config -->
-<!-- This is a global variable that is set in the POSController -->
-<!-- FIXME: this span is not centered -->
-        <h2 class="text-white m-0"><t t-esc="selfOrder.config.pos_name"/></h2>
+    <h2 class="text-white m-0"><t t-esc="selfOrder.config.pos_name"/></h2>
     </nav>
     </t>
 </templates>
