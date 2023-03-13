@@ -9350,7 +9350,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("buttons are disabled until status bar action is resolved", async function (assert) {
+    QUnit.test("buttons are disabled until status bar action is resolved", async function (assert) {
         const def = makeDeferred();
         const actionService = {
             start() {
@@ -9447,7 +9447,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("buttons are disabled until button box action is resolved", async function (assert) {
+    QUnit.test("buttons are disabled until button box action is resolved", async function (assert) {
         const def = makeDeferred();
         const actionService = {
             start() {
@@ -9544,7 +9544,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         'buttons with "confirm" attribute save before calling the method',
         async function (assert) {
             const actionService = {
@@ -9588,17 +9588,17 @@ QUnit.module("Views", (hooks) => {
                 "button should no longer be disabled"
             );
 
-            assert.verifySteps(["get_views", "onchange"]);
+            assert.verifySteps(["get_views", "onchange2"]);
 
             // click on button, and click on ok in confirm dialog
             await click(target.querySelector(".o_statusbar_buttons button"));
             assert.verifySteps([]);
             await click(target.querySelector(".modal-footer button.btn-primary"));
-            assert.verifySteps(["create", "read", "execute_action"]);
+            assert.verifySteps(["create", "unity_read", "execute_action"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'buttons with "confirm-title" and "confirm-label" attributes',
         async function (assert) {
             await makeView({
@@ -9632,11 +9632,11 @@ QUnit.module("Views", (hooks) => {
                 "confirmation dialog should have correct confirmation label"
             );
 
-            assert.verifySteps(["get_views", "onchange"]);
+            assert.verifySteps(["get_views", "onchange2"]);
         }
     );
 
-    QUnit.tttt('buttons with "confirm" attribute: click twice on "Ok"', async function (assert) {
+    QUnit.test('buttons with "confirm" attribute: click twice on "Ok"', async function (assert) {
         const actionService = {
             start() {
                 return {
@@ -9663,7 +9663,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
 
         await click(target.querySelector(".o_statusbar_buttons button"));
         assert.verifySteps([]);
@@ -9671,10 +9671,10 @@ QUnit.module("Views", (hooks) => {
         click(target.querySelector(".modal-footer button.btn-primary"));
         await Promise.resolve();
         await click(target.querySelector(".modal-footer button.btn-primary"));
-        assert.verifySteps(["create", "read", "execute_action"]);
+        assert.verifySteps(["create", "unity_read", "execute_action"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "buttons are disabled until action is resolved (in dialogs)",
         async function (assert) {
             const def = makeDeferred();
@@ -9729,7 +9729,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("multiple clicks on save should reload only once", async function (assert) {
+    QUnit.test("multiple clicks on save should reload only once", async function (assert) {
         const def = makeDeferred();
 
         await makeView({
@@ -9754,13 +9754,13 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.verifySteps([
             "get_views",
-            "read", // initial read to render the view
+            "unity_read", // initial read to render the view
             "write", // write on save
-            "read", // read on reload
+            "unity_read", // read on reload
         ]);
     });
 
-    QUnit.tttt("form view is not broken if save operation fails", async function (assert) {
+    QUnit.test("form view is not broken if save operation fails", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9782,14 +9782,14 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "read", // initial read to render the view
+            "unity_read", // initial read to render the view
             "write", // write on save (it fails, does not trigger a read)
             "write", // write on save (it works)
-            "read", // read on reload
+            "unity_read", // read on reload
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "form view is not broken if save failed in readonly mode on field changed",
         async function (assert) {
             let failFlag = false;
@@ -9811,8 +9811,8 @@ QUnit.module("Views", (hooks) => {
                         if (failFlag) {
                             return Promise.reject();
                         }
-                    } else if (args.method === "read") {
-                        assert.step("read");
+                    } else if (args.method === "unity_read") {
+                        assert.step("unity_read");
                     }
                 },
             });
@@ -9840,11 +9840,11 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "read",
+                "unity_read",
                 "write", // fails
-                "read", // must reload when saving fails
+                "unity_read", // must reload when saving fails
                 "write", // works
-                "read", // must reload when saving works
+                "unity_read", // must reload when saving works
             ]);
         }
     );
