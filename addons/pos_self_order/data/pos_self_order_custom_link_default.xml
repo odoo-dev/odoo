@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <record id="pos_self_order_custom_link_default" model="pos_self_order.custom_link">
+        <!-- <record id="pos_self_order_custom_link_default" model="pos_self_order.custom_link">
             <field name="name">View Menu</field>
-            <!-- <field name="url" >http://localhost:8069/pos-self-order/products</field>  -->
-            <!-- <field name="url" eval="obj().env.['ir.config_parameter'].get_param('web.base.url')"/>  -->
-        </record>
+        </record> -->
             <!-- <field name="url" eval="obj(ref(ir.config_parameter)).get_param('web.base.url')" model="ir.config.parameter"></field>  -->
             <!-- <field name="url" eval="obj.get_base_url" ></field>  -->
             <!-- <field name="name" eval="obj(ref('base.partner_admin')).name" model="res.partner"/> -->
