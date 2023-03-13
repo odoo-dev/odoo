@@ -570,3 +570,37 @@ QUnit.test("activity mark done popover click on discard", async (assert) => {
     await click(".o-mail-ActivityMarkAsDone button:contains(Discard)");
     assert.containsNone($, ".o-mail-ActivityMarkAsDone");
 });
+
+QUnit.test("Activity are sorted by deadline", async (assert) => {
+    patchDate(2023, 0, 11, 12, 0, 0);
+    const today = new Date();
+    const dateBefore = new Date();
+    dateBefore.setDate(today.getDate() - 5);
+    const dateAfter = new Date();
+    dateAfter.setDate(today.getDate() + 4);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    pyEnv["mail.activity"].create({
+        date_deadline: date_to_str(dateAfter),
+        res_id: partnerId,
+        res_model: "res.partner",
+        state: "planned",
+    });
+    pyEnv["mail.activity"].create({
+        date_deadline: date_to_str(today),
+        res_id: partnerId,
+        res_model: "res.partner",
+        state: "today",
+    });
+    pyEnv["mail.activity"].create({
+        date_deadline: date_to_str(dateBefore),
+        res_id: partnerId,
+        res_model: "res.partner",
+        state: "overdue",
+    });
+    const { openFormView } = await start();
+    await openFormView("res.partner", partnerId);
+    assert.containsOnce($, ".o-mail-Activity:eq(0):contains(5 days overdue:)");
+    assert.containsOnce($, ".o-mail-Activity:eq(1):contains(Today:)");
+    assert.containsOnce($, ".o-mail-Activity:eq(2):contains(Due in 4 days:)");
+});
