@@ -68,7 +68,7 @@
                     datetime="failure.datetime"
                     displayName="failure.modelName"
                     iconSrc="failure.iconSrc"
-                    isLast="failure_last"
+                    isLast="displayedPreviews.length === 0 and failure_last"
                     hasMarkAsReadButton="true"
                     onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
                     onSwipeRight="hasTouch ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
