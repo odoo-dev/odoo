@@ -11513,7 +11513,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "company_dependent field in form view, in multi company group",
         async function (assert) {
             serverData.models.partner.fields.product_id.company_dependent = true;
@@ -11558,7 +11558,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "company_dependent field in form view, not in multi company group",
         async function (assert) {
             serverData.models.partner.fields.product_id.company_dependent = true;
@@ -11594,7 +11594,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Auto save: save when page changed", async function (assert) {
+    QUnit.test("Auto save: save when page changed", async function (assert) {
         assert.expect(10);
 
         serverData.actions[1] = {
@@ -11670,7 +11670,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector('.o_field_widget[name="name"] input').value, "aaa");
     });
 
-    QUnit.tttt("Auto save: save when breadcrumb clicked", async function (assert) {
+    QUnit.test("Auto save: save when breadcrumb clicked", async function (assert) {
         assert.expect(7);
 
         serverData.actions[1] = {
@@ -11730,7 +11730,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector('.o_field_widget[name="name"] input').value, "aaa");
     });
 
-    QUnit.tttt("Auto save: error on save when breadcrumb clicked", async function (assert) {
+    QUnit.test("Auto save: error on save when breadcrumb clicked", async function (assert) {
         assert.expect(3);
 
         registry.category("services").add("error", errorService);
@@ -11787,7 +11787,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_error_dialog");
     });
 
-    QUnit.tttt("Auto save: save when action changed", async function (assert) {
+    QUnit.test("Auto save: save when action changed", async function (assert) {
         assert.expect(6);
 
         serverData.actions[1] = {
@@ -11865,7 +11865,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector('.o_field_widget[name="name"] input').value, "aaa");
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
         assert.expect(4);
 
         await makeView({
@@ -11900,7 +11900,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["save"], "should not prevent unload");
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -11930,7 +11930,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["prevented"], "should not save because of invalid field");
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (not dirty)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (not dirty)", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -11955,7 +11955,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([], "should not save because we do not change anything");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (not dirty but trailing spaces)",
         async function (assert) {
             serverData.models.partner.fields.foo.trim = true;
@@ -11984,7 +11984,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (not dirty) with text field",
         async function (assert) {
             serverData.models.partner.fields.bloup = {
@@ -12024,7 +12024,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Auto save: save on closing tab/browser (detached form)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (detached form)", async function (assert) {
         serverData.actions[1] = {
             id: 1,
             name: "Partner",
@@ -12080,7 +12080,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
         assert.expect(1);
 
         serverData.models.partner.onchanges = {
@@ -12103,7 +12103,7 @@ QUnit.module("Views", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, { args, method, model }) {
-                if (method === "onchange" && model === "partner") {
+                if (method === "onchange2" && model === "partner") {
                     return def;
                 }
                 if (method === "write" && model === "partner") {
@@ -12118,7 +12118,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (onchanges 2)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (onchanges 2)", async function (assert) {
         assert.expect(1);
 
         serverData.models.partner.onchanges = {
@@ -12139,7 +12139,7 @@ QUnit.module("Views", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, { args, method }) {
-                if (method === "onchange") {
+                if (method === "onchange2") {
                     return def;
                 }
                 if (method === "write") {
@@ -12155,7 +12155,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (pending change)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (pending change)", async function (assert) {
         assert.expect(5);
 
         await makeView({
@@ -12181,10 +12181,10 @@ QUnit.module("Views", (hooks) => {
         window.dispatchEvent(new Event("beforeunload"));
         await nextTick();
 
-        assert.verifySteps(["get_views", "read", "write"]);
+        assert.verifySteps(["get_views", "unity_read", "write"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (onchanges + pending change)",
         async function (assert) {
             assert.expect(6);
@@ -12209,7 +12209,7 @@ QUnit.module("Views", (hooks) => {
                 resId: 1,
                 mockRPC(route, { args, method }) {
                     assert.step(method);
-                    if (method === "onchange") {
+                    if (method === "onchange2") {
                         return def;
                     }
                     if (method === "write") {
@@ -12237,11 +12237,11 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "read", "onchange", "write"]);
+            assert.verifySteps(["get_views", "unity_read", "onchange2", "write"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (invalid pending change)",
         async function (assert) {
             assert.expect(3);
@@ -12269,11 +12269,11 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "read"]);
+            assert.verifySteps(["get_views", "unity_read"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (onchanges + invalid field)",
         async function (assert) {
             serverData.models.partner.onchanges = {
@@ -12297,7 +12297,7 @@ QUnit.module("Views", (hooks) => {
                 resId: 1,
                 mockRPC(route, { method }) {
                     assert.step(method);
-                    if (method === "onchange") {
+                    if (method === "onchange2") {
                         return def;
                     }
                     if (method === "write") {
@@ -12312,11 +12312,11 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "read", "onchange"]);
+            assert.verifySteps(["get_views", "unity_read", "onchange2"]);
         }
     );
 
-    QUnit.tttt("Auto save: save when action button clicked", async function (assert) {
+    QUnit.test("Auto save: save when action button clicked", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12348,7 +12348,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget[name='foo'] input").value, "test");
     });
 
-    QUnit.tttt("Auto save: error on save when action button clicked", async function (assert) {
+    QUnit.test("Auto save: error on save when action button clicked", async function (assert) {
         assert.expect(3);
 
         registry.category("services").add("error", errorService);
@@ -12384,7 +12384,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_error_dialog");
     });
 
-    QUnit.tttt("Auto save: save when create button clicked", async function (assert) {
+    QUnit.test("Auto save: save when create button clicked", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12410,7 +12410,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".breadcrumb-item.active").textContent, "New");
     });
 
-    QUnit.tttt("Auto save: error on save when create button clicked", async function (assert) {
+    QUnit.test("Auto save: error on save when create button clicked", async function (assert) {
         assert.expect(3);
 
         registry.category("services").add("error", errorService);
