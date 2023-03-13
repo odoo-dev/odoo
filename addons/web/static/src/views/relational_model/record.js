@@ -34,6 +34,7 @@ export class Record extends DataPoint {
         this.selected = false; // TODO: rename into isSelected?
         this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
+        this._closeInvalidFieldsNotification = () => {};
     }
 
     // -------------------------------------------------------------------------
@@ -132,6 +133,8 @@ export class Record extends DataPoint {
         this.data = { ...this._values };
         this._setEvalContext();
         this._invalidFields.clear();
+        this._closeInvalidFieldsNotification();
+        this._closeInvalidFieldsNotification = () => {};
     }
 
     async save({ noReload, force } = {}) {
@@ -145,7 +148,7 @@ export class Record extends DataPoint {
             const items = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
             }, this);
-            this.model.notification.add(markup(`<ul>${items.join("")}</ul>`), {
+            this._closeInvalidFieldsNotification = this.model.notification.add(markup(`<ul>${items.join("")}</ul>`), {
                 title: _t("Invalid fields: "),
                 type: "danger",
             });

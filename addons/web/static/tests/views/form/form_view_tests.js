@@ -6384,7 +6384,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "unity_read", "onchange2"]);
     });
 
-    QUnit.tttt("rpc complete after destroying parent", async function (assert) {
+    QUnit.test("rpc complete after destroying parent", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -6436,7 +6436,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_view");
     });
 
-    QUnit.tttt("onchanges that complete after discarding", async function (assert) {
+    QUnit.test("onchanges that complete after discarding", async function (assert) {
         serverData.models.partner.onchanges = {
             foo: function (obj) {
                 obj.int_field = obj.foo.length + 1000;
@@ -6451,7 +6451,7 @@ QUnit.module("Views", (hooks) => {
             arch: `<form><field name="foo"/><field name="int_field"/></form>`,
             resId: 2,
             async mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step("onchange is done");
                     await def;
                 }
@@ -11116,7 +11116,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o-autocomplete.dropdown input"));
     });
 
-    QUnit.tttt("discard after a failed save (and close notifications)", async function (assert) {
+    QUnit.test("discard after a failed save (and close notifications)", async function (assert) {
         patchWithCleanup(browser, { setTimeout: () => 1 });
 
         serverData.views = {
