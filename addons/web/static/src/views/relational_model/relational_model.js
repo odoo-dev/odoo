@@ -136,7 +136,7 @@ export class RelationalModel extends Model {
         const fieldSpec = getFieldsSpec(params.activeFields, params.fields);
         console.log("Unity field spec", fieldSpec);
         const unityReadSpec = {
-            context: { ...params.context, bin_size: true },
+            context: { bin_size: true, ...params.context },
             fields: fieldSpec,
         };
         if (params.viewMode === "form") {
@@ -235,7 +235,7 @@ export class RelationalModel extends Model {
     async loadRecord({ resModel, resId, activeFields, fields, context }) {
         const fieldSpec = getFieldsSpec(activeFields, fields);
         const unityReadSpec = {
-            context: { ...context, bin_size: true },
+            context: { bin_size: true, ...context },
             fields: fieldSpec,
         };
         unityReadSpec.method = "read";
