@@ -17,6 +17,7 @@ QUnit.test("basic rendering", async (assert) => {
     assert.containsOnce($, ".o-mail-Call");
     assert.containsOnce($, ".o-mail-CallParticipantCard[aria-label='Mitchell Admin']");
     assert.containsOnce($, ".o-mail-CallActionList");
+    assert.containsOnce($, ".o-mail-CallMenu-buttonContent");
     assert.containsN($, ".o-mail-CallActionList button", 6);
     assert.containsOnce($, "button[aria-label='Unmute'], button[aria-label='Mute']"); // FIXME depends on current browser permission
     assert.containsOnce($, ".o-mail-CallActionList button[aria-label='Deafen']");
@@ -41,7 +42,7 @@ QUnit.test("should not display call UI when no more members (self disconnect)", 
 QUnit.test("show call UI in chat window when in call", async (assert) => {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({ name: "General" });
-    await start();
+    const { env } = await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem:contains(General)");
     assert.containsOnce($, ".o-mail-ChatWindow");
@@ -57,6 +58,11 @@ QUnit.test("show call UI in chat window when in call", async (assert) => {
         $,
         ".o-mail-ChatWindow-header .o-mail-ChatWindow-command[title='Start a Call']"
     );
+    /**
+     * during the tests, the browser is not really closed,
+     * so we need to end the call manually to avoid memory leaks.
+     */
+    env.services["mail.rtc"]?.endCall();
 });
 
 QUnit.test("should disconnect when closing page while in call", async (assert) => {
@@ -131,4 +137,57 @@ QUnit.test("no default rtc after joining a group conversation", async (assert) =
     assert.containsOnce($, ".o-mail-DiscussCategoryItem");
     assert.containsNone($, ".o-mail-Discuss-content .o-mail-Message");
     assert.containsNone($, ".o-mail-Call");
+});
+
+QUnit.test("should display invitations", async (assert) => {
+    patchWithCleanup(
+        browser,
+        {
+            Audio: class extends Audio {
+                pause() {
+                    assert.step("pause_sound_effect");
+                }
+                play() {
+                    assert.step("play_sound_effect");
+                }
+            },
+        },
+        { pure: true }
+    );
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General" });
+    const partnerId = pyEnv["res.partner"].create({ name: "InvitationSender" });
+    const memberId = pyEnv["mail.channel.member"].create({
+        channel_id: channelId,
+        partner_id: partnerId,
+    });
+    const sessionId = pyEnv["mail.channel.rtc.session"].create({
+        channel_member_id: memberId,
+        channel_id: channelId,
+    });
+    await start();
+    // Simulate receive call invitation
+    await afterNextRender(() => {
+        pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.record/insert", {
+            Thread: {
+                id: channelId,
+                model: "mail.channel",
+                rtcInvitingSession: { id: sessionId, channelMember: { id: memberId } },
+            },
+        });
+    });
+    assert.containsOnce($, ".o-mail-CallInvitation");
+    assert.verifySteps(["play_sound_effect"]);
+    // Simulate stop receiving call invitation
+    await afterNextRender(() => {
+        pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.record/insert", {
+            Thread: {
+                id: channelId,
+                model: "mail.channel",
+                rtcInvitingSession: [["unlink"]],
+            },
+        });
+    });
+    assert.containsNone($, ".o-mail-CallInvitation");
+    assert.verifySteps(["pause_sound_effect"]);
 });

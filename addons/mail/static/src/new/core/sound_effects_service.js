@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
+import { browser } from "@web/core/browser/browser";
 
 export class SoundEffects {
     constructor(env) {
@@ -30,7 +31,7 @@ export class SoundEffects {
      *   If not provided, uses the default volume of this sound effect.
      */
     play(soundEffectName, { loop = false, volume } = {}) {
-        if (typeof Audio === "undefined") {
+        if (typeof browser.Audio === "undefined") {
             return;
         }
         const soundEffect = this.soundEffects[soundEffectName];
@@ -38,12 +39,14 @@ export class SoundEffects {
             return;
         }
         if (!soundEffect.audio) {
-            const audio = new window.Audio();
+            const audio = new browser.Audio();
             const ext = audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
             audio.src = soundEffect.path + ext;
             soundEffect.audio = audio;
         }
-        soundEffect.audio.pause();
+        if (!soundEffect.audio.paused) {
+            soundEffect.audio.pause();
+        }
         soundEffect.audio.currentTime = 0;
         soundEffect.audio.loop = loop;
         soundEffect.audio.volume = volume ?? soundEffect.defaultVolume ?? 1;

@@ -10,6 +10,8 @@ import { ActivityMenu } from "@mail/new/web/activity/activity_menu";
 import { ChatWindowContainer } from "@mail/new/web/chat_window/chat_window_container";
 import { MessagingMenu } from "@mail/new/web/messaging_menu/messaging_menu";
 import { messagingService } from "@mail/new/core/messaging_service";
+import { CallInvitations } from "@mail/new/rtc/call_invitations";
+import { CallMenu } from "@mail/new/rtc/call_menu";
 
 import { patch } from "@web/core/utils/patch";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
@@ -100,6 +102,9 @@ function setupMainComponentRegistry() {
     const mainComponentRegistry = registry.category("main_components");
     mainComponentRegistry.add("mail.ChatWindowContainer", {
         Component: ChatWindowContainer,
+    });
+    mainComponentRegistry.add("mail.CallInvitations", {
+        Component: CallInvitations,
     });
     if (!registry.category("actions").contains("mail.action_discuss")) {
         registry.category("actions").add("mail.action_discuss", DiscussClientAction);
@@ -200,20 +205,13 @@ async function setupMessagingServiceRegistries({
         }
     });
 
-    registry.category("systray").add(
-        "mail.activity_menu",
-        {
-            Component: ActivityMenu,
-        },
-        { sequence: 20 }
-    );
-    registry.category("systray").add(
-        "mail.messaging_menu",
-        {
-            Component: MessagingMenu,
-        },
-        { sequence: 25 }
-    );
+    registry.category("systray").add("mail.CallMenu", { Component: CallMenu }, { sequence: 15 });
+    registry
+        .category("systray")
+        .add("mail.activity_menu", { Component: ActivityMenu }, { sequence: 20 });
+    registry
+        .category("systray")
+        .add("mail.messaging_menu", { Component: MessagingMenu }, { sequence: 25 });
 }
 
 /**
