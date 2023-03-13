@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="ProductMainView" owl="1">
-        <NavBar previousPage="'products'"/>
-            <!-- this padding-bottom is important in order for the Cart button not to -->
-            <!-- appear over the last item -->
+        <NavBar previousPage="'/products'"/>
             <div class="py-3">
                 <div class="px-3 border-bottom">
                     <img class="w-100 h-100 rounded" style="max-height: 400px; object-fit: cover;" t-attf-src="/pos-self-order/get-images/{{ props.product.product_id }}"  alt="Product image"/>

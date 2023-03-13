@@ -7,7 +7,7 @@
     <!-- to be visible and to call this function when pressed -->
     <!-- to be clear: the back button only calls the function provided by the parent as a prop -->
     <!-- the logic of changing the shown page is done in the parent -->
-    <t t-if="props.previousPage or props.previousPage === ''">
+    <t t-if="props.previousPage">
     <!-- back arrow  -->
         <svg t-on-click = "() => env.navigate(props.previousPage)"
             xmlns="http://www.w3.org/2000/svg" 

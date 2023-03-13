@@ -1,84 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
+
+
     <t t-name="ProductList" owl="1">
         <div class="sticky-top">
-            <NavBar previousPage="''" />
-<!-- tag and search bar -->
+            <NavBar previousPage="'/'" />
             <div class="d-flex justify-content-center align-items-center p-0 m-0 bg-100 shadow-sm">
-    <!-- search input -->
                 <t t-if="private_state.search_is_focused">
-                    <div class="p-3 w-100 d-flex align-items-center input-groupt">
-                        <input type="text" class="form-control " t-ref="searchInput" placeholder="Pizza"
-                                t-model="private_state.search_input"/>
-                        <button class="btn btn-outline-primary"
-                                t-on-click="() => closeSearch()">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
+                    <t t-call="SearchBox"/>
                     </t>
                 <t t-else="">
-            <!-- TODO: this focusearch() only gets called when you click on the very small svg icon
-            we have to make it so it's called when you click on the div that holds it -->
-                    <div class="ps-2" >
-                        <button class="btn btn-outline-primary"
-                                t-on-click="() => focusSearch()">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                    <div class="p-3 overflow-auto text-nowrap">
-                        <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
-                            <div class="mx-1 d-inline float-none"
-                                t-on-click="() => selectTag(tag)">
-                                <span t-attf-class="badge px-2 py-2 rounded {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
-                                    <t t-esc="tag"/>
-                                </span>
-                            </div>
-                        </t>
-                    </div>
+                    <t t-call="SearchIcon"/>
+                    <t t-call="TagPicker"/>
                 </t>
             </div>
         </div>
-
-            <div class="bg-300 p-2">
-                <t t-if="filteredProducts().length > 0">
-                    <t t-set="tag" t-value="filteredProducts()[0].tagList"/>
-                    <t t-esc="Array.from(tag).join(' ')"/>
+        <div class="bg-300 p-2">
+            <t t-if="!filteredProducts().length">
+                <p class="text-center">
+                    No products found
+                </p>
+            </t>
+            <t t-else="">
+                <t t-foreach="filteredProducts()" t-as="product" t-key="product.product_id">
+                    <t t-if="!(tag and areSetsEqual(product.tagList, tag))">
+                        <t t-set="tag" t-value="product.tagList"/>
+                        <h3>
+                            <t t-esc="Array.from(tag).join(' ')"/>
+                        </h3>
+                    </t>
+                    <t t-call="ProductCard"/>
                 </t>
-                <t t-else="">
-                    <p class="text-center">
-                        No products found
+            </t>
+        </div>
+    </t>
+
+    <t t-name="ProductCard" owl="1">
+        <div class="o_self_order_item_card d-flex flex-row card my-2 rounded shadow-sm overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="{{product.product_id}}">
+            <div class="o_self_order_item_card--image">
+                <img class="h-100 w-100" t-attf-src="/pos-self-order/get-images/{{ product.product_id }}" alt="Product image"/>
+            </div>
+            <div class="o_self_order_item_card--content d-flex flex-column p-2">
+                <t t-if="product.description_sale != false">
+                    <h5 class="mb-0 text-900 ">
+                        <t t-esc="product.name"/>
+                    </h5>
+                    <p class="flex-grow-1 mb-1 text-muted small lh-sm break-line">
+                        <t t-esc="product.description_sale" />
                     </p>
                 </t>
-                <t t-foreach="filteredProducts()" t-as="product" t-key="product.product_id">
-                    <t t-if="!areSetsEqual(product.tagList, tag)">
-                        <t t-set="tag" t-value="product.tagList"/>
-                        <t t-esc="Array.from(tag).join(' ')"/>
-                    </t>
-                    <div class="o_self_order_item_card d-flex flex-row card my-2 rounded shadow-sm overflow-hidden" t-on-click="() => env.navigate('products/' + product.product_id)" t-ref="{{product.product_id}}">
-                        <div class="o_self_order_item_card--image">
-                            <img class="h-100 w-100" t-attf-src="/pos-self-order/get-images/{{ product.product_id }}" alt="Product image"/>
-                        </div>
-                        <div class="o_self_order_item_card--content d-flex flex-column p-2">
-                            <t t-if="product.description_sale != false">
-                                <h5 class="mb-0 text-900 ">
-                                    <t t-esc="product.name"/>
-                                </h5>
-                                <p class="flex-grow-1 mb-1 text-muted small lh-sm break-line">
-                                    <t t-esc="product.description_sale" />
-                                </p>
-                            </t>
-                            <t t-else="">
-                                <h5 class="flex-grow-1 mb-0 text-900">
-                                    <t t-esc="product.name"/>
-                                </h5>
-                            </t>
-                            <p class="card-text text-primary fw-bold">
-                                <t t-esc="formatMonetary(product.list_price, {currencyId: selfOrder.config.currency_id})" />
-                            </p>
-                        </div>
-                    </div>
+                <t t-else="">
+                    <h5 class="flex-grow-1 mb-0 text-900">
+                        <t t-esc="product.name"/>
+                    </h5>
                 </t>
+                <p class="card-text text-primary fw-bold">
+                    <t t-esc="formatMonetary(product.list_price, {currencyId: selfOrder.config.currency_id})" />
+                </p>
             </div>
+        </div>
+    </t>
+    <t t-name="SearchBox" owl="1">
+        <div class="p-3 w-100 d-flex align-items-center input-groupt">
+            <input type="text" class="form-control " t-ref="searchInput" placeholder="Pizza"
+                    t-model="private_state.search_input"/>
+            <button class="btn btn-outline-primary"
+                    t-on-click="() => closeSearch()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </t>
+    <t t-name="SearchIcon" owl="1">
+        <div class="ps-2" >
+            <button class="btn btn-outline-primary"
+                    t-on-click="() => focusSearch()">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </t>
+    <t t-name="TagPicker" owl="1">
+        <div class="p-3 overflow-auto text-nowrap">
+            <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
+                <div class="mx-1 d-inline float-none"
+                    t-on-click="() => selectTag(tag)">
+                    <span t-attf-class="badge px-2 py-2 rounded {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
+                        <t t-esc="tag"/>
+                    </span>
+                </div>
+            </t>
+        </div>
     </t>
 </templates>
 

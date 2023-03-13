@@ -6,7 +6,7 @@
             />
             <div class="d-flex flex-column w-75 justify-content-around">
 
-                <button type="button" t-on-click="()=>env.navigate('products')"
+                <button type="button" t-on-click="()=>env.navigate('/products')"
                 t-attf-class="my-2 btn btn-lg"
                 >
                     View Menu
