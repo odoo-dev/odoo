@@ -5149,7 +5149,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
     });
 
-    QUnit.tttt("keynav: switching to another record from a dirty one", async function (assert) {
+    QUnit.test("keynav: switching to another record from a dirty one", async function (assert) {
         let nbWrite = 0;
         await makeView({
             type: "form",
@@ -6339,7 +6339,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("onchanges are not sent for invalid values", async function (assert) {
+    QUnit.test("onchanges are not sent for invalid values", async function (assert) {
         serverData.models.partner.onchanges = {
             int_field: function (obj) {
                 obj.foo = String(obj.int_field);
@@ -6381,7 +6381,7 @@ QUnit.module("Views", (hooks) => {
             "input int_field is marked as invalid"
         );
 
-        assert.verifySteps(["get_views", "read", "onchange"]);
+        assert.verifySteps(["get_views", "unity_read", "onchange2"]);
     });
 
     QUnit.tttt("rpc complete after destroying parent", async function (assert) {
