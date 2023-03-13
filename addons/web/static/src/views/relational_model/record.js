@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { markup } from "@odoo/owl";
+import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
@@ -77,137 +78,126 @@ export class Record extends DataPoint {
     }
 
     async update(changes) {
-        this.isDirty = true;
-        const onChangeFields = Object.keys(changes).filter(
-            (fieldName) => this.activeFields[fieldName].onChange
-        );
-        if (onChangeFields.length) {
-            const otherChanges = await this.model._onchange({
-                resModel: this.resModel,
-                resIds: this.resId ? [this.resId] : [],
-                changes: this._getChanges({ ...this._changes, ...changes }),
-                fieldNames: onChangeFields,
-                spec: getOnChangeSpec(this.activeFields),
-                context: this.context,
+        return this.model.mutex.exec(async () => {
+            this.isDirty = true;
+            const onChangeFields = Object.keys(changes).filter(
+                (fieldName) => this.activeFields[fieldName].onChange
+            );
+            if (onChangeFields.length) {
+                let context = this.context;
+                if (onChangeFields.length === 1) {
+                    const fieldContext = this.activeFields[onChangeFields[0]].context;
+                    context = makeContext([context, fieldContext], this.evalContext);
+                }
+                const otherChanges = await this.model._onchange({
+                    resModel: this.resModel,
+                    resIds: this.resId ? [this.resId] : [],
+                    changes: this._getChanges({ ...this._changes, ...changes }),
+                    fieldNames: onChangeFields,
+                    spec: getOnChangeSpec(this.activeFields),
+                    context,
+                });
+                Object.assign(changes, this._parseServerValues(otherChanges));
+            }
+            Object.assign(this._changes, changes);
+            Object.assign(this.data, changes);
+            this._setEvalContext();
+            this._removeInvalidFields(Object.keys(changes));
+            // FIXME: should we remove this from model? Only for standalone case
+            this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
+                record: this,
+                changes: this._getChanges(),
             });
-            Object.assign(changes, this._parseServerValues(otherChanges));
-        }
-        Object.assign(this._changes, changes);
-        Object.assign(this.data, changes);
-        this._setEvalContext();
-        this._removeInvalidFields(Object.keys(changes));
-        // FIXME: should we remove this from model? Only for standalone case
-        this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
-            record: this,
-            changes: this._getChanges(),
         });
     }
 
     async delete() {
-        const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {
-            context: this.context,
+        return this.model.mutex.exec(async () => {
+            const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {
+                context: this.context,
+            });
+            if (!unlinked) {
+                return false;
+            }
+            const resIds = this.resIds.slice();
+            const index = resIds.indexOf(this.resId);
+            resIds.splice(index, 1);
+            const resId = resIds[Math.min(index, resIds.length - 1)] || false;
+            if (resId) {
+                await this._load(resId);
+            } else {
+                this.resId = false;
+                this.isDirty = false;
+                this._changes = this._parseServerValues(this._getDefaultValues());
+                this._values = {};
+                this.data = { ...this._changes };
+                this._setEvalContext();
+            }
+            this.resIds = resIds;
         });
-        if (!unlinked) {
-            return false;
-        }
-        const resIds = this.resIds.slice();
-        const index = resIds.indexOf(this.resId);
-        resIds.splice(index, 1);
-        const resId = resIds[Math.min(index, resIds.length - 1)] || false;
-        if (resId) {
-            await this.load(resId);
-        } else {
-            this.resId = false;
-            this.isDirty = false;
-            this._changes = this._parseServerValues(this._getDefaultValues());
-            this._values = {};
-            this.data = { ...this._changes };
-            this._setEvalContext();
-        }
-        this.resIds = resIds;
     }
 
-    discard() {
-        this.isDirty = false;
-        this._changes = {};
-        this.data = { ...this._values };
-        this._setEvalContext();
-        this._invalidFields.clear();
-        this._closeInvalidFieldsNotification();
-        this._closeInvalidFieldsNotification = () => {};
+    async discard() {
+        return this.model.mutex.exec(async () => {
+            this.isDirty = false;
+            this._changes = {};
+            this.data = { ...this._values };
+            this._setEvalContext();
+            this._invalidFields.clear();
+            this._closeInvalidFieldsNotification();
+            this._closeInvalidFieldsNotification = () => {};
+        });
     }
 
     async save({ noReload, force } = {}) {
-        // TODO: mutexify
         // TODO: handle errors
         await this._askChanges();
-        if (!this.isDirty && !force) {
-            return true;
-        }
-        if (!this._checkValidity()) {
-            const items = [...this._invalidFields].map((fieldName) => {
-                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
-            }, this);
-            this._closeInvalidFieldsNotification = this.model.notification.add(markup(`<ul>${items.join("")}</ul>`), {
-                title: _t("Invalid fields: "),
-                type: "danger",
-            });
-            return false;
-        }
-        const changes = this._getChanges();
-        delete changes.id; // id never changes, and should not be written
-        if (!Object.keys(changes).length) {
-            return true;
-        }
-        const kwargs = { context: this.context };
-        let resId = this.resId;
-        const creation = !resId;
-        if (creation) {
-            [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
-        } else {
-            await this.model.orm.write(this.resModel, [resId], changes, kwargs);
-        }
-        if (!noReload) {
-            await this.load(resId);
-            if (creation) {
-                this.resIds.push(resId);
+        return this.model.mutex.exec(async () => {
+            if (!this.isDirty && !force) {
+                return true;
             }
-        } else {
-            this._values = { ...this._values, ...this._changes };
-            this._changes = {};
-            this.isDirty = false;
-        }
-        return true;
+            if (!this._checkValidity()) {
+                const items = [...this._invalidFields].map((fieldName) => {
+                    return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
+                }, this);
+                this._closeInvalidFieldsNotification = this.model.notification.add(
+                    markup(`<ul>${items.join("")}</ul>`),
+                    {
+                        title: _t("Invalid fields: "),
+                        type: "danger",
+                    }
+                );
+                return false;
+            }
+            const changes = this._getChanges();
+            delete changes.id; // id never changes, and should not be written
+            if (!Object.keys(changes).length) {
+                return true;
+            }
+            const kwargs = { context: this.context };
+            let resId = this.resId;
+            const creation = !resId;
+            if (creation) {
+                [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
+            } else {
+                await this.model.orm.write(this.resModel, [resId], changes, kwargs);
+            }
+            if (!noReload) {
+                await this._load(resId);
+                if (creation) {
+                    this.resIds.push(resId);
+                }
+            } else {
+                this._values = { ...this._values, ...this._changes };
+                this._changes = {};
+                this.isDirty = false;
+            }
+            return true;
+        });
     }
 
     async load(resId = this.resId) {
-        // TODO: do not duplicate logic with relational_model?
-        // TODO: handle concurrency
-        // TODO: really not sure about all this
-        const params = {
-            activeFields: this.activeFields,
-            fields: this.fields,
-            resModel: this.resModel,
-            context: this.context,
-        };
-        let record;
-        if (resId) {
-            params.resId = resId;
-            record = await this.model.loadRecord(params);
-            this._values = this._parseServerValues(record);
-            this._changes = {};
-        } else {
-            record = await this.model.loadNewRecord(params);
-            this._values = {};
-            this._changes = this._parseServerValues(
-                Object.assign(this._getDefaultValues(), record)
-            );
-        }
-        this.isDirty = false;
-        this.data = { ...this._values, ...this._changes };
-        this.resId = resId;
-        this._setEvalContext();
-        this._invalidFields.clear();
+        return this.model.mutex.exec(() => this._load(resId));
     }
 
     async setInvalidField(fieldName) {
@@ -344,6 +334,33 @@ export class Record extends DataPoint {
 
     _isX2ManyValid(fieldName) {
         return this.data[fieldName].records.every((r) => r._checkValidity());
+    }
+
+    async _load(resId) {
+        const params = {
+            activeFields: this.activeFields,
+            fields: this.fields,
+            resModel: this.resModel,
+            context: this.context,
+        };
+        let record;
+        if (resId) {
+            params.resId = resId;
+            record = await this.model.keepLast.add(this.model.loadRecord(params));
+            this._values = this._parseServerValues(record);
+            this._changes = {};
+        } else {
+            record = await this.model.keepLast.add(this.model.loadNewRecord(params));
+            this._values = {};
+            this._changes = this._parseServerValues(
+                Object.assign(this._getDefaultValues(), record)
+            );
+        }
+        this.isDirty = false;
+        this.data = { ...this._values, ...this._changes };
+        this.resId = resId;
+        this._setEvalContext();
+        this._invalidFields.clear();
     }
 
     _removeInvalidFields(fieldNames) {

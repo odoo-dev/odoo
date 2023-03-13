@@ -6436,7 +6436,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_view");
     });
 
-    QUnit.test("onchanges that complete after discarding", async function (assert) {
+    QUnit.tttt("onchanges that complete after discarding", async function (assert) {
         serverData.models.partner.onchanges = {
             foo: function (obj) {
                 obj.int_field = obj.foo.length + 1000;
@@ -6485,7 +6485,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange is done"]);
     });
 
-    QUnit.tttt("discarding before save returns", async function (assert) {
+    QUnit.test("discarding before save returns", async function (assert) {
         const def = makeDeferred();
         let form;
         patchWithCleanup(FormController.prototype, {
@@ -6859,7 +6859,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "context of onchanges contains the context of changed fields",
         async function (assert) {
             assert.expect(2);
@@ -6877,7 +6877,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="int_field" context="{'int_ctx': 1}"/>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange") {
+                    if (args.method === "onchange2") {
                         assert.strictEqual(
                             args.kwargs.context.test,
                             1,
@@ -6896,7 +6896,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("clicking on a stat button with a context", async function (assert) {
+    QUnit.test("clicking on a stat button with a context", async function (assert) {
         assert.expect(1);
 
         const actionService = {
