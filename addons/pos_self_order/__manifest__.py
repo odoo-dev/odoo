@@ -50,6 +50,8 @@
             'web/static/lib/luxon/luxon.js',
 
             'web/static/src/views/fields/formatters.js',
+            'web/static/src/libs/fontawesome/css/font-awesome.css',
+
 
             'pos_self_order/static/src/**/*',
             'point_of_sale/static/src/utils.js',
