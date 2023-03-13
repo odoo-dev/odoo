@@ -6,12 +6,6 @@ import { browser } from "@web/core/browser/browser";
 import { zip } from "@web/core/utils/arrays";
 
 function parseParams(matches, paramSpecs) {
-    // [["37", {type: "int", name:"productId"}], ["somethign", {type: "string", name:"categoryName"}]]
-    // return {
-    //     productId: 37,
-    //     categoryName: "somethign"
-    // }
-
     return Object.fromEntries(
         zip(matches, paramSpecs).map(([match, paramSpec]) => {
             const { type, name } = paramSpec;
@@ -26,7 +20,6 @@ function parseParams(matches, paramSpecs) {
         })
     );
 }
-
 export class Router extends Component {
     static template = xml`<t t-slot="{{state.activeSlot}}" t-props="state.slotProps"/>`;
     setup() {
@@ -36,6 +29,10 @@ export class Router extends Component {
             slotProps: {},
         });
         window.addEventListener("self_order_navigate", () => {
+            this.matchURL();
+        });
+        // this is needed for the back button to work
+        window.addEventListener("popstate", (event) => {
             this.matchURL();
         });
         this.routes = Object.keys(this.props.slots).map((route) => {
@@ -55,7 +52,6 @@ export class Router extends Component {
             );
             return { route, paramSpecs, regex };
         });
-
         this.matchURL();
     }
 

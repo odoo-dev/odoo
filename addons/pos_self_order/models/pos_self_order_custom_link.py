@@ -19,6 +19,15 @@ class PosSelfOrderCustomLink(models.Model):
                             ],      
             string='Style', default='primary')
     sequence = fields.Integer('Sequence', default=1)
+
+    @api.onchange('url')
+    def _compute_url(self):
+      for record in self:
+        if record.url:
+          print("sal;ut", record.url)
+          record.url = record.url.replace("https://", "").replace("http://", "").replace("www.", "") # 👉️ Remove "HTTPS" and "HTTP" and "WWW"
+
+
     @api.model
     def findDefaultUrl(self):
       print("salut")
