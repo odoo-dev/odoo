@@ -8,6 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
 import { getOnChangeSpec } from "./utils";
+import { FormErrorDialog } from "@web/views/form/form_error_dialog/form_error_dialog";
 
 export class Record extends DataPoint {
     setup(params) {
@@ -138,19 +139,10 @@ export class Record extends DataPoint {
     }
 
     async discard() {
-        return this.model.mutex.exec(async () => {
-            this.isDirty = false;
-            this._changes = {};
-            this.data = { ...this._values };
-            this._setEvalContext();
-            this._invalidFields.clear();
-            this._closeInvalidFieldsNotification();
-            this._closeInvalidFieldsNotification = () => {};
-        });
+        return this.model.mutex.exec(() => this._discard());
     }
 
-    async save({ noReload, force } = {}) {
-        // TODO: handle errors
+    async save({ noReload, force, useSaveErrorDialog } = {}) {
         await this._askChanges();
         return this.model.mutex.exec(async () => {
             if (!this.isDirty && !force) {
@@ -177,10 +169,29 @@ export class Record extends DataPoint {
             const kwargs = { context: this.context };
             let resId = this.resId;
             const creation = !resId;
-            if (creation) {
-                [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
-            } else {
-                await this.model.orm.write(this.resModel, [resId], changes, kwargs);
+            try {
+                if (creation) {
+                    [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
+                } else {
+                    await this.model.orm.write(this.resModel, [resId], changes, kwargs);
+                }
+            } catch (e) {
+                if (useSaveErrorDialog) {
+                    return new Promise((resolve) => {
+                        this.model.dialog.add(FormErrorDialog, {
+                            message: e.data.message,
+                            onDiscard: () => {
+                                this._discard();
+                                resolve(true);
+                            },
+                            onStayHere: () => resolve(false),
+                        });
+                    });
+                }
+                if (!this.isInEdition) {
+                    await this._load(resId);
+                }
+                return false;
             }
             if (!noReload) {
                 await this._load(resId);
@@ -249,6 +260,16 @@ export class Record extends DataPoint {
             }
         }
         return !this._invalidFields.size;
+    }
+
+    _discard() {
+        this.isDirty = false;
+        this._changes = {};
+        this.data = { ...this._values };
+        this._setEvalContext();
+        this._invalidFields.clear();
+        this._closeInvalidFieldsNotification();
+        this._closeInvalidFieldsNotification = () => {};
     }
 
     _getChanges(changes = this._changes) {
