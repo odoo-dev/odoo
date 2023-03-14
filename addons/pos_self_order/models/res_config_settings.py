@@ -8,10 +8,14 @@ from werkzeug.urls import url_quote
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+
+
+
     def generate_qr_codes_page(self):
         """
         Generate the data needed to print the QR codes page
         """
+        # TODO :replace with self.env
         business_url = request.env['ir.config_parameter'].sudo(
         ).get_param('web.base.url')
         no_of_qr_codes_per_page = 9

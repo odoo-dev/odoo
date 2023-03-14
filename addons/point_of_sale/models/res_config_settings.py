@@ -53,15 +53,12 @@ class ResConfigSettings(models.TransientModel):
     user clicks on "Self Ordering" setting from the "POS interface" section
     or when the user clicks on "QR Code Menu" from the restaurant section.
     We also have to know by which means did the user install the self_order module,
-    Because the module behaves differently depending on this info.
+    because the module behaves differently depending on this info.
     """
-    # Customer will be able to see the menu on their phone
     pos_self_order_view_mode = fields.Boolean(related='pos_config_id.self_order_view_mode', readonly=False)
     @api.onchange('pos_self_order_view_mode')
-    def _compute_self_order_view(self):
-        for record in self:
-            record.env["pos.config"].search([]).module_pos_self_order = record.pos_self_order_view_mode
-
+    def _onchange_pos_self_order_view_mode(self):
+        self.env['pos.config'].browse(self.pos_config_id.id).module_pos_self_order = self.pos_self_order_view_mode
     pos_allowed_pricelist_ids = fields.Many2many('product.pricelist', compute='_compute_pos_allowed_pricelist_ids')
     pos_amount_authorized_diff = fields.Float(related='pos_config_id.amount_authorized_diff', readonly=False)
     pos_available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists', compute='_compute_pos_pricelist_id', readonly=False, store=True)
