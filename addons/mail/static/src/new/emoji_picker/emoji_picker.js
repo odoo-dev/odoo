@@ -124,6 +124,8 @@ export async function loadEmoji() {
     return odoo.runtimeImport("@mail/new/emoji_picker/emoji_data");
 }
 
+export const EMOJI_PER_ROW = 9;
+
 export class EmojiPicker extends Component {
     static props = ["onSelect", "close", "onClose?", "storeScroll?"];
     static defaultProps = { onClose: () => {} };
@@ -136,6 +138,7 @@ export class EmojiPicker extends Component {
         this.gridRef = useRef("emoji-grid");
         this.shouldScrollElem = null;
         this.state = useState({
+            activeEmojiIndex: 0,
             categoryId: null,
             searchStr: "",
         });
@@ -189,10 +192,51 @@ export class EmojiPicker extends Component {
     }
 
     onKeydown(ev) {
-        if (ev.key === "Escape") {
-            this.props.close();
-            this.props.onClose();
-            ev.stopPropagation();
+        switch (ev.key) {
+            case "ArrowUp": {
+                const newIndex = this.state.activeEmojiIndex - EMOJI_PER_ROW;
+                if (newIndex >= 0) {
+                    this.state.activeEmojiIndex = newIndex;
+                }
+                break;
+            }
+            case "ArrowDown": {
+                const newIndex = this.state.activeEmojiIndex + EMOJI_PER_ROW;
+                if (newIndex <= this.getEmojis().length - 1) {
+                    this.state.activeEmojiIndex = newIndex;
+                }
+                break;
+            }
+            case "ArrowRight": {
+                const newIndex = Math.min(
+                    this.state.activeEmojiIndex + 1,
+                    this.getEmojis().length - 1
+                );
+                if (newIndex !== this.state.activeEmojiIndex) {
+                    this.state.activeEmojiIndex = newIndex;
+                    ev.preventDefault();
+                }
+                break;
+            }
+            case "ArrowLeft": {
+                const newIndex = Math.max(this.state.activeEmojiIndex - 1, 0);
+                if (newIndex !== this.state.activeEmojiIndex) {
+                    this.state.activeEmojiIndex = newIndex;
+                    ev.preventDefault();
+                }
+                break;
+            }
+            case "Enter":
+                this.gridRef.el
+                    .querySelector(
+                        `.o-mail-EmojiPicker-content .o-mail-Emoji[data-index="${this.state.activeEmojiIndex}"]`
+                    )
+                    .click();
+                break;
+            case "Escape":
+                this.props.close();
+                this.props.onClose();
+                ev.stopPropagation();
         }
     }
 

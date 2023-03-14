@@ -12,7 +12,7 @@
         </div>
         <div class="p-1 d-flex flex-column">
             <div class="d-flex">
-                <input class="form-control border-0 flex-grow-1" t-ref="input" placeholder="Search for an emoji" t-model="state.searchStr"/>
+                <input class="form-control border-0 flex-grow-1" t-ref="input" placeholder="Search for an emoji" t-model="state.searchStr" t-on-input="() => this.state.activeEmojiIndex = 0"/>
                 <i class="oi oi-search p-2 fs-5" title="Search..." role="img" aria-label="Search..."></i>
             </div>
             <hr class="mx-2 my-0 text-muted"/>
@@ -27,7 +27,7 @@
                     <span class="o-mail-EmojiPicker-category opacity-100" t-att-data-category="categorySortId"/>
                 </t>
                 <t t-elif="state.searchStr" t-set="categorySortId" t-value="null"/>
-                <span class="o-mail-Emoji p-1 cursor-pointer" t-att-title="emoji.name" t-att-data-codepoints="emoji.codepoints" t-att-data-index="emoji_index" t-att-data-category="categorySortId">
+                <span class="o-mail-Emoji p-1 cursor-pointer" t-att-class="{ 'bg-300': state.activeEmojiIndex === emoji_index }" t-att-title="emoji.name" t-att-data-codepoints="emoji.codepoints" t-att-data-index="emoji_index" t-att-data-category="categorySortId">
                     <t t-esc="emoji.codepoints"/>
                 </span>
             </t>
