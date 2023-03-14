@@ -5,7 +5,8 @@ export const addFieldDependencies = (activeFields, fieldDependencies = []) => {
         if (!activeFields[field.name]) {
             activeFields[field.name] = {
                 context: "{}",
-                readonly: false,
+                invisible: false,
+                readonly: field.readonly || false,
                 required: false,
                 onChange: false,
             };
@@ -21,6 +22,7 @@ export const getActiveFieldsFromArchInfo = ({ fieldNodes, widgetNodes }, { isSma
         if (!(fieldName in activeFields)) {
             activeFields[fieldName] = {
                 context: fieldNode.context || "{}",
+                invisible: modifiers.invisible || modifiers.column_invisible || false,
                 readonly: modifiers.readonly || false,
                 required: modifiers.required || false,
                 onChange: fieldNode.onChange || false,

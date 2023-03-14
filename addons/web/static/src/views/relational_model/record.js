@@ -178,8 +178,7 @@ export class Record extends DataPoint {
     _checkValidity() {
         for (const fieldName in this.activeFields) {
             const fieldType = this.fields[fieldName].type;
-            const activeField = this.activeFields[fieldName];
-            if (activeField.alwaysInvisible) {
+            if (this._isInvisible(fieldName)) {
                 continue;
             }
             switch (fieldType) {
@@ -213,18 +212,23 @@ export class Record extends DataPoint {
         this._closeInvalidFieldsNotification = () => {};
     }
 
-    _getChanges(changes = this._changes) {
+    _getChanges(changes = this._changes, { withReadonly } = {}) {
         const result = {};
         for (const [fieldName, value] of Object.entries(changes)) {
             const type = this.fields[fieldName].type;
+            if (!withReadonly && this._isReadonly(fieldName)) {
+                continue;
+            }
             if (type === "date") {
                 result[fieldName] = value ? serializeDate(value) : false;
             } else if (type === "datetime") {
                 result[fieldName] = value ? serializeDateTime(value) : false;
+            } else if (type === "char" || type === "text") {
+                result[fieldName] = value !== "" ? value : false;
             } else if (type === "many2one") {
                 result[fieldName] = value ? value[0] : false;
             } else {
-                result[fieldName] = value === null ? false : value;
+                result[fieldName] = value;
             }
         }
         return result;
@@ -277,6 +281,11 @@ export class Record extends DataPoint {
         //     evalContext.parent = this.getParentRecordContext();
         // }
         return evalContext;
+    }
+
+    _isInvisible(fieldName) {
+        const invisible = this.activeFields[fieldName].invisible;
+        return invisible ? evalDomain(invisible, this.evalContext) : false;
     }
 
     _isReadonly(fieldName) {
@@ -344,13 +353,13 @@ export class Record extends DataPoint {
             return false;
         }
         const changes = this._getChanges();
+        const creation = !this.resId;
         delete changes.id; // id never changes, and should not be written
-        if (!Object.keys(changes).length) {
+        if (!creation && !Object.keys(changes).length) {
             return true;
         }
         const kwargs = { context: this.context };
         let resId = this.resId;
-        const creation = !resId;
         try {
             if (creation) {
                 [resId] = await this.model.orm.create(this.resModel, [changes], kwargs);
