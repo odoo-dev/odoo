@@ -112,7 +112,9 @@ export class FormController extends Component {
         const activeFields = getActiveFieldsFromArchInfo(this.archInfo, {
             isSmall: this.env.isSmall,
         });
-        addFieldDependencies(activeFields, [{ name: "display_name", type: "string" }]);
+        addFieldDependencies(activeFields, [
+            { name: "display_name", type: "string", readonly: true },
+        ]);
 
         this.beforeLoadResolver = null;
         const beforeLoadProm = new Promise((r) => {

@@ -7388,7 +7388,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o-kanban-button-new");
     });
 
-    QUnit.tttt("readonly fields with modifiers may be saved", async function (assert) {
+    QUnit.test("readonly fields with modifiers may be saved", async function (assert) {
         // the readonly property on the field description only applies on view,
         // this is not a DB constraint. It should be seen as a default value,
         // that may be overridden in views, for example with modifiers. So
@@ -12723,7 +12723,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_form_editable");
     });
 
-    QUnit.tttt("save a form view with an invisible required field", async function (assert) {
+    QUnit.test("save a form view with an invisible required field", async function (assert) {
         serverData.models.partner.fields.text = { string: "Text", type: "char", required: 1 };
         await makeView({
             type: "form",
@@ -12739,7 +12739,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, args) {
                 assert.step(args.method);
                 if (args.method === "create") {
-                    assert.deepEqual(args.args, [
+                    assert.deepEqual(args.args[0], [
                         {
                             int_field: 0,
                             text: false,
@@ -12750,10 +12750,10 @@ QUnit.module("Views", (hooks) => {
         });
 
         await clickSave(target);
-        assert.verifySteps(["get_views", "onchange", "create", "read"]);
+        assert.verifySteps(["get_views", "onchange2", "create", "unity_read"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "save a form view with a duplicated invisible required field",
         async function (assert) {
             serverData.models.partner.fields.text = { string: "Text", type: "char", required: 1 };
