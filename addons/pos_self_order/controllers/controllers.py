@@ -7,16 +7,16 @@ class PosSelfOrder(http.Controller):
     """
     This is the controller for the POS Self Order App
     There is one main route that the client will use to access the POS Self Order App
-    -- /pos-self-order/--
+    -- /menu/--
     This route will render the LANDING PAGE of the POS Self Order App
     And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency...
     After that the client will be able to navigate ot the /products route w/o aditional requests
     to the server, using client side routing.
     """
     @http.route([
-        '/pos-self-order/',
-        '/pos-self-order/products',
-        '/pos-self-order/products/<int:product_id>',
+        '/menu/',
+        '/menu/products',
+        '/menu/products/<int:product_id>',
     ], auth='public', website=True)
     def pos_self_order_start(self, pos_id=None, product_id=None):
         """
@@ -44,7 +44,7 @@ class PosSelfOrder(http.Controller):
             })
         return response
 
-    @http.route('/pos-self-order/get-menu', auth='public', type="json", website=True)
+    @http.route('/menu/get-menu', auth='public', type="json", website=True)
     def pos_self_order_get_menu(self, pos_id=None):
         """
         This is the route that the POS Self Order App uses to GET THE MENU
@@ -59,7 +59,7 @@ class PosSelfOrder(http.Controller):
         return add_price_and_attribute_info_to_products(products_sudo, pos_id)
 
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
-    @http.route('/pos-self-order/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
+    @http.route('/menu/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
     def pos_self_order_get_images(self, product_id):
         """
         This is the route that the POS Self Order App uses to GET THE PRODUCT IMAGES

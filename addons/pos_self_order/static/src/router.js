@@ -73,7 +73,7 @@ export class Router extends Component {
 
 export function navigate(route) {
     const url = new URL(browser.location.href);
-    url.pathname = "/pos-self-order" + route;
+    url.pathname = "/menu" + route;
     history.pushState({}, "", url);
     window.dispatchEvent(new Event("self_order_navigate"));
 }

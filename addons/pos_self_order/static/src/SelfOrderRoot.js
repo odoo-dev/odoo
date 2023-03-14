@@ -43,7 +43,7 @@ class SelfOrderRoot extends Component {
         useSubEnv({ state: this.state });
         this.rpc = useService("rpc");
         onWillStart(async () => {
-            this.result_from_get_menu = await this.rpc(`/pos-self-order/get-menu`, {
+            this.result_from_get_menu = await this.rpc(`/menu/get-menu`, {
                 pos_id: this.selfOrder.config.pos_id,
             });
             this.productList = this.result_from_get_menu.map(

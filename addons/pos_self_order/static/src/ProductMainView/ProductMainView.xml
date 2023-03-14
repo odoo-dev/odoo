@@ -4,7 +4,7 @@
         <NavBar previousPage="'/products'"/>
             <div class="py-3">
                 <div class="px-3 border-bottom">
-                    <img class="w-100 h-100 rounded" style="max-height: 400px; object-fit: cover;" t-attf-src="/pos-self-order/get-images/{{ props.product.product_id }}"  alt="Product image"/>
+                    <img class="w-100 h-100 rounded" style="max-height: 400px; object-fit: cover;" t-attf-src="/menu/get-images/{{ props.product.product_id }}"  alt="Product image"/>
                     <div class="d-flex flex-column w-100 py-3">
                         <!-- Product Name -->
                         <h3>

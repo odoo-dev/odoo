@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("menu_tour", {
     test: true,
-    url: "/pos-self-order/?pos_id=3",
+    url: "/menu/?pos_id=3",
     steps: [
         {
             content: "Open Employees app",

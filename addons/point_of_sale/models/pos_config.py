@@ -138,6 +138,16 @@ class PosConfig(models.Model):
     
 
 
+    """
+    what we do here is kind of complicated...
+    we have the variable module_pos_self_order. When this 
+    variable is set to True, the pos_self_order module is installed.
+    the problem is that we want to install the module when either the 
+    user clicks on "Self Ordering" setting from the "POS interface" section
+    or when the user clicks on "QR Code Menu" from the restaurant section.
+    We also have to know by which means did the user install the self_order module,
+    because the module behaves differently depending on this info.
+    """
     module_pos_self_order = fields.Boolean("Is a Self Order", compute="_compute_self_order")
     self_order_view_mode = fields.Boolean("View Mode")
     @api.depends('self_order_view_mode')

@@ -21,7 +21,7 @@ class ResConfigSettings(models.TransientModel):
         no_of_qr_codes_per_page = 9
         qr_codes_to_print = [{
             'id': 0,
-            'url': url_quote(f"{business_url}/pos-self-order?pos_id={self.pos_config_id.id}"),
+            'url': url_quote(f"{business_url}/menu?pos_id={self.pos_config_id.id}"),
         } for i in range(0, no_of_qr_codes_per_page)]
         data = {
             'pos_name': self.pos_config_id.name,

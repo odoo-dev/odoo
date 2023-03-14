@@ -19,11 +19,11 @@ class PosConfig(models.Model):
     #     if self.self_order_view_mode:
     #         self.env['pos_self_order.custom_link'].create({
     #             'name': _('View Menu'),
-    #             'url' : f"{self.env['ir.config_parameter'].sudo().get_param('web.base.url')}/pos-self-order?pos_id={self.id}",
+    #             'url' : f"{self.env['ir.config_parameter'].sudo().get_param('web.base.url')}/menu?pos_id={self.id}",
     #             'pos_config_id': [(6, 0, [self.id])],
     #         })
     #     else:
-    #         self.env['pos_self_order.custom_link'].search([('url', '=', f"{self.env['ir.config_parameter'].sudo().get_param('web.base.url')}/pos-self-order?pos_id={self.id}")]).unlink()
+    #         self.env['pos_self_order.custom_link'].search([('url', '=', f"{self.env['ir.config_parameter'].sudo().get_param('web.base.url')}/menu?pos_id={self.id}")]).unlink()
     #     print("salut", self.env['pos_self_order.custom_link'].search([]).read())
 
 

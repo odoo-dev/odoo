@@ -8,12 +8,12 @@
                     productList="productList" 
                 />
             </t>
-            <t t-set-slot="/pos-self-order/products">
+            <t t-set-slot="/menu/products">
                 <ProductList
                     productList="productList" 
                 />
             </t>
-            <t t-set-slot="/pos-self-order/products/{int:productId}" t-slot-scope="url">
+            <t t-set-slot="/menu/products/{int:productId}" t-slot-scope="url">
                 <ProductMainView 
                     product="productList.find(x => x.product_id === url.productId)" 
                 />
