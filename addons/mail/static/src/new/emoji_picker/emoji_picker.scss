@@ -16,4 +16,10 @@
     .o-mail-EmojiPicker-header .o-mail-Emoji:not(:hover):not(.o-isActive) {
         filter: grayscale(1);
     }
+
+    input:not(:focus) {
+        & + i.oi-search, &::placeholder {
+            opacity: 75%;
+        }
+    }
 }
