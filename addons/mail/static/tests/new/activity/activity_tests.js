@@ -9,7 +9,12 @@ import {
     createFile,
     waitUntil,
 } from "@mail/../tests/helpers/test_utils";
-import { patchDate, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
+import {
+    patchDate,
+    patchWithCleanup,
+    triggerHotkey,
+    mockTimeout,
+} from "@web/../tests/helpers/utils";
 import { date_to_str } from "web.time";
 
 const { inputFiles } = file;
@@ -233,6 +238,37 @@ QUnit.test("activity info layout when planned before yesterday", async (assert) 
     assert.containsOnce($, ".o-mail-Activity");
     assert.containsOnce($, ".o-mail-Activity .text-danger");
     assert.containsOnce($, ".o-mail-Activity:contains('5 days overdue:')");
+});
+
+QUnit.test("activity info layout change at midnight", async (assert) => {
+    const mock = mockTimeout();
+    patchDate(2023, 11, 7, 23, 59, 59);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    pyEnv["mail.activity"].create({
+        date_deadline: date_to_str(tomorrow),
+        res_id: partnerId,
+        res_model: "res.partner",
+        state: "planned",
+    });
+    const { openView } = await start();
+    await openView({
+        res_model: "res.partner",
+        res_id: partnerId,
+        views: [[false, "form"]],
+    });
+    assert.containsOnce($, ".o-mail-Activity");
+    assert.containsOnce($, ".o-mail-Activity .text-success");
+    assert.containsOnce($, ".o-mail-Activity:contains('Tomorrow:')");
+
+    patchDate(2023, 11, 8, 0, 0, 1); // OXP is coming!
+    await mock.advanceTime(2000);
+    assert.containsOnce($, ".o-mail-Activity");
+    assert.containsOnce($, ".o-mail-Activity .text-warning");
+    assert.containsOnce($, ".o-mail-Activity:contains('Today:')");
 });
 
 QUnit.test("activity with a summary layout", async (assert) => {

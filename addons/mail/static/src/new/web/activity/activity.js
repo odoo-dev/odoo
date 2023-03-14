@@ -1,14 +1,15 @@
 /* @odoo-module */
 
-import { Component, useState, onWillUpdateProps } from "@odoo/owl";
+import { Component, useState, onMounted, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { browser } from "@web/core/browser/browser";
 
 import { ActivityMailTemplate } from "@mail/new/web/activity/activity_mail_template";
 import { ActivityMarkAsDone } from "@mail/new/web/activity/activity_markasdone_popover";
-import { computeDelay } from "@mail/new/utils/dates";
+import { computeDelay, getMsToTomorrow } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/attachments/attachment_uploader_hook";
 
 import { _t } from "@web/core/l10n/translation";
@@ -38,11 +39,14 @@ export class Activity extends Component {
         this.threadService = useService("mail.thread");
         this.state = useState({
             showDetails: false,
+            delay: computeDelay(this.props.data.date_deadline),
         });
         this.popover = usePopover();
-        this.delay = computeDelay(this.props.data.date_deadline);
+        onMounted(() => {
+            this.updateDelayAtNight();
+        });
         onWillUpdateProps((nextProps) => {
-            this.delay = computeDelay(nextProps.data.date_deadline);
+            this.state.delay = computeDelay(nextProps.data.date_deadline);
         });
         this.attachmentUploader = useAttachmentUploader(this.thread);
     }
@@ -52,6 +56,13 @@ export class Activity extends Component {
             return sprintf(_t("“%s”"), this.props.data.summary);
         }
         return this.props.data.display_name;
+    }
+
+    updateDelayAtNight() {
+        browser.setTimeout(() => {
+            this.state.delay = computeDelay(this.props.data.date_deadline);
+            this.updateDelayAtNight();
+        }, getMsToTomorrow() + 100); // Make sure there is no race condition
     }
 
     toggleDetails() {
