@@ -23,7 +23,7 @@ export class Messaging {
         this.setup(...args);
     }
 
-    setup(env, services, initialThreadLocalId) {
+    setup(env, services) {
         this.env = env;
         /** @type {import("@mail/new/core/store_service").Store} */
         this.store = services["mail.store"];
@@ -57,7 +57,6 @@ export class Messaging {
         this.personaService.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.store.registeredImStatusPartners = this.registeredImStatusPartners;
-        this.store.discuss.threadLocalId = initialThreadLocalId;
         this.store.discuss.inbox = this.threadService.insert({
             id: "inbox",
             model: "mail.box",
@@ -116,6 +115,21 @@ export class Messaging {
         this.userSettingsService.updateFromCommands(settings);
         this.userSettingsService.id = settings.id;
         this.store.companyName = data.companyName;
+        // compute initial discuss thread if none is set
+        if (!this.store.discuss.threadLocalId) {
+            let threadLocalId = this.store.discuss.inbox.localId;
+            const activeId = this.router.current.hash.active_id;
+            if (typeof activeId === "number") {
+                threadLocalId = createLocalId("mail.channel", activeId);
+            }
+            if (typeof activeId === "string" && activeId.startsWith("mail.box_")) {
+                threadLocalId = createLocalId("mail.box", activeId.slice(9));
+            }
+            if (typeof activeId === "string" && activeId.startsWith("mail.channel_")) {
+                threadLocalId = createLocalId("mail.channel", parseInt(activeId.slice(13), 10));
+            }
+            this.threadService.setDiscussThread(threadLocalId);
+        }
         this.store.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
         this.store.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
         this.store.discuss.inbox.counter = data.needaction_inbox_counter;
@@ -679,19 +693,7 @@ export const messagingService = {
         "mail.out_of_focus",
     ],
     start(env, services) {
-        // compute initial discuss thread
-        let threadLocalId = createLocalId("mail.box", "inbox");
-        const activeId = services.router.current.hash.active_id;
-        if (typeof activeId === "number") {
-            threadLocalId = createLocalId("mail.channel", activeId);
-        }
-        if (typeof activeId === "string" && activeId.startsWith("mail.box_")) {
-            threadLocalId = createLocalId("mail.box", activeId.slice(9));
-        }
-        if (typeof activeId === "string" && activeId.startsWith("mail.channel_")) {
-            threadLocalId = createLocalId("mail.channel", parseInt(activeId.slice(13), 10));
-        }
-        const messaging = new Messaging(env, services, threadLocalId);
+        const messaging = new Messaging(env, services);
         messaging.initialize();
         services.bus_service.addEventListener("notification", (notifEvent) => {
             messaging.handleNotification(notifEvent.detail);
