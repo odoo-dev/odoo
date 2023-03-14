@@ -4,9 +4,7 @@
     <t t-name="SelfOrderRoot" owl="1">
         <Router>
             <t t-set-slot="default">
-                <LandingPage 
-                    productList="productList" 
-                />
+                <LandingPage/>
             </t>
             <t t-set-slot="/menu/products">
                 <ProductList

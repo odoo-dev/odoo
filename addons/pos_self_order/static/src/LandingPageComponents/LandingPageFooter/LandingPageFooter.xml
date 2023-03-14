@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="LandingPageFooter" owl="1">
-    <!-- FIXME: logo is not vertically centered -->
         <div class="d-flex align-items-center">Powered By
             <span class="o_pos_self_order_odoo_logo ms-1 mt-n2">
                 <svg height="24" viewBox="0 0 621 196" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

@@ -5,11 +5,6 @@ import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { NavBar } from "../NavBar/NavBar";
-/**
- * @typedef {import("@pos_self_order/jsDocTypes").Product} Product
- * @typedef {import("@pos_self_order/jsDocTypes").Order} Order
- * @typedef {import("@pos_self_order/jsDocTypes").CartItem} CartItem
- */
 export class ProductList extends Component {
     static template = "ProductList";
     static components = { NavBar };
@@ -36,8 +31,8 @@ export class ProductList extends Component {
      *             it filters the products based on the selected tags and the search input
      */
     filteredProducts = () => {
-        // FIXME: this scroll is not working
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        // FIXME: scroll to top when the list of products changes not working
+        document.body.scrollTo({ top: 0, behavior: "smooth" });
         return this.props.productList.filter((product) => {
             return (
                 this.itemHasAllOfTheTags(product, this.private_state.selected_tags) &&

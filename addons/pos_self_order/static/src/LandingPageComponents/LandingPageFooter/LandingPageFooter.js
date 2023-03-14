@@ -1,5 +1,6 @@
 /** @odoo-module */
-const { Component } = owl;
+
+import { Component } from "@odoo/owl";
 export class LandingPageFooter extends Component {
     static template = "LandingPageFooter";
     setup() {}

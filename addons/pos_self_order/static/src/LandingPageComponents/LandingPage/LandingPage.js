@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-const { Component, useState } = owl;
-import { LandingPageHeader } from "../LandingPageHeader/LandingPageHeader.js";
-import { LandingPageFooter } from "../LandingPageFooter/LandingPageFooter.js";
+import { Component, useState } from "@odoo/owl";
+import { LandingPageHeader } from "@pos_self_order/LandingPageComponents/LandingPageHeader/LandingPageHeader";
+import { LandingPageFooter } from "@pos_self_order/LandingPageComponents/LandingPageFooter/LandingPageFooter";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { formatMonetary } from "@web/views/fields/formatters";
 export class LandingPage extends Component {

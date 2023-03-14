@@ -33,6 +33,7 @@
                 </t>
             </div>
     </t>
+
     <t t-name="RadioProductAttribute" owl="1">
         <div class="configurator_radio px-3" t-ref="root">
             <t t-log="attribute"/>

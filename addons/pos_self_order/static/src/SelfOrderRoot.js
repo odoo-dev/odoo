@@ -30,12 +30,6 @@ class SelfOrderRoot extends Component {
     */
     setup() {
         this.selfOrder = useSelfOrder();
-        /**
-         * @type {{
-         * currentScreen: number,
-         * currentProduct: number,
-         * }}
-         */
         this.state = useState({
             currentScreen: 0,
             currentProduct: 0,
@@ -61,8 +55,6 @@ class SelfOrderRoot extends Component {
             this.selfOrder.config.tagList = new Set(
                 this.productList.map((product) => Array.from(product.tagList)).flat()
             );
-
-            console.log("this.tagList1", this.productList);
             this.productList.forEach((product) => {
                 if (
                     !product.attribute_line_ids.some(

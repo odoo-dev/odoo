@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models
-from odoo.http import request
+from odoo import models
 from werkzeug.urls import url_quote
 
 
@@ -12,8 +11,7 @@ class ResConfigSettings(models.TransientModel):
         """
         Generate the data needed to print the QR codes page
         """
-        # TODO :replace with self.env
-        business_url = request.env['ir.config_parameter'].sudo(
+        business_url = self.env['ir.config_parameter'].sudo(
         ).get_param('web.base.url')
         no_of_qr_codes_per_page = 9
         qr_codes_to_print = [{

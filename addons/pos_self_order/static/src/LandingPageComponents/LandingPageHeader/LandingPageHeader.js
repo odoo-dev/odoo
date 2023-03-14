@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-const { Component } = owl;
+import { Component } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 
 export class LandingPageHeader extends Component {
