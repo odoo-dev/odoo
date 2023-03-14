@@ -7,9 +7,6 @@ from werkzeug.urls import url_quote
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
-    
-
-
 
     def generate_qr_codes_page(self):
         """

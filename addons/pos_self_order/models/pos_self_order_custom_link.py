@@ -24,15 +24,7 @@ class PosSelfOrderCustomLink(models.Model):
     def _compute_url(self):
       for record in self:
         if record.url:
-          print("sal;ut", record.url)
-          record.url = record.url.replace("https://", "").replace("http://", "").replace("www.", "") # 👉️ Remove "HTTPS" and "HTTP" and "WWW"
-
-
-    @api.model
-    def findDefaultUrl(self):
-      print("salut")
-      print(self.env['ir.config_parameter'].sudo().get_param('web.base.url') + "/pos_self_order/products")
-
-    # TODO: sanitize url input; make sure it's a valid url
-    # remove http:// or https:// 
-    # TODO: double check access rights
+          # TODO: make sure the url sanitization is done correctly
+          record.url = record.url.replace("https://", "").replace("http://", "").replace("www.", "")
+    
+    # TODO: double check access rights for this model
