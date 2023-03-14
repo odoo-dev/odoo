@@ -1,11 +1,3 @@
-.modal {
-    @include media-breakpoint-up(xxl, $o-extra-grid-breakpoints) {
-        .o_attachment_preview_placeholder {
-            width: 300px;
-        }
-    }
-}
-
 @include media-breakpoint-up(xxl, $o-extra-grid-breakpoints) {
     .o_attachment_preview {
         display: block;
@@ -48,11 +40,5 @@
                 }
             }
         }
-    }
-}
-
-@include media-breakpoint-down(xxl, $o-extra-grid-breakpoints) {
-    .o_attachment_preview_placeholder {
-        display: none;
     }
 }
