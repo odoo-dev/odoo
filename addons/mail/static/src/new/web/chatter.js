@@ -105,7 +105,7 @@ export class Chatter extends Component {
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
                     const files = [...ev.dataTransfer.files];
-                    if (!this.threadId) {
+                    if (!this.props.threadId) {
                         const saved = await this.props.saveRecord?.();
                         if (!saved) {
                             return;
@@ -361,7 +361,7 @@ export class Chatter extends Component {
     }
 
     async onClickAttachFile(ev) {
-        if (this.threadId) {
+        if (this.props.threadId) {
             return;
         }
         const saved = await this.props.saveRecord?.();
