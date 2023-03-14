@@ -4,7 +4,7 @@ import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { useAutofocus } from "@web/core/utils/hooks";
 import { formatMonetary } from "@web/views/fields/formatters";
-import { NavBar } from "../NavBar/NavBar";
+import { NavBar } from "@pos_self_order/NavBar/NavBar";
 export class ProductList extends Component {
     static template = "ProductList";
     static components = { NavBar };
@@ -18,9 +18,11 @@ export class ProductList extends Component {
         this.selfOrder = useSelfOrder();
         this.formatMonetary = formatMonetary;
         useAutofocus({ refName: "searchInput", mobile: true });
+        this.productListDiv = useRef("productListDiv");
         const currentProductCard = useRef(`product_${this.state.currentProduct}`);
         onMounted(() => {
             if (this.state.currentProduct) {
+                console.log("scrolling to current product");
                 currentProductCard.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
@@ -31,8 +33,11 @@ export class ProductList extends Component {
      *             it filters the products based on the selected tags and the search input
      */
     filteredProducts = () => {
-        // FIXME: scroll to top when the list of products changes not working
-        document.body.scrollTo({ top: 0, behavior: "smooth" });
+        this.productListDiv?.el?.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth",
+        });
         return this.props.productList.filter((product) => {
             return (
                 this.itemHasAllOfTheTags(product, this.private_state.selected_tags) &&
