@@ -22,22 +22,13 @@ class PosSelfOrder(http.Controller):
         """
         The user gets this route from the QR code that they scan at the table
         This START ROUTE will render the LANDING PAGE of the POS Self Order App
-        And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency
+        And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency, 
 
         We get some details about this POS from the model "pos.config"
         """
-        pos_sudo = find_pos_config(pos_id)
-        context = {
-            'pos_id': pos_id,
-            'pos_name': pos_sudo.name,
-            'currency_id': pos_sudo.currency_id.id,
-            'show_prices_with_tax_included': True,
-            'custom_links': get_custom_links_list(pos_id),
-            'attributes_by_ptal_id': request.env['pos.session'].sudo()._get_attributes_by_ptal_id(),
-        }
         # TODO: make sure it is ok to send session_info to frontend
         session_info = request.env['ir.http'].session_info()
-        session_info['pos_self_order'] = context
+        session_info['pos_self_order'] = get_self_order_config(pos_id)
         response = request.render(
             'pos_self_order.pos_self_order_index', {
                 'session_info': session_info,
@@ -50,11 +41,10 @@ class PosSelfOrder(http.Controller):
         This is the route that the POS Self Order App uses to GET THE MENU
         :param pos_id: the id of the POS
         :type pos_id: int
-
         :return: the menu
         :rtype: list of dict
         """
-        pos_sudo = find_pos_config(pos_id) 
+        pos_sudo = find_pos_config_sudo(pos_id) 
         products_sudo = get_products_that_are_available_in_this_pos(pos_sudo)
         return add_price_and_attribute_info_to_products(products_sudo, pos_id)
 
@@ -72,7 +62,7 @@ class PosSelfOrder(http.Controller):
         product_sudo= request.env['product.product'].sudo().browse(product_id)
         return request.env['ir.binary']._get_image_stream_from(product_sudo, field_name='image_1920').get_response()
 
-def find_pos_config(pos_id):
+def find_pos_config_sudo(pos_id):
     """ 
     This function checks that the pos_id exists, and that the pos is configured to allow the menu to be viewed online
 
@@ -88,6 +78,21 @@ def find_pos_config(pos_id):
         raise werkzeug.exceptions.NotFound()
     return pos_sudo
 
+def get_self_order_config(pos_id):
+    """
+    Returns the necessary information for the POS Self Order App
+    :param int pos_id: the id of the POS
+    :return: dictionary 
+    """
+    pos_sudo = find_pos_config_sudo(pos_id)
+    return {
+        'pos_id': pos_id,
+        'pos_name': pos_sudo.name,
+        'currency_id': pos_sudo.currency_id.id,
+        'show_prices_with_tax_included': True,
+        'custom_links': get_custom_links_list(pos_id),
+        'attributes_by_ptal_id': request.env['pos.session'].sudo()._get_attributes_by_ptal_id(),
+    }
 
 def get_custom_links_list(pos_id):
     """
