@@ -12,4 +12,11 @@ patch(ActivityService.prototype, "calendar/activity_service", {
         }
         return activity;
     },
+
+    async rescheduleMeeting(activityId) {
+        const action = await this.orm.call("mail.activity", "action_create_calendar_event", [
+            [activityId],
+        ]);
+        this.env.services.action.doAction(action);
+    },
 });
