@@ -5,7 +5,7 @@
     <t t-name="ProductList" owl="1">
         <div class="sticky-top">
             <NavBar previousPage="'/'" />
-            <div class="d-flex justify-content-center align-items-center p-0 m-0 bg-100 shadow-sm">
+            <div class="d-flex justify-content-start align-items-center p-0 m-0 bg-100 shadow-sm">
                 <t t-if="private_state.search_is_focused">
                     <t t-call="SearchBox"/>
                     </t>
@@ -15,9 +15,9 @@
                 </t>
             </div>
         </div>
-        <div class="bg-300 p-2">
+        <div class="bg-300 vh-100 py-0 px-3 overflow-auto">
             <t t-if="!filteredProducts().length">
-                <p class="text-center">
+                <p class="mt-3 text-center">
                     No products found
                 </p>
             </t>
@@ -25,7 +25,7 @@
                 <t t-foreach="filteredProducts()" t-as="product" t-key="product.product_id">
                     <t t-if="!(tag and areSetsEqual(product.tagList, tag))">
                         <t t-set="tag" t-value="product.tagList"/>
-                        <h3>
+                        <h3 class="pt-3 pb-1">
                             <t t-esc="Array.from(tag).join(' ')"/>
                         </h3>
                     </t>
@@ -61,34 +61,34 @@
         </div>
     </t>
     <t t-name="SearchBox" owl="1">
-        <div class="p-3 w-100 d-flex align-items-center input-groupt">
-            <input type="text" class="form-control " t-ref="searchInput" placeholder="Pizza"
+        <div class="input-group d-flex align-items-center w-100 h-100">
+            <input type="text" class="form-control py-3 border-0 border-end bg-white" t-ref="searchInput" placeholder="Pizza"
                     t-model="private_state.search_input"/>
-            <button class="btn btn-outline-primary"
-                    t-on-click="() => closeSearch()">
-                <i class="fa fa-times"></i>
-            </button>
+            <div class="px-2">
+                <button class="btn btn-light"
+                        t-on-click="() => closeSearch()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
         </div>
     </t>
     <t t-name="SearchIcon" owl="1">
-        <div class="ps-2" >
-            <button class="btn btn-outline-primary"
-                    t-on-click="() => focusSearch()">
-                <i class="fa fa-search"></i>
-            </button>
-        </div>
+        <button class="btn btn-light px-3"
+                t-on-click="() => focusSearch()">
+            <i class="fa fa-search"></i>
+        </button>
     </t>
     <t t-name="TagPicker" owl="1">
-        <div class="p-3 overflow-auto text-nowrap">
+        <ul class="nav nav-pills flex-nowrap px-2 py-2 border-start overflow-auto">
             <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
-                <div class="mx-1 d-inline float-none"
+                <li class="nav-item"
                     t-on-click="() => selectTag(tag)">
-                    <span t-attf-class="badge px-2 py-2 rounded {{private_state.selected_tags.has(tag) ? 'text-bg-primary' : 'text-bg-light'}}">
+                    <span t-attf-class="{{private_state.selected_tags.has(tag) ? 'nav-link active rounded py-2' : 'nav-link text-dark'}}">
                         <t t-esc="tag"/>
                     </span>
-                </div>
+                </li>
             </t>
-        </div>
+        </ul>
     </t>
 </templates>
 
