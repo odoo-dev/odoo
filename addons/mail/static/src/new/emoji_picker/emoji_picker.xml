@@ -5,7 +5,7 @@
     <div class="o-mail-EmojiPicker bg-white" t-on-click="onClick" t-on-keydown="onKeydown">
         <div class="o-mail-EmojiPicker-header d-flex align-items-center border-bottom overflow-auto bg-100" t-on-click="selectCategory">
             <t t-foreach="categories" t-as="category" t-key="category.sortId">
-                <span class="o-mail-Emoji text-center p-1 cursor-pointer" t-att-class="{'o-isActive bg-white': category.sortId === state.categoryId}" t-att-title="category.name" t-att-data-id="category.sortId">
+                <span class="o-mail-Emoji text-center p-1 cursor-pointer" t-att-class="{'o-isActive bg-300': category.sortId === state.categoryId}" t-att-title="category.name" t-att-data-id="category.sortId">
                     <t t-esc="category.title"/>
                 </span>
             </t>
