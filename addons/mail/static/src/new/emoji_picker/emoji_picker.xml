@@ -23,9 +23,8 @@
                 <t t-if="!state.searchStr and current !== emoji.category">
                     <t t-set="current" t-value="emoji.category"/>
                     <t t-set="categorySortId" t-value="categories.find(c => c.name === current).sortId"/>
-                    <div class="o-mail-EmojiPicker-category w-100 fs-5 p-2" t-att-data-category="categorySortId">
-                        <t t-esc="current"/>
-                    </div>
+                    <span class="w-100 fs-5 p-2 position-sticky top-0 bg-white" t-esc="current" t-att-data-category="categorySortId"/>
+                    <span class="o-mail-EmojiPicker-category opacity-100" t-att-data-category="categorySortId"/>
                 </t>
                 <t t-elif="state.searchStr" t-set="categorySortId" t-value="null"/>
                 <span class="o-mail-Emoji p-1 cursor-pointer" t-att-title="emoji.name" t-att-data-codepoints="emoji.codepoints" t-att-data-index="emoji_index" t-att-data-category="categorySortId">
