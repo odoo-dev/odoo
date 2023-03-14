@@ -4,11 +4,11 @@ export const addFieldDependencies = (activeFields, fieldDependencies = []) => {
     for (const field of fieldDependencies) {
         if (!activeFields[field.name]) {
             activeFields[field.name] = {
-                context: "{}",
-                invisible: false,
+                context: field.context || "{}",
+                invisible: field.invisible || false,
                 readonly: field.readonly || false,
-                required: false,
-                onChange: false,
+                required: field.required || false,
+                onChange: field.onChange || false,
             };
         }
     }
