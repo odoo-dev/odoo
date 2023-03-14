@@ -24,6 +24,7 @@ export class MessagingMenu extends Component {
     setup() {
         this.messaging = useMessaging();
         this.store = useStore();
+        this.hasTouch = hasTouch;
         this.notification = useState(useService("mail.notification.permission"));
         this.chatWindowService = useState(useService("mail.chat_window"));
         this.threadService = useState(useService("mail.thread"));
@@ -36,10 +37,6 @@ export class MessagingMenu extends Component {
         onExternalClick("selector", () => {
             Object.assign(this.state, { addingChat: false, addingChannel: false });
         });
-    }
-
-    get hasTouch() {
-        return hasTouch();
     }
 
     beforeOpen() {

@@ -83,6 +83,7 @@ export class Message extends Component {
             isReadMoreByIndex: new Map(),
         });
         this.root = useRef("root");
+        this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
         this.messaging = useMessaging();
         this.store = useStore();
@@ -148,10 +149,6 @@ export class Message extends Component {
                 $(this.messageBody.el).find(".o-mail-read-more-less").remove();
             }
         });
-    }
-
-    get hasTouch() {
-        return hasTouch();
     }
 
     get message() {

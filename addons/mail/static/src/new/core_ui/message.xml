@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Message" owl="1">
-        <ActionSwiper onRightSwipe="hasTouch and isInInbox ? { action: () => this.messageService.setDone(this.message), bgColor: 'bg-success', icon: 'fa-check-circle' } : undefined">
+        <ActionSwiper onRightSwipe="hasTouch() and isInInbox ? { action: () => this.messageService.setDone(this.message), bgColor: 'bg-success', icon: 'fa-check-circle' } : undefined">
             <div class="o-mail-Message position-relative py-1"
                 t-att-class="{
                     'o-highlighted-from-mention': message.isHighlightedFromMention,
