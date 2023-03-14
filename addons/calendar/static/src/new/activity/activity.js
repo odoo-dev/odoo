@@ -7,14 +7,10 @@ import { patch } from "@web/core/utils/patch";
 patch(Activity.prototype, "calendar", {
     setup() {
         this._super();
-        this.action = useService("action");
         this.orm = useService("orm");
     },
-    async reschedule() {
-        const action = await this.orm.call("mail.activity", "action_create_calendar_event", [
-            [this.props.data.id],
-        ]);
-        this.action.doAction(action);
+    async onClickReschedule() {
+        await this.env.services["mail.activity"].rescheduleMeeting(this.props.data.id);
     },
     /**
      * @override
