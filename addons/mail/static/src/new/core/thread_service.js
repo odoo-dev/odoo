@@ -766,7 +766,7 @@ export class ThreadService {
         if (thread.type === "mailbox") {
             return thread.counter;
         }
-        if (thread.type === "chat") {
+        if (thread.type === "chat" || thread.type === "group") {
             return this.localMessageUnreadCounter(thread);
         }
         return thread.message_needaction_counter;
