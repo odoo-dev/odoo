@@ -8,7 +8,7 @@ import {
     removeFromArrayWithPredicate,
     replaceArrayWithCompare,
 } from "@mail/new/utils/arrays";
-import { assignDefined, createLocalId } from "../utils/misc";
+import { assignDefined, createLocalId, onChange } from "../utils/misc";
 import { Composer } from "../composer/composer_model";
 import { prettifyMessageContent } from "../utils/format";
 import { registry } from "@web/core/registry";
@@ -251,9 +251,10 @@ export class ThreadService {
     }
 
     pin(thread) {
-        if (thread.model !== "mail.channel") {
+        if (thread.model !== "mail.channel" || this.store.guest) {
             return;
         }
+        thread.is_pinned = true;
         return this.orm.silent.call("mail.channel", "channel_pin", [thread.id], { pinned: true });
     }
 
@@ -612,6 +613,12 @@ export class ThreadService {
             return thread;
         }
         let thread = new Thread(this.store, data);
+        onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
+        onChange(thread, "is_pinned", () => {
+            if (!thread.is_pinned && this.store.discuss.threadLocalId === thread.localId) {
+                this.store.discuss.threadLocalId = null;
+            }
+        });
         thread = this.store.threads[thread.localId] = thread;
         this.update(thread, data);
         this.insertComposer({ thread });

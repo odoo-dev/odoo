@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    afterNextRender,
+    click,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
 
 import { triggerHotkey, patchWithCleanup } from "@web/../tests/helpers/utils";
 
@@ -77,9 +83,9 @@ QUnit.test("Thread description update", async (assert) => {
     );
 });
 
-QUnit.test("Channel subscription is renewed when channel is added", async (assert) => {
+QUnit.test("Channel subscription is renewed when channel is manually added", async (assert) => {
     const pyEnv = await startServer();
-    const channelId = pyEnv["mail.channel"].create({ name: "Sales", channel_member_ids: [] });
+    pyEnv["mail.channel"].create({ name: "General", channel_member_ids: [] });
     const { env, openDiscuss } = await start();
     patchWithCleanup(env.services["bus_service"], {
         forceUpdateChannels() {
@@ -87,13 +93,33 @@ QUnit.test("Channel subscription is renewed when channel is added", async (asser
         },
     });
     await openDiscuss();
-    await afterNextRender(() => {
-        env.services.orm.call("mail.channel", "add_members", [[channelId]], {
-            partner_ids: [pyEnv.currentPartnerId],
-        });
-    });
+    await click("[title='Add or join a channel']");
+    await insertText(".o-mail-ChannelSelector", "General");
+    await afterNextRender(() => triggerHotkey("Enter"));
     assert.verifySteps(["update-channels"]);
 });
+
+QUnit.test(
+    "Channel subscription is renewed when channel is added from invite",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({ name: "Sales", channel_member_ids: [] });
+        const { env, openDiscuss } = await start();
+        patchWithCleanup(env.services["bus_service"], {
+            forceUpdateChannels() {
+                assert.step("update-channels");
+            },
+        });
+        await openDiscuss();
+        // simulate receiving invite
+        await afterNextRender(() => {
+            env.services.orm.call("mail.channel", "add_members", [[channelId]], {
+                partner_ids: [pyEnv.currentPartnerId],
+            });
+        });
+        assert.verifySteps(["update-channels"]);
+    }
+);
 
 QUnit.test("Channel subscription is renewed when channel is left", async (assert) => {
     const pyEnv = await startServer();

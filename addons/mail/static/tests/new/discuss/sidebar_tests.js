@@ -8,7 +8,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
-import { editInput, makeDeferred } from "@web/../tests/helpers/utils";
+import { editInput, makeDeferred, nextTick } from "@web/../tests/helpers/utils";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 QUnit.module("discuss sidebar");
@@ -1111,4 +1111,31 @@ QUnit.test("Can leave channel", async (assert) => {
         ]);
     });
     assert.containsNone($, ".o-mail-DiscussCategoryItem:contains(General)");
+});
+
+QUnit.test("Do no channel_info after unpin", async (assert) => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({ name: "General", channel_type: "chat" });
+    const { env, openDiscuss } = await start({
+        mockRPC(route, args, originalRPC) {
+            if (args.method === "channel_info") {
+                assert.step("channel_info");
+            }
+            return originalRPC(route, args);
+        },
+    });
+    await openDiscuss(channelId);
+    await click(".o-mail-DiscussCategoryItem-commands [title='Unpin Conversation']");
+    await afterNextRender(() => {
+        env.services.rpc("/mail/message/post", {
+            thread_id: channelId,
+            thread_model: "mail.channel",
+            post_data: {
+                body: "Hello world",
+                message_type: "comment",
+            },
+        });
+    });
+    await nextTick();
+    assert.verifySteps([]);
 });
