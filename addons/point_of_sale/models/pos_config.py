@@ -138,8 +138,12 @@ class PosConfig(models.Model):
     
 
 
-    module_pos_self_order = fields.Boolean("Is a Self Order")
+    module_pos_self_order = fields.Boolean("Is a Self Order", compute="_compute_self_order")
     self_order_view_mode = fields.Boolean("View Mode")
+    @api.depends('self_order_view_mode')
+    def _compute_self_order(self):
+        for record in self:
+            record.module_pos_self_order = record.self_order_view_mode
     
 
 
