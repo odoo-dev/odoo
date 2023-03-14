@@ -277,7 +277,6 @@ QUnit.test("Channel suggestions do not crash after rpc returns", async (assert) 
             if (params.method === "get_mention_suggestions") {
                 const res = await originalFn(args, params);
                 assert.step("get_mention_suggestions");
-                assert.strictEqual(res.length, 1);
                 deferred.resolve();
                 return res;
             }

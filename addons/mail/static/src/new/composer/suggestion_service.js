@@ -17,17 +17,17 @@ class SuggestionService {
         this.personaService = services["mail.persona"];
     }
 
-    async fetchSuggestions({ delimiter, term }, { thread } = {}) {
+    async fetchSuggestions({ delimiter, term }, { thread, onFetched } = {}) {
         const cleanedSearchTerm = cleanTerm(term);
         switch (delimiter) {
             case "@": {
-                this.fetchPartners(cleanedSearchTerm, thread);
+                this.fetchPartners(cleanedSearchTerm, thread).then(onFetched);
                 break;
             }
             case ":":
                 break;
             case "#":
-                this.fetchThreads(cleanedSearchTerm);
+                this.fetchThreads(cleanedSearchTerm).then(onFetched);
                 break;
             case "/":
                 break;

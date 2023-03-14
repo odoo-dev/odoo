@@ -71,7 +71,6 @@ export class ThreadService {
             uuid,
             authorizedGroupFullName,
         });
-        this.fetchChannelMembers(thread);
         return thread;
     }
 

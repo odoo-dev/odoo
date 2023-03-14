@@ -143,7 +143,7 @@ export function useSuggestion() {
         () => {
             self.update();
             self.process(async () => {
-                if (self.search.position === undefined || self.search.term === "") {
+                if (self.search.position === undefined || !self.search.delimiter) {
                     return; // ignore obsolete call
                 }
                 if (!comp.props.composer.thread) {
@@ -151,6 +151,12 @@ export function useSuggestion() {
                 }
                 await suggestionService.fetchSuggestions(self.search, {
                     thread: comp.props.composer.thread,
+                    onFetched() {
+                        if (owl.status(comp) === "destroyed") {
+                            return;
+                        }
+                        self.update();
+                    },
                 });
                 self.update();
             });
