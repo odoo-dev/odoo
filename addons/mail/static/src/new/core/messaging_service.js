@@ -382,7 +382,7 @@ export class Messaging {
                     if (!thread) {
                         return;
                     }
-                    this.threadService.remove(thread);
+                    thread.is_pinned = false;
                     this.notificationService.add(
                         sprintf(_t("You unpinned your conversation with %s"), thread.displayName),
                         { type: "info" }

@@ -8,11 +8,29 @@ import { onChange } from "@mail/new/utils/misc";
 export class Store {
     constructor(env) {
         this.setup(env);
+        this.lastChannelSubscription = "";
     }
 
     setup(env) {
         this.env = env;
         this.isSmall = env.isSmall;
+    }
+
+    async updateBusSubscription() {
+        await new Promise(setTimeout); // Wait for thread fully inserted.
+        const channelIds = [];
+        const ids = Object.keys(this.threads).sort(); // Ensure channels processed in same order.
+        for (const id of ids) {
+            const thread = this.threads[id];
+            if (thread.model === "mail.channel" && thread.hasSelfAsMember) {
+                channelIds.push(id);
+            }
+        }
+        const channels = JSON.stringify(channelIds);
+        if (this.isMessagingReady && this.lastChannelSubscription !== channels) {
+            this.env.services["bus_service"].forceUpdateChannels();
+        }
+        this.lastChannelSubscription = channels;
     }
 
     get self() {
@@ -129,26 +147,9 @@ export class Store {
 
 export const storeService = {
     dependencies: ["bus_service", "ui"],
-    start(env, { bus_service: busService, ui }) {
+    start(env, { ui }) {
         const res = reactive(new Store(env));
-        let prevChannels;
-        onChange(res, "threads", async () => {
-            // sync bus channel sybscriptions
-            await new Promise(setTimeout); // Wait for thread fully inserted.
-            const channelIds = [];
-            const ids = Object.keys(res.threads).sort(); // Ensure channels processed in same order.
-            for (const id of ids) {
-                const thread = res.threads[id];
-                if (thread.model === "mail.channel" && thread.hasSelfAsMember) {
-                    channelIds.push(id);
-                }
-            }
-            const channels = JSON.stringify(channelIds);
-            if (res.isMessagingReady && prevChannels !== channels) {
-                busService.forceUpdateChannels();
-            }
-            prevChannels = channels;
-        });
+        onChange(res, "threads", () => res.updateBusSubscription());
         res.discuss.activeTab = res.isSmall ? "mailbox" : "all";
         ui.bus.addEventListener("resize", () => {
             res.isSmall = ui.isSmall;
