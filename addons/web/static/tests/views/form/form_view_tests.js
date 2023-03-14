@@ -12820,7 +12820,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("help on field as precedence over field's declaration -- form", async (assert) => {
+    QUnit.test("help on field as precedence over field's declaration -- form", async (assert) => {
         serverData.models.partner.fields.foo.help = "pythonHelp";
         patchWithCleanup(odoo, { debug: "1" });
         await makeView({
@@ -12837,7 +12837,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("onSave/onDiscard props", async function (assert) {
+    QUnit.test("onSave/onDiscard props", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12915,7 +12915,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_view_nocontent");
     });
 
-    QUnit.tttt("status indicator: saved state", async (assert) => {
+    QUnit.test("status indicator: saved state", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12930,7 +12930,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_form_status_indicator_buttons button", 2);
     });
 
-    QUnit.tttt("status indicator: dirty state", async (assert) => {
+    QUnit.test("status indicator: dirty state", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12944,7 +12944,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
-    QUnit.tttt("status indicator: field dirty state", async (assert) => {
+    QUnit.test("status indicator: field dirty state", async (assert) => {
         // this test check that the indicator don't need the onchange to be displayed
         await makeView({
             type: "form",
@@ -12963,7 +12963,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
-    QUnit.tttt("status indicator: field dirty state (date)", async (assert) => {
+    QUnit.test("status indicator: field dirty state (date)", async (assert) => {
         // this test check that the indicator don't need the onchange to be displayed
         await makeView({
             type: "form",
@@ -12982,7 +12982,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
-    QUnit.tttt("status indicator: field dirty state (datetime)", async (assert) => {
+    QUnit.test("status indicator: field dirty state (datetime)", async (assert) => {
         // this test check that the indicator don't need the onchange to be displayed
         await makeView({
             type: "form",
@@ -13001,7 +13001,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_form_status_indicator_buttons.invisible");
     });
 
-    QUnit.tttt("status indicator: save dirty state", async (assert) => {
+    QUnit.test("status indicator: save dirty state", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -13018,7 +13018,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "dirty");
     });
 
-    QUnit.tttt("status indicator: discard dirty state", async (assert) => {
+    QUnit.test("status indicator: discard dirty state", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -13035,7 +13035,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget input").value, "yop");
     });
 
-    QUnit.tttt("status indicator: invalid state", async (assert) => {
+    QUnit.test("status indicator: invalid state", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -13059,7 +13059,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "execute an action before and after each valid save in a form view",
         async function (assert) {
             const formView = registry.category("views").get("form");
@@ -13100,7 +13100,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "don't exec a valid save with onWillSaveRecord in a form view",
         async function (assert) {
             const formView = registry.category("views").get("form");
@@ -13142,7 +13142,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Can't use FormRenderer implementation details in arch", async (assert) => {
+    QUnit.test("Can't use FormRenderer implementation details in arch", async (assert) => {
         // using t-esc in form view archs isn't accepted, so it displays a warning
         // in the console
         patchWithCleanup(console, {
@@ -13166,7 +13166,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["warn", "warn", "warn", "warn"]);
     });
 
-    QUnit.tttt("reload form view with an empty notebook", async function (assert) {
+    QUnit.test("reload form view with an empty notebook", async function (assert) {
         assert.expect(1);
 
         serverData.views = {
@@ -13203,7 +13203,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_form_view");
     });
 
-    QUnit.tttt("setting : boolean field", async function (assert) {
+    QUnit.test("setting : boolean field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -13228,7 +13228,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".btn-link[name='buttonName']");
     });
 
-    QUnit.tttt("setting : char field", async function (assert) {
+    QUnit.test("setting : char field", async function (assert) {
         patchWithCleanup(session, {
             display_switch_company_menu: true,
         });
@@ -13251,7 +13251,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_field_char input");
     });
 
-    QUnit.tttt("setting : without field", async function (assert) {
+    QUnit.test("setting : without field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
