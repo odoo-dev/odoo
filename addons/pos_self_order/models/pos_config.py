@@ -7,7 +7,7 @@ from odoo.exceptions import ValidationError
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
-    @api.onchange('self_order_view_mode')
+    @api.depends('self_order_view_mode')
     def _onchange_self_order_view_mode(self):
         print("asdfs")
         print("asdfs")
