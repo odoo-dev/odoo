@@ -133,6 +133,8 @@ export class RelationalModel extends Model {
                 ...rootParams,
                 mode: params.mode,
                 resIds: params.resIds,
+                onWillSaveRecord: params.onWillSaveRecord,
+                onRecordSaved: params.onRecordSaved,
             });
         } else {
             const listParams = {

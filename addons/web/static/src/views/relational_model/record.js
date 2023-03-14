@@ -38,6 +38,8 @@ export class Record extends DataPoint {
         this._invalidFields = new Set();
         this._closeInvalidFieldsNotification = () => {};
         this._urgentSave = false;
+        this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
+        this._onRecordSaved = params.onRecordSaved || (() => {});
     }
 
     // -------------------------------------------------------------------------
@@ -358,6 +360,10 @@ export class Record extends DataPoint {
         if (!creation && !Object.keys(changes).length) {
             return true;
         }
+        const canProceed = await this._onWillSaveRecord(this);
+        if (canProceed === false) {
+            return false;
+        }
         const kwargs = { context: this.context };
         let resId = this.resId;
         try {
@@ -394,6 +400,7 @@ export class Record extends DataPoint {
             this._changes = {};
             this.isDirty = false;
         }
+        await this._onRecordSaved(this);
         return true;
     }
 
