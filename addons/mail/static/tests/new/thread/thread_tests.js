@@ -11,6 +11,7 @@ import {
     nextAnimationFrame,
     start,
     startServer,
+    waitUntil,
 } from "@mail/../tests/helpers/test_utils";
 
 import { makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -834,3 +835,36 @@ QUnit.test(
         assert.containsOnce($, ".o-mail-ChatWindow");
     }
 );
+
+QUnit.test("Thread messages are only loaded once", async function (assert) {
+    const pyEnv = await startServer();
+    const channelIds = pyEnv["mail.channel"].create([{ name: "General" }, { name: "Sales" }]);
+    const { openDiscuss } = await start({
+        mockRPC(route, args, originalRPC) {
+            if (route === "/mail/channel/messages") {
+                assert.step(`load messages - ${args["channel_id"]}`);
+            }
+            return originalRPC(route, args);
+        },
+    });
+    pyEnv["mail.message"].create([
+        {
+            model: "mail.channel",
+            res_id: channelIds[0],
+            body: "Message on channel1",
+        },
+        {
+            model: "mail.channel",
+            res_id: channelIds[1],
+            body: "Message on channel2",
+        },
+    ]);
+    await openDiscuss();
+    await click(".o-mail-DiscussCategoryItem:eq(0)");
+    await waitUntil(".o-mail-Message:contains(channel1)");
+    await click(".o-mail-DiscussCategoryItem:eq(1)");
+    await waitUntil(".o-mail-Message:contains(channel2)");
+    await click(".o-mail-DiscussCategoryItem:eq(0)");
+    await waitUntil(".o-mail-Message:contains(channel1)");
+    assert.verifySteps([`load messages - ${channelIds[0]}`, `load messages - ${channelIds[1]}`]);
+});

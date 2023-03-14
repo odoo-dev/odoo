@@ -197,7 +197,7 @@ export class ThreadService {
      * @param {Thread} thread
      */
     async fetchNewMessages(thread) {
-        if (thread.status === "loading") {
+        if (thread.status === "loading" || (thread.isLoaded && thread.model === "mail.channel")) {
             return;
         }
         const min = thread.isLoaded ? thread.mostRecentNonTransientMessage?.id : undefined;
