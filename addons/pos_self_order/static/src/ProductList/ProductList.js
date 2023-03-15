@@ -33,6 +33,7 @@ export class ProductList extends Component {
      *             it filters the products based on the selected tags and the search input
      */
     filteredProducts = () => {
+        // we scroll to the top of the product list when the filtered products change
         this.productListDiv?.el?.scrollTo({
             top: 0,
             left: 0,
