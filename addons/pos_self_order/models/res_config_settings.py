@@ -20,18 +20,6 @@ class ResConfigSettings(models.TransientModel):
         } for i in range(0, no_of_qr_codes_per_page)]
         data = {
             'pos_name': self.pos_config_id.name,
-            'groups_of_tables': splitListIntoNLists(qr_codes_to_print, no_of_qr_codes_per_page),
+            'tables': qr_codes_to_print,
         }
         return self.env.ref('pos_self_order.report_self_order_qr_codes_page').report_action([], data=data)
-
-
-def splitListIntoNLists(l, n):
-    """
-    Split a list into n lists
-    :param l: list to split
-    :type l: list
-    :param n: number of lists to split into
-    :type n: int
-    :return: list of lists
-    """
-    return [l[i:i + n] for i in range(0, len(l), n)]
