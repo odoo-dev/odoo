@@ -2,6 +2,7 @@
 import werkzeug
 from odoo import http, _
 from odoo.http import request
+from typing import List, Dict
 
 class PosSelfOrder(http.Controller):
     """
@@ -17,7 +18,8 @@ class PosSelfOrder(http.Controller):
         '/menu/products',
         '/menu/products/<int:product_id>',
     ], auth='public', website=True)
-    def pos_self_order_start(self, pos_id=None, product_id=None):
+    # TODO: is the signature of this function correct?
+    def pos_self_order_start(self, pos_id: int=None, product_id: int=None) -> http.Response:
         """
         The user gets this route from the QR code that they scan at the table
         This START ROUTE will render the LANDING PAGE of the POS Self Order App
@@ -35,7 +37,7 @@ class PosSelfOrder(http.Controller):
         return response
 
     @http.route('/menu/get-menu', auth='public', type="json", website=True)
-    def pos_self_order_get_menu(self, pos_id=None):
+    def pos_self_order_get_menu(self, pos_id: int=None) -> List[Dict]:
         """
         This is the route that the POS Self Order App uses to GET THE MENU
         :param pos_id: the id of the POS
@@ -48,7 +50,7 @@ class PosSelfOrder(http.Controller):
 
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
     @http.route('/menu/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
-    def pos_self_order_get_images(self, product_id):
+    def pos_self_order_get_images(self, product_id: int):
         """
         This is the route that the POS Self Order App uses to GET THE PRODUCT IMAGES
         If the product does not have an image, the function _get_image_stream_from will return the default image
@@ -60,7 +62,7 @@ class PosSelfOrder(http.Controller):
         product_sudo= request.env['product.product'].sudo().browse(product_id)
         return request.env['ir.binary']._get_image_stream_from(product_sudo, field_name='image_1920').get_response()
 
-def find_pos_config_sudo(pos_id):
+def find_pos_config_sudo(pos_id: int):
     """ 
     This function checks that the pos_id exists, and that the pos is configured to allow the menu to be viewed online
 
@@ -76,7 +78,7 @@ def find_pos_config_sudo(pos_id):
         raise werkzeug.exceptions.NotFound()
     return pos_sudo
 
-def get_self_order_config(pos_id):
+def get_self_order_config(pos_id: int) -> Dict:
     """
     Returns the necessary information for the POS Self Order App
     :param int pos_id: the id of the POS
@@ -91,8 +93,8 @@ def get_self_order_config(pos_id):
         'custom_links': get_custom_links_list(pos_id),
         'attributes_by_ptal_id': request.env['pos.session'].sudo()._get_attributes_by_ptal_id(),
     }
-
-def get_custom_links_list(pos_id):
+# TODO: maybe there are no custom links --> what is the type signature of the return then?
+def get_custom_links_list(pos_id: int) -> List[Dict[str, str]]:
     """
     On the landing page of the app we can have a number of custom links
     that are defined by the restaurant employee in the backend.
@@ -111,7 +113,7 @@ def get_custom_links_list(pos_id):
                             )
 
 
-def get_products_that_are_available_in_this_pos_sudo(pos_id):
+def get_products_that_are_available_in_this_pos_sudo(pos_id: int):
     """
     This function returns the products that are available in the POS with id pos_id
     :param pos_sudo: the POS config object
@@ -130,7 +132,7 @@ def get_products_that_are_available_in_this_pos_sudo(pos_id):
                         )
 
 
-def get_necessary_data_from_products_list(products_sudo, pos_id):
+def get_necessary_data_from_products_list(products_sudo, pos_id: int) -> List[Dict[str, str]]:
     """
     This function adds the price info to each product in the list products_sudo
     and returns the list of products with the necessary info
