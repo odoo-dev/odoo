@@ -138,9 +138,6 @@ def add_price_and_attribute_info_to_products(products_sudo, pos_id):
     :return: the list of products with the price info and the attribute line ids
     :rtype: list of dict
     """
-    for product in products_sudo:
-        print(product.read(['lst_price']))
-        # print(product.get_product_info_pos(product.list_price, 1, int(pos_id))),
     return [{
         **{
             'price_info': product.get_product_info_pos(product.lst_price, 1, int(pos_id))['all_prices'],
