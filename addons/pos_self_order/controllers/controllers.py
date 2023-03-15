@@ -43,8 +43,7 @@ class PosSelfOrder(http.Controller):
         :return: the menu
         :rtype: list of dict
         """
-        pos_sudo = find_pos_config_sudo(pos_id) 
-        products_sudo = get_products_that_are_available_in_this_pos(pos_sudo)
+        products_sudo = get_products_that_are_available_in_this_pos_sudo(pos_id)
         return get_necessary_data_from_products_list(products_sudo, pos_id)
 
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
@@ -110,7 +109,9 @@ def get_custom_links_list(pos_id):
                             int(pos_id) in [pos.id for pos in link.pos_config_id] 
                             or not link.pos_config_id).read(['name', 'url', 'style']
                             )
-def get_products_that_are_available_in_this_pos(pos_sudo):
+
+
+def get_products_that_are_available_in_this_pos_sudo(pos_id):
     """
     This function returns the products that are available in the POS with id pos_id
     :param pos_sudo: the POS config object
@@ -118,6 +119,7 @@ def get_products_that_are_available_in_this_pos(pos_sudo):
     :return: the products that are available in the POS with id pos_id
     :rtype: list of product.product objects
     """
+    pos_sudo = find_pos_config_sudo(pos_id)
     return request.env['product.product'].sudo().search(
                         [('available_in_pos', '=', True)], 
                         order='pos_categ_id').filtered(
