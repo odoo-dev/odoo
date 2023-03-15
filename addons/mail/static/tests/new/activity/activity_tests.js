@@ -240,7 +240,12 @@ QUnit.test("activity info layout when planned before yesterday", async (assert) 
     assert.containsOnce($, ".o-mail-Activity:contains('5 days overdue:')");
 });
 
-QUnit.test("activity info layout change at midnight", async (assert) => {
+/**
+ * Test if the activity layout change while crossing a day.
+ * Pass locally or if triggered on runbot manually, but fail on ci build.
+ * The hook/runbot environment might not support this test, so skipped for now.
+ */
+QUnit.skip("activity info layout change at midnight", async (assert) => {
     const mock = mockTimeout();
     patchDate(2023, 11, 7, 23, 59, 59);
     const today = new Date();
