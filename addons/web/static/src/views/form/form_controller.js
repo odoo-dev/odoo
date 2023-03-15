@@ -321,17 +321,9 @@ export class FormController extends Component {
 
     getStaticActionMenuItems() {
         const { activeActions } = this.archInfo;
-        const isActive = (record) => {
-            if ("active" in record.activeFields) {
-                return record.data.active;
-            } else if ("x_active" in record.activeFields) {
-                return record.data.x_active;
-            }
-            return true;
-        };
         return {
             archive: {
-                isAvailable: () => this.archiveEnabled && isActive(this.model.root),
+                isAvailable: () => this.archiveEnabled && this.model.root.isActive,
                 sequence: 10,
                 description: this.env._t("Archive"),
                 callback: () => {
@@ -344,7 +336,7 @@ export class FormController extends Component {
                 },
             },
             unarchive: {
-                isAvailable: () => this.archiveEnabled && !isActive(this.model.root),
+                isAvailable: () => this.archiveEnabled && !this.model.root.isActive,
                 sequence: 20,
                 description: this.env._t("Unarchive"),
                 callback: () => this.model.root.unarchive(),
