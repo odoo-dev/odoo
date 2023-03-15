@@ -145,3 +145,5 @@ def add_price_and_attribute_info_to_products(products_sudo, pos_id):
         },
         **product.read(['id', 'name', 'description_sale', 'pos_categ_id'])[0],
     } for product in products_sudo]
+def greeting(name: str) -> str:
+    return 'Hello ' + name

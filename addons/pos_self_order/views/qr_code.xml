@@ -15,17 +15,16 @@
 
     <template id="qr_codes_page">
         <t t-call="web.html_container">
-            <t t-call="web.external_layout">
+            <t t-call="web.internal_layout">
                 <div class="page">
                     <t t-set="qr_code_size" t-value="200"/>
                     <div class="container text-center">
-                    <h2 class="mb-2">
-                    QR Code Menu
-                    </h2>
+                        <h2 class="mb-2">
+                            QR Code Menu
+                        </h2>
                         <t t-foreach="groups_of_tables" t-as="group_of_tables">
     <!-- 3 COLUMN bootstrap grid layout -->
                             <div class="row row-cols-3 g-5" style="page-break-after:always;">
-    <!-- for each qr code -->
                                 <t t-foreach="group_of_tables" t-as="table">
                                     <t t-call="pos_self_order.qr_code"/>
                                 </t>
@@ -40,10 +39,11 @@
         <div class="d-flex flex-column col align-items-center" >
             <h3 class="fw-bold">
             </h3>
-            <div class="qr_code_and_logo_container m-2" style="
-                position: relative;
-                top: 0;
-                left: 0;
+            <div class="qr_code_and_logo_container m-2" 
+                style="
+                    position: relative;
+                    top: 0;
+                    left: 0;
             ">
     <!-- QRCode -->
                 <img class="qr_code" t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %(table['url'], qr_code_size, qr_code_size)" style="
