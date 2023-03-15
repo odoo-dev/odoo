@@ -73,7 +73,7 @@
         </div>
     </t>
     <t t-name="SearchIcon" owl="1">
-        <button class="btn btn-secondary px-3"
+        <button class="btn btn-link px-3"
                 t-on-click="() => focusSearch()">
             <i class="fa fa-search px-1"></i>
         </button>

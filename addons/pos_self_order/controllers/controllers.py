@@ -138,12 +138,13 @@ def add_price_and_attribute_info_to_products(products_sudo, pos_id):
     :return: the list of products with the price info and the attribute line ids
     :rtype: list of dict
     """
+    for product in products_sudo:
+        print(product.read(['display_name']))
+        # print(product.get_product_info_pos(product.list_price, 1, int(pos_id))),
     return [{
         **{
             'price_info': product.get_product_info_pos(product.list_price, 1, int(pos_id))['all_prices'],
             'attribute_line_ids': product.read(['attribute_line_ids'])[0].get('attribute_line_ids'),
         },
-        **product.read(['id', 'name', 'description_sale', 'pos_categ_id'])[0],
+        **product.read(['id', 'display_name', 'description_sale', 'pos_categ_id'])[0],
     } for product in products_sudo]
-def greeting(name: str) -> str:
-    return 'Hello ' + name

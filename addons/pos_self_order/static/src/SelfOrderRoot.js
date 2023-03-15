@@ -41,13 +41,15 @@ class SelfOrderRoot extends Component {
                 pos_id: this.selfOrder.config.pos_id,
             });
             this.productList = this.result_from_get_menu.map(
-                ({ id, pos_categ_id, price_info, ...rest }) => ({
+                ({ id, pos_categ_id, price_info, display_name, ...rest }) => ({
                     product_id: id,
                     // TODO: we have to TEST if prices are correctly displayed / calculated with tax included or tax excluded
                     list_price: this.selfOrder.config.show_prices_with_tax_included
                         ? price_info["price_with_tax"]
                         : price_info["price_without_tax"],
                     tagList: pos_categ_id ? new Set(pos_categ_id[1].split(" / ")) : new Set(),
+                    // the display name is like '[FURN_7888] Desk Stand with Screen' so we remove the [FURN_7888] part
+                    name: display_name.replace(/^\[.*]/g, ""),
                     attributes: [],
                     ...rest,
                 })
