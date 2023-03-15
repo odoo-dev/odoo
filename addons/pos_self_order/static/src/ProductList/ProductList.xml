@@ -37,8 +37,8 @@
 
     <t t-name="ProductCard" owl="1">
         <div class="o_self_order_item_card card d-flex flex-row my-2 rounded-3 overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
-            <div class="o_self_order_item_card--image">
-                <img class="h-100 w-100" t-attf-src="/menu/get-images/{{ product.product_id }}" alt="Product image"/>
+            <div class="o_self_order_item_card--image position-relative">
+                <img class="h-100 w-100 position-absolute" t-attf-src="/menu/get-images/{{ product.product_id }}" alt="Product image"/>
             </div>
             <div class="o_self_order_item_card--content d-flex flex-column p-2">
                 <t t-if="product.description_sale != false">
@@ -65,7 +65,7 @@
             <input type="text" class="form-control p-3 border-0 shadow-none" t-ref="searchInput" placeholder="Pizza"
                     t-model="private_state.search_input"/>
             <div class="px-3">
-                <button class="btn bg-200"
+                <button class="btn bg-200 rounded"
                         t-on-click="() => closeSearch()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -73,7 +73,7 @@
         </div>
     </t>
     <t t-name="SearchIcon" owl="1">
-        <button class="btn btn-link px-3"
+        <button class="btn btn-link text-dark px-3"
                 t-on-click="() => focusSearch()">
             <i class="fa fa-search px-1"></i>
         </button>
