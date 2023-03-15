@@ -65,7 +65,7 @@
             <input type="text" class="form-control p-3 border-0 shadow-none" t-ref="searchInput" placeholder="Pizza"
                     t-model="private_state.search_input"/>
             <div class="px-3">
-                <button class="btn bg-200"
+                <button class="btn bg-200 rounded"
                         t-on-click="() => closeSearch()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -73,7 +73,7 @@
         </div>
     </t>
     <t t-name="SearchIcon" owl="1">
-        <button class="btn btn-secondary px-3"
+        <button class="btn btn-link text-dark px-3"
                 t-on-click="() => focusSearch()">
             <i class="fa fa-search px-1"></i>
         </button>
