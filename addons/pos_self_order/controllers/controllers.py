@@ -139,11 +139,11 @@ def add_price_and_attribute_info_to_products(products_sudo, pos_id):
     :rtype: list of dict
     """
     for product in products_sudo:
-        print(product.read(['display_name']))
+        print(product.read(['lst_price']))
         # print(product.get_product_info_pos(product.list_price, 1, int(pos_id))),
     return [{
         **{
-            'price_info': product.get_product_info_pos(product.list_price, 1, int(pos_id))['all_prices'],
+            'price_info': product.get_product_info_pos(product.lst_price, 1, int(pos_id))['all_prices'],
             'attribute_line_ids': product.read(['attribute_line_ids'])[0].get('attribute_line_ids'),
         },
         **product.read(['id', 'display_name', 'description_sale', 'pos_categ_id'])[0],
