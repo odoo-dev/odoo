@@ -19,65 +19,26 @@
     </data>
 
     <template id="qr_codes_page">
-        <!-- <t t-call="web.html_container"> -->
-            <t t-call="web.basic_layout">
-                <div class="page">
-                    <t t-set="qr_code_size" t-value="200"/>
-                    <div class="container text-center">
-                        <h2 class="mb-2">
-                            QR Code Menu
-                        </h2>
-    <!-- 3 COLUMN bootstrap grid layout -->
-                        <div class="row row-cols-3" style="page-break-after:always;">
-                            <t t-foreach="tables" t-as="table">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-set="qr_code_size" t-value="200"/>
+                <div class="text-center">
+                    <h1 class="mb-2">
+                        QR Code Menu
+                    </h1>
+                    <div class="row">
+                        <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="table">
+                                <!-- <t t-call="pos_self_order.qr_code"/> -->
                                 <div class="col">
-                                    <t t-call="pos_self_order.qr_code"/>
+                                <t t-esc="'sal'"/>
                                 </div>
+                                <t t-if="table % 3 == 0">
+                                <div class="w-100"></div>
                             </t>
-                        </div>
+                        </t>
                     </div>
                 </div>
-            <!-- </t> -->
-        </t>
-    </template>
-    <template id="qr_code">
-        <div class="d-flex flex-column col align-items-center" >
-            <div class="qr_code_and_logo_container m-2" 
-                style="
-                    position: relative;
-                    top: 0;
-                    left: 0;
-            ">
-    <!-- QRCode -->
-                <img class="qr_code" t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %(table['url'], qr_code_size, qr_code_size)" 
-                    style="
-                        position: relative;
-                        top: 0;
-                        left: 0;
-                    " />
-    <!-- O from odoo logo in the CENTER of the qr code -->
-                <svg class="logo" 
-                        style="
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                        " 
-                        t-att-width="qr_code_size/4" 
-                        t-att-height="qr_code_size/4" 
-                        viewBox="0 0 120 120" fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <g id="Group 1">
-                        <rect id="Rectangle 1" width="120" height="120" rx="33" fill="white"/>
-                        <g id="Group 2">
-                            <path id="Vector" d="M60 110C87.6142 110 110 87.6142 110 60C110 32.3858 87.6142 10 60 10C32.3858 10 10 32.3858 10 60C10 87.6142 32.3858 110 60 110Z" fill="#9C5789"/>
-                            <path id="Vector_2" d="M59.5166 89.6961C75.8029 89.6961 89.0055 76.4935 89.0055 60.2072C89.0055 43.9209 75.8029 30.7182 59.5166 30.7182C43.2303 30.7182 30.0276 43.9209 30.0276 60.2072C30.0276 76.4935 43.2303 89.6961 59.5166 89.6961Z" fill="white"/>
-                        </g>
-                    </g>
-                </svg> 
             </div>
-        </div>
-
+        </t>
     </template>
 </odoo>

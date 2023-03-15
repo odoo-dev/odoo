@@ -5,6 +5,22 @@ from odoo.http import request
 from typing import List, Dict
 
 class PosSelfOrder(http.Controller):
+    @http.route([
+        '/test',
+    ], auth='public', website=True)
+    def test(self, pos_id: int=None, product_id: int=None) -> http.Response:
+        """
+        The user gets this route from the QR code that they scan at the table
+        This START ROUTE will render the LANDING PAGE of the POS Self Order App
+        And it will pass some generic variabiles to the template: pos_id, table_id, pos_name, currency, 
+
+        We get some details about this POS from the model "pos.config"
+        """
+        # TODO: make sure it is ok to send session_info to frontend
+        response = request.render(
+            'pos_self_order.qr_codes_page', {
+            })
+        return response
     """
     This is the controller for the POS Self Order App
     There is one main route that the client will use to access the POS Self Order App: /menu

@@ -21,4 +21,5 @@ class ResConfigSettings(models.TransientModel):
             'pos_name': self.pos_config_id.name,
             'tables': qr_codes_to_print,
         }
+        print(data)
         return self.env.ref('pos_self_order.report_self_order_qr_codes_page').report_action([], data=data)
