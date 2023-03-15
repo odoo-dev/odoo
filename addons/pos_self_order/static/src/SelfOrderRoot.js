@@ -52,6 +52,7 @@ class SelfOrderRoot extends Component {
                     ...rest,
                 })
             );
+            // we create a set with all the tags that are present in the menu
             this.selfOrder.config.tagList = new Set(
                 this.productList.map((product) => Array.from(product.tagList)).flat()
             );
@@ -70,6 +71,8 @@ class SelfOrderRoot extends Component {
         });
     }
 }
+// FIXME: env.js:115 TypeError: Cannot read properties of undefined (reading 'allowed_companies')
+// at computeAllowedCompanyIds
 export async function createPublicRoot() {
     await whenReady();
     const wowlEnv = makeEnv();
