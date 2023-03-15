@@ -45,7 +45,7 @@ class PosSelfOrder(http.Controller):
         """
         pos_sudo = find_pos_config_sudo(pos_id) 
         products_sudo = get_products_that_are_available_in_this_pos(pos_sudo)
-        return add_price_and_attribute_info_to_products(products_sudo, pos_id)
+        return get_necessary_data_from_products_list(products_sudo, pos_id)
 
     # TODO: right now this route will return the image to whoever calls it; is there any reason to not make it public?
     @http.route('/menu/get-images/<int:product_id>', methods=['GET'], type='http', auth='public')
@@ -128,9 +128,10 @@ def get_products_that_are_available_in_this_pos(pos_sudo):
                         )
 
 
-def add_price_and_attribute_info_to_products(products_sudo, pos_id):
+def get_necessary_data_from_products_list(products_sudo, pos_id):
     """
-    This function adds the price info and the attribute line ids to each product in the list products_sudo
+    This function adds the price info to each product in the list products_sudo
+    and returns the list of products with the necessary info
     :param products_sudo: the list of products
     :type products_sudo: list of product.product objects
     :param pos_id: the id of the POS
@@ -141,7 +142,6 @@ def add_price_and_attribute_info_to_products(products_sudo, pos_id):
     return [{
         **{
             'price_info': product.get_product_info_pos(product.lst_price, 1, int(pos_id))['all_prices'],
-            'attribute_line_ids': product.read(['attribute_line_ids'])[0].get('attribute_line_ids'),
         },
-        **product.read(['id', 'display_name', 'description_sale', 'pos_categ_id'])[0],
+        **product.read(['id', 'display_name', 'description_sale', 'pos_categ_id', 'attribute_line_ids'])[0],
     } for product in products_sudo]
