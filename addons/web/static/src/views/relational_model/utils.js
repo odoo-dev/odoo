@@ -46,7 +46,9 @@ export const getActiveFieldsFromArchInfo = ({ fieldNodes, widgetNodes }, { isSma
         } else {
             // TODO (see task description for multiple occurrences of fields)
         }
-        addFieldDependencies(activeFields, fieldNode.field.fieldDependencies);
+        if (fieldNode.field) {
+            addFieldDependencies(activeFields, fieldNode.field.fieldDependencies);
+        }
     }
     for (const widgetInfo of Object.values(widgetNodes || {})) {
         addFieldDependencies(activeFields, widgetInfo.widget.fieldDependencies);
