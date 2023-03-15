@@ -73,7 +73,9 @@ patch(Message.prototype, "mail/web", {
                 return format.char(trackingValue.value);
             case "date":
                 if (trackingValue.value) {
-                    return format.date(moment.utc(trackingValue.value));
+                    return luxon.DateTime.fromISO(trackingValue.value, { setZone: "utc" }).toFormat(
+                        "LL/dd/yyyy"
+                    );
                 }
                 return format.date(trackingValue.value);
             case "datetime": {

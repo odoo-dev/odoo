@@ -69,7 +69,7 @@ export class CallSettings extends Component {
         a.href = url;
         a.download = `RtcLogs_Channel_${this.rtc.state.logs.channelId}_Session_${
             this.rtc.state.logs.selfSessionId
-        }_${window.moment().format("YYYY-MM-DD_HH-mm")}.json`;
+        }_${luxon.DateTime.now().toFormat("yyyy-ll-dd_HH-mm")}.json`;
         a.click();
         window.URL.revokeObjectURL(url);
     }

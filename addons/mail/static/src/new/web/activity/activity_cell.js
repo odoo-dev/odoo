@@ -26,15 +26,19 @@ export class ActivityCell extends Component {
     }
 
     get closestDeadlineFormatted() {
-        const date = moment(this.props.closestDeadline).toDate();
+        const date = luxon.DateTime.fromISO(this.props.closestDeadline);
         // To remove year only if current year
-        if (moment().year() === moment(date).year()) {
-            return date.toLocaleDateString(moment().locale(), {
+        if (new luxon.DateTime.now().year === date.year) {
+            return date.toLocaleString({
                 day: "numeric",
                 month: "short",
             });
         } else {
-            return moment(date).format("ll");
+            return date.toLocaleDateString({
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            });
         }
     }
 

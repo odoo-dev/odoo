@@ -505,7 +505,7 @@ export class Rtc {
         }
         const trace = window.Error().stack || "";
         this.state.logs.get(session.id).logs.push({
-            event: `${window.moment().format("h:mm:ss")}: ${entry}`,
+            event: `${luxon.DateTime.now().toFormat("HH:mm:ss")}: ${entry}`,
             error: error && {
                 name: error.name,
                 message: error.message,
