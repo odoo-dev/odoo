@@ -14,7 +14,12 @@ import {
     waitUntil,
 } from "@mail/../tests/helpers/test_utils";
 
-import { makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import {
+    makeDeferred,
+    nextTick,
+    patchWithCleanup,
+    triggerEvents,
+} from "@web/../tests/helpers/utils";
 
 QUnit.module("thread");
 
@@ -868,3 +873,81 @@ QUnit.test("Thread messages are only loaded once", async function (assert) {
     await waitUntil(".o-mail-Message:contains(channel1)");
     assert.verifySteps([`load messages - ${channelIds[0]}`, `load messages - ${channelIds[1]}`]);
 });
+
+QUnit.test(
+    "Opening thread with needaction messages should mark all messages of thread as read",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({ name: "General" });
+        const { env, openDiscuss } = await start({
+            mockRPC(route, args) {
+                if (args.model === "mail.message" && args.method === "mark_all_as_read") {
+                    assert.step("mark-all-messages-as-read");
+                    assert.deepEqual(args.args[0], [
+                        ["model", "=", "mail.channel"],
+                        ["res_id", "=", channelId],
+                    ]);
+                }
+            },
+        });
+        await openDiscuss(channelId);
+        // ensure focusout is triggered on composers' textarea
+        await triggerEvents($(".o-mail-Composer-input")[0], null, ["blur", "focusout"]);
+        await click("button:contains(Inbox)");
+        const messageId = pyEnv["mail.message"].create({
+            body: "@Mitchel Admin",
+            needaction: true,
+            model: "mail.channel",
+            res_id: channelId,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: messageId,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        });
+        // simulate receiving a new needaction message
+        const [formattedMessage] = await env.services.orm.call("mail.message", "message_format", [
+            [messageId],
+        ]);
+        pyEnv["bus.bus"]._sendone(pyEnv.currentPartner, "mail.channel/new_message", {
+            id: channelId,
+            message: formattedMessage,
+        });
+        await waitUntil(".o-mail-DiscussCategoryItem-counter:contains(1)");
+        await waitUntil("button:contains(Inbox) .badge:contains(1)");
+        await click("button:contains(General)");
+        await waitUntil(".o-mail-DiscussCategoryItem-counter", 0);
+        await waitUntil("button:contains(Inbox) .badge", 0);
+        assert.verifySteps(["mark-all-messages-as-read"]);
+    }
+);
+
+QUnit.test(
+    "[technical] Opening thread without needaction messages should not mark all messages of thread as read",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({ name: "General" });
+        const { env, openDiscuss } = await start({
+            mockRPC(route, args) {
+                if (args.model === "mail.message" && args.method === "mark_all_as_read") {
+                    assert.step("mark-all-messages-as-read");
+                }
+            },
+        });
+        await openDiscuss(channelId);
+        await click("button:contains(Inbox)");
+        await env.services.rpc("/mail/message/post", {
+            post_data: {
+                body: "Hello world!",
+                attachment_ids: [],
+            },
+            thread_id: channelId,
+            thread_model: "mail.channel",
+        });
+        await click("button:contains(General)");
+        await nextTick();
+        assert.verifySteps([]);
+    }
+);
