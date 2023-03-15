@@ -22,7 +22,6 @@ export class ProductList extends Component {
         const currentProductCard = useRef(`product_${this.state.currentProduct}`);
         onMounted(() => {
             if (this.state.currentProduct) {
-                console.log("scrolling to current product");
                 currentProductCard.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
