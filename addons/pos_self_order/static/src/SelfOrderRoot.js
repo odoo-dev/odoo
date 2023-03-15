@@ -73,6 +73,7 @@ class SelfOrderRoot extends Component {
 }
 // FIXME: env.js:115 TypeError: Cannot read properties of undefined (reading 'allowed_companies')
 // at computeAllowedCompanyIds
+// error dissapears when you add #cids=1 to the url
 export async function createPublicRoot() {
     await whenReady();
     const wowlEnv = makeEnv();
