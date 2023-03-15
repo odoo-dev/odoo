@@ -11,6 +11,11 @@
             <field name="binding_model_id" ref="model_pos_config"/>
             <field name="binding_type">report</field>
         </record>
+        <record id="paperformat_qrcodes" model="report.paperformat">
+            <field name="name">QR Codes Page</field>
+            <field name="default" eval="True"/>
+            <field name="header_line" eval="False"/>
+        </record>
     </data>
 
     <template id="qr_codes_page">
@@ -23,13 +28,13 @@
                             QR Code Menu
                         </h2>
     <!-- 3 COLUMN bootstrap grid layout -->
-                            <div class="row row-cols-3" style="page-break-after:always;">
-                                <t t-foreach="tables" t-as="table">
-                                    <div class="col">
-                                        <t t-call="pos_self_order.qr_code"/>
-                                    </div>
-                                </t>
-                            </div>
+                        <div class="row row-cols-3" style="page-break-after:always;">
+                            <t t-foreach="tables" t-as="table">
+                                <div class="col">
+                                    <t t-call="pos_self_order.qr_code"/>
+                                </div>
+                            </t>
+                        </div>
                     </div>
                 </div>
             </t>

@@ -11,8 +11,7 @@ class ResConfigSettings(models.TransientModel):
         """
         Generate the data needed to print the QR codes page
         """
-        business_url = self.env['ir.config_parameter'].sudo(
-        ).get_param('web.base.url')
+        business_url = self.env['ir.config_parameter'].get_param('web.base.url')
         no_of_qr_codes_per_page = 9
         qr_codes_to_print = [{
             'id': 0,
