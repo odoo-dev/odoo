@@ -6,9 +6,10 @@ import { registry } from "@web/core/registry";
 import { onChange } from "@mail/new/utils/misc";
 
 export class Store {
-    constructor(env) {
+    constructor(env, { "mail.context": context }) {
         this.setup(env);
         this.lastChannelSubscription = "";
+        this.inPublicPage = Boolean(context.inPublicPage);
     }
 
     setup(env) {
@@ -146,13 +147,13 @@ export class Store {
 }
 
 export const storeService = {
-    dependencies: ["bus_service", "ui"],
-    start(env, { ui }) {
-        const res = reactive(new Store(env));
+    dependencies: ["bus_service", "ui", "mail.context"],
+    start(env, services) {
+        const res = reactive(new Store(env, services));
         onChange(res, "threads", () => res.updateBusSubscription());
         res.discuss.activeTab = res.isSmall ? "mailbox" : "all";
-        ui.bus.addEventListener("resize", () => {
-            res.isSmall = ui.isSmall;
+        services.ui.bus.addEventListener("resize", () => {
+            res.isSmall = services.ui.isSmall;
             if (!res.isSmall) {
                 res.discuss.activeTab = "all";
             } else {

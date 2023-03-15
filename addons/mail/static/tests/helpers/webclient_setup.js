@@ -36,6 +36,7 @@ import { attachmentService } from "@mail/new/attachments/attachment_service";
 import { notificationPermissionService } from "@mail/new/core/notification_permission_service";
 import { session } from "@web/session";
 import { channelMemberService } from "@mail/new/core/channel_member_service";
+import { contextService } from "@mail/new/web/discuss/context_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -119,6 +120,7 @@ export const setupManager = {
             im_status: imStatusService,
             effect: effectService,
             "mail.channel.member": channelMemberService,
+            "mail.context": contextService,
             "mail.notification.permission": notificationPermissionService,
             "mail.suggestion": suggestionService,
             "mail.store": storeService,
