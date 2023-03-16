@@ -65,7 +65,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         };
     });
 
-    QUnit.tttt("change setting on nav bar click in base settings", async function (assert) {
+    QUnit.test("change setting on nav bar click in base settings", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
@@ -354,7 +354,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.containsOnce(target, ".o_setting_tip:not(.d-none)", "Tip should not be hidden");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "settings views does not read existing id when coming back in breadcrumbs",
         async function (assert) {
             assert.expect(11);
@@ -425,7 +425,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.tttt("resIds should contains only 1 id", async function (assert) {
+    QUnit.test("resIds should contains only 1 id", async function (assert) {
         assert.expect(1);
 
         serverData.models["res.config.settings"].fields.foo_text = {
@@ -491,7 +491,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                     ]);
                 }
                 if (route === "/web/dataset/call_button" && method === "execute") {
-                    assert.deepEqual(args, [[2]]);
+                    assert.deepEqual(args[0].length, 1);
                     return true;
                 }
             },
@@ -503,7 +503,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target.querySelector(".o_form_button_save")); // Save Settings
     });
 
-    QUnit.tttt("settings views does not read existing id when reload", async function (assert) {
+    QUnit.test("settings views does not read existing id when reload", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,
@@ -938,7 +938,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.tttt("clicking a button with dirty settings -- save", async (assert) => {
+    QUnit.test("clicking a button with dirty settings -- save", async (assert) => {
         registry.category("services").add(
             "action",
             {
@@ -979,7 +979,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("clicking a button with dirty settings -- discard", async (assert) => {
+    QUnit.test("clicking a button with dirty settings -- discard", async (assert) => {
         registry.category("services").add(
             "action",
             {
@@ -1177,7 +1177,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "execute action from settings view with several actions in the breadcrumb",
         async function (assert) {
             // This commit fixes a race condition, that's why we artificially slow down a read rpc
@@ -1226,7 +1226,7 @@ QUnit.module("SettingsFormView", (hooks) => {
 
             let def;
             const mockRPC = async (route, args) => {
-                if (args.method === "web_search_read") {
+                if (args.method === "unity_read") {
                     await def; // slow down reload of settings view
                 }
             };
@@ -1484,7 +1484,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         );
     });
 
-    QUnit.tttt("standalone field labels with string inside a settings page", async (assert) => {
+    QUnit.test("standalone field labels with string inside a settings page", async (assert) => {
         let compiled = undefined;
         patchWithCleanup(SettingsFormCompiler.prototype, {
             compile() {
