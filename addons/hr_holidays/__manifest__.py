@@ -63,36 +63,23 @@ A synchronization with an internal agenda (Meetings of the CRM module) is also p
     'application': True,
     'assets': {
         'web.assets_backend': [
-            'hr_holidays/static/src/views/**/*.js',
-            'hr_holidays/static/src/views/**/*.scss',
-            'hr_holidays/static/src/views/**/*.xml',
-            'hr_holidays/static/src/dashboard/**/*.js',
-            'hr_holidays/static/src/dashboard/**/*.scss',
-            'hr_holidays/static/src/dashboard/**/*.xml',
-            'hr_holidays/static/src/leave_stats/**/*.js',
-            'hr_holidays/static/src/leave_stats/**/*.xml',
-            'hr_holidays/static/src/new/**/*',
-            'hr_holidays/static/src/scss/*.scss',
-            'hr_holidays/static/src/tours/*.js',
-            'hr_holidays/static/src/radio_image_field/*.js',
-            'hr_holidays/static/src/radio_image_field/*.xml',
-
+            'hr_holidays/static/src/**/*',
             # Don't include dark mode files in light mode
-            ('remove', 'hr_holidays/static/src/views/**/*.dark.scss'),
-            ('remove', 'hr_holidays/static/src/dashboard/**/*.dark.scss'),
+            ('remove', 'hr_holidays/static/src/**/*.dark.scss'),
         ],
         "web.dark_mode_assets_backend": [
-            'hr_holidays/static/src/views/**/*.dark.scss',
-            'hr_holidays/static/src/dashboard/**/*.dark.scss',
+            'hr_holidays/static/src/**/*.dark.scss',
         ],
         'web.tests_assets': [
             'hr_holidays/static/tests/helpers/**/*',
         ],
         'web.qunit_suite_tests': [
-            'hr_holidays/static/tests/new/**/*.js',
+            'hr_holidays/static/tests/**/*.js',
+            ('remove', 'hr_holidays/static/tests/tours/**/*'),
+            ('remove', 'hr_holidays/static/tests/helpers/**/*'),
         ],
         'web.assets_tests': [
-            '/hr_holidays/static/tests/tours/**/**.js'
+            '/hr_holidays/static/tests/tours/**/*'
         ],
     },
     'license': 'LGPL-3',

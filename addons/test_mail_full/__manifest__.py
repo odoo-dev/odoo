@@ -31,10 +31,11 @@ real applications. """,
     ],
     'assets': {
         'web.qunit_suite_tests': [
-            'test_mail_full/static/tests/new/**/*.js',
+            'test_mail_full/static/tests/**/*',
+            ('remove', 'test_mail_full/static/tests/helpers/**/*'),
         ],
         'web.tests_assets': [
-            'test_mail_full/static/tests/helpers/*.js',
+            'test_mail_full/static/tests/helpers/**/*',
         ],
     },
     'installable': True,

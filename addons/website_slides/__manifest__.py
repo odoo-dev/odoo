@@ -71,7 +71,7 @@ Featuring
     'application': True,
     'assets': {
         'web.assets_backend': [
-            'website_slides/static/src/backend/**/*',
+            'website_slides/static/src/activity/**/*',
             'website_slides/static/src/slide_category_one2many_field.js',
             'website_slides/static/src/slide_category_list_renderer.js',
             'website_slides/static/src/scss/slide_views.scss',
@@ -261,7 +261,9 @@ Featuring
             'website_slides/static/tests/helpers/*.js',
         ],
         'web.qunit_suite_tests': [
-            'website_slides/static/tests/new/**/*.js',
+            'website_slides/static/tests/**/*',
+            ('remove', 'website_slides/static/tests/tours/**/*'),
+            ('remove', 'website_slides/static/tests/helpers/*.js'),
         ],
     },
     'license': 'LGPL-3',

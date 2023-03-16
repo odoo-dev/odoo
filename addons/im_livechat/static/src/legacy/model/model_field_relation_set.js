@@ -3,7 +3,19 @@
 import { decrement, increment } from "@im_livechat/legacy/model/model_field_command";
 import { Listener } from "@im_livechat/legacy/model/model_listener";
 import { followRelations } from "@im_livechat/legacy/model/model_utils";
-import { cleanSearchTerm } from "@mail/utils/utils";
+import { unaccent } from "web.utils";
+
+/**
+ * Returns the given string after cleaning it. The goal of the clean is to give
+ * more convenient results when comparing it to potential search results, on
+ * which the clean should also be called before comparing them.
+ *
+ * @param {string} searchTerm
+ * @returns {string}
+ */
+function cleanSearchTerm(searchTerm) {
+    return unaccent(searchTerm.toLowerCase());
+}
 
 /**
  * Defines a set containing the relation records of the given field on the given

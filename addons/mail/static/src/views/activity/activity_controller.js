@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { useMessaging } from "@mail/new/core/messaging_hook";
+import { useMessaging } from "@mail/core/messaging_hook";
 
 import { Component } from "@odoo/owl";
 

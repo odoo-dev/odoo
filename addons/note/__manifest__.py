@@ -25,11 +25,8 @@
     'installable': True,
     'application': True,
     'assets': {
-        'mail.assets_backend': [
-            'note/static/src/new/**/*',
-        ],
         'web.assets_backend': [
-            'note/static/src/scss/note.scss',
+            'note/static/src/**/*',
         ],
         'web.qunit_suite_tests': [
             'note/static/tests/**/*',

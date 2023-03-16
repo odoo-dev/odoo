@@ -2,8 +2,7 @@
 
 import { getPyEnv, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
-import { loadEmoji } from "@mail/new/emoji_picker/emoji_picker";
-import { nextTick } from "@mail/utils/utils";
+import { loadEmoji } from "@mail/emoji_picker/emoji_picker";
 import { getAdvanceTime } from "@mail/../tests/helpers/time_control";
 import { patchBrowserNotification } from "@mail/../tests/helpers/patch_notifications";
 import { getWebClientReady } from "@mail/../tests/helpers/webclient_setup";
@@ -64,6 +63,14 @@ function nextAnimationFrame() {
     });
 }
 
+/**
+ * Wait a task tick, so that anything in micro-task queue that can be processed
+ * is processed.
+ */
+async function nextTick() {
+    await new Promise(setTimeout);
+}
+
 //------------------------------------------------------------------------------
 // Public: test lifecycle
 //------------------------------------------------------------------------------
@@ -120,7 +127,9 @@ function getClick({ target, afterNextRender }) {
     return async function click(selector) {
         await afterNextRender(() => {
             if (typeof selector === "string") {
-                $(target ?? document.body).find(selector)[0].click();
+                $(target ?? document.body)
+                    .find(selector)[0]
+                    .click();
             } else if (selector instanceof HTMLElement) {
                 selector.click();
             } else {

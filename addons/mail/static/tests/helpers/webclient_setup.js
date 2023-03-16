@@ -6,12 +6,12 @@ import { imStatusService } from "@bus/im_status_service";
 import { multiTabService } from "@bus/multi_tab_service";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
-import { ActivityMenu } from "@mail/new/web/activity/activity_menu";
-import { ChatWindowContainer } from "@mail/new/web/chat_window/chat_window_container";
-import { MessagingMenu } from "@mail/new/web/messaging_menu/messaging_menu";
-import { messagingService } from "@mail/new/core/messaging_service";
-import { CallInvitations } from "@mail/new/rtc/call_invitations";
-import { CallMenu } from "@mail/new/rtc/call_menu";
+import { ActivityMenu } from "@mail/web/activity/activity_menu";
+import { ChatWindowContainer } from "@mail/web/chat_window/chat_window_container";
+import { MessagingMenu } from "@mail/web/messaging_menu/messaging_menu";
+import { messagingService } from "@mail/core/messaging_service";
+import { CallInvitations } from "@mail/rtc/call_invitations";
+import { CallMenu } from "@mail/rtc/call_menu";
 
 import { patch } from "@web/core/utils/patch";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
@@ -20,23 +20,23 @@ import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeMockXHR } from "@web/../tests/helpers/mock_services";
 import { createWebClient } from "@web/../tests/webclient/helpers";
 import { effectService } from "@web/core/effects/effect_service";
-import { soundEffects } from "@mail/new/core/sound_effects_service";
-import { userSettingsService } from "@mail/new/core/user_settings_service";
-import { rtcService } from "@mail/new/rtc/rtc_service";
-import { suggestionService } from "@mail/new/composer/suggestion_service";
-import { storeService } from "@mail/new/core/store_service";
-import { chatWindowService } from "@mail/new/web/chat_window/chat_window_service";
-import { threadService } from "@mail/new/core/thread_service";
-import { messageService } from "@mail/new/core/message_service";
-import { activityService } from "@mail/new/web/activity/activity_service";
-import { outOfFocusService } from "@mail/new/core/out_of_focus_service";
-import { DiscussClientAction } from "@mail/new/discuss/discuss_client_action";
-import { personaService } from "@mail/new/core/persona_service";
-import { attachmentService } from "@mail/new/attachments/attachment_service";
-import { notificationPermissionService } from "@mail/new/core/notification_permission_service";
+import { soundEffects } from "@mail/core/sound_effects_service";
+import { userSettingsService } from "@mail/core/user_settings_service";
+import { rtcService } from "@mail/rtc/rtc_service";
+import { suggestionService } from "@mail/composer/suggestion_service";
+import { storeService } from "@mail/core/store_service";
+import { chatWindowService } from "@mail/web/chat_window/chat_window_service";
+import { threadService } from "@mail/core/thread_service";
+import { messageService } from "@mail/core/message_service";
+import { activityService } from "@mail/web/activity/activity_service";
+import { outOfFocusService } from "@mail/core/out_of_focus_service";
+import { DiscussClientAction } from "@mail/discuss/discuss_client_action";
+import { personaService } from "@mail/core/persona_service";
+import { attachmentService } from "@mail/attachments/attachment_service";
+import { notificationPermissionService } from "@mail/core/notification_permission_service";
 import { session } from "@web/session";
-import { channelMemberService } from "@mail/new/core/channel_member_service";
-import { contextService } from "@mail/new/web/discuss/context_service";
+import { channelMemberService } from "@mail/core/channel_member_service";
+import { contextService } from "@mail/web/discuss/context_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",

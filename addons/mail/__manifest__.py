@@ -116,31 +116,23 @@ For more specific needs, you may also assign custom-defined actions
     'installable': True,
     'application': True,
     'assets': {
-        # Custom bundle in case we want to remove things that are later added to web.assets_common
-        'mail.assets_common_discuss_public': [
-            ('include', 'web.assets_common'),
-        ],
         'web._assets_primary_variables': [
             'mail/static/src/scss/variables/primary_variables.scss',
-            'mail/static/src/new/core_ui/primary_variables.scss',
+            'mail/static/src/core_ui/primary_variables.scss',
         ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
-            'mail/static/src/js/**/*.js',
-            'mail/static/src/utils/*.js',
             'mail/static/src/scss/*.scss',
-            'mail/static/src/xml/*.xml',
-            'mail/static/src/views/*/*.xml',
-            ('include', 'mail.assets_core_messaging'),
-            'mail/static/src/views/**/*.js',
-            'mail/static/src/views/**/*.scss',
-            'mail/static/src/views/**/*.xml',
-
-            ('include', 'mail.assets_backend'),
+            'mail/static/lib/**/*',
+            'mail/static/src/**/*',
+            ('remove', 'mail/static/src/worklets/**/*'),
+            ('remove', 'mail/static/src/public/**/*'),
+            ('remove', 'mail/static/src/**/*.dark.scss'),
+            ('remove', 'mail/static/src/emoji_picker/emoji_data.js'),
         ],
         "web.dark_mode_assets_backend": [
-            ('include', 'mail.assets_dark'),
+            'mail/static/src/**/*.dark.scss',
         ],
         'mail.assets_discuss_public_test_tours': [
             'web/static/tests/legacy/helpers/test_utils_file.js',
@@ -151,24 +143,15 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/tests/tours/**/*',
         ],
         'web.tests_assets': [
-            'mail/static/tests/helpers/**/*.js',
+            'mail/static/tests/helpers/**/*',
         ],
         'web.qunit_suite_tests': [
-            'mail/static/tests/new/**/*.js',
-        ],
-        # new bundles
-        'mail.assets_backend': [
-            'mail/static/src/new/**/*',
-            ('remove', 'mail/static/src/new/public/**/*'),
-            ('remove', 'mail/static/src/new/**/*.dark.scss'),
-            ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
-            'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
-        ],
-        'mail.assets_dark': [
-            'mail/static/src/new/**/*.dark.scss',
+            'mail/static/tests/**/*',
+            ('remove', 'mail/static/tests/tours/**/*'),
+            ('remove', 'mail/static/tests/helpers/**/*'),
         ],
         'mail.assets_emoji': [
-            'mail/static/src/new/emoji_picker/emoji_data.js',
+            'mail/static/src/emoji_picker/emoji_data.js',
         ],
         'mail.assets_public': [
             ('include', 'web._assets_helpers'),
@@ -185,7 +168,6 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/views/fields/file_handler.*',
             'web/static/src/views/fields/many2many_tags/tags_list.*',
 
-            'mail/static/src/new/**/*',
             'web/static/src/legacy/js/core/misc.js',
             'web/static/src/legacy/js/env.js',
             'web/static/src/legacy/js/owl_compatibility.js',
@@ -193,9 +175,16 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/legacy_load_views.js',
             'web/static/src/legacy/utils.js',
-            ('remove', 'mail/static/src/new/web/**/*'),
-            ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
-            ('remove', 'mail/static/src/new/**/*.dark.scss'),
+
+            'mail/static/src/**/*',
+            ('remove', 'mail/static/src/js/**/*'),
+            ('remove', 'mail/static/src/scss/**/*'),
+            ('remove', 'mail/static/src/xml/**/*'),
+            ('remove', 'mail/static/src/worklets/**/*'),
+            ('remove', 'mail/static/src/views/**/*'),
+            ('remove', 'mail/static/src/web/**/*'),
+            ('remove', 'mail/static/src/emoji_picker/emoji_data.js'),
+            ('remove', 'mail/static/src/**/*.dark.scss'),
         ]
     },
     'license': 'LGPL-3',

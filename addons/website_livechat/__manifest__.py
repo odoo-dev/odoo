@@ -26,21 +26,24 @@ Allow website visitors to chat with the collaborators. This module also brings a
     ],
     'assets': {
         'im_livechat.assets_public_livechat': [
-            'website_livechat/static/src/legacy/public_models/*',
-            'website_livechat/static/src/legacy/widgets/*/*',
+            'website_livechat/static/src/legacy/public_models/**/*',
+            'website_livechat/static/src/legacy/widgets/**/*',
         ],
         'web.assets_frontend': [
             'website_livechat/static/src/legacy/public_livechat.js',
             'website_livechat/static/src/legacy/public_livechat.scss',
         ],
         'website.assets_wysiwyg': [
-            'website_livechat/static/src/scss/website_livechat.edit_mode.scss',
+            'website_livechat/static/src/scss/**/*',
         ],
         'website.assets_editor': [
-            'website_livechat/static/src/js/systray_items/*.js',
+            'website_livechat/static/src/js/**/*',
         ],
         'web.assets_backend': [
-            'website_livechat/static/src/new/**/*',
+            'website_livechat/static/src/**/*',
+            ('remove', 'website_livechat/static/src/external_lib/**/*'),
+            ('remove', 'website_livechat/static/src/legacy/**/*'),
+            ('remove', 'website_livechat/static/src/scss/**/*'),
         ],
         'web.assets_tests': [
             'website_livechat/static/tests/tours/**/*',
@@ -49,10 +52,12 @@ Allow website visitors to chat with the collaborators. This module also brings a
             'website_livechat/static/tests/helpers/**/*.js',
         ],
         'web.qunit_suite_tests': [
-            'website_livechat/static/tests/new/**/*',
+            'website_livechat/static/tests/**/*',
+            ('remove', 'website_livechat/static/tests/tours/**/*'),
+            ('remove', 'website_livechat/static/tests/helpers/**/*.js'),
         ],
         'im_livechat.external_lib': [
-            'website_livechat/static/src/external_lib/livechat_button.js',
+            'website_livechat/static/src/external_lib/**/*',
             'website_livechat/static/src/legacy/public_livechat.scss',
         ],
     },
