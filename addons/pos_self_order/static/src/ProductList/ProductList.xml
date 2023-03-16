@@ -77,7 +77,7 @@
     <t t-name="SearchIcon" owl="1">
         <button class="btn btn-link text-dark px-3"
                 t-on-click="() => focusSearch()">
-            <i class="fa fa-search px-1"></i>
+            <i class="oi oi-search px-1"></i>
         </button>
     </t>
     <t t-name="TagPicker" owl="1">

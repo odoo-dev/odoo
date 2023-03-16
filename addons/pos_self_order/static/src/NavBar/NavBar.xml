@@ -3,12 +3,12 @@
     <t t-name="NavBar" owl="1">
         <nav class="d-flex align-items-center p-3 border-bottom bg-white">
             <t t-if="props.previousPage">
-                <i class="fa fa-arrow-left fa-lg"
+                <i class="fa fa-fw fa-chevron-left text-dark"
                     t-on-click = "() => env.navigate(props.previousPage)"
                 >
             </t>
             <div class="d-flex flex-grow-1 justify-content-center mx-3 text-start text-truncate">
-                <h2 class="m-0"><t t-esc="selfOrder.config.pos_name"/></h2>
+                <h2 class="m-0 text-primary"><t t-esc="selfOrder.config.pos_name"/></h2>
             </div>
             <span class="o_so_table px-2" />
         </nav>

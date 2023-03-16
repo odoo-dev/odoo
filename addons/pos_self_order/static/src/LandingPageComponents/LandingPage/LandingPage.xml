@@ -6,7 +6,7 @@
             <div class="d-flex flex-column w-75 justify-content-around">
     <!-- View Menu -->
                 <button type="button" t-on-click="()=>env.navigate('/products')"
-                t-attf-class="btn btn-primary btn-lg">
+                t-attf-class="btn btn-primary btn-lg my-2">
                     View Menu
                 </button>
     <!-- Custom Links -->
