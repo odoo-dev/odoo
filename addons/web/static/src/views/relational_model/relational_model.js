@@ -129,7 +129,7 @@ export class RelationalModel extends Model {
         };
         if (params.viewMode === "form") {
             rootParams.data = rootParams.data[0];
-            return new Record(this, {
+            return new this.constructor.Record(this, {
                 ...rootParams,
                 mode: params.mode,
                 resIds: params.resIds,
@@ -146,9 +146,9 @@ export class RelationalModel extends Model {
                 offset: params.offset || 0,
             };
             if (params.groupBy.length) {
-                return new DynamicGroupList(this, listParams);
+                return new this.constructor.DynamicGroupList(this, listParams);
             } else {
-                return new DynamicRecordList(this, listParams);
+                return new this.constructor.DynamicRecordList(this, listParams);
             }
         }
     }
