@@ -4,7 +4,7 @@
     <t t-name="ProductList" owl="1">
         <div class="o_so_navbar sticky-top bg-white shadow-sm">
             <NavBar previousPage="'/'" />
-            <div class="o_so_searchbar_filter d-flex justify-content-start align-items-center p-0 m-0">
+            <div class="o_so_searchbar_filter d-flex justify-content-start align-items-center p-0 m-0 border-bottom">
                 <t t-if="private_state.search_is_focused">
                     <t t-call="SearchBox"/>
                     </t>
@@ -14,59 +14,61 @@
                 </t>
             </div>
         </div>
-        <div t-ref="productListDiv" class="vh-100 py-0 px-3 bg-200 overflow-auto">
-            <t t-set="filteredProducts" t-value="filteredProducts()"/>
-            <t t-if="!filteredProducts?.length">
-                <p class="mt-3 text-center">
-                    No products found
-                </p>
-            </t>
-            <t t-else="">
-                <t t-foreach="filteredProducts" t-as="product" t-key="product.product_id">
-                    <t t-if="!(tag and areSetsEqual(product.tagList, tag))">
-                        <t t-set="tag" t-value="product.tagList"/>
-                        <h3 class="pt-3 pb-1">
-                            <t t-esc="Array.from(tag).join(' ')"/>
-                        </h3>
-                    </t>
-                    <t t-call="ProductCard"/>
+        <div t-ref="productListDiv" class="vh-100 py-0 bg-white overflow-auto">
+            <div class="o_self_order_item_card_container d-flex flex-row flex-wrap">  
+                <t t-set="filteredProducts" t-value="filteredProducts()"/>
+                <t t-if="!filteredProducts?.length">
+                    <p class="mt-3 text-center">
+                        No products found
+                    </p>
                 </t>
-            </t>
+                <t t-else="">
+                    <t t-foreach="filteredProducts" t-as="product" t-key="product.product_id">
+                        <t t-if="!(tag and areSetsEqual(product.tagList, tag))">
+                            <t t-set="tag" t-value="product.tagList"/>
+                            <h2 class="w-100 m-0 pt-4 pb-3 px-2 bg-light mt-n1">
+                                <span class="px-1"><t t-esc="Array.from(tag).join(' ')"/></span>
+                            </h2>
+                        </t>
+                        <t t-call="ProductCard"/>
+                    </t>
+                </t>
+            </div>
         </div>
     </t>
 
     <t t-name="ProductCard" owl="1">
-        <div class="o_self_order_item_card card d-flex flex-row my-2 rounded-3 overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
-            <t t-if="product.has_image">
-                <div class="o_self_order_item_card--image position-relative">
-                    <img class="h-100 w-100 position-absolute" t-attf-src="/menu/get-images/{{ product.product_id }}" alt="Product image"/>
-                </div>
-            </t>
-            <div class="o_self_order_item_card--content d-flex flex-column p-2">
+        <div class="o_self_order_item_card d-flex w-100 w-md-50 p-2 border-bottom overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
+            <div t-attf-class="o_self_order_item_card--content d-flex flex-grow-1 p-2 px-1 {{product.has_image ? 'flex-column' : 'flex-row align-items-center py-2' }}">
                 <t t-if="product.description_sale != false">
-                    <h5 class="mb-0 text-900 ">
+                    <h3 class="mb-0 text-900 fw-bold fs-6">
                         <t t-esc="product.name"/>
-                    </h5>
+                    </h3>
                     <p class="flex-grow-1 mb-1 text-muted small lh-sm break-line">
                         <t t-esc="product.description_sale" />
                     </p>
                 </t>
                 <t t-else="">
-                    <h5 class="flex-grow-1 mb-0 text-900">
+                    <h3 class="flex-grow-1 mb-0 text-900 fw-bold fs-5">
                         <t t-esc="product.name"/>
-                    </h5>
+                    </h3>
                 </t>
-                <p class="card-text text-primary fw-bold">
-                    <t t-esc="formatMonetary(product.list_price, {currencyId: selfOrder.config.currency_id})" />
+                <p class="card-text small">
+                    <t t-esc="formatMonetary(product.list_price, {currencyId: selfOrder.config.currency_id}).replace('.00','')" />
                 </p>
             </div>
+            <t t-if="product.has_image">
+                <div class="o_self_order_item_card--image position-relative">
+                    <img class="position-absolute h-100 w-100 border border-light rounded-3 bg-light" t-attf-src="/menu/get-images/{{ product.product_id }}" alt="Product image"/>
+                </div>
+            </t>
         </div>
     </t>
     <t t-name="SearchBox" owl="1">
         <div class="input-group d-flex align-items-center">
             <input type="text" class="form-control p-3 border-0 shadow-none" t-ref="searchInput" placeholder="Pizza"
                     t-model="private_state.search_input"/>
-            <div class="px-3">
+            <div class="px-2">
                 <button class="btn bg-200 rounded"
                         t-on-click="() => closeSearch()">
                     <i class="fa fa-times"></i>
@@ -85,7 +87,7 @@
             <t t-foreach="Array.from(selfOrder.config.tagList)" t-as="tag" t-key="tag">
                 <li class="nav-item mx-1 py-1"
                     t-on-click="() => selectTag(tag)">
-                    <span t-attf-class="{{private_state.selected_tags.has(tag) ? 'nav-link active py-1 rounded bg-800' : 'nav-link py-1 rounded bg-white text-dark'}}">
+                    <span t-attf-class="{{private_state.selected_tags.has(tag) ? 'nav-link active py-1 rounded' : 'nav-link py-1 rounded text-dark'}}">
                         <t t-esc="tag"/>
                     </span>
                 </li>
