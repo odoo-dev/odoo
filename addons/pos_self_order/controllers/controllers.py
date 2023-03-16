@@ -46,6 +46,10 @@ class PosSelfOrder(http.Controller):
         # TODO: make sure it is ok to send session_info to frontend
         session_info = request.env['ir.http'].session_info()
         session_info['pos_self_order'] = get_self_order_config(pos_id)
+        # session_info ={
+        #     'currency': request.env['ir.http'].session_info()['currencies'],
+        #     'pos_self_order': get_self_order_config(pos_id),
+        # }
         response = request.render(
             'pos_self_order.pos_self_order_index', {
                 'session_info': session_info,
