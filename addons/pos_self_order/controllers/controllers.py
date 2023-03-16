@@ -111,7 +111,7 @@ def get_self_order_config(pos_id: int) -> Dict:
         'custom_links': get_custom_links_list(pos_id),
         'attributes_by_ptal_id': request.env['pos.session'].sudo()._get_attributes_by_ptal_id(),
     }
-# TODO: maybe there are no custom links --> what is the type signature of the return then?
+# TODO: maybe there are no custom links --> what is the type signature of the return then? the return would be an empty list
 def get_custom_links_list(pos_id: int) -> List[Dict[str, str]]:
     """
     On the landing page of the app we can have a number of custom links

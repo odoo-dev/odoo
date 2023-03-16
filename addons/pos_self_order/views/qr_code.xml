@@ -19,39 +19,66 @@
     </data>
 
     <template id="qr_codes_page">
-
-        <t t-call="web.basic_layout">
-            <div class="page">
+        <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <div class="page bg-300">
                 <t t-set="qr_code_size" t-value="200"/>
-                <div class="text-center">
                     <h1 class="mb-2">
                         QR Code Menu
                     </h1>
-  <div class="row row-cols-2">
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
-  </div>
-    <div class="col">col-4</div>
-    <div class="col">col-4</div>
                                 <!-- <t t-call="pos_self_order.qr_code"/> -->
-                    <!-- <div class="d-flex">
-                        <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="table">
-                                <div class="">
-                                <t t-esc="'sal'"/>
-                                </div>
-                        </t>
-                    </div> -->
-                </div>
+                    <div style="
+                        display: flex;
+                        flex-wrap: wrap;
+                    ">
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                                <div style="
+                                      background-color: red;
+                                        flex: 0 0 33.333333%;
+
+                                ">salut</div>
+                    </div>
             </div>
+        </t>
         </t>
     </template>
 </odoo>
+                        <!-- <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="table">
+                                <div style="
+                                      background-color: red;
+                                ">salut</div>
+                        </t> -->
