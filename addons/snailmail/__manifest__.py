@@ -22,7 +22,7 @@ Allows users to send documents by post
     'auto_install': True,
     'assets': {
         'mail.assets_backend': [
-            'snailmail/static/src/new/**/*',
+            'snailmail/static/src/discuss/**/*',
         ],
         'snailmail.report_assets_snailmail': [
             ('include', 'web._assets_helpers'),
@@ -35,7 +35,7 @@ Allows users to send documents by post
             'snailmail/static/tests/helpers/**/*.js',
         ],
         'web.qunit_suite_tests': [
-            'snailmail/static/tests/new/**/*',
+            'snailmail/static/tests/discuss/**/*',
         ],
     },
     'license': 'LGPL-3',

@@ -65,7 +65,7 @@
             'hr/static/tests/tours/user_modify_own_profile_tour.js',
         ],
          'mail.assets_backend': [
-            'hr/static/src/new/**/*',
+            'hr/static/src/discuss/**/*',
         ],
     },
     'license': 'LGPL-3',

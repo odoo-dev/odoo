@@ -40,7 +40,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
             'website_livechat/static/src/js/systray_items/*.js',
         ],
         'web.assets_backend': [
-            'website_livechat/static/src/new/**/*',
+            'website_livechat/static/src/discuss/**/*',
         ],
         'web.assets_tests': [
             'website_livechat/static/tests/tours/**/*',
@@ -49,7 +49,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
             'website_livechat/static/tests/helpers/**/*.js',
         ],
         'web.qunit_suite_tests': [
-            'website_livechat/static/tests/new/**/*',
+            'website_livechat/static/tests/discuss/**/*',
         ],
         'im_livechat.external_lib': [
             'website_livechat/static/src/external_lib/livechat_button.js',

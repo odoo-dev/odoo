@@ -122,7 +122,7 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web._assets_primary_variables': [
             'mail/static/src/scss/variables/primary_variables.scss',
-            'mail/static/src/new/core_ui/primary_variables.scss',
+            'mail/static/src/discuss/core_ui/primary_variables.scss',
         ],
         'web.assets_backend': [
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
@@ -154,21 +154,21 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/tests/helpers/**/*.js',
         ],
         'web.qunit_suite_tests': [
-            'mail/static/tests/new/**/*.js',
+            'mail/static/tests/discuss/**/*.js',
         ],
         # new bundles
         'mail.assets_backend': [
-            'mail/static/src/new/**/*',
-            ('remove', 'mail/static/src/new/public/**/*'),
-            ('remove', 'mail/static/src/new/**/*.dark.scss'),
-            ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
+            'mail/static/src/discuss/**/*',
+            ('remove', 'mail/static/src/discuss/public/**/*'),
+            ('remove', 'mail/static/src/discuss/**/*.dark.scss'),
+            ('remove', 'mail/static/src/discuss/emoji_picker/emoji_data.js'),
             'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
         ],
         'mail.assets_dark': [
-            'mail/static/src/new/**/*.dark.scss',
+            'mail/static/src/discuss/**/*.dark.scss',
         ],
         'mail.assets_emoji': [
-            'mail/static/src/new/emoji_picker/emoji_data.js',
+            'mail/static/src/discuss/emoji_picker/emoji_data.js',
         ],
         'mail.assets_public': [
             ('include', 'web._assets_helpers'),
@@ -185,7 +185,7 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/views/fields/file_handler.*',
             'web/static/src/views/fields/many2many_tags/tags_list.*',
 
-            'mail/static/src/new/**/*',
+            'mail/static/src/discuss/**/*',
             'web/static/src/legacy/js/core/misc.js',
             'web/static/src/legacy/js/env.js',
             'web/static/src/legacy/js/owl_compatibility.js',
@@ -193,9 +193,9 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/legacy_load_views.js',
             'web/static/src/legacy/utils.js',
-            ('remove', 'mail/static/src/new/web/**/*'),
-            ('remove', 'mail/static/src/new/emoji_picker/emoji_data.js'),
-            ('remove', 'mail/static/src/new/**/*.dark.scss'),
+            ('remove', 'mail/static/src/discuss/web/**/*'),
+            ('remove', 'mail/static/src/discuss/emoji_picker/emoji_data.js'),
+            ('remove', 'mail/static/src/discuss/**/*.dark.scss'),
         ]
     },
     'license': 'LGPL-3',

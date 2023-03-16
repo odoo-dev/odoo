@@ -76,7 +76,7 @@
             'crm/static/src/js/tours/crm.js',
             'crm/static/src/scss/crm.scss',
             'crm/static/src/scss/crm_team_member_views.scss',
-            'crm/static/src/new/**/*',
+            'crm/static/src/discuss/**/*',
         ],
         'web.assets_tests': [
             'crm/static/tests/tours/**/*',

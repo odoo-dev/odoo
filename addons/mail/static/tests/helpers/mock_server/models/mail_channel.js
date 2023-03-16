@@ -4,7 +4,7 @@ import { patch } from "@web/core/utils/patch";
 import { MockServer } from "@web/../tests/helpers/mock_server";
 
 import { datetime_to_str } from "web.time";
-import { assignDefined } from "@mail/new/utils/misc";
+import { assignDefined } from "@mail/discuss/utils/misc";
 
 patch(MockServer.prototype, "mail/models/mail_channel", {
     async _performRPC(route, args) {

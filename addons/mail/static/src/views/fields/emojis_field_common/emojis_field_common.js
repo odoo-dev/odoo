@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { useEmojiPicker } from "@mail/new/emoji_picker/emoji_picker";
+import { useEmojiPicker } from "@mail/discuss/emoji_picker/emoji_picker";
 
 /*
  * Common code for EmojisTextField and EmojisCharField

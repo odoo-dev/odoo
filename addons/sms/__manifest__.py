@@ -41,13 +41,13 @@ The service is provided by the In App Purchase Odoo platform.
     'auto_install': True,
     'assets': {
         'mail.assets_backend': [
-            'sms/static/src/new/**/*',
+            'sms/static/src/discuss/**/*',
         ],
         'web.assets_backend': [
             'sms/static/src/components/*/*',
         ],
         'web.qunit_suite_tests': [
-            'sms/static/tests/new/**/*',
+            'sms/static/tests/discuss/**/*',
         ],
     },
     'license': 'LGPL-3',

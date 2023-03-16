@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { Chatter } from "@mail/new/web/chatter";
-import { AttachmentView } from "@mail/new/attachments/attachment_view";
+import { Chatter } from "@mail/discuss/web/chatter";
+import { AttachmentView } from "@mail/discuss/attachments/attachment_view";
 
 import { patch } from "@web/core/utils/patch";
 import { FormRenderer } from "@web/views/form/form_renderer";

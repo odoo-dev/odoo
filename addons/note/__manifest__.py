@@ -26,7 +26,7 @@
     'application': True,
     'assets': {
         'mail.assets_backend': [
-            'note/static/src/new/**/*',
+            'note/static/src/discuss/**/*',
         ],
         'web.assets_backend': [
             'note/static/src/scss/note.scss',

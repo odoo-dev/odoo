@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { AttachmentView } from "@mail/new/attachments/attachment_view";
-import { Chatter } from "@mail/new/web/chatter";
+import { AttachmentView } from "@mail/discuss/attachments/attachment_view";
+import { Chatter } from "@mail/discuss/web/chatter";
 
 import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
@@ -21,7 +21,7 @@ patch(FormController.prototype, "mail", {
     setup() {
         this._super();
         this.messagingState = useState({
-            /** @type {import("@mail/new/core/thread_model").Thread} */
+            /** @type {import("@mail/discuss/core/thread_model").Thread} */
             thread: undefined,
         });
         if (this.env.services["mail.thread"]) {
