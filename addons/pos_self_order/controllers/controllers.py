@@ -76,6 +76,8 @@ class PosSelfOrder(http.Controller):
         :rtype: binary
         """
         product_sudo= request.env['product.product'].sudo().browse(product_id)
+        if not product_sudo.image_1920:
+            raise werkzeug.exceptions.NotFound()
         return request.env['ir.binary']._get_image_stream_from(product_sudo, field_name='image_1920').get_response()
 
 def find_pos_config_sudo(pos_id: int):
@@ -162,6 +164,7 @@ def get_necessary_data_from_products_list(products_sudo, pos_id: int) -> List[Di
     return [{
         **{
             'price_info': product.get_product_info_pos(product.lst_price, 1, int(pos_id))['all_prices'],
+            'has_image': bool(product.image_1920),
         },
         **product.read(['id', 'display_name', 'description_sale', 'pos_categ_id', 'attribute_line_ids'])[0],
     } for product in products_sudo]

@@ -19,6 +19,7 @@
     </data>
 
     <template id="qr_codes_page">
+
         <t t-call="web.basic_layout">
             <div class="page">
                 <t t-set="qr_code_size" t-value="200"/>
@@ -26,17 +27,29 @@
                     <h1 class="mb-2">
                         QR Code Menu
                     </h1>
-                    <div class="row">
-                        <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="table">
+  <div class="row row-cols-2">
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
+  </div>
+    <div class="col">col-4</div>
+    <div class="col">col-4</div>
                                 <!-- <t t-call="pos_self_order.qr_code"/> -->
-                                <div class="col">
+                    <!-- <div class="d-flex">
+                        <t t-foreach="[1,2,3,4,5,6,7,8,9]" t-as="table">
+                                <div class="">
                                 <t t-esc="'sal'"/>
                                 </div>
-                                <t t-if="table % 3 == 0">
-                                <div class="w-100"></div>
-                            </t>
                         </t>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </t>
