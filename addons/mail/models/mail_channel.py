@@ -1218,7 +1218,7 @@ class Channel(models.Model):
     def execute_command_who(self, **kwargs):
         partner = self.env.user.partner_id
         members = [
-            p._get_html_link(title=f"@{p.name}")
+            p._get_html_link(title=f"@{html_escape(p.name)}")
             for p in self.channel_partner_ids[:30] if p != partner
         ]
         if len(members) == 0:
