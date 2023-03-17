@@ -38,7 +38,7 @@
     </t>
 
     <t t-name="ProductCard" owl="1">
-        <div class="o_self_order_item_card d-flex w-100 w-md-50 p-2 border-bottom overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
+        <div class="o_self_order_item_card d-flex w-100 w-md-50 p-2 px-md-3 border-bottom overflow-hidden" t-on-click="() => env.navigate('/products/' + product.product_id)" t-ref="product_{{product.product_id}}">
             <div t-attf-class="o_self_order_item_card--content d-flex flex-grow-1 p-2 px-1 {{product.has_image ? 'flex-column' : 'flex-row align-items-center py-2' }}">
                 <t t-if="product.description_sale != false">
                     <h3 class="mb-0 text-900 fw-bold fs-6">
