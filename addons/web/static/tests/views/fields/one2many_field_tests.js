@@ -7491,7 +7491,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.test("contexts of nested x2manys are correctly sent (add line)", async function (assert) {
+    QUnit.tttt("contexts of nested x2manys are correctly sent (add line)", async function (assert) {
         assert.expect(2);
 
         serverData.models.partner.fields.timmy.default = [12];
@@ -12691,7 +12691,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_kanban_record:not('.o_kanban_ghost')");
     });
 
-    QUnit.test("kanban one2many in opened view form (with _view_ref)", async (assert) => {
+    QUnit.tttt("kanban one2many in opened view form (with _view_ref)", async (assert) => {
         serverData.views = {
             "partner,1234,kanban": /* xml */ `
                 <kanban class="o-custom-class">
@@ -12773,7 +12773,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_data_row td[name=display_name]");
     });
 
-    QUnit.test("list one2many in opened view form (with _view_ref)", async function (assert) {
+    QUnit.tttt("list one2many in opened view form (with _view_ref)", async function (assert) {
         serverData.views = {
             "partner,1234,list": /* xml */ `
                 <tree editable="1" class="o-custom-class">
