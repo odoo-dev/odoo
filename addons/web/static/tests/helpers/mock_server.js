@@ -2016,6 +2016,9 @@ export class MockServer {
                 ...omit(kwargs, "method"),
                 fields: Object.keys(kwargs.fields),
             };
+            if (!_kwargs.fields.length) {
+                _kwargs.fields = ["id"]; //Maybe do this all the time ?
+            }
             const result = this.mockWebSearchRead(modelName, [], _kwargs);
             unityReadRecords(modelName, kwargs.fields, result.records);
             return [result, {}];

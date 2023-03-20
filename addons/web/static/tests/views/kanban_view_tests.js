@@ -331,7 +331,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.module("KanbanView");
 
-    QUnit.tttt("basic ungrouped rendering", async (assert) => {
+    QUnit.test("basic ungrouped rendering", async (assert) => {
         assert.expect(6);
 
         await makeView({
@@ -348,7 +348,7 @@ QUnit.module("Views", (hooks) => {
                     </t></templates>
                 </kanban>`,
             mockRPC(route, args) {
-                if (args.method === "web_search_read") {
+                if (args.method === "unity_read") {
                     assert.ok(
                         args.kwargs.context.bin_size,
                         "should not request direct binary payload"
@@ -364,23 +364,25 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_record:contains(gnap)");
     });
 
-    QUnit.tttt("generic tags are case insensitive", async function (assert) {
+    QUnit.test("generic tags are case insensitive", async function (assert) {
         await makeView({
             type: "kanban",
             resModel: "partner",
             serverData,
             arch: `
                 <kanban>
-                    <templates><t t-name="kanban-box">
-                        <Div class="test">Hello</Div>
-                    </t></templates>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <Div class="test">Hello</Div>
+                        </t>
+                    </templates>
                 </kanban>`,
         });
 
         assert.containsN(target, "div.test", 4);
     });
 
-    QUnit.tttt("display full is supported on fields", async (assert) => {
+    QUnit.test("display full is supported on fields", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -399,7 +401,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("span.o_text_block").textContent, "yop");
     });
 
-    QUnit.tttt("basic grouped rendering", async (assert) => {
+    QUnit.test("basic grouped rendering", async (assert) => {
         assert.expect(14);
 
         await makeView({
