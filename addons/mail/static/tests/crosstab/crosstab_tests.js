@@ -239,6 +239,7 @@ QUnit.test("Message delete notification", async (assert) => {
     });
     const { openDiscuss } = await start();
     await openDiscuss();
+    await click("i[aria-label='Expand']");
     await click("i[aria-label='Mark as Todo']");
     assert.containsOnce($, "button:contains(Inbox) .badge");
     assert.containsOnce($, "button:contains(Starred) .badge");

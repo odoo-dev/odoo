@@ -79,7 +79,7 @@ export class Message extends Component {
             isEditing: false,
             isHovered: false,
             isClicked: false,
-            isActionListSquashed: this.env.inChatWindow,
+            compactOptions: true,
             lastReadMoreIndex: 0,
             isReadMoreByIndex: new Map(),
         });

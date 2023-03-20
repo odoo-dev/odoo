@@ -786,11 +786,17 @@ QUnit.test("rendering of inbox message", async (assert) => {
     assert.containsOnce($, ".o-mail-Message");
     const $message = $(".o-mail-Message");
     assert.containsOnce($message, ".o-mail-Message-header:contains(on Refactoring)");
-    assert.containsN($message, ".o-mail-Message-actions i", 4);
+    assert.containsN($message, ".o-mail-Message-actions i", 3);
     assert.containsOnce($message, "i[aria-label='Add a Reaction']");
-    assert.containsOnce($message, "i[aria-label='Mark as Todo']");
     assert.containsOnce($message, "i[aria-label='Reply']");
+    assert.containsOnce($message, "i[aria-label='Expand']");
+    await click("i[aria-label='Expand']");
+    assert.containsN($message, ".o-mail-Message-actions i", 5);
+    assert.containsOnce($message, "i[aria-label='Add a Reaction']");
+    assert.containsOnce($message, "i[aria-label='Reply']");
+    assert.containsOnce($message, "i[aria-label='Mark as Todo']");
     assert.containsOnce($message, "i[aria-label='Mark as Read']");
+    assert.containsOnce($message, "i[aria-label='Compact']");
 });
 
 QUnit.test('messages marked as read move to "History" mailbox', async (assert) => {
@@ -879,6 +885,7 @@ QUnit.test(
         assert.hasClass($("button:contains(Inbox)"), "o-active");
         assert.containsN($, ".o-mail-Message", 2);
 
+        await click(".o-mail-Message:contains(not empty 1) i[aria-label='Expand']");
         await click(".o-mail-Message:contains(not empty 1) i[aria-label='Mark as Read']");
         assert.containsOnce($, ".o-mail-Message");
         assert.containsOnce($, ".o-mail-Message:contains(not empty 2)");
