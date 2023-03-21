@@ -20,6 +20,7 @@
                 t-on-click="onClick"
                 t-on-mouseenter="onMouseenter"
                 t-on-mouseleave="onMouseleave"
+                t-on-contextmenu="(ev) => messageReactionViewer.open(ev)"
                 t-ref="root"
             >
                 <MessageInReply t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>

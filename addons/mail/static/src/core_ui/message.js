@@ -6,6 +6,7 @@ import { MessageInReply } from "./message_in_reply";
 import { isEventHandled, markEventHandled } from "@mail/utils/misc";
 import { convertBrToLineBreak, htmlToTextContentInline } from "@mail/utils/format";
 import { onExternalClick } from "@mail/utils/hooks";
+import { MessageReactionMenu } from "@mail/core_ui/message_reaction_menu";
 import {
     Component,
     onMounted,
@@ -15,6 +16,7 @@ import {
     useEffect,
     useRef,
     useState,
+    onWillDestroy,
 } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
@@ -31,6 +33,7 @@ import { _t } from "@web/core/l10n/translation";
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { url } from "@web/core/utils/urls";
+import { registry } from "@web/core/registry";
 
 /**
  * @typedef {Object} Props
@@ -150,6 +153,8 @@ export class Message extends Component {
                 $(this.messageBody.el).find(".o-mail-read-more-less").remove();
             }
         });
+
+        this.messageReactionViewer = this.messageReactionViewer();
     }
 
     get authorAvatarUrl() {
@@ -276,6 +281,26 @@ export class Message extends Component {
     onMouseleave() {
         this.state.isHovered = false;
         this.state.isClicked = null;
+    }
+
+    messageReactionViewer() {
+        const message = this.message;
+        function open(ev) {
+            if (!message || message.reactions.length === 0) {
+                return;
+            }
+            ev.preventDefault();
+            registry.category("main_components").add(message.id, {
+                Component: MessageReactionMenu,
+                props: { close, message: message },
+            });
+        }
+
+        function close() {
+            registry.category("main_components").remove(message.id);
+        }
+        onWillDestroy(close);
+        return { open, close };
     }
 
     /**
