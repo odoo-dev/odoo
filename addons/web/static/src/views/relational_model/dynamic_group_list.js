@@ -42,5 +42,14 @@ export class DynamicGroupList extends DynamicList {
     get nbTotalRecords() {
         return this.groups.reduce((acc, group) => acc + group.count, 0);
     }
+
+    // -------------------------------------------------------------------------
+    // Protected
+    // -------------------------------------------------------------------------
+
+    _load() {
+        throw new Error("Method '_load()' needs to be implemented.");
+        // TODO => call model _loadGroupedList with a domain to only modify this one
+    }
 }
 DynamicGroupList.DEFAULT_LOAD_LIMIT = 10; // FIXME: move

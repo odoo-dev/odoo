@@ -27,6 +27,10 @@ export class DynamicList extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
+    async archive(isSelected) {
+        return this.model.mutex.exec(() => this._toggleArchive(isSelected, true));
+    }
+
     canResequence() {
         return false;
     }
@@ -55,5 +59,25 @@ export class DynamicList extends DataPoint {
     // TODO: keep this??
     selectDomain(value) {
         this.isDomainSelected = value;
+    }
+
+    async unarchive(isSelected) {
+        return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
+    }
+
+    // -------------------------------------------------------------------------
+    // Protected
+    // -------------------------------------------------------------------------
+
+    async _toggleArchive(isSelected, state) {
+        const method = state ? "action_archive" : "action_unarchive";
+        const context = this.context;
+        const resIds = await this.getResIds(isSelected);
+        const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
+        if (action && Object.keys(action).length) {
+            this.model.action.doAction(action, { onClose: () => this._load() });
+        } else {
+            return this._load();
+        }
     }
 }

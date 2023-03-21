@@ -468,7 +468,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "basic grouped rendering with active field (archivable by default)",
         async (assert) => {
             // add active field on partner model and make all records active
@@ -487,13 +487,18 @@ QUnit.module("Views", (hooks) => {
                 type: "kanban",
                 resModel: "partner",
                 serverData,
-                arch:
-                    "<kanban>" +
-                    '<field name="active"/>' +
-                    '<field name="bar"/>' +
-                    '<templates><t t-name="kanban-box">' +
-                    '<div><field name="foo"/></div>' +
-                    "</t></templates></kanban>",
+                arch: `
+                    <kanban>
+                        <field name="active"/>
+                        <field name="bar"/>
+                        <templates>
+                            <t t-name="kanban-box">
+                                <div>
+                                    <field name="foo"/>
+                                </div>
+                            </t>
+                        </templates>
+                    </kanban>`,
                 groupBy: ["bar"],
             });
 
@@ -522,7 +527,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "basic grouped rendering with active field and archive enabled (archivable true)",
         async (assert) => {
             // add active field on partner model and make all records active
@@ -576,7 +581,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "basic grouped rendering with active field and hidden archive buttons (archivable false)",
         async (assert) => {
             // add active field on partner model and make all records active
