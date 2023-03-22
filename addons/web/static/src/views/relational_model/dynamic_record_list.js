@@ -17,11 +17,40 @@ export class DynamicRecordList extends DynamicList {
                     data: r,
                 })
         );
+        this.hasLimitedCount = false;
+        this._updateCount(params.data);
+    }
+
+    // -------------------------------------------------------------------------
+    // Public
+    // -------------------------------------------------------------------------
+
+    /**
+     * Performs a search_count with the current domain to set the count. This is
+     * useful as web_search_read limits the count for performance reasons, so it
+     * might sometimes be less than the real number of records matching the domain.
+     **/
+    async fetchCount() {
+        const keepLast = this.model.keepLast;
+        this.count = await keepLast.add(this.model.orm.searchCount(this.resModel, this.domain));
+        this.hasLimitedCount = false;
+        return this.count;
     }
 
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    _updateCount(data) {
+        const length = data.length;
+        if (length === this.constructor.WEB_SEARCH_READ_COUNT_LIMIT + 1) {
+            this.hasLimitedCount = true;
+            this.count = length - 1;
+        } else {
+            this.hasLimitedCount = false;
+            this.count = length;
+        }
+    }
 
     async _load() {
         const fieldSpec = getFieldsSpec(this.activeFields, this.fields);
@@ -51,7 +80,7 @@ export class DynamicRecordList extends DynamicList {
                     data: r,
                 })
         );
-        this.count = response.length;
+        this._updateCount(response);
     }
 }
 DynamicRecordList.WEB_SEARCH_READ_COUNT_LIMIT = 10000; // FIXME: move
