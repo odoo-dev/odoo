@@ -26,7 +26,7 @@ export class KanbanController extends Component {
             fields,
             resModel,
             handleField: archInfo.handleField,
-            limit: archInfo.limit || limit,
+            limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
             onCreate: archInfo.onCreate,
             quickCreateView: archInfo.quickCreateView,

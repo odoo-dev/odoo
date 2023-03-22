@@ -23,8 +23,6 @@ export const kanbanView = {
 
     buttonTemplate: "web.KanbanView.Buttons",
 
-    limit: 40,
-
     props: (genericProps, view) => {
         const { arch, relatedModels, resModel } = genericProps;
         const { ArchParser } = view;
