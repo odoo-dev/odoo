@@ -17,6 +17,7 @@ import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { useSetupView } from "@web/views/view_hook";
+import { FormErrorDialog } from "./form_error_dialog/form_error_dialog";
 import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "../relational_model/utils";
 
@@ -273,6 +274,20 @@ export class FormController extends Component {
      */
     async onWillSaveRecord(record) {}
 
+    async onSaveError(error, { discard }) {
+        const proceed = await new Promise((resolve) => {
+            this.model.dialog.add(FormErrorDialog, {
+                message: error.data.message,
+                onDiscard: () => {
+                    discard();
+                    resolve(true);
+                },
+                onStayHere: () => resolve(false),
+            });
+        });
+        return proceed;
+    }
+
     displayName() {
         return this.model.root.data.display_name || this.env._t("New");
     }
@@ -280,7 +295,7 @@ export class FormController extends Component {
     async onPagerUpdate({ offset, resIds }) {
         const canProceed = await this.model.root.save({
             stayInEdition: true,
-            useSaveErrorDialog: true,
+            onError: this.onSaveError.bind(this),
         });
         if (canProceed) {
             return this.model.load({ resId: resIds[offset] });
@@ -291,7 +306,7 @@ export class FormController extends Component {
         return this.model.root.save({
             noReload: true,
             stayInEdition: true,
-            useSaveErrorDialog: true,
+            onError: this.onSaveError.bind(this),
         });
     }
 
@@ -363,7 +378,7 @@ export class FormController extends Component {
         if ((this.model.root.isDirty || this.model.root.isNew) && !item.skipSave) {
             return this.model.root.save({
                 stayInEdition: true,
-                useSaveErrorDialog: true,
+                onError: this.onSaveError.bind(this),
             });
         }
         return true;
@@ -398,19 +413,20 @@ export class FormController extends Component {
     async beforeExecuteActionButton(clickParams) {
         if (clickParams.special !== "cancel") {
             const noReload = this.env.inDialog && clickParams.close;
-            return this.model.root
-                .save({
-                    force: true,
-                    stayInEdition: true,
-                    useSaveErrorDialog: !this.env.inDialog,
-                    noReload,
-                })
-                .then((saved) => {
-                    if (saved && this.props.onSave) {
-                        this.props.onSave(this.model.root);
-                    }
-                    return saved;
-                });
+            const params = {
+                force: true,
+                stayInEdition: true,
+                noReload,
+            };
+            if (!this.env.inDialog) {
+                params.onError = this.onSaveError.bind(this);
+            }
+            return this.model.root.save(params).then((saved) => {
+                if (saved && this.props.onSave) {
+                    this.props.onSave(this.model.root);
+                }
+                return saved;
+            });
         } else if (this.props.onDiscard) {
             this.props.onDiscard(this.model.root);
         }
@@ -425,7 +441,7 @@ export class FormController extends Component {
     async create() {
         const canProceed = await this.model.root.save({
             stayInEdition: true,
-            useSaveErrorDialog: true,
+            onError: this.onSaveError.bind(this),
         });
         // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
