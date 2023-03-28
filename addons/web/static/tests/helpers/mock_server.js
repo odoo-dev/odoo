@@ -2523,7 +2523,11 @@ export class MockServer {
                 case "one2many":
                 case "many2many": {
                     if (relatedFields && Object.keys(relatedFields).length) {
-                        const ids = unique(records.map((r) => r[fieldName]).flat());
+                        let ids = unique(records.map((r) => r[fieldName]).flat());
+                        const limit = fields[fieldName].limit;
+                        if (limit) {
+                            ids = ids.slice(0, limit);
+                        }
                         const result = this.mockWebReadUnity(field.relation, [ids], {
                             fields: relatedFields,
                             context: fields[fieldName].context,
@@ -2533,7 +2537,9 @@ export class MockServer {
                             relRecords[relRecord.id] = relRecord;
                         }
                         for (const record of records) {
-                            record[fieldName] = record[fieldName].map((resId) => relRecords[resId]);
+                            record[fieldName] = record[fieldName].map((resId) => {
+                                return relRecords[resId] || { id: resId };
+                            });
                         }
                     }
                     break;
