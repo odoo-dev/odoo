@@ -78,7 +78,7 @@ export class Record extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    async archive() {
+    archive() {
         return this.model.mutex.exec(() => this._toggleArchive(true));
     }
 
@@ -91,14 +91,14 @@ export class Record extends DataPoint {
         return this._invalidFields.has(fieldName);
     }
 
-    async update(changes) {
+    update(changes) {
         if (this.model._urgentSave) {
             return this._update(changes);
         }
         return this.model.mutex.exec(() => this._update(changes));
     }
 
-    async delete() {
+    delete() {
         return this.model.mutex.exec(async () => {
             const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {
                 context: this.context,
@@ -124,11 +124,11 @@ export class Record extends DataPoint {
         });
     }
 
-    async discard() {
+    discard() {
         return this.model.mutex.exec(() => this._discard());
     }
 
-    async duplicate() {
+    duplicate() {
         return this.model.mutex.exec(async () => {
             const kwargs = { context: this.context };
             const index = this.resIds.indexOf(this.resId);
@@ -139,7 +139,7 @@ export class Record extends DataPoint {
         });
     }
 
-    async load(resId = this.resId) {
+    load(resId = this.resId) {
         return this.model.mutex.exec(() => this._load(resId));
     }
 
@@ -148,7 +148,7 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._save(options));
     }
 
-    async setInvalidField(fieldName) {
+    setInvalidField(fieldName) {
         this.isDirty = true;
         this._invalidFields.add(fieldName);
     }
@@ -165,7 +165,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async unarchive() {
+    unarchive() {
         return this.model.mutex.exec(() => this._toggleArchive(false));
     }
 
@@ -228,10 +228,10 @@ export class Record extends DataPoint {
         return parsedValues;
     }
 
-    async _askChanges() {
+    _askChanges() {
         const proms = [];
         this.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
-        await Promise.all(proms);
+        return Promise.all(proms);
     }
 
     _checkValidity() {
