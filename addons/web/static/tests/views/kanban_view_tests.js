@@ -3934,80 +3934,6 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.tttt(
-        "quick create record if grouped on date(time) field with attribute allow_group_range_value: true",
-        async (assert) => {
-            serverData.models.partner.records[0].date = "2017-01-08";
-            serverData.models.partner.records[1].date = "2017-01-09";
-            serverData.models.partner.records[2].date = "2017-01-08";
-            serverData.models.partner.records[3].date = "2017-01-10";
-            serverData.models.partner.records[0].datetime = "2017-01-08 10:55:05";
-            serverData.models.partner.records[1].datetime = "2017-01-09 11:31:10";
-            serverData.models.partner.records[2].datetime = "2017-01-08 09:20:25";
-            serverData.models.partner.records[3].datetime = "2017-01-10 08:05:51";
-            serverData.views["partner,quick_form,form"] =
-                "<form>" + '<field name="date"/>' + '<field name="datetime"/>' + "</form>";
-
-            const kanban = await makeView({
-                type: "kanban",
-                resModel: "partner",
-                serverData,
-                arch:
-                    '<kanban on_create="quick_create" quick_create_view="quick_form">' +
-                    '<field name="date" allow_group_range_value="true"/>' +
-                    '<field name="datetime" allow_group_range_value="true"/>' +
-                    '<templates><t t-name="kanban-box">' +
-                    '<div><field name="display_name"/></div>' +
-                    "</t></templates>" +
-                    "</kanban>",
-                groupBy: ["date"],
-            });
-
-            assert.containsOnce(
-                target,
-                ".o_kanban_header .o_kanban_quick_add i",
-                "quick create should be enabled when grouped on a non-readonly date field"
-            );
-
-            // clicking on CREATE in control panel should open a quick create
-            await createRecord();
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:first-child .o_kanban_quick_create",
-                "should have opened the quick create in the first column"
-            );
-            assert.strictEqual(
-                target.querySelector(
-                    ".o_kanban_group:first-child .o_kanban_quick_create .o_field_widget[name=date] .o_datepicker input"
-                ).value,
-                "01/31/2017"
-            );
-
-            await reload(kanban, { groupBy: ["datetime"] });
-
-            assert.containsOnce(
-                target,
-                ".o_kanban_header .o_kanban_quick_add i",
-                "quick create should be enabled when grouped on a non-readonly datetime field"
-            );
-
-            // clicking on CREATE in control panel should open a quick create
-            await createRecord();
-
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:first-child .o_kanban_quick_create",
-                "should have opened the quick create in the first column"
-            );
-            assert.strictEqual(
-                target.querySelector(
-                    ".o_kanban_group:first-child .o_kanban_quick_create .o_field_widget[name=datetime] .o_datepicker input"
-                ).value,
-                "01/31/2017 23:59:59"
-            );
-        }
-    );
-
-    QUnit.tttt(
         "quick create record feature is properly enabled/disabled at reload",
         async (assert) => {
             const kanban = await makeView({
@@ -5239,118 +5165,6 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
-        "drag and drop record if grouped by date/time field with attribute allow_group_range_value: true",
-        async (assert) => {
-            assert.expect(16);
-
-            serverData.models.partner.records[0].date = "2017-01-08";
-            serverData.models.partner.records[1].date = "2017-01-09";
-            serverData.models.partner.records[2].date = "2017-02-08";
-            serverData.models.partner.records[3].date = "2017-02-10";
-            serverData.models.partner.records[0].datetime = "2017-01-08 10:55:05";
-            serverData.models.partner.records[1].datetime = "2017-01-09 11:31:10";
-            serverData.models.partner.records[2].datetime = "2017-02-08 09:20:25";
-            serverData.models.partner.records[3].datetime = "2017-02-10 08:05:51";
-
-            const kanban = await makeView({
-                type: "kanban",
-                resModel: "partner",
-                serverData,
-                arch:
-                    "<kanban>" +
-                    '<field name="date" allow_group_range_value="true"/>' +
-                    '<field name="datetime" allow_group_range_value="true"/>' +
-                    "<templates>" +
-                    '<t t-name="kanban-box">' +
-                    '<div><field name="display_name"/></div>' +
-                    "</t>" +
-                    "</templates>" +
-                    "</kanban>",
-                groupBy: ["date:month"],
-                async mockRPC(route, { model, method, args }) {
-                    if (route === "/web/dataset/resequence") {
-                        assert.step("resequence");
-                        return true;
-                    }
-                    if (model === "partner" && method === "write") {
-                        if ("date" in args[1]) {
-                            assert.deepEqual(args[1], { date: "2017-02-28" });
-                        } else if ("datetime" in args[1]) {
-                            assert.deepEqual(args[1], { datetime: "2017-02-28 22:59:59" });
-                        }
-                    }
-                },
-            });
-
-            assert.containsN(target, ".o_kanban_group", 2);
-            assert.containsN(
-                target,
-                ".o_kanban_group:first-child .o_kanban_record",
-                2,
-                "1st column should contain 2 records of January month"
-            );
-            assert.containsN(
-                target,
-                ".o_kanban_group:nth-child(2) .o_kanban_record",
-                2,
-                "2nd column should contain 2 records of February month"
-            );
-
-            await dragAndDrop(
-                ".o_kanban_group:first-child .o_kanban_record",
-                ".o_kanban_group:nth-child(2)"
-            );
-
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:first-child .o_kanban_record",
-                "Should only have one record remaining"
-            );
-            assert.containsN(
-                target,
-                ".o_kanban_group:nth-child(2) .o_kanban_record",
-                3,
-                "Should now have 3 records"
-            );
-            assert.verifySteps(["resequence"]);
-
-            await reload(kanban, { groupBy: ["datetime:month"] });
-
-            assert.containsN(target, ".o_kanban_group", 2);
-            assert.containsN(
-                target,
-                ".o_kanban_group:first-child .o_kanban_record",
-                2,
-                "1st column should contain 2 records of January month"
-            );
-            assert.containsN(
-                target,
-                ".o_kanban_group:nth-child(2) .o_kanban_record",
-                2,
-                "2nd column should contain 2 records of February month"
-            );
-
-            await dragAndDrop(
-                ".o_kanban_group:first-child .o_kanban_record",
-                ".o_kanban_group:nth-child(2)"
-            );
-
-            assert.containsOnce(
-                target,
-                ".o_kanban_group:first-child .o_kanban_record",
-                "Should only have one record remaining"
-            );
-            assert.containsN(
-                target,
-                ".o_kanban_group:nth-child(2) .o_kanban_record",
-                3,
-                "Should now have 3 records"
-            );
-            assert.verifySteps(["resequence"]);
-        }
-    );
-
     QUnit.tttt("Move record in grouped by date, progress bars and sum field", async (assert) => {
         serverData.models.partner.records[0].date = "2017-01-08";
         serverData.models.partner.records[1].date = "2017-01-09";
@@ -5363,7 +5177,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: /* xml */ `
                 <kanban>
-                    <field name="date" allow_group_range_value="true" />
+                    <field name="date" />
                     <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}' sum_field="int_field" />
                     <templates>
                         <div t-name="kanban-box">
@@ -7261,7 +7075,7 @@ QUnit.module("Views", (hooks) => {
             await makeView({
                 arch: `
                 <kanban sample="1">
-                    <field name="date" allow_group_range_value="true"/>
+                    <field name="date"/>
                     <field name="state"/>
                     <field name="int_field"/>
                     <progressbar field="state" sum_field="int_field" help="progress" colors="{}"/>
