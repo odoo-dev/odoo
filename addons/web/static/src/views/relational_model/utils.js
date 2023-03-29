@@ -3,7 +3,7 @@
 import { makeContext } from "@web/core/context";
 import { omit } from "@web/core/utils/objects";
 
-export const addFieldDependencies = (activeFields, fields, fieldDependencies = []) => {
+export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
         if (!activeFields[field.name]) {
             activeFields[field.name] = {
@@ -26,7 +26,7 @@ export const addFieldDependencies = (activeFields, fields, fieldDependencies = [
     }
 };
 
-export const extractFieldsFromArchInfo = ({ fieldNodes, widgetNodes }, fields) => {
+export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
     const activeFields = {};
     fields = { ...fields };
     for (const fieldNode of Object.values(fieldNodes)) {
@@ -94,7 +94,7 @@ function getFieldContext(fieldName, activeFields, evalContext, parentActiveField
     }
 }
 
-export const getFieldsSpec = (activeFields, fields, evalContext, parentActiveFields = null) => {
+export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
     console.log("getFieldsSpec");
     const fieldsSpec = {};
     for (const fieldName in activeFields) {
