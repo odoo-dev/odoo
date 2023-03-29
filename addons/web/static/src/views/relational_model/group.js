@@ -4,7 +4,15 @@ import { DataPoint } from "./datapoint";
 
 const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
 
+/**
+ * @typedef Params
+ * @property {string[]} groupBy
+ */
+
 export class Group extends DataPoint {
+    /**
+     * @param {Params} params 
+     */
     setup(params) {
         super.setup();
         this.groupByField = this.fields[params.groupByFieldName];
@@ -17,6 +25,7 @@ export class Group extends DataPoint {
         // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
         // we have to get the count from `__count` instead
         // see _read_group_raw in models.py
+        /** @type {number} */
         this._count = groupData.__count || groupData[`${this.groupByField.name}_count`] || 0;
         this.value = this._getValueFromGroupData(groupData, this.groupByField);
         this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
@@ -29,6 +38,8 @@ export class Group extends DataPoint {
             groupBy: params.groupBy,
             domain: groupData.__domain,
         };
+        /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
+        this.list;
         if (params.groupBy.length) {
             this.list = new this.model.constructor.DynamicGroupList(this.model, {
                 ...listParams,
@@ -89,7 +100,7 @@ export class Group extends DataPoint {
 
     /**
      * @param {Object} groupData
-     * @param {Object} field
+     * @param {import("./datapoint").Field} field
      * @returns {string | false}
      */
     _getDisplayNameFromGroupData(groupData, field) {
@@ -104,7 +115,7 @@ export class Group extends DataPoint {
 
     /**
      * @param {Object} groupData
-     * @param {Object} field
+     * @param {import("./datapoint").Field} field
      * @returns {any}
      */
     _getValueFromGroupData(groupData, field) {

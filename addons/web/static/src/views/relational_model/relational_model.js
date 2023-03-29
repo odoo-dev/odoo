@@ -19,7 +19,26 @@ import { getFieldsSpec, getOnChangeSpec } from "./utils";
 //  -> first two are now private and save checks if record isDirty -> can be
 //     called even is not dirty (+ option "force" to bypass isDirty check)
 
+/**
+ * @typedef Params
+ * @property {number} [countLimit]
+ * @property {string} viewMode
+ * @property {string[]} groupBy
+ */
+
+
 export class RelationalModel extends Model {
+    static services = ["action", "company", "dialog", "notification", "rpc", "user"];
+    static Record = Record;
+    static Group = Group;
+    static DynamicRecordList = DynamicRecordList;
+    static DynamicGroupList = DynamicGroupList;
+    static StaticList = StaticList;
+    static WEB_SEARCH_READ_COUNT_LIMIT = 10000;
+
+    /**
+     * @param {Params} params 
+     */
     setup(params, { action, company, dialog, notification, rpc, user }) {
         this.action = action;
         this.company = company;
@@ -35,6 +54,7 @@ export class RelationalModel extends Model {
 
         this.rootParams = markRaw(params);
 
+        /** @type { number } */
         this.countLimit = params.countLimit || this.constructor.WEB_SEARCH_READ_COUNT_LIMIT;
 
         this._urgentSave = false;
@@ -261,11 +281,3 @@ export class RelationalModel extends Model {
         return response;
     }
 }
-
-RelationalModel.services = ["action", "company", "dialog", "notification", "rpc", "user"];
-RelationalModel.Record = Record;
-RelationalModel.Group = Group;
-RelationalModel.DynamicRecordList = DynamicRecordList;
-RelationalModel.DynamicGroupList = DynamicGroupList;
-RelationalModel.StaticList = StaticList;
-RelationalModel.WEB_SEARCH_READ_COUNT_LIMIT = 10000;
