@@ -191,8 +191,8 @@ export class RelationalModel extends Model {
         return { groups, length };
     }
 
-    async _loadNewRecord(params) {
-        return await this._onchange({
+    _loadNewRecord(params) {
+        return this._onchange({
             resModel: params.resModel,
             spec: getOnChangeSpec(params.activeFields),
             context: params.context,

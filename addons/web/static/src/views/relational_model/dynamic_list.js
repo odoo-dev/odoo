@@ -27,7 +27,7 @@ export class DynamicList extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    async archive(isSelected) {
+    archive(isSelected) {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, true));
     }
 
@@ -61,7 +61,7 @@ export class DynamicList extends DataPoint {
         this.isDomainSelected = value;
     }
 
-    async unarchive(isSelected) {
+    unarchive(isSelected) {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
     }
 
