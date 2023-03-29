@@ -54,7 +54,7 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    async toggle() {
+    toggle() {
         this.isFolded = !this.isFolded;
     }
 
