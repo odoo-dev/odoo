@@ -5,6 +5,7 @@ import { DynamicList } from "./dynamic_list";
 export class DynamicRecordList extends DynamicList {
     setup(params) {
         super.setup(params);
+        /** @type {import("./record").Record[]} */
         this.records = params.data.records.map(
             (r) =>
                 new this.model.constructor.Record(this.model, {

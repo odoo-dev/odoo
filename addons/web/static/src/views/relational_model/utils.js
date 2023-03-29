@@ -24,7 +24,7 @@ export function addFieldDependencies(activeFields, fields, fieldDependencies = [
             ]);
         }
     }
-};
+}
 
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
     const activeFields = {};
@@ -62,7 +62,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
         addFieldDependencies(activeFields, fields, widgetInfo.widget.fieldDependencies);
     }
     return { activeFields, fields };
-};
+}
 
 const SENTINEL = Symbol("sentinel");
 function getFieldContext(fieldName, activeFields, evalContext, parentActiveFields = null) {
@@ -127,7 +127,7 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
         }
     }
     return fieldsSpec;
-};
+}
 
 function _populateOnChangeSpec(activeFields, spec, path = false) {
     const prefix = path ? `${path}.` : "";
@@ -144,3 +144,12 @@ export const getOnChangeSpec = (activeFields) => {
     _populateOnChangeSpec(activeFields, spec);
     return spec;
 };
+
+let nextId = 0;
+/**
+ * @param {string} [prefix]
+ * @returns {string}
+ */
+export function getId(prefix = "") {
+    return `${prefix}_${++nextId}`;
+}

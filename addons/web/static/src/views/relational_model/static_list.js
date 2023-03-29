@@ -1,14 +1,12 @@
 /* @odoo-module */
 
 import { x2ManyCommands } from "@web/core/orm_service";
+import { getId } from "./utils";
 import { DataPoint } from "./datapoint";
 
-let nextId = 0;
-function getNextVirtualId() {
-    return `virtual_${++nextId}`;
-}
-
 export class StaticList extends DataPoint {
+    static DEFAULT_LIMIT = 40;
+
     setup(params) {
         this._parent = params.parent;
         this._onChange = params.onChange;
@@ -58,7 +56,7 @@ export class StaticList extends DataPoint {
         } else {
             this.records.unshift(record);
         }
-        this._commands.push([x2ManyCommands.CREATE, getNextVirtualId(), record]);
+        this._commands.push([x2ManyCommands.CREATE, getId("virtual"), record]);
         this._onChange();
     }
 
@@ -89,7 +87,7 @@ export class StaticList extends DataPoint {
                 case x2ManyCommands.CREATE: {
                     const record = this._createRecordDatapoint(command[2]);
                     this.records.push(record);
-                    this._commands.push([x2ManyCommands.CREATE, getNextVirtualId(), record]);
+                    this._commands.push([x2ManyCommands.CREATE, getId("virtual"), record]);
                     break;
                 }
                 case x2ManyCommands.UPDATE: {
@@ -173,4 +171,3 @@ export class StaticList extends DataPoint {
         this.limit = limit;
     }
 }
-StaticList.DEFAULT_LIMIT = 40;

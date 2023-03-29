@@ -86,11 +86,17 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._toggleArchive(true));
     }
 
+    /**
+     * @param {string} fieldName 
+     */
     getFieldDomain(fieldName) {
         const { domain } = this.fields[fieldName];
         return domain ? new Domain(domain).toList(this.evalContext) : [];
     }
 
+    /**
+     * @param {string} fieldName 
+     */
     isInvalid(fieldName) {
         return this._invalidFields.has(fieldName);
     }
