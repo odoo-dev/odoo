@@ -3,19 +3,44 @@
 import { markup } from "@odoo/owl";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { evalDomain } from "@web/views/utils";
+import { getId } from "./utils";
 
-let nextId = 0;
+/**
+ * @typedef Params
+ * @property {string} resModel
+ * @property {Object} context
+ * @property {{[key: string]: FieldInfo}} activeFields
+ * @property {{[key: string]: Field}} fields
+ */
+
+/**
+ * @typedef Field
+ * @property {string} name
+ * @property {string} type
+ * @property {[string,string][]} [selection]
+ */
+
+/**
+ * @typedef FieldInfo
+ * @property {string} context
+ * @property {boolean} invisible
+ * @property {boolean} readonly
+ * @property {boolean} required
+ * @property {boolean} onChange
+ */
+
 export class DataPoint {
     /**
-     * @param {RelationalModel} model
-     * @param {Object} [params={}]
+     * @param {import("./relational_model").RelationalModel} model
+     * @param {Params} params
      * @param {Object} [state={}]
      */
-    constructor(model, params = {}, state = {}) {
-        this.id = `datapoint_${nextId++}`;
+    constructor(model, params, state = {}) {
+        this.id = getId("datapoint");
         this.model = model;
         this.resModel = params.resModel;
         this.context = params.context;
+        /** @type {{[key: string]: Field}} */
         this.fields = {
             id: { name: "id", type: "integer", readonly: true },
             display_name: { name: "display_name", type: "char" },
@@ -56,6 +81,11 @@ export class DataPoint {
     // Protected
     // -------------------------------------------------------------------------
 
+    /**
+     * @param {Field | false} field
+     * @param {any} value
+     * @returns {any}
+     */
     _parseServerValue(field, value) {
         if (!field) {
             field = { type: "integer" };
