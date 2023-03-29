@@ -35,7 +35,6 @@ import { SIZES } from "@web/core/ui/ui_service";
 import { errorService } from "@web/core/errors/error_service";
 import { RPCError } from "@web/core/network/rpc_service";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { RelationalModel } from "@web/views/relational_model/relational_model";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
