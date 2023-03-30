@@ -2,6 +2,7 @@
 
 import { markup } from "@odoo/owl";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { evalDomain } from "@web/views/utils";
 
 let nextId = 0;
 export class DataPoint {
@@ -38,6 +39,18 @@ export class DataPoint {
 
     // FIXME: not sure we want to keep this mecanism
     exportState() {}
+
+    /**
+     * FIXME: memoize this at some point?
+     * @param {string} fieldName
+     * @returns {boolean}
+     */
+    isFieldReadonly(fieldName) {
+        const activeField = this.activeFields[fieldName];
+        // FIXME: if modifiers has readonly or not ?
+        const { readonly } = activeField || this.fields[fieldName];
+        return readonly && evalDomain(readonly, this.evalContext);
+    }
 
     // -------------------------------------------------------------------------
     // Protected
