@@ -4520,7 +4520,7 @@ QUnit.module("Views", (hooks) => {
         await click(testLink);
     });
 
-    QUnit.tttt("Open record when clicking on widget field", async function (assert) {
+    QUnit.test("Open record when clicking on widget field", async function (assert) {
         assert.expect(2);
 
         serverData.views[
@@ -5268,7 +5268,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 2);
     });
 
-    QUnit.tttt("kanban view with default_group_by", async (assert) => {
+    QUnit.test("kanban view with default_group_by", async (assert) => {
         assert.expect(7);
 
         serverData.models.partner.records[0].product_id = 1;
@@ -5312,7 +5312,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 2);
     });
 
-    QUnit.tttt("kanban view not groupable", async (assert) => {
+    QUnit.test("kanban view not groupable", async (assert) => {
         patchWithCleanup(kanbanView, { searchMenuTypes: ["filter", "favorite"] });
 
         await makeView({
@@ -5352,7 +5352,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_filter_menu .o_menu_item");
     });
 
-    QUnit.tttt("kanban view with create=False", async (assert) => {
+    QUnit.test("kanban view with create=False", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -5367,7 +5367,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o-kanban-button-new");
     });
 
-    QUnit.tttt("kanban view with create=False and groupby", async (assert) => {
+    QUnit.test("kanban view with create=False and groupby", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -5386,7 +5386,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o-kanban-button-new");
     });
 
-    QUnit.tttt("clicking on a link triggers correct event", async (assert) => {
+    QUnit.test("clicking on a link triggers correct event", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -5403,7 +5403,7 @@ QUnit.module("Views", (hooks) => {
         await click(getCard(0), "a");
     });
 
-    QUnit.tttt("environment is updated when (un)folding groups", async (assert) => {
+    QUnit.test("environment is updated when (un)folding groups", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6605,7 +6605,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("no content helper when archive all records in kanban group", async (assert) => {
+    QUnit.test("no content helper when archive all records in kanban group", async (assert) => {
         // add active field on partner model to have archive option
         serverData.models.partner.fields.active = {
             string: "Active",
@@ -6649,7 +6649,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["open-dialog"]);
     });
 
-    QUnit.tttt("no content helper when no data", async (assert) => {
+    QUnit.test("no content helper when no data", async (assert) => {
         const records = serverData.models.partner.records;
 
         serverData.models.partner.records = [];
@@ -6686,7 +6686,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("no nocontent helper for grouped kanban with empty groups", async (assert) => {
+    QUnit.test("no nocontent helper for grouped kanban with empty groups", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6718,7 +6718,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_record", "there should be no records");
     });
 
-    QUnit.tttt("no nocontent helper for grouped kanban with no records", async (assert) => {
+    QUnit.test("no nocontent helper for grouped kanban with no records", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -6790,7 +6790,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent", "there should be a nocontent helper");
     });
 
-    QUnit.tttt("no nocontent helper is hidden when quick creating a column", async (assert) => {
+    QUnit.test("no nocontent helper is hidden when quick creating a column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -6967,7 +6967,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "nocontent helper for grouped kanban (on m2o field) with no records with no group_create",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -7001,7 +7001,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "nocontent helper for grouped kanban (on date field) with no records with no group_create",
         async (assert) => {
             serverData.models.partner.records = [];

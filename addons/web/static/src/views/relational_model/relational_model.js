@@ -45,7 +45,7 @@ export class RelationalModel extends Model {
     // -------------------------------------------------------------------------
 
     hasData() {
-        return this.rootParams.viewMode !== "form" ? this.root.count > 0 : true;
+        return this.root.hasData;
     }
     /**
      * @param {Object} [params={}]
@@ -177,15 +177,18 @@ export class RelationalModel extends Model {
         const { groups, length } = response;
         for (const group of groups) {
             const groupBy = params.groupBy.slice(1);
-            const response = await this._loadData({
-                ...params,
-                domain: params.domain.concat(group.__domain),
-                groupBy,
-            });
+            let response;
+            if (group[`${firstGroupByName}_count`]) {
+                response = await this._loadData({
+                    ...params,
+                    domain: params.domain.concat(group.__domain),
+                    groupBy,
+                });
+            }
             if (groupBy.length) {
-                group.groups = response.groups;
+                group.groups = response ? response.groups : [];
             } else {
-                group.records = response.records;
+                group.records = response ? response.records : [];
             }
         }
         return { groups, length };
