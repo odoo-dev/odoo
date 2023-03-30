@@ -3,7 +3,7 @@
 import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { useSetupView } from "@web/views/ view_hook";
+import { useSetupView } from "@web/views/view_hook";
 import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";

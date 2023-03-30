@@ -17,7 +17,7 @@ export class Group extends DataPoint {
         // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
         // we have to get the count from `__count` instead
         // see _read_group_raw in models.py
-        this.count = groupData.__count || groupData[`${this.groupByField.name}_count`] || 0;
+        this._count = groupData.__count || groupData[`${this.groupByField.name}_count`] || 0;
         this.value = this._getValueFromGroupData(groupData, this.groupByField);
         this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
         this.aggregates = this._getAggregatesFromGroupData(groupData);
@@ -32,12 +32,12 @@ export class Group extends DataPoint {
         if (params.groupBy.length) {
             this.list = new this.model.constructor.DynamicGroupList(this.model, {
                 ...listParams,
-                data: { count: this.count, groups: groupData.groups },
+                data: { length: this._count, groups: groupData.groups },
             });
         } else {
             this.list = new this.model.constructor.DynamicRecordList(this.model, {
                 ...listParams,
-                data: { count: this.count, records: groupData.records },
+                data: { length: this._count, records: groupData.records },
             });
         }
     }
@@ -45,6 +45,10 @@ export class Group extends DataPoint {
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
+
+    get count() {
+        return this.isFolded ? this._count : this.list.count;
+    }
 
     get records() {
         return this.list.records;
@@ -55,12 +59,14 @@ export class Group extends DataPoint {
     // -------------------------------------------------------------------------
 
     toggle() {
+        if (!this.isFolded) {
+            this._count = this.list.count;
+        }
         this.isFolded = !this.isFolded;
     }
 
     async deleteRecords(records) {
         await this.list.deleteRecords(records);
-        this.count = this.count - records.length;
     }
 
     // -------------------------------------------------------------------------
