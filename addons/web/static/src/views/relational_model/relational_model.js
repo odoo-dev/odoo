@@ -195,20 +195,29 @@ export class RelationalModel extends Model {
             }
         );
         const { groups, length } = response;
+        const groupBy = params.groupBy.slice(1);
         for (const group of groups) {
-            const groupBy = params.groupBy.slice(1);
+            group.__fold = group.__fold || !params.openGroupsByDefault;
+            if (groupBy.length) {
+                group.groups = [];
+            } else {
+                group.records = [];
+            }
             let response;
-            if (group[`${firstGroupByName}_count`]) {
+            group.count = group.__count || group[`${firstGroupByName}_count`];
+            delete group.__count;
+            delete group[`${firstGroupByName}_count`];
+            if (!group.__fold && group.count > 0) {
                 response = await this._loadData({
                     ...params,
                     domain: params.domain.concat(group.__domain),
                     groupBy,
                 });
-            }
-            if (groupBy.length) {
-                group.groups = response ? response.groups : [];
-            } else {
-                group.records = response ? response.records : [];
+                if (groupBy.length) {
+                    group.groups = response ? response.groups : [];
+                } else {
+                    group.records = response ? response.records : [];
+                }
             }
         }
         return { groups, length };

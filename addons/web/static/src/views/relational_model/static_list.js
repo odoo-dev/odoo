@@ -70,6 +70,7 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._load({ limit, offset }));
     }
 
+    // FIXME: rename? This is not about selection, but mode
     unselectRecord() {
         if (this.editedRecord) {
             this.editedRecord.switchMode("readonly");
