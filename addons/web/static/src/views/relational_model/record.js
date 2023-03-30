@@ -87,7 +87,7 @@ export class Record extends DataPoint {
     }
 
     /**
-     * @param {string} fieldName 
+     * @param {string} fieldName
      */
     getFieldDomain(fieldName) {
         const { domain } = this.fields[fieldName];
@@ -95,9 +95,9 @@ export class Record extends DataPoint {
     }
 
     /**
-     * @param {string} fieldName 
+     * @param {string} fieldName
      */
-    isInvalid(fieldName) {
+    isFieldInvalid(fieldName) {
         return this._invalidFields.has(fieldName);
     }
 

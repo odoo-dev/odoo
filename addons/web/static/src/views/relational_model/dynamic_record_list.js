@@ -6,17 +6,7 @@ export class DynamicRecordList extends DynamicList {
     setup(params) {
         super.setup(params);
         /** @type {import("./record").Record[]} */
-        this.records = params.data.records.map(
-            (r) =>
-                new this.model.constructor.Record(this.model, {
-                    activeFields: this.activeFields,
-                    fields: this.fields,
-                    resModel: this.resModel,
-                    context: this.context,
-                    resIds: params.data.records.map((r) => r.id),
-                    data: r,
-                })
-        );
+        this.records = params.data.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(params.data);
     }
 
@@ -33,6 +23,14 @@ export class DynamicRecordList extends DynamicList {
     // -------------------------------------------------------------------------
 
     /**
+     * TODO: rename into "addNewRecord"?
+     * @param {boolean} [atFirstPosition=false]
+     * @returns {Promise}
+     */
+    createRecord(atFirstPosition = false) {
+        return this.model.mutex.exec(() => this._addNewRecord(atFirstPosition));
+    }
+    /**
      * Performs a search_count with the current domain to set the count. This is
      * useful as web_search_read limits the count for performance reasons, so it
      * might sometimes be less than the real number of records matching the domain.
@@ -44,31 +42,35 @@ export class DynamicRecordList extends DynamicList {
         return this.count;
     }
 
-    load(params = {}) {
-        const limit = params.limit === undefined ? this.limit : params.limit;
-        const offset = params.offset === undefined ? this.offset : params.offset;
-        return this.model.mutex.exec(() => this._load(offset, limit));
-    }
-
-    deleteRecords(records) {
-        return this.model.mutex.exec(async () => {
-            const unlinked = await this.model.orm.unlink(
-                this.resModel,
-                records.map((r) => r.resId),
-                {
-                    context: this.context,
-                }
-            );
-            if (!unlinked) {
-                return false;
-            }
-            return this._removeRecords(records);
-        });
-    }
-
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    async _addNewRecord(atFirstPosition) {
+        const values = await this.model._loadNewRecord({
+            resModel: this.resModel,
+            activeFields: this.activeFields,
+            context: this.context,
+        });
+        const record = this._createRecordDatapoint(values, "edit");
+        if (atFirstPosition) {
+            this.records.unshift(record);
+        } else {
+            this.records.push(record);
+        }
+        this.count++;
+    }
+
+    _createRecordDatapoint(data, mode = "readonly") {
+        return new this.model.constructor.Record(this.model, {
+            context: this.context,
+            activeFields: this.activeFields,
+            resModel: this.resModel,
+            fields: this.fields,
+            data,
+            mode,
+        });
+    }
 
     _removeRecords(records) {
         const _records = this.records.filter((r) => !records.includes(r));
@@ -77,7 +79,7 @@ export class DynamicRecordList extends DynamicList {
             return this._load(offset, this.limit);
         }
         this.records = _records;
-        this._updateCount(this.records);
+        this._updateCount(this.records); // FIXME: this is not correct I think (multi page, delete a record)
     }
 
     _updateCount(data) {

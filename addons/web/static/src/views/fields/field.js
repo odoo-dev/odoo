@@ -58,7 +58,7 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     return {
         readonly,
         required: evalDomain(modifiers.required, record.evalContext),
-        invalid: record.isInvalid(fieldName),
+        invalid: record.isFieldInvalid(fieldName),
         empty,
     };
 }

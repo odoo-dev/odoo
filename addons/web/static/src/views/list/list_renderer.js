@@ -768,7 +768,7 @@ export class ListRenderer extends Component {
             if (required && evalDomain(required, record.evalContext)) {
                 classNames.push("o_required_modifier");
             }
-            if (record.isInvalid(column.name)) {
+            if (record.isFieldInvalid(column.name)) {
                 classNames.push("o_invalid_cell");
             }
             if (this.isCellReadonly(column, record)) {
