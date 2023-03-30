@@ -27,6 +27,10 @@ export class DynamicGroupList extends DynamicList {
     // Getters
     // -------------------------------------------------------------------------
 
+    get hasData() {
+        return this.groups.find((group) => group.list.hasData);
+    }
+
     /**
      * List of loaded records inside groups.
      */

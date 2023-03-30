@@ -57,6 +57,10 @@ export class Record extends DataPoint {
     // Getter
     // -------------------------------------------------------------------------
 
+    get hasData() {
+        return true;
+    }
+
     get isActive() {
         if ("active" in this.activeFields) {
             return this.data.active;
