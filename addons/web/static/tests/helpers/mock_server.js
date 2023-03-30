@@ -640,8 +640,6 @@ export class MockServer {
                 return this.mockNameGet(args.model, args.args);
             case "name_search":
                 return this.mockNameSearch(args.model, args.args, args.kwargs);
-            case "onchange":
-                return this.mockOnchange(args.model, args.args, args.kwargs);
             case "onchange2":
                 return this.mockOnchange2(args.model, args.args, args.kwargs);
             case "read":
@@ -888,52 +886,6 @@ export class MockServer {
         return result.slice(0, limit);
     }
 
-    mockOnchange(modelName, args, kwargs) {
-        const currentData = args[1];
-        const onChangeSpec = args[3];
-        let fields = args[2] ? (Array.isArray(args[2]) ? args[2] : [args[2]]) : [];
-        const onchanges = this.models[modelName].onchanges || {};
-        const firstOnChange = !fields.length;
-        const onchangeVals = {};
-        let defaultVals = undefined;
-        let nullValues;
-        if (firstOnChange) {
-            const fieldsFromView = Object.keys(onChangeSpec).reduce((acc, fname) => {
-                fname = fname.split(".", 1)[0];
-                if (!acc.includes(fname)) {
-                    acc.push(fname);
-                }
-                return acc;
-            }, []);
-            const defaultingFields = fieldsFromView.filter((fname) => !(fname in currentData));
-            defaultVals = this.mockDefaultGet(modelName, [defaultingFields], kwargs);
-            // It is the new semantics: no field in arguments means we are in
-            // a default_get + onchange situation
-            fields = fieldsFromView;
-            nullValues = {};
-            fields
-                .filter((fName) => !Object.keys(defaultVals).includes(fName))
-                .forEach((fName) => {
-                    nullValues[fName] = false;
-                });
-        }
-        Object.assign(currentData, defaultVals);
-        fields.forEach((field) => {
-            if (field in onchanges) {
-                const changes = Object.assign({}, nullValues, currentData);
-                onchanges[field](changes);
-                Object.entries(changes).forEach(([key, value]) => {
-                    if (currentData[key] !== value) {
-                        onchangeVals[key] = value;
-                    }
-                });
-            }
-        });
-        return {
-            value: this.convertToOnChange(modelName, Object.assign({}, defaultVals, onchangeVals)),
-        };
-    }
-
     mockOnchange2(modelName, args, kwargs) {
         const resId = args[0][0];
         const currentData = args[1];
@@ -957,6 +909,8 @@ export class MockServer {
             // It is the new semantics: no field in arguments means we are in
             // a default_get + onchange situation
             fields = fieldsFromView;
+            // FIXME: for the first onchange, this method should return a value for each field in the spec
+            // currently it is not the case (see what we do with those nullValues)
             nullValues = {};
             fields
                 .filter((fName) => !Object.keys(defaultVals).includes(fName))
