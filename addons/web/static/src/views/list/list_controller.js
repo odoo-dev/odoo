@@ -233,8 +233,11 @@ export class ListController extends Component {
         }
     }
 
-    onClickSave() {
-        this.model.root.editedRecord.save();
+    async onClickSave() {
+        const saved = await this.model.root.editedRecord.save();
+        if (saved) {
+            this.model.root.editedRecord.switchMode("readonly");
+        }
     }
 
     onMouseDownDiscard(mouseDownEvent) {

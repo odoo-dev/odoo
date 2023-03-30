@@ -11,7 +11,7 @@ const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that
 
 export class Group extends DataPoint {
     /**
-     * @param {Params} params 
+     * @param {Params} params
      */
     setup(params) {
         super.setup();
@@ -26,7 +26,7 @@ export class Group extends DataPoint {
         // we have to get the count from `__count` instead
         // see _read_group_raw in models.py
         /** @type {number} */
-        this._count = groupData.__count || groupData[`${this.groupByField.name}_count`] || 0;
+        this.count = groupData.count;
         this.value = this._getValueFromGroupData(groupData, this.groupByField);
         this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
         this.aggregates = this._getAggregatesFromGroupData(groupData);
@@ -38,27 +38,24 @@ export class Group extends DataPoint {
             groupBy: params.groupBy,
             domain: groupData.__domain,
         };
-        /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
-        this.list;
+        let List;
         if (params.groupBy.length) {
-            this.list = new this.model.constructor.DynamicGroupList(this.model, {
-                ...listParams,
-                data: { length: this._count, groups: groupData.groups },
-            });
+            List = this.model.constructor.DynamicGroupList;
+            listParams.data = { length: groupData.count, groups: groupData.groups };
         } else {
-            this.list = new this.model.constructor.DynamicRecordList(this.model, {
-                ...listParams,
-                data: { length: this._count, records: groupData.records },
-            });
+            List = this.model.constructor.DynamicRecordList;
+            listParams.data = { length: groupData.count, records: groupData.records };
         }
+        /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
+        this.list = new List(this.model, listParams);
     }
 
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
 
-    get count() {
-        return this.isFolded ? this._count : this.list.count;
+    get hasData() {
+        return this.list.hasData;
     }
 
     get records() {
@@ -69,15 +66,21 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    toggle() {
-        if (!this.isFolded) {
-            this._count = this.list.count;
-        }
-        this.isFolded = !this.isFolded;
+    async createRecord() {
+        await this.list.createRecord();
+        this.count++;
     }
 
     async deleteRecords(records) {
         await this.list.deleteRecords(records);
+        this.count -= records.length;
+    }
+
+    async toggle() {
+        if (this.isFolded) {
+            await this.list.load();
+        }
+        this.isFolded = !this.isFolded;
     }
 
     // -------------------------------------------------------------------------

@@ -9,21 +9,9 @@ export class DynamicGroupList extends DynamicList {
         super.setup(params);
         this.isGrouped = true;
         this.groupBy = params.groupBy;
-        const groupByFieldName = this.groupBy[0].split(":")[0];
-        this.groupByField = this.fields[groupByFieldName];
+        this.groupByField = this.fields[this.groupBy[0].split(":")[0]];
         /** @type {import("./group").Group[]} */
-        this.groups = params.data.groups.map(
-            (g) =>
-                new this.model.constructor.Group(this.model, {
-                    activeFields: this.activeFields,
-                    fields: this.fields,
-                    resModel: this.resModel,
-                    context: this.context,
-                    groupBy: this.groupBy.slice(1),
-                    groupByFieldName,
-                    data: g,
-                })
-        );
+        this.groups = params.data.groups.map((g) => this._createGroupDatapoint(g));
     }
 
     // -------------------------------------------------------------------------
@@ -31,7 +19,10 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
 
     get hasData() {
-        return this.groups.find((group) => group.list.hasData);
+        if (this.count === 0) {
+            return false;
+        }
+        return this.groups.some((group) => group.hasData);
     }
 
     /**
@@ -59,8 +50,39 @@ export class DynamicGroupList extends DynamicList {
     // Protected
     // -------------------------------------------------------------------------
 
-    _load() {
-        throw new Error("Method '_load()' needs to be implemented.");
-        // TODO => call model _loadGroupedList with a domain to only modify this one
+    _createGroupDatapoint(data) {
+        return new this.model.constructor.Group(this.model, {
+            activeFields: this.activeFields,
+            fields: this.fields,
+            resModel: this.resModel,
+            context: this.context,
+            groupBy: this.groupBy.slice(1),
+            groupByFieldName: this.groupByField.name,
+            data,
+        });
+    }
+
+    async _load(offset, limit) {
+        const response = await this.model._loadGroupedList({
+            activeFields: this.activeFields,
+            context: this.context,
+            domain: this.domain,
+            fields: this.fields,
+            groupBy: this.groupBy,
+            orderBy: this.orderBy,
+            resModel: this.resModel,
+            limit,
+            offset,
+        });
+        this.groups = response.groups.map((g) => this._createGroupDatapoint(g));
+        this.count = response.length;
+        this.offset = offset;
+        this.limit = limit;
+    }
+
+    _removeRecords(records) {
+        for (const group of this.groups) {
+            group.list._removeRecords(records);
+        }
     }
 }

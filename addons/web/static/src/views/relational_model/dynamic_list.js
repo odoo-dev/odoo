@@ -11,16 +11,20 @@ export class DynamicList extends DataPoint {
         this.groupBy = [];
         this.limit = params.limit || 80;
         this.offset = params.offset || 0;
-        this.count = params.data.length;
         this.isDomainSelected = false;
+        this.evalContext = this.context;
     }
 
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
 
+    get editedRecord() {
+        return this.records.find((record) => record.isInEdition);
+    }
+
     get selection() {
-        return this.records.filter((r) => r.selected);
+        return this.records.filter((record) => record.selected);
     }
 
     // -------------------------------------------------------------------------
@@ -33,6 +37,22 @@ export class DynamicList extends DataPoint {
 
     canResequence() {
         return false;
+    }
+
+    deleteRecords(records) {
+        return this.model.mutex.exec(async () => {
+            const unlinked = await this.model.orm.unlink(
+                this.resModel,
+                records.map((r) => r.resId),
+                {
+                    context: this.context,
+                }
+            );
+            if (!unlinked) {
+                return false;
+            }
+            return this._removeRecords(records);
+        });
     }
 
     /**
@@ -56,6 +76,12 @@ export class DynamicList extends DataPoint {
         return resIds;
     }
 
+    load(params = {}) {
+        const limit = params.limit === undefined ? this.limit : params.limit;
+        const offset = params.offset === undefined ? this.offset : params.offset;
+        return this.model.mutex.exec(() => this._load(offset, limit));
+    }
+
     // TODO: keep this??
     selectDomain(value) {
         this.isDomainSelected = value;
@@ -63,6 +89,17 @@ export class DynamicList extends DataPoint {
 
     unarchive(isSelected) {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
+    }
+
+    // FIXME: rename? This is not about selection, but mode
+    async unselectRecord() {
+        if (this.editedRecord) {
+            const saved = await this.editedRecord.save();
+            if (saved) {
+                this.editedRecord.switchMode("readonly");
+            }
+        }
+        return true;
     }
 
     // -------------------------------------------------------------------------
