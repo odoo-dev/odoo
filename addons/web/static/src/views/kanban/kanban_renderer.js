@@ -444,7 +444,7 @@ export class KanbanRenderer extends Component {
     }
 
     loadMore(group) {
-        return group.list.loadMore();
+        return group.list.load({ limit: group.list.records.length + group.model.rootParams.limit });
     }
 
     editGroup(group) {

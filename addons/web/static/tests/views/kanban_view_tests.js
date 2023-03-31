@@ -7746,7 +7746,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_view_nocontent");
     });
 
-    QUnit.tttt("bounce create button when no data and click on empty area", async (assert) => {
+    QUnit.test("bounce create button when no data and click on empty area", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7769,7 +7769,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o-kanban-button-new"), "o_catch_attention");
     });
 
-    QUnit.tttt("buttons with modifiers", async (assert) => {
+    QUnit.test("buttons with modifiers", async (assert) => {
         serverData.models.partner.records[1].bar = false; // so that test is more complete
 
         await makeView({
@@ -7795,7 +7795,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_btn_test_2", 3, "kanban should have three buttons of type 2");
     });
 
-    QUnit.tttt("support styling of anchor tags with action type", async function (assert) {
+    QUnit.test("support styling of anchor tags with action type", async function (assert) {
         assert.expect(3);
 
         const actionService = {
@@ -7827,7 +7827,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("a[type='action']").style.marginLeft, "10px");
     });
 
-    QUnit.tttt("button executes action and reloads", async (assert) => {
+    QUnit.test("button executes action and reloads", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7873,7 +7873,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("button executes action and check domain", async (assert) => {
+    QUnit.test("button executes action and check domain", async (assert) => {
         serverData.models.partner.fields.active = {
             string: "Active",
             type: "boolean",
@@ -7917,7 +7917,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("button executes action with domain field not in view", async (assert) => {
+    QUnit.test("button executes action with domain field not in view", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7946,7 +7946,7 @@ QUnit.module("Views", (hooks) => {
         }
     });
 
-    QUnit.tttt("field tag with modifiers but no widget", async (assert) => {
+    QUnit.test("field tag with modifiers but no widget", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7967,7 +7967,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelectorAll(".o_kanban_record")[1].innerText, "blip");
     });
 
-    QUnit.tttt("field tag with widget and class attributes", async (assert) => {
+    QUnit.test("field tag with widget and class attributes", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7987,7 +7987,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_field_widget.hi", 4);
     });
 
-    QUnit.tttt("rendering date and datetime (value)", async (assert) => {
+    QUnit.test("rendering date and datetime (value)", async (assert) => {
         serverData.models.partner.records[0].date = "2017-01-25";
         serverData.models.partner.records[1].datetime = "2016-12-12 10:55:05";
 
@@ -8012,7 +8012,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(1).querySelector(".datetime").innerText, "12/12/2016 11:55:05");
     });
 
-    QUnit.tttt("rendering date and datetime (raw value)", async (assert) => {
+    QUnit.test("rendering date and datetime (raw value)", async (assert) => {
         serverData.models.partner.records[0].date = "2017-01-25";
         serverData.models.partner.records[1].datetime = "2016-12-12 10:55:05";
 
@@ -8040,7 +8040,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("rendering many2one (value)", async (assert) => {
+    QUnit.test("rendering many2one (value)", async (assert) => {
         serverData.models.partner.records[1].product_id = false;
 
         await makeView({
@@ -8061,7 +8061,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["hello", "hello", "xmo"]);
     });
 
-    QUnit.tttt("rendering many2one (raw value)", async (assert) => {
+    QUnit.test("rendering many2one (raw value)", async (assert) => {
         serverData.models.partner.records[1].product_id = false;
 
         await makeView({
@@ -8082,7 +8082,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["3", "false", "3", "5"]);
     });
 
-    QUnit.tttt("evaluate conditions on relational fields", async (assert) => {
+    QUnit.test("evaluate conditions on relational fields", async (assert) => {
         serverData.models.partner.records[0].product_id = false;
 
         await makeView({
@@ -8257,7 +8257,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["1", "3", "2", "4"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column config dropdown should not crash when records_draggable and groups_draggable are set to false",
         async (assert) => {
             await makeView({
@@ -8281,7 +8281,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("properly evaluate more complex domains", async (assert) => {
+    QUnit.test("properly evaluate more complex domains", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -8309,7 +8309,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("edit the kanban color with the colorpicker", async (assert) => {
+    QUnit.test("edit the kanban color with the colorpicker", async (assert) => {
         serverData.models.category.records[0].color = 12;
 
         await makeView({
@@ -8415,7 +8415,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["2 - 0", "4 - 0"]);
     });
 
-    QUnit.tttt("load more records in column with x2many", async (assert) => {
+    QUnit.test("load more records in column with x2many", async (assert) => {
         serverData.models.partner.records[0].category_ids = [7];
         serverData.models.partner.records[1].category_ids = [];
         serverData.models.partner.records[2].category_ids = [6];
@@ -8437,24 +8437,29 @@ QUnit.module("Views", (hooks) => {
                 </kanban>`,
             groupBy: ["bar"],
             limit: 2,
-            async mockRPC(_route, { args, kwargs, model, method }) {
-                if (model === "category" && method === "read") {
-                    assert.step(`read ${String(args[0])}`);
-                } else if (method === "web_search_read_unity") {
+            async mockRPC(_route, { kwargs, method }) {
+                if (method === "web_search_read_unity") {
                     assert.step(`web_search_read_unity ${kwargs.limit}-${kwargs.offset}`);
                 }
             },
         });
 
         assert.containsN(getColumn(1), ".o_kanban_record", 2);
-
-        assert.verifySteps(["web_search_read_unity 2-0", "web_search_read_unity 2-0", "read 7"]);
+        assert.deepEqual(
+            [...getColumn(1).querySelectorAll("[name='category_ids']")].map((el) => el.textContent),
+            ["silver", ""]
+        );
+        assert.verifySteps(["web_search_read_unity 2-0", "web_search_read_unity 2-0"]);
 
         // load more
         await loadMore(1);
 
         assert.containsN(getColumn(1), ".o_kanban_record", 3);
-        assert.verifySteps(["web_search_read_unity 4-0", "read 7,6"]);
+        assert.deepEqual(
+            [...getColumn(1).querySelectorAll("[name='category_ids']")].map((el) => el.textContent),
+            ["silver", "", "gold"]
+        );
+        assert.verifySteps(["web_search_read_unity 4-0"]);
     });
 
     QUnit.tttt("update buttons after column creation", async (assert) => {
