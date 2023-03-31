@@ -3925,7 +3925,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("properly apply onchange in simple case", async function (assert) {
+    QUnit.test("properly apply onchange in simple case", async function (assert) {
         serverData.models.foo.onchanges = {
             foo: function (obj) {
                 obj.int_field = obj.foo.length + 1000;
@@ -3955,7 +3955,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column width should not change when switching mode", async function (assert) {
+    QUnit.test("column width should not change when switching mode", async function (assert) {
         // Warning: this test is css dependant
         await makeView({
             type: "list",
@@ -4007,7 +4007,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column widths should depend on the content when there is data",
         async function (assert) {
             serverData.models.foo.records[0].foo = "Some very very long value for a char field";
@@ -4048,7 +4048,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "width of some of the fields should be hardcoded if no data",
         async function (assert) {
             const assertions = [
@@ -4104,7 +4104,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("colspan of empty lines is correct in readonly", async function (assert) {
+    QUnit.test("colspan of empty lines is correct in readonly", async function (assert) {
         serverData.models.foo.fields.foo_o2m = {
             string: "Foo O2M",
             type: "one2many",
@@ -4130,7 +4130,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "1");
     });
 
-    QUnit.tttt("colspan of empty lines is correct in edit", async function (assert) {
+    QUnit.test("colspan of empty lines is correct in edit", async function (assert) {
         serverData.models.foo.fields.foo_o2m = {
             string: "Foo O2M",
             type: "one2many",
@@ -4156,7 +4156,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("tbody td").getAttribute("colspan"), "2");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "colspan of empty lines is correct in readonly with optional fields",
         async function (assert) {
             serverData.models.foo.fields.foo_o2m = {
@@ -4186,7 +4186,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "colspan of empty lines is correct in edit with optional fields",
         async function (assert) {
             serverData.models.foo.fields.foo_o2m = {
@@ -4216,7 +4216,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "width of some fields should be hardcoded if no data, and list initially invisible",
         async function (assert) {
             const assertions = [
@@ -4297,7 +4297,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "empty editable list with the handle widget and no content help",
         async function (assert) {
             // no records for the foo model
@@ -4339,7 +4339,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable list: overflowing table", async function (assert) {
+    QUnit.test("editable list: overflowing table", async function (assert) {
         serverData.models.bar = {
             fields: {
                 titi: { string: "Small char", type: "char", sortable: true },
@@ -4382,7 +4382,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list: overflowing table (3 columns)", async function (assert) {
+    QUnit.test("editable list: overflowing table (3 columns)", async function (assert) {
         const longText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                         Donec est massa, gravida eget dapibus ac, eleifend eget libero.
                         Suspendisse feugiat sed massa eleifend vestibulum. Sed tincidunt
@@ -4436,7 +4436,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list: list view in an initially unselected notebook page",
         async function (assert) {
             serverData.models.foo.records = [{ id: 1, o2m: [1] }];
@@ -4491,7 +4491,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable list: list view hidden by an invisible modifier", async function (assert) {
+    QUnit.test("editable list: list view hidden by an invisible modifier", async function (assert) {
         serverData.models.foo.records = [{ id: 1, bar: true, o2m: [1] }];
         serverData.models.bar = {
             fields: {
@@ -4539,7 +4539,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list: updating list state while invisible", async function (assert) {
+    QUnit.test("editable list: updating list state while invisible", async function (assert) {
         serverData.models.foo.onchanges = {
             bar: function (obj) {
                 obj.o2m = [[5], [0, null, { display_name: "Whatever" }]];
@@ -4585,7 +4585,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty list: state with nameless and stringless buttons", async function (assert) {
+    QUnit.test("empty list: state with nameless and stringless buttons", async function (assert) {
         serverData.models.foo.records = [];
         await makeView({
             type: "list",
@@ -4611,7 +4611,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list: unnamed columns cannot be resized", async function (assert) {
+    QUnit.test("editable list: unnamed columns cannot be resized", async function (assert) {
         serverData.models.foo.records = [{ id: 1, o2m: [1] }];
         serverData.models.bar.records = [{ id: 1, display_name: "Oui" }];
         await makeView({
@@ -4648,7 +4648,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view, click on m2o dropdown does not close editable row",
         async function (assert) {
             await makeView({
@@ -4679,7 +4679,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "width of some of the fields should be hardcoded if no data (grouped case)",
         async function (assert) {
             const assertions = [
@@ -4735,7 +4735,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("column width should depend on the widget", async function (assert) {
+    QUnit.test("column width should depend on the widget", async function (assert) {
         serverData.models.foo.records = []; // the width heuristic only applies when there are no records
         await makeView({
             type: "list",
@@ -4754,7 +4754,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column widths are kept when adding first record", async function (assert) {
+    QUnit.test("column widths are kept when adding first record", async function (assert) {
         serverData.models.foo.records = []; // in this scenario, we start with no records
         await makeView({
             type: "list",
@@ -4778,7 +4778,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column widths are kept when editing a record", async function (assert) {
+    QUnit.test("column widths are kept when editing a record", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -4809,7 +4809,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column widths are kept when switching records in edition", async function (assert) {
+    QUnit.test("column widths are kept when switching records in edition", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -4834,7 +4834,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelectorAll('th[data-name="m2o"]')[0].offsetWidth, width);
     });
 
-    QUnit.tttt("column widths are re-computed on window resize", async function (assert) {
+    QUnit.test("column widths are re-computed on window resize", async function (assert) {
         serverData.models.foo.records[0].text =
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
             "Sed blandit, justo nec tincidunt feugiat, mi justo suscipit libero, sit amet tempus " +
@@ -4865,7 +4865,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(selectorWidth, postResizeSelectorWidth);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "columns with an absolute width are never narrower than that width",
         async function (assert) {
             serverData.models.foo.records[0].text =
@@ -4891,7 +4891,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("list view with data: text columns are not crushed", async function (assert) {
+    QUnit.test("list view with data: text columns are not crushed", async function (assert) {
         const longText =
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
             "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim " +
@@ -4931,7 +4931,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("button in a list view with a default relative width", async function (assert) {
+    QUnit.test("button in a list view with a default relative width", async function (assert) {
         await makeView({
             type: "list",
             arch: `
@@ -4950,7 +4950,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("button columns in a list view don't have a max width", async function (assert) {
+    QUnit.test("button columns in a list view don't have a max width", async function (assert) {
         // set a long foo value s.t. the column can be squeezed
         serverData.models.foo.records[0].foo = "Lorem ipsum dolor sit amet";
         await makeView({
@@ -5016,7 +5016,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector('th[data-name="datetime"]').offsetWidth, width);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "row height and width should not change when switching mode",
         async function (assert) {
             // Warning: this test is css dependant
@@ -5073,7 +5073,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("fields are translatable in list view", async function (assert) {
+    QUnit.test("fields are translatable in list view", async function (assert) {
         serverData.models.foo.fields.foo.translate = true;
         serviceRegistry.add("localization", makeFakeLocalizationService({ multiLang: true }), {
             force: true,
@@ -5115,7 +5115,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("long words in text cells should break into smaller lines", async function (assert) {
+    QUnit.test("long words in text cells should break into smaller lines", async function (assert) {
         serverData.models.foo.records[0].text = "a";
         serverData.models.foo.records[1].text = "pneumonoultramicroscopicsilicovolcanoconiosis"; // longest english word I could find
 
@@ -5309,7 +5309,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["notify"]);
     });
 
-    QUnit.tttt("archiving one record", async function (assert) {
+    QUnit.test("archiving one record", async function (assert) {
         // add active field on foo model and make all records active
         serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
 
@@ -5333,7 +5333,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read",
+            "/web/dataset/call_kw/foo/web_search_read_unity",
         ]);
         await toggleActionMenu(target);
         await toggleMenuItem(target, "Archive");
@@ -5362,7 +5362,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody td.o_list_record_selector", 3, "should have 3 records");
         assert.verifySteps([
             "/web/dataset/call_kw/foo/action_archive",
-            "/web/dataset/call_kw/foo/web_search_read",
+            "/web/dataset/call_kw/foo/web_search_read_unity",
         ]);
     });
 
@@ -5461,7 +5461,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["notify"]);
     });
 
-    QUnit.tttt("archive/unarchive handles returned action", async function (assert) {
+    QUnit.test("archive/unarchive handles returned action", async function (assert) {
         // add active field on foo model and make all records active
         serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
 
@@ -5530,7 +5530,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("apply custom static action menu (archive)", async function (assert) {
+    QUnit.test("apply custom static action menu (archive)", async function (assert) {
         // add active field on foo model and make all records active
         serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
 
@@ -5569,7 +5569,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["customArchive"]);
     });
 
-    QUnit.tttt("add custom static action menu", async function (assert) {
+    QUnit.test("add custom static action menu", async function (assert) {
         const listView = registry.category("views").get("list");
         class CustomListController extends listView.Controller {
             getStaticActionMenuItems() {

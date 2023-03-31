@@ -131,9 +131,11 @@ export class DynamicList extends DataPoint {
         const resIds = await this.getResIds(isSelected);
         const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
         if (action && Object.keys(action).length) {
-            this.model.action.doAction(action, { onClose: () => this._load() });
+            this.model.action.doAction(action, {
+                onClose: () => this._load(this.offset, this.limit, this.orderBy),
+            });
         } else {
-            return this._load();
+            return this._load(this.offset, this.limit, this.orderBy);
         }
     }
 }
