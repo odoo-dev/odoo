@@ -2141,7 +2141,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("ordered target, sort attribute in context", async function (assert) {
+    QUnit.test("ordered target, sort attribute in context", async function (assert) {
         serverData.models.foo.fields.foo.sortable = true;
         serverData.models.foo.fields.date.sortable = true;
 
@@ -2174,7 +2174,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(['["date","foo desc"]']);
     });
 
-    QUnit.tttt("Loading a filter with a sort attribute", async function (assert) {
+    QUnit.test("Loading a filter with a sort attribute", async function (assert) {
         assert.expect(2);
 
         serverData.models.foo.fields.foo.sortable = true;
@@ -2191,7 +2191,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="date"/>
                 </tree>`,
             mockRPC(route, args) {
-                if (args.method === "web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     if (searchReads === 0) {
                         assert.strictEqual(
                             args.kwargs.order,
@@ -2234,7 +2234,7 @@ QUnit.module("Views", (hooks) => {
         await toggleMenuItem(target, "My second favorite");
     });
 
-    QUnit.tttt("many2one field rendering", async function (assert) {
+    QUnit.test("many2one field rendering", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
