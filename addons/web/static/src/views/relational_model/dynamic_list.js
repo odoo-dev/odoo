@@ -79,12 +79,31 @@ export class DynamicList extends DataPoint {
     load(params = {}) {
         const limit = params.limit === undefined ? this.limit : params.limit;
         const offset = params.offset === undefined ? this.offset : params.offset;
-        return this.model.mutex.exec(() => this._load(offset, limit));
+        const orderBy = params.orderBy === undefined ? this.orderBy : params.orderBy;
+        return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
     }
 
     // TODO: keep this??
     selectDomain(value) {
         this.isDomainSelected = value;
+    }
+
+    async sortBy(fieldName) {
+        let orderBy = [...this.orderBy];
+        if (orderBy.length && orderBy[0].name === fieldName) {
+            // if (this.isOrder) {
+            orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+            // }
+        } else {
+            orderBy = orderBy.filter((o) => o.name !== fieldName);
+            orderBy.unshift({
+                name: fieldName,
+                asc: true,
+            });
+        }
+
+        // this.isOrder = true;
+        await this.load({ orderBy });
     }
 
     unarchive(isSelected) {

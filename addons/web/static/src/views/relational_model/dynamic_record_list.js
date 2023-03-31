@@ -93,7 +93,7 @@ export class DynamicRecordList extends DynamicList {
         }
     }
 
-    async _load(offset, limit) {
+    async _load(offset, limit, orderBy) {
         const response = await this.model._loadUngroupedList({
             activeFields: this.activeFields,
             context: this.context,
@@ -101,6 +101,7 @@ export class DynamicRecordList extends DynamicList {
             fields: this.fields,
             limit,
             offset,
+            orderBy,
             resModel: this.resModel,
         });
         this.records = response.records.map(
@@ -116,6 +117,7 @@ export class DynamicRecordList extends DynamicList {
         );
         this.offset = offset;
         this.limit = limit;
+        this.orderBy = orderBy;
         this._updateCount(response);
     }
 }
