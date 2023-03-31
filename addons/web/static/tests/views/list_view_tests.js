@@ -2248,7 +2248,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped list view, with 1 open group", async function (assert) {
+    QUnit.test("grouped list view, with 1 open group", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -2274,7 +2274,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("opening records when clicking on record", async function (assert) {
+    QUnit.test("opening records when clicking on record", async function (assert) {
         assert.expect(6);
 
         const listView = registry.category("views").get("list");
@@ -2310,7 +2310,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["openRecord", "openRecord"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "execute an action before and after each valid save in a list view",
         async function (assert) {
             const listView = registry.category("views").get("list");
@@ -2397,7 +2397,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "don't exec a valid save with onWillSaveRecord in a list view",
         async function (assert) {
             const listView = registry.category("views").get("list");
@@ -2444,7 +2444,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("action/type attributes on tree arch, type='object'", async (assert) => {
+    QUnit.test("action/type attributes on tree arch, type='object'", async (assert) => {
         const list = await makeView({
             type: "list",
             resModel: "foo",
@@ -2462,12 +2462,12 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         await click(target.querySelector(".o_data_cell"));
-        assert.verifySteps(["doActionButton type object name a1", "web_search_read"]);
+        assert.verifySteps(["doActionButton type object name a1", "web_search_read_unity"]);
     });
 
-    QUnit.tttt("action/type attributes on tree arch, type='action'", async (assert) => {
+    QUnit.test("action/type attributes on tree arch, type='action'", async (assert) => {
         const list = await makeView({
             type: "list",
             resModel: "foo",
@@ -2485,12 +2485,12 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         await click(target.querySelector(".o_data_cell"));
-        assert.verifySteps(["doActionButton type action name a1", "web_search_read"]);
+        assert.verifySteps(["doActionButton type action name a1", "web_search_read_unity"]);
     });
 
-    QUnit.tttt("editable list view: readonly fields cannot be edited", async function (assert) {
+    QUnit.test("editable list view: readonly fields cannot be edited", async function (assert) {
         serverData.models.foo.fields.foo.readonly = true;
 
         await makeView({
@@ -2528,7 +2528,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll(".o_data_cell")[0], "o_readonly_modifier");
     });
 
-    QUnit.tttt("editable list view: line with no active element", async function (assert) {
+    QUnit.test("editable list view: line with no active element", async function (assert) {
         assert.expect(4);
 
         serverData.models.bar = {
