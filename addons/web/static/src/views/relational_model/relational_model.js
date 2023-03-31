@@ -96,9 +96,9 @@ export class RelationalModel extends Model {
         ) {
             this.rootParams.groupBy = [this.rootParams.defaultGroupBy];
         }
-        // if (this.rootParams.defaultOrder && !(this.rootParams.orderBy && this.rootParams.orderBy.length)) {
-        //     this.rootParams.orderBy = this.rootParams.defaultOrder;
-        // }
+        if (this.rootParams.defaultOrder && !this.rootParams.orderBy.length) {
+            this.rootParams.orderBy = this.rootParams.defaultOrder;
+        }
         let data;
         if (this.rootParams.values) {
             data = this.rootParams.values;
@@ -187,7 +187,7 @@ export class RelationalModel extends Model {
             unique([...Object.keys(params.activeFields), firstGroupByName]),
             [params.groupBy[0]], // TODO: expand attribute in list views
             {
-                order: orderby,
+                orderby,
                 lazy: true, // maybe useless
                 offset: params.offset,
                 limit: params.limit,
