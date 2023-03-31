@@ -3626,7 +3626,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "groups can not be sorted on a different field than the first field of the groupBy - 1",
         async function (assert) {
             assert.expect(1);
@@ -3646,7 +3646,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "groups can not be sorted on a different field than the first field of the groupBy - 2",
         async function (assert) {
             assert.expect(1);
@@ -3666,7 +3666,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("groups can be sorted on the first field of the groupBy", async function (assert) {
+    QUnit.test("groups can be sorted on the first field of the groupBy", async function (assert) {
         assert.expect(3);
 
         await makeView({
@@ -3692,7 +3692,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "groups can't be sorted on aggregates if there is no record",
         async function (assert) {
             serverData.models.foo.records = [];
@@ -3719,7 +3719,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("groups can be sorted on aggregates", async function (assert) {
+    QUnit.test("groups can be sorted on aggregates", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3771,7 +3771,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["default order", "int_field ASC", "int_field DESC"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "groups cannot be sorted on non-aggregable fields if every group is folded",
         async function (assert) {
             serverData.models.foo.fields.sort_field = {
@@ -3846,7 +3846,7 @@ QUnit.module("Views", (hooks) => {
                             }`
                         );
                     }
-                    if (method === "web_search_read") {
+                    if (method === "web_search_read_unity") {
                         assert.step(
                             `web_search_read.order: ${args.kwargs.order || "default order"}`
                         );
