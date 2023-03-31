@@ -3348,7 +3348,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target.querySelector(".o_cp_buttons"), ".o_list_selection_box");
     });
 
-    QUnit.tttt("aggregates are computed correctly", async function (assert) {
+    QUnit.test("aggregates are computed correctly", async function (assert) {
         // map: foo record id -> qux value
         const quxVals = { 1: 1.0, 2: 2.0, 3: 3.0, 4: 0 };
 
@@ -3394,7 +3394,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getFooterTextArray(), ["", "", "", ""]);
     });
 
-    QUnit.tttt("aggregates are computed correctly in grouped lists", async function (assert) {
+    QUnit.test("aggregates are computed correctly in grouped lists", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3427,7 +3427,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("aggregates are formatted correctly in grouped lists", async function (assert) {
+    QUnit.test("aggregates are formatted correctly in grouped lists", async function (assert) {
         // in this scenario, there is a widget on an aggregated field, and this widget has no
         // associated formatter, so we fallback on the formatter corresponding to the field type
         fieldRegistry.add("my_float", FloatField);
@@ -3450,7 +3450,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("aggregates in grouped lists with buttons", async function (assert) {
+    QUnit.test("aggregates in grouped lists with buttons", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3469,7 +3469,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_list_number")), cellVals);
     });
 
-    QUnit.tttt("date field aggregates in grouped lists", async function (assert) {
+    QUnit.test("date field aggregates in grouped lists", async function (assert) {
         // this test simulates a scenario where a date field has a group_operator
         // and the web_read_group thus return a value for that field for each group
         await makeView({
@@ -3499,7 +3499,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "hide aggregated value in grouped lists when no data provided by RPC call",
         async function (assert) {
             await makeView({
@@ -3531,7 +3531,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("aggregates are updated when a line is edited", async function (assert) {
+    QUnit.test("aggregates are updated when a line is edited", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3555,7 +3555,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("aggregates are formatted according to field widget", async function (assert) {
+    QUnit.test("aggregates are formatted according to field widget", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3574,7 +3574,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("aggregates digits can be set with digits field attribute", async function (assert) {
+    QUnit.test("aggregates digits can be set with digits field attribute", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3597,7 +3597,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "currency_field is taken into account when formatting monetary values",
         async (assert) => {
             await makeView({
