@@ -57,6 +57,9 @@ export class RelationalModel extends Model {
         this.countLimit = params.countLimit || this.constructor.WEB_SEARCH_READ_COUNT_LIMIT;
 
         this._urgentSave = false;
+
+        this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
+        this._onRecordSaved = params.onRecordSaved || (() => {});
     }
 
     // -------------------------------------------------------------------------
@@ -124,8 +127,6 @@ export class RelationalModel extends Model {
                 ...rootParams,
                 mode: params.mode,
                 resIds: params.resIds,
-                onWillSaveRecord: params.onWillSaveRecord,
-                onRecordSaved: params.onRecordSaved,
             });
         } else {
             const listParams = {
