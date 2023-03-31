@@ -62,14 +62,14 @@ export class DynamicGroupList extends DynamicList {
         });
     }
 
-    async _load(offset, limit) {
+    async _load(offset, limit, orderBy) {
         const response = await this.model._loadGroupedList({
             activeFields: this.activeFields,
             context: this.context,
             domain: this.domain,
             fields: this.fields,
             groupBy: this.groupBy,
-            orderBy: this.orderBy,
+            orderBy: orderBy,
             resModel: this.resModel,
             limit,
             offset,
@@ -78,6 +78,7 @@ export class DynamicGroupList extends DynamicList {
         this.count = response.length;
         this.offset = offset;
         this.limit = limit;
+        this.orderBy = orderBy;
     }
 
     _removeRecords(records) {
