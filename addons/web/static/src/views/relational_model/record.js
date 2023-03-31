@@ -12,8 +12,6 @@ import { getOnChangeSpec } from "./utils";
 export class Record extends DataPoint {
     setup(params) {
         this._parentRecord = params.parentRecord;
-        this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
-        this._onRecordSaved = params.onRecordSaved || (() => {});
         this._onChange = params.onChange || (() => {});
 
         this.resId = params.data.id || false;
@@ -434,7 +432,7 @@ export class Record extends DataPoint {
         if (!creation && !Object.keys(changes).length) {
             return true;
         }
-        const canProceed = await this._onWillSaveRecord(this);
+        const canProceed = await this.model._onWillSaveRecord(this);
         if (canProceed === false) {
             return false;
         }
@@ -465,7 +463,7 @@ export class Record extends DataPoint {
             this._changes = {};
             this.isDirty = false;
         }
-        await this._onRecordSaved(this);
+        await this.model._onRecordSaved(this);
         return true;
     }
 
