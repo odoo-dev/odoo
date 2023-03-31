@@ -26,7 +26,6 @@ import { getFieldsSpec, getOnChangeSpec } from "./utils";
  * @property {string[]} groupBy
  */
 
-
 export class RelationalModel extends Model {
     static services = ["action", "company", "dialog", "notification", "rpc", "user"];
     static Record = Record;
@@ -37,7 +36,7 @@ export class RelationalModel extends Model {
     static WEB_SEARCH_READ_COUNT_LIMIT = 10000;
 
     /**
-     * @param {Params} params 
+     * @param {Params} params
      */
     setup(params, { action, company, dialog, notification, rpc, user }) {
         this.action = action;
@@ -187,7 +186,7 @@ export class RelationalModel extends Model {
             unique([...Object.keys(params.activeFields), firstGroupByName]),
             [params.groupBy[0]], // TODO: expand attribute in list views
             {
-                orderby,
+                order: orderby,
                 lazy: true, // maybe useless
                 offset: params.offset,
                 limit: params.limit,
@@ -268,6 +267,7 @@ export class RelationalModel extends Model {
         context,
         domain,
         fields,
+        orderBy = [],
         limit,
         offset = 0,
         resModel,
@@ -275,9 +275,10 @@ export class RelationalModel extends Model {
         const countLimit = Math.max(this.countLimit, offset + limit);
         const kwargs = {
             fields: getFieldsSpec(activeFields, fields, context),
-            domain: domain,
-            offset: offset,
-            limit: limit,
+            domain,
+            offset,
+            order: orderByToString(orderBy),
+            limit,
             context: { bin_size: true, ...context },
         };
         if (countLimit !== Number.MAX_SAFE_INTEGER) {
