@@ -46,6 +46,23 @@ export class DynamicGroupList extends DynamicList {
         return this.groups.reduce((acc, group) => acc + group.count, 0);
     }
 
+    async sortBy(fieldName) {
+        if (!this.groups.length) {
+            return;
+        }
+        if (this.groups.every((group) => group.isFolded)) {
+            // all groups are folded
+            if (this.groupByField.name !== fieldName) {
+                // grouped by another field than fieldName
+                if (!(fieldName in this.groups[0].aggregates)) {
+                    // fieldName has no aggregate values
+                    return;
+                }
+            }
+        }
+        return super.sortBy(fieldName);
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
