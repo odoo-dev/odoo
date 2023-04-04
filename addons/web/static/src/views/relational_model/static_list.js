@@ -5,7 +5,7 @@ import { getId } from "./utils";
 import { DataPoint } from "./datapoint";
 
 export class StaticList extends DataPoint {
-    static DEFAULT_LIMIT = 40;
+    static type = "StaticList";
 
     setup(params) {
         this._parent = params.parent;

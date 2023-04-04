@@ -3,6 +3,7 @@
 import { DynamicList } from "./dynamic_list";
 
 export class DynamicRecordList extends DynamicList {
+    static type = "DynamicRecordList";
     setup(params) {
         super.setup(params);
         /** @type {import("./record").Record[]} */
@@ -38,6 +39,7 @@ export class DynamicRecordList extends DynamicList {
     async fetchCount() {
         const keepLast = this.model.keepLast;
         this.count = await keepLast.add(this.model.orm.searchCount(this.resModel, this.domain));
+        this.config.countLimit = Number.MAX_SAFE_INTEGER;
         this.hasLimitedCount = false;
         return this.count;
     }
@@ -84,9 +86,9 @@ export class DynamicRecordList extends DynamicList {
 
     _updateCount(data) {
         const length = data.length;
-        if (length >= this.model.countLimit + 1) {
+        if (length >= this.config.countLimit + 1) {
             this.hasLimitedCount = true;
-            this.count = this.model.countLimit;
+            this.count = this.config.countLimit;
         } else {
             this.hasLimitedCount = false;
             this.count = length;
@@ -94,16 +96,18 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async _load(offset, limit, orderBy) {
-        const response = await this.model._loadUngroupedList({
-            activeFields: this.activeFields,
-            context: this.context,
-            domain: this.domain,
-            fields: this.fields,
-            limit,
-            offset,
-            orderBy,
-            resModel: this.resModel,
-        });
+        const config = { limit, offset, countLimit: this.config.countLimit };
+        const response = await this.model._loadUngroupedList(
+            {
+                activeFields: this.activeFields,
+                context: this.context,
+                domain: this.domain,
+                fields: this.fields,
+                orderBy,
+                resModel: this.resModel,
+            },
+            config
+        );
         this.records = response.records.map(
             (r) =>
                 new this.model.constructor.Record(this.model, {
@@ -115,8 +119,7 @@ export class DynamicRecordList extends DynamicList {
                     data: r,
                 })
         );
-        this.offset = offset;
-        this.limit = limit;
+        this.config = config;
         this.orderBy = orderBy;
         this._updateCount(response);
     }

@@ -143,7 +143,6 @@ export class FormController extends Component {
                 resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
                 fields,
                 activeFields,
-                viewMode: "form",
                 rootType: "record",
                 mode,
                 beforeLoadProm,

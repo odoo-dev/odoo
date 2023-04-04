@@ -9,8 +9,6 @@ export class DynamicList extends DataPoint {
         this.orderBy = params.orderBy || [];
         this.domain = params.domain;
         this.groupBy = [];
-        this.limit = params.limit || 80;
-        this.offset = params.offset || 0;
         this.isDomainSelected = false;
         this.evalContext = this.context;
     }
@@ -22,7 +20,12 @@ export class DynamicList extends DataPoint {
     get editedRecord() {
         return this.records.find((record) => record.isInEdition);
     }
-
+    get limit() {
+        return this.config.limit;
+    }
+    get offset() {
+        return this.config.offset;
+    }
     get selection() {
         return this.records.filter((record) => record.selected);
     }

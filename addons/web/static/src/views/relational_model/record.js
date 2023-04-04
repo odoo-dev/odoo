@@ -10,6 +10,7 @@ import { DataPoint } from "./datapoint";
 import { getOnChangeSpec } from "./utils";
 
 export class Record extends DataPoint {
+    static type = "Record";
     setup(params) {
         this._parentRecord = params.parentRecord;
         this._onChange = params.onChange || (() => {});

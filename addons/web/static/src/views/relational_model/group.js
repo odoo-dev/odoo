@@ -10,6 +10,7 @@ const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that
  */
 
 export class Group extends DataPoint {
+    static type = "Group";
     /**
      * @param {Params} params
      */
@@ -19,9 +20,8 @@ export class Group extends DataPoint {
         this.progressBars = []; // FIXME: remove from model?
         this.tooltip = []; // FIXME: remove from model?
         const groupData = params.data;
-        this.isFolded = groupData.__fold || false;
         // this.range = groupData.__range;
-        // this.__rawValue = groupData[this.groupByField.name]; // might be useful at some point
+        this._rawValue = groupData[this.groupByField.name];
         // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
         // we have to get the count from `__count` instead
         // see _read_group_raw in models.py
@@ -37,6 +37,7 @@ export class Group extends DataPoint {
             context: this.context,
             groupBy: params.groupBy,
             domain: groupData.__domain,
+            config: this.config.list,
         };
         let List;
         if (params.groupBy.length) {
@@ -57,7 +58,9 @@ export class Group extends DataPoint {
     get hasData() {
         return this.list.hasData;
     }
-
+    get isFolded() {
+        return this.config.isFolded;
+    }
     get records() {
         return this.list.records;
     }
@@ -80,7 +83,7 @@ export class Group extends DataPoint {
         if (this.isFolded) {
             await this.list.load();
         }
-        this.isFolded = !this.isFolded;
+        this.config.isFolded = !this.isFolded;
     }
 
     // -------------------------------------------------------------------------
