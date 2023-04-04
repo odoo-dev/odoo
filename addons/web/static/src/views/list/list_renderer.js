@@ -186,7 +186,7 @@ export class ListRenderer extends Component {
             () => {
                 this.freezeColumnWidths();
             },
-            () => [this.state.columns, this.isEmpty]
+            () => [this.state.columns, this.isEmpty, this.props.list.offset, this.props.list.limit]
         );
         useExternalListener(window, "resize", () => {
             this.columnWidths = null;

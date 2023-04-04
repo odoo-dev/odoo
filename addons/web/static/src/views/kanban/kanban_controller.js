@@ -33,9 +33,9 @@ export class KanbanController extends Component {
             countLimit: archInfo.countLimit,
             defaultGroupBy,
             defaultOrder: archInfo.defaultOrder,
-            viewMode: "kanban",
             openGroupsByDefault: true,
             rootState,
+            maxGroupByDepth: 1,
         });
         this.model = useState(model);
         this.headerButtons = archInfo.headerButtons;
@@ -87,7 +87,7 @@ export class KanbanController extends Component {
                     limit: limit,
                     total: count,
                     onUpdate: async ({ offset, limit }) => {
-                        await this.model.load({ offset, limit });
+                        await this.model.root.load({ offset, limit });
                         await this.onUpdatedPager();
                     },
                     updateTotal: hasLimitedCount ? () => root.fetchCount() : undefined,

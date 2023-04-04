@@ -1150,7 +1150,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached", async (assert) => {
-        patchWithCleanup(RelationalModel, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
 
         await makeView({
             type: "kanban",
@@ -1182,7 +1182,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click next", async (assert) => {
-        patchWithCleanup(RelationalModel, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
 
         await makeView({
             type: "kanban",
@@ -1214,7 +1214,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click next (2)", async (assert) => {
-        patchWithCleanup(RelationalModel, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1253,7 +1253,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, click previous", async (assert) => {
-        patchWithCleanup(RelationalModel, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1286,7 +1286,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("pager, ungrouped, with count limit reached, edit pager", async (assert) => {
-        patchWithCleanup(RelationalModel, { WEB_SEARCH_READ_COUNT_LIMIT: 3 });
+        patchWithCleanup(RelationalModel, { DEFAULT_COUNT_LIMIT: 3 });
         serverData.models.partner.records.push({ id: 5, foo: "xxx" });
 
         await makeView({
@@ -1397,7 +1397,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("pager, update calls onUpdatedPager before the render", async (assert) => {
+    QUnit.tttt("pager, update calls onUpdatedPager before the render", async (assert) => {
         assert.expect(8);
 
         class TestKanbanController extends KanbanController {

@@ -58,7 +58,6 @@ export class ListController extends Component {
             fields,
             activeFields,
             handleField: this.archInfo.handleField,
-            viewMode: "list",
             groupByInfo: this.archInfo.groupBy.fields,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,
@@ -145,7 +144,7 @@ export class ListController extends Component {
                             return;
                         }
                     }
-                    await this.model.load({ limit, offset });
+                    await this.model.root.load({ limit, offset });
                     if (hasNavigated) {
                         this.onPageChangeScroll();
                     }
