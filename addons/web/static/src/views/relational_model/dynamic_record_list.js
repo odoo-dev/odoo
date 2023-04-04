@@ -74,6 +74,11 @@ export class DynamicRecordList extends DynamicList {
         });
     }
 
+    _addRecord(record, index) {
+        this.records.splice(Number.isInteger(index) ? index : this.records.length, 0, record);
+        this.count++;
+    }
+
     _removeRecords(records) {
         const _records = this.records.filter((r) => !records.includes(r));
         if (this.offset && !_records.length) {
@@ -122,5 +127,11 @@ export class DynamicRecordList extends DynamicList {
         this.config = config;
         this.orderBy = orderBy;
         this._updateCount(response);
+    }
+
+    _resequence() {
+        const ids = this.records.map((r) => r.resId);
+        const params = { model: this.resModel, ids, context: this.context };
+        return this.model.keepLast.add(this.model.rpc("/web/dataset/resequence", params));
     }
 }

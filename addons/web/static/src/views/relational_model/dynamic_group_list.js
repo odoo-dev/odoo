@@ -112,4 +112,24 @@ export class DynamicGroupList extends DynamicList {
             group.list._removeRecords(records);
         }
     }
+
+    /**
+     * @param {string} dataRecordId
+     * @param {string} dataGroupId
+     * @param {string} refId
+     * @param {string} targetGroupId
+     */
+    async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
+        const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
+        const targetGroup = this.groups.find((g) => g.id === targetGroupId);
+
+        const record = sourceGroup.list.records.find((r) => r.id === dataRecordId);
+        if (dataGroupId !== targetGroupId) {
+            // step 1: move record to correct position
+            const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+            sourceGroup.removeRecord(record);
+            targetGroup.addRecord(record, refIndex + 1);
+        }
+        return targetGroup.list._resequence();
+    }
 }

@@ -4727,7 +4727,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("can drag and drop a record from one column to the next", async (assert) => {
+    QUnit.test("can drag and drop a record from one column to the next", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -4767,7 +4767,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.tttt("drag and drop highlight on hover", async (assert) => {
+    QUnit.test("drag and drop highlight on hover", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -4796,7 +4796,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_group:nth-child(2).o_kanban_hover");
     });
 
-    QUnit.tttt("drag and drop outside of a column", async (assert) => {
+    QUnit.test("drag and drop outside of a column", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
