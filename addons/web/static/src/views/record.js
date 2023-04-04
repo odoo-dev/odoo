@@ -13,7 +13,6 @@ class _Record extends Component {
         const modelParams = {
             resModel,
             fields: this.props.fields,
-            viewMode: "form",
             rootType: "record",
             activeFields: this.getActiveFields(),
         };

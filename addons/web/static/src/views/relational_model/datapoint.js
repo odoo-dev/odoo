@@ -35,7 +35,7 @@ export class DataPoint {
      * @param {Params} params
      * @param {Object} [state={}]
      */
-    constructor(model, params, state = {}) {
+    constructor(model, params) {
         this.id = getId("datapoint");
         this.model = model;
         this.resModel = params.resModel;
@@ -48,7 +48,8 @@ export class DataPoint {
         };
         this.activeFields = params.activeFields;
         this.fieldNames = Object.keys(this.activeFields);
-        this.setup(params, state);
+        this.config = params.config;
+        this.setup(params);
     }
 
     // -------------------------------------------------------------------------
