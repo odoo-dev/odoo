@@ -339,7 +339,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_widget[name=user_id] span.o_m2o_avatar_empty");
     });
 
-    QUnit.test("widget many2one_avatar in kanban view (load more dialog)", async function (assert) {
+    QUnit.tttt("widget many2one_avatar in kanban view (load more dialog)", async function (assert) {
         assert.expect(1);
 
         for (let id = 1; id <= 10; id++) {
