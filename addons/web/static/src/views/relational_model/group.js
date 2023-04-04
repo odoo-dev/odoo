@@ -69,6 +69,16 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
+    removeRecord(record) {
+        this.list._removeRecords([record]);
+        this.count--;
+    }
+
+    addRecord(record, index) {
+        this.list._addRecord(record, index);
+        this.count++;
+    }
+
     async createRecord() {
         await this.list.createRecord();
         this.count++;
