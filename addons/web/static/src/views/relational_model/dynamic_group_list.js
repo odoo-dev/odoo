@@ -63,6 +63,10 @@ export class DynamicGroupList extends DynamicList {
         return super.sortBy(fieldName);
     }
 
+    createGroup() {
+        // TODO
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
