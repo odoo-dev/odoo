@@ -8,7 +8,6 @@ import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
-import { KanbanRenderer } from "./kanban_renderer";
 import { extractFieldsFromArchInfo } from "../relational_model/utils";
 import { KanbanRenderer } from "./kanban_renderer";
 
