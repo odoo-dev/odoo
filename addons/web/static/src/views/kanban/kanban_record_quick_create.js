@@ -1,21 +1,22 @@
 /** @odoo-module */
-import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 
 import {
     Component,
     onMounted,
-    useExternalListener,
-    useState,
-    useRef,
     onWillStart,
+    useExternalListener,
+    useRef,
+    useState,
     useSubEnv,
 } from "@odoo/owl";
-import { getDefaultConfig } from "../view";
 import { RPCError } from "@web/core/network/rpc_service";
-import { FormViewDialog } from "../view_dialogs/form_view_dialog";
+import { extractFieldsFromArchInfo } from "@web/views/relational_model/utils";
 import { formView } from "../form/form_view";
 import { useModel } from "../model";
+import { getDefaultConfig } from "../view";
+import { FormViewDialog } from "../view_dialogs/form_view_dialog";
 
 const DEFAULT_QUICK_CREATE_VIEW = {
     // note: the required modifier is written in the format returned by the server
@@ -55,14 +56,18 @@ class KanbanQuickCreateController extends Component {
         this.state = useState({ disabled: false });
         this.addDialog = useOwnedDialogs();
 
+        const { activeFields, fields } = extractFieldsFromArchInfo(
+            this.props.archInfo,
+            this.props.fields
+        );
         this.model = useModel(
             this.props.Model,
             {
                 resModel: this.props.resModel,
                 resId: false,
                 resIds: [],
-                fields: this.props.fields,
-                activeFields: this.props.archInfo.activeFields,
+                fields,
+                activeFields,
                 viewMode: "form",
                 rootType: "record",
                 mode: "edit",
@@ -126,7 +131,7 @@ class KanbanQuickCreateController extends Component {
 
         const keys = Object.keys(this.model.root.activeFields);
         if (keys.length === 1 && keys[0] === "display_name") {
-            const isValid = await this.model.root.checkValidity(true); // needed to put the class o_field_invalid in the field
+            const isValid = await this.model.root.checkValidity(); // needed to put the class o_field_invalid in the field
             if (isValid) {
                 try {
                     [resId] = await this.model.orm.call(
@@ -157,6 +162,9 @@ class KanbanQuickCreateController extends Component {
 
         if (resId) {
             await this.props.onValidate(resId, mode);
+            if (mode === "add") {
+                await this.model.load();
+            }
         }
         this.state.disabled = false;
     }
@@ -185,6 +193,7 @@ class KanbanQuickCreateController extends Component {
             title: this.env._t("Create"),
             onRecordSaved: async (record) => {
                 await this.props.onValidate(record.resId, "add");
+                await this.model.load();
             },
         });
     }
