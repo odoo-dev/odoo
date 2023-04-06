@@ -4,11 +4,12 @@ import { DynamicList } from "./dynamic_list";
 
 export class DynamicRecordList extends DynamicList {
     static type = "DynamicRecordList";
-    setup(params) {
-        super.setup(params);
+    setup(config) {
+        super.setup(config);
         /** @type {import("./record").Record[]} */
-        this.records = params.data.records.map((r) => this._createRecordDatapoint(r));
-        this._updateCount(params.data);
+        console.log(config.data);
+        this.records = config.data.records.map((r) => this._createRecordDatapoint(r));
+        this._updateCount(config.data);
     }
 
     // -------------------------------------------------------------------------
@@ -109,31 +110,23 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async _load(offset, limit, orderBy) {
-        const config = { limit, offset, countLimit: this.config.countLimit };
-        const response = await this.model._loadUngroupedList(
-            {
-                activeFields: this.activeFields,
-                context: this.context,
-                domain: this.domain,
-                fields: this.fields,
-                orderBy,
-                resModel: this.resModel,
-            },
-            config
-        );
+        const response = await this.model.updateConfig(this.config, {
+            offset,
+            limit,
+            orderBy,
+        });
+        const resIds = response.records.map((record) => record.id);
         this.records = response.records.map(
-            (r) =>
+            (record) =>
                 new this.model.constructor.Record(this.model, {
                     activeFields: this.activeFields,
                     fields: this.fields,
                     resModel: this.resModel,
                     context: this.context,
-                    resIds: response.records.map((r) => r.id),
-                    data: r,
+                    resIds, //TODOPRO add resIds with _createRecordDatapoint
+                    data: record,
                 })
         );
-        this.config = config;
-        this.orderBy = orderBy;
         this._updateCount(response);
     }
 

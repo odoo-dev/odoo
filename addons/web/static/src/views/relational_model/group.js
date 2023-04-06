@@ -12,14 +12,14 @@ const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that
 export class Group extends DataPoint {
     static type = "Group";
     /**
-     * @param {Params} params
+     * @param {import("./relational_model").Config} config
      */
-    setup(params) {
+    setup(config) {
         super.setup();
-        this.groupByField = this.fields[params.groupByFieldName];
+        this.groupByField = this.fields[config.groupByFieldName];
         this.progressBars = []; // FIXME: remove from model?
         this.tooltip = []; // FIXME: remove from model?
-        const groupData = params.data;
+        const groupData = config.data;
         // this.range = groupData.__range;
         this._rawValue = groupData[this.groupByField.name];
         // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
@@ -30,25 +30,23 @@ export class Group extends DataPoint {
         this.value = this._getValueFromGroupData(groupData, this.groupByField);
         this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
         this.aggregates = this._getAggregatesFromGroupData(groupData);
-        const listParams = {
-            activeFields: this.activeFields,
-            fields: this.fields,
-            resModel: this.resModel,
-            context: this.context,
-            groupBy: params.groupBy,
-            domain: groupData.__domain,
-            config: this.config.list,
-        };
+        // const listParams = {
+        //     activeFields: this.activeFields,
+        //     fields: this.fields,
+        //     resModel: this.resModel,
+        //     context: this.context,
+        //     groupBy: config.groupBy,
+        //     domain: groupData.__domain,
+        //     config: this.config.list,
+        // };
         let List;
-        if (params.groupBy.length) {
+        if (config.groupBy.length) {
             List = this.model.constructor.DynamicGroupList;
-            listParams.data = { length: groupData.count, groups: groupData.groups };
         } else {
             List = this.model.constructor.DynamicRecordList;
-            listParams.data = { length: groupData.count, records: groupData.records };
         }
         /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
-        this.list = new List(this.model, listParams);
+        this.list = new List(this.model, config.list);
     }
 
     // -------------------------------------------------------------------------
@@ -111,6 +109,7 @@ export class Group extends DataPoint {
         if (this.isFolded) {
             await this.list.load();
         }
+        //TODOPRO The config is updated here, should be done with updateConfig
         this.config.isFolded = !this.isFolded;
     }
 

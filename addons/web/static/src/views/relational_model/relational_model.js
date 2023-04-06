@@ -1,4 +1,5 @@
 /* @odoo-module */
+// @ts-check
 
 import { EventBus, markRaw } from "@odoo/owl";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
@@ -13,6 +14,7 @@ import { DynamicGroupList } from "./dynamic_group_list";
 import { Group } from "./group";
 import { StaticList } from "./static_list";
 import { getFieldsSpec, getOnChangeSpec } from "./utils";
+import { DataPoint } from "./datapoint";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -22,9 +24,45 @@ import { getFieldsSpec, getOnChangeSpec } from "./utils";
 
 /**
  * @typedef Params
+ * @property {Config} config
+ * @property {number} [limit]
+ * @property {number} [countLimit]
+ * @property {number} [groupsLimit]
+ * @property {Array<string>} [defaultOrder]
+ * @property {Array<string>} [defaultGroupBy]
+ * @property {boolean} [openGroupsByDefault]
+ * @property {number} [maxGroupByDepth]
+ * @property {Function} [onRecordSaved]
+ * @property {Function} [onWillSaveRecord]
+ *
+ *
  * @property {number} [countLimit]
  * @property {string} [rootType]
  * @property {string[]} groupBy
+ */
+
+/**
+ * @typedef Config
+ * @property {string} resModel
+ * @property {Object} fields
+ * @property {Object} activeFields
+ * @property {Array} domain
+ * @property {object} context
+ * @property {Array} groupBy
+ * @property {Array} orderBy
+ * @property {boolean} [isMonoRecord]
+ * @property {string} [resId]
+ * @property {Array<string>} [resIds]
+ * @property {string} [mode]
+ * @property {number} [limit]
+ * @property {number} [offset]
+ * @property {number} [countLimit]
+ * @property {number} [groupsLimit]
+ * @property {Config} [config]
+ * @property {Object} [groups]
+ * @property {Object} [list]
+ * @property {boolean} [isFolded]
+ * @property {any} [data]
  */
 
 export class RelationalModel extends Model {
@@ -56,20 +94,29 @@ export class RelationalModel extends Model {
         this.keepLast = markRaw(new KeepLast());
         this.mutex = markRaw(new Mutex());
 
-        this.rootParams = markRaw(params);
+        /** @type {Config} */
+        this.config = {
+            isMonoRecord: false,
+            domain: [],
+            context: {},
+            groupBy: [],
+            orderBy: [],
+            ...params.config,
+        };
 
         this._urgentSave = false;
 
         this.initialLimit = params.limit || this.constructor.DEFAULT_LIMIT;
         this.initialGroupsLimit =
             params.groupsLimit ||
-            (params.expand
+            (params.openGroupsByDefault
                 ? this.constructor.DEFAULT_OPEN_GROUP_LIMIT
                 : this.constructor.DEFAULT_GROUP_LIMIT);
         this.initialCountLimit = params.countLimit || this.constructor.DEFAULT_COUNT_LIMIT;
-        delete this.rootParams.limit;
-        delete this.rootParams.groupsLimit;
-        delete this.rootParams.countLimit;
+        this.defaultOrder = params.defaultOrder;
+        this.defaultGroupBy = params.defaultGroupBy;
+        this.openGroupsByDefault = params.openGroupsByDefault;
+        this.maxGroupByDepth = params.maxGroupByDepth;
 
         this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
         this._onRecordSaved = params.onRecordSaved || (() => {});
@@ -78,6 +125,22 @@ export class RelationalModel extends Model {
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
+
+    /**
+     *
+     * @param {Config} config
+     * @param {Partial<Config>} patch
+     */
+    async updateConfig(config, patch) {
+        const tmpConfig = { ...config, ...patch }; //TODOPRO I wonder if we should not use deepCopy here
+        const response = await this._loadData(tmpConfig);
+        Object.assign(config, tmpConfig);
+        return response;
+    }
+
+    exportConfig() {
+        return this.config;
+    }
 
     hasData() {
         return this.root.hasData;
@@ -89,159 +152,190 @@ export class RelationalModel extends Model {
      * @param {DomainListRepr} [params.domain]
      * @param {string[]} [params.groupBy]
      * @param {Object[]} [params.orderBy]
+     * @param {string} [params.mode]
      * @param {number} [params.resId] should not be there
      * @returns {Promise<void>}
      */
     async load(params = {}) {
         let data;
-        let config = {};
-        const rootParams = { ...this.rootParams };
+        let config = deepCopy(this.config);
         if (params.values) {
+            //TODOPRO What is values ? Update docstring
             data = params.values;
             if (params.mode) {
-                rootParams.mode = params.mode;
+                config.mode = params.mode;
             }
         } else {
-            const previousGroupBy = rootParams.groupBy;
-            // rootParams must be changed directly, because we could get multiple
-            // load requests, with different params, and they must be aggregated
-            // TOCHECK: is it really true?
-            Object.assign(rootParams, params);
-            // FIXME: doesn't work (overruled by below)
-            config.offset = rootParams.offset || config.offset;
-            config.limit = rootParams.limit || config.limit;
-            delete rootParams.limit;
-            delete rootParams.offset;
-            // apply default order if no order
-            if (rootParams.defaultOrder && !rootParams.orderBy.length) {
-                rootParams.orderBy = rootParams.defaultOrder;
-            }
-            // apply default groupBy
-            if (
-                rootParams.defaultGroupBy &&
-                !this.env.inDialog && // FIXME ???
-                !rootParams.groupBy.length
-            ) {
-                rootParams.groupBy = [rootParams.defaultGroupBy];
-            }
-            // restrict the number of groupbys if requested
-            const maxGroupByDepth = rootParams.maxGroupByDepth;
-            if (maxGroupByDepth) {
-                rootParams.groupBy = rootParams.groupBy.slice(0, maxGroupByDepth);
-            }
-            if (this.root) {
-                // keep current root config if any, if the groupBy parameter is the same
-                if (shallowEqual(rootParams.groupBy || [], previousGroupBy || [])) {
-                    config = deepCopy(this.root.config);
-                    config.offset = 0;
-                }
-                // re-apply previous orderBy if not given (or no order)
-                if (!rootParams.orderBy) {
-                    rootParams.orderBy = this.root.orderBy;
-                }
-            }
-            data = await this.keepLast.add(this._loadData(rootParams, config));
+            config = this._enhanceConfig(config, params);
+            data = await this.keepLast.add(this._loadData(config));
         }
-        this.root = this._createRoot(rootParams, data, config);
-        this.rootParams = rootParams;
+        this.config = config;
+        this.root = this._createRoot(data);
 
-        window.root = this.root;
+        window.root = this.root; //FIXME Remove this
     }
 
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
 
-    _createRoot(params, data, config = {}) {
-        const rootParams = {
-            activeFields: params.activeFields,
-            fields: params.fields,
-            resModel: params.resModel,
-            context: params.context,
-            config,
-            data,
-        };
-        if (params.rootType === "record") {
-            return new this.constructor.Record(this, {
-                ...rootParams,
-                mode: params.mode,
-                resIds: params.resIds,
-            });
-        } else {
-            const listParams = {
-                ...rootParams,
-                domain: params.domain,
-                groupBy: params.groupBy,
-                orderBy: params.orderBy,
-            };
-            if (params.groupBy.length) {
-                listParams.groupsLimit = params.groupsLimit;
-                return new this.constructor.DynamicGroupList(this, listParams);
-            } else {
-                return new this.constructor.DynamicRecordList(this, listParams);
+    /**
+     * @param {Config} config
+     * @param {*} params
+     * @returns {Config}
+     */
+    _enhanceConfig(config, params) {
+        const previousGroupBy = config.groupBy;
+        Object.assign(config, params);
+        // apply default order if no order
+        if (this.defaultOrder && !config.orderBy.length) {
+            config.orderBy = this.defaultOrder;
+        }
+        // apply default groupBy
+        if (
+            this.defaultGroupBy &&
+            !this.env.inDialog && // FIXME ???
+            !config.groupBy.length
+        ) {
+            config.groupBy = [this.defaultGroupBy];
+        }
+        // restrict the number of groupbys if requested
+        if (this.maxGroupByDepth) {
+            config.groupBy = config.groupBy.slice(0, this.maxGroupByDepth);
+        }
+        if (this.root) {
+            // keep current root config if any, if the groupBy parameter is the same
+            // if (shallowEqual(config.groupBy || [], previousGroupBy || [])) {
+            //     config = deepCopy(this.root.config); //TODOPRO Check that
+            //     config.offset = 0;
+            // }
+            // re-apply previous orderBy if not given (or no order)
+            if (!config.orderBy) {
+                config.orderBy = this.root.config.orderBy; //TODOPRO We should not access orderBy from root. I think it's the same as this.config.orderBy
             }
         }
+        return config;
     }
 
-    async _loadData(params, config = {}) {
-        if (params.rootType === "record" && !params.resId) {
+    /**
+     *
+     * @param {*} data
+     * @returns {DataPoint}
+     */
+    _createRoot(data) {
+        /** @type {Config} */
+        Object.assign(this.config, {
+            data, //TODOPRO Move outside the config. Maybe later ?
+        });
+        if (this.config.isMonoRecord) {
+            return new this.constructor.Record(this, this.config);
+        }
+        if (this.config.groupBy.length) {
+            return new this.constructor.DynamicGroupList(this, this.config);
+        }
+        return new this.constructor.DynamicRecordList(this, this.config);
+    }
+
+    /**
+     *
+     * @param {Config} config
+     */
+    async _loadData(config) {
+        if (config.isMonoRecord && !config.resId) {
             // FIXME: this will be handled by unity at some point
-            return this._loadNewRecord(params);
+            return this._loadNewRecord(config);
         }
-        if (params.rootType !== "record" && params.groupBy.length) {
+        if (!config.isMonoRecord && config.groupBy.length) {
             // FIXME: this *might* be handled by unity at some point
-            return this._loadGroupedList(params, config);
+            return this._loadGroupedList(config);
         }
-        if (params.rootType === "record") {
+        if (config.isMonoRecord) {
             const context = {
-                ...params.context,
-                active_id: params.resId,
-                active_ids: [params.resId],
-                active_model: params.resModel,
+                ...config.context,
+                active_id: config.resId,
+                active_ids: [config.resId],
+                active_model: config.resModel,
                 current_company_id: this.company.currentCompany.id,
             };
             const records = await this._loadRecords({
-                resModel: params.resModel,
-                activeFields: params.activeFields,
-                fields: params.fields,
+                ...config,
+                resIds: [config.resId],
                 context,
-                resIds: [params.resId],
             });
             return records[0];
         } else {
-            return this._loadUngroupedList(params, config);
+            Object.assign(config, {
+                limit: config.limit || this.initialLimit,
+                countLimit: "countLimit" in config ? config.countLimit : this.initialCountLimit,
+                offset: config.offset || 0,
+            });
+            if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
+                config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
+            }
+            return this._loadUngroupedList(config);
         }
     }
 
-    async _loadGroupedList(params, config = {}) {
+    /**
+     * @param {Config} config
+     */
+    async _loadGroupedList(config) {
+        //TODOPRO Not a great fan of method that have a side effect on config. I think we should return the new config instead
+        //modifying the config in place. It's a source of confusion
         config.offset = config.offset || 0;
         config.limit = config.limit || this.initialGroupsLimit;
         config.groups = config.groups || {};
-        const firstGroupByName = params.groupBy[0].split(":")[0];
-        const _orderBy = params.orderBy.filter(
-            (o) => o.name === firstGroupByName || params.fields[o.name].group_operator !== undefined
+        const firstGroupByName = config.groupBy[0].split(":")[0];
+        const _orderBy = config.orderBy.filter(
+            (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
         );
         const orderby = orderByToString(_orderBy);
         const response = await this.orm.webReadGroup(
-            params.resModel,
-            params.domain,
-            unique([...Object.keys(params.activeFields), firstGroupByName]),
-            [params.groupBy[0]], // TODO: expand attribute in list views
+            config.resModel,
+            config.domain,
+            unique([...Object.keys(config.activeFields), firstGroupByName]),
+            [config.groupBy[0]], // TODO: expand attribute in list views
             {
                 orderby,
                 lazy: true, // maybe useless
                 offset: config.offset,
                 limit: config.limit,
-                context: params.context,
+                context: config.context,
             }
         );
         const { groups, length } = response;
-        const groupBy = params.groupBy.slice(1);
+        const groupBy = config.groupBy.slice(1);
+        const groupByField = config.fields[config.groupBy[0].split(":")[0]];
+        const commonConfig = {
+            resModel: config.resModel,
+            fields: config.fields,
+            activeFields: config.activeFields,
+            context: config.context,
+            groupBy,
+            groupByFieldName: groupByField.name,
+            orderBy: config.orderBy,
+            groupsLimit: config.limit,
+        };
         for (const group of groups) {
+            const domain = config.domain.concat(group.__domain);
+            group.count = group.__count || group[`${firstGroupByName}_count`];
+            delete group.__count;
+            delete group[`${firstGroupByName}_count`];
             if (!config.groups[group[firstGroupByName]]) {
                 config.groups[group[firstGroupByName]] = {
-                    isFolded: group.__fold || !params.openGroupsByDefault,
-                    list: {},
+                    ...commonConfig,
+                    domain,
+                    data: group, //TODOPRO Not a great fan, group is updated in place below
+                    isFolded: group.__fold || !this.openGroupsByDefault,
+                    list: {
+                        ...commonConfig,
+                        domain,
+                        data: {
+                            length: group.count,
+                            groups: [],
+                            records: [],
+                        },
+                    },
                 };
             }
             const groupConfig = config.groups[group[firstGroupByName]];
@@ -250,34 +344,34 @@ export class RelationalModel extends Model {
             } else {
                 group.records = [];
             }
-            let response;
-            group.count = group.__count || group[`${firstGroupByName}_count`];
-            delete group.__count;
-            delete group[`${firstGroupByName}_count`];
             if (!groupConfig.isFolded && group.count > 0) {
-                response = await this._loadData(
-                    {
-                        ...params,
-                        domain: params.domain.concat(group.__domain),
-                        groupBy,
-                    },
-                    groupConfig.list
-                );
+                const response = await this._loadData({
+                    ...config,
+                    domain,
+                    groupBy,
+                });
                 if (groupBy.length) {
                     group.groups = response ? response.groups : [];
+                    groupConfig.list.data.groups = group.groups;
                 } else {
                     group.records = response ? response.records : [];
+                    groupConfig.list.data.records = group.records;
                 }
             }
         }
         return { groups, length };
     }
 
-    _loadNewRecord(params) {
+    /**
+     *
+     * @param {Config} config
+     * @returns
+     */
+    _loadNewRecord(config) {
         return this._onchange({
-            resModel: params.resModel,
-            spec: getOnChangeSpec(params.activeFields),
-            context: params.context,
+            resModel: config.resModel,
+            spec: getOnChangeSpec(config.activeFields),
+            context: config.context,
         });
     }
 
@@ -302,7 +396,13 @@ export class RelationalModel extends Model {
         return response.value;
     }
 
+    /**
+     *
+     * @param {Config} config
+     * @returns
+     */
     async _loadRecords({ resModel, resIds, activeFields, fields, context }) {
+        //TODOPRO Note: config is not modified anymore here \o/
         const kwargs = {
             context: { bin_size: true, ...context },
             fields: getFieldsSpec(activeFields, fields, context),
@@ -313,27 +413,27 @@ export class RelationalModel extends Model {
         return records;
     }
 
-    async _loadUngroupedList(
-        { activeFields, context, domain, fields, orderBy = [], resModel },
-        config = {}
-    ) {
-        config.limit = config.limit || this.initialLimit;
-        config.countLimit = "countLimit" in config ? config.countLimit : this.initialCountLimit;
-        config.offset = config.offset || 0;
+    /**
+     * Load records from the server for an ungrouped list. Return the result
+     * of unity read RPC.
+     *
+     * @param {Config} config
+     * @returns
+     */
+    async _loadUngroupedList(config) {
+        //TODOPRO Note: config is not modified anymore here \o/
         const kwargs = {
-            fields: getFieldsSpec(activeFields, fields, context),
-            domain,
+            fields: getFieldsSpec(config.activeFields, config.fields, config.context),
+            domain: config.domain,
             offset: config.offset,
-            order: orderByToString(orderBy),
+            order: orderByToString(config.orderBy),
             limit: config.limit,
-            context: { bin_size: true, ...context },
+            context: { bin_size: true, ...config.context },
+            count_limit:
+                config.countLimit !== Number.MAX_SAFE_INTEGER ? config.countLimit + 1 : undefined,
         };
-        if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
-            config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
-            kwargs.count_limit = config.countLimit + 1;
-        }
         console.log("Unity field spec", kwargs.fields);
-        const response = await this.orm.call(resModel, "web_search_read_unity", [], kwargs);
+        const response = await this.orm.call(config.resModel, "web_search_read_unity", [], kwargs);
         console.log("Unity response", response);
         return response;
     }
