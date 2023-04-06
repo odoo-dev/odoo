@@ -107,6 +107,13 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._update(changes));
     }
 
+    async checkValidity() {
+        if (!this._urgentSave) {
+            await this._askChanges();
+        }
+        return this._checkValidity();
+    }
+
     delete() {
         return this.model.mutex.exec(async () => {
             const unlinked = await this.model.orm.unlink(this.resModel, [this.resId], {

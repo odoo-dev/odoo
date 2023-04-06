@@ -24,9 +24,21 @@ export class DynamicRecordList extends DynamicList {
     // -------------------------------------------------------------------------
 
     /**
+     * @param {number} resId
+     * @param {boolean} [atFirstPosition]
+     * @returns {Promise<Record>} the newly created record
+     */
+    async addExistingRecord(resId, atFirstPosition) {
+        const record = this._createRecordDatapoint({});
+        await this.model.mutex.exec(() => record._load(resId));
+        this._addRecord(record, atFirstPosition ? 0 : this.records.length);
+        return record;
+    }
+
+    /**
      * TODO: rename into "addNewRecord"?
      * @param {boolean} [atFirstPosition=false]
-     * @returns {Promise}
+     * @returns {Promise<Record>}
      */
     createRecord(atFirstPosition = false) {
         return this.model.mutex.exec(() => this._addNewRecord(atFirstPosition));
@@ -55,12 +67,8 @@ export class DynamicRecordList extends DynamicList {
             context: this.context,
         });
         const record = this._createRecordDatapoint(values, "edit");
-        if (atFirstPosition) {
-            this.records.unshift(record);
-        } else {
-            this.records.push(record);
-        }
-        this.count++;
+        this._addRecord(record, atFirstPosition ? 0 : this.records.length);
+        return record;
     }
 
     _createRecordDatapoint(data, mode = "readonly") {

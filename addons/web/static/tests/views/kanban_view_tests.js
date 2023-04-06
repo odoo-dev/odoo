@@ -681,7 +681,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("kanban grouped by date field", async (assert) => {
+    QUnit.test("kanban grouped by date field", async (assert) => {
         serverData.models.partner.records[0].date = "2007-06-10";
         await makeView({
             type: "kanban",
@@ -1542,7 +1542,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create record"]);
     });
 
-    QUnit.tttt("create in grouped on m2o", async (assert) => {
+    QUnit.test("create in grouped on m2o", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -1567,7 +1567,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_column_title").innerText, "hello");
     });
 
-    QUnit.tttt("create in grouped on char", async (assert) => {
+    QUnit.test("create in grouped on char", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -1587,7 +1587,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_group:first-child > .o_kanban_quick_create");
     });
 
-    QUnit.tttt("prevent deletion when grouped by many2many field", async (assert) => {
+    QUnit.test("prevent deletion when grouped by many2many field", async (assert) => {
         serverData.models.partner.records[0].category_ids = [6, 7];
         serverData.models.partner.records[3].category_ids = [7];
 
@@ -1616,7 +1616,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".thisisdeletable", 4, "records should be deletable");
     });
 
-    QUnit.tttt("quick created records in grouped kanban are on displayed top", async (assert) => {
+    QUnit.test("quick created records in grouped kanban are on displayed top", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -1656,7 +1656,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelectorAll(".o_kanban_record")[1].innerText, "new record");
     });
 
-    QUnit.tttt("quick create record without quick_create_view", async (assert) => {
+    QUnit.test("quick create record without quick_create_view", async (assert) => {
         assert.expect(16);
 
         await makeView({
@@ -1707,10 +1707,10 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "onchange", // quick create
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 

@@ -79,6 +79,11 @@ export class Group extends DataPoint {
         this.count++;
     }
 
+    addExistingRecord(resId, atFirstPosition = false) {
+        this.count++;
+        return this.list.addExistingRecord(resId, atFirstPosition);
+    }
+
     async createRecord() {
         await this.list.createRecord();
         this.count++;
@@ -87,6 +92,19 @@ export class Group extends DataPoint {
     async deleteRecords(records) {
         await this.list.deleteRecords(records);
         this.count -= records.length;
+    }
+
+    getServerValue() {
+        const { type } = this.groupByField;
+
+        // TODO: handle other types (selection, date, datetime)
+        switch (type) {
+            case "many2one":
+                return this.value || false;
+            default: {
+                return this._rawValue || false;
+            }
+        }
     }
 
     async toggle() {
