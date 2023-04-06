@@ -133,13 +133,15 @@ export class FormController extends Component {
         const model = useModel(
             this.props.Model,
             {
-                resModel: this.props.resModel,
-                resId: this.props.resId || false,
-                resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
-                fields,
-                activeFields,
-                rootType: "record",
-                mode,
+                config: {
+                    resModel: this.props.resModel,
+                    resId: this.props.resId || false,
+                    resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
+                    fields,
+                    activeFields,
+                    isMonoRecord: true,
+                    mode,
+                },
                 component: this,
                 onRecordSaved: this.onRecordSaved.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),

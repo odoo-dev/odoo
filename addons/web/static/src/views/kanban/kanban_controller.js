@@ -21,20 +21,21 @@ export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
         const { Model, resModel, archInfo, limit, defaultGroupBy, state } = this.props;
-        const { rootState } = state || {};
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
-        const model = useModel(Model, {
-            activeFields,
-            progressAttributes: archInfo.progressAttributes,
-            fields,
+        const modelConfig = state?.modelConfig || {
             resModel,
+            activeFields,
+            fields,
+        };
+        const model = useModel(Model, {
+            config: modelConfig,
+            progressAttributes: archInfo.progressAttributes,
             handleField: archInfo.handleField,
             limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
             defaultGroupBy,
             defaultOrder: archInfo.defaultOrder,
             openGroupsByDefault: true,
-            rootState,
             maxGroupByDepth: 1,
         });
         this.model = useState(model);
@@ -74,7 +75,7 @@ export class KanbanController extends Component {
             },
             getLocalState: () => {
                 return {
-                    rootState: this.model.root.exportState(),
+                    modelConfig: this.model.exportConfig(),
                 };
             },
         });
@@ -82,6 +83,7 @@ export class KanbanController extends Component {
             const root = this.model.root;
             const { count, hasLimitedCount, isGrouped, limit, offset } = root;
             if (!isGrouped) {
+                console.log(root);
                 return {
                     offset: offset,
                     limit: limit,

@@ -4,10 +4,13 @@ import { DataPoint } from "./datapoint";
 import { session } from "@web/session";
 
 export class DynamicList extends DataPoint {
-    setup(params) {
-        super.setup(params);
-        this.orderBy = params.orderBy || [];
-        this.domain = params.domain;
+    /**
+     *
+     * @param {import("./relational_model").Config} config
+     */
+    setup(config) {
+        super.setup(config);
+        this.domain = config.domain;
         this.groupBy = [];
         this.isDomainSelected = false;
         this.evalContext = this.context;
@@ -16,6 +19,10 @@ export class DynamicList extends DataPoint {
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
+
+    get orderBy() {
+        return this.config.orderBy;
+    }
 
     get editedRecord() {
         return this.records.find((record) => record.isInEdition);
@@ -82,7 +89,8 @@ export class DynamicList extends DataPoint {
     load(params = {}) {
         const limit = params.limit === undefined ? this.limit : params.limit;
         const offset = params.offset === undefined ? this.offset : params.offset;
-        const orderBy = params.orderBy === undefined ? this.orderBy : params.orderBy;
+        const orderBy = params.orderBy === undefined ? this.config.orderBy : params.orderBy;
+        console.log(orderBy);
         return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
     }
 
@@ -92,7 +100,7 @@ export class DynamicList extends DataPoint {
     }
 
     async sortBy(fieldName) {
-        let orderBy = [...this.orderBy];
+        let orderBy = [...this.config.orderBy];
         if (orderBy.length && orderBy[0].name === fieldName) {
             // if (this.isOrder) {
             orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
@@ -135,10 +143,10 @@ export class DynamicList extends DataPoint {
         const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
         if (action && Object.keys(action).length) {
             this.model.action.doAction(action, {
-                onClose: () => this._load(this.offset, this.limit, this.orderBy),
+                onClose: () => this._load(this.offset, this.limit, this.config.orderBy),
             });
         } else {
-            return this._load(this.offset, this.limit, this.orderBy);
+            return this._load(this.offset, this.limit, this.config.orderBy);
         }
     }
 }

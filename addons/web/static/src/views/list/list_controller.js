@@ -46,27 +46,28 @@ export class ListController extends Component {
         this.editable = this.props.editable ? this.archInfo.editable : false;
         this.multiEdit = this.archInfo.multiEdit;
         this.activeActions = this.archInfo.activeActions;
-        const { rootState } = this.props.state || {};
         const { defaultGroupBy, rawExpand } = this.archInfo;
         const { activeFields, fields } = extractFieldsFromArchInfo(
             this.archInfo,
             this.props.fields
         );
-
-        const model = useModel(this.props.Model, {
+        const modelConfig = this.props.state?.modelConfig || {
             resModel: this.props.resModel,
             fields,
             activeFields,
+        };
+
+        const model = useModel(this.props.Model, {
+            config: modelConfig,
             handleField: this.archInfo.handleField,
             groupByInfo: this.archInfo.groupBy.fields,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,
             defaultOrder: this.archInfo.defaultOrder,
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
-            expand: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
+            openGroupsByDefault: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
             groupsLimit: this.archInfo.groupsLimit,
             multiEdit: this.multiEdit,
-            rootState,
             onRecordSaved: this.onRecordSaved.bind(this),
             onWillSaveRecord: this.onWillSaveRecord.bind(this),
         });
@@ -120,7 +121,7 @@ export class ListController extends Component {
             getLocalState: () => {
                 const renderer = this.rootRef.el.querySelector(".o_list_renderer");
                 return {
-                    rootState: this.model.root.exportState(),
+                    modelConfig: this.model.exportConfig(), //TODOPRO: rename everywhere
                     rendererScrollPositions: {
                         left: renderer.scrollLeft,
                         top: renderer.scrollTop,

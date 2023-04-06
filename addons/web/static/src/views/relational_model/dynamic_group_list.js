@@ -1,18 +1,23 @@
 /* @odoo-module */
+//@ts-check
 
 import { DynamicList } from "./dynamic_list";
 
 export class DynamicGroupList extends DynamicList {
     static type = "DynamicGroupList";
 
-    setup(params) {
-        super.setup(params);
+    /**
+     *
+     * @param {import("./relational_model").Config} config
+     */
+    setup(config) {
+        super.setup(config);
         this.isGrouped = true;
-        this.groupBy = params.groupBy;
+        this.groupBy = config.groupBy;
         this.groupByField = this.fields[this.groupBy[0].split(":")[0]];
         /** @type {import("./group").Group[]} */
-        this.groups = params.data.groups.map((g) => this._createGroupDatapoint(g));
-        this.count = params.data.length;
+        this.groups = config.data.groups.map((g) => this._createGroupDatapoint(g));
+        this.count = config.data.length;
     }
 
     // -------------------------------------------------------------------------
@@ -73,38 +78,32 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
 
     _createGroupDatapoint(data) {
-        const params = {
-            activeFields: this.activeFields,
-            fields: this.fields,
-            resModel: this.resModel,
-            context: this.context,
-            groupBy: this.groupBy.slice(1),
-            groupByFieldName: this.groupByField.name,
-            groupsLimit: this.limit,
-            config: this.config.groups[data[this.groupByField.name]],
-            data,
-        };
-        return new this.model.constructor.Group(this.model, params);
+        // const config = {
+        //     activeFields: this.activeFields,
+        //     fields: this.fields,
+        //     resModel: this.resModel,
+        //     context: this.context,
+        //     groupBy: this.groupBy.slice(1),
+        //     groupByFieldName: this.groupByField.name,
+        //     groupsLimit: this.limit,
+        //     orderBy: this.orderBy,
+        //     config: this.config.groups[data[this.groupByField.name]],
+        //     data,
+        // };
+        return new this.model.constructor.Group(
+            this.model,
+            this.config.groups[data[this.groupByField.name]]
+        );
     }
 
     async _load(offset, limit, orderBy) {
-        const config = { offset, limit };
-        const response = await this.model._loadGroupedList(
-            {
-                activeFields: this.activeFields,
-                context: this.context,
-                domain: this.domain,
-                fields: this.fields,
-                groupBy: this.groupBy,
-                resModel: this.resModel,
-                orderBy: orderBy,
-            },
-            this.config
-        );
-        this.groups = response.groups.map((g) => this._createGroupDatapoint(g));
+        const response = await this.model.updateConfig(this.config, {
+            offset,
+            limit,
+            orderBy,
+        });
+        this.groups = response.groups.map((group) => this._createGroupDatapoint(group));
         this.count = response.length;
-        this.config = config;
-        this.orderBy = orderBy;
     }
 
     _removeRecords(records) {

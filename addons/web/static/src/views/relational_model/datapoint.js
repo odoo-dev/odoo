@@ -32,24 +32,29 @@ import { getId } from "./utils";
 export class DataPoint {
     /**
      * @param {import("./relational_model").RelationalModel} model
-     * @param {Params} params
+     * @param {import("./relational_model").Config"} config
+     * @param {any} data
      * @param {Object} [state={}]
      */
-    constructor(model, params) {
+    constructor(model, config) {
         this.id = getId("datapoint");
         this.model = model;
-        this.resModel = params.resModel;
-        this.context = params.context;
+        this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification
+        this.context = config.context;
         /** @type {{[key: string]: Field}} */
         this.fields = {
-            id: { name: "id", type: "integer", readonly: true },
+            id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
             display_name: { name: "display_name", type: "char" },
-            ...params.fields,
+            ...config.fields,
         };
-        this.activeFields = params.activeFields;
+        this.activeFields = config.activeFields;
         this.fieldNames = Object.keys(this.activeFields);
-        this.config = params.config;
-        this.setup(params);
+        this._config = config;
+        this.setup(config);
+    }
+
+    get config() {
+        return this._config; //TODOPRO Remove this, it's only for dev purpose to see if the config is updated somewhere
     }
 
     // -------------------------------------------------------------------------
@@ -89,7 +94,7 @@ export class DataPoint {
      */
     _parseServerValue(field, value) {
         if (!field) {
-            field = { type: "integer" };
+            field = { type: "integer" }; //TODOPRO integer seems not be used in the switch case, why not return value directly ?
         }
         switch (field.type) {
             case "char":

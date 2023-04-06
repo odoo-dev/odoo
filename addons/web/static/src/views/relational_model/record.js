@@ -11,26 +11,26 @@ import { getOnChangeSpec } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
-    setup(params) {
-        this._parentRecord = params.parentRecord;
-        this._onChange = params.onChange || (() => {});
+    setup(config) {
+        this._parentRecord = config.parentRecord;
+        this._onChange = config.onChange || (() => {});
 
-        this.resId = params.data.id || false;
-        this.resIds = params.resIds || [];
-        if (params.mode === "readonly") {
+        this.resId = config.data.id || false; //TODOPRO Take the id from the config and not from the data ?
+        this.resIds = config.resIds || [];
+        if (config.mode === "readonly") {
             this.isInEdition = false;
         } else {
-            this.isInEdition = params.mode === "edit" || !this.resId;
+            this.isInEdition = config.mode === "edit" || !this.resId;
         }
 
         if (this.resId) {
-            this._values = this._applyServerValues(params.data);
+            this._values = this._applyServerValues(config.data);
             this._changes = {};
         } else {
             this._values = {};
             this._changes = this._applyServerValues({
                 ...this._getDefaultValues(),
-                ...params.data,
+                ...config.data,
             });
         }
         this.data = { ...this._values, ...this._changes };
