@@ -158,7 +158,7 @@ export class RelationalModel extends Model {
      */
     async load(params = {}) {
         let data;
-        let config = deepCopy(this.config);
+        let config = deepCopy(this.config); // FIXME: we deep copy fields and activeFields -> do a smarter copy here
         if (params.values) {
             //TODOPRO What is values ? Update docstring
             data = params.values;
@@ -186,7 +186,7 @@ export class RelationalModel extends Model {
      */
     _enhanceConfig(config, params) {
         const previousGroupBy = config.groupBy;
-        Object.assign(config, params);
+        Object.assign(config, params); // FIXME: at some point I would like to hardcode the params we apply into the config
         // apply default order if no order
         if (this.defaultOrder && !config.orderBy.length) {
             config.orderBy = this.defaultOrder;
@@ -319,7 +319,6 @@ export class RelationalModel extends Model {
             groupBy,
             groupByFieldName: groupByField.name,
             orderBy: config.orderBy,
-            groupsLimit: config.limit,
         };
         for (const group of groups) {
             const domain = config.domain.concat(group.__domain);
