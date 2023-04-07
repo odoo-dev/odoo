@@ -215,7 +215,7 @@ QUnit.module("Record Component", (hooks) => {
 
             onRecordChanged(record, changes) {
                 assert.step("record changed");
-                assert.strictEqual(record.model.constructor.name, "RelationalModel");
+                assert.strictEqual(record.model.constructor.name, "StandaloneRelationalModel");
                 assert.deepEqual(changes, { foo: "753" });
             }
         }
@@ -321,7 +321,7 @@ QUnit.module("Record Component", (hooks) => {
 
                 onRecordChanged(record, changes) {
                     assert.step("record changed");
-                    assert.strictEqual(record.model.constructor.name, "RelationalModel");
+                    assert.strictEqual(record.model.constructor.name, "StandaloneRelationalModel");
                     assert.deepEqual(changes, { foo: "753" });
                     this.values.foo = "357";
                 }

@@ -7,6 +7,20 @@ import { Component, xml, onWillStart, onWillUpdateProps, useState } from "@odoo/
 
 const defaultActiveField = { attrs: {}, options: {}, domain: "[]", string: "" };
 
+class StandaloneRelationalModel extends RelationalModel {
+    load(params = {}) {
+        if (params.values) {
+            const data = params.values;
+            if (params.mode) {
+                this.config.mode = params.mode;
+            }
+            this.root = this._createRoot(this.config, data);
+            return;
+        }
+        return super.load(params);
+    }
+}
+
 class _Record extends Component {
     setup() {
         const resModel = this.props.info.resModel;
@@ -16,42 +30,37 @@ class _Record extends Component {
                 fields: this.props.fields,
                 isMonoRecord: true,
                 activeFields: this.getActiveFields(),
+                resId: this.props.info.resId,
+                mode: this.props.info.mode,
             },
         };
         const modelServices = Object.fromEntries(
-            RelationalModel.services.map((servName) => {
+            StandaloneRelationalModel.services.map((servName) => {
                 return [servName, useService(servName)];
             })
         );
         if (resModel) {
             modelServices.orm = useService("orm");
         }
+        this.model = useState(new StandaloneRelationalModel(this.env, modelParams, modelServices));
 
-        this.model = useState(new RelationalModel(this.env, modelParams, modelServices));
-
-        let loadKey;
-        const load = (props) => {
-            const loadParams = {
-                resId: props.info.resId,
-                mode: props.info.mode,
-            };
-            if (props.values) {
-                loadParams.values = pick(
-                    props.values,
-                    ...Object.keys(modelParams.config.activeFields)
-                );
-            }
-            const nextLoadKey = JSON.stringify(loadParams);
-            if (loadKey === nextLoadKey) {
-                return;
-            }
-            loadKey = nextLoadKey;
-            return this.model.load(loadParams);
+        const loadWithValues = (values) => {
+            values = pick(values, ...Object.keys(modelParams.config.activeFields));
+            return this.model.load({ values });
         };
-        onWillStart(() => load(this.props));
+        onWillStart(() => {
+            if (this.props.values) {
+                return loadWithValues(this.props.values);
+            } else {
+                return this.model.load();
+            }
+        });
         onWillUpdateProps((nextProps) => {
-            // don't wait because the keeplast may make willUpdateProps hang forever
-            load(nextProps);
+            if (nextProps.values) {
+                return loadWithValues(nextProps.values);
+            } else if (nextProps.info.resId !== this.model.root.resId) {
+                return this.model.root.load(nextProps.info.resId);
+            }
         });
 
         if (this.props.info.onRecordChanged) {

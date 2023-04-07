@@ -60,23 +60,26 @@ class KanbanQuickCreateController extends Component {
             this.props.archInfo,
             this.props.fields
         );
-        this.model = useModel(
-            this.props.Model,
-            {
-                config: {
-                    resModel: this.props.resModel,
-                    resId: false,
-                    resIds: [],
-                    fields,
-                    activeFields,
-                    isMonoRecord: true,
-                    mode: "edit",
-                },
-            },
-            {
-                ignoreUseSampleModel: true,
-            }
+
+        const modelServices = Object.fromEntries(
+            this.props.Model.services.map((servName) => {
+                return [servName, useService(servName)];
+            })
         );
+        modelServices.orm = useService("orm");
+        const config = {
+            resModel: this.props.resModel,
+            resId: false,
+            resIds: [],
+            fields,
+            activeFields,
+            isMonoRecord: true,
+            mode: "edit",
+            context: this.props.context,
+        };
+        this.model = useState(new this.props.Model(this.env, { config }, modelServices));
+
+        onWillStart(() => this.model.load());
 
         onMounted(() => {
             this.uiActiveElement = this.uiService.activeElement;

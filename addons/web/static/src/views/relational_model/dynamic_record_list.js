@@ -31,7 +31,7 @@ export class DynamicRecordList extends DynamicList {
      */
     async addExistingRecord(resId, atFirstPosition) {
         const record = this._createRecordDatapoint({});
-        await this.model.mutex.exec(() => record._load(resId));
+        await this.model.mutex.exec(() => record._load({ resId }));
         this._addRecord(record, atFirstPosition ? 0 : this.records.length);
         return record;
     }

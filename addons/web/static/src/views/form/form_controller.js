@@ -21,7 +21,7 @@ import { FormErrorDialog } from "./form_error_dialog/form_error_dialog";
 import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "../relational_model/utils";
 
-import { Component, onRendered, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onRendered, onWillStart, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
 
 const viewRegistry = registry.category("views");
 
@@ -126,40 +126,45 @@ export class FormController extends Component {
             mode = "readonly";
         }
 
-        owl.onWillRender(() => {
-            console.log("render form controller");
-        });
-
-        const model = useModel(
-            this.props.Model,
-            {
-                config: {
-                    resModel: this.props.resModel,
-                    resId: this.props.resId || false,
-                    resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
-                    fields,
-                    activeFields,
-                    isMonoRecord: true,
-                    mode,
-                },
-                onRecordSaved: this.onRecordSaved.bind(this),
-                onWillSaveRecord: this.onWillSaveRecord.bind(this),
-            },
-            {
-                ignoreUseSampleModel: true,
-                onWillStart: () =>
-                    loadSubViews(
-                        this.archInfo.activeFields,
-                        this.props.fields,
-                        this.props.context,
-                        this.props.resModel,
-                        this.viewService,
-                        this.user,
-                        this.env.isSmall
-                    ),
-            }
+        const modelServices = Object.fromEntries(
+            this.props.Model.services.map((servName) => {
+                return [servName, useService(servName)];
+            })
         );
-        this.model = useState(model);
+        modelServices.orm = useService("orm");
+        const modelParams = {
+            config: {
+                resModel: this.props.resModel,
+                resId: this.props.resId || false,
+                resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
+                fields,
+                activeFields,
+                isMonoRecord: true,
+                mode,
+                context: this.props.context,
+            },
+            onRecordSaved: this.onRecordSaved.bind(this),
+            onWillSaveRecord: this.onWillSaveRecord.bind(this),
+        };
+        this.model = useState(new this.props.Model(this.env, modelParams, modelServices));
+
+        onWillStart(async () => {
+            await loadSubViews(
+                this.archInfo.activeFields,
+                this.props.fields,
+                this.props.context,
+                this.props.resModel,
+                this.viewService,
+                this.user,
+                this.env.isSmall
+            );
+            return this.model.load();
+        });
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.resId !== this.model.root.resId) {
+                return this.model.root.load(nextProps.resId);
+            }
+        });
 
         this.cpButtonsRef = useRef("cpButtons");
 
@@ -446,7 +451,7 @@ export class FormController extends Component {
         // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
             this.disableButtons();
-            await this.model.load({ resId: null });
+            await this.model.root.load(false);
             this.model.root.switchMode("edit");
             this.enableButtons();
         }

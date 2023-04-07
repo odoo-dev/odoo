@@ -8,9 +8,10 @@ import { SettingsFormRenderer } from "./settings_form_renderer";
 import { SettingsFormCompiler } from "./settings_form_compiler";
 
 class SettingModel extends formView.Model {
-    async load(params = {}) {
-        delete params.resId;
-        return super.load(params);
+    _getNextConfig() {
+        const nextConfig = super._getNextConfig(...arguments);
+        nextConfig.resId = false;
+        return nextConfig;
     }
 }
 
