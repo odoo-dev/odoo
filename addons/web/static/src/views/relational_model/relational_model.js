@@ -186,6 +186,7 @@ export class RelationalModel extends Model {
      */
     _enhanceConfig(config, params) {
         // const previousGroupBy = config.groupBy;
+        const previousOrderBy = config.orderBy;
         Object.assign(config, params); // FIXME: at some point I would like to hardcode the params we apply into the config
         // apply default order if no order
         if (this.defaultOrder && !config.orderBy.length) {
@@ -211,7 +212,7 @@ export class RelationalModel extends Model {
             // }
             // re-apply previous orderBy if not given (or no order)
             if (!config.orderBy) {
-                config.orderBy = this.root.config.orderBy; //TODOPRO We should not access orderBy from root. I think it's the same as this.config.orderBy
+                config.orderBy = previousOrderBy;
             }
         }
         return config;
