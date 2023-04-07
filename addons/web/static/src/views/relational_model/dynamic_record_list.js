@@ -92,7 +92,7 @@ export class DynamicRecordList extends DynamicList {
         const _records = this.records.filter((r) => !records.includes(r));
         if (this.offset && !_records.length) {
             const offset = Math.max(this.offset - this.limit, 0);
-            return this._load(offset, this.limit);
+            return this._load(offset, this.limit, this.orderBy);
         }
         this.records = _records;
         this._updateCount(this.records); // FIXME: this is not correct I think (multi page, delete a record)
