@@ -13,7 +13,7 @@ import { DynamicRecordList } from "./dynamic_record_list";
 import { DynamicGroupList } from "./dynamic_group_list";
 import { Group } from "./group";
 import { StaticList } from "./static_list";
-import { getFieldsSpec, getOnChangeSpec } from "./utils";
+import { getFieldContext, getOnChangeSpec } from "./utils";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -72,7 +72,7 @@ export class RelationalModel extends Model {
     static DynamicGroupList = DynamicGroupList;
     static StaticList = StaticList;
     static DEFAULT_LIMIT = 80;
-    // static DEFAULT_X2M_LIMIT = 40; // FIXME: should be defined here
+    static DEFAULT_X2M_LIMIT = 40;
     static DEFAULT_COUNT_LIMIT = 10000;
     static DEFAULT_GROUP_LIMIT = 80;
     static DEFAULT_OPEN_GROUP_LIMIT = 10;
@@ -181,6 +181,40 @@ export class RelationalModel extends Model {
         return count;
     }
 
+    _getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
+        console.log("getFieldsSpec");
+        const fieldsSpec = {};
+        for (const fieldName in activeFields) {
+            const { related, limit, invisible } = activeFields[fieldName];
+            fieldsSpec[fieldName] = {};
+            // X2M
+            if (related) {
+                fieldsSpec[fieldName].fields = this._getFieldsSpec(
+                    related.activeFields,
+                    related.fields,
+                    evalContext,
+                    activeFields
+                );
+                fieldsSpec[fieldName].limit = limit || this.constructor.DEFAULT_X2M_LIMIT;
+            }
+            // M2O
+            if (fields[fieldName].type === "many2one" && invisible !== true) {
+                fieldsSpec[fieldName].fields = { display_name: {} };
+            }
+            if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
+                const context = getFieldContext(
+                    fieldName,
+                    activeFields,
+                    evalContext,
+                    parentActiveFields
+                );
+                if (context) {
+                    fieldsSpec[fieldName].context = context;
+                }
+            }
+        }
+        return fieldsSpec;
+    }
     /**
      * @param {*} params
      * @returns {Config}
@@ -234,17 +268,13 @@ export class RelationalModel extends Model {
      * @returns {DataPoint}
      */
     _createRoot(config, data) {
-        /** @type {Config} */
-        Object.assign(config, {
-            data, //TODOPRO Move outside the config. Maybe later ?
-        });
         if (config.isMonoRecord) {
-            return new this.constructor.Record(this, config);
+            return new this.constructor.Record(this, config, data);
         }
         if (config.groupBy.length) {
-            return new this.constructor.DynamicGroupList(this, config);
+            return new this.constructor.DynamicGroupList(this, config, data);
         }
-        return new this.constructor.DynamicRecordList(this, config);
+        return new this.constructor.DynamicRecordList(this, config, data);
     }
 
     /**
@@ -346,8 +376,6 @@ export class RelationalModel extends Model {
                 };
             }
             const groupConfig = config.groups[group[firstGroupByName]];
-            groupConfig.data = group;
-            groupConfig.list.data = group;
             if (groupBy.length) {
                 group.groups = [];
             } else {
@@ -407,7 +435,7 @@ export class RelationalModel extends Model {
     async _loadRecords({ resModel, resIds, activeFields, fields, context }) {
         const kwargs = {
             context: { bin_size: true, ...context },
-            fields: getFieldsSpec(activeFields, fields, context),
+            fields: this._getFieldsSpec(activeFields, fields, context),
         };
         console.log("Unity field spec", kwargs.fields);
         const records = await this.orm.call(resModel, "web_read_unity", [resIds], kwargs);
@@ -424,7 +452,7 @@ export class RelationalModel extends Model {
      */
     async _loadUngroupedList(config) {
         const kwargs = {
-            fields: getFieldsSpec(config.activeFields, config.fields, config.context),
+            fields: this._getFieldsSpec(config.activeFields, config.fields, config.context),
             domain: config.domain,
             offset: config.offset,
             order: orderByToString(config.orderBy),

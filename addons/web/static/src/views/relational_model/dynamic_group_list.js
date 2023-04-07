@@ -10,14 +10,14 @@ export class DynamicGroupList extends DynamicList {
      *
      * @param {import("./relational_model").Config} config
      */
-    setup(config) {
-        super.setup(config);
+    setup(config, data) {
+        super.setup(...arguments);
         this.isGrouped = true;
         this.groupBy = config.groupBy;
         this.groupByField = this.fields[this.groupBy[0].split(":")[0]];
         /** @type {import("./group").Group[]} */
-        this.groups = config.data.groups.map((g) => this._createGroupDatapoint(g));
-        this.count = config.data.length;
+        this.groups = data.groups.map((g) => this._createGroupDatapoint(g));
+        this.count = data.length;
     }
 
     // -------------------------------------------------------------------------
@@ -80,7 +80,8 @@ export class DynamicGroupList extends DynamicList {
     _createGroupDatapoint(data) {
         return new this.model.constructor.Group(
             this.model,
-            this.config.groups[data[this.groupByField.name]]
+            this.config.groups[data[this.groupByField.name]],
+            data
         );
     }
 
