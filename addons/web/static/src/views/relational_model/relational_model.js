@@ -3,8 +3,7 @@
 
 import { EventBus, markRaw } from "@odoo/owl";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-// import { shallowEqual, unique } from "@web/core/utils/arrays";
-import { unique } from "@web/core/utils/arrays";
+import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 // import { deepCopy } from "@web/core/utils/objects";
 import { Model } from "@web/views/model";
@@ -95,7 +94,7 @@ export class RelationalModel extends Model {
         this.mutex = markRaw(new Mutex());
 
         /** @type {Config} */
-        this.baseConfig = {
+        this.config = {
             isMonoRecord: false,
             ...params.config,
         };
@@ -148,31 +147,23 @@ export class RelationalModel extends Model {
      * @param {DomainListRepr} [params.domain]
      * @param {string[]} [params.groupBy]
      * @param {Object[]} [params.orderBy]
-     * @param {string} [params.mode]
+     * @param {string} [params.mode] should not be there
      * @param {number} [params.resId] should not be there
+     * @param {Object} [params.values] standalone case
      * @returns {Promise<void>}
      */
     async load(params = {}) {
         let data;
-        let config = this.config || this.baseConfig;
         if (params.values) {
-            //TODOPRO What is values ? Update docstring
             data = params.values;
             if (params.mode) {
-                config.mode = params.mode;
+                this.config.mode = params.mode;
             }
         } else {
-            config = this._getNextConfig(config, params);
-            if (this.config) {
-                // keep current root config if any, if the groupBy parameter is the same
-                // if (shallowEqual(config.groupBy || [], this.config.groupBy || [])) {
-                //     config = deepCopy(this.root.config); //TODOPRO Check that
-                //     config.offset = 0;
-                // }
-            }
+            const config = this._getNextConfig(this.config, params);
             data = await this.keepLast.add(this._loadData(config));
+            this.config = config;
         }
-        this.config = config;
         this.root = this._createRoot(data);
 
         window.root = this.root; //FIXME Remove this
@@ -187,12 +178,14 @@ export class RelationalModel extends Model {
      * @returns {Config}
      */
     _getNextConfig(currentConfig, params) {
+        const currentGroupBy = currentConfig.groupBy;
         const config = Object.assign({}, currentConfig);
+        config.offset = 0;
 
         config.context = "context" in params ? params.context : config.context;
         if (currentConfig.isMonoRecord) {
             config.resId = "resId" in params ? params.resId : config.resId;
-            config.mode = "mode" in params ? params.mode : config.mode; // FIXME: remove?
+            // config.mode = "mode" in params ? params.mode : config.mode; // FIXME: remove?
         } else {
             config.domain = "domain" in params ? params.domain : config.domain;
             config.comparison = "comparison" in params ? params.comparison : config.comparison;
@@ -218,6 +211,11 @@ export class RelationalModel extends Model {
             // re-apply previous orderBy if not given (or no order)
             if (!config.orderBy.length) {
                 config.orderBy = currentConfig.orderBy || [];
+            }
+
+            // keep current root config if any, if the groupBy parameter is the same
+            if (!shallowEqual(config.groupBy || [], currentGroupBy || [])) {
+                delete config.groups;
             }
         }
 
@@ -401,7 +399,6 @@ export class RelationalModel extends Model {
      * @returns
      */
     async _loadRecords({ resModel, resIds, activeFields, fields, context }) {
-        //TODOPRO Note: config is not modified anymore here \o/
         const kwargs = {
             context: { bin_size: true, ...context },
             fields: getFieldsSpec(activeFields, fields, context),
@@ -420,7 +417,6 @@ export class RelationalModel extends Model {
      * @returns
      */
     async _loadUngroupedList(config) {
-        //TODOPRO Note: config is not modified anymore here \o/
         const kwargs = {
             fields: getFieldsSpec(config.activeFields, config.fields, config.context),
             domain: config.domain,
