@@ -32,7 +32,6 @@ export class ActivityController extends Component {
                 viewMode: "activity",
                 rootState,
             },
-            { ignoreUseSampleModel: true }
         );
 
         this.dialog = useService("dialog");

@@ -135,24 +135,13 @@ export class RelationalModel extends Model {
      * @param {DomainListRepr} [params.domain]
      * @param {string[]} [params.groupBy]
      * @param {Object[]} [params.orderBy]
-     * @param {string} [params.mode] should not be there
-     * @param {number} [params.resId] should not be there
-     * @param {Object} [params.values] standalone case
      * @returns {Promise<void>}
      */
     async load(params = {}) {
-        let data;
-        if (params.values) {
-            data = params.values;
-            if (params.mode) {
-                this.config.mode = params.mode;
-            }
-        } else {
-            const config = this._getNextConfig(this.config, params);
-            data = await this.keepLast.add(this._loadData(config));
-            this.config = config;
-        }
-        this.root = this._createRoot(data);
+        const config = this._getNextConfig(this.config, params);
+        const data = await this.keepLast.add(this._loadData(config));
+        this.root = this._createRoot(config, data);
+        this.config = config;
 
         window.root = this.root; //FIXME Remove this
     }
@@ -199,13 +188,10 @@ export class RelationalModel extends Model {
     _getNextConfig(currentConfig, params) {
         const currentGroupBy = currentConfig.groupBy;
         const config = Object.assign({}, currentConfig);
-        config.offset = 0;
 
         config.context = "context" in params ? params.context : config.context;
-        if (currentConfig.isMonoRecord) {
-            config.resId = "resId" in params ? params.resId : config.resId;
-            // config.mode = "mode" in params ? params.mode : config.mode; // FIXME: remove?
-        } else {
+        if (!currentConfig.isMonoRecord) {
+            config.offset = 0;
             config.domain = "domain" in params ? params.domain : config.domain;
             config.comparison = "comparison" in params ? params.comparison : config.comparison;
 
@@ -243,21 +229,22 @@ export class RelationalModel extends Model {
 
     /**
      *
+     * @param {Config} config
      * @param {*} data
      * @returns {DataPoint}
      */
-    _createRoot(data) {
+    _createRoot(config, data) {
         /** @type {Config} */
-        Object.assign(this.config, {
+        Object.assign(config, {
             data, //TODOPRO Move outside the config. Maybe later ?
         });
-        if (this.config.isMonoRecord) {
-            return new this.constructor.Record(this, this.config);
+        if (config.isMonoRecord) {
+            return new this.constructor.Record(this, config);
         }
-        if (this.config.groupBy.length) {
-            return new this.constructor.DynamicGroupList(this, this.config);
+        if (config.groupBy.length) {
+            return new this.constructor.DynamicGroupList(this, config);
         }
-        return new this.constructor.DynamicRecordList(this, this.config);
+        return new this.constructor.DynamicRecordList(this, config);
     }
 
     /**
