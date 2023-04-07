@@ -50,9 +50,7 @@ export class DynamicRecordList extends DynamicList {
      * might sometimes be less than the real number of records matching the domain.
      **/
     async fetchCount() {
-        const keepLast = this.model.keepLast;
-        this.count = await keepLast.add(this.model.orm.searchCount(this.resModel, this.domain));
-        this.config.countLimit = Number.MAX_SAFE_INTEGER;
+        this.count = await this.model._updateCount(this.config);
         this.hasLimitedCount = false;
         return this.count;
     }
@@ -110,7 +108,7 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async _load(offset, limit, orderBy) {
-        const response = await this.model.updateConfig(this.config, {
+        const response = await this.model._updateConfig(this.config, {
             offset,
             limit,
             orderBy,

@@ -78,18 +78,6 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
 
     _createGroupDatapoint(data) {
-        // const config = {
-        //     activeFields: this.activeFields,
-        //     fields: this.fields,
-        //     resModel: this.resModel,
-        //     context: this.context,
-        //     groupBy: this.groupBy.slice(1),
-        //     groupByFieldName: this.groupByField.name,
-        //     groupsLimit: this.limit,
-        //     orderBy: this.orderBy,
-        //     config: this.config.groups[data[this.groupByField.name]],
-        //     data,
-        // };
         return new this.model.constructor.Group(
             this.model,
             this.config.groups[data[this.groupByField.name]]
@@ -97,7 +85,7 @@ export class DynamicGroupList extends DynamicList {
     }
 
     async _load(offset, limit, orderBy) {
-        const response = await this.model.updateConfig(this.config, {
+        const response = await this.model._updateConfig(this.config, {
             offset,
             limit,
             orderBy,
