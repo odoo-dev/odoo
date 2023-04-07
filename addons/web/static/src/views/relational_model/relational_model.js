@@ -285,6 +285,11 @@ export class RelationalModel extends Model {
         config.offset = config.offset || 0;
         config.limit = config.limit || this.initialGroupsLimit;
         config.groups = config.groups || {};
+        for (const group of Object.values(config.groups)) {
+            //TODOPRO This will be removed when data will be extracted from the config
+            delete group.data;
+            delete group.list.data;
+        }
         const firstGroupByName = config.groupBy[0].split(":")[0];
         const _orderBy = config.orderBy.filter(
             (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
@@ -319,26 +324,23 @@ export class RelationalModel extends Model {
         for (const group of groups) {
             const domain = config.domain.concat(group.__domain);
             group.count = group.__count || group[`${firstGroupByName}_count`];
+            group.length = group.count;
             delete group.__count;
             delete group[`${firstGroupByName}_count`];
             if (!config.groups[group[firstGroupByName]]) {
                 config.groups[group[firstGroupByName]] = {
                     ...commonConfig,
                     domain,
-                    data: group, //TODOPRO Not a great fan, group is updated in place below
                     isFolded: group.__fold || !this.openGroupsByDefault,
                     list: {
                         ...commonConfig,
                         domain,
-                        data: {
-                            length: group.count,
-                            groups: [],
-                            records: [],
-                        },
                     },
                 };
             }
             const groupConfig = config.groups[group[firstGroupByName]];
+            groupConfig.data = group;
+            groupConfig.list.data = group;
             if (groupBy.length) {
                 group.groups = [];
             } else {
@@ -346,16 +348,14 @@ export class RelationalModel extends Model {
             }
             if (!groupConfig.isFolded && group.count > 0) {
                 const response = await this._loadData({
-                    ...config,
+                    ...groupConfig,
                     domain,
                     groupBy,
                 });
                 if (groupBy.length) {
                     group.groups = response ? response.groups : [];
-                    groupConfig.list.data.groups = group.groups;
                 } else {
                     group.records = response ? response.records : [];
-                    groupConfig.list.data.records = group.records;
                 }
             }
         }
