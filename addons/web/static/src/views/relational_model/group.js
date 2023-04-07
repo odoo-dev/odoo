@@ -30,17 +30,8 @@ export class Group extends DataPoint {
         this.value = this._getValueFromGroupData(groupData, this.groupByField);
         this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
         this.aggregates = this._getAggregatesFromGroupData(groupData);
-        // const listParams = {
-        //     activeFields: this.activeFields,
-        //     fields: this.fields,
-        //     resModel: this.resModel,
-        //     context: this.context,
-        //     groupBy: config.groupBy,
-        //     domain: groupData.__domain,
-        //     config: this.config.list,
-        // };
         let List;
-        if (config.groupBy.length) {
+        if (config.list.groupBy.length) {
             List = this.model.constructor.DynamicGroupList;
         } else {
             List = this.model.constructor.DynamicRecordList;

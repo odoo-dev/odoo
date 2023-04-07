@@ -291,17 +291,16 @@ export class RelationalModel extends Model {
             delete group.list.data;
         }
         const firstGroupByName = config.groupBy[0].split(":")[0];
-        const _orderBy = config.orderBy.filter(
+        const orderBy = config.orderBy.filter(
             (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
         );
-        const orderby = orderByToString(_orderBy);
         const response = await this.orm.webReadGroup(
             config.resModel,
             config.domain,
             unique([...Object.keys(config.activeFields), firstGroupByName]),
             [config.groupBy[0]], // TODO: expand attribute in list views
             {
-                orderby,
+                orderby: orderByToString(orderBy),
                 lazy: true, // maybe useless
                 offset: config.offset,
                 limit: config.limit,
@@ -316,9 +315,6 @@ export class RelationalModel extends Model {
             fields: config.fields,
             activeFields: config.activeFields,
             context: config.context,
-            groupBy,
-            groupByFieldName: groupByField.name,
-            orderBy: config.orderBy,
         };
         for (const group of groups) {
             group.count = group.__count || group[`${firstGroupByName}_count`];
@@ -328,10 +324,13 @@ export class RelationalModel extends Model {
             if (!config.groups[group[firstGroupByName]]) {
                 config.groups[group[firstGroupByName]] = {
                     ...commonConfig,
+                    groupByFieldName: groupByField.name,
                     isFolded: group.__fold || !this.openGroupsByDefault,
                     list: {
                         ...commonConfig,
                         domain: group.__domain,
+                        groupBy,
+                        orderBy,
                     },
                 };
             }
@@ -344,11 +343,7 @@ export class RelationalModel extends Model {
                 group.records = [];
             }
             if (!groupConfig.isFolded && group.count > 0) {
-                const response = await this._loadData({
-                    ...groupConfig,
-                    domain: groupConfig.list.domain,
-                    groupBy,
-                });
+                const response = await this._loadData(groupConfig.list);
                 if (groupBy.length) {
                     group.groups = response ? response.groups : [];
                 } else {
