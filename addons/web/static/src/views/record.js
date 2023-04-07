@@ -36,7 +36,10 @@ class _Record extends Component {
                 mode: props.info.mode,
             };
             if (props.values) {
-                loadParams.values = pick(props.values, ...Object.keys(modelParams.activeFields));
+                loadParams.values = pick(
+                    props.values,
+                    ...Object.keys(modelParams.config.activeFields)
+                );
             }
             const nextLoadKey = JSON.stringify(loadParams);
             if (loadKey === nextLoadKey) {
