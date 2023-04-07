@@ -3,7 +3,8 @@
 
 import { EventBus, markRaw } from "@odoo/owl";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { shallowEqual, unique } from "@web/core/utils/arrays";
+// import { shallowEqual, unique } from "@web/core/utils/arrays";
+import { unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { deepCopy } from "@web/core/utils/objects";
 import { Model } from "@web/views/model";
@@ -14,7 +15,6 @@ import { DynamicGroupList } from "./dynamic_group_list";
 import { Group } from "./group";
 import { StaticList } from "./static_list";
 import { getFieldsSpec, getOnChangeSpec } from "./utils";
-import { DataPoint } from "./datapoint";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -185,7 +185,7 @@ export class RelationalModel extends Model {
      * @returns {Config}
      */
     _enhanceConfig(config, params) {
-        const previousGroupBy = config.groupBy;
+        // const previousGroupBy = config.groupBy;
         Object.assign(config, params); // FIXME: at some point I would like to hardcode the params we apply into the config
         // apply default order if no order
         if (this.defaultOrder && !config.orderBy.length) {
@@ -321,7 +321,6 @@ export class RelationalModel extends Model {
             orderBy: config.orderBy,
         };
         for (const group of groups) {
-            const domain = config.domain.concat(group.__domain);
             group.count = group.__count || group[`${firstGroupByName}_count`];
             group.length = group.count;
             delete group.__count;
@@ -329,11 +328,10 @@ export class RelationalModel extends Model {
             if (!config.groups[group[firstGroupByName]]) {
                 config.groups[group[firstGroupByName]] = {
                     ...commonConfig,
-                    domain,
                     isFolded: group.__fold || !this.openGroupsByDefault,
                     list: {
                         ...commonConfig,
-                        domain,
+                        domain: group.__domain,
                     },
                 };
             }
@@ -348,7 +346,7 @@ export class RelationalModel extends Model {
             if (!groupConfig.isFolded && group.count > 0) {
                 const response = await this._loadData({
                     ...groupConfig,
-                    domain,
+                    domain: groupConfig.list.domain,
                     groupBy,
                 });
                 if (groupBy.length) {
