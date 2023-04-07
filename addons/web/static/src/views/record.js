@@ -11,10 +11,12 @@ class _Record extends Component {
     setup() {
         const resModel = this.props.info.resModel;
         const modelParams = {
-            resModel,
-            fields: this.props.fields,
-            rootType: "record",
-            activeFields: this.getActiveFields(),
+            config: {
+                resModel,
+                fields: this.props.fields,
+                isMonoRecord: true,
+                activeFields: this.getActiveFields(),
+            },
         };
         const modelServices = Object.fromEntries(
             RelationalModel.services.map((servName) => {
