@@ -12,7 +12,6 @@ import { createElement } from "@web/core/utils/xml";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
@@ -21,7 +20,15 @@ import { FormErrorDialog } from "./form_error_dialog/form_error_dialog";
 import { FormStatusIndicator } from "./form_status_indicator/form_status_indicator";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "../relational_model/utils";
 
-import { Component, onRendered, onWillStart, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onRendered,
+    onWillStart,
+    onWillUpdateProps,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 
 const viewRegistry = registry.category("views");
 
@@ -303,7 +310,7 @@ export class FormController extends Component {
             onError: this.onSaveError.bind(this),
         });
         if (canProceed) {
-            return this.model.load({ resId: resIds[offset] });
+            return this.model.root.load(resIds[offset]);
         }
     }
 

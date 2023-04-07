@@ -14,22 +14,20 @@ export class Group extends DataPoint {
     /**
      * @param {import("./relational_model").Config} config
      */
-    setup(config) {
-        super.setup();
+    setup(config, data) {
+        super.setup(...arguments);
         this.groupByField = this.fields[config.groupByFieldName];
         this.progressBars = []; // FIXME: remove from model?
-        this.tooltip = []; // FIXME: remove from model?
-        const groupData = config.data;
-        // this.range = groupData.__range;
-        this._rawValue = groupData[this.groupByField.name];
+        // this.range = data.__range;
+        this._rawValue = data[this.groupByField.name];
         // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
         // we have to get the count from `__count` instead
         // see _read_group_raw in models.py
         /** @type {number} */
-        this.count = groupData.count;
-        this.value = this._getValueFromGroupData(groupData, this.groupByField);
-        this.displayName = this._getDisplayNameFromGroupData(groupData, this.groupByField);
-        this.aggregates = this._getAggregatesFromGroupData(groupData);
+        this.count = data.count;
+        this.value = this._getValueFromGroupData(data, this.groupByField);
+        this.displayName = this._getDisplayNameFromGroupData(data, this.groupByField);
+        this.aggregates = this._getAggregatesFromGroupData(data);
         let List;
         if (config.list.groupBy.length) {
             List = this.model.constructor.DynamicGroupList;
@@ -37,7 +35,7 @@ export class Group extends DataPoint {
             List = this.model.constructor.DynamicRecordList;
         }
         /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
-        this.list = new List(this.model, config.list);
+        this.list = new List(this.model, config.list, data);
     }
 
     // -------------------------------------------------------------------------

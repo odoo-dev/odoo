@@ -9,7 +9,7 @@ export class DynamicList extends DataPoint {
      * @param {import("./relational_model").Config} config
      */
     setup(config) {
-        super.setup(config);
+        super.setup(...arguments);
         this.domain = config.domain;
         this.groupBy = [];
         this.isDomainSelected = false;

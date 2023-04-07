@@ -4,12 +4,12 @@ import { DynamicList } from "./dynamic_list";
 
 export class DynamicRecordList extends DynamicList {
     static type = "DynamicRecordList";
-    setup(config) {
+    setup(config, data) {
         super.setup(config);
         /** @type {import("./record").Record[]} */
-        console.log(config.data);
-        this.records = config.data.records.map((r) => this._createRecordDatapoint(r));
-        this._updateCount(config.data);
+        console.log(data);
+        this.records = data.records.map((r) => this._createRecordDatapoint(r));
+        this._updateCount(data);
     }
 
     // -------------------------------------------------------------------------
@@ -71,14 +71,19 @@ export class DynamicRecordList extends DynamicList {
     }
 
     _createRecordDatapoint(data, mode = "readonly") {
-        return new this.model.constructor.Record(this.model, {
-            context: this.context,
-            activeFields: this.activeFields,
-            resModel: this.resModel,
-            fields: this.fields,
-            data,
-            mode,
-        });
+        return new this.model.constructor.Record(
+            this.model,
+            {
+                context: this.context,
+                activeFields: this.activeFields,
+                resModel: this.resModel,
+                fields: this.fields,
+                resId: data.id || false,
+                isMonoRecord: true,
+                mode,
+            },
+            data
+        );
     }
 
     _addRecord(record, index) {
@@ -116,14 +121,18 @@ export class DynamicRecordList extends DynamicList {
         const resIds = response.records.map((record) => record.id);
         this.records = response.records.map(
             (record) =>
-                new this.model.constructor.Record(this.model, {
-                    activeFields: this.activeFields,
-                    fields: this.fields,
-                    resModel: this.resModel,
-                    context: this.context,
-                    resIds, //TODOPRO add resIds with _createRecordDatapoint
-                    data: record,
-                })
+                new this.model.constructor.Record(
+                    this.model,
+                    {
+                        activeFields: this.activeFields,
+                        fields: this.fields,
+                        resModel: this.resModel,
+                        context: this.context,
+                        resId: record.id,
+                        resIds, //TODOPRO add resIds with _createRecordDatapoint
+                    },
+                    record
+                )
         );
         this._updateCount(response);
     }

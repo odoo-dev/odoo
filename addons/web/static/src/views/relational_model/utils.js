@@ -65,7 +65,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
 }
 
 const SENTINEL = Symbol("sentinel");
-function getFieldContext(fieldName, activeFields, evalContext, parentActiveFields = null) {
+export function getFieldContext(fieldName, activeFields, evalContext, parentActiveFields = null) {
     const rawContext = activeFields[fieldName].context;
     if (!rawContext || rawContext === "{}") {
         return;
@@ -92,41 +92,6 @@ function getFieldContext(fieldName, activeFields, evalContext, parentActiveField
     if (Object.keys(evaluatedContext).length > 0) {
         return evaluatedContext;
     }
-}
-
-export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
-    console.log("getFieldsSpec");
-    const fieldsSpec = {};
-    for (const fieldName in activeFields) {
-        const fieldDescr = activeFields[fieldName];
-        fieldsSpec[fieldName] = {};
-        // X2M
-        if (fieldDescr.related) {
-            fieldsSpec[fieldName].fields = getFieldsSpec(
-                fieldDescr.related.activeFields,
-                fieldDescr.related.fields,
-                evalContext,
-                activeFields
-            );
-            fieldsSpec[fieldName].limit = fieldDescr.limit || 40;
-        }
-        // M2O
-        if (fields[fieldName].type === "many2one" && fieldDescr.invisible !== true) {
-            fieldsSpec[fieldName].fields = { display_name: {} };
-        }
-        if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
-            const context = getFieldContext(
-                fieldName,
-                activeFields,
-                evalContext,
-                parentActiveFields
-            );
-            if (context) {
-                fieldsSpec[fieldName].context = context;
-            }
-        }
-    }
-    return fieldsSpec;
 }
 
 function _populateOnChangeSpec(activeFields, spec, path = false) {

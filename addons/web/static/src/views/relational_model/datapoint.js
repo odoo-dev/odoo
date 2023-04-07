@@ -34,9 +34,9 @@ export class DataPoint {
      * @param {import("./relational_model").RelationalModel} model
      * @param {import("./relational_model").Config"} config
      * @param {any} data
-     * @param {Object} [state={}]
+     * @param {Object} [options]
      */
-    constructor(model, config) {
+    constructor(model, config, data, options) {
         this.id = getId("datapoint");
         this.model = model;
         this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification
@@ -50,7 +50,7 @@ export class DataPoint {
         this.activeFields = config.activeFields;
         this.fieldNames = Object.keys(this.activeFields);
         this._config = config;
-        this.setup(config);
+        this.setup(config, data, options);
     }
 
     get config() {

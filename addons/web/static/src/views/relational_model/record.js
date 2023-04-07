@@ -11,11 +11,11 @@ import { getOnChangeSpec } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
-    setup(config) {
-        this._parentRecord = config.parentRecord;
-        this._onChange = config.onChange || (() => {});
+    setup(config, data, options = {}) {
+        this._parentRecord = options.parentRecord;
+        this._onChange = options.onChange || (() => {});
 
-        this.resId = config.data.id || false; //TODOPRO Take the id from the config and not from the data ?
+        this.resId = config.resId;
         this.resIds = config.resIds || [];
         if (config.mode === "readonly") {
             this.isInEdition = false;
@@ -24,13 +24,13 @@ export class Record extends DataPoint {
         }
 
         if (this.resId) {
-            this._values = this._applyServerValues(config.data);
+            this._values = this._applyServerValues(data);
             this._changes = {};
         } else {
             this._values = {};
             this._changes = this._applyServerValues({
                 ...this._getDefaultValues(),
-                ...config.data,
+                ...data,
             });
         }
         this.data = { ...this._values, ...this._changes };
@@ -216,22 +216,13 @@ export class Record extends DataPoint {
             const value = serverValues[fieldName];
             const field = this.fields[fieldName];
             if (field.type === "one2many" || field.type === "many2many") {
-                const { related, limit } = this.activeFields[fieldName];
                 let staticList = currentValues[fieldName];
                 let valueIsCommandList = true;
+                // value can be a list of records or a list of commands (new record)
+                valueIsCommandList = value.length > 0 && Array.isArray(value[0]);
                 if (!staticList) {
-                    // value can be a list of records or a list of commands (new record)
-                    valueIsCommandList = value.length > 0 && Array.isArray(value[0]);
-                    staticList = new this.model.constructor.StaticList(this.model, {
-                        // FIXME: can't do that here, no context... yes, we do, but need to pass rawContext
-                        resModel: field.relation,
-                        activeFields: (related && related.activeFields) || {},
-                        fields: (related && related.fields) || {},
-                        data: valueIsCommandList ? [] : value,
-                        parent: this,
-                        limit,
-                        onChange: () => this._update({ [fieldName]: staticList }),
-                    });
+                    const data = valueIsCommandList ? [] : value;
+                    staticList = this._createStaticListDatapoint(data, fieldName);
                 }
                 if (valueIsCommandList) {
                     staticList._applyCommands(value);
@@ -275,6 +266,25 @@ export class Record extends DataPoint {
             }
         }
         return !this._invalidFields.size;
+    }
+
+    _createStaticListDatapoint(data, fieldName) {
+        const { related, limit } = this.activeFields[fieldName];
+        const config = {
+            // FIXME: can't do that here, no context... yes, we do, but need to pass rawContext
+            resModel: this.fields[fieldName].relation,
+            activeFields: (related && related.activeFields) || {},
+            fields: (related && related.fields) || {},
+            offset: 0,
+            limit,
+        };
+        let staticList;
+        const options = {
+            onChange: () => this._update({ [fieldName]: staticList }),
+            parent: this,
+        };
+        staticList = new this.model.constructor.StaticList(this.model, config, data, options);
+        return staticList;
     }
 
     _discard() {

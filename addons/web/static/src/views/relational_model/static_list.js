@@ -7,14 +7,14 @@ import { DataPoint } from "./datapoint";
 export class StaticList extends DataPoint {
     static type = "StaticList";
 
-    setup(params) {
-        this._parent = params.parent;
-        this._onChange = params.onChange;
-        this.orderBy = params.orderBy || [];
-        this.limit = params.limit || 40;
-        this.offset = params.offset || 0;
-        this.resIds = params.data.map((r) => r.id);
-        this.records = params.data
+    setup(config, data, options = {}) {
+        this._parent = options.parent;
+        this._onChange = options.onChange;
+        this.orderBy = config.orderBy || [];
+        this.limit = config.limit || 40;
+        this.offset = config.offset || 0;
+        this.resIds = data.map((r) => r.id);
+        this.records = data
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
         this._commands = [];
@@ -135,16 +135,20 @@ export class StaticList extends DataPoint {
     }
 
     _createRecordDatapoint(data, mode = "readonly") {
-        return new this.model.constructor.Record(this.model, {
+        const config = {
             context: this.context,
             activeFields: this.activeFields,
             resModel: this.resModel,
             fields: this.fields,
-            parentRecord: this._parent,
-            data,
+            resId: data.id || false,
             mode,
+            isMonoRecord: true,
+        };
+        const options = {
+            parentRecord: this._parent,
             onChange: this._onChange,
-        });
+        };
+        return new this.model.constructor.Record(this.model, config, data, options);
     }
 
     _getCommands() {
