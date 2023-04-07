@@ -446,7 +446,8 @@ export class FormController extends Component {
         // FIXME: disable/enable not done in onPagerChange
         if (canProceed) {
             this.disableButtons();
-            await this.model.load({ resId: null, mode: "edit" });
+            await this.model.load({ resId: null });
+            this.model.root.switchMode("edit");
             this.enableButtons();
         }
     }
