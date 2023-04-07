@@ -63,7 +63,7 @@ export class ListController extends Component {
             groupByInfo: this.archInfo.groupBy.fields,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,
-            defaultOrder: this.archInfo.defaultOrder,
+            defaultOrderBy: this.archInfo.defaultOrder,
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
             openGroupsByDefault: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
             groupsLimit: this.archInfo.groupsLimit,

@@ -34,7 +34,7 @@ export class KanbanController extends Component {
             limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
             defaultGroupBy,
-            defaultOrder: archInfo.defaultOrder,
+            defaultOrderBy: archInfo.defaultOrder,
             openGroupsByDefault: true,
             maxGroupByDepth: 1,
         });

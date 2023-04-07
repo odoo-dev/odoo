@@ -6,7 +6,7 @@ import { WarningDialog } from "@web/core/errors/error_dialogs";
 // import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
-import { deepCopy } from "@web/core/utils/objects";
+// import { deepCopy } from "@web/core/utils/objects";
 import { Model } from "@web/views/model";
 import { orderByToString } from "@web/views/utils";
 import { Record } from "./record";
@@ -28,7 +28,7 @@ import { getFieldsSpec, getOnChangeSpec } from "./utils";
  * @property {number} [limit]
  * @property {number} [countLimit]
  * @property {number} [groupsLimit]
- * @property {Array<string>} [defaultOrder]
+ * @property {Array<string>} [defaultOrderBy]
  * @property {Array<string>} [defaultGroupBy]
  * @property {boolean} [openGroupsByDefault]
  * @property {number} [maxGroupByDepth]
@@ -95,12 +95,8 @@ export class RelationalModel extends Model {
         this.mutex = markRaw(new Mutex());
 
         /** @type {Config} */
-        this.config = {
+        this.baseConfig = {
             isMonoRecord: false,
-            domain: [],
-            context: {},
-            groupBy: [],
-            orderBy: [],
             ...params.config,
         };
 
@@ -113,7 +109,7 @@ export class RelationalModel extends Model {
                 ? this.constructor.DEFAULT_OPEN_GROUP_LIMIT
                 : this.constructor.DEFAULT_GROUP_LIMIT);
         this.initialCountLimit = params.countLimit || this.constructor.DEFAULT_COUNT_LIMIT;
-        this.defaultOrder = params.defaultOrder;
+        this.defaultOrderBy = params.defaultOrderBy;
         this.defaultGroupBy = params.defaultGroupBy;
         this.openGroupsByDefault = params.openGroupsByDefault;
         this.maxGroupByDepth = params.maxGroupByDepth;
@@ -158,7 +154,7 @@ export class RelationalModel extends Model {
      */
     async load(params = {}) {
         let data;
-        let config = deepCopy(this.config); // FIXME: we deep copy fields and activeFields -> do a smarter copy here
+        let config = this.config || this.baseConfig;
         if (params.values) {
             //TODOPRO What is values ? Update docstring
             data = params.values;
@@ -166,7 +162,14 @@ export class RelationalModel extends Model {
                 config.mode = params.mode;
             }
         } else {
-            config = this._enhanceConfig(config, params);
+            config = this._getNextConfig(config, params);
+            if (this.config) {
+                // keep current root config if any, if the groupBy parameter is the same
+                // if (shallowEqual(config.groupBy || [], this.config.groupBy || [])) {
+                //     config = deepCopy(this.root.config); //TODOPRO Check that
+                //     config.offset = 0;
+                // }
+            }
             data = await this.keepLast.add(this._loadData(config));
         }
         this.config = config;
@@ -180,41 +183,44 @@ export class RelationalModel extends Model {
     // -------------------------------------------------------------------------
 
     /**
-     * @param {Config} config
      * @param {*} params
      * @returns {Config}
      */
-    _enhanceConfig(config, params) {
-        // const previousGroupBy = config.groupBy;
-        const previousOrderBy = config.orderBy;
-        Object.assign(config, params); // FIXME: at some point I would like to hardcode the params we apply into the config
-        // apply default order if no order
-        if (this.defaultOrder && !config.orderBy.length) {
-            config.orderBy = this.defaultOrder;
-        }
-        // apply default groupBy
-        if (
-            this.defaultGroupBy &&
-            !this.env.inDialog && // FIXME ???
-            !config.groupBy.length
-        ) {
-            config.groupBy = [this.defaultGroupBy];
-        }
-        // restrict the number of groupbys if requested
-        if (this.maxGroupByDepth) {
-            config.groupBy = config.groupBy.slice(0, this.maxGroupByDepth);
-        }
-        if (this.root) {
-            // keep current root config if any, if the groupBy parameter is the same
-            // if (shallowEqual(config.groupBy || [], previousGroupBy || [])) {
-            //     config = deepCopy(this.root.config); //TODOPRO Check that
-            //     config.offset = 0;
-            // }
+    _getNextConfig(currentConfig, params) {
+        const config = Object.assign({}, currentConfig);
+
+        config.context = "context" in params ? params.context : config.context;
+        if (currentConfig.isMonoRecord) {
+            config.resId = "resId" in params ? params.resId : config.resId;
+            config.mode = "mode" in params ? params.mode : config.mode; // FIXME: remove?
+        } else {
+            config.domain = "domain" in params ? params.domain : config.domain;
+            config.comparison = "comparison" in params ? params.comparison : config.comparison;
+
+            // groupBy
+            config.groupBy = "groupBy" in params ? params.groupBy : config.groupBy;
+            // apply default groupBy if any
+            if (this.defaultGroupBy && !config.groupBy.length) {
+                // !this.env.inDialog && // FIXME ???
+                config.groupBy = [this.defaultGroupBy];
+            }
+            // restrict the number of groupbys if requested
+            if (this.maxGroupByDepth) {
+                config.groupBy = config.groupBy.slice(0, this.maxGroupByDepth);
+            }
+
+            // orderBy
+            config.orderBy = "orderBy" in params ? params.orderBy : config.orderBy;
+            // apply default order if no order
+            if (this.defaultOrderBy && !config.orderBy.length) {
+                config.orderBy = this.defaultOrderBy;
+            }
             // re-apply previous orderBy if not given (or no order)
-            if (!config.orderBy) {
-                config.orderBy = previousOrderBy;
+            if (!config.orderBy.length) {
+                config.orderBy = currentConfig.orderBy || [];
             }
         }
+
         return config;
     }
 
