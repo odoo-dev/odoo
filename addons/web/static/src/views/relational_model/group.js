@@ -97,11 +97,10 @@ export class Group extends DataPoint {
     }
 
     async toggle() {
-        if (this.isFolded) {
+        if (this.config.isFolded) {
             await this.list.load();
         }
-        //TODOPRO The config is updated here, should be done with updateConfig
-        this.config.isFolded = !this.isFolded;
+        this.model._toggleGroup(this.config);
     }
 
     // -------------------------------------------------------------------------

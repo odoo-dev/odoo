@@ -121,18 +121,6 @@ export class RelationalModel extends Model {
     // Public
     // -------------------------------------------------------------------------
 
-    /**
-     *
-     * @param {Config} config
-     * @param {Partial<Config>} patch
-     */
-    async updateConfig(config, patch) {
-        const tmpConfig = { ...config, ...patch }; //TODOPRO I wonder if we should not use deepCopy here
-        const response = await this._loadData(tmpConfig);
-        Object.assign(config, tmpConfig);
-        return response;
-    }
-
     exportConfig() {
         return this.config;
     }
@@ -172,6 +160,37 @@ export class RelationalModel extends Model {
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    /**
+     *
+     * @param {Config} config
+     */
+    _toggleGroup(config) {
+        config.isFolded = !config.isFolded;
+    }
+
+    /**
+     *
+     * @param {Config} config
+     * @param {Partial<Config>} patch
+     */
+    async _updateConfig(config, patch) {
+        const tmpConfig = { ...config, ...patch }; //TODOPRO I wonder if we should not use deepCopy here
+        const response = await this._loadData(tmpConfig);
+        Object.assign(config, tmpConfig);
+        return response;
+    }
+
+    /**
+     *
+     * @param {Config} config
+     * @returns {Promise<number>}
+     */
+    async _updateCount(config) {
+        const count = await this.keepLast.add(this.orm.searchCount(config.resModel, config.domain));
+        config.countLimit = Number.MAX_SAFE_INTEGER;
+        return count;
+    }
 
     /**
      * @param {*} params
