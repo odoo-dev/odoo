@@ -263,12 +263,30 @@ class AccountPaymentTermLine(models.Model):
 
     def _get_due_date(self, date_ref):
         self.ensure_one()
+<<<<<<< HEAD
         due_date = fields.Date.from_string(date_ref)
         if self.delay_type == 'days_after_end_of_month':
             return date_utils.end_of(due_date, 'month') + relativedelta(days=self.nb_days)
         elif self.delay_type == 'days_after_end_of_next_month':
             return date_utils.end_of(due_date + relativedelta(months=1), 'month') + relativedelta(days=self.nb_days)
         return due_date + relativedelta(days=self.nb_days)
+||||||| parent of 320d9ea1b4b (temp)
+        due_date = fields.Date.from_string(date_ref)
+        due_date += relativedelta(months=self.months)
+        due_date += relativedelta(days=self.days)
+        if self.end_month:
+            due_date += relativedelta(day=31)
+            due_date += relativedelta(days=self.days_after)
+        return due_date
+=======
+        due_date = fields.Date.from_string(date_ref) or fields.Date.today()
+        due_date += relativedelta(months=self.months)
+        due_date += relativedelta(days=self.days)
+        if self.end_month:
+            due_date += relativedelta(day=31)
+            due_date += relativedelta(days=self.days_after)
+        return due_date
+>>>>>>> 320d9ea1b4b (temp)
 
     @api.constrains('value', 'value_amount')
     def _check_percent(self):
