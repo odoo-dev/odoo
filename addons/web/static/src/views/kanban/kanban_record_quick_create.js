@@ -63,15 +63,15 @@ class KanbanQuickCreateController extends Component {
         this.model = useModel(
             this.props.Model,
             {
-                resModel: this.props.resModel,
-                resId: false,
-                resIds: [],
-                fields,
-                activeFields,
-                viewMode: "form",
-                rootType: "record",
-                mode: "edit",
-                component: this,
+                config: {
+                    resModel: this.props.resModel,
+                    resId: false,
+                    resIds: [],
+                    fields,
+                    activeFields,
+                    isMonoRecord: true,
+                    mode: "edit",
+                },
             },
             {
                 ignoreUseSampleModel: true,

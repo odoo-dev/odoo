@@ -142,7 +142,6 @@ export class FormController extends Component {
                     isMonoRecord: true,
                     mode,
                 },
-                component: this,
                 onRecordSaved: this.onRecordSaved.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
             },
