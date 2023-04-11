@@ -141,6 +141,7 @@ export class StaticList extends DataPoint {
             resModel: this.resModel,
             fields: this.fields,
             resId: data.id || false,
+            resIds: data.id ? [data.id] : [],
             mode,
             isMonoRecord: true,
         };

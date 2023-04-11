@@ -79,6 +79,7 @@ export class DynamicRecordList extends DynamicList {
                 resModel: this.resModel,
                 fields: this.fields,
                 resId: data.id || false,
+                resIds: data.id ? [data.id] : [],
                 isMonoRecord: true,
                 mode,
             },

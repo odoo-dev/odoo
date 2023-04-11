@@ -15,14 +15,6 @@ export class Record extends DataPoint {
         this._parentRecord = options.parentRecord;
         this._onChange = options.onChange || (() => {});
 
-        this.resId = config.resId;
-        this.resIds = config.resIds || [];
-        if (config.mode === "readonly") {
-            this.isInEdition = false;
-        } else {
-            this.isInEdition = config.mode === "edit" || !this.resId;
-        }
-
         if (this.resId) {
             this._values = this._applyServerValues(data);
             this._changes = {};
@@ -77,6 +69,22 @@ export class Record extends DataPoint {
         return !this._invalidFields.size;
     }
 
+    get resId() {
+        return this.config.resId;
+    }
+
+    get resIds() {
+        return this.config.resIds;
+    }
+
+    get isInEdition() {
+        if (this.config.mode === "readonly") {
+            return false;
+        } else {
+            return this.config.mode === "edit" || !this.resId;
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
@@ -127,16 +135,15 @@ export class Record extends DataPoint {
             resIds.splice(index, 1);
             const resId = resIds[Math.min(index, resIds.length - 1)] || false;
             if (resId) {
-                await this._load(resId);
+                await this._load({ resId, resIds });
             } else {
-                this.resId = false;
+                this.model._updateConfig(this.config, { resId: false }, { noReload: true });
                 this.isDirty = false;
                 this._changes = this._applyServerValues(this._getDefaultValues());
                 this._values = {};
                 this.data = { ...this._changes };
                 this._setEvalContext();
             }
-            this.resIds = resIds;
         });
     }
 
@@ -149,14 +156,14 @@ export class Record extends DataPoint {
             const kwargs = { context: this.context };
             const index = this.resIds.indexOf(this.resId);
             const resId = await this.model.orm.call(this.resModel, "copy", [this.resId], kwargs);
-            await this._load(resId);
-            this.isInEdition = true;
-            this.resIds.splice(index + 1, 0, this.resId);
+            const resIds = this.resIds.slice();
+            resIds.splice(index + 1, 0, resId);
+            await this._load({ resId, resIds, mode: "edit" });
         });
     }
 
     load(resId = this.resId) {
-        return this.model.mutex.exec(() => this._load(resId));
+        return this.model.mutex.exec(() => this._load({ resId }));
     }
 
     async save(options) {
@@ -170,7 +177,7 @@ export class Record extends DataPoint {
     }
 
     switchMode(mode) {
-        this.isInEdition = mode === "edit";
+        this.model._updateConfig(this.config, { mode }, { noReload: true });
     }
 
     toggleSelection(selected) {
@@ -389,34 +396,17 @@ export class Record extends DataPoint {
         return this.data[fieldName].records.every((r) => r._checkValidity());
     }
 
-    async _load(resId) {
-        const params = {
-            activeFields: this.activeFields,
-            fields: this.fields,
-            resModel: this.resModel,
-            context: this.context,
-        };
-        let record;
-        if (resId) {
-            params.resIds = [resId];
-            params.context = {
-                ...params.context,
-                active_id: resId,
-                active_ids: [resId],
-                active_model: this.resModel,
-                current_company_id: this.model.company.currentCompany.id,
-            };
-            [record] = await this.model._loadRecords(params);
+    async _load(nextConfig) {
+        const record = await this.model._updateConfig(this.config, nextConfig);
+        if (this.resId) {
             this._values = this._applyServerValues(record);
             this._changes = {};
         } else {
-            record = await this.model._loadNewRecord(params);
             this._values = {};
             this._changes = this._applyServerValues({ ...this._getDefaultValues(), ...record });
         }
         this.isDirty = false;
         this.data = { ...this._values, ...this._changes };
-        this.resId = resId;
         this._setEvalContext();
         this._invalidFields.clear();
     }
@@ -467,15 +457,16 @@ export class Record extends DataPoint {
                 return onError(e, { discard: () => this._discard() });
             }
             if (!this.isInEdition) {
-                await this._load(resId);
+                await this._load({ resId });
             }
             return false;
         }
         if (!noReload) {
-            await this._load(resId);
+            const nextConfig = { resId };
             if (creation) {
-                this.resIds.push(resId);
+                nextConfig.resIds = this.resIds.concat([resId]);
             }
+            await this._load(nextConfig);
         } else {
             this._values = { ...this._values, ...this._changes };
             this._changes = {};
@@ -504,9 +495,9 @@ export class Record extends DataPoint {
         const resId = this.resId;
         const action = await this.model.orm.call(this.resModel, method, [[resId]], { context });
         if (action && Object.keys(action).length) {
-            this.model.action.doAction(action, { onClose: () => this._load(resId) });
+            this.model.action.doAction(action, { onClose: () => this._load({ resId }) });
         } else {
-            return this._load(resId);
+            return this._load({ resId });
         }
     }
 
