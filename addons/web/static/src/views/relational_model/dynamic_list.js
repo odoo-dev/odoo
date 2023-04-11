@@ -49,7 +49,7 @@ export class DynamicList extends DataPoint {
         return false;
     }
 
-    deleteRecords(records) {
+    deleteRecords(records = this.records) {
         return this.model.mutex.exec(async () => {
             const unlinked = await this.model.orm.unlink(
                 this.resModel,
@@ -135,6 +135,13 @@ export class DynamicList extends DataPoint {
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    _leaveSampleMode() {
+        if (this.model.useSampleModel) {
+            this.model.useSampleModel = false;
+            return this._load(this.offset, this.limit, this.config.orderBy);
+        }
+    }
 
     async _toggleArchive(isSelected, state) {
         const method = state ? "action_archive" : "action_unarchive";

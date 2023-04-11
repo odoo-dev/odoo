@@ -42,7 +42,10 @@ export class DynamicRecordList extends DynamicList {
      * @returns {Promise<Record>}
      */
     createRecord(atFirstPosition = false) {
-        return this.model.mutex.exec(() => this._addNewRecord(atFirstPosition));
+        return this.model.mutex.exec(async () => {
+            await this._leaveSampleMode();
+            return this._addNewRecord(atFirstPosition);
+        });
     }
     /**
      * Performs a search_count with the current domain to set the count. This is
@@ -53,6 +56,19 @@ export class DynamicRecordList extends DynamicList {
         this.count = await this.model._updateCount(this.config);
         this.hasLimitedCount = false;
         return this.count;
+    }
+
+    removeRecord(record) {
+        if (!record.isNew) {
+            throw new Error("removeRecord can't be called on an existing record");
+        }
+        const index = this.records.findIndex((r) => r === record);
+        if (index < 0) {
+            return;
+        }
+        this.records.splice(index, 1);
+        this.count--;
+        return record;
     }
 
     // -------------------------------------------------------------------------

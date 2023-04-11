@@ -234,7 +234,7 @@ export class ListController extends Component {
     }
 
     async onClickSave() {
-        const saved = await this.model.root.editedRecord.save();
+        const saved = await this.model.root.editedRecord.save({ force: true });
         if (saved) {
             this.model.root.editedRecord.switchMode("readonly");
         }
