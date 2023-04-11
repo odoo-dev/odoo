@@ -6904,7 +6904,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_view table", "should have a table in the dom");
     });
 
-    QUnit.tttt("empty list with sample data", async function (assert) {
+    QUnit.test("empty list with sample data", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6979,7 +6979,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_nocontent_help");
     });
 
-    QUnit.tttt("refresh empty list with sample data", async function (assert) {
+    QUnit.test("refresh empty list with sample data", async function (assert) {
         serverData.views = {
             "foo,false,search": `
                 <search>
@@ -7024,7 +7024,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_list_view").textContent, textContent);
     });
 
-    QUnit.tttt("empty list with sample data: toggle optional field", async function (assert) {
+    QUnit.test("empty list with sample data: toggle optional field", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7055,7 +7055,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "th", 4);
     });
 
-    QUnit.tttt("empty list with sample data: keyboard navigation", async function (assert) {
+    QUnit.test("empty list with sample data: keyboard navigation", async function (assert) {
         await makeView({
             type: "list",
             arch: `
@@ -7106,7 +7106,7 @@ QUnit.module("Views", (hooks) => {
         assert.ok(document.activeElement.dataset.name === "foo");
     });
 
-    QUnit.tttt("empty list with sample data: group by date", async (assert) => {
+    QUnit.test("empty list with sample data: group by date", async (assert) => {
         await makeView({
             type: "list",
             arch: `
@@ -7127,7 +7127,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 4);
     });
 
-    QUnit.tttt("non empty list with sample data", async function (assert) {
+    QUnit.test("non empty list with sample data", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7165,7 +7165,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("click on header in empty list with sample data", async function (assert) {
+    QUnit.test("click on header in empty list with sample data", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7193,7 +7193,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "non empty editable list with sample data: delete all records",
         async function (assert) {
             await makeView({
@@ -7236,7 +7236,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "empty editable list with sample data: start create record and cancel",
         async function (assert) {
             await makeView({
@@ -7280,7 +7280,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "empty editable list with sample data: create and delete record",
         async function (assert) {
             await makeView({
@@ -7371,7 +7371,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         assert.containsOnce(
             target,
             "thead th:not(.o_list_record_selector)",
