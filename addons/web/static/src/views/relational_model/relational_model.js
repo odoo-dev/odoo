@@ -230,7 +230,6 @@ export class RelationalModel extends Model {
 
         config.context = "context" in params ? params.context : config.context;
         if (!currentConfig.isMonoRecord) {
-            config.offset = 0;
             config.domain = "domain" in params ? params.domain : config.domain;
             config.comparison = "comparison" in params ? params.comparison : config.comparison;
 

@@ -6166,7 +6166,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("list keeps offset on switchView", async (assert) => {
+    QUnit.test("list keeps offset on switchView", async (assert) => {
         assert.expect(3);
         serverData.views = {
             "foo,false,search": `<search />`,
@@ -6194,7 +6194,7 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_back_button");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Navigate between the list and kanban view using the command palette",
         async (assert) => {
             serverData.views = {
@@ -6243,7 +6243,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("can sort records when clicking on header", async function (assert) {
+    QUnit.test("can sort records when clicking on header", async function (assert) {
         serverData.models.foo.fields.foo.sortable = true;
 
         let nbSearchRead = 0;
@@ -6252,8 +6252,8 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: '<tree><field name="foo"/><field name="bar"/></tree>',
-            mockRPC(route) {
-                if (route === "/web/dataset/call_kw/foo/web_search_read") {
+            mockRPC(route, args) {
+                if (args.method === "web_search_read_unity") {
                     nbSearchRead++;
                 }
             },
@@ -6294,7 +6294,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("do not sort records when clicking on header with nolabel", async function (assert) {
+    QUnit.test("do not sort records when clicking on header with nolabel", async function (assert) {
         serverData.models.foo.fields.foo.sortable = true;
 
         let nbSearchRead = 0;
@@ -6303,8 +6303,8 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: '<tree><field name="foo" nolabel="1"/><field name="int_field"/></tree>',
-            mockRPC(route) {
-                if (route === "/web/dataset/call_kw/foo/web_search_read") {
+            mockRPC(route, args) {
+                if (args.method === "web_search_read_unity") {
                     nbSearchRead++;
                 }
             },
@@ -6322,7 +6322,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual($(target).find(".o_data_cell").text(), "blip-4blip9yop10gnap17");
     });
 
-    QUnit.tttt("use default_order", async function (assert) {
+    QUnit.test("use default_order", async function (assert) {
         assert.expect(3);
 
         await makeView({
@@ -6331,7 +6331,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree default_order="foo"><field name="foo"/><field name="bar"/></tree>',
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/foo/web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     assert.strictEqual(
                         args.kwargs.order,
                         "foo ASC",
@@ -6351,7 +6351,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("use more complex default_order", async function (assert) {
+    QUnit.test("use more complex default_order", async function (assert) {
         assert.expect(3);
 
         await makeView({
@@ -6363,7 +6363,7 @@ QUnit.module("Views", (hooks) => {
                 '<field name="foo"/><field name="bar"/>' +
                 "</tree>",
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/foo/web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     assert.strictEqual(
                         args.kwargs.order,
                         "foo ASC, bar DESC, int_field ASC",
@@ -6551,7 +6551,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("can display button in edit mode", async function (assert) {
+    QUnit.test("can display button in edit mode", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6574,7 +6574,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row button[name=notafield]");
     });
 
-    QUnit.tttt("can display a list with a many2many field", async function (assert) {
+    QUnit.test("can display a list with a many2many field", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6584,7 +6584,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(args.method);
             },
         });
-        assert.verifySteps(["get_views", "web_search_read"], "should have done 1 web_search_read");
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell")), [
             "2 records",
             "3 records",
@@ -6593,7 +6593,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("display a tooltip on a field", async function (assert) {
+    QUnit.test("display a tooltip on a field", async function (assert) {
         patchWithCleanup(odoo, {
             debug: false,
         });
@@ -6647,7 +6647,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("support row decoration", async function (assert) {
+    QUnit.test("support row decoration", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6669,7 +6669,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
-    QUnit.tttt("support row decoration (with unset numeric values)", async function (assert) {
+    QUnit.test("support row decoration (with unset numeric values)", async function (assert) {
         serverData.models.foo.records = [];
 
         await makeView({
@@ -6697,7 +6697,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("support row decoration with date", async function (assert) {
+    QUnit.test("support row decoration with date", async function (assert) {
         serverData.models.foo.records[0].datetime = "2017-02-27 12:51:35";
 
         await makeView({
@@ -6726,7 +6726,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
-    QUnit.tttt("support row decoration (decoration-bf)", async function (assert) {
+    QUnit.test("support row decoration (decoration-bf)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6743,7 +6743,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
-    QUnit.tttt("support row decoration (decoration-it)", async function (assert) {
+    QUnit.test("support row decoration (decoration-it)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6765,7 +6765,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
-    QUnit.tttt("support field decoration", async function (assert) {
+    QUnit.test("support field decoration", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6784,7 +6784,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, "tbody td.o_list_number.text-danger");
     });
 
-    QUnit.tttt("support field decoration (decoration-bf)", async function (assert) {
+    QUnit.test("support field decoration (decoration-bf)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6803,7 +6803,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, "tbody td.o_list_number.fw-bold");
     });
 
-    QUnit.tttt("support field decoration (decoration-it)", async function (assert) {
+    QUnit.test("support field decoration (decoration-it)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6822,7 +6822,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, "tbody td.o_list_number.fst-italic");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "bounce create button when no data and click on empty area",
         async function (assert) {
             patchWithCleanup(browser, {
@@ -6856,7 +6856,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("no content helper when no data", async function (assert) {
+    QUnit.test("no content helper when no data", async function (assert) {
         const records = serverData.models.foo.records;
 
         serverData.models.foo.records = [];
@@ -6885,7 +6885,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("no nocontent helper when no data and no help", async function (assert) {
+    QUnit.test("no nocontent helper when no data and no help", async function (assert) {
         serverData.models.foo.records = [];
 
         await makeView({
