@@ -1714,7 +1714,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record with quick_create_view", async (assert) => {
+    QUnit.test("quick create record with quick_create_view", async (assert) => {
         assert.expect(20);
 
         serverData.views["partner,some_view_ref,form"] =
@@ -1739,7 +1739,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(args.method || route);
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args,
+                        args.args[0],
                         [
                             {
                                 foo: "new partner",
@@ -1786,15 +1786,15 @@ QUnit.module("Views", (hooks) => {
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // new quick create
+            "web_read_unity",
+            "web_read_unity", // read the created record
+            "onchange2", // new quick create
         ]);
     });
 
-    QUnit.tttt("quick create record flickering", async (assert) => {
+    QUnit.test("quick create record flickering", async (assert) => {
         let def;
         serverData.views["partner,some_view_ref,form"] = `
             <form>
@@ -1822,7 +1822,7 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, args) {
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args,
+                        args.args[0],
                         [
                             {
                                 foo: "new partner",
@@ -1833,7 +1833,7 @@ QUnit.module("Views", (hooks) => {
                         "should send the correct values"
                     );
                 }
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await def;
                 }
             },
@@ -1866,7 +1866,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_quick_create");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record should focus default field [REQUIRE FOCUS]",
         async function (assert) {
             serverData.views["partner,some_view_ref,form"] =
@@ -1897,7 +1897,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record should focus first field input [REQUIRE FOCUS]",
         async function (assert) {
             serverData.views["partner,some_view_ref,form"] =
@@ -1928,7 +1928,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick_create_view without quick_create option", async (assert) => {
+    QUnit.test("quick_create_view without quick_create option", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = `
             <form>
                 <field name="display_name"/>
@@ -1966,7 +1966,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2o (no quick_create_view)", async (assert) => {
+    QUnit.test("quick create record in grouped on m2o (no quick_create_view)", async (assert) => {
         assert.expect(14);
 
         await makeView({
@@ -2017,14 +2017,14 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "onchange", // quick create
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2o (with quick_create_view)", async (assert) => {
+    QUnit.test("quick create record in grouped on m2o (with quick_create_view)", async (assert) => {
         assert.expect(16);
 
         serverData.views["partner,some_view_ref,form"] =
@@ -2049,7 +2049,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(method || route);
                 if (method === "create") {
                     assert.deepEqual(
-                        args,
+                        args[0],
                         [
                             {
                                 foo: "new partner",
@@ -2087,11 +2087,11 @@ QUnit.module("Views", (hooks) => {
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity",
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2143,16 +2143,16 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "read", // read display_name of categories
-            "onchange", // quick create
+            "web_read_unity", // read display_name of categories
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read",
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity",
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2m in the None column", async (assert) => {
+    QUnit.test("quick create record in grouped on m2m in the None column", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -2202,12 +2202,11 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "read", // read display_name of categories
             "web_search_read_unity", // read records when unfolding 'None'
-            "onchange", // quick create
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "web_read_unity", // read the created record
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2233,7 +2232,7 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, { method, args, kwargs }) {
                 assert.step(method || route);
                 if (method === "create") {
-                    assert.deepEqual(args, [
+                    assert.deepEqual(args[0], [
                         {
                             foo: "new partner",
                         },
@@ -2268,10 +2267,10 @@ QUnit.module("Views", (hooks) => {
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
             "get_views", // get form view
-            "onchange", // quick create
+            "onchange2", // quick create
             "create", // should perform a create to create the record
             "read", // read the created record
-            "onchange", // reopen the quick create automatically
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
@@ -2342,11 +2341,11 @@ QUnit.module("Views", (hooks) => {
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
             "get_views", // get form view
-            "onchange", // quick create
+            "onchange2", // quick create
             "read",
             "create", // should perform a create to create the record
             "read",
-            "onchange",
+            "onchange2",
             "read",
         ]);
     });
@@ -2377,7 +2376,7 @@ QUnit.module("Views", (hooks) => {
         ]);
 
         await createRecord();
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // do not fill anything and validate
         await validateRecord();
@@ -2447,8 +2446,8 @@ QUnit.module("Views", (hooks) => {
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
             "get_views", // form view in quick create
-            "onchange", // quick create
-            "onchange", // onchange due to 'foo' field change
+            "onchange2", // quick create
+            "onchange2", // onchange due to 'foo' field change
         ]);
     });
 
@@ -2541,16 +2540,16 @@ QUnit.module("Views", (hooks) => {
 
         // click on 'Create' -> should open the quick create in the first column
         await quickCreateRecord();
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
 
         // fill the 'foo' field -> should trigger the onchange
         await editQuickCreateInput("foo", "new partner");
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
         await validateRecord();
-        assert.verifySteps(["create", "read", "onchange"]);
+        assert.verifySteps(["create", "read", "onchange2"]);
     });
 
-    QUnit.tttt("quick create record and change state in grouped mode", async (assert) => {
+    QUnit.test("quick create record and change state in grouped mode", async (assert) => {
         serverData.models.partner.fields.kanban_state = {
             string: "Kanban State",
             type: "selection",
@@ -2596,7 +2595,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("window resize should not change quick create form size", async (assert) => {
+    QUnit.test("window resize should not change quick create form size", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -2864,7 +2863,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "save a quick create record and create a new record at the same time",
         async (assert) => {
             const prom = makeDeferred();
@@ -2987,7 +2986,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
                 async mockRPC(route, { method, args }) {
                     switch (method) {
-                        case "onchange": {
+                        case "onchange2": {
                             assert.step(method);
                             if (shouldDelayOnchange) {
                                 await prom;
@@ -3060,10 +3059,10 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "onchange", // default_get
-                "onchange", // new partner
+                "onchange2", // default_get
+                "onchange2", // new partner
                 "create",
-                "onchange", // default_get
+                "onchange2", // default_get
             ]);
         }
     );
@@ -3095,8 +3094,8 @@ QUnit.module("Views", (hooks) => {
                     "</t></templates></kanban>",
                 groupBy: ["bar"],
                 async mockRPC(route, args) {
-                    if (args.method === "onchange") {
-                        assert.step("onchange");
+                    if (args.method === "onchange2") {
+                        assert.step("onchange2");
                         if (shouldDelayOnchange) {
                             await prom;
                         }
@@ -3159,15 +3158,15 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "onchange", // default_get
-                "onchange", // new partner
+                "onchange2", // default_get
+                "onchange2", // new partner
                 "create",
-                "onchange", // default_get
+                "onchange2", // default_get
             ]);
         }
     );
 
-    QUnit.tttt("quick create when first column is folded", async (assert) => {
+    QUnit.test("quick create when first column is folded", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3227,7 +3226,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record: cancel when not dirty", async (assert) => {
+    QUnit.test("quick create record: cancel when not dirty", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3328,7 +3327,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record: cancel when modal is opened", async (assert) => {
+    QUnit.test("quick create record: cancel when modal is opened", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = '<form><field name="product_id"/></form>';
 
         // patch setTimeout s.t. the autocomplete dropdown opens directly
@@ -3372,7 +3371,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record: cancel when dirty", async (assert) => {
+    QUnit.test("quick create record: cancel when dirty", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3502,7 +3501,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create several records in a row", async (assert) => {
+    QUnit.test("quick create several records in a row", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3676,7 +3675,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_quick_create:not(.o_disabled)");
     });
 
-    QUnit.tttt("quick create record is re-enabled after discard on failure", async (assert) => {
+    QUnit.test("quick create record is re-enabled after discard on failure", async (assert) => {
         serverData.views["partner,false,form"] = `
             <form>
                 <field name="product_id"/>
@@ -3886,7 +3885,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record in grouped on date(time) field", async (assert) => {
+    QUnit.test("quick create record in grouped on date(time) field", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3936,7 +3935,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["createRecord", "createRecord"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record feature is properly enabled/disabled at reload",
         async (assert) => {
             const kanban = await makeView({
@@ -3978,7 +3977,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick create record in grouped by char field", async (assert) => {
+    QUnit.test("quick create record in grouped by char field", async (assert) => {
         assert.expect(4);
 
         await makeView({
@@ -4009,7 +4008,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 3);
     });
 
-    QUnit.tttt("quick create record in grouped by boolean field", async (assert) => {
+    QUnit.test("quick create record in grouped by boolean field", async (assert) => {
         assert.expect(4);
 
         await makeView({
@@ -4040,7 +4039,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:last-child .o_kanban_record", 4);
     });
 
-    QUnit.tttt("quick create record in grouped on selection field", async (assert) => {
+    QUnit.test("quick create record in grouped on selection field", async (assert) => {
         assert.expect(4);
 
         await makeView({
@@ -4285,7 +4284,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 3);
     });
 
-    QUnit.tttt("close a column while quick creating a record", async (assert) => {
+    QUnit.test("close a column while quick creating a record", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = '<form><field name="int_field"/></form>';
 
         let prom;
@@ -4340,7 +4339,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_column_folded");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record: open on a column while another column has already one",
         async (assert) => {
             await makeView({
@@ -4462,7 +4461,7 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_kanban_record:first-child .o_tag:first-child");
     });
 
-    QUnit.tttt("Do not open record when clicking on `a` with `href`", async (assert) => {
+    QUnit.test("Do not open record when clicking on `a` with `href`", async (assert) => {
         serverData.models.partner.records = [{ id: 1, foo: "yop" }];
 
         const kanban = await makeView({
@@ -5248,7 +5247,7 @@ QUnit.module("Views", (hooks) => {
                 "</kanban>",
             groupBy: ["product_id"],
             async mockRPC(route, { model, method }) {
-                if (model === "partner" && method === "onchange") {
+                if (model === "partner" && method === "onchange2") {
                     throw {};
                 }
             },
@@ -11871,8 +11870,8 @@ QUnit.module("Views", (hooks) => {
             `,
             groupBy: ["bar"],
             async mockRPC(route, args) {
-                if (args.method === "onchange") {
-                    assert.step("onchange");
+                if (args.method === "onchange2") {
+                    assert.step("onchange2");
                     await Promise.resolve(def);
                 }
             },
@@ -11915,7 +11914,7 @@ QUnit.module("Views", (hooks) => {
             ),
             ["blipDEF", "ABC"]
         );
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         def.resolve();
         await nextTick();
@@ -12262,13 +12261,13 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "onchange", // quick create
+            "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
             "get_views", // load views for form view dialog
-            "onchange", // load of a virtual record in form view dialog
+            "onchange2", // load of a virtual record in form view dialog
             "create", // save virtual record
             "read", // read the created record to get foo value
-            "onchange", // reopen the quick create automatically
+            "onchange2", // reopen the quick create automatically
         ]);
     });
 
