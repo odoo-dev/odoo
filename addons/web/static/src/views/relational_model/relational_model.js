@@ -439,6 +439,10 @@ export class RelationalModel extends Model {
         };
         console.log("Unity field spec", kwargs.fields);
         const records = await this.orm.call(resModel, "web_read_unity", [resIds], kwargs);
+        if (!records.length) {
+            // see test "click on breadcrumb of a deleted record" (might missing a no error dialog assertion)
+            throw new Error(`Can't fetch record(s) ${resIds}. They might have been deleted.`);
+        }
         console.log("Unity response", records);
         return records;
     }

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { getFixture, triggerEvents } from "@web/../tests/helpers/utils";
+import { getFixture, nextTick, triggerEvents } from "@web/../tests/helpers/utils";
 import { pagerNext } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { fakeCookieService } from "@web/../tests/helpers/mock_services";
@@ -93,7 +93,7 @@ QUnit.module("Fields", (hooks) => {
         assert.ok(target.querySelector(".o_field_ace").textContent.includes("yop"));
 
         await pagerNext(target);
-
+        await nextTick(); // ace is updated in a useEffect, post rendering, and the update is async
         assert.ok(target.querySelector(".o_field_ace").textContent.includes("blip"));
     });
 });
