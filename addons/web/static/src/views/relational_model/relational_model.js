@@ -331,11 +331,6 @@ export class RelationalModel extends Model {
         config.offset = config.offset || 0;
         config.limit = config.limit || this.initialGroupsLimit;
         config.groups = config.groups || {};
-        for (const group of Object.values(config.groups)) {
-            //TODOPRO This will be removed when data will be extracted from the config
-            delete group.data;
-            delete group.list.data;
-        }
         const firstGroupByName = config.groupBy[0].split(":")[0];
         const orderBy = config.orderBy.filter(
             (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
