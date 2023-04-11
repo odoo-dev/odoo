@@ -88,6 +88,9 @@ export class Group extends DataPoint {
         switch (type) {
             case "many2one":
                 return this.value || false;
+            case "many2many": {
+                return this.value ? [this.value] : false;
+            }
             default: {
                 return this._rawValue || false;
             }
