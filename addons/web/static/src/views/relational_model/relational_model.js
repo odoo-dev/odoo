@@ -7,7 +7,7 @@ import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 // import { deepCopy } from "@web/core/utils/objects";
 import { Model } from "@web/views/model";
-import { orderByToString } from "@web/views/utils";
+import { isRelational, orderByToString } from "@web/views/utils";
 import { Record } from "./record";
 import { DynamicRecordList } from "./dynamic_record_list";
 import { DynamicGroupList } from "./dynamic_group_list";
@@ -384,6 +384,9 @@ export class RelationalModel extends Model {
                 group.groups = [];
             } else {
                 group.records = [];
+            }
+            if (isRelational(config.fields[firstGroupByName]) && !group[firstGroupByName]) {
+                groupConfig.isFolded = true;
             }
             if (!groupConfig.isFolded && group.count > 0) {
                 const response = await this._loadData(groupConfig.list);

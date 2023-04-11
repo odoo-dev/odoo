@@ -2095,7 +2095,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2m (no quick_create_view)", async (assert) => {
+    QUnit.test("quick create record in grouped on m2m (no quick_create_view)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -2143,10 +2143,8 @@ QUnit.module("Views", (hooks) => {
             "web_read_group", // initial read_group
             "web_search_read_unity", // initial search_read (first column)
             "web_search_read_unity", // initial search_read (second column)
-            "web_read_unity", // read display_name of categories
             "onchange2", // quick create
             "name_create", // should perform a name_create to create the record
-            "web_read_unity",
             "web_read_unity", // read the created record
             "onchange2", // reopen the quick create automatically
         ]);
