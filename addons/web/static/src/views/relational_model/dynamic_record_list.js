@@ -119,22 +119,7 @@ export class DynamicRecordList extends DynamicList {
             limit,
             orderBy,
         });
-        const resIds = response.records.map((record) => record.id);
-        this.records = response.records.map(
-            (record) =>
-                new this.model.constructor.Record(
-                    this.model,
-                    {
-                        activeFields: this.activeFields,
-                        fields: this.fields,
-                        resModel: this.resModel,
-                        context: this.context,
-                        resId: record.id,
-                        resIds, //TODOPRO add resIds with _createRecordDatapoint
-                    },
-                    record
-                )
-        );
+        this.records = response.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(response);
     }
 
