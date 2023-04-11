@@ -4881,7 +4881,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:first-child .o_kanban_record", 2);
     });
 
-    QUnit.tttt("drag and drop a record, grouped by selection", async (assert) => {
+    QUnit.test("drag and drop a record, grouped by selection", async (assert) => {
         assert.expect(7);
 
         await makeView({
