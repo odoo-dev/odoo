@@ -10,10 +10,6 @@ export class StaticList extends DataPoint {
     setup(config, data, options = {}) {
         this._parent = options.parent;
         this._onChange = options.onChange;
-        this.orderBy = config.orderBy || [];
-        this.limit = config.limit || 40;
-        this.offset = config.offset || 0;
-        this.resIds = data.map((r) => r.id);
         this.records = data
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
@@ -40,6 +36,22 @@ export class StaticList extends DataPoint {
         };
     }
 
+    get limit() {
+        return this.config.limit;
+    }
+
+    get offset() {
+        return this.config.offset;
+    }
+
+    get resIds() {
+        return this.config.resIds;
+    }
+
+    get orderBy() {
+        return this.config.orderBy;
+    }
+
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
@@ -48,7 +60,7 @@ export class StaticList extends DataPoint {
         const values = await this.model._loadNewRecord({
             resModel: this.resModel,
             activeFields: this.activeFields,
-            context: Object.assign(this.context, params.context),
+            context: Object.assign({}, this.context, params.context),
         });
         const record = this._createRecordDatapoint(values, "edit");
         if (params.position === "bottom") {
@@ -163,17 +175,8 @@ export class StaticList extends DataPoint {
     }
 
     async _load({ limit, offset }) {
-        const resIds = this.resIds.slice(offset, offset + limit);
-        const records = await this.model._loadRecords({
-            activeFields: this.activeFields,
-            context: this.context,
-            fields: this.fields,
-            resIds,
-            resModel: this.resModel,
-        });
+        const records = await this.model._updateConfig(this.config, { limit, offset });
         // FIXME: might need to keep references to the records of previous page (for changes)
         this.records = records.map((r) => this._createRecordDatapoint(r));
-        this.offset = offset;
-        this.limit = limit;
     }
 }

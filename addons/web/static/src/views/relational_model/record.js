@@ -283,6 +283,8 @@ export class Record extends DataPoint {
             activeFields: (related && related.activeFields) || {},
             fields: (related && related.fields) || {},
             offset: 0,
+            resIds: data.map((r) => r.id),
+            orderBy: [],
             limit,
         };
         let staticList;

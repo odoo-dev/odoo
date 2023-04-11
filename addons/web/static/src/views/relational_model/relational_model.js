@@ -287,15 +287,11 @@ export class RelationalModel extends Model {
      * @param {Config} config
      */
     async _loadData(config) {
-        if (config.isMonoRecord && !config.resId) {
-            // FIXME: this will be handled by unity at some point
-            return this._loadNewRecord(config);
-        }
-        if (!config.isMonoRecord && config.groupBy.length) {
-            // FIXME: this *might* be handled by unity at some point
-            return this._loadGroupedList(config);
-        }
         if (config.isMonoRecord) {
+            if (!config.resId) {
+                // FIXME: this will be handled by unity at some point
+                return this._loadNewRecord(config);
+            }
             const context = {
                 ...config.context,
                 active_id: config.resId,
@@ -309,17 +305,25 @@ export class RelationalModel extends Model {
                 context,
             });
             return records[0];
-        } else {
-            Object.assign(config, {
-                limit: config.limit || this.initialLimit,
-                countLimit: "countLimit" in config ? config.countLimit : this.initialCountLimit,
-                offset: config.offset || 0,
-            });
-            if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
-                config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
-            }
-            return this._loadUngroupedList(config);
         }
+        if (config.resIds) {
+            // static list
+            const resIds = config.resIds.slice(config.offset, config.offset + config.limit);
+            return this._loadRecords({ ...config, resIds });
+        }
+        if (config.groupBy.length) {
+            // FIXME: this *might* be handled by unity at some point
+            return this._loadGroupedList(config);
+        }
+        Object.assign(config, {
+            limit: config.limit || this.initialLimit,
+            countLimit: "countLimit" in config ? config.countLimit : this.initialCountLimit,
+            offset: config.offset || 0,
+        });
+        if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
+            config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
+        }
+        return this._loadUngroupedList(config);
     }
 
     /**
