@@ -384,7 +384,7 @@ export class Record extends DataPoint {
         const result = {};
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
-            if (!withReadonly && this._isReadonly(fieldName)) {
+            if (!withReadonly && fieldName in this.activeFields && this._isReadonly(fieldName)) {
                 continue;
             }
             if (field.relatedPropertyField) {
@@ -588,7 +588,7 @@ export class Record extends DataPoint {
             }
         }
         const onChangeFields = Object.keys(changes).filter(
-            (fieldName) => this.activeFields[fieldName].onChange
+            (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
         );
         if (onChangeFields.length && !this.model._urgentSave) {
             let context = this.context;
