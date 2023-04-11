@@ -162,10 +162,15 @@ export class RelationalModel extends Model {
      *
      * @param {Config} config
      * @param {Partial<Config>} patch
+     * @param {Object} [options]
+     * @param {boolean} [options.noReload=false]
      */
-    async _updateConfig(config, patch) {
+    async _updateConfig(config, patch, options = {}) {
         const tmpConfig = { ...config, ...patch }; //TODOPRO I wonder if we should not use deepCopy here
-        const response = await this._loadData(tmpConfig);
+        let response;
+        if (!options.noReload) {
+            response = await this._loadData(tmpConfig);
+        }
         Object.assign(config, tmpConfig);
         return response;
     }
