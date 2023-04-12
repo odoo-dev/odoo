@@ -61,7 +61,8 @@ export class DynamicList extends DataPoint {
             if (!unlinked) {
                 return false;
             }
-            return this._removeRecords(records);
+            await this._removeRecords(records);
+            return true;
         });
     }
 
