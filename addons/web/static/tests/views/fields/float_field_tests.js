@@ -239,7 +239,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("float field in editable list view", async function (assert) {
+    QUnit.test("float field in editable list view", async function (assert) {
         await makeView({
             serverData,
             type: "list",

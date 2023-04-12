@@ -92,7 +92,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2OneField Barcode (Desktop)");
 
-    QUnit.tttt(
+    QUnit.test(
         "Many2OneBarcode component should display the barcode icon",
         async function (assert) {
             assert.expect(1);

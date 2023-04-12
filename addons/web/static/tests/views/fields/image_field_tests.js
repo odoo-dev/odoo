@@ -152,7 +152,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ImageField is correctly replaced when given an incorrect value",
         async function (assert) {
             serverData.models.partner.records[0].document = "incorrect_base64_value";
@@ -224,7 +224,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("ImageField preview is updated when an image is uploaded", async function (assert) {
+    QUnit.test("ImageField preview is updated when an image is uploaded", async function (assert) {
         const imageData = Uint8Array.from([...atob(MY_IMAGE)].map((c) => c.charCodeAt(0)));
         await makeView({
             type: "form",
@@ -268,7 +268,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "clicking save manually after uploading new image should change the unique of the image src",
         async function (assert) {
             serverData.models.partner.onchanges = { foo: () => {} };
@@ -353,7 +353,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("ImageField: option accepted_file_extensions", async function (assert) {
+    QUnit.test("ImageField: option accepted_file_extensions", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -372,7 +372,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ImageField: set 0 width/height in the size option", async function (assert) {
+    QUnit.test("ImageField: set 0 width/height in the size option", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -426,7 +426,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ImageField: zoom and zoom_delay options (readonly)", async (assert) => {
+    QUnit.test("ImageField: zoom and zoom_delay options (readonly)", async (assert) => {
         serverData.models.partner.records[0].document = MY_IMAGE;
 
         await makeView({
@@ -452,7 +452,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ImageField: zoom and zoom_delay options (edit)", async function (assert) {
+    QUnit.test("ImageField: zoom and zoom_delay options (edit)", async function (assert) {
         serverData.models.partner.records[0].document = MY_IMAGE;
 
         await makeView({
@@ -472,7 +472,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ImageField displays the right images with zoom and preview_image options (readonly)",
         async function (assert) {
             serverData.models.partner.records[0].document = "3 kb";
@@ -556,7 +556,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, `img[data-src="data:image/gif;base64,${PRODUCT_IMAGE}"]`);
     });
 
-    QUnit.tttt("ImageField in x2many list is loaded correctly", async function (assert) {
+    QUnit.test("ImageField in x2many list is loaded correctly", async function (assert) {
         serverData.models.partner_type.fields.image = { name: "image", type: "binary" };
         serverData.models.partner_type.records[0].image = PRODUCT_IMAGE;
         serverData.models.partner.records[0].timmy = [12];
@@ -583,7 +583,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ImageField with required attribute", async function (assert) {
+    QUnit.test("ImageField with required attribute", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -613,7 +613,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ImageField is reset when changing record", async function (assert) {
+    QUnit.test("ImageField is reset when changing record", async function (assert) {
         const imageData = Uint8Array.from([...atob(MY_IMAGE)].map((c) => c.charCodeAt(0)));
         await makeView({
             type: "form",

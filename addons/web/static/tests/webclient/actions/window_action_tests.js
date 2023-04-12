@@ -133,7 +133,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("switching into a view with mode=edit lands in edit mode", async function (assert) {
+    QUnit.test("switching into a view with mode=edit lands in edit mode", async function (assert) {
         serverData.views["partner,1,kanban"] = `
             <kanban on_create="quick_create" default_group_by="m2o">
                 <templates>
@@ -184,7 +184,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "orderedBy in context is not propagated when executing another action",
         async function (assert) {
             assert.expect(6);
@@ -1220,7 +1220,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.tttt("can't restore previous action if form is invalid", async function (assert) {
+    QUnit.test("can't restore previous action if form is invalid", async function (assert) {
         serverData.models.partner.fields.foo.required = true;
 
         const webClient = await createWebClient({ serverData });
@@ -1646,7 +1646,7 @@ QUnit.module("ActionManager", (hooks) => {
         await cpHelpers.saveFavorite(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list with default_order and favorite filter with no orderedBy",
         async function (assert) {
             serverData.views["partner,1,list"] =
@@ -1821,7 +1821,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsOnce(target, ".o_kanban_view");
     });
 
-    QUnit.tttt("execute action from dirty, new record, and come back", async function (assert) {
+    QUnit.test("execute action from dirty, new record, and come back", async function (assert) {
         serverData.models.partner.fields.bar.default = 1;
         serverData.views["partner,false,form"] = `
             <form>
@@ -2176,7 +2176,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "executing a window action with onchange warning does not hide it",
         async function (assert) {
             serverData.views["partner,false,form"] = `<form><field name="foo"/></form>`;

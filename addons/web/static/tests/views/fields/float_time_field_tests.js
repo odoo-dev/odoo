@@ -25,7 +25,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("FloatTimeField");
 
-    QUnit.tttt("FloatTimeField in form view", async function (assert) {
+    QUnit.test("FloatTimeField in form view", async function (assert) {
         assert.expect(4);
 
         await makeView({
@@ -77,7 +77,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("FloatTimeField value formatted on blur", async function (assert) {
+    QUnit.test("FloatTimeField value formatted on blur", async function (assert) {
         assert.expect(4);
 
         await makeView({
@@ -121,7 +121,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("FloatTimeField with invalid value", async function (assert) {
+    QUnit.test("FloatTimeField with invalid value", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -157,7 +157,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("float_time field with placeholder", async function (assert) {
+    QUnit.test("float_time field with placeholder", async function (assert) {
         await makeView({
             serverData,
             type: "form",

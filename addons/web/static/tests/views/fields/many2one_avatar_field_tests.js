@@ -67,7 +67,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2OneAvatar");
 
-    QUnit.tttt("basic form view flow", async function (assert) {
+    QUnit.test("basic form view flow", async function (assert) {
         await makeView({
             type: "form",
             serverData,
@@ -124,7 +124,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_m2o_avatar > .o_m2o_avatar_empty");
     });
 
-    QUnit.tttt("onchange in form view flow", async function (assert) {
+    QUnit.test("onchange in form view flow", async function (assert) {
         serverData.models.partner.onchanges = {
             int_field: function (obj) {
                 if (obj.int_field === 1) {
@@ -177,7 +177,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_m2o_avatar > img");
     });
 
-    QUnit.tttt("basic list view flow", async function (assert) {
+    QUnit.test("basic list view flow", async function (assert) {
         await makeView({
             type: "list",
             serverData,
@@ -195,7 +195,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(imgs[2].dataset.src, "/web/image/user/17/avatar_128");
     });
 
-    QUnit.tttt("basic flow in editable list view", async function (assert) {
+    QUnit.test("basic flow in editable list view", async function (assert) {
         await makeView({
             type: "list",
             serverData,
@@ -221,7 +221,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Many2OneAvatar with placeholder", async function (assert) {
+    QUnit.test("Many2OneAvatar with placeholder", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -260,7 +260,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("click on many2one_avatar in an editable list view", async function (assert) {
+    QUnit.test("click on many2one_avatar in an editable list view", async function (assert) {
         const listView = registry.category("views").get("list");
         patchWithCleanup(listView.Controller.prototype, {
             openRecord() {
@@ -285,7 +285,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("click on many2one_avatar in an editable list view", async function (assert) {
+    QUnit.test("click on many2one_avatar in an editable list view", async function (assert) {
         const listView = registry.category("views").get("list");
         patchWithCleanup(listView.Controller.prototype, {
             openRecord() {
@@ -309,7 +309,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["openRecord"]);
     });
 
-    QUnit.tttt("cancelling create dialog should clear value in the field", async function (assert) {
+    QUnit.test("cancelling create dialog should clear value in the field", async function (assert) {
         serverData.views = {
             "user,false,form": `
                 <form>

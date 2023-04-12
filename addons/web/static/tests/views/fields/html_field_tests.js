@@ -37,7 +37,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
 
     QUnit.module("HtmlField");
 
-    QUnit.tttt("html fields are correctly rendered in form view (readonly)", async (assert) => {
+    QUnit.test("html fields are correctly rendered in form view (readonly)", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -51,7 +51,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         assert.strictEqual(target.querySelector(".o_field_html").textContent, "some text");
     });
 
-    QUnit.tttt("html fields are correctly rendered (edit)", async (assert) => {
+    QUnit.test("html fields are correctly rendered (edit)", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -72,7 +72,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         assert.strictEqual(textarea.value, BLUE_TEXT);
     });
 
-    QUnit.tttt("html fields are correctly rendered in list view", async (assert) => {
+    QUnit.test("html fields are correctly rendered in list view", async (assert) => {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -93,7 +93,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "html field displays an empty string for the value false in list view",
         async (assert) => {
             serverData.models.partner.records[0].txt = false;
@@ -115,7 +115,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         }
     );
 
-    QUnit.tttt("html fields are correctly rendered in kanban view", async (assert) => {
+    QUnit.test("html fields are correctly rendered in kanban view", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -264,7 +264,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         await click(target, ".modal button.btn-primary"); // save
     });
 
-    QUnit.tttt("html fields: spellcheck is disabled on blur", async (assert) => {
+    QUnit.test("html fields: spellcheck is disabled on blur", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",

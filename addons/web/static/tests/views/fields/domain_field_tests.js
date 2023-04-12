@@ -818,7 +818,13 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["/web/webclient/load_menus"]);
 
         await doAction(webClient, 1);
-        assert.verifySteps(["/web/action/load", "get_views", "read", "search_count", "fields_get"]);
+        assert.verifySteps([
+            "/web/action/load",
+            "get_views",
+            "web_read_unity",
+            "search_count",
+            "fields_get",
+        ]);
 
         assert.strictEqual(target.querySelector(".o_domain_debug_input").value, rawDomain);
         assert.containsOnce(target, ".o_datepicker", "there should be a datepicker");
@@ -839,7 +845,7 @@ QUnit.module("Fields", (hooks) => {
 
         // Save
         await clickSave(target);
-        assert.verifySteps(["write", "read", "search_count"]);
+        assert.verifySteps(["write", "web_read_unity", "search_count"]);
         assert.strictEqual(target.querySelector(".o_domain_debug_input").value, rawDomain);
     });
 

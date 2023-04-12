@@ -241,7 +241,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(document.body, ".modal", "there should not be a Warning dialog");
     });
 
-    QUnit.tttt("DatetimeField in editable list view", async function (assert) {
+    QUnit.test("DatetimeField in editable list view", async function (assert) {
         patchTimeZone(120);
 
         await makeView({

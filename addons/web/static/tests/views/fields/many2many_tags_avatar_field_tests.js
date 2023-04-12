@@ -43,7 +43,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2ManyTagsAvatarField");
 
-    QUnit.tttt("widget many2many_tags_avatar", async function (assert) {
+    QUnit.test("widget many2many_tags_avatar", async function (assert) {
         await makeView({
             type: "form",
             resModel: "turtle",

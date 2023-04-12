@@ -511,7 +511,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("Many2ManyTagsField: update color", async function (assert) {
+    QUnit.test("Many2ManyTagsField: update color", async function (assert) {
         serverData.models.partner.records[0].timmy = [12];
         serverData.models.partner_type.records[0].color = 0;
 
@@ -590,7 +590,7 @@ QUnit.module("Fields", (hooks) => {
         */
     });
 
-    QUnit.tttt("Many2ManyTagsField with no_edit_color option", async function (assert) {
+    QUnit.test("Many2ManyTagsField with no_edit_color option", async function (assert) {
         serverData.models.partner.records[0].timmy = [12];
 
         await makeView({
@@ -654,7 +654,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(firstRow, ".o_field_many2many_tags .badge", 2);
     });
 
-    QUnit.tttt("Many2ManyTagsField can load more than 40 records", async function (assert) {
+    QUnit.test("Many2ManyTagsField can load more than 40 records", async function (assert) {
         serverData.models.partner.fields.partner_ids = {
             string: "Partner",
             type: "many2many",
@@ -763,7 +763,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Many2ManyTagsField: tags title attribute", async function (assert) {
+    QUnit.test("Many2ManyTagsField: tags title attribute", async function (assert) {
         serverData.models.turtle.records[0].partner_ids = [2];
 
         await makeView({
@@ -787,7 +787,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Many2ManyTagsField: toggle colorpicker with multiple tags",
         async function (assert) {
             serverData.models.partner.records[0].timmy = [12, 14];
@@ -828,7 +828,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Many2ManyTagsField: toggle colorpicker multiple times", async function (assert) {
+    QUnit.test("Many2ManyTagsField: toggle colorpicker multiple times", async function (assert) {
         serverData.models.partner.records[0].timmy = [12];
         serverData.models.partner_type.records[0].color = 0;
 
@@ -961,7 +961,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "input and remove text without selecting any tag or option",
         async function (assert) {
             serverData.models.partner_type.records.push({ id: 13, display_name: "red", color: 8 });
@@ -1309,7 +1309,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Many2ManyTagsField: conditional create/delete actions", async function (assert) {
+    QUnit.test("Many2ManyTagsField: conditional create/delete actions", async function (assert) {
         serverData.models.turtle.records[0].partner_ids = [2];
         for (var i = 1; i <= 10; i++) {
             serverData.models.partner.records.push({
@@ -1510,7 +1510,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_many2many_tags .badge");
     });
 
-    QUnit.tttt("navigation in tags (mode 'readonly')", async function (assert) {
+    QUnit.test("navigation in tags (mode 'readonly')", async function (assert) {
         // keep a single line with 2 badges
         serverData.models.partner.records = serverData.models.partner.records.slice(0, 1);
         serverData.models.partner.records[0].timmy = [12, 14];
@@ -1634,7 +1634,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Many2ManyTagsField supports 'create' props to be a Boolean", async (assert) => {
+    QUnit.test("Many2ManyTagsField supports 'create' props to be a Boolean", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1731,7 +1731,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Many2ManyTagsField with option 'no_create' set to true", async (assert) => {
+    QUnit.test("Many2ManyTagsField with option 'no_create' set to true", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1744,7 +1744,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o-autocomplete.dropdown li.o_m2o_no_result");
     });
 
-    QUnit.tttt("Many2ManyTagsField with attribute 'can_create' set to false", async (assert) => {
+    QUnit.test("Many2ManyTagsField with attribute 'can_create' set to false", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
