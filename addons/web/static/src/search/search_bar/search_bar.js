@@ -21,9 +21,6 @@ export class SearchBar extends Component {
         this.searchItemsFields = this.env.searchModel.getSearchItems((f) => f.type === "field");
         this.root = useRef("root");
 
-        owl.onWillRender(() => {
-            console.log("render searchbar");
-        });
         // core state
         this.state = useState({
             expanded: [],
