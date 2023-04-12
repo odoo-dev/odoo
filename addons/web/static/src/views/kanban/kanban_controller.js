@@ -57,10 +57,6 @@ export class KanbanController extends Component {
             view: archInfo.quickCreateView,
         });
 
-        owl.onWillRender(() => {
-            console.log("render kanban controller");
-        });
-
         this.rootRef = useRef("root");
         useViewButtons(this.model, this.rootRef, {
             beforeExecuteAction: this.beforeExecuteActionButton.bind(this),

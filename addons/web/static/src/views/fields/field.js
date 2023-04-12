@@ -71,10 +71,6 @@ export class Field extends Component {
             const fieldType = this.props.record.fields[this.props.name].type;
             this.field = getFieldFromRegistry(fieldType, this.props.type);
         }
-
-        owl.onWillRender(() => {
-            console.log("render Field");
-        });
     }
 
     get classNames() {
