@@ -472,6 +472,7 @@ export class Record extends DataPoint {
             }
             await this._load(nextConfig);
         } else {
+            this.model._updateConfig(this.config, { resId }, { noReload: true });
             this._values = { ...this._values, ...this._changes };
             this._changes = {};
             this.isDirty = false;
