@@ -2666,7 +2666,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 
-    QUnit.tttt("editable list: add a line and discard", async function (assert) {
+    QUnit.test("editable list: add a line and discard", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -2740,7 +2740,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("editable list view: basic char field edition", async function (assert) {
+    QUnit.test("editable list view: basic char field edition", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15947,7 +15947,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Auto save: modify a record and leave action (reject)", async function (assert) {
+    QUnit.test("Auto save: modify a record and leave action (reject)", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,

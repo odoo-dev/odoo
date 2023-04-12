@@ -125,8 +125,11 @@ export class DynamicList extends DataPoint {
     async unselectRecord() {
         if (this.editedRecord) {
             const saved = await this.editedRecord.save();
+            //TODOPRO I do not think it should be done here. It should be the responsability of the controller to do it.
             if (saved) {
                 await this.switchRecordToReadonly(this.editedRecord);
+            } else {
+                return false;
             }
         }
         return true;
@@ -137,8 +140,10 @@ export class DynamicList extends DataPoint {
     }
 
     async editRecord(record) {
-        await this.unselectRecord();
-        await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+        const canProceed = await this.unselectRecord();
+        if (canProceed) {
+            await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+        }
     }
 
     // -------------------------------------------------------------------------
