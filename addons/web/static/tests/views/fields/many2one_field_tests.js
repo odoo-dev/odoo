@@ -3980,7 +3980,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("updating a many2one from a many2many", async function (assert) {
+    QUnit.test("updating a many2one from a many2many", async function (assert) {
         assert.expect(5);
 
         serverData.models.turtle.records[1].turtle_trululu = 1;
@@ -4031,7 +4031,8 @@ QUnit.module("Fields", (hooks) => {
 
         // Test whether the value has changed
         assert.strictEqual(
-            target.querySelectorAll(".o_data_cell")[1].textContent,
+            target.querySelector(".o_dialog:not(.o_inactive_modal) div[name=turtle_trululu] input")
+                .value,
             "test",
             "the partner name should have been updated to 'test'"
         );
