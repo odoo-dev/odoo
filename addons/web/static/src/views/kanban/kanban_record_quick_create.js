@@ -148,7 +148,7 @@ class KanbanQuickCreateController extends Component {
                     this.showFormDialogInError(e);
                 }
             } else {
-                this.model.notificationService.add(this.model.env._t("Display Name"), {
+                this.model.notification.add(this.model.env._t("Display Name"), {
                     title: this.model.env._t("Invalid fields: "),
                     type: "danger",
                 });

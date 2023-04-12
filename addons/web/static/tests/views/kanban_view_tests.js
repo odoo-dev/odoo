@@ -2208,7 +2208,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2m (field not in template)", async (assert) => {
+    QUnit.test("quick create record in grouped on m2m (field not in template)", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = `
             <form>
                 <field name="foo"/>
@@ -2237,6 +2237,10 @@ QUnit.module("Views", (hooks) => {
                     ]);
                     const { default_category_ids } = kwargs.context;
                     assert.deepEqual(default_category_ids, [6]);
+                    return [5];
+                }
+                if (method === "web_read_unity" && kwargs.context.active_id === 5) {
+                    return [{ id: 5, foo: "new partner", category_ids: [6] }];
                 }
             },
         });
@@ -2267,7 +2271,7 @@ QUnit.module("Views", (hooks) => {
             "get_views", // get form view
             "onchange2", // quick create
             "create", // should perform a create to create the record
-            "read", // read the created record
+            "web_read_unity", // read the created record
             "onchange2", // reopen the quick create automatically
         ]);
     });
@@ -2348,7 +2352,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record validation: stays open when invalid", async (assert) => {
+    QUnit.test("quick create record validation: stays open when invalid", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -2388,7 +2392,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record with default values and onchanges", async (assert) => {
+    QUnit.test("quick create record with default values and onchanges", async (assert) => {
         serverData.models.partner.fields.int_field.default = 4;
         serverData.models.partner.onchanges = {
             foo(obj) {
@@ -2449,7 +2453,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record with quick_create_view: modifiers", async (assert) => {
+    QUnit.test("quick create record with quick_create_view: modifiers", async (assert) => {
         serverData.views["partner,some_view_ref,form"] =
             "<form>" +
             '<field name="foo" required="1"/>' +
@@ -2491,7 +2495,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record with onchange of field marked readonly", async (assert) => {
+    QUnit.test("quick create record with onchange of field marked readonly", async (assert) => {
         assert.expect(15);
 
         serverData.models.partner.onchanges = {
@@ -2544,7 +2548,7 @@ QUnit.module("Views", (hooks) => {
         await editQuickCreateInput("foo", "new partner");
         assert.verifySteps(["onchange2"]);
         await validateRecord();
-        assert.verifySteps(["create", "read", "onchange2"]);
+        assert.verifySteps(["create", "web_read_unity", "onchange2"]);
     });
 
     QUnit.test("quick create record and change state in grouped mode", async (assert) => {
@@ -2621,7 +2625,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record: cancel and validate without using the buttons",
         async (assert) => {
             serverData.views["partner,some_view_ref,form"] = `<form><field name="foo" /></form>`;
@@ -2697,7 +2701,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick create record: validate with ENTER", async (assert) => {
+    QUnit.test("quick create record: validate with ENTER", async (assert) => {
         serverData.views["partner,some_view_ref,form"] =
             "<form>" + '<field name="foo"/>' + '<field name="int_field"/>' + "</form>";
 
@@ -2730,7 +2734,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record: prevent multiple adds with ENTER", async (assert) => {
+    QUnit.test("quick create record: prevent multiple adds with ENTER", async (assert) => {
         serverData.views["partner,some_view_ref,form"] =
             "<form>" + '<field name="foo"/>' + '<field name="int_field"/>' + "</form>";
 
@@ -2799,7 +2803,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt("quick create record: prevent multiple adds with Add clicked", async (assert) => {
+    QUnit.test("quick create record: prevent multiple adds with Add clicked", async (assert) => {
         serverData.views["partner,some_view_ref,form"] =
             "<form>" + '<field name="foo"/>' + '<field name="int_field"/>' + "</form>";
 
