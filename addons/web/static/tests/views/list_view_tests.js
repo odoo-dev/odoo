@@ -6137,7 +6137,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.debug(
         "grouped, show only limited records when the list view is initially expanded",
         async function (assert) {
             const forcedDefaultLimit = 3;
@@ -7338,7 +7338,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("groupby node with a button", async function (assert) {
+    QUnit.test("groupby node with a button", async function (assert) {
         assert.expect(17);
 
         serverData.models.foo.fields.currency_id.sortable = true;
@@ -7389,14 +7389,14 @@ QUnit.module("Views", (hooks) => {
             "there should be no button in the header"
         );
         await click(target, ".o_group_header:first-child");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
         assert.containsOnce(target, ".o_group_header button");
 
         await click(target, ".o_group_header:first-child button");
         assert.verifySteps(["button_method"]);
     });
 
-    QUnit.tttt("groupby node with a button in inner groupbys", async function (assert) {
+    QUnit.test("groupby node with a button in inner groupbys", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7421,8 +7421,8 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_group_header button");
     });
 
-    QUnit.tttt("groupby node with a button with modifiers", async function (assert) {
-        assert.expect(15);
+    QUnit.test("groupby node with a button with modifiers", async function (assert) {
+        assert.expect(16);
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7437,29 +7437,30 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             mockRPC(route, args) {
                 assert.step(args.method || route);
-                if (args.method === "read" && args.model === "res_currency") {
-                    assert.deepEqual(args.args, [[1, 2], ["position"]]);
+                if (args.method === "web_read_unity" && args.model === "res_currency") {
+                    assert.deepEqual(args.args, [[1, 2]]);
+                    assert.deepEqual(args.kwargs.fields, { position: {} });
                 }
             },
             groupBy: ["currency_id"],
         });
 
-        assert.verifySteps(["get_views", "web_read_group", "read"]);
+        assert.verifySteps(["get_views", "web_read_group", "web_read_unity"]);
         assert.containsNone(target, ".o_group_header button");
         assert.containsNone(target, ".o_data_row");
 
         await click(target, ".o_group_header:nth-child(2)");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
         assert.containsNone(target, ".o_group_header button");
         assert.containsN(target, ".o_data_row", 1);
 
         await click(target, ".o_group_header:first-child");
-        assert.verifySteps(["web_search_read"]);
+        assert.verifySteps(["web_search_read_unity"]);
         assert.containsOnce(target, ".o_group_header button");
         assert.containsN(target, ".o_data_row", 4);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "groupby node with a button with modifiers using a many2one",
         async function (assert) {
             serverData.models.res_currency.fields.m2o = {
@@ -7490,11 +7491,17 @@ QUnit.module("Views", (hooks) => {
             assert.containsOnce(groupHeaders[0], "button");
             assert.containsNone(groupHeaders[1], "button");
 
-            assert.verifySteps(["get_views", "web_read_group", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "web_read_group",
+                "web_search_read_unity",
+                "web_search_read_unity",
+                "web_read_unity",
+            ]);
         }
     );
 
-    QUnit.tttt("reload list view with groupby node", async function (assert) {
+    QUnit.test("reload list view with groupby node", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7516,7 +7523,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_group_header button");
     });
 
-    QUnit.tttt("editable list view with groupby node and modifiers", async function (assert) {
+    QUnit.test("editable list view with groupby node and modifiers", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7553,7 +7560,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("groupby node with edit button", async function (assert) {
+    QUnit.test("groupby node with edit button", async function (assert) {
         assert.expect(1);
 
         const list = await makeView({
@@ -7584,7 +7591,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelectorAll(".o_group_header button")[1]);
     });
 
-    QUnit.tttt("groupby node with subfields, and onchange", async function (assert) {
+    QUnit.test("groupby node with subfields, and onchange", async function (assert) {
         assert.expect(1);
 
         serverData.models.foo.onchanges = {
@@ -7595,7 +7602,8 @@ QUnit.module("Views", (hooks) => {
             type: "list",
             resModel: "foo",
             serverData,
-            arch: `<tree editable="bottom" expand="1">
+            arch: `
+                <tree editable="bottom" expand="1">
                     <field name="foo"/>
                     <field name="currency_id"/>
                     <groupby name="currency_id">
@@ -7604,7 +7612,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["currency_id"],
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.deepEqual(
                         args.args[3],
                         {

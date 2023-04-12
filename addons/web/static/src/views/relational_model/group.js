@@ -36,6 +36,9 @@ export class Group extends DataPoint {
         }
         /** @type {import("./dynamic_group_list").DynamicGroupList | import("./dynamic_record_list").DynamicRecordList} */
         this.list = new List(this.model, config.list, data);
+        if (config.record) {
+            this.record = new this.model.constructor.Record(this.model, config.record, data.values);
+        }
     }
 
     // -------------------------------------------------------------------------

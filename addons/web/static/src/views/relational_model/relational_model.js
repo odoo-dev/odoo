@@ -112,6 +112,7 @@ export class RelationalModel extends Model {
         this.defaultGroupBy = params.defaultGroupBy;
         this.openGroupsByDefault = params.openGroupsByDefault;
         this.maxGroupByDepth = params.maxGroupByDepth;
+        this.groupByInfo = params.groupByInfo || {};
 
         this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
         this._onRecordSaved = params.onRecordSaved || (() => {});
@@ -360,6 +361,16 @@ export class RelationalModel extends Model {
             activeFields: config.activeFields,
             context: config.context,
         };
+        let groupRecordConfig;
+        const groupRecordResIds = [];
+        if (this.groupByInfo[firstGroupByName]) {
+            groupRecordConfig = {
+                ...this.groupByInfo[firstGroupByName],
+                resModel: config.fields[firstGroupByName].relation,
+                context: {},
+            };
+        }
+        const proms = [];
         for (const group of groups) {
             group.count = group.__count || group[`${firstGroupByName}_count`];
             group.length = group.count;
@@ -377,6 +388,19 @@ export class RelationalModel extends Model {
                         orderBy,
                     },
                 };
+                if (groupRecordConfig) {
+                    const resId = group[firstGroupByName] ? group[firstGroupByName][0] : false;
+                    config.groups[group[firstGroupByName]].record = {
+                        ...groupRecordConfig,
+                        resId,
+                    };
+                }
+            }
+            if (groupRecordConfig) {
+                const resId = config.groups[group[firstGroupByName]].record.resId;
+                if (resId) {
+                    groupRecordResIds.push(resId);
+                }
             }
             const groupConfig = config.groups[group[firstGroupByName]];
             if (groupBy.length) {
@@ -388,14 +412,30 @@ export class RelationalModel extends Model {
                 groupConfig.isFolded = true;
             }
             if (!groupConfig.isFolded && group.count > 0) {
-                const response = await this._loadData(groupConfig.list);
-                if (groupBy.length) {
-                    group.groups = response ? response.groups : [];
-                } else {
-                    group.records = response ? response.records : [];
-                }
+                const prom = this._loadData(groupConfig.list).then((response) => {
+                    if (groupBy.length) {
+                        group.groups = response ? response.groups : [];
+                    } else {
+                        group.records = response ? response.records : [];
+                    }
+                });
+                proms.push(prom);
             }
         }
+        if (groupRecordConfig && Object.keys(groupRecordConfig.activeFields).length) {
+            const prom = this._loadRecords({
+                ...groupRecordConfig,
+                resIds: groupRecordResIds,
+            }).then((records) => {
+                for (const group of groups) {
+                    group.values = records.find(
+                        (r) => group[firstGroupByName] && r.id === group[firstGroupByName][0]
+                    );
+                }
+            });
+            proms.push(prom);
+        }
+        await Promise.all(proms);
         return { groups, length };
     }
 
@@ -439,6 +479,9 @@ export class RelationalModel extends Model {
      * @returns
      */
     async _loadRecords({ resModel, resIds, activeFields, fields, context }) {
+        if (!resIds.length) {
+            return [];
+        }
         const kwargs = {
             context: { bin_size: true, ...context },
             fields: this._getFieldsSpec(activeFields, fields, context),
