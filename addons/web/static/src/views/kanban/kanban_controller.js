@@ -26,6 +26,7 @@ export class KanbanController extends Component {
             resModel,
             activeFields,
             fields,
+            openGroupsByDefault: true,
         };
         const model = useModel(Model, {
             config: modelConfig,
@@ -35,7 +36,6 @@ export class KanbanController extends Component {
             countLimit: archInfo.countLimit,
             defaultGroupBy,
             defaultOrderBy: archInfo.defaultOrder,
-            openGroupsByDefault: true,
             maxGroupByDepth: 1,
         });
         this.model = useState(model);

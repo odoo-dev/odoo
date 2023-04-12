@@ -49,7 +49,7 @@ export class DynamicList extends DataPoint {
         return false;
     }
 
-    deleteRecords(records = this.records) {
+    deleteRecords(records = this.selection) {
         return this.model.mutex.exec(async () => {
             const unlinked = await this.model.orm.unlink(
                 this.resModel,

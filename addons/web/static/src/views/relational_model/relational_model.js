@@ -110,7 +110,6 @@ export class RelationalModel extends Model {
         this.initialCountLimit = params.countLimit || this.constructor.DEFAULT_COUNT_LIMIT;
         this.defaultOrderBy = params.defaultOrderBy;
         this.defaultGroupBy = params.defaultGroupBy;
-        this.openGroupsByDefault = params.openGroupsByDefault;
         this.maxGroupByDepth = params.maxGroupByDepth;
         this.groupByInfo = params.groupByInfo || {};
 
@@ -380,7 +379,7 @@ export class RelationalModel extends Model {
                 config.groups[group[firstGroupByName]] = {
                     ...commonConfig,
                     groupByFieldName: groupByField.name,
-                    isFolded: group.__fold || !this.openGroupsByDefault,
+                    isFolded: group.__fold || !config.openGroupsByDefault,
                     list: {
                         ...commonConfig,
                         domain: group.__domain,

@@ -12,7 +12,6 @@ import { session } from "@web/session";
 import { FloatField } from "@web/views/fields/float/float_field";
 import { textField } from "@web/views/fields/text/text_field";
 import { ListController } from "@web/views/list/list_controller";
-import { DynamicGroupList } from "@web/views/relational_model";
 import { RelationalModel } from "@web/views/relational_model/relational_model";
 import { actionService } from "@web/webclient/actions/action_service";
 import { makeFakeLocalizationService, makeFakeUserService } from "../helpers/mock_services";
@@ -5633,7 +5632,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["Custom Default Available"]);
     });
 
-    QUnit.tttt(
+    QUnit.debug(
         "grouped, update the count of the group (and ancestors) when a record is deleted",
         async function (assert) {
             serverData.models.foo.records = [
@@ -6137,11 +6136,11 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.debug(
+    QUnit.test(
         "grouped, show only limited records when the list view is initially expanded",
         async function (assert) {
             const forcedDefaultLimit = 3;
-            patchWithCleanup(DynamicGroupList, { DEFAULT_LIMIT: forcedDefaultLimit });
+            patchWithCleanup(RelationalModel, { DEFAULT_LIMIT: forcedDefaultLimit });
 
             serverData.models.foo.records = [
                 { id: 121, foo: "blip" },
