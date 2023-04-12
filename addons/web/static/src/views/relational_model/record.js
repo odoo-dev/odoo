@@ -163,7 +163,11 @@ export class Record extends DataPoint {
     }
 
     load(resId = this.resId) {
-        return this.model.mutex.exec(() => this._load({ resId }));
+        let mode = this.config.mode;
+        if (!resId) {
+            mode = "edit";
+        }
+        return this.model.mutex.exec(() => this._load({ resId, mode }));
     }
 
     async save(options) {
@@ -176,9 +180,9 @@ export class Record extends DataPoint {
         this._invalidFields.add(fieldName);
     }
 
-    switchMode(mode) {
-        this.model._updateConfig(this.config, { mode }, { noReload: true });
-    }
+    // switchMode(mode) {
+    //     this.model._updateConfig(this.config, { mode }, { noReload: true });
+    // }
 
     toggleSelection(selected) {
         if (typeof selected === "boolean") {
