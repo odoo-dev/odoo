@@ -446,10 +446,6 @@ export class FormController extends Component {
 
     async afterExecuteActionButton(clickParams) {}
 
-    async edit() {
-        await this.model.root.switchMode("edit");
-    }
-
     async create() {
         const canProceed = await this.model.root.save({
             stayInEdition: true,

@@ -189,10 +189,10 @@ export class ListController extends Component {
                 throw new Error("List should be a DynamicRecordList");
             }
             if (list.editedRecord) {
-                await list.editedRecord.save();
+                await list.switchRecordToReadonly(list.editedRecord);
             }
             if (!list.editedRecord) {
-                await (group || list).createRecord({}, this.editable === "top");
+                await (group || list).createRecord(this.editable === "top");
             }
             this.render();
         } else {
@@ -236,7 +236,7 @@ export class ListController extends Component {
     async onClickSave() {
         const saved = await this.model.root.editedRecord.save({ force: true });
         if (saved) {
-            this.model.root.editedRecord.switchMode("readonly");
+            this.model.root.switchRecordToReadonly(this.model.root.editedRecord);
         }
     }
 

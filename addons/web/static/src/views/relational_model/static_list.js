@@ -85,9 +85,21 @@ export class StaticList extends DataPoint {
     // FIXME: rename? This is not about selection, but mode
     unselectRecord() {
         if (this.editedRecord) {
-            this.editedRecord.switchMode("readonly");
+            this.switchRecordToReadonly(this.editedRecord);
         }
         return true;
+    }
+
+    async switchRecordToReadonly(record) {
+        await this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+    }
+
+    async editRecord(record) {
+        if (this.editedRecord) {
+            await this.editedRecord.save();
+            await this.switchRecordToReadonly(this.editedRecord);
+        }
+        await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
     }
 
     // -------------------------------------------------------------------------
