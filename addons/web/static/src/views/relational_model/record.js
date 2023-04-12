@@ -163,7 +163,11 @@ export class Record extends DataPoint {
     }
 
     load(resId = this.resId) {
-        return this.model.mutex.exec(() => this._load({ resId }));
+        let mode = this.config.mode;
+        if (!resId) {
+            mode = "edit";
+        }
+        return this.model.mutex.exec(() => this._load({ resId, mode }));
     }
 
     async save(options) {

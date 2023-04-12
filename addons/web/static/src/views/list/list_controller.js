@@ -51,6 +51,12 @@ export class ListController extends Component {
             this.archInfo,
             this.props.fields
         );
+        const groupByInfo = {};
+        for (const fieldName in this.archInfo.groupBy.fields) {
+            const fieldNodes = this.archInfo.groupBy.fields[fieldName].fieldNodes;
+            const fields = this.archInfo.groupBy.fields[fieldName].fields;
+            groupByInfo[fieldName] = extractFieldsFromArchInfo({ fieldNodes }, fields);
+        }
         const modelConfig = this.props.state?.modelConfig || {
             resModel: this.props.resModel,
             fields,
@@ -60,7 +66,7 @@ export class ListController extends Component {
         const model = useModel(this.props.Model, {
             config: modelConfig,
             handleField: this.archInfo.handleField,
-            groupByInfo: this.archInfo.groupBy.fields,
+            groupByInfo,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,
             defaultOrderBy: this.archInfo.defaultOrder,
