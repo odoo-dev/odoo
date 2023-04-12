@@ -113,7 +113,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: value should update in edit mode when typing in input",
         async function (assert) {
             assert.expect(4);
@@ -164,7 +164,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: value should update in edit mode when typing in input with field max value",
         async function (assert) {
             assert.expect(4);
@@ -211,7 +211,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: max value should update in edit mode when typing in input with field max value",
         async function (assert) {
             assert.expect(5);
@@ -360,7 +360,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("force readonly in kanban", async (assert) => {
+    QUnit.test("force readonly in kanban", async (assert) => {
         assert.expect(2);
 
         serverData.models.partner.records[0].int_field = 99;
@@ -391,7 +391,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_progressbar_value .o_input");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: readonly and editable attrs/options in kanban",
         async function (assert) {
             assert.expect(4);
@@ -449,7 +449,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: write float instead of int works, in locale",
         async function (assert) {
             assert.expect(4);
@@ -503,7 +503,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "ProgressBarField: write gibbrish instead of int throws warning",
         async function (assert) {
             serverData.models.partner.records[0].int_field = 99;

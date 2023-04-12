@@ -102,7 +102,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("JournalDashboardGraphField");
 
-    QUnit.tttt("JournalDashboardGraphField is rendered correctly", async function (assert) {
+    QUnit.test("JournalDashboardGraphField is rendered correctly", async function (assert) {
         await makeView({
             serverData,
             type: "kanban",
@@ -146,7 +146,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "rendering of a JournalDashboardGraphField in an updated grouped kanban view",
         async function (assert) {
             const kanban = await makeView({

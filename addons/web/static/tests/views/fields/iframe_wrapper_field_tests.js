@@ -41,7 +41,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("IframeWrapperField");
 
-    QUnit.tttt("IframeWrapperField in form view", async function (assert) {
+    QUnit.test("IframeWrapperField in form view", async function (assert) {
         await makeView({
             type: "form",
             resModel: "report",

@@ -48,7 +48,7 @@ QUnit.module("Fields", (hooks) => {
                     </group>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step(`onchange ${JSON.stringify(args.args)}`);
                 }
             },
@@ -78,7 +78,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("color field in editable list view", async function (assert) {
+    QUnit.test("color field in editable list view", async function (assert) {
         await makeView({
             type: "list",
             serverData,
@@ -159,7 +159,7 @@ QUnit.module("Fields", (hooks) => {
                     <field name="hex_color" widget="color" />
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step(`onchange ${JSON.stringify(args.args)}`);
                 }
             },

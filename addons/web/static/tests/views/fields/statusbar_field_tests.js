@@ -169,7 +169,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "folded statusbar widget on selection field has selected value in the toggler",
         async function (assert) {
             registry.category("services").add("ui", {
@@ -229,7 +229,7 @@ QUnit.module("Fields", (hooks) => {
         });
     });
 
-    QUnit.tttt("clickable statusbar widget on many2one field", async function (assert) {
+    QUnit.test("clickable statusbar widget on many2one field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -269,7 +269,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("statusbar with no status", async function (assert) {
+    QUnit.test("statusbar with no status", async function (assert) {
         serverData.models.product.records = [];
         await makeView({
             type: "form",
@@ -292,7 +292,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("statusbar with tooltip for help text", async function (assert) {
+    QUnit.test("statusbar with tooltip for help text", async function (assert) {
         serverData.models.partner.fields.product_id.help = "some info about the field";
         await makeView({
             type: "form",
@@ -317,7 +317,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("statusbar with required modifier", async function (assert) {
+    QUnit.test("statusbar with required modifier", async function (assert) {
         const mock = () => {
             assert.step("Show error message");
             return () => {};
@@ -365,7 +365,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, ".o_statusbar_status button:visible", 2);
     });
 
-    QUnit.tttt("statusbar with domain but no value (create mode)", async function (assert) {
+    QUnit.test("statusbar with domain but no value (create mode)", async function (assert) {
         serverData.models.partner.fields.trululu.domain = "[('bar', '=', True)]";
 
         await makeView({
@@ -517,7 +517,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(rpcCount, 2, "should not have done 1 more search_read rpc");
     });
 
-    QUnit.tttt('statusbar edited by the smart action "Move to stage..."', async function (assert) {
+    QUnit.test('statusbar edited by the smart action "Move to stage..."', async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -550,7 +550,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, "#o_command_2");
     });
 
-    QUnit.tttt("smart actions are unavailable if readonly", async function (assert) {
+    QUnit.test("smart actions are unavailable if readonly", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -573,7 +573,7 @@ QUnit.module("Fields", (hooks) => {
         assert.notOk(moveStages.includes("Move to next...ALT + X"));
     });
 
-    QUnit.tttt("hotkeys are unavailable if readonly", async function (assert) {
+    QUnit.test("hotkeys are unavailable if readonly", async function (assert) {
         await makeView({
             serverData,
             type: "form",

@@ -216,7 +216,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2oneField");
 
-    QUnit.tttt("many2ones in form views", async function (assert) {
+    QUnit.test("many2ones in form views", async function (assert) {
         assert.expect(2);
 
         function createMockActionService(assert) {
@@ -294,7 +294,7 @@ QUnit.module("Fields", (hooks) => {
         // the value is correctly updated on close
     });
 
-    QUnit.tttt("editing a many2one, but not changing anything", async function (assert) {
+    QUnit.test("editing a many2one, but not changing anything", async function (assert) {
         assert.expect(1);
 
         serverData.views = {
@@ -585,7 +585,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("many2ones in form views with search more", async function (assert) {
+    QUnit.test("many2ones in form views with search more", async function (assert) {
         for (let i = 5; i < 11; i++) {
             serverData.models.partner.records.push({ id: i, display_name: `Partner ${i}` });
         }
@@ -640,7 +640,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual($("tr.o_data_row").length, 0, "should display 0 records");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "many2ones: Open the selection dialog several times using the 'Search More...' button with a context containing 'search_default_...'",
         async function (assert) {
             for (let i = 5; i < 11; i++) {
@@ -775,7 +775,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "using a many2one widget must take into account the decorations",
         async function (assert) {
             await makeView({
@@ -885,7 +885,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".modal .btn-primary");
     });
 
-    QUnit.tttt("empty a many2one field in list view", async function (assert) {
+    QUnit.test("empty a many2one field in list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -915,7 +915,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["write"]);
     });
 
-    QUnit.tttt("focus tracking on a many2one in a list", async function (assert) {
+    QUnit.test("focus tracking on a many2one in a list", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -959,7 +959,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(input.value, "", "Input should be empty after discard");
     });
 
-    QUnit.tttt('many2one fields with option "no_open"', async function (assert) {
+    QUnit.test('many2one fields with option "no_open"', async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -982,7 +982,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty many2one field", async function (assert) {
+    QUnit.test("empty many2one field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1026,7 +1026,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty readonly many2one field", async function (assert) {
+    QUnit.test("empty readonly many2one field", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1038,7 +1038,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_widget[name=trululu]").innerHTML, "");
     });
 
-    QUnit.tttt("empty many2one field with node options", async function (assert) {
+    QUnit.test("empty many2one field with node options", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -1263,7 +1263,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2one in non edit mode (with value)", async function (assert) {
+    QUnit.test("many2one in non edit mode (with value)", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1284,7 +1284,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2one in non edit mode (without value)", async function (assert) {
+    QUnit.test("many2one in non edit mode (without value)", async function (assert) {
         serverData.models.partner.records[0].trululu = false;
 
         await makeView({
@@ -1339,7 +1339,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector("div[name=product_id] input").value, "new value");
     });
 
-    QUnit.tttt("many2one searches with correct value", async function (assert) {
+    QUnit.test("many2one searches with correct value", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1443,7 +1443,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2one search with trailing and leading spaces", async function (assert) {
+    QUnit.test("many2one search with trailing and leading spaces", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -1561,7 +1561,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2one field and list navigation", async function (assert) {
+    QUnit.test("many2one field and list navigation", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -1935,7 +1935,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("list in form: create with one2many with many2one", async function (assert) {
+    QUnit.test("list in form: create with one2many with many2one", async function (assert) {
         serverData.models.partner.fields.p.default = [
             [0, 0, { display_name: "new record", p: [] }],
         ];
@@ -1969,7 +1969,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list in form: create with one2many with many2one (version 2)",
         async function (assert) {
             // This test simulates the exact same scenario as the previous one,
@@ -2009,7 +2009,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "item not dropped on discard with empty required field (default_get)",
         async function (assert) {
             // This test simulates discarding a record that has been created with
@@ -2084,7 +2084,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("list in form: name_get with unique ids (default_get)", async function (assert) {
+    QUnit.test("list in form: name_get with unique ids (default_get)", async function (assert) {
         serverData.models.partner.records[0].display_name = "MyTrululu";
         serverData.models.partner.fields.p.default = [
             [0, 0, { trululu: 1, p: [] }],
@@ -2170,7 +2170,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "list in form: item not dropped on discard with empty required field (onchange in default_get)",
         async function (assert) {
             // variant of the test "list in form: discard newly added element with
@@ -2246,7 +2246,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "list in form: item not dropped on discard with empty required field (onchange on list after default_get)",
         async function (assert) {
             // discarding a record from an `onchange` in a `default_get` should not
@@ -2358,7 +2358,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'item not dropped on discard with empty required field with "Add an item" (invalid on "UPDATE")',
         async function (assert) {
             // when a record in a list is added with "Add an item", it should
@@ -2547,7 +2547,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("list in form: call button in sub view", async function (assert) {
+    QUnit.test("list in form: call button in sub view", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         serverData.views = {
             "product,false,form": `
@@ -2742,7 +2742,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["onchange sequence", "partner_type write"]);
     });
 
-    QUnit.tttt("autocompletion in a many2one, in form view with a domain", async function (assert) {
+    QUnit.test("autocompletion in a many2one, in form view with a domain", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -2761,7 +2761,7 @@ QUnit.module("Fields", (hooks) => {
         click(target, ".o_field_widget[name=product_id] input");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "autocompletion in a many2one, in form view with a date field",
         async function (assert) {
             assert.expect(1);
@@ -2824,7 +2824,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "empty list with sample data and many2one with option always_reload",
         async function (assert) {
             await makeView({
@@ -2849,7 +2849,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("selecting a many2one, then discarding", async function (assert) {
+    QUnit.test("selecting a many2one, then discarding", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -3097,7 +3097,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("slow create on a many2one", async function (assert) {
+    QUnit.test("slow create on a many2one", async function (assert) {
         serverData.views = {
             "product,false,form": '<form><field name="name" /></form>',
         };
@@ -3174,7 +3174,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".modal .o_form_button_cancel");
     });
 
-    QUnit.tttt("select a many2one value by focusing out", async function (assert) {
+    QUnit.test("select a many2one value by focusing out", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -3190,7 +3190,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_external_button");
     });
 
-    QUnit.tttt("no_create option on a many2one", async function (assert) {
+    QUnit.test("no_create option on a many2one", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -3214,7 +3214,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("can_create and can_write option on a many2one", async function (assert) {
+    QUnit.test("can_create and can_write option on a many2one", async function (assert) {
         serverData.models.product.options = {
             can_create: "false",
             can_write: "false",
@@ -3279,7 +3279,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal");
     });
 
-    QUnit.tttt("create_name_field option on a many2one", async function (assert) {
+    QUnit.test("create_name_field option on a many2one", async function (assert) {
         // when the 'create_name_field' option is set, the value entered in the
         // many2one input should be used to populate this specified field,
         // instead of the generic 'name' field.
@@ -3313,7 +3313,7 @@ QUnit.module("Fields", (hooks) => {
         await clickDiscard(target.querySelector(".modal"));
     });
 
-    QUnit.tttt("propagate can_create onto the search popup", async function (assert) {
+    QUnit.test("propagate can_create onto the search popup", async function (assert) {
         serverData.models.product.records = [
             { id: 1, name: "Tromblon1" },
             { id: 2, name: "Tromblon2" },
@@ -3372,7 +3372,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "many2one with can_create=false shows no result item when searched something that doesn't exist",
         async function (assert) {
             await makeView({
@@ -3409,7 +3409,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("pressing enter in a m2o in an editable list", async function (assert) {
+    QUnit.test("pressing enter in a m2o in an editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -3466,7 +3466,7 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(target.querySelector("tr.o_data_row:nth-child(3)"), "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing ENTER on a 'no_quick_create' many2one should open a M2ODialog",
         async function (assert) {
             serverData.views = {
@@ -3498,7 +3498,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "select a value by pressing TAB on a many2one with onchange",
         async function (assert) {
             serverData.models.partner.onchanges.trululu = () => {};
@@ -3548,7 +3548,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("leaving a many2one by pressing tab", async function (assert) {
+    QUnit.test("leaving a many2one by pressing tab", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -3579,7 +3579,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(input.value, "second record", "first record should have been selected");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "leaving an empty many2one by pressing tab (after backspace or delete)",
         async function (assert) {
             await makeView({
@@ -3713,7 +3713,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("many2one: dynamic domain set in the field's definition", async function (assert) {
+    QUnit.test("many2one: dynamic domain set in the field's definition", async function (assert) {
         assert.expect(2);
         serverData.models.partner.fields.trululu.domain = "[('foo' ,'=', foo)]";
 
@@ -3743,7 +3743,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_many2one .o-autocomplete--dropdown-item");
     });
 
-    QUnit.tttt("many2one: domain set in view and on field", async function (assert) {
+    QUnit.test("many2one: domain set in view and on field", async function (assert) {
         assert.expect(2);
         serverData.models.partner.fields.trululu.domain = "[('foo' ,'=', 'boum')]";
 
@@ -3770,7 +3770,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_many2one .o-autocomplete--dropdown-item");
     });
 
-    QUnit.tttt("many2one: domain updated by an onchange", async function (assert) {
+    QUnit.test("many2one: domain updated by an onchange", async function (assert) {
         assert.expect(2);
 
         serverData.models.partner.onchanges = {
@@ -3926,7 +3926,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("search more in many2one: dropdown click", async function (assert) {
+    QUnit.test("search more in many2one: dropdown click", async function (assert) {
         for (let i = 0; i < 8; i++) {
             serverData.models.partner.records.push({ id: 100 + i, display_name: `test_${i}` });
         }
@@ -4093,7 +4093,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("many2one dropdown disappears on scroll", async function (assert) {
+    QUnit.test("many2one dropdown disappears on scroll", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4120,7 +4120,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_field_many2one .dropdown-menu");
     });
 
-    QUnit.tttt("search more in many2one: group and use the pager", async function (assert) {
+    QUnit.test("search more in many2one: group and use the pager", async function (assert) {
         serverData.models.partner.records.push(
             {
                 id: 5,
@@ -4179,7 +4179,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(modal, ".o_data_row", "should display 1 record in the second page");
     });
 
-    QUnit.tttt("focus when closing many2one modal in many2one modal", async function (assert) {
+    QUnit.test("focus when closing many2one modal in many2one modal", async function (assert) {
         serverData.views = {
             "partner,false,form": '<form><field name="trululu"/></form>',
         };
@@ -4300,7 +4300,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(modal, "tr.o_data_row", "should display 1 record");
     });
 
-    QUnit.tttt("click on many2one link in list view", async function (assert) {
+    QUnit.test("click on many2one link in list view", async function (assert) {
         serverData.models["turtle"].records[1].product_id = 37;
         serverData.views = {
             "partner,false,form": '<form> <field name="turtles"/> </form>',
@@ -4359,7 +4359,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Many2oneField with placeholder", async function (assert) {
+    QUnit.test("Many2oneField with placeholder", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4373,7 +4373,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("external_button performs a doAction by default", async function (assert) {
+    QUnit.test("external_button performs a doAction by default", async function (assert) {
         serverData.views = {
             "partner,false,form": '<form><field name="trululu"/></form>',
             "partner,false,search": "<search></search>",
@@ -4414,7 +4414,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".breadcrumb").textContent, "first recordNew");
     });
 
-    QUnit.tttt("external_button opens a FormViewDialog in dialogs", async function (assert) {
+    QUnit.test("external_button opens a FormViewDialog in dialogs", async function (assert) {
         await makeViewInDialog({
             type: "form",
             resModel: "partner",
@@ -4437,7 +4437,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, ".modal", 2);
     });
 
-    QUnit.tttt("external_button opens a FormViewDialog in dialogs", async function (assert) {
+    QUnit.test("external_button opens a FormViewDialog in dialogs", async function (assert) {
         await makeViewInDialog({
             type: "form",
             resModel: "partner",
@@ -4460,7 +4460,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, ".modal", 2);
     });
 
-    QUnit.tttt("keep changes when editing related record in a dialog", async function (assert) {
+    QUnit.test("keep changes when editing related record in a dialog", async function (assert) {
         serverData.views = {
             "partner,98,form": '<form><field name="int_field"/></form>',
         };

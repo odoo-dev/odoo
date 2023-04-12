@@ -506,7 +506,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".int_field_2 input");
     });
 
-    QUnit.tttt("duplicate fields rendered properly (one2many)", async function (assert) {
+    QUnit.test("duplicate fields rendered properly (one2many)", async function (assert) {
         serverData.models.partner.records.push({ id: 6, p: [1] });
         await makeView({
             type: "form",
@@ -1701,7 +1701,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_notebook .nav-link"), "active");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "trying to leave an invalid form view should not change the navbar",
         async function (assert) {
             serverData.menus = {
@@ -4525,7 +4525,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2one in a one2many", async function (assert) {
+    QUnit.test("many2one in a one2many", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         serverData.models.partner.records[1].product_id = 37;
 
@@ -4856,7 +4856,7 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(target.querySelector(".o_form_editable"), "o_form_dirty");
     });
 
-    QUnit.tttt("discard changes on a duplicated record", async function (assert) {
+    QUnit.test("discard changes on a duplicated record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -4882,7 +4882,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(document.body, ".modal", "there should not be a confirm modal");
     });
 
-    QUnit.tttt("discard invalid value", async function (assert) {
+    QUnit.test("discard invalid value", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -8315,7 +8315,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "do not perform extra RPC to read invisible many2one fields",
         async function (assert) {
             // WOWL TODO: use this test to check the unity spec:
@@ -8419,7 +8419,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getFooValues(), ["zzz", "zop", "xop", "My little Foo Value"]);
     });
 
-    QUnit.tttt("action context is used when evaluating domains", async function (assert) {
+    QUnit.test("action context is used when evaluating domains", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -8906,7 +8906,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("translation dialog with right context and domain", async function (assert) {
+    QUnit.test("translation dialog with right context and domain", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
         patchWithCleanup(localization, {
@@ -9007,7 +9007,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "translate event correctly handled with multiple controllers",
         async function (assert) {
             assert.expect(3);
@@ -9928,7 +9928,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("process the context for inline subview", async function (assert) {
+    QUnit.test("process the context for inline subview", async function (assert) {
         serverData.models.partner.records[0].p = [2];
 
         await makeView({
@@ -12484,7 +12484,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["save", "discard"]);
     });
 
-    QUnit.tttt("form view does not deactivate sample data on other views", async function (assert) {
+    QUnit.test("form view does not deactivate sample data on other views", async function (assert) {
         serverData.models.partner.records = [];
         serverData.views = {
             "partner,false,list": `<tree sample="1"><field name="name"/></tree>`,
@@ -12509,7 +12509,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_view .o_content.o_view_sample_data");
     });
 
-    QUnit.tttt("empty x2manys when coming form a list with sample data", async function (assert) {
+    QUnit.test("empty x2manys when coming form a list with sample data", async function (assert) {
         serverData.models.partner.records = [];
         serverData.views = {
             "partner,false,list": `<tree sample="1"><field name="name"/></tree>`,
@@ -12905,7 +12905,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "action button in x2many should display a notification if the record is virtual",
         async (assert) => {
             const notificationService = makeFakeNotificationService((msg, options) => {

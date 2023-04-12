@@ -85,7 +85,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("MonetaryField");
 
-    QUnit.tttt("basic flow in form view - float field", async function (assert) {
+    QUnit.test("basic flow in form view - float field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -138,7 +138,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("basic flow in form view - monetary field", async function (assert) {
+    QUnit.test("basic flow in form view - monetary field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -186,7 +186,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("rounding using formula in form view - float field", async function (assert) {
+    QUnit.test("rounding using formula in form view - float field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -218,7 +218,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("rounding using formula in form view - monetary field", async function (assert) {
+    QUnit.test("rounding using formula in form view - monetary field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -250,7 +250,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("with currency digits != 2 - float field", async function (assert) {
+    QUnit.test("with currency digits != 2 - float field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
         patchWithCleanup(currencies, {
             3: {
@@ -308,7 +308,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("with currency digits != 2 - monetary field", async function (assert) {
+    QUnit.test("with currency digits != 2 - monetary field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
         patchWithCleanup(currencies, {
             3: {
@@ -366,7 +366,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("basic flow in editable list view - float field", async function (assert) {
+    QUnit.test("basic flow in editable list view - float field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -461,7 +461,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("basic flow in editable list view - monetary field", async function (assert) {
+    QUnit.test("basic flow in editable list view - monetary field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -556,7 +556,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("changing currency updates the field - float field", async function (assert) {
+    QUnit.test("changing currency updates the field - float field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -600,7 +600,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("changing currency updates the field - monetary field", async function (assert) {
+    QUnit.test("changing currency updates the field - monetary field", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -644,7 +644,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("MonetaryField with monetary field given in options", async function (assert) {
+    QUnit.test("MonetaryField with monetary field given in options", async function (assert) {
         serverData.models.partner.fields.float_field.type = "monetary";
         serverData.models.partner.fields.company_currency_id = {
             string: "Company Currency",
@@ -749,7 +749,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("MonetaryField with currency set by an onchange", async function (assert) {
+    QUnit.test("MonetaryField with currency set by an onchange", async function (assert) {
         // this test ensures that the monetary field can be re-rendered with and
         // without currency (which can happen as the currency can be set by an
         // onchange)
@@ -824,7 +824,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("float widget on monetary field", async function (assert) {
+    QUnit.test("float widget on monetary field", async function (assert) {
         serverData.models.partner.fields.monetary = { string: "Monetary", type: "monetary" };
         serverData.models.partner.records[0].monetary = 9.99;
         serverData.models.partner.records[0].currency_id = 1;
@@ -850,7 +850,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("float field with monetary widget and decimal precision", async function (assert) {
+    QUnit.test("float field with monetary widget and decimal precision", async function (assert) {
         serverData.models.partner.records = [
             {
                 id: 1,
@@ -909,7 +909,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("MonetaryField without currency symbol", async function (assert) {
+    QUnit.test("MonetaryField without currency symbol", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -932,7 +932,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("monetary field with placeholder", async function (assert) {
+    QUnit.test("monetary field with placeholder", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -953,7 +953,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("required monetary field with zero value", async function (assert) {
+    QUnit.test("required monetary field with zero value", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -968,7 +968,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector("[name=monetary_field] input").value, "0.00");
     });
 
-    QUnit.tttt("uses 'currency_id' as currency field by default", async function (assert) {
+    QUnit.test("uses 'currency_id' as currency field by default", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -990,7 +990,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("automatically uses currency_field if defined", async function (assert) {
+    QUnit.test("automatically uses currency_field if defined", async function (assert) {
         serverData.models.partner.fields.custom_currency_id = {
             string: "Currency",
             type: "many2one",

@@ -620,7 +620,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "m2m grouped rendering with active field and archive enabled (archivable true)",
         async (assert) => {
             // add active field on partner model and make all records active
@@ -3622,7 +3622,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record fail in grouped by many2one", async (assert) => {
+    QUnit.test("quick create record fail in grouped by many2one", async (assert) => {
         serverData.views["partner,false,form"] = `
             <form>
                 <field name="product_id"/>
@@ -5083,7 +5083,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("prevent drag and drop if grouped by many2many field", async (assert) => {
+    QUnit.test("prevent drag and drop if grouped by many2many field", async (assert) => {
         serverData.models.partner.records[0].category_ids = [6, 7];
         serverData.models.partner.records[3].category_ids = [7];
 
@@ -5167,7 +5167,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "completely prevent drag and drop if records_draggable set to false",
         async (assert) => {
             await makeView({
@@ -5662,7 +5662,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "hide and display help message (ESC) in kanban quick create [REQUIRE FOCUS]",
         async (assert) => {
             await makeView({
@@ -6058,7 +6058,7 @@ QUnit.module("Views", (hooks) => {
         await clickColumnAction("Edit");
     });
 
-    QUnit.tttt("quick create column should be opened if there is no column", async (assert) => {
+    QUnit.test("quick create column should be opened if there is no column", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6083,7 +6083,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create column should not be closed on window click if there is no column",
         async (assert) => {
             await makeView({
@@ -6208,7 +6208,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 3, "should now have three columns");
     });
 
-    QUnit.tttt("quick create column and examples", async (assert) => {
+    QUnit.test("quick create column and examples", async (assert) => {
         serviceRegistry.add("dialog", dialogService, { force: true });
         registry.category("kanban_examples").add("test", {
             allowedGroupBys: ["product_id"],
@@ -6374,7 +6374,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create column's apply button's display text", async (assert) => {
+    QUnit.test("quick create column's apply button's display text", async (assert) => {
         serviceRegistry.add("dialog", dialogService, { force: true });
         const applyExamplesText = "Use This For My Test";
         registry.category("kanban_examples").add("test", {
@@ -6420,7 +6420,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create column and examples background with ghostColumns titles",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -6478,7 +6478,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create column and examples background without ghostColumns titles",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -6522,7 +6522,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "nocontent helper after adding a record (kanban with progressbar)",
         async (assert) => {
             await makeView({
@@ -6579,7 +6579,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "if view was not grouped at start, it can be grouped and ungrouped",
         async (assert) => {
             const kanban = await makeView({
@@ -6833,7 +6833,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("remove nocontent helper after adding a record", async (assert) => {
+    QUnit.test("remove nocontent helper after adding a record", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -6878,7 +6878,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("remove nocontent helper when adding a record", async (assert) => {
+    QUnit.test("remove nocontent helper when adding a record", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -6922,7 +6922,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "nocontent helper is displayed again after canceling quick create",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -8223,7 +8223,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("prevent resequence columns if groups_draggable=false", async (assert) => {
+    QUnit.test("prevent resequence columns if groups_draggable=false", async (assert) => {
         serverData.models.product.fields.sequence = { type: "integer" };
 
         await makeView({
@@ -8364,7 +8364,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(getCard(0), "oe_kanban_color_9");
     });
 
-    QUnit.tttt("load more records in column", async (assert) => {
+    QUnit.test("load more records in column", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -8577,7 +8577,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("asynchronous tooltips when grouped", async (assert) => {
+    QUnit.test("asynchronous tooltips when grouped", async (assert) => {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
         });
@@ -8628,7 +8628,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read: product"]);
     });
 
-    QUnit.tttt("loads data tooltips only when first opening", async (assert) => {
+    QUnit.test("loads data tooltips only when first opening", async (assert) => {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
         });
@@ -8777,7 +8777,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence", "resequence"], "should have resequenced twice");
     });
 
-    QUnit.tttt("basic support for widgets (being Owl Components)", async (assert) => {
+    QUnit.test("basic support for widgets (being Owl Components)", async (assert) => {
         class MyComponent extends Component {
             static template = owl.xml`<div t-att-class="props.class" t-esc="value"/>`;
             get value() {
@@ -8941,7 +8941,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["-4", "15"]);
     });
 
-    QUnit.tttt("column progressbars should not crash in non grouped views", async (assert) => {
+    QUnit.test("column progressbars should not crash in non grouped views", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9038,7 +9038,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column progressbars are working with load more", async (assert) => {
+    QUnit.test("column progressbars are working with load more", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9143,7 +9143,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "kanban with progressbars: correctly update env when archiving records",
         async (assert) => {
             // add active field on partner model and make all records active
@@ -9506,7 +9506,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "keep adding quickcreate in first column after a record from this column was moved",
         async (assert) => {
             await makeView({
@@ -9543,7 +9543,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("test displaying image (URL, image field not set)", async (assert) => {
+    QUnit.test("test displaying image (URL, image field not set)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9600,7 +9600,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("test displaying image (binary & placeholder)", async (assert) => {
+    QUnit.test("test displaying image (binary & placeholder)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9635,7 +9635,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("test displaying image (for another record)", async (assert) => {
+    QUnit.test("test displaying image (for another record)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9707,7 +9707,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "grouped kanban becomes ungrouped when clearing domain then clearing groupby",
         async (assert) => {
             // in this test, we simulate that clearing the domain is slow, so that
@@ -9771,7 +9771,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick_create on grouped kanban without column", async (assert) => {
+    QUnit.test("quick_create on grouped kanban without column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -9795,7 +9795,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["createRecord"]);
     });
 
-    QUnit.tttt("keyboard navigation on kanban basic rendering", async (assert) => {
+    QUnit.test("keyboard navigation on kanban basic rendering", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9825,7 +9825,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, getCard(0), "the first card should be focussed");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "keyboard navigation on kanban basic rendering does not crash when the focus is inside a card",
         async (assert) => {
             await makeView({
@@ -9853,7 +9853,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("keyboard navigation on kanban grouped rendering", async (assert) => {
+    QUnit.test("keyboard navigation on kanban grouped rendering", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9903,7 +9903,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "keyboard navigation on kanban grouped rendering with empty columns",
         async (assert) => {
             serverData.models.partner.records[1].state = "abc";
@@ -9988,7 +9988,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "keyboard navigation on kanban when the focus is on a link that " +
             "has an action and the kanban has no oe_kanban_global_... class",
         async (assert) => {
@@ -10014,7 +10014,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("set cover image", async (assert) => {
+    QUnit.test("set cover image", async (assert) => {
         assert.expect(10);
 
         serviceRegistry.add("dialog", dialogService, { force: true });
@@ -10156,7 +10156,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["yop", "blip", "gnap", "blip"]);
     });
 
-    QUnit.tttt("click on image field in kanban with oe_kanban_global_click", async (assert) => {
+    QUnit.test("click on image field in kanban with oe_kanban_global_click", async (assert) => {
         assert.expect(2);
 
         await makeView({
@@ -10185,7 +10185,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_image"), null, { skipVisibilityCheck: true });
     });
 
-    QUnit.tttt("kanban view with boolean field", async (assert) => {
+    QUnit.test("kanban view with boolean field", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10205,7 +10205,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_record input:not(:checked)");
     });
 
-    QUnit.tttt("kanban view with boolean widget", async (assert) => {
+    QUnit.test("kanban view with boolean widget", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10224,7 +10224,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(getCard(0), "div.o_field_boolean .o-checkbox");
     });
 
-    QUnit.tttt("kanban view with boolean toggle widget", async (assert) => {
+    QUnit.test("kanban view with boolean toggle widget", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10247,7 +10247,7 @@ QUnit.module("Views", (hooks) => {
         assert.notOk(getCard(1).querySelector("[name='bar'] input").checked);
     });
 
-    QUnit.tttt("kanban view with monetary and currency fields without widget", async (assert) => {
+    QUnit.test("kanban view with monetary and currency fields without widget", async (assert) => {
         const currencies = {};
         for (const record of serverData.models.currency.records) {
             currencies[record.id] = record;
@@ -10275,7 +10275,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create: keyboard navigation to buttons", async (assert) => {
+    QUnit.test("quick create: keyboard navigation to buttons", async (assert) => {
         await makeView({
             arch: `
                 <kanban on_create="quick_create">
@@ -10313,7 +10313,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(document.activeElement, "btn btn-primary o_kanban_add");
     });
 
-    QUnit.tttt("kanban with isHtmlEmpty method", async (assert) => {
+    QUnit.test("kanban with isHtmlEmpty method", async (assert) => {
         serverData.models.product.fields.description = { string: "Description", type: "html" };
         serverData.models.product.records.push(
             {
@@ -10668,7 +10668,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("kanban widget can extract props from attrs", async (assert) => {
+    QUnit.test("kanban widget can extract props from attrs", async (assert) => {
         class TestWidget extends Component {
             static template = xml`<div class="o-test-widget-option" t-esc="props.title"/>`;
         }
@@ -10705,7 +10705,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("action/type attributes on kanban arch, type='object'", async (assert) => {
+    QUnit.test("action/type attributes on kanban arch, type='object'", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10734,7 +10734,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["doActionButton type object name a1", "web_search_read_unity"]);
     });
 
-    QUnit.tttt("action/type attributes on kanban arch, type='action'", async (assert) => {
+    QUnit.test("action/type attributes on kanban arch, type='action'", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10763,7 +10763,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["doActionButton type action name a1", "web_search_read_unity"]);
     });
 
-    QUnit.tttt("Missing t-key is automatically filled with a warning", async (assert) => {
+    QUnit.test("Missing t-key is automatically filled with a warning", async (assert) => {
         patchWithCleanup(console, { warn: () => assert.step("warning") });
 
         await makeView({
@@ -10831,7 +10831,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["name_create", "read"]);
     });
 
-    QUnit.tttt("Allow use of 'editable'/'deletable' in ungrouped kanban", async (assert) => {
+    QUnit.test("Allow use of 'editable'/'deletable' in ungrouped kanban", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10850,7 +10850,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["EDITDELETE", "EDITDELETE", "EDITDELETE", "EDITDELETE"]);
     });
 
-    QUnit.tttt("folded groups are kept when leaving and coming back", async (assert) => {
+    QUnit.test("folded groups are kept when leaving and coming back", async (assert) => {
         serverData.views = {
             "partner,false,kanban": `
                 <kanban>
@@ -10962,7 +10962,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(1), ["2"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "folded groups are kept when leaving and coming back (grouped by date)",
         async (assert) => {
             serverData.models.partner.fields.date.default = "2022-10-10";
@@ -11015,7 +11015,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("loaded records are kept when leaving and coming back", async (assert) => {
+    QUnit.test("loaded records are kept when leaving and coming back", async (assert) => {
         serverData.views = {
             "partner,false,kanban": `
                 <kanban limit="1">
@@ -11060,7 +11060,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record", 3);
     });
 
-    QUnit.tttt("basic rendering with 2 groupbys", async (assert) => {
+    QUnit.test("basic rendering with 2 groupbys", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11131,7 +11131,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record and click outside (no dirty input)", async (assert) => {
+    QUnit.test("quick create record and click outside (no dirty input)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11191,7 +11191,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_quick_create");
     });
 
-    QUnit.tttt("quick create record and click outside (with dirty input)", async (assert) => {
+    QUnit.test("quick create record and click outside (with dirty input)", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11275,7 +11275,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_quick_create");
     });
 
-    QUnit.tttt("quick create record and click on 'Load more'", async (assert) => {
+    QUnit.test("quick create record and click on 'Load more'", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11309,7 +11309,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
     });
 
-    QUnit.tttt("dropdown is closed on item click", async (assert) => {
+    QUnit.test("dropdown is closed on item click", async (assert) => {
         serverData.models.partner.records.splice(1, 3); // keep one record only
         await makeView({
             type: "kanban",
@@ -11336,7 +11336,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".dropdown-menu");
     });
 
-    QUnit.tttt("can use JSON in kanban template", async (assert) => {
+    QUnit.test("can use JSON in kanban template", async (assert) => {
         serverData.models.partner.records = [{ id: 1, foo: '["g", "e", "d"]' }];
         await makeView({
             type: "kanban",
@@ -11668,7 +11668,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("no leak of TransactionInProgress (grouped case)", async (assert) => {
+    QUnit.test("no leak of TransactionInProgress (grouped case)", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
@@ -11934,7 +11934,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["notification"]);
     });
 
-    QUnit.tttt("renders banner_route", async (assert) => {
+    QUnit.test("renders banner_route", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11961,7 +11961,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".setmybodyfree");
     });
 
-    QUnit.tttt("fieldDependencies support for fields", async (assert) => {
+    QUnit.test("fieldDependencies support for fields", async (assert) => {
         const customField = {
             component: class CustomField extends Component {
                 static template = xml`<span t-esc="props.record.data.int_field"/>`;
@@ -11990,7 +11990,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("[name=foo] span").innerText, "10");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "fieldDependencies support for fields: dependence on a relational field",
         async (assert) => {
             const customField = {
@@ -12026,7 +12026,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("column quick create - title and placeholder", async function (assert) {
+    QUnit.test("column quick create - title and placeholder", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -12063,7 +12063,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("fold a column and drag record on it should not unfold it", async (assert) => {
+    QUnit.test("fold a column and drag record on it should not unfold it", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -12097,7 +12097,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getColumn(1).innerText, "xmo (3)");
     });
 
-    QUnit.tttt("drag record on initially folded column should not unfold it", async (assert) => {
+    QUnit.test("drag record on initially folded column should not unfold it", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -12322,7 +12322,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(1), ["yop10", "blip9", "gnap17", "cba13"]);
     });
 
-    QUnit.tttt("no sample data when all groups are folded then one is unfolded", async (assert) => {
+    QUnit.test("no sample data when all groups are folded then one is unfolded", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -12357,7 +12357,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, "o_view_sample_data");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "no content helper when all groups are folded but there are (unloaded) records",
         async (assert) => {
             await makeView({
@@ -12395,7 +12395,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Move multiple records in different columns simultaneously", async (assert) => {
+    QUnit.test("Move multiple records in different columns simultaneously", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
@@ -12493,7 +12493,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelectorAll(".o_kanban_record").length, 1);
     });
 
-    QUnit.tttt("drag & drop: content scrolls when reaching the edges", async (assert) => {
+    QUnit.test("drag & drop: content scrolls when reaching the edges", async (assert) => {
         const { advanceFrame } = mockAnimationFrame();
         await makeView({
             type: "kanban",
@@ -12562,7 +12562,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_record.o_dragged");
     });
 
-    QUnit.tttt("attribute default_order", async function (assert) {
+    QUnit.test("attribute default_order", async function (assert) {
         serverData.models.custom_model = {
             fields: {
                 int: { type: "integer", string: "Int" },
@@ -12658,7 +12658,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Can't use KanbanRecord implementation details in arch", async (assert) => {
+    QUnit.test("Can't use KanbanRecord implementation details in arch", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -12846,7 +12846,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["scrolled"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "kanban view: action button in controlPanel with display='always'",
         async (assert) => {
             const domain = [["id", "=", 1]];
@@ -12908,7 +12908,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Keep scrollTop when loading records with load more", async (assert) => {
+    QUnit.test("Keep scrollTop when loading records with load more", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",

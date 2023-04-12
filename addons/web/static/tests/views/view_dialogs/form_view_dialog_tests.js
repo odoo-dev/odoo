@@ -70,7 +70,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.module("FormViewDialog");
 
-    QUnit.tttt("formviewdialog buttons in footer are positioned properly", async function (assert) {
+    QUnit.test("formviewdialog buttons in footer are positioned properly", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                     <form string="Partner">
@@ -101,7 +101,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    QUnit.tttt("modifiers are considered on multiple <footer/> tags", async function (assert) {
+    QUnit.test("modifiers are considered on multiple <footer/> tags", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -144,7 +144,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         }
     });
 
-    QUnit.tttt("formviewdialog buttons in footer are not duplicated", async function (assert) {
+    QUnit.test("formviewdialog buttons in footer are not duplicated", async function (assert) {
         serverData.models.partner.fields.poney_ids = {
             string: "Poneys",
             type: "one2many",
@@ -322,7 +322,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         }
     );
 
-    QUnit.tttt("FormViewDialog with remove button", async function (assert) {
+    QUnit.test("FormViewDialog with remove button", async function (assert) {
         serverData.views = {
             "partner,false,form": `<form><field name="foo"/></form>`,
         };

@@ -174,7 +174,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("fieldradio widget on a selection in a new record", async function (assert) {
+    QUnit.test("fieldradio widget on a selection in a new record", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -205,7 +205,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("fieldradio widget has o_horizontal or o_vertical class", async function (assert) {
+    QUnit.test("fieldradio widget has o_horizontal or o_vertical class", async function (assert) {
         serverData.models.partner.fields.color2 = serverData.models.partner.fields.color;
 
         await makeView({
@@ -243,7 +243,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("fieldradio widget with numerical keys encoded as strings", async function (assert) {
+    QUnit.test("fieldradio widget with numerical keys encoded as strings", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.fields.selection = {

@@ -226,7 +226,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("char field in editable list view", async function (assert) {
+    QUnit.test("char field in editable list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -660,7 +660,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "input field: change value before pending onchange returns",
         async function (assert) {
             serverData.models.partner.onchanges = {

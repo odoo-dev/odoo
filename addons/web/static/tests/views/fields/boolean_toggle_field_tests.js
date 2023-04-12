@@ -194,7 +194,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_boolean_toggle input:checked");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "BooleanToggleField is disabled if readonly in editable list",
         async function (assert) {
             serverData.models.partner.fields.bar.readonly = true;

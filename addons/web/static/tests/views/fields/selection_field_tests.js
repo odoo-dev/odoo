@@ -70,7 +70,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("SelectionField");
 
-    QUnit.tttt("SelectionField in a list view", async function (assert) {
+    QUnit.test("SelectionField in a list view", async function (assert) {
         serverData.models.partner.records.forEach(function (r) {
             r.color = "red";
         });
@@ -150,7 +150,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views", "read", "name_search", "name_search", "onchange"]);
     });
 
-    QUnit.tttt("unset selection field with 0 as key", async function (assert) {
+    QUnit.test("unset selection field with 0 as key", async function (assert) {
         // The server doesn't make a distinction between false value (the field
         // is unset), and selection 0, as in that case the value it returns is
         // false. So the client must convert false to value 0 if it exists.
@@ -182,7 +182,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("unset selection field with string keys", async function (assert) {
+    QUnit.test("unset selection field with string keys", async function (assert) {
         // The server doesn't make a distinction between false value (the field
         // is unset), and selection 0, as in that case the value it returns is
         // false. So the client must convert false to value 0 if it exists. In
@@ -310,7 +310,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("required selection widget should not have blank option", async function (assert) {
+    QUnit.test("required selection widget should not have blank option", async function (assert) {
         serverData.models.partner.fields.feedback_value = {
             type: "selection",
             required: true,
@@ -356,7 +356,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "required selection widget should have only one blank option",
         async function (assert) {
             serverData.models.partner.fields.feedback_value = {

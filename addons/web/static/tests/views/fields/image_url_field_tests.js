@@ -67,7 +67,7 @@ QUnit.module("Fields", (hooks) => {
      */
     QUnit.module("ImageUrlField");
 
-    QUnit.tttt("image fields are correctly rendered", async function (assert) {
+    QUnit.test("image fields are correctly rendered", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -159,7 +159,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("image fields in x2many list are loaded correctly", async function (assert) {
+    QUnit.test("image fields in x2many list are loaded correctly", async function (assert) {
         serverData.models.partner_type.fields.image = { name: "image", type: "char" };
         serverData.models.partner_type.records[0].image = EN_FLAG_URL;
         serverData.models.partner.records[0].timmy = [12];
@@ -186,7 +186,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("image url fields in kanban don't stop opening record", async function (assert) {
+    QUnit.test("image url fields in kanban don't stop opening record", async function (assert) {
         patchWithCleanup(KanbanController.prototype, {
             openRecord() {
                 assert.step("open record");
@@ -213,7 +213,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["open record"]);
     });
 
-    QUnit.tttt("image fields with empty value", async function (assert) {
+    QUnit.test("image fields with empty value", async function (assert) {
         serverData.models.partner.records[0].foo = false;
 
         await makeView({

@@ -1648,7 +1648,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody tr", 4, "should have 4 rows");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         'discard a new record in editable="top" list with less than 4 records',
         async function (assert) {
             await makeView({
@@ -7629,7 +7629,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".o_field_widget[name=foo] input", "new value");
     });
 
-    QUnit.tttt("list view, editable, without data", async function (assert) {
+    QUnit.test("list view, editable, without data", async function (assert) {
         serverData.models.foo.records = [];
         serverData.models.foo.fields.date.default = "2017-02-10";
 
@@ -7741,7 +7741,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list view with a button without icon", async function (assert) {
+    QUnit.test("list view with a button without icon", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7760,7 +7760,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list view, editable, can discard", async function (assert) {
+    QUnit.test("list view, editable, can discard", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7829,7 +7829,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt("editable list view, should refocus date field", async (assert) => {
+    QUnit.test("editable list view, should refocus date field", async (assert) => {
         patchDate(2017, 1, 10, 0, 0, 0);
         serverData.models.foo.records = [];
         await makeView({
@@ -7912,7 +7912,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("invisible attrs in readonly and editable list", async function (assert) {
+    QUnit.test("invisible attrs in readonly and editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7941,7 +7941,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 
-    QUnit.tttt("monetary fields are properly rendered", async function (assert) {
+    QUnit.test("monetary fields are properly rendered", async function (assert) {
         const currencies = {};
         serverData.models.res_currency.records.forEach((currency) => {
             currencies[currency.id] = currency;
@@ -7982,7 +7982,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("simple list with date and datetime", async function (assert) {
+    QUnit.test("simple list with date and datetime", async function (assert) {
         patchTimeZone(120);
 
         await makeView({
@@ -8000,7 +8000,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("edit a row by clicking on a readonly field", async function (assert) {
+    QUnit.test("edit a row by clicking on a readonly field", async function (assert) {
         serverData.models.foo.fields.foo.readonly = true;
         await makeView({
             type: "list",
@@ -8241,7 +8241,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped list on selection field at level 2", async function (assert) {
+    QUnit.test("grouped list on selection field at level 2", async function (assert) {
         serverData.models.foo.fields.priority = {
             string: "Priority",
             type: "selection",
@@ -8291,7 +8291,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped list with a pager in a group", async function (assert) {
+    QUnit.test("grouped list with a pager in a group", async function (assert) {
         serverData.models.foo.records[3].bar = true;
 
         await makeView({
@@ -8324,7 +8324,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_data_row");
     });
 
-    QUnit.tttt("edition: create new line, then discard", async function (assert) {
+    QUnit.test("edition: create new line, then discard", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -8347,7 +8347,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_list_record_selector input:enabled", 5);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "invisible attrs on fields are re-evaluated on field change",
         async function (assert) {
             await makeView({
@@ -8400,7 +8400,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "readonly attrs on fields are re-evaluated on field change",
         async function (assert) {
             await makeView({
@@ -8457,7 +8457,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "required attrs on fields are re-evaluated on field change",
         async function (assert) {
             await makeView({
@@ -8585,7 +8585,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("leaving unvalid rows in edition", async function (assert) {
+    QUnit.test("leaving unvalid rows in edition", async function (assert) {
         let warnings = 0;
         const list = await makeView({
             type: "list",
@@ -8627,7 +8627,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(warnings, 1, "a warning should have been displayed");
     });
 
-    QUnit.tttt("open a virtual id", async function (assert) {
+    QUnit.test("open a virtual id", async function (assert) {
         await makeView({
             type: "list",
             resModel: "event",
@@ -8790,7 +8790,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_search_read", "write", "read", "onchange"]);
     });
 
-    QUnit.tttt("display toolbar", async function (assert) {
+    QUnit.test("display toolbar", async function (assert) {
         await makeView({
             type: "list",
             resModel: "event",
@@ -8872,7 +8872,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "execute ActionMenus actions with correct params (single page)",
         async function (assert) {
             assert.expect(12);
@@ -8955,7 +8955,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "execute ActionMenus actions with correct params (multi pages)",
         async function (assert) {
             patchWithCleanup(actionService, {
@@ -9037,7 +9037,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("edit list line after line deletion", async function (assert) {
+    QUnit.test("edit list line after line deletion", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9562,7 +9562,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("skip invisible fields when navigating list view with TAB", async function (assert) {
+    QUnit.test("skip invisible fields when navigating list view with TAB", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9589,7 +9589,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("skip buttons when navigating list view with TAB (end)", async function (assert) {
+    QUnit.test("skip buttons when navigating list view with TAB (end)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9615,7 +9615,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("skip buttons when navigating list view with TAB (middle)", async function (assert) {
+    QUnit.test("skip buttons when navigating list view with TAB (middle)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9643,7 +9643,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("navigation: not moving down with keydown", async function (assert) {
+    QUnit.test("navigation: not moving down with keydown", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9658,7 +9658,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "navigation: moving right with keydown from text field does not move the focus",
         async function (assert) {
             serverData.models.foo.fields.foo.type = "text";
@@ -9691,7 +9691,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "discarding changes in a row properly updates the rendering",
         async function (assert) {
             await makeView({
@@ -9720,7 +9720,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("numbers in list are right-aligned", async function (assert) {
+    QUnit.test("numbers in list are right-aligned", async function (assert) {
         const currencies = {};
         serverData.models.res_currency.records.forEach((currency) => {
             currencies[currency.id] = currency;
@@ -9750,7 +9750,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(nbInputRight, 2, "there should be two right-aligned input");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "grouped list with another grouped list parent, click unfold",
         async function (assert) {
             serverData.models.bar.fields = {
@@ -9805,7 +9805,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("field values are escaped", async function (assert) {
+    QUnit.test("field values are escaped", async function (assert) {
         const value = "<script>throw Error();</script>";
 
         serverData.models.foo.records[0].foo = value;
@@ -9870,7 +9870,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("field with password attribute", async function (assert) {
+    QUnit.test("field with password attribute", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -10715,7 +10715,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable list view: contexts are correctly sent", async function (assert) {
+    QUnit.test("editable list view: contexts are correctly sent", async function (assert) {
         patchWithCleanup(session.user_context, { someKey: "some value" });
         await makeView({
             type: "list",
@@ -10767,7 +10767,7 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".modal-dialog button.btn-primary");
     });
 
-    QUnit.tttt("editable list view: single edition with selected records", async function (assert) {
+    QUnit.test("editable list view: single edition with selected records", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -10998,7 +10998,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("create in multi editable list", async function (assert) {
+    QUnit.test("create in multi editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11483,7 +11483,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable list view: many2one with readonly modifier", async function (assert) {
+    QUnit.test("editable list view: many2one with readonly modifier", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11983,7 +11983,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list with fields with readonly modifier", async function (assert) {
+    QUnit.test("editable list with fields with readonly modifier", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12027,7 +12027,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable form with many2one: click out does not discard the row",
         async function (assert) {
             serverData.models.bar.fields.m2o = {
@@ -12068,7 +12068,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "editable form alongside html field: click out to unselect the row",
         async function (assert) {
             // FIXME WOWL hack: add back the text field as html field removed by web_editor html_field file
@@ -12124,7 +12124,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped list edition with boolean_favorite widget", async function (assert) {
+    QUnit.test("grouped list edition with boolean_favorite widget", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12156,7 +12156,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped list view, indentation for empty group", async function (assert) {
+    QUnit.test("grouped list view, indentation for empty group", async function (assert) {
         serverData.models.foo.fields.priority = {
             string: "Priority",
             type: "selection",
@@ -12551,7 +12551,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("list should ask to scroll to top on page changes", async function (assert) {
+    QUnit.test("list should ask to scroll to top on page changes", async function (assert) {
         patchWithCleanup(ListController.prototype, {
             onPageChangeScroll() {
                 this._super(...arguments);
@@ -12584,7 +12584,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["scroll"], "this is still working after a limit change");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list with handle field, override default_get, bottom when inline",
         async function (assert) {
             serverData.models.foo.fields.int_field.default = 10;
@@ -12627,7 +12627,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("create record on list with modifiers depending on id", async function (assert) {
+    QUnit.test("create record on list with modifiers depending on id", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12668,7 +12668,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row div[name=int_field]");
     });
 
-    QUnit.tttt("readonly boolean in editable list is readonly", async function (assert) {
+    QUnit.test("readonly boolean in editable list is readonly", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12708,7 +12708,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("grouped lists with groups_limit attribute", async function (assert) {
+    QUnit.test("grouped lists with groups_limit attribute", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12760,7 +12760,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("grouped list with dynamic expand attribute (eval true)", async function (assert) {
+    QUnit.test("grouped list with dynamic expand attribute (eval true)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12776,7 +12776,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 4);
     });
 
-    QUnit.tttt("grouped list with dynamic expand attribute (eval false)", async function (assert) {
+    QUnit.test("grouped list with dynamic expand attribute (eval false)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12792,7 +12792,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_data_row");
     });
 
-    QUnit.tttt("grouped list (two levels) with expand attribute", async function (assert) {
+    QUnit.test("grouped list (two levels) with expand attribute", async function (assert) {
         // the expand attribute only opens the first level groups
         await makeView({
             type: "list",
@@ -12915,7 +12915,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["[], 0", "[], 3", '[["bar","=",false]], 0']);
     });
 
-    QUnit.tttt("editable grouped lists", async function (assert) {
+    QUnit.test("editable grouped lists", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12951,7 +12951,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.tttt("grouped lists are editable (ungrouped first)", async function (assert) {
+    QUnit.test("grouped lists are editable (ungrouped first)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12979,7 +12979,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row");
     });
 
-    QUnit.tttt("char field edition in editable grouped list", async function (assert) {
+    QUnit.test("char field edition in editable grouped list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12999,7 +12999,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_data_row:first:contains(pla)");
     });
 
-    QUnit.tttt("control panel buttons in editable grouped list views", async function (assert) {
+    QUnit.test("control panel buttons in editable grouped list views", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13025,7 +13025,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_list_button_add");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "control panel buttons in multi editable grouped list views",
         async function (assert) {
             await makeView({
@@ -13073,7 +13073,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("edit a line and discard it in grouped editable", async function (assert) {
+    QUnit.test("edit a line and discard it in grouped editable", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13671,7 +13671,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("cell-level keyboard navigation in non-editable list", async function (assert) {
+    QUnit.test("cell-level keyboard navigation in non-editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14173,7 +14173,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("removing a groupby while adding a line from list", async function (assert) {
+    QUnit.test("removing a groupby while adding a line from list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14480,7 +14480,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, firstVisibleDataRow.querySelector("[name=foo]"));
     });
 
-    QUnit.tttt("execute group header button with keyboard navigation", async function (assert) {
+    QUnit.test("execute group header button with keyboard navigation", async function (assert) {
         const list = await makeView({
             type: "list",
             resModel: "foo",
@@ -14683,7 +14683,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("discard an invalid row in a list", async function (assert) {
+    QUnit.test("discard an invalid row in a list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14707,7 +14707,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("[name='foo']").textContent, "yop");
     });
 
-    QUnit.tttt('editable grouped list with create="0"', async function (assert) {
+    QUnit.test('editable grouped list with create="0"', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14829,7 +14829,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["2"]);
     });
 
-    QUnit.tttt("list view with optional fields rendering", async function (assert) {
+    QUnit.test("list view with optional fields rendering", async function (assert) {
         patchWithCleanup(localization, {
             direction: "ltr",
         });
@@ -14919,7 +14919,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list view with optional fields rendering in RTL mode", async function (assert) {
+    QUnit.test("list view with optional fields rendering in RTL mode", async function (assert) {
         patchWithCleanup(localization, {
             direction: "rtl",
         });
@@ -14950,7 +14950,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "optional fields do not disappear even after listview reload",
         async function (assert) {
             await makeView({
@@ -15015,7 +15015,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("selection is kept when optional fields are toggled", async function (assert) {
+    QUnit.test("selection is kept when optional fields are toggled", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15050,7 +15050,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_list_record_selector input:checked", 5);
     });
 
-    QUnit.tttt("list view with optional fields and async rendering", async function (assert) {
+    QUnit.test("list view with optional fields and async rendering", async function (assert) {
         assert.expect(14);
 
         const def = makeDeferred();
@@ -15100,7 +15100,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_optional_columns_dropdown input:checked");
     });
 
-    QUnit.tttt("change the viewType of the current action", async function (assert) {
+    QUnit.test("change the viewType of the current action", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,
@@ -15249,7 +15249,7 @@ QUnit.module("Views", (hooks) => {
         ); //o2m field
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list view with optional fields rendering and local storage mock",
         async function (assert) {
             let forceLocalStorage = true;
@@ -15362,7 +15362,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("float field render with digits attribute on listview", async function (assert) {
+    QUnit.test("float field render with digits attribute on listview", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15377,7 +15377,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list: column: resize, reorder, resize again", async function (assert) {
+    QUnit.test("list: column: resize, reorder, resize again", async function (assert) {
         serverData.models.foo.fields.foo.sortable = true;
         serverData.models.foo.fields.int_field.sortable = true;
         await makeView({
@@ -15429,7 +15429,7 @@ QUnit.module("Views", (hooks) => {
         assertAlmostEqual(th2.offsetWidth, widthsAfterReorder[1] + widthsAfterReorder[2] / 2);
     });
 
-    QUnit.tttt("list: resize column and toggle one checkbox", async function (assert) {
+    QUnit.test("list: resize column and toggle one checkbox", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15469,7 +15469,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list: resize column and toggle check all", async function (assert) {
+    QUnit.test("list: resize column and toggle check all", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15509,7 +15509,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list: resize column headers", async function (assert) {
+    QUnit.test("editable list: resize column headers", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15538,7 +15538,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(finalWidths[2], originalWidths[2]);
     });
 
-    QUnit.tttt("editable list: resize column headers", async function (assert) {
+    QUnit.test("editable list: resize column headers", async function (assert) {
         // This test will ensure that, on resize list header,
         // the resized element have the correct size and other elements are not resized
         serverData.models.foo.records[0].foo = "a".repeat(200);
@@ -15580,7 +15580,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("resize column with several x2many lists in form group", async function (assert) {
+    QUnit.test("resize column with several x2many lists in form group", async function (assert) {
         serverData.models.bar.fields.text = { string: "Text field", type: "char" };
         serverData.models.foo.records[0].o2m = [1, 2];
 
@@ -15645,7 +15645,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "resize column with x2many list with several fields in form notebook",
         async function (assert) {
             serverData.models.foo.records[0].o2m = [1, 2];
@@ -15690,7 +15690,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("enter edition in editable list with multi_edit = 0", async function (assert) {
+    QUnit.test("enter edition in editable list with multi_edit = 0", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15709,7 +15709,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, intFieldInput);
     });
 
-    QUnit.tttt("enter edition in editable list with multi_edit = 1", async function (assert) {
+    QUnit.test("enter edition in editable list with multi_edit = 1", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -15728,7 +15728,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, intFieldInput);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "continue creating new lines in editable=top on keyboard nav",
         async function (assert) {
             await makeView({
@@ -15759,7 +15759,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Date in evaluation context works with date field", async function (assert) {
+    QUnit.test("Date in evaluation context works with date field", async function (assert) {
         patchDate(1997, 0, 9, 12, 0, 0);
 
         serverData.models.foo.fields.birthday = { string: "Birthday", type: "date" };
@@ -15780,7 +15780,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_data_row .text-danger");
     });
 
-    QUnit.tttt("Datetime in evaluation context works with datetime field", async function (assert) {
+    QUnit.test("Datetime in evaluation context works with datetime field", async function (assert) {
         patchDate(1997, 0, 9, 12, 0, 0);
 
         /**
@@ -16215,7 +16215,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (onchanges)", async function (assert) {
         assert.expect(1);
 
         serverData.models.foo.onchanges = {
@@ -16235,7 +16235,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="int_field"/>
                 </tree>`,
             mockRPC(route, { args, method, model }) {
-                if (model === "foo" && method === "onchange") {
+                if (model === "foo" && method === "onchange2") {
                     return def;
                 }
                 if (model === "foo" && method === "write") {
@@ -16315,7 +16315,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "selecting a row after another one containing a table within an html field should be the correct one",
         async function (assert) {
             // FIXME WOWL hack: add back the text field as html field removed by web_editor html_field file
@@ -16350,7 +16350,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "archive/unarchive not available on active readonly models",
         async function (assert) {
             serverData.models.foo.fields.active = {
@@ -16506,7 +16506,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("keep order after grouping", async (assert) => {
+    QUnit.test("keep order after grouping", async (assert) => {
         serverData.models.foo.fields.foo.sortable = true;
         await makeView({
             type: "list",
@@ -16552,7 +16552,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list header click should unselect record", async (assert) => {
+    QUnit.test("editable list header click should unselect record", async (assert) => {
         await makeView({
             resModel: "foo",
             type: "list",
@@ -16569,7 +16569,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.tttt("editable list group header click should unselect record", async (assert) => {
+    QUnit.test("editable list group header click should unselect record", async (assert) => {
         await makeView({
             resModel: "foo",
             type: "list",
@@ -16589,7 +16589,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.tttt("renders banner_route", async (assert) => {
+    QUnit.test("renders banner_route", async (assert) => {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16610,7 +16610,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".setmybodyfree");
     });
 
-    QUnit.tttt("fieldDependencies support for fields", async (assert) => {
+    QUnit.test("fieldDependencies support for fields", async (assert) => {
         serverData.models.foo.records = [{ id: 1, int_field: 2 }];
 
         const customField = {
@@ -16746,7 +16746,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create", "read"]);
     });
 
-    QUnit.tttt("create a record with the correct context", async (assert) => {
+    QUnit.test("create a record with the correct context", async (assert) => {
         serverData.models.foo.fields.text.required = true;
         serverData.models.foo.records = [];
 
@@ -16831,7 +16831,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "classNames given to a field are set on the right field directly",
         async function (assert) {
             await makeView({
@@ -16862,7 +16862,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("use a filter_domain in a list view", async function (assert) {
+    QUnit.test("use a filter_domain in a list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16880,7 +16880,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 3);
     });
 
-    QUnit.tttt("Formatted group operator", async function (assert) {
+    QUnit.test("Formatted group operator", async function (assert) {
         serverData.models.foo.records[0].qux = 0.4;
         serverData.models.foo.records[1].qux = 0.2;
         serverData.models.foo.records[2].qux = 0.01;
@@ -16897,7 +16897,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(td2.textContent, "61%");
     });
 
-    QUnit.tttt("list view does not crash when clicked button cell", async function (assert) {
+    QUnit.test("list view does not crash when clicked button cell", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16913,7 +16913,7 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".o_data_row:first-child td.o_list_button");
     });
 
-    QUnit.tttt("group by going to next page then back to first", async function (assert) {
+    QUnit.test("group by going to next page then back to first", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16929,7 +16929,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
     });
 
-    QUnit.tttt("list with group_by_no_leaf and group by", async function (assert) {
+    QUnit.test("list with group_by_no_leaf and group by", async function (assert) {
         assert.expect(4);
 
         await makeView({
@@ -16953,7 +16953,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("sort on a non sortable field with allow_order option", async function (assert) {
+    QUnit.test("sort on a non sortable field with allow_order option", async function (assert) {
         serverData.models.foo.records = [{ bar: true }, { bar: false }, { bar: true }];
 
         await makeView({
@@ -16985,7 +16985,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll("th[data-name=bar] i"), "fa-angle-up");
     });
 
-    QUnit.tttt("sort rows in a grouped list view", async function (assert) {
+    QUnit.test("sort rows in a grouped list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17078,7 +17078,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("optional field selection do not unselect current row", async function (assert) {
+    QUnit.test("optional field selection do not unselect current row", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17114,7 +17114,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row div[name=text]");
     });
 
-    QUnit.tttt("view widgets are rendered in list view", async function (assert) {
+    QUnit.test("view widgets are rendered in list view", async function (assert) {
         class TestWidget extends Component {
             static template = xml`<div class="test_widget" t-esc="props.record.data.bar"/>`;
         }
@@ -17188,7 +17188,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("no highlight of a (sortable) column without label", async function (assert) {
+    QUnit.test("no highlight of a (sortable) column without label", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17204,7 +17204,7 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(target.querySelector("thead th[data-name=foo]"), "table-active");
     });
 
-    QUnit.tttt("highlight of a (sortable) column with label", async function (assert) {
+    QUnit.test("highlight of a (sortable) column with label", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17276,7 +17276,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("view's context is passed down as evalContext", async (assert) => {
+    QUnit.test("view's context is passed down as evalContext", async (assert) => {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -17302,7 +17302,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["name_search"]);
     });
 
-    QUnit.tttt("list view with default_group_by", async (assert) => {
+    QUnit.test("list view with default_group_by", async (assert) => {
         serverData.models.foo.fields.m2m.store = true;
 
         let readGroupCount = 0;
@@ -17340,7 +17340,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_group_header", 2);
     });
 
-    QUnit.tttt("ungrouped list, apply filter, decrease limit", async function (assert) {
+    QUnit.test("ungrouped list, apply filter, decrease limit", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",

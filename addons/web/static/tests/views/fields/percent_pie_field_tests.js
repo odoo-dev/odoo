@@ -41,7 +41,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("PercentPieField");
 
-    QUnit.tttt("PercentPieField in form view with value < 50%", async function (assert) {
+    QUnit.test("PercentPieField in form view with value < 50%", async function (assert) {
         await makeView({
             serverData,
             type: "form",
@@ -134,7 +134,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("PercentPieField in form view with value > 50%", async function (assert) {
+    QUnit.test("PercentPieField in form view with value > 50%", async function (assert) {
         await makeView({
             serverData,
             type: "form",

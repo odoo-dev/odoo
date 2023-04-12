@@ -1548,7 +1548,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         `create event with timezone in week mode with formViewDialog European locale`,
         async (assert) => {
             assert.expect(7);
@@ -1782,7 +1782,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         `create event with timezone in week mode with formViewDialog American locale`,
         async (assert) => {
             assert.expect(7);
@@ -3308,7 +3308,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(target, ".fc-event", 4, "should display the created item");
     });
 
-    QUnit.tttt(`Update event with filters`, async (assert) => {
+    QUnit.test(`Update event with filters`, async (assert) => {
         const records = serverData.models.user.records;
         records.push({ id: 5, display_name: "user 5", partner_id: 3 });
         serverData.models.event.onchanges = {
@@ -3800,7 +3800,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(`drag and drop on month mode`, async (assert) => {
+    QUnit.test(`drag and drop on month mode`, async (assert) => {
         await makeView({
             type: "calendar",
             resModel: "event",
@@ -3833,7 +3833,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(`drag and drop on month mode with all_day mapping`, async (assert) => {
+    QUnit.test(`drag and drop on month mode with all_day mapping`, async (assert) => {
         // Same test as before but in calendarEventToRecord (calendar_model.js) there is
         // different condition branching with all_day mapping or not
         assert.expect(1);
@@ -4305,7 +4305,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         `edit record and attempt to create a record with "create" attribute set to false`,
         async (assert) => {
             assert.expect(8);

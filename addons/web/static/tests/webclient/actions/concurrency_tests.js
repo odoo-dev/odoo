@@ -95,7 +95,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsNone(target, ".o_list_view", "there should not be a list view in dom");
     });
 
-    QUnit.tttt("when an server action takes too much time...", async function (assert) {
+    QUnit.test("when an server action takes too much time...", async function (assert) {
         assert.expect(1);
         const def = makeDeferred();
         const mockRPC = async function (route, args) {
@@ -117,7 +117,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.tttt("clicking quickly on breadcrumbs...", async function (assert) {
+    QUnit.test("clicking quickly on breadcrumbs...", async function (assert) {
         assert.expect(1);
         let def;
         const mockRPC = async function (route, args) {
@@ -386,7 +386,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("open a record while reloading the list view", async function (assert) {
+    QUnit.test("open a record while reloading the list view", async function (assert) {
         assert.expect(10);
         let def;
         const mockRPC = async function (route) {
@@ -416,7 +416,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsNone(target, ".o_control_panel .o_list_buttons");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "properly drop client actions after new action is initiated",
         async function (assert) {
             assert.expect(3);
@@ -630,7 +630,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.tttt("local state, global state, and race conditions", async function (assert) {
+    QUnit.test("local state, global state, and race conditions", async function (assert) {
         serverData.views = {
             "partner,false,toy": `<toy/>`,
             "partner,false,list": `<list><field name="foo"/></list>`,
