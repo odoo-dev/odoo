@@ -15802,7 +15802,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_data_row .text-danger");
     });
 
-    QUnit.tttt("Auto save: add a record and leave action", async function (assert) {
+    QUnit.test("Auto save: add a record and leave action", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,
@@ -15848,7 +15848,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: create a new record without modifying it and leave action",
         async function (assert) {
             serverData.models.foo.fields.foo.required = true;
@@ -15898,7 +15898,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("Auto save: modify a record and leave action", async function (assert) {
+    QUnit.test("Auto save: modify a record and leave action", async function (assert) {
         serverData.actions = {
             1: {
                 id: 1,
@@ -15995,7 +15995,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["Invalid fields: ", "<ul><li>Foo</li></ul>"]);
     });
 
-    QUnit.tttt("Auto save: add a record and change page", async function (assert) {
+    QUnit.test("Auto save: add a record and change page", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16025,7 +16025,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Auto save: modify a record and change page", async function (assert) {
+    QUnit.test("Auto save: modify a record and change page", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16055,7 +16055,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Auto save: modify a record and change page (reject)", async function (assert) {
+    QUnit.test("Auto save: modify a record and change page (reject)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -16080,7 +16080,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser", async function (assert) {
         assert.expect(3);
 
         await makeView({
@@ -16108,7 +16108,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["save"]);
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (pending changes)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (pending changes)", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -16134,7 +16134,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.tttt("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
+    QUnit.test("Auto save: save on closing tab/browser (invalid field)", async function (assert) {
         assert.expect(2);
 
         await makeView({
