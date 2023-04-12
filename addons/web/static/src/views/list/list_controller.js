@@ -61,6 +61,7 @@ export class ListController extends Component {
             resModel: this.props.resModel,
             fields,
             activeFields,
+            openGroupsByDefault: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
         };
 
         const model = useModel(this.props.Model, {
@@ -71,7 +72,6 @@ export class ListController extends Component {
             countLimit: this.archInfo.countLimit,
             defaultOrderBy: this.archInfo.defaultOrder,
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
-            openGroupsByDefault: rawExpand ? evaluateExpr(rawExpand, this.props.context) : false,
             groupsLimit: this.archInfo.groupsLimit,
             multiEdit: this.multiEdit,
             onRecordSaved: this.onRecordSaved.bind(this),
