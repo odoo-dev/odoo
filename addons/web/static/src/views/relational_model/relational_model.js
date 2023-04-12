@@ -384,7 +384,6 @@ export class RelationalModel extends Model {
                         ...commonConfig,
                         domain: group.__domain,
                         groupBy,
-                        orderBy,
                     },
                 };
                 if (groupRecordConfig) {
@@ -402,6 +401,7 @@ export class RelationalModel extends Model {
                 }
             }
             const groupConfig = config.groups[group[firstGroupByName]];
+            groupConfig.list.orderBy = config.orderBy;
             if (groupBy.length) {
                 group.groups = [];
             } else {

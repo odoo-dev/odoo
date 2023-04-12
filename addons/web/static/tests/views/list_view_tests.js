@@ -2355,7 +2355,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "execute an action before and after each valid save in a grouped list view",
         async function (assert) {
             const listView = registry.category("views").get("list");
@@ -3821,7 +3821,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "groups can be sorted on non-aggregable fields if a group isn't folded",
         async function (assert) {
             serverData.models.foo.fields.foo.sortable = true;
@@ -3877,7 +3877,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "groups can be sorted on non-aggregable fields if a group isn't folded with expand='1'",
         async function (assert) {
             serverData.models.foo.fields.foo.sortable = true;
@@ -3896,10 +3896,10 @@ QUnit.module("Views", (hooks) => {
                         assert.step(
                             `web_read_group.orderby: ${args.kwargs.orderby || "default order"}`
                         );
+                    }
+                    if (method === "web_search_read_unity") {
                         assert.step(
-                            `web_read_group.expand_orderby: ${
-                                args.kwargs.expand_orderby || "default order"
-                            }`
+                            `web_search_read.orderby: ${args.kwargs.order || "default order"}`
                         );
                     }
                 },
@@ -3910,7 +3910,8 @@ QUnit.module("Views", (hooks) => {
             );
             assert.verifySteps([
                 "web_read_group.orderby: default order",
-                "web_read_group.expand_orderby: default order",
+                "web_search_read.orderby: default order",
+                "web_search_read.orderby: default order",
             ]);
 
             await click(target.querySelector(".o_column_sortable[data-name='foo']"));
@@ -3920,7 +3921,8 @@ QUnit.module("Views", (hooks) => {
             );
             assert.verifySteps([
                 "web_read_group.orderby: default order",
-                "web_read_group.expand_orderby: foo ASC",
+                "web_search_read.orderby: foo ASC",
+                "web_search_read.orderby: foo ASC",
             ]);
         }
     );
@@ -5141,7 +5143,7 @@ QUnit.module("Views", (hooks) => {
         assert.ok(longText > emptyText, "Long word should change the height of the cell");
     });
 
-    QUnit.tttt("deleting one record and verify context key", async function (assert) {
+    QUnit.test("deleting one record and verify context key", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -5182,7 +5184,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tbody td.o_list_record_selector", 3, "should have 3 records");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "deleting record which throws UserError should close confirmation dialog",
         async function (assert) {
             await makeView({
