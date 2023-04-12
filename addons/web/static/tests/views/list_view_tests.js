@@ -16371,7 +16371,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("open groups are kept when leaving and coming back", async (assert) => {
+    QUnit.test("open groups are kept when leaving and coming back", async (assert) => {
         serverData.views = {
             "foo,false,list": `<tree><field name="foo"/></tree>`,
             "foo,false,search": "<search/>",
@@ -16410,7 +16410,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 3);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "open groups are kept when leaving and coming back (grouped by date)",
         async (assert) => {
             serverData.models.foo.fields.date.default = "2022-10-10";
@@ -16453,7 +16453,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "go to the next page after leaving and coming back to a grouped list view",
         async (assert) => {
             serverData.views = {
