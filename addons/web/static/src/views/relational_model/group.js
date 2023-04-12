@@ -59,11 +59,6 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    removeRecord(record) {
-        this.list._removeRecords([record]);
-        this.count--;
-    }
-
     addRecord(record, index) {
         this.list._addRecord(record, index);
         this.count++;
@@ -161,5 +156,11 @@ export class Group extends DataPoint {
             return value ? value[0] : false;
         }
         return value;
+    }
+
+    async _removeRecords(records) {
+        const recordsToRemove = records.filter((record) => this.list.records.includes(record));
+        await this.list._removeRecords(records);
+        this.count -= recordsToRemove.length;
     }
 }

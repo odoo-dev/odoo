@@ -96,9 +96,11 @@ export class DynamicGroupList extends DynamicList {
     }
 
     _removeRecords(records) {
+        const proms = [];
         for (const group of this.groups) {
-            group.list._removeRecords(records);
+            proms.push(group._removeRecords(records));
         }
+        return Promise.all(proms);
     }
 
     /**
@@ -115,7 +117,7 @@ export class DynamicGroupList extends DynamicList {
         if (dataGroupId !== targetGroupId) {
             // step 1: move record to correct position
             const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
-            sourceGroup.removeRecord(record);
+            sourceGroup._removeRecords([record]);
             targetGroup.addRecord(record, refIndex + 1);
         }
         return targetGroup.list._resequence();

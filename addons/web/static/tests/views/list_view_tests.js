@@ -5632,7 +5632,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["Custom Default Available"]);
     });
 
-    QUnit.debug(
+    QUnit.test(
         "grouped, update the count of the group (and ancestors) when a record is deleted",
         async function (assert) {
             serverData.models.foo.records = [
