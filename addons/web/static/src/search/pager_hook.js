@@ -32,7 +32,6 @@ export function usePager(getProps) {
         },
     });
     onWillRender(() => {
-        console.log("Ask for parger props");
         Object.assign(pagerState, getProps() || { total: 0 });
     });
 }

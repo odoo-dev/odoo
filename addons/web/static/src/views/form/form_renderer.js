@@ -49,10 +49,6 @@ export class FormRenderer extends Component {
         onMounted(() => browser.addEventListener("resize", this.onResize));
         onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
 
-        owl.onWillRender(() => {
-            console.log("render form renderer");
-        });
-
         const { autofocusFieldId } = archInfo;
         if (this.shouldAutoFocus) {
             const rootRef = useRef("compiled_view_root");
