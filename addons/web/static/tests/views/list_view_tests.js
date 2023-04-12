@@ -8632,7 +8632,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`switch to form - resId: 2-20170808020000`]);
     });
 
-    QUnit.tttt("pressing enter on last line of editable list view", async function (assert) {
+    QUnit.test("pressing enter on last line of editable list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -8643,7 +8643,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
         assert.containsN(target, "tr.o_data_row", 4);
 
         // click on 3rd line
@@ -8669,7 +8669,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, "tr.o_data_row", 5);
         assert.hasClass(target.querySelector("tr.o_data_row:nth-child(5)"), "o_selected_row");
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
     });
 
     QUnit.tttt("pressing tab on last cell of editable list view", async function (assert) {
@@ -9061,7 +9061,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_selected_row", "no other row should be selected");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing TAB in editable list with several fields [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -9104,7 +9104,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -9145,7 +9145,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("navigation with tab and readonly field (no modification)", async function (assert) {
+    QUnit.test("navigation with tab and readonly field (no modification)", async function (assert) {
         // This test makes sure that if we have 2 cells in a row, the first in
         // edit mode, and the second one readonly, then if we press TAB when the
         // focus is on the first, then the focus skip the readonly cells and
@@ -9191,7 +9191,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "navigation with tab and readonly field (with modification)",
         async function (assert) {
             // This test makes sure that if we have 2 cells in a row, the first in
@@ -9243,7 +9243,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt('navigation with tab on a list with create="0"', async function (assert) {
+    QUnit.test('navigation with tab on a list with create="0"', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9286,7 +9286,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt('navigation with tab on a one2many list with create="0"', async function (assert) {
+    QUnit.test('navigation with tab on a one2many list with create="0"', async function (assert) {
         serverData.models.foo.records[0].o2m = [1, 2];
         await makeView({
             type: "form",
@@ -9451,7 +9451,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with a readonly field [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -9485,7 +9485,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with a readonly field in first column [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -9519,7 +9519,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with a readonly field in last column [REQUIRE FOCUS]",
         async function (assert) {
             await makeView({
@@ -13119,7 +13119,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing ESC in editable grouped list should discard the current line changes",
         async function (assert) {
             await makeView({
@@ -13153,7 +13153,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt('pressing TAB in editable="bottom" grouped list', async function (assert) {
+    QUnit.test('pressing TAB in editable="bottom" grouped list', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13193,7 +13193,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
     });
 
-    QUnit.tttt('pressing TAB in editable="top" grouped list', async function (assert) {
+    QUnit.test('pressing TAB in editable="top" grouped list', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13224,7 +13224,7 @@ QUnit.module("Views", (hooks) => {
         }
     });
 
-    QUnit.tttt("pressing TAB in editable grouped list with create=0", async function (assert) {
+    QUnit.test("pressing TAB in editable grouped list with create=0", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13263,7 +13263,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
     });
 
-    QUnit.tttt('pressing SHIFT-TAB in editable="bottom" grouped list', async function (assert) {
+    QUnit.test('pressing SHIFT-TAB in editable="bottom" grouped list', async function (assert) {
         serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
@@ -13305,7 +13305,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(secondRow, "o_selected_row");
     });
 
-    QUnit.tttt('pressing SHIFT-TAB in editable="top" grouped list', async function (assert) {
+    QUnit.test('pressing SHIFT-TAB in editable="top" grouped list', async function (assert) {
         serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
@@ -13347,7 +13347,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(secondRow, "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         'pressing SHIFT-TAB in editable grouped list with create="0"',
         async function (assert) {
             serverData.models.foo.records[2].bar = false;
@@ -13492,7 +13492,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt('pressing ENTER in editable="bottom" grouped list view', async function (assert) {
+    QUnit.test('pressing ENTER in editable="bottom" grouped list view', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -13529,13 +13529,13 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
-            "onchange",
+            "web_search_read_unity",
+            "web_search_read_unity",
+            "onchange2",
         ]);
     });
 
-    QUnit.tttt('pressing ENTER in editable="top" grouped list view', async function (assert) {
+    QUnit.test('pressing ENTER in editable="top" grouped list view', async function (assert) {
         serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
@@ -13568,10 +13568,15 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(target.querySelectorAll(".o_data_row")[2], "o_selected_row");
 
-        assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "web_search_read_unity",
+            "web_search_read_unity",
+        ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing ENTER in editable grouped list view with create=0",
         async function (assert) {
             await makeView({
@@ -13596,7 +13601,7 @@ QUnit.module("Views", (hooks) => {
             await click(secondGroupHeader);
             assert.containsN(target, ".o_data_row", 4);
             assert.containsNone(target, ".o_selected_row");
-            assert.verifySteps(["web_search_read", "web_search_read"]);
+            assert.verifySteps(["web_search_read_unity", "web_search_read_unity"]);
 
             // Click on first data row
             const dataRows = [...target.querySelectorAll(".o_data_row")];

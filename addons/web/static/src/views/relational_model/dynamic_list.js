@@ -126,10 +126,19 @@ export class DynamicList extends DataPoint {
         if (this.editedRecord) {
             const saved = await this.editedRecord.save();
             if (saved) {
-                this.editedRecord.switchMode("readonly");
+                await this.switchRecordToReadonly(this.editedRecord);
             }
         }
         return true;
+    }
+
+    async switchRecordToReadonly(record) {
+        await this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+    }
+
+    async editRecord(record) {
+        await this.unselectRecord();
+        await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
     }
 
     // -------------------------------------------------------------------------
