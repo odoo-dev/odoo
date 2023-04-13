@@ -111,13 +111,21 @@ export class DynamicRecordList extends DynamicList {
     _removeRecords(records) {
         const _records = this.records.filter((r) => !records.includes(r));
         if (this.offset && !_records.length) {
+            // we weren't on the first page, and we removed all records of the current page
             const offset = Math.max(this.offset - this.limit, 0);
             return this._load(offset, this.limit, this.orderBy);
         }
-        if (!this.hasLimitedCount) {
-            this.count -= this.records.length - _records.length;
+        const nbRemovedRecords = this.records.length - _records.length;
+        if (nbRemovedRecords > 0) {
+            if (this.count > this.offset + this.limit) {
+                // we removed some records, and there are other pages after the current one
+                return this._load(this.offset, this.limit, this.orderBy);
+            } else {
+                // we are on the last page and there are still records remaining
+                this.count -= nbRemovedRecords;
+                this.records = _records;
+            }
         }
-        this.records = _records;
     }
 
     _updateCount(data) {

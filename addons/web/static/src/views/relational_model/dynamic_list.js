@@ -23,7 +23,6 @@ export class DynamicList extends DataPoint {
     get orderBy() {
         return this.config.orderBy;
     }
-
     get editedRecord() {
         return this.records.find((record) => record.isInEdition);
     }
@@ -90,7 +89,7 @@ export class DynamicList extends DataPoint {
     load(params = {}) {
         const limit = params.limit === undefined ? this.limit : params.limit;
         const offset = params.offset === undefined ? this.offset : params.offset;
-        const orderBy = params.orderBy === undefined ? this.config.orderBy : params.orderBy;
+        const orderBy = params.orderBy === undefined ? this.orderBy : params.orderBy;
         console.log(orderBy);
         return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
     }
@@ -101,7 +100,7 @@ export class DynamicList extends DataPoint {
     }
 
     sortBy(fieldName) {
-        let orderBy = [...this.config.orderBy];
+        let orderBy = [...this.orderBy];
         if (orderBy.length && orderBy[0].name === fieldName) {
             orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
         } else {
@@ -149,7 +148,7 @@ export class DynamicList extends DataPoint {
     _leaveSampleMode() {
         if (this.model.useSampleModel) {
             this.model.useSampleModel = false;
-            return this._load(this.offset, this.limit, this.config.orderBy);
+            return this._load(this.offset, this.limit, this.orderBy);
         }
     }
 
@@ -160,10 +159,10 @@ export class DynamicList extends DataPoint {
         const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
         if (action && Object.keys(action).length) {
             this.model.action.doAction(action, {
-                onClose: () => this._load(this.offset, this.limit, this.config.orderBy),
+                onClose: () => this._load(this.offset, this.limit, this.orderBy),
             });
         } else {
-            return this._load(this.offset, this.limit, this.config.orderBy);
+            return this._load(0, this.limit, this.orderBy);
         }
     }
 }
