@@ -7267,7 +7267,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(document.activeElement, "o_searchview_input");
     });
 
-    QUnit.tttt("empty kanban with sample data", async (assert) => {
+    QUnit.test("empty kanban with sample data", async (assert) => {
         serverData.models.partner.records = [];
 
         const kanban = await makeView({
@@ -7409,7 +7409,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("non empty kanban with sample data", async (assert) => {
+    QUnit.test("non empty kanban with sample data", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7700,7 +7700,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("kanban with sample data: do an on_create action", async (assert) => {
+    QUnit.test("kanban with sample data: do an on_create action", async (assert) => {
         serverData.models.partner.records = [];
         serverData.views["partner,some_view_ref,form"] = `<form><field name="foo"/></form>`;
 
@@ -9668,7 +9668,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("test displaying image from m2o field (m2o field not set)", async (assert) => {
+    QUnit.test("test displaying image from m2o field (m2o field not set)", async (assert) => {
         serverData.models.foo_partner = {
             fields: {
                 name: { string: "Foo Name", type: "char" },
@@ -10130,7 +10130,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["blip", "yop", "gnap", "blip"]);
     });
 
-    QUnit.tttt("ungrouped kanban without handle field", async (assert) => {
+    QUnit.test("ungrouped kanban without handle field", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
