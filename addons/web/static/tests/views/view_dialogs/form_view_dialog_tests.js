@@ -7,10 +7,9 @@ import {
     patchWithCleanup,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { makeViewInDialog } from "@web/../tests/views/helpers";
+import { makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient } from "@web/../tests/webclient/helpers";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
-import { setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
 
 QUnit.module("ViewDialogs", (hooks) => {
     let serverData;
@@ -65,7 +64,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             },
         };
         target = getFixture();
-        setupControlPanelServiceRegistry();
+        setupViewRegistries();
     });
 
     QUnit.module("FormViewDialog");
@@ -247,7 +246,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         await click(target, '.o_field_widget[name="instrument"] button.o_external_button');
     });
 
-    QUnit.tttt("click on view buttons in a FormViewDialog", async function (assert) {
+    QUnit.test("click on view buttons in a FormViewDialog", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -275,16 +274,16 @@ QUnit.module("ViewDialogs", (hooks) => {
 
         assert.containsOnce(target, ".o_dialog .o_form_view");
         assert.containsN(target, ".o_dialog .o_form_view button", 2);
-        assert.verifySteps(["/web/webclient/load_menus", "get_views", "read"]);
+        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read_unity"]);
         await click(target.querySelector(".o_dialog .o_form_view .btn1"));
         assert.containsOnce(target, ".o_dialog .o_form_view");
-        assert.verifySteps(["method1", "read"]); // should re-read the record
+        assert.verifySteps(["method1", "web_read_unity"]); // should re-read the record
         await click(target.querySelector(".o_dialog .o_form_view .btn2"));
         assert.containsNone(target, ".o_dialog .o_form_view");
         assert.verifySteps(["method2"]); // should not read as we closed
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "formviewdialog is not closed when button handlers return a rejected promise",
         async function (assert) {
             serverData.views = {
