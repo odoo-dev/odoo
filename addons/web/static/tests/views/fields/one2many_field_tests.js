@@ -9360,7 +9360,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["test_button"]);
     });
 
-    QUnit.tttt("o2m add a line custom control create align with handle", async function (assert) {
+    QUnit.test("o2m add a line custom control create align with handle", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
