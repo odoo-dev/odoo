@@ -6384,7 +6384,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("use default_order on editable tree: sort on save", async function (assert) {
+    QUnit.test("use default_order on editable tree: sort on save", async function (assert) {
         serverData.models.foo.records[0].o2m = [1, 3];
 
         await makeView({
@@ -6430,7 +6430,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("use default_order on editable tree: sort on demand", async function (assert) {
+    QUnit.test("use default_order on editable tree: sort on demand", async function (assert) {
         serverData.models.foo.records[0].o2m = [1, 3];
         serverData.models.bar.fields = {
             ...serverData.models.bar.fields,
@@ -6490,7 +6490,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "use default_order on editable tree: sort on demand in page",
         async function (assert) {
             serverData.models.bar.fields = {

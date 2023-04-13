@@ -2475,23 +2475,28 @@ export class MockServer {
                 case "one2many":
                 case "many2many": {
                     if (relatedFields && Object.keys(relatedFields).length) {
-                        let ids = unique(records.map((r) => r[fieldName]).flat());
-                        const limit = fields[fieldName].limit;
-                        if (limit) {
-                            ids = ids.slice(0, limit);
-                        }
+                        const ids = unique(records.map((r) => r[fieldName]).flat());
                         const result = this.mockWebReadUnity(field.relation, [ids], {
                             fields: relatedFields,
                             context: fields[fieldName].context,
                         });
-                        const relRecords = {};
+                        const allRelRecords = {};
                         for (const relRecord of result) {
-                            relRecords[relRecord.id] = relRecord;
+                            allRelRecords[relRecord.id] = relRecord;
                         }
+                        const { limit, order } = fields[fieldName];
                         for (const record of records) {
-                            record[fieldName] = record[fieldName].map((resId) => {
-                                return relRecords[resId] || { id: resId };
-                            });
+                            const relResIds = record[fieldName];
+                            let relRecords = relResIds.map((resId) => allRelRecords[resId]);
+                            if (order) {
+                                relRecords = this.sortByField(relRecords, field.relation, order);
+                            }
+                            if (limit) {
+                                relRecords = relRecords.map((r, i) => {
+                                    return i < limit ? r : { id: r.id };
+                                });
+                            }
+                            record[fieldName] = relRecords;
                         }
                     }
                     break;

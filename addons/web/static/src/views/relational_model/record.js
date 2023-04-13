@@ -228,7 +228,13 @@ export class Record extends DataPoint {
                 // value can be a list of records or a list of commands (new record)
                 valueIsCommandList = value.length > 0 && Array.isArray(value[0]);
                 if (!staticList) {
-                    const data = valueIsCommandList ? [] : value;
+                    let data = valueIsCommandList ? [] : value;
+                    // FIXME: tocheck: what does unity return when no related field? In the mockServer, we return the list of ids
+                    if (data.length > 0 && typeof data[0] === "number") {
+                        data = data.map((resId) => {
+                            return { id: resId };
+                        });
+                    }
                     staticList = this._createStaticListDatapoint(data, fieldName);
                 }
                 if (valueIsCommandList) {
@@ -276,7 +282,8 @@ export class Record extends DataPoint {
     }
 
     _createStaticListDatapoint(data, fieldName) {
-        const { related, limit } = this.activeFields[fieldName];
+        const { related, limit, defaultOrderBy } = this.activeFields[fieldName];
+        // TODO: generate the config in relational model
         const config = {
             // FIXME: can't do that here, no context... yes, we do, but need to pass rawContext
             resModel: this.fields[fieldName].relation,
@@ -284,7 +291,7 @@ export class Record extends DataPoint {
             fields: (related && related.fields) || {},
             offset: 0,
             resIds: data.map((r) => r.id),
-            orderBy: [],
+            orderBy: defaultOrderBy,
             limit,
         };
         let staticList;

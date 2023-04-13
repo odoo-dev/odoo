@@ -1,8 +1,35 @@
 /* @odoo-module */
 
 import { x2ManyCommands } from "@web/core/orm_service";
+import { intersection } from "@web/core/utils/arrays";
+import { pick } from "@web/core/utils/objects";
 import { getId } from "./utils";
 import { DataPoint } from "./datapoint";
+
+import { markRaw } from "@odoo/owl";
+
+function compareFieldValues(v1, v2, fieldType) {
+    if (fieldType === "many2one") {
+        v1 = v1 ? v1[1] : false;
+        v2 = v2 ? v2[1] : false;
+    }
+    return v1 < v2;
+}
+function compareRecords(r1, r2, orderBy, fields) {
+    const { name, asc } = orderBy[0];
+    const v1 = asc ? r1.data[name] : r2.data[name];
+    const v2 = asc ? r2.data[name] : r1.data[name];
+    if (compareFieldValues(v1, v2, fields[name].type)) {
+        return -1;
+    }
+    if (compareFieldValues(v2, v1, fields[name].type)) {
+        return 1;
+    }
+    if (orderBy.length > 1) {
+        return compareRecords(r1, r2, orderBy.slice(1));
+    }
+    return 0;
+}
 
 export class StaticList extends DataPoint {
     static type = "StaticList";
@@ -10,10 +37,13 @@ export class StaticList extends DataPoint {
     setup(config, data, options = {}) {
         this._parent = options.parent;
         this._onChange = options.onChange;
+        this._cache = markRaw({});
         this.records = data
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
         this._commands = [];
+        this._currentIds = [...this.resIds];
+        this._needsReordering = false;
         this.count = this.resIds.length;
         this.context = {}; // FIXME: should receive context (remove this when it does, see datapoint.js)
     }
@@ -62,13 +92,17 @@ export class StaticList extends DataPoint {
             activeFields: this.activeFields,
             context: Object.assign({}, this.context, params.context),
         });
-        const record = this._createRecordDatapoint(values, "edit");
+        const virtualId = getId("virtual");
+        const record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
         if (params.position === "bottom") {
             this.records.push(record);
+            this._currentIds.splice(this.offset + this.limit, 0, virtualId);
         } else {
             this.records.unshift(record);
+            this._currentIds.splice(this.offset, 0, virtualId);
         }
-        this._commands.push([x2ManyCommands.CREATE, getId("virtual"), record]);
+        this._commands.push([x2ManyCommands.CREATE, virtualId, record]);
+        this._needsReordering = true;
         this._onChange();
     }
 
@@ -76,10 +110,15 @@ export class StaticList extends DataPoint {
         return false;
     }
 
-    load({ limit, offset }) {
+    load({ limit, offset, orderBy }) {
         limit = limit !== undefined ? limit : this.limit;
         offset = offset !== undefined ? offset : this.offset;
-        return this.model.mutex.exec(() => this._load({ limit, offset }));
+        orderBy = orderBy !== undefined ? orderBy : this.orderBy;
+        return this.model.mutex.exec(() => this._load({ limit, offset, orderBy }));
+    }
+
+    sortBy(fieldName) {
+        return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
     leaveEditMode() {
@@ -106,9 +145,11 @@ export class StaticList extends DataPoint {
         for (const command of commands) {
             switch (command[0]) {
                 case x2ManyCommands.CREATE: {
-                    const record = this._createRecordDatapoint(command[2]);
+                    const virtualId = getId("virtual");
+                    const record = this._createRecordDatapoint(command[2], { virtualId });
                     this.records.push(record);
-                    this._commands.push([x2ManyCommands.CREATE, getId("virtual"), record]);
+                    this._commands.push([x2ManyCommands.CREATE, virtualId, record]);
+                    this._currentIds.splice(this.offset + this.limit, 0, virtualId);
                     break;
                 }
                 case x2ManyCommands.UPDATE: {
@@ -144,6 +185,7 @@ export class StaticList extends DataPoint {
                 case x2ManyCommands.DELETE_ALL: {
                     // TODO
                     this.records = [];
+                    this._currentIds = [];
                     break;
                 }
                 case x2ManyCommands.REPLACE_WITH: {
@@ -154,22 +196,28 @@ export class StaticList extends DataPoint {
         }
     }
 
-    _createRecordDatapoint(data, mode = "readonly") {
+    _createRecordDatapoint(data, params = {}) {
+        const resId = data.id || false;
+        if (!resId && !params.virtualId) {
+            throw new Error("You must provide a virtualId if the record has no id");
+        }
         const config = {
             context: this.context,
-            activeFields: this.activeFields,
+            activeFields: params.activeFields || this.activeFields,
             resModel: this.resModel,
             fields: this.fields,
-            resId: data.id || false,
-            resIds: data.id ? [data.id] : [],
-            mode,
+            resId,
+            resIds: resId ? [resId] : [],
+            mode: params.mode || "readonly",
             isMonoRecord: true,
         };
         const options = {
             parentRecord: this._parent,
             onChange: this._onChange,
         };
-        return new this.model.constructor.Record(this.model, config, data, options);
+        const record = new this.model.constructor.Record(this.model, config, data, options);
+        this._cache[resId || params.virtualId] = record;
+        return record;
     }
 
     _getCommands() {
@@ -182,9 +230,57 @@ export class StaticList extends DataPoint {
         });
     }
 
-    async _load({ limit, offset }) {
-        const records = await this.model._updateConfig(this.config, { limit, offset });
+    async _load({ limit, offset, orderBy }) {
+        const records = await this.model._updateConfig(this.config, { limit, offset, orderBy });
         // FIXME: might need to keep references to the records of previous page (for changes)
         this.records = records.map((r) => this._createRecordDatapoint(r));
+    }
+
+    async _sortBy(fieldName) {
+        let orderBy = [...this.config.orderBy];
+        if (orderBy.length && orderBy[0].name === fieldName) {
+            if (!this._needsReordering) {
+                orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+            }
+        } else {
+            orderBy = orderBy.filter((o) => o.name !== fieldName);
+            orderBy.unshift({
+                name: fieldName,
+                asc: true,
+            });
+        }
+        const fieldNames = orderBy.map((o) => o.name);
+        const resIds = this._currentIds.filter((id) => {
+            if (typeof id === "string") {
+                // this is a virtual id, we don't want to read it
+                return false;
+            }
+            const record = this._cache[id];
+            if (!record) {
+                // record hasn't been loaded yet
+                return true;
+            }
+            // record has already been loaded -> check if we already read all orderBy fields
+            return intersection(record.fieldNames, fieldNames).length !== fieldNames.length;
+        });
+        if (resIds.length) {
+            const activeFields = pick(this.activeFields, fieldNames);
+            const config = { ...this.config, resIds, activeFields };
+            const records = await this.model._loadRecords(config);
+            for (const record of records) {
+                // FIXME: if already in cache, we'll lose potential pending changes
+                // maybe keep existing record, and write inside _values
+                this._createRecordDatapoint(record, { activeFields });
+            }
+        }
+        const allRecords = this._currentIds.map((id) => this._cache[id]);
+        const sortedRecords = allRecords.sort((r1, r2) => {
+            return compareRecords(r1, r2, orderBy, this.fields) || (orderBy[0].asc ? -1 : 1);
+        });
+        const currentPageRecords = sortedRecords.slice(this.offset, this.offset + this.limit);
+        //TODO: read records that haven't been fully read yet
+        this.model._updateConfig(this.config, { orderBy }, { noReload: true });
+        this.records = currentPageRecords;
+        this._needsReordering = false;
     }
 }

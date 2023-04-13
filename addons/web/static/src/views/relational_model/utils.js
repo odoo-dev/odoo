@@ -50,6 +50,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                     viewDescr.fields
                 );
                 activeFields[fieldName].limit = viewDescr.limit;
+                activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
             }
         } else {
             // TODO (see task description for multiple occurrences of fields)

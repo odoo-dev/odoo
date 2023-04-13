@@ -100,12 +100,10 @@ export class DynamicList extends DataPoint {
         this.isDomainSelected = value;
     }
 
-    async sortBy(fieldName) {
+    sortBy(fieldName) {
         let orderBy = [...this.config.orderBy];
         if (orderBy.length && orderBy[0].name === fieldName) {
-            // if (this.isOrder) {
             orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
-            // }
         } else {
             orderBy = orderBy.filter((o) => o.name !== fieldName);
             orderBy.unshift({
@@ -113,9 +111,7 @@ export class DynamicList extends DataPoint {
                 asc: true,
             });
         }
-
-        // this.isOrder = true;
-        await this.load({ orderBy });
+        return this.load({ orderBy });
     }
 
     unarchive(isSelected) {

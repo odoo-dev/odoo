@@ -5,7 +5,6 @@ import { EventBus, markRaw } from "@odoo/owl";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
-// import { deepCopy } from "@web/core/utils/objects";
 import { Model } from "@web/views/model";
 import { isRelational, orderByToString } from "@web/views/utils";
 import { Record } from "./record";
@@ -190,7 +189,7 @@ export class RelationalModel extends Model {
         console.log("getFieldsSpec");
         const fieldsSpec = {};
         for (const fieldName in activeFields) {
-            const { related, limit, invisible } = activeFields[fieldName];
+            const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
             fieldsSpec[fieldName] = {};
             // X2M
             if (related) {
@@ -201,6 +200,9 @@ export class RelationalModel extends Model {
                     activeFields
                 );
                 fieldsSpec[fieldName].limit = limit || this.constructor.DEFAULT_X2M_LIMIT;
+                if (defaultOrderBy) {
+                    fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
+                }
             }
             // M2O
             if (fields[fieldName].type === "many2one" && invisible !== true) {
