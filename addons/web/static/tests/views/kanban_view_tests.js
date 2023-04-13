@@ -2960,7 +2960,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record: prevent multiple adds with ENTER, with onchange",
         async (assert) => {
             assert.expect(14);
@@ -2997,7 +2997,7 @@ QUnit.module("Views", (hooks) => {
                         }
                         case "create": {
                             assert.step(method);
-                            const values = args[0];
+                            const values = args[0][0];
                             assert.strictEqual(values.foo, "new partner");
                             assert.strictEqual(values.int_field, 3);
                             break;
@@ -3069,7 +3069,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record: click Add to create, with delayed onchange",
         async (assert) => {
             assert.expect(13);
@@ -3104,7 +3104,7 @@ QUnit.module("Views", (hooks) => {
                     }
                     if (args.method === "create") {
                         assert.step("create");
-                        assert.deepEqual(_.pick(args.args[0], "foo", "int_field"), {
+                        assert.deepEqual(args.args[0][0], {
                             foo: "new partner",
                             int_field: 3,
                         });
@@ -3449,7 +3449,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create record and edit in grouped mode", async (assert) => {
+    QUnit.test("quick create record and edit in grouped mode", async (assert) => {
         assert.expect(5);
 
         let newRecordID;
@@ -3464,7 +3464,7 @@ QUnit.module("Views", (hooks) => {
                 '<div><field name="foo"/></div>' +
                 "</t></templates></kanban>",
             async mockRPC(route, { args, method }) {
-                if (method === "read") {
+                if (method === "web_read_unity") {
                     newRecordID = args[0][0];
                 }
             },
@@ -3561,7 +3561,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create is disabled until record is created and read", async (assert) => {
+    QUnit.test("quick create is disabled until record is created and read", async (assert) => {
         const prom = makeDeferred();
         await makeView({
             type: "kanban",
@@ -3575,7 +3575,7 @@ QUnit.module("Views", (hooks) => {
                 "</t></templates></kanban>",
             groupBy: ["bar"],
             async mockRPC(route, { method }) {
-                if (method === "read") {
+                if (method === "web_read_unity") {
                     await prom;
                 }
             },
@@ -3757,7 +3757,7 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "create") {
-                    assert.deepEqual(args.args[0], { foo: "blip" });
+                    assert.deepEqual(args.args[0][0], { foo: "blip" });
                     assert.deepEqual(args.kwargs.context, {
                         default_foo: "blip",
                         default_name: "test",
