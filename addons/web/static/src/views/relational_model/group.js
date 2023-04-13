@@ -18,11 +18,8 @@ export class Group extends DataPoint {
         super.setup(...arguments);
         this.groupByField = this.fields[config.groupByFieldName];
         this.progressBars = []; // FIXME: remove from model?
-        // this.range = data.__range;
+        this.range = data.range;
         this._rawValue = data[this.groupByField.name];
-        // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
-        // we have to get the count from `__count` instead
-        // see _read_group_raw in models.py
         /** @type {number} */
         this.count = data.count;
         this.value = this._getValueFromGroupData(data, this.groupByField);
@@ -127,12 +124,12 @@ export class Group extends DataPoint {
      */
     _getDisplayNameFromGroupData(groupData, field) {
         if (field.type === "selection") {
-            return Object.fromEntries(field.selection)[groupData[field.name]];
+            return Object.fromEntries(field.selection)[groupData.value];
         }
         if (["many2one", "many2many"].includes(field.type)) {
-            return groupData[field.name] ? groupData[field.name][1] : false;
+            return groupData.value ? groupData.value[1] : false;
         }
-        return groupData[field.name];
+        return groupData.value;
     }
 
     /**
@@ -142,7 +139,7 @@ export class Group extends DataPoint {
      */
     _getValueFromGroupData(groupData, field) {
         if (["date", "datetime"].includes(field.type)) {
-            const range = groupData.__range[field.name];
+            const range = groupData.range;
             if (!range) {
                 return false;
             }
@@ -151,7 +148,7 @@ export class Group extends DataPoint {
                 [field.type === "date" ? "day" : "second"]: 1,
             });
         }
-        const value = this._parseServerValue(field, groupData[field.name]);
+        const value = this._parseServerValue(field, groupData.value);
         if (["many2one", "many2many"].includes(field.type)) {
             return value ? value[0] : false;
         }

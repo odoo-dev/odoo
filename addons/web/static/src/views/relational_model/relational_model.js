@@ -365,7 +365,6 @@ export class RelationalModel extends Model {
             resModel: config.resModel,
             fields: config.fields,
             activeFields: config.activeFields,
-            context: config.context,
         };
         let groupRecordConfig;
         const groupRecordResIds = [];
@@ -378,17 +377,31 @@ export class RelationalModel extends Model {
         }
         const proms = [];
         for (const group of groups) {
+            // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
+            // we have to get the count from `__count` instead
+            // see _read_group_raw in models.py
             group.count = group.__count || group[`${firstGroupByName}_count`];
             group.length = group.count;
+            group.range = group.__range ? group.__range[config.groupBy[0]] : null;
             delete group.__count;
             delete group[`${firstGroupByName}_count`];
+            delete group.__range;
+            group.value = group[config.groupBy[0]];
+            // delete group[config.groupBy[0]];
             if (!config.groups[group[firstGroupByName]]) {
+                const context = {
+                    ...config.context,
+                    // FIXME: doesn't work for many2ones, need to move some logic from group.js to here
+                    [`default_${firstGroupByName}`]: group[firstGroupByName],
+                };
                 config.groups[group[firstGroupByName]] = {
                     ...commonConfig,
+                    context,
                     groupByFieldName: groupByField.name,
                     isFolded: group.__fold || !config.openGroupsByDefault,
                     list: {
                         ...commonConfig,
+                        context,
                         domain: group.__domain,
                         groupBy,
                     },
