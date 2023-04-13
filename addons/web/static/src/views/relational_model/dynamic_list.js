@@ -122,13 +122,15 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
     }
 
-    // FIXME: rename? This is not about selection, but mode
-    async unselectRecord() {
+    async leaveEditMode() {
         if (this.editedRecord) {
             const saved = await this.editedRecord.save();
-            //TODOPRO I do not think it should be done here. It should be the responsability of the controller to do it.
             if (saved) {
-                await this.switchRecordToReadonly(this.editedRecord);
+                this.model._updateConfig(
+                    this.editedRecord.config,
+                    { mode: "readonly" },
+                    { noReload: true }
+                );
             } else {
                 return false;
             }
@@ -136,15 +138,12 @@ export class DynamicList extends DataPoint {
         return true;
     }
 
-    async switchRecordToReadonly(record) {
-        await this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
-    }
-
-    async editRecord(record) {
-        const canProceed = await this.unselectRecord();
+    async enterEditMode(record) {
+        const canProceed = await this.leaveEditMode();
         if (canProceed) {
-            await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+            this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
         }
+        return canProceed;
     }
 
     // -------------------------------------------------------------------------

@@ -82,24 +82,20 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._load({ limit, offset }));
     }
 
-    // FIXME: rename? This is not about selection, but mode
-    unselectRecord() {
+    leaveEditMode() {
         if (this.editedRecord) {
-            this.switchRecordToReadonly(this.editedRecord);
+            this.model._updateConfig(
+                this.editedRecord.config,
+                { mode: "readonly" },
+                { noReload: true }
+            );
         }
         return true;
     }
 
-    async switchRecordToReadonly(record) {
-        await this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
-    }
-
-    async editRecord(record) {
-        if (this.editedRecord) {
-            await this.editedRecord.save();
-            await this.switchRecordToReadonly(this.editedRecord);
-        }
-        await this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+    enterEditMode(record) {
+        this.leaveEditMode();
+        this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
     }
 
     // -------------------------------------------------------------------------
