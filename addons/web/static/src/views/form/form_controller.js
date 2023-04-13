@@ -455,7 +455,6 @@ export class FormController extends Component {
         if (canProceed) {
             this.disableButtons();
             await this.model.root.load(false);
-            // this.model.root.switchMode("edit");
             this.enableButtons();
         }
     }

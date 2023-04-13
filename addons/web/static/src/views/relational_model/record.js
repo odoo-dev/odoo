@@ -180,10 +180,6 @@ export class Record extends DataPoint {
         this._invalidFields.add(fieldName);
     }
 
-    // switchMode(mode) {
-    //     this.model._updateConfig(this.config, { mode }, { noReload: true });
-    // }
-
     toggleSelection(selected) {
         if (typeof selected === "boolean") {
             this.selected = selected;

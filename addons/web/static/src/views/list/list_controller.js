@@ -106,13 +106,7 @@ export class ListController extends Component {
         useSetupView({
             rootRef: this.rootRef,
             beforeLeave: async () => {
-                const list = this.model.root;
-                const editedRecord = list.editedRecord;
-                if (editedRecord) {
-                    if (!(await list.unselectRecord(true))) {
-                        return false;
-                    }
-                }
+                return this.model.root.leaveEditMode();
             },
             beforeUnload: async (ev) => {
                 const editedRecord = this.model.root.editedRecord;
@@ -194,9 +188,7 @@ export class ListController extends Component {
             if (!(list instanceof DynamicRecordList)) {
                 throw new Error("List should be a DynamicRecordList");
             }
-            if (list.editedRecord) {
-                await list.switchRecordToReadonly(list.editedRecord);
-            }
+            await list.leaveEditMode();
             if (!list.editedRecord) {
                 await (group || list).createRecord(this.editable === "top");
             }
@@ -242,7 +234,7 @@ export class ListController extends Component {
     async onClickSave() {
         const saved = await this.model.root.editedRecord.save({ force: true });
         if (saved) {
-            this.model.root.switchRecordToReadonly(this.model.root.editedRecord);
+            this.model.root.leaveEditMode();
         }
     }
 
