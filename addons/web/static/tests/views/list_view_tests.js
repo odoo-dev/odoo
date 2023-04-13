@@ -12873,7 +12873,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("add filter in a grouped list with a pager", async function (assert) {
+    QUnit.test("add filter in a grouped list with a pager", async function (assert) {
         serverData.actions = {
             11: {
                 id: 11,
