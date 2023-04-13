@@ -7701,7 +7701,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt("list view, editable, with a button", async function (assert) {
+    QUnit.test("list view, editable, with a button", async function (assert) {
         serverData.models.foo.records = [];
         await makeView({
             type: "list",
@@ -7793,7 +7793,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_list_button_discard");
     });
 
-    QUnit.tttt("editable list view, click on the list to save", async function (assert) {
+    QUnit.test("editable list view, click on the list to save", async function (assert) {
         serverData.models.foo.fields.date.default = "2017-02-10";
         serverData.models.foo.records = [];
 
@@ -7872,7 +7872,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement.selectionEnd, 10);
     });
 
-    QUnit.tttt("click on a button in a list view", async function (assert) {
+    QUnit.test("click on a button in a list view", async function (assert) {
         assert.expect(10);
 
         const list = await makeView({
@@ -7905,8 +7905,8 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(
             [
                 "/web/dataset/call_kw/foo/get_views",
-                "/web/dataset/call_kw/foo/web_search_read",
-                "/web/dataset/call_kw/foo/web_search_read",
+                "/web/dataset/call_kw/foo/web_search_read_unity",
+                "/web/dataset/call_kw/foo/web_search_read_unity",
             ],
             "should have reloaded the view (after the action is complete)"
         );
@@ -8046,7 +8046,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list view with nested groups", async function (assert) {
+    QUnit.test("list view with nested groups", async function (assert) {
         assert.expect(40);
 
         serverData.models.foo.records.push({ id: 5, foo: "blip", int_field: -7, m2o: 1 });
@@ -8073,7 +8073,7 @@ QUnit.module("Views", (hooks) => {
                         );
                     }
                     nbRPCs.readGroup++;
-                } else if (args.method === "web_search_read") {
+                } else if (args.method === "web_search_read_unity") {
                     // called twice (once when opening the group, once when sorting)
                     assert.deepEqual(
                         args.kwargs.domain,
@@ -8514,7 +8514,6 @@ QUnit.module("Views", (hooks) => {
             serverData.models.foo.onchanges = {
                 o2m: function (obj) {
                     obj.o2m = [
-                        [5],
                         [1, 1, { display_name: "Value 1", stage: "open" }],
                         [1, 2, { display_name: "Value 2", stage: "draft" }],
                     ];
@@ -8681,7 +8680,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange2"]);
     });
 
-    QUnit.tttt("pressing tab on last cell of editable list view", async function (assert) {
+    QUnit.test("pressing tab on last cell of editable list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -8724,14 +8723,14 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read",
+            "/web/dataset/call_kw/foo/web_search_read_unity",
             "/web/dataset/call_kw/foo/write",
-            "/web/dataset/call_kw/foo/read",
-            "/web/dataset/call_kw/foo/onchange",
+            "/web/dataset/call_kw/foo/web_read_unity",
+            "/web/dataset/call_kw/foo/onchange2",
         ]);
     });
 
-    QUnit.tttt("navigation with tab and read completes after default_get", async function (assert) {
+    QUnit.test("navigation with tab and read completes after default_get", async function (assert) {
         const onchangeGetPromise = makeDeferred();
         const readPromise = makeDeferred();
 
@@ -8743,12 +8742,12 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, args, performRPC) {
                 assert.step(args.method);
                 const result = performRPC(route, args);
-                if (args.method === "read") {
+                if (args.method === "web_read_unity") {
                     return readPromise.then(function () {
                         return result;
                     });
                 }
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     return onchangeGetPromise.then(function () {
                         return result;
                     });
@@ -8787,7 +8786,13 @@ QUnit.module("Views", (hooks) => {
             "5th row should be selected"
         );
 
-        assert.verifySteps(["get_views", "web_search_read", "write", "read", "onchange"]);
+        assert.verifySteps([
+            "get_views",
+            "web_search_read_unity",
+            "write",
+            "web_read_unity",
+            "onchange2",
+        ]);
     });
 
     QUnit.test("display toolbar", async function (assert) {
@@ -8818,7 +8823,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("execute ActionMenus actions", async function (assert) {
+    QUnit.test("execute ActionMenus actions", async function (assert) {
         patchWithCleanup(actionService, {
             start() {
                 return {
@@ -8866,9 +8871,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_search_read",
+            "web_search_read_unity",
             `{"action_id":44,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1,2,3,4],"active_model":"foo","active_domain":[]}}`,
-            "web_search_read",
+            "web_search_read_unity",
         ]);
     });
 
@@ -9362,7 +9367,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, nextInput);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly field)",
         async function (assert) {
             // This test makes sure that if we have 2 cells in a row, the first in
@@ -9395,11 +9400,11 @@ QUnit.module("Views", (hooks) => {
                 1,
                 "should have the new value visible in dom"
             );
-            assert.verifySteps(["get_views", "web_search_read", "write", "read"]);
+            assert.verifySteps(["get_views", "web_search_read_unity", "write", "web_read_unity"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly field and onchange)",
         async function (assert) {
             // This test makes sure that if we have a read-only cell in a row, in
@@ -9435,7 +9440,7 @@ QUnit.module("Views", (hooks) => {
                         </group>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange") {
+                    if (args.method === "onchange2") {
                         assert.step(`onchange:${args.model}`);
                     }
                 },
@@ -10379,7 +10384,7 @@ QUnit.module("Views", (hooks) => {
             arch: '<tree editable="top"><field name="m2o" required="1"/></tree>',
             mockRPC: async function (route, args, performRPC) {
                 const result = await performRPC(route, args);
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await prom;
                 }
                 return result;
@@ -12815,7 +12820,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("grouped lists with expand attribute and a lot of groups", async function (assert) {
+    QUnit.test("grouped lists with expand attribute and a lot of groups", async function (assert) {
         for (var i = 0; i < 15; i++) {
             serverData.models.foo.records.push({ foo: "record " + i, int_field: i });
         }

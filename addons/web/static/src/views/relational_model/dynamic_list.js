@@ -121,7 +121,7 @@ export class DynamicList extends DataPoint {
     async leaveEditMode() {
         if (this.editedRecord) {
             const saved = await this.editedRecord.save();
-            if (saved) {
+            if (saved && this.editedRecord) {
                 this.model._updateConfig(
                     this.editedRecord.config,
                     { mode: "readonly" },

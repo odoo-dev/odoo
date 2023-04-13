@@ -28,7 +28,6 @@ import { getFieldContext, getOnChangeSpec } from "./utils";
  * @property {number} [groupsLimit]
  * @property {Array<string>} [defaultOrderBy]
  * @property {Array<string>} [defaultGroupBy]
- * @property {boolean} [openGroupsByDefault]
  * @property {number} [maxGroupByDepth]
  * @property {Function} [onRecordSaved]
  * @property {Function} [onWillSaveRecord]
@@ -60,6 +59,7 @@ import { getFieldContext, getOnChangeSpec } from "./utils";
  * @property {Object} [groups]
  * @property {Object} [list]
  * @property {boolean} [isFolded]
+ * @property {boolean} [openGroupsByDefault]
  * @property {any} [data]
  */
 
@@ -101,11 +101,7 @@ export class RelationalModel extends Model {
         this._urgentSave = false;
 
         this.initialLimit = params.limit || this.constructor.DEFAULT_LIMIT;
-        this.initialGroupsLimit =
-            params.groupsLimit ||
-            (params.openGroupsByDefault
-                ? this.constructor.DEFAULT_OPEN_GROUP_LIMIT
-                : this.constructor.DEFAULT_GROUP_LIMIT);
+        this.initialGroupsLimit = params.groupsLimit;
         this.initialCountLimit = params.countLimit || this.constructor.DEFAULT_COUNT_LIMIT;
         this.defaultOrderBy = params.defaultOrderBy;
         this.defaultGroupBy = params.defaultGroupBy;
@@ -335,6 +331,11 @@ export class RelationalModel extends Model {
         //modifying the config in place. It's a source of confusion
         config.offset = config.offset || 0;
         config.limit = config.limit || this.initialGroupsLimit;
+        if (!config.limit) {
+            config.limit = config.openGroupsByDefault
+                ? this.constructor.DEFAULT_OPEN_GROUP_LIMIT
+                : this.constructor.DEFAULT_GROUP_LIMIT;
+        }
         config.groups = config.groups || {};
         const firstGroupByName = config.groupBy[0].split(":")[0];
         const orderBy = config.orderBy.filter(
