@@ -12319,7 +12319,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("list grouped by date:month", async function (assert) {
+    QUnit.test("list grouped by date:month", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12439,7 +12439,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("use the limit attribute in arch", async function (assert) {
+    QUnit.test("use the limit attribute in arch", async function (assert) {
         assert.expect(4);
 
         await makeView({
@@ -12448,7 +12448,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree limit="2"><field name="foo"/></tree>',
             mockRPC(route, args) {
-                if (args.method === "web_search_read") {
+                if (args.method === "web_search_read_unity") {
                     assert.strictEqual(args.kwargs.limit, 2, "should use the correct limit value");
                 }
             },
@@ -12458,7 +12458,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 2, "should display 2 data rows");
     });
 
-    QUnit.tttt("concurrent reloads finishing in inverse order", async function (assert) {
+    QUnit.test("concurrent reloads finishing in inverse order", async function (assert) {
         let blockSearchRead = false;
         const def = makeDeferred();
         await makeView({
@@ -12467,7 +12467,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<tree><field name="foo"/></tree>',
             mockRPC: async function (route, args) {
-                if (args.method === "web_search_read" && blockSearchRead) {
+                if (args.method === "web_search_read_unity" && blockSearchRead) {
                     await def;
                 }
             },
@@ -12519,7 +12519,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list view move to previous page when all records from last page deleted",
         async function (assert) {
             assert.expect(8);
@@ -12531,7 +12531,7 @@ QUnit.module("Views", (hooks) => {
                 serverData,
                 arch: '<tree limit="3"><field name="display_name"/></tree>',
                 mockRPC(route, args) {
-                    if (checkSearchRead && args.method === "web_search_read") {
+                    if (checkSearchRead && args.method === "web_search_read_unity") {
                         assert.strictEqual(args.kwargs.limit, 3, "limit should 3");
                         assert.notOk(
                             args.kwargs.offset,
@@ -12564,7 +12564,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "grouped list view move to previous page of group when all records from last page deleted",
         async function (assert) {
             assert.expect(10);
@@ -12576,7 +12576,7 @@ QUnit.module("Views", (hooks) => {
                 serverData,
                 arch: '<tree limit="2"><field name="display_name"/></tree>',
                 mockRPC(route, args) {
-                    if (checkSearchRead && args.method === "web_search_read") {
+                    if (checkSearchRead && args.method === "web_search_read_unity") {
                         assert.strictEqual(args.kwargs.limit, 2, "limit should 2");
                         assert.notOk(
                             args.kwargs.offset,
@@ -12628,7 +12628,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "grouped list view move to next page when all records from the current page deleted",
         async function (assert) {
             serverData.models.foo.records = [1, 2, 3, 4, 5, 6]
@@ -12684,7 +12684,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "list view move to previous page when all records from last page archive/unarchived",
         async function (assert) {
             // add active field on foo model and make all records active
@@ -12946,7 +12946,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("grouped list with expand attribute", async function (assert) {
+    QUnit.test("grouped list with expand attribute", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12967,7 +12967,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_read_group", // records are fetched alongside groups
+            "web_read_group",
+            "web_search_read_unity",
+            "web_search_read_unity",
         ]);
     });
 
@@ -13659,18 +13661,18 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "get_views",
             "web_read_group",
-            "web_search_read",
-            "web_search_read",
+            "web_search_read_unity",
+            "web_search_read_unity",
             "write",
-            "read",
-            "onchange",
+            "web_read_unity",
+            "onchange2",
             "create",
-            "read",
-            "onchange",
+            "web_read_unity",
+            "onchange2",
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editing then pressing TAB (with a readonly field) in grouped list",
         async function (assert) {
             serverData.models.foo.records[0].bar = false;
@@ -13708,7 +13710,13 @@ QUnit.module("Views", (hooks) => {
                 secondDataRow.querySelector(".o_selected_row [name=foo] input")
             );
 
-            assert.verifySteps(["get_views", "web_read_group", "web_search_read", "write", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "web_read_group",
+                "web_search_read_unity",
+                "write",
+                "web_read_unity",
+            ]);
         }
     );
 
@@ -16439,7 +16447,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["prevented"], "should not save because of invalid field");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Auto save: save on closing tab/browser (onchanges + pending changes)",
         async function (assert) {
             assert.expect(1);
@@ -16461,7 +16469,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="int_field"/>
                     </tree>`,
                 mockRPC(route, { args, method, model }) {
-                    if (model === "foo" && method === "onchange") {
+                    if (model === "foo" && method === "onchange2") {
                         return def;
                     }
                     if (model === "foo" && method === "write") {
@@ -16515,7 +16523,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly re-evaluated field and onchange)",
         async function (assert) {
             // This test makes sure that if we have a cell in a row that will become
@@ -16552,7 +16560,7 @@ QUnit.module("Views", (hooks) => {
                         </group>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange") {
+                    if (args.method === "onchange2") {
                         assert.step(`onchange:${args.model}`);
                     }
                 },
@@ -16897,7 +16905,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector("[name=foo] span").innerText, "2");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "fieldDependencies support for fields: dependence on a relational field",
         async (assert) => {
             const customField = {
@@ -16923,11 +16931,11 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.strictEqual(target.querySelector("[name=foo] span").innerText, "1");
-            assert.verifySteps(["get_views", "web_search_read"]);
+            assert.verifySteps(["get_views", "web_search_read_unity"]);
         }
     );
 
-    QUnit.tttt("editable list correctly saves dirty fields ", async (assert) => {
+    QUnit.test("editable list correctly saves dirty fields ", async (assert) => {
         serverData.models.foo.records = [serverData.models.foo.records[0]];
 
         await makeView({
@@ -16955,7 +16963,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["write"]);
     });
 
-    QUnit.tttt("edit a field with a slow onchange in a new row", async function (assert) {
+    QUnit.test("edit a field with a slow onchange in a new row", async function (assert) {
         serverData.models.foo.onchanges = {
             int_field: function () {},
         };
@@ -16972,19 +16980,19 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             async mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await Promise.resolve(def);
                 }
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
 
         const value = "14";
         // add a new line
         await click(target.querySelector(".o_list_button_add"));
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // we want to add a delay to simulate an onchange
         def = makeDeferred();
@@ -16997,7 +17005,7 @@ QUnit.module("Views", (hooks) => {
 
         // check that nothing changed before the onchange finished
         assert.strictEqual(target.querySelector("[name=int_field] input").value, value);
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // unlock onchange
         def.resolve();
@@ -17005,7 +17013,7 @@ QUnit.module("Views", (hooks) => {
 
         // check the current line is added with the correct content
         assert.strictEqual(target.querySelector(".o_data_row [name=int_field]").innerText, value);
-        assert.verifySteps(["create", "read"]);
+        assert.verifySteps(["create", "web_read_unity"]);
     });
 
     QUnit.test("create a record with the correct context", async (assert) => {
@@ -17049,7 +17057,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt("create a record with the correct context in a group", async (assert) => {
+    QUnit.test("create a record with the correct context in a group", async (assert) => {
         serverData.models.foo.fields.text.required = true;
 
         await makeView({
@@ -17279,7 +17287,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelectorAll("th[data-name=int_field] i"), "fa-angle-up");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "have some records, then go to next page in pager then group by some field: at least one group should be visible",
         async function (assert) {
             await makeView({
