@@ -133,7 +133,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "DatetimeField does not trigger fieldChange before datetime completly picked",
         async function (assert) {
             patchTimeZone(120);
@@ -148,8 +148,8 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 arch: '<form><field name="datetime"/></form>',
                 mockRPC(route, { method }) {
-                    if (method === "onchange") {
-                        assert.step("onchange");
+                    if (method === "onchange2") {
+                        assert.step("onchange2");
                     }
                 },
             });
@@ -203,7 +203,7 @@ QUnit.module("Fields", (hooks) => {
                 target.querySelector(".o_datepicker_input").value,
                 "04/22/2017 08:25:35"
             );
-            assert.verifySteps(["onchange"], "should have done only one onchange");
+            assert.verifySteps(["onchange2"], "should have done only one onchange");
         }
     );
 
