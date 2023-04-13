@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+        Handle automatically created product.template.attribute.value.
+        This will allow setting fields like "price_extra" and "exclude_for"
+         -->
+        <function model="ir.model.data" name="_update_xmlids">
+            <value model="base"
+                eval="[{
+                'xml_id': 'point_of_sale.desk_organizer_attribute_fabric_value_leather',
+                'record': obj().env.ref('point_of_sale.desk_organizer_fabric').product_template_value_ids[1],
+                'noupdate': True,
+            },]" />
+        </function>
+
+        <record id="point_of_sale.desk_organizer_attribute_fabric_value_leather"
+            model="product.template.attribute.value">
+            <field name="price_extra">23</field>
+        </record>
+    </data>
+</odoo>
