@@ -3727,7 +3727,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 2);
     });
 
-    QUnit.tttt("quick create record fails in grouped by char", async (assert) => {
+    QUnit.test("quick create record fails in grouped by char", async (assert) => {
         assert.expect(7);
 
         serverData.views["partner,false,form"] = '<form><field name="foo"/></form>';
@@ -3786,7 +3786,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 3);
     });
 
-    QUnit.tttt("quick create record fails in grouped by selection", async (assert) => {
+    QUnit.test("quick create record fails in grouped by selection", async (assert) => {
         assert.expect(7);
 
         serverData.views["partner,false,form"] = '<form><field name="state"/></form>';
@@ -3816,7 +3816,7 @@ QUnit.module("Views", (hooks) => {
                     });
                 }
                 if (args.method === "create") {
-                    assert.deepEqual(args.args[0], { state: "abc" });
+                    assert.deepEqual(args.args[0][0], { state: "abc" });
                     assert.deepEqual(args.kwargs.context, {
                         default_state: "abc",
                         default_name: "test",
@@ -3846,7 +3846,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target.querySelector(".o_kanban_group"), ".o_kanban_record", 2);
     });
 
-    QUnit.tttt("quick create record in empty grouped kanban", async (assert) => {
+    QUnit.test("quick create record in empty grouped kanban", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -3866,8 +3866,16 @@ QUnit.module("Views", (hooks) => {
                     // by stage_id)
                     return {
                         groups: [
-                            { __domain: [["product_id", "=", 3]], product_id_count: 0 },
-                            { __domain: [["product_id", "=", 5]], product_id_count: 0 },
+                            {
+                                __domain: [["product_id", "=", 3]],
+                                product_id_count: 0,
+                                product_id: [3, "xplone"],
+                            },
+                            {
+                                __domain: [["product_id", "=", 5]],
+                                product_id_count: 0,
+                                product_id: [5, "xplan"],
+                            },
                         ],
                         length: 2,
                     };
@@ -4086,7 +4094,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record in grouped by char field (within quick_create_view)",
         async (assert) => {
             assert.expect(6);
@@ -4107,7 +4115,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["foo"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ foo: "blip" }]);
+                        assert.deepEqual(args[0], [{ foo: "blip" }]);
                         assert.strictEqual(kwargs.context.default_foo, "blip");
                     }
                 },
@@ -4128,7 +4136,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record in grouped by boolean field (within quick_create_view)",
         async (assert) => {
             assert.expect(6);
@@ -4149,7 +4157,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ bar: true }]);
+                        assert.deepEqual(args[0], [{ bar: true }]);
                         assert.strictEqual(kwargs.context.default_bar, true);
                     }
                 },
@@ -4175,7 +4183,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "quick create record in grouped by selection field (within quick_create_view)",
         async (assert) => {
             assert.expect(6);
@@ -4195,7 +4203,7 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["state"],
                 async mockRPC(route, { method, args, kwargs }) {
                     if (method === "create") {
-                        assert.deepEqual(args, [{ state: "abc" }]);
+                        assert.deepEqual(args[0], [{ state: "abc" }]);
                         assert.strictEqual(kwargs.context.default_state, "abc");
                     }
                 },
