@@ -117,10 +117,19 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._toggleArchive(isSelected, false));
     }
 
-    async leaveEditMode() {
+    async leaveEditMode({ discard } = {}) {
         if (this.editedRecord) {
-            const saved = await this.editedRecord.save();
-            if (saved && this.editedRecord) {
+            let canProceed = true;
+            if (discard) {
+                await this.editedRecord.discard();
+                if (this.editedRecord.isNew) {
+                    this._removeRecords([this.editedRecord]);
+                }
+            }
+            if (!discard && !this.blockUpdate) {
+                canProceed = await this.editedRecord.save();
+            }
+            if (canProceed && this.editedRecord) {
                 this.model._updateConfig(
                     this.editedRecord.config,
                     { mode: "readonly" },
