@@ -135,10 +135,6 @@ export class RelationalModel extends Model {
      */
     async load(params = {}) {
         const config = this._getNextConfig(this.config, params);
-        if (!config.isMonoRecord && this.root) {
-            // always reset the offset to 0 when reloading from above
-            config.offset = 0;
-        }
         const data = await this.keepLast.add(this._loadData(config));
         this.root = this._createRoot(config, data);
         this.config = config;
@@ -263,6 +259,10 @@ export class RelationalModel extends Model {
             if (!shallowEqual(config.groupBy || [], currentGroupBy || [])) {
                 delete config.groups;
             }
+        }
+        if (!config.isMonoRecord && this.root) {
+            // always reset the offset to 0 when reloading from above
+            config.offset = 0;
         }
 
         return config;
