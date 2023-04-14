@@ -1444,8 +1444,7 @@ export class ListRenderer extends Component {
             }
             case "escape": {
                 // TODO this seems bad: refactor this
-                record.discard();
-                list.leaveEditMode();
+                list.leaveEditMode({ discard: true });
                 const firstAddButton = this.tableRef.el.querySelector(
                     ".o_field_x2many_list_row_add a"
                 );
