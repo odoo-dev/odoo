@@ -9829,7 +9829,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("pressing ESC discard the current line changes", async function (assert) {
+    QUnit.test("pressing ESC discard the current line changes", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -9846,7 +9846,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_list_button_save", "should not have a save button");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "pressing ESC discard the current line changes (with required)",
         async function (assert) {
             await makeView({
@@ -11274,7 +11274,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'editable list view: clicking on "Discard changes" in multi edition',
         async function (assert) {
             await makeView({
