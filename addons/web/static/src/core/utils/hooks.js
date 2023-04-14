@@ -179,6 +179,7 @@ function _protectMethod(component, fn) {
         const protectedProm = prom.then((result) =>
             status(component) === "destroyed" ? new Promise(() => {}) : result
         );
+        prom.catch(() => {}); // try to test this
         return Object.assign(protectedProm, {
             abort: prom.abort,
             cancel: prom.cancel,
