@@ -470,7 +470,7 @@ export class Record extends DataPoint {
             if (!this.isInEdition) {
                 await this._load({ resId });
             }
-            return false;
+            throw e;
         }
         if (!noReload) {
             const nextConfig = { resId };

@@ -17416,7 +17416,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "edit a record then select another record with a throw error when saving",
         async function (assert) {
             serviceRegistry.add("error", errorService);

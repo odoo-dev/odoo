@@ -3881,7 +3881,7 @@ QUnit.module("Views", (hooks) => {
             arch: '<form><field name="trululu"/></form>',
             mockRPC(route, args) {
                 if (args.method === "name_get") {
-                    throw new Error("Should not call name_get");
+                    assert.step("name_get");
                 }
             },
         });
@@ -3891,6 +3891,7 @@ QUnit.module("Views", (hooks) => {
             "aaa",
             "default value should be correctly displayed"
         );
+        assert.verifySteps([]);
     });
 
     QUnit.test("form view properly change its title", async function (assert) {
@@ -5058,7 +5059,7 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
             mockRPC(route) {
                 if (route === "/web/dataset/call_kw/partner/write") {
-                    throw new Error("Shouldn't call write as the record is invalid");
+                    assert.step("write");
                 }
             },
         });
@@ -5082,6 +5083,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
         assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_field_invalid");
         assert.containsOnce(target, ".o_notification_manager .o_notification");
+        assert.verifySteps([]);
     });
 
     QUnit.test("keynav: switching to another record from an invalid one", async function (assert) {
@@ -5094,7 +5096,7 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
             mockRPC(route) {
                 if (route === "/web/dataset/call_kw/partner/write") {
-                    throw new Error("Shouldn't call write as the record is invalid");
+                    assert.step("write");
                 }
             },
         });
@@ -5119,6 +5121,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
         assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "o_field_invalid");
         assert.containsOnce(target, ".o_notification_manager .o_notification");
+        assert.verifySteps([]);
     });
 
     QUnit.test("switching to another record from an invalid one (2)", async function (assert) {
@@ -9496,6 +9499,21 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("form view is not broken if save operation fails", async function (assert) {
+        registry.category("services").add("error", errorService);
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+        // remove the override in qunit.js that swallows unhandledrejection errors
+        // s.t. we let the error service handle them
+        const originalOnUnhandledRejection = window.onunhandledrejection;
+        window.onunhandledrejection = () => {};
+        registerCleanup(() => {
+            window.onunhandledrejection = originalOnUnhandledRejection;
+        });
+
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9505,13 +9523,16 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, args) {
                 assert.step(args.method);
                 if (args.method === "write" && args.args[1].foo === "incorrect value") {
-                    return Promise.reject();
+                    return Promise.reject(new Error("Odoo Server Error"));
                 }
             },
         });
 
         await editInput(target, ".o_field_widget[name=foo] input", "incorrect value");
         await clickSave(target);
+        await nextTick();
+        assert.containsOnce(target, ".o_dialog", "should display an error dialog");
+        await click(target.querySelector(".o_dialog .modal-footer .btn-primary")); // close it
         await editInput(target, ".o_field_widget[name=foo] input", "correct value");
         await clickSave(target);
 
@@ -9527,6 +9548,20 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "form view is not broken if save failed in readonly mode on field changed",
         async function (assert) {
+            registry.category("services").add("error", errorService);
+            const handler = (ev) => {
+                // need to preventDefault to remove error from console (so python test pass)
+                ev.preventDefault();
+            };
+            window.addEventListener("unhandledrejection", handler);
+            registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+            // remove the override in qunit.js that swallows unhandledrejection errors
+            // s.t. we let the error service handle them
+            const originalOnUnhandledRejection = window.onunhandledrejection;
+            window.onunhandledrejection = () => {};
+            registerCleanup(() => {
+                window.onunhandledrejection = originalOnUnhandledRejection;
+            });
             let failFlag = false;
             await makeView({
                 type: "form",
@@ -9544,7 +9579,7 @@ QUnit.module("Views", (hooks) => {
                     if (args.method === "write") {
                         assert.step("write");
                         if (failFlag) {
-                            return Promise.reject();
+                            return Promise.reject(new Error("Odoo Server Error"));
                         }
                     } else if (args.method === "web_read_unity") {
                         assert.step("web_read_unity");
@@ -11364,6 +11399,12 @@ QUnit.module("Views", (hooks) => {
 
         registry.category("services").add("error", errorService);
 
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
         // remove the override in qunit.js that swallows unhandledrejection errors
         // s.t. we let the error service handle them
         const originalOnUnhandledRejection = window.onunhandledrejection;
@@ -11402,7 +11443,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method }) {
                 if (method === "write") {
                     assert.step("write");
-                    throw new RPCError("Something went wrong");
+                    return Promise.reject(new RPCError("Something went wrong"));
                 }
             },
         });
@@ -11597,9 +11638,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<form><field name="foo"/></form>`,
                 resId: 1,
                 mockRPC(route, { args, method, model }) {
-                    if (method === "write" && model === "partner") {
-                        throw new Error("no write should be done");
-                    }
+                    assert.step(method);
                 },
             });
 
@@ -11610,6 +11649,8 @@ QUnit.module("Views", (hooks) => {
 
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
+
+            assert.verifySteps(["get_views", "web_read_unity"]);
         }
     );
 
@@ -11929,9 +11970,6 @@ QUnit.module("Views", (hooks) => {
                     if (method === "onchange2") {
                         return def;
                     }
-                    if (method === "write") {
-                        throw new Error("Should not save the record");
-                    }
                 },
             });
 
@@ -11982,6 +12020,12 @@ QUnit.module("Views", (hooks) => {
 
         registry.category("services").add("error", errorService);
 
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
         // remove the override in qunit.js that swallows unhandledrejection errors
         // s.t. we let the error service handle them
         const originalOnUnhandledRejection = window.onunhandledrejection;
@@ -12000,7 +12044,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method }) {
                 if (method === "write") {
                     assert.step("write");
-                    throw new RPCError("Something went wrong");
+                    return Promise.reject(new RPCError("Something went wrong"));
                 }
             },
         });
@@ -12044,6 +12088,12 @@ QUnit.module("Views", (hooks) => {
 
         registry.category("services").add("error", errorService);
 
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
         // remove the override in qunit.js that swallows unhandledrejection errors
         // s.t. we let the error service handle them
         const originalOnUnhandledRejection = window.onunhandledrejection;
@@ -12062,7 +12112,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method }) {
                 if (method === "write") {
                     assert.step("write");
-                    throw new RPCError("Something went wrong");
+                    return Promise.reject(new RPCError("Something went wrong"));
                 }
             },
         });
@@ -12079,6 +12129,12 @@ QUnit.module("Views", (hooks) => {
 
         registry.category("services").add("error", errorService);
         registry.category("error_dialogs").add("odoo.exceptions.UserError", WarningDialog);
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
         // remove the override in qunit.js that swallows unhandledrejection errors
         // s.t. we let the error service handle them
         const originalOnUnhandledRejection = window.onunhandledrejection;
@@ -12099,7 +12155,7 @@ QUnit.module("Views", (hooks) => {
                     const error = new RPCError("Some business message");
                     error.data = { context: {} };
                     error.exceptionName = "odoo.exceptions.UserError";
-                    throw error;
+                    return Promise.reject(error);
                 }
             },
         });
@@ -12756,7 +12812,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<form js_class="custom_form"><field name="foo" required="1"/></form>`,
                 mockRPC(route, args) {
                     if (args.method === "write") {
-                        throw new Error("should not save the record");
+                        assert.step("write");
                     }
                 },
             });

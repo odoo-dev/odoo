@@ -154,16 +154,12 @@ class KanbanQuickCreateController extends Component {
                 });
             }
         } else {
-            try {
-                await this.model.root.save({
-                    closable: true,
-                    noReload: true,
-                    throwOnError: true,
-                    force: true,
-                });
-            } catch (e) {
-                this.showFormDialogInError(e);
-            }
+            await this.model.root.save({
+                closable: true,
+                noReload: true,
+                force: true,
+                onError: (e) => this.showFormDialogInError(e),
+            });
             resId = this.model.root.resId;
         }
 

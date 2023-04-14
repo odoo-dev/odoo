@@ -19,6 +19,7 @@ import { getFieldContext, getOnChangeSpec } from "./utils";
 // checkValidity/askChanges/save/isDirty:
 //  -> first two are now private and save checks if record isDirty -> can be
 //     called even is not dirty (+ option "force" to bypass isDirty check)
+// grep throwOnError before merging (option removed)
 
 /**
  * @typedef Params
