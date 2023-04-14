@@ -210,6 +210,10 @@ export class Thread {
         return true;
     }
 
+    get allowOpenInDiscuss() {
+        return true;
+    }
+
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
             return (
@@ -219,7 +223,7 @@ export class Thread {
         }
         if (this.type === "group" && !this.name) {
             const listFormatter = new Intl.ListFormat(
-                this._store.env.services["user"].lang.replace("_", "-"),
+                this._store.env.services["user"].lang?.replace("_", "-"),
                 { type: "conjunction", style: "long" }
             );
             return listFormatter.format(
@@ -356,7 +360,7 @@ export class Thread {
 
     get lastSelfMessageSeenByEveryone() {
         const otherSeenInfos = [...this.seenInfos].filter(
-            (seenInfo) => seenInfo.partner.id !== this._store.self.id
+            (seenInfo) => seenInfo.partner.id !== this._store.self?.id
         );
         if (otherSeenInfos.length === 0) {
             return false;
@@ -407,6 +411,10 @@ export class Thread {
 
     get unknownMembersCount() {
         return this.memberCount - this.channelMembers.length;
+    }
+
+    get hasNewMessageSeparator() {
+        return true;
     }
 
     get hasTypingMembers() {
