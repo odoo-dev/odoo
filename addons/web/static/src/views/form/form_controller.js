@@ -463,17 +463,18 @@ export class FormController extends Component {
         this.disableButtons();
         const record = this.model.root;
         let saved = false;
-
-        if (this.props.saveRecord) {
-            saved = await this.props.saveRecord(record, params);
-        } else {
-            saved = await record.save({ ...params, force: true });
+        try {
+            if (this.props.saveRecord) {
+                saved = await this.props.saveRecord(record, params);
+            } else {
+                saved = await record.save({ ...params, force: true });
+            }
+        } finally {
+            this.enableButtons();
         }
-        this.enableButtons();
         if (saved && this.props.onSave) {
             this.props.onSave(record, params);
         }
-
         return saved;
     }
 

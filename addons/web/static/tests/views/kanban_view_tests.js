@@ -3647,7 +3647,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["product_id"],
             async mockRPC(route, args) {
                 if (args.method === "name_create") {
-                    throw makeErrorFromResponse({
+                    const error = makeErrorFromResponse({
                         code: 200,
                         message: "Odoo Server Error",
                         data: {
@@ -3657,6 +3657,7 @@ QUnit.module("Views", (hooks) => {
                             context: {},
                         },
                     });
+                    return Promise.reject(error);
                 }
             },
         });
@@ -3702,7 +3703,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["product_id"],
             async mockRPC(route, args) {
                 if (args.method === "name_create") {
-                    throw makeErrorFromResponse({
+                    const error = makeErrorFromResponse({
                         code: 200,
                         message: "Odoo Server Error",
                         data: {
@@ -3712,6 +3713,7 @@ QUnit.module("Views", (hooks) => {
                             context: {},
                         },
                     });
+                    return Promise.reject(error);
                 }
             },
         });
@@ -3749,7 +3751,7 @@ QUnit.module("Views", (hooks) => {
                 </kanban>`,
             async mockRPC(route, args) {
                 if (args.method === "name_create") {
-                    throw makeErrorFromResponse({
+                    const error = makeErrorFromResponse({
                         code: 200,
                         message: "Odoo Server Error",
                         data: {
@@ -3759,6 +3761,7 @@ QUnit.module("Views", (hooks) => {
                             context: {},
                         },
                     });
+                    return Promise.reject(error);
                 }
                 if (args.method === "create") {
                     assert.deepEqual(args.args[0][0], { foo: "blip" });
@@ -3808,7 +3811,7 @@ QUnit.module("Views", (hooks) => {
                 </kanban>`,
             async mockRPC(route, args) {
                 if (args.method === "name_create") {
-                    throw makeErrorFromResponse({
+                    const error = makeErrorFromResponse({
                         code: 200,
                         message: "Odoo Server Error",
                         data: {
@@ -3818,6 +3821,7 @@ QUnit.module("Views", (hooks) => {
                             context: {},
                         },
                     });
+                    return Promise.reject(error);
                 }
                 if (args.method === "create") {
                     assert.deepEqual(args.args[0][0], { state: "abc" });
@@ -4501,7 +4505,7 @@ QUnit.module("Views", (hooks) => {
             async switchView() {
                 // when clicking on a record in kanban view,
                 // it switches to form view.
-                throw new Error("should not switch view");
+                assert.step("switchView");
             },
         });
 
@@ -4531,6 +4535,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(testLink);
+        assert.verifySteps([]);
     });
 
     QUnit.test("Open record when clicking on widget field", async function (assert) {
@@ -4909,7 +4914,7 @@ QUnit.module("Views", (hooks) => {
                     return true;
                 }
                 if (args.model === "partner" && args.method === "write") {
-                    throw new Error("should not be draggable");
+                    assert.step("should not be called");
                 }
             },
         });
@@ -4998,6 +5003,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group:nth-child(3) .o_kanban_record", 0);
 
         assert.deepEqual(getCardTexts(0), ["yopABC", "gnapGHI"]);
+        assert.verifySteps([]);
     });
 
     QUnit.tttt("prevent drag and drop if grouped by date/datetime field", async (assert) => {
@@ -5262,7 +5268,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["product_id"],
             async mockRPC(route, { model, method }) {
                 if (model === "partner" && method === "onchange2") {
-                    throw {};
+                    throw {}; // TODO: return Promise.reject
                 }
             },
         });
@@ -5350,7 +5356,7 @@ QUnit.module("Views", (hooks) => {
             `,
             async mockRPC(route, { method }) {
                 if (method === "web_read_group") {
-                    throw new Error("Should not do a read_group RPC");
+                    assert.step("web_read_group");
                 }
             },
             context: { search_default_itsName: 1 },
@@ -5363,6 +5369,7 @@ QUnit.module("Views", (hooks) => {
         // validate presence of the search arch info
         await toggleFilterMenu(target);
         assert.containsOnce(target, ".o_filter_menu .o_menu_item");
+        assert.verifySteps([]);
     });
 
     QUnit.test("kanban view with create=False", async (assert) => {
@@ -10156,7 +10163,7 @@ QUnit.module("Views", (hooks) => {
                 "</t></templates></kanban>",
             async mockRPC(route, args) {
                 if (route === "/web/dataset/resequence") {
-                    throw new Error("should not trigger a resequencing");
+                    assert.step("resequence");
                 }
             },
         });
@@ -10166,6 +10173,7 @@ QUnit.module("Views", (hooks) => {
         await dragAndDrop(".o_kanban_record", ".o_kanban_record:nth-child(4)");
 
         assert.deepEqual(getCardTexts(), ["yop", "blip", "gnap", "blip"]);
+        assert.verifySteps([]);
     });
 
     QUnit.test("click on image field in kanban with oe_kanban_global_click", async (assert) => {
@@ -12227,7 +12235,7 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, { method }) {
                 assert.step(method || route);
                 if (method === "name_create") {
-                    throw new RPCError();
+                    throw new RPCError(); // TODO: return Promise.resolve()
                 }
             },
         });
