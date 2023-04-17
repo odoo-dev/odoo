@@ -5217,7 +5217,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("delete all records matching the domain", async function (assert) {
+    QUnit.test("delete all records matching the domain", async function (assert) {
         assert.expect(6);
 
         serverData.models.foo.records.push({ id: 5, bar: true, foo: "xxx" });
@@ -5261,7 +5261,7 @@ QUnit.module("Views", (hooks) => {
         await click(document, "body .modal footer button.btn-primary");
     });
 
-    QUnit.tttt("delete all records matching the domain (limit reached)", async function (assert) {
+    QUnit.test("delete all records matching the domain (limit reached)", async function (assert) {
         assert.expect(8);
 
         serverData.models.foo.records.push({ id: 5, bar: true, foo: "xxx" });
@@ -5368,7 +5368,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("archive all records matching the domain", async function (assert) {
+    QUnit.test("archive all records matching the domain", async function (assert) {
         assert.expect(6);
         // add active field on foo model and make all records active
         serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
@@ -5414,7 +5414,7 @@ QUnit.module("Views", (hooks) => {
         await click(document, ".modal-footer .btn-primary");
     });
 
-    QUnit.tttt("archive all records matching the domain (limit reached)", async function (assert) {
+    QUnit.test("archive all records matching the domain (limit reached)", async function (assert) {
         assert.expect(8);
 
         // add active field on foo model and make all records active

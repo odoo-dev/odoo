@@ -1,6 +1,8 @@
 /* @odoo-module */
 
 import { DataPoint } from "./datapoint";
+import { _t } from "@web/core/l10n/translation";
+import { sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
 
 export class DynamicList extends DataPoint {
@@ -48,20 +50,35 @@ export class DynamicList extends DataPoint {
         return false;
     }
 
-    deleteRecords(records = this.selection) {
+    deleteRecords(records = []) {
         return this.model.mutex.exec(async () => {
-            const unlinked = await this.model.orm.unlink(
-                this.resModel,
-                records.map((r) => r.resId),
-                {
-                    context: this.context,
-                }
-            );
-            if (!unlinked) {
+            let resIds;
+            if (records.length) {
+                resIds = records.map((r) => r.resId);
+            } else {
+                resIds = await this.getResIds(true);
+                records = this.records.filter((r) => resIds.includes(r.resId));
+            }
+            const unliked = await this.model.orm.unlink(this.resModel, resIds, {
+                context: this.context,
+            });
+            if (!unliked) {
                 return false;
             }
+            if (
+                this.isDomainSelected &&
+                resIds.length === session.active_ids_limit &&
+                resIds.length < this.count
+            ) {
+                const msg = sprintf(
+                    _t(`Only the first %s records have been deleted (out of %s selected)`),
+                    resIds.length,
+                    this.count
+                );
+                this.model.notification.add(msg, { title: _t("Warning") });
+            }
             await this._removeRecords(records);
-            return true;
+            return unliked;
         });
     }
 
@@ -166,6 +183,18 @@ export class DynamicList extends DataPoint {
         const context = this.context;
         const resIds = await this.getResIds(isSelected);
         const action = await this.model.orm.call(this.resModel, method, [resIds], { context });
+        if (
+            this.isDomainSelected &&
+            resIds.length === session.active_ids_limit &&
+            resIds.length < this.count
+        ) {
+            const msg = sprintf(
+                _t("Of the %d records selected, only the first %d have been archived/unarchived."),
+                resIds.length,
+                this.count
+            );
+            this.model.notification.add(msg, { title: _t("Warning") });
+        }
         if (action && Object.keys(action).length) {
             this.model.action.doAction(action, {
                 onClose: () => this._load(this.offset, this.limit, this.orderBy),

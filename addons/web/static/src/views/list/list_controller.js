@@ -6,11 +6,9 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { unique } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
 import { omit } from "@web/core/utils/objects";
-import { sprintf } from "@web/core/utils/strings";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { session } from "@web/session";
 import { useModel } from "@web/views/model";
 import { DynamicRecordList } from "@web/views/relational_model/dynamic_record_list";
 import { standardViewProps } from "@web/views/standard_view_props";
@@ -37,7 +35,6 @@ export class ListController extends Component {
     setup() {
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.notificationService = useService("notification");
         this.userService = useService("user");
         this.rpc = useService("rpc");
         this.rootRef = useRef("root");
@@ -456,30 +453,10 @@ export class ListController extends Component {
      * @returns {Promise}
      */
     async toggleArchiveState(archive) {
-        let resIds;
-        const isDomainSelected = this.model.root.isDomainSelected;
-        const total = this.model.root.count;
         if (archive) {
-            resIds = await this.model.root.archive(true);
-        } else {
-            resIds = await this.model.root.unarchive(true);
+            return this.model.root.archive(true);
         }
-        if (
-            isDomainSelected &&
-            resIds.length === session.active_ids_limit &&
-            resIds.length < total
-        ) {
-            this.notificationService.add(
-                sprintf(
-                    this.env._t(
-                        "Of the %d records selected, only the first %d have been archived/unarchived."
-                    ),
-                    resIds.length,
-                    total
-                ),
-                { title: this.env._t("Warning") }
-            );
-        }
+        return this.model.root.unarchive(true);
     }
 
     async onDeleteSelectedRecords() {
@@ -490,27 +467,7 @@ export class ListController extends Component {
                 : this.env._t("Are you sure you want to delete this record?");
         const dialogProps = {
             body,
-            confirm: async () => {
-                const total = root.count;
-                const resIds = await this.model.root.deleteRecords();
-                this.model.notify();
-                if (
-                    root.isDomainSelected &&
-                    resIds.length === session.active_ids_limit &&
-                    resIds.length < total
-                ) {
-                    this.notificationService.add(
-                        sprintf(
-                            this.env._t(
-                                `Only the first %s records have been deleted (out of %s selected)`
-                            ),
-                            resIds.length,
-                            total
-                        ),
-                        { title: this.env._t("Warning") }
-                    );
-                }
-            },
+            confirm: () => this.model.root.deleteRecords(),
             cancel: () => {},
         };
         this.dialogService.add(ConfirmationDialog, dialogProps);
