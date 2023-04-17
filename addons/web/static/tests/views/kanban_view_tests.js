@@ -4289,7 +4289,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick create record while adding a new column", async (assert) => {
+    QUnit.test("quick create record while adding a new column", async (assert) => {
         const prom = makeDeferred();
         await makeView({
             type: "kanban",
@@ -5049,7 +5049,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("prevent drag and drop if grouped by date/datetime field", async (assert) => {
+    QUnit.test("prevent drag and drop if grouped by date/datetime field", async (assert) => {
         serverData.models.partner.records[0].date = "2017-01-08";
         serverData.models.partner.records[1].date = "2017-01-09";
         serverData.models.partner.records[2].date = "2017-02-08";
@@ -6182,7 +6182,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quick create several columns in a row", async (assert) => {
+    QUnit.test("quick create several columns in a row", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6246,7 +6246,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group", 4);
     });
 
-    QUnit.tttt("quick create column with enter", async (assert) => {
+    QUnit.test("quick create column with enter", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -6376,7 +6376,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("quick create column and examples: with folded columns", async (assert) => {
+    QUnit.test("quick create column and examples: with folded columns", async (assert) => {
         serverData.models.partner.records = [];
         serverData.models.product.fields.folded = { string: "Folded", type: "boolean" };
         serviceRegistry.add("dialog", dialogService, { force: true });
@@ -6812,7 +6812,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("no nocontent helper is shown when no longer creating column", async (assert) => {
+    QUnit.test("no nocontent helper is shown when no longer creating column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -8526,7 +8526,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["web_search_read_unity 4-0"]);
     });
 
-    QUnit.tttt("update buttons after column creation", async (assert) => {
+    QUnit.test("update buttons after column creation", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -8733,7 +8733,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt("move a record then put it again in the same column", async (assert) => {
+    QUnit.test("move a record then put it again in the same column", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -11680,7 +11680,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["web_search_read_unity"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "keep focus inside control panel when pressing arrowdown and no kanban card",
         async (assert) => {
             serverData.models.partner.records = [];
