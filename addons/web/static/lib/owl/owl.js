@@ -2305,6 +2305,7 @@
             this.app = app;
             this.parent = parent;
             this.props = props;
+            this.nextProps = props || null;
             this.parentKey = parentKey;
             const defaultProps = C.defaultProps;
             props = Object.assign({}, props);
@@ -2445,7 +2446,7 @@
                 return;
             }
             component.props = props;
-            this.props = rawProps;
+            this.nextProps = rawProps;
             fiber.render();
             const parentRoot = parentFiber.root;
             if (this.willPatch.length) {
@@ -2520,6 +2521,7 @@
                 // by the component will be patched independently in the appropriate
                 // fiber.complete
                 this._patch();
+                this.props = this.nextProps;
             }
         }
         _patch() {
