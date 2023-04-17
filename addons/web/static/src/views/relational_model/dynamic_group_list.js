@@ -69,13 +69,58 @@ export class DynamicGroupList extends DynamicList {
         return super.sortBy(fieldName);
     }
 
-    createGroup() {
-        // TODO
+    async createGroup(groupName, groupData, isFolded) {
+        await this.model.mutex.exec(() => this._createGroup(groupName, groupData, isFolded));
     }
 
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    async _createGroup(groupName, groupData = {}, isFolded = false) {
+        groupData = { ...groupData, name: groupName };
+        const [id] = await this.model.orm.create(this.groupByField.relation, [groupData], {
+            context: this.context,
+        });
+
+        // This is almost a copy/past of the code in relational_model.js
+        // Maybe we can create an addGroup method in relational_model.js
+        // and call it from here and from relational_model.js
+        const commonConfig = {
+            resModel: this.config.resModel,
+            fields: this.config.fields,
+            activeFields: this.config.activeFields,
+        };
+        const context = {
+            ...this.config.context,
+            [`default_${this.groupByField.name}`]: id,
+        };
+        const nextConfigGroups = { ...this.config.groups };
+        nextConfigGroups[id + "," + groupName] = {
+            ...commonConfig,
+            context,
+            groupByFieldName: this.groupByField.name,
+            isFolded,
+            list: {
+                ...commonConfig,
+                context,
+                domain: [[this.groupByField.name, "=", id]],
+                groupBy: [],
+            },
+        };
+        this.model._updateConfig(this.config, { groups: nextConfigGroups }, { noReload: true });
+
+        const data = {
+            count: 0,
+            length: 0,
+            records: [],
+            __domain: [[this.groupByField.name, "=", id]],
+            [this.groupByField.name]: [id, groupName],
+            value: [id, groupName],
+        };
+
+        this.groups.push(this._createGroupDatapoint(data));
+    }
 
     _createGroupDatapoint(data) {
         return new this.model.constructor.Group(
