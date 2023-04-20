@@ -139,11 +139,12 @@ export class DynamicRecordList extends DynamicList {
         }
     }
 
-    async _load(offset, limit, orderBy) {
+    async _load(offset, limit, orderBy, domain = this.domain) {
         const response = await this.model._updateConfig(this.config, {
             offset,
             limit,
             orderBy,
+            domain,
         });
         this.records = response.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(response);

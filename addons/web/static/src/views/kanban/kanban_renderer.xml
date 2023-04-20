@@ -25,6 +25,7 @@
                             quickCreateState="props.quickCreateState"
                             scrollTop="props.scrollTop"
                             tooltipInfo="props.archInfo.tooltipInfo"
+                            progressBarState="props.progressBarState"
                         />
                         <t t-if="!group.isFolded">
                             <t t-if="group.id === props.quickCreateState.groupId">

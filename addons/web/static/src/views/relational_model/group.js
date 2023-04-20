@@ -17,7 +17,6 @@ export class Group extends DataPoint {
     setup(config, data) {
         super.setup(...arguments);
         this.groupByField = this.fields[config.groupByFieldName];
-        this.progressBars = []; // FIXME: remove from model?
         this.range = data.range;
         this._rawValue = data[this.groupByField.name];
         /** @type {number} */

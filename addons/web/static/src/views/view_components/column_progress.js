@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
+import { Component, onWillUpdateProps } from "@odoo/owl";
 import { AnimatedNumber } from "./animated_number";
 
 export class ColumnProgress extends Component {
@@ -12,13 +12,22 @@ export class ColumnProgress extends Component {
         aggregate: { type: Object },
         group: { type: Object },
         onBarClicked: { type: Function, optional: true },
+        progressBar: { type: Object },
     };
     static defaultProps = {
         onBarClicked: () => {},
     };
 
+    setup() {
+        let i = 0;
+        onWillUpdateProps((nextProps) => {
+            console.log(++i);
+            console.log(nextProps.progressBar);
+            console.log(nextProps.aggregate);
+        });
+    }
+
     async onBarClick(progressBar) {
-        await this.props.group.filterProgressValue(progressBar.value);
-        this.props.onBarClicked();
+        await this.props.onBarClicked(progressBar);
     }
 }

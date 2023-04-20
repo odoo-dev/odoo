@@ -10,6 +10,7 @@ import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
 import { extractFieldsFromArchInfo } from "../relational_model/utils";
 import { KanbanRenderer } from "./kanban_renderer";
+import { useProgressBar } from "./progress_bar_hook";
 
 import { Component, reactive, useRef, useState } from "@odoo/owl";
 
@@ -30,7 +31,6 @@ export class KanbanController extends Component {
         };
         const model = useModel(Model, {
             config: modelConfig,
-            progressAttributes: archInfo.progressAttributes,
             handleField: archInfo.handleField,
             limit: archInfo.limit || limit || 40,
             countLimit: archInfo.countLimit,
@@ -39,6 +39,11 @@ export class KanbanController extends Component {
             maxGroupByDepth: 1,
         });
         this.model = useState(model);
+        if (archInfo.progressAttributes) {
+            const progressBarState = useProgressBar(archInfo.progressAttributes, this.model);
+            this.progressBarState = reactive(progressBarState);
+        }
+
         this.headerButtons = archInfo.headerButtons;
 
         const self = this;

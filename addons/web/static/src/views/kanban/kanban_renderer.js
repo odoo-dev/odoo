@@ -56,6 +56,7 @@ export class KanbanRenderer extends Component {
         "scrollTop?",
         "canQuickCreate?",
         "quickCreateState?",
+        "progressBarState?",
     ];
 
     static defaultProps = {
@@ -301,10 +302,12 @@ export class KanbanRenderer extends Component {
         if (!group.isFolded) {
             classes.push("bg-100");
         }
-        if (group.progressBars.length) {
-            classes.push("o_kanban_has_progressbar");
-            if (!group.isFolded && group.hasActiveProgressValue) {
-                const progressBar = group.activeProgressBar;
+        if (this.props.archInfo.progressAttributes && !group.isFolded) {
+            const progressBarInfo = this.props.progressBarState.getGroupInfo(group.id);
+            if (progressBarInfo.activeBar) {
+                const progressBar = progressBarInfo.bars.find(
+                    (b) => b.value === progressBarInfo.activeBar
+                );
                 classes.push("o_kanban_group_show", `o_kanban_group_show_${progressBar.color}`);
             }
         }
@@ -312,9 +315,19 @@ export class KanbanRenderer extends Component {
     }
 
     getGroupUnloadedCount(group) {
-        const progressBar = group.activeProgressBar;
         const records = group.list.records.filter((r) => !r.isInQuickCreation);
-        return (progressBar ? progressBar.count : group.count) - records.length;
+        if (this.props.archInfo.progressAttributes) {
+            const progressBarInfo = this.props.progressBarState.getGroupInfo(group.id);
+            if (progressBarInfo.activeBar) {
+                const progressBar = progressBarInfo.bars.find(
+                    (b) => b.value === progressBarInfo.activeBar
+                );
+                if (progressBar) {
+                    return progressBar.count - records.length;
+                }
+            }
+        }
+        return group.count - records.length;
     }
 
     generateGhostColumns() {

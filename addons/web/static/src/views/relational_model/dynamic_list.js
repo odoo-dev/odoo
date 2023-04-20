@@ -107,8 +107,8 @@ export class DynamicList extends DataPoint {
         const limit = params.limit === undefined ? this.limit : params.limit;
         const offset = params.offset === undefined ? this.offset : params.offset;
         const orderBy = params.orderBy === undefined ? this.orderBy : params.orderBy;
-        console.log(orderBy);
-        return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
+        const domain = params.domain === undefined ? this.domain : params.domain;
+        return this.model.mutex.exec(() => this._load(offset, limit, orderBy, domain));
     }
 
     // TODO: keep this??

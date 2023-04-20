@@ -8872,7 +8872,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(2).querySelector(".o_widget").innerText, '{"foo":"gnap"}');
     });
 
-    QUnit.tttt("column progressbars properly work", async (assert) => {
+    QUnit.test("column progressbars properly work", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -8905,7 +8905,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt('column progressbars: "false" bar is clickable', async (assert) => {
+    QUnit.test('column progressbars: "false" bar is clickable', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -8961,7 +8961,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["1", "1"]);
     });
 
-    QUnit.tttt('column progressbars: "false" bar with sum_field', async (assert) => {
+    QUnit.test('column progressbars: "false" bar with sum_field', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -9031,7 +9031,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column progressbars: creating a new column should create a new progressbar",
         async (assert) => {
             await makeView({
@@ -9067,7 +9067,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("column progressbars on quick create properly update counter", async (assert) => {
+    QUnit.test("column progressbars on quick create properly update counter", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9246,7 +9246,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("RPCs when (re)loading kanban view progressbars", async (assert) => {
+    QUnit.test("RPCs when (re)loading kanban view progressbars", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9332,7 +9332,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("drag & drop records grouped by m2o with progressbar", async (assert) => {
+    QUnit.test("drag & drop records grouped by m2o with progressbar", async (assert) => {
         serverData.models.partner.records[0].product_id = false;
 
         await makeView({
@@ -9378,7 +9378,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCounters(), ["0", "1", "3"]);
     });
 
-    QUnit.tttt("progress bar subgroup count recompute", async (assert) => {
+    QUnit.test("progress bar subgroup count recompute", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -10967,7 +10967,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record", 2);
     });
 
-    QUnit.tttt("filter groups are kept when leaving and coming back", async (assert) => {
+    QUnit.test("filter groups are kept when leaving and coming back", async (assert) => {
         serverData.models.partner.records[1].state = "abc";
         serverData.views = {
             "partner,false,kanban": `
@@ -11428,7 +11428,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "ged");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Color '200' (gray) can be used twice (for false value and another value) in progress bar",
         async (assert) => {
             serverData.models.partner.records.push({ id: 5, bar: true }, { id: 6, bar: false });
