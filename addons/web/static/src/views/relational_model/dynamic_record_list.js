@@ -87,13 +87,14 @@ export class DynamicRecordList extends DynamicList {
     }
 
     _createRecordDatapoint(data, mode = "readonly") {
+        const { context, activeFields, resModel, fields } = this.config;
         return new this.model.constructor.Record(
             this.model,
             {
-                context: this.context,
-                activeFields: this.activeFields,
-                resModel: this.resModel,
-                fields: this.fields,
+                context,
+                activeFields,
+                resModel,
+                fields,
                 resId: data.id || false,
                 resIds: data.id ? [data.id] : [],
                 isMonoRecord: true,
