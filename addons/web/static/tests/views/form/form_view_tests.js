@@ -806,7 +806,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method, kwargs }) {
                 if (method === "web_read") {
                     assert.deepEqual(
-                        kwargs.fields,
+                        kwargs.specification,
                         { foo: {}, display_name: {} },
                         "should only fetch requested fields"
                     );
@@ -8346,7 +8346,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method, kwargs }) {
                 assert.step(method);
                 if (method === "web_read") {
-                    assert.deepEqual(kwargs.fields, {
+                    assert.deepEqual(kwargs.specification, {
                         p: {},
                         product_ids: {},
                         timmy: {},

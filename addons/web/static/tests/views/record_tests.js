@@ -384,7 +384,9 @@ QUnit.module("Record Component", (hooks) => {
                 serverData,
                 mockRPC(route, { method, args, kwargs }) {
                     assert.step(
-                        `${method} : ${JSON.stringify(args[0])} - ${JSON.stringify(kwargs.fields)}`
+                        `${method} : ${JSON.stringify(args[0])} - ${JSON.stringify(
+                            kwargs.specification
+                        )}`
                     );
                 },
             }),
