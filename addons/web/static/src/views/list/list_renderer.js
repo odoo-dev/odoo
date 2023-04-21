@@ -12,7 +12,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable";
 import { getTabableElements } from "@web/core/utils/ui";
-import { Field } from "@web/views/fields/field";
+import { Field, getFieldFromRegistry } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { evalDomain, getClassNameFromDecoration } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -223,21 +223,54 @@ export class ListRenderer extends Component {
     processAllColumn(allColumns, list) {
         return allColumns.flatMap((column) => {
             if (column.type === "field" && list.fields[column.name].type === "properties") {
-                return Object.values(list.activeFields)
+                return Object.values(list.fields)
                     .filter(
-                        (activeField) =>
-                            activeField.relatedPropertyField &&
-                            activeField.relatedPropertyField.fieldName === column.name
+                        (field) =>
+                            field.relatedPropertyField &&
+                            field.relatedPropertyField.fieldName === column.name
                     )
-                    .map((activeField) => ({
-                        ...activeField,
-                        id: `${column.id}_${activeField.name}`,
-                        classNames: column.classNames,
-                        optional: "hide",
-                        type: "field",
-                        hasLabel: true,
-                        label: activeField.string,
-                    }));
+                    .map((propertyField) => {
+                        let widget = propertyField.type;
+                        if (["many2one", "many2many"].includes(propertyField.type)) {
+                            if (["res.users", "res.partner"].includes(propertyField.comodel)) {
+                                widget =
+                                    propertyField.type === "many2one"
+                                        ? "many2one_avatar"
+                                        : "many2many_tags_avatar";
+                            } else {
+                                widget =
+                                    propertyField.type === "many2one" ? widget : "many2many_tags";
+                            }
+                        } else if (widget === "tags") {
+                            widget = `property_tags`;
+                        }
+                        const field = getFieldFromRegistry(propertyField.type, widget);
+                        let { relatedFields } = field;
+                        if (relatedFields) {
+                            if (relatedFields instanceof Function) {
+                                relatedFields = relatedFields({ options: {}, attrs: {} });
+                            }
+                            relatedFields = Object.fromEntries(
+                                relatedFields.map((f) => [f.name, f])
+                            );
+                        }
+
+                        return {
+                            ...propertyField,
+                            id: `${column.id}_${propertyField.name}`,
+                            classNames: column.classNames,
+                            optional: "hide",
+                            type: "field",
+                            hasLabel: true,
+                            label: propertyField.string,
+                            sortable: false,
+                            options: {}, // maybe use the options of the properties field ?
+                            modifiers: {}, // maybe use the options of the properties field ?
+                            attrs: {},
+                            field,
+                            widget,
+                        };
+                    });
             } else {
                 return [column];
             }

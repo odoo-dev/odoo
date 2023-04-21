@@ -17631,7 +17631,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 2);
     });
 
-    QUnit.tttt("Properties: char", async (assert) => {
+    QUnit.test("Properties: char", async (assert) => {
         const definition = {
             type: "char",
             name: "property_char",
@@ -17650,7 +17650,6 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
-                    <field name="m2o"/>
                     <field name="properties" />
                 </tree>
             `,
@@ -17683,7 +17682,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_cell.o_char_cell").textContent, "TEST");
     });
 
-    QUnit.tttt("Properties: boolean", async (assert) => {
+    QUnit.test("Properties: boolean", async (assert) => {
         const definition = {
             type: "boolean",
             name: "property_boolean",
@@ -17737,7 +17736,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Properties: integer", async (assert) => {
+    QUnit.test("Properties: integer", async (assert) => {
         const definition = {
             type: "integer",
             name: "property_integer",
@@ -17785,7 +17784,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_cell.o_integer_cell").textContent, "321");
     });
 
-    QUnit.tttt("Properties: float", async (assert) => {
+    QUnit.test("Properties: float", async (assert) => {
         const definition = {
             type: "float",
             name: "property_float",
@@ -17833,7 +17832,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_cell.o_float_cell").textContent, "3.21");
     });
 
-    QUnit.tttt("Properties: date", async (assert) => {
+    QUnit.test("Properties: date", async (assert) => {
         const definition = {
             type: "date",
             name: "property_date",
@@ -17888,7 +17887,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Properties: datetime", async (assert) => {
+    QUnit.test("Properties: datetime", async (assert) => {
         patchTimeZone(0);
         const definition = {
             type: "datetime",
@@ -17948,7 +17947,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Properties: selection", async (assert) => {
+    QUnit.test("Properties: selection", async (assert) => {
         const definition = {
             type: "selection",
             name: "property_selection",
@@ -18004,7 +18003,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_cell.o_selection_cell").textContent, "A");
     });
 
-    QUnit.tttt("Properties: tags", async (assert) => {
+    QUnit.test("Properties: tags", async (assert) => {
         const definition = {
             type: "tags",
             name: "property_tags",
@@ -18076,13 +18075,13 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Properties: many2one", async (assert) => {
+    QUnit.test("Properties: many2one", async (assert) => {
         const definition = {
             type: "many2one",
             name: "property_many2one",
             string: "Property many2one",
             comodel: "res_currency",
-            domain: [],
+            domain: "[]",
         };
         serverData.models.bar.records[0].definitions = [definition];
         for (const record of serverData.models.foo.records) {
@@ -18135,13 +18134,13 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Properties: many2many", async (assert) => {
+    QUnit.test("Properties: many2many", async (assert) => {
         const definition = {
             type: "many2many",
             name: "property_many2many",
             string: "Property many2many",
             comodel: "res_currency",
-            domain: [],
+            domain: "[]",
         };
         serverData.models.bar.records[0].definitions = [definition];
         for (const record of serverData.models.foo.records) {
@@ -18180,9 +18179,13 @@ QUnit.module("Views", (hooks) => {
             "Property many2many"
         );
         assert.containsN(target, ".o_field_cell.o_many2many_tags_cell", 3);
+        assert.strictEqual(
+            target.querySelector(".o_field_cell.o_many2many_tags_cell").textContent,
+            "USD"
+        );
     });
 
-    QUnit.tttt("multiple sources of properties definitions", async (assert) => {
+    QUnit.test("multiple sources of properties definitions", async (assert) => {
         const definition0 = {
             type: "char",
             name: "property_char",
@@ -18209,13 +18212,19 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
-                    <field name="m2o"/>
                     <field name="properties" />
                 </tree>
             `,
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
+        assert.deepEqual(
+            [
+                ...target.querySelectorAll(".o_optional_columns_dropdown .dropdown-item .fw-bold"),
+            ].map((el) => el.textContent),
+            ["Value 1", "Value 2"]
+        );
+
         await click(
             target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[0]
         );
@@ -18230,7 +18239,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_field_cell.o_boolean_cell", 1);
     });
 
-    QUnit.tttt("toggle properties", async (assert) => {
+    QUnit.test("toggle properties", async (assert) => {
         const definition0 = {
             type: "char",
             name: "property_char",
@@ -18290,7 +18299,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_list_renderer th[data-name='properties.property_boolean']");
     });
 
-    QUnit.tttt("reload properties definitions when domain change", async (assert) => {
+    QUnit.test("reload properties definitions when domain change", async (assert) => {
         const definition0 = {
             type: "char",
             name: "property_char",
@@ -18330,16 +18339,16 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read",
+            "/web/dataset/call_kw/foo/web_search_read_unity",
         ]);
 
         await toggleFavoriteMenu(target);
         await toggleMenuItem(target, "only one");
 
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
     });
 
-    QUnit.tttt("do not reload properties definitions when page change", async (assert) => {
+    QUnit.test("do not reload properties definitions when page change", async (assert) => {
         const definition0 = {
             type: "char",
             name: "property_char",
@@ -18369,15 +18378,15 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read",
+            "/web/dataset/call_kw/foo/web_search_read_unity",
         ]);
 
         await pagerNext(target);
 
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
     });
 
-    QUnit.tttt("load properties definitions only once when grouped", async (assert) => {
+    QUnit.test("load properties definitions only once when grouped", async (assert) => {
         const definition0 = {
             type: "char",
             name: "property_char",
@@ -18412,10 +18421,10 @@ QUnit.module("Views", (hooks) => {
         ]);
 
         await click(target.querySelector(".o_group_header"));
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
     });
 
-    QUnit.tttt("Invisible Properties", async (assert) => {
+    QUnit.test("Invisible Properties", async (assert) => {
         const definition = {
             type: "integer",
             name: "property_integer",
@@ -18444,7 +18453,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsNone(target, ".o_optional_columns_dropdown_toggle");
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "web_search_read_unity"]);
     });
 
     QUnit.test("header buttons in list view", async function (assert) {

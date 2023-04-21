@@ -146,6 +146,66 @@ export class RelationalModel extends Model {
     // Protected
     // -------------------------------------------------------------------------
 
+    _applyProperties(records, config) {
+        for (const record of records) {
+            for (const fieldName in record) {
+                const field = config.fields[fieldName];
+                if (field && field.type === "properties") {
+                    const parent = record[field.definition_record];
+                    const relatedPropertyField = {
+                        fieldName,
+                    };
+                    if (parent) {
+                        relatedPropertyField.id = parent.id;
+                        relatedPropertyField.displayName = parent.display_name;
+                    }
+                    for (const property of record[fieldName]) {
+                        const propertyFieldName = `${fieldName}.${property.name}`;
+                        if (!config.fields[propertyFieldName]) {
+                            config.fields[propertyFieldName] = {
+                                ...property,
+                                name: propertyFieldName,
+                                relatedPropertyField,
+                                propertyName: property.name,
+                                relation: property.comodel,
+                            };
+                            config.activeFields[propertyFieldName] = {
+                                context: "{}",
+                                invisible: false,
+                                readonly: false,
+                                required: false,
+                                onChange: false,
+                            };
+                            if (property.type === "many2many") {
+                                config.activeFields[propertyFieldName].related = {
+                                    fields: {
+                                        id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
+                                        display_name: { name: "display_name", type: "char" },
+                                    },
+                                    activeFields: {
+                                        id: {
+                                            context: "{}",
+                                            invisible: false,
+                                            readonly: false,
+                                            required: false,
+                                            onChange: false,
+                                        },
+                                        display_name: {
+                                            context: "{}",
+                                            invisible: false,
+                                            readonly: false,
+                                            required: false,
+                                            onChange: false,
+                                        },
+                                    },
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     /**
      *
      * @param {Config} config
@@ -186,8 +246,11 @@ export class RelationalModel extends Model {
         console.log("getFieldsSpec");
         const fieldsSpec = {};
         for (const fieldName in activeFields) {
+            if (fields[fieldName].relatedPropertyField) {
+                continue;
+            }
             const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
-            fieldsSpec[fieldName] = {};
+            fieldsSpec[fieldName] = fieldsSpec[fieldName] || {};
             // X2M
             if (related) {
                 fieldsSpec[fieldName].fields = this._getFieldsSpec(
@@ -200,6 +263,11 @@ export class RelationalModel extends Model {
                 if (defaultOrderBy) {
                     fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
                 }
+            }
+            if (fields[fieldName].type === "properties") {
+                fieldsSpec[fields[fieldName].definition_record] = {
+                    fields: { display_name: {} },
+                };
             }
             // M2O
             if (fields[fieldName].type === "many2one" && invisible !== true) {
@@ -465,6 +533,7 @@ export class RelationalModel extends Model {
      * @returns
      */
     _loadNewRecord(config) {
+        // Maybe we should add _applyProperties for the form view ?
         return this._onchange({
             resModel: config.resModel,
             spec: getOnChangeSpec(config.activeFields),
@@ -498,7 +567,8 @@ export class RelationalModel extends Model {
      * @param {Config} config
      * @returns
      */
-    async _loadRecords({ resModel, resIds, activeFields, fields, context }) {
+    async _loadRecords(config) {
+        const { resModel, resIds, activeFields, fields, context } = config;
         if (!resIds.length) {
             return [];
         }
@@ -513,6 +583,8 @@ export class RelationalModel extends Model {
             throw new Error(`Can't fetch record(s) ${resIds}. They might have been deleted.`);
         }
         console.log("Unity response", records);
+
+        this._applyProperties(records, config);
         return records;
     }
 
@@ -537,6 +609,8 @@ export class RelationalModel extends Model {
         console.log("Unity field spec", kwargs.fields);
         const response = await this.orm.call(config.resModel, "unity_web_search_read", [], kwargs);
         console.log("Unity response", response);
+
+        this._applyProperties(response.records, config);
         return response;
     }
 }

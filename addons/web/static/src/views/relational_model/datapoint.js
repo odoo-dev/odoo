@@ -130,6 +130,14 @@ export class DataPoint {
                 }
                 return value ? [value.id, value.display_name] : false;
             }
+            case "properties": {
+                return value
+                    ? value.map((property) => ({
+                          ...property,
+                          value: this._parseServerValue(property, property.value ?? false),
+                      }))
+                    : [];
+            }
         }
         return value;
     }

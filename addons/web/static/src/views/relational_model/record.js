@@ -243,6 +243,28 @@ export class Record extends DataPoint {
                 parsedValues[fieldName] = staticList;
             } else {
                 parsedValues[fieldName] = this._parseServerValue(field, value);
+                if (field.type === "properties") {
+                    for (const property of parsedValues[fieldName]) {
+                        const fieldPropertyName = `${fieldName}.${property.name}`;
+                        if (property.type === "one2many" || property.type === "many2many") {
+                            const staticList = this._createStaticListDatapoint(
+                                property.value.map((record) => ({
+                                    id: record[0],
+                                    display_name: record[1],
+                                })),
+                                fieldPropertyName
+                            );
+                            parsedValues[fieldPropertyName] = staticList;
+                        } else if (property.type === "many2one") {
+                            parsedValues[fieldPropertyName] =
+                                property.value.length && property.value[1] === null
+                                    ? [property.value[0], this.model.env._t("No Access")]
+                                    : property.value;
+                        } else {
+                            parsedValues[fieldPropertyName] = property.value ?? false;
+                        }
+                    }
+                }
             }
         }
         return parsedValues;
@@ -313,28 +335,44 @@ export class Record extends DataPoint {
         this._closeInvalidFieldsNotification = () => {};
     }
 
+    _formatServerValue(fieldType, value) {
+        if (fieldType === "date") {
+            return value ? serializeDate(value) : false;
+        } else if (fieldType === "datetime") {
+            return value ? serializeDateTime(value) : false;
+        } else if (fieldType === "char" || fieldType === "text") {
+            return value !== "" ? value : false;
+        } else if (fieldType === "many2one") {
+            return value ? value[0] : false;
+        } else if (fieldType === "properties") {
+            return value.map((property) => ({
+                ...property,
+                value:
+                    property.type === "many2one"
+                        ? property.value
+                        : this._formatServerValue(property.type, property.value),
+            }));
+        }
+        return value;
+    }
+
     _getChanges(changes = this._changes, { withReadonly } = {}) {
         const result = {};
         for (const [fieldName, value] of Object.entries(changes)) {
-            const type = this.fields[fieldName].type;
+            const field = this.fields[fieldName];
             if (!withReadonly && this._isReadonly(fieldName)) {
                 continue;
             }
-            if (type === "date") {
-                result[fieldName] = value ? serializeDate(value) : false;
-            } else if (type === "datetime") {
-                result[fieldName] = value ? serializeDateTime(value) : false;
-            } else if (type === "char" || type === "text") {
-                result[fieldName] = value !== "" ? value : false;
-            } else if (type === "many2one") {
-                result[fieldName] = value ? value[0] : false;
-            } else if (type === "one2many" || type === "many2many") {
+            if (field.relatedPropertyField) {
+                continue;
+            }
+            if (field.type === "one2many" || field.type === "many2many") {
                 const commands = value._getCommands();
                 if (commands.length) {
                     result[fieldName] = commands;
                 }
             } else {
-                result[fieldName] = value;
+                result[fieldName] = this._formatServerValue(field.type, value);
             }
         }
         return result;
@@ -515,6 +553,15 @@ export class Record extends DataPoint {
 
     async _update(changes) {
         this.isDirty = true;
+        for (const [fieldName, value] of Object.entries(changes)) {
+            const field = this.fields[fieldName];
+            if (field && field.relatedPropertyField) {
+                const propertyFieldName = field.relatedPropertyField.fieldName;
+                changes[propertyFieldName] = this.data[propertyFieldName].map((property) =>
+                    property.name === field.propertyName ? { ...property, value } : property
+                );
+            }
+        }
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName].onChange
         );
