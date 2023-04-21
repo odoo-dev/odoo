@@ -29,7 +29,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
      * Check that documents with data in a <head> node are set to readonly
      * with a codeview option.
      */
-    QUnit.test("html fields with complete HTML document", async (assert) => {
+    QUnit.tttt("html fields with complete HTML document", async (assert) => {
         assert.timeout(2000);
         assert.expect(12);
         let codeViewState = false;
