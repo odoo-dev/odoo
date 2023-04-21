@@ -26,6 +26,43 @@ export function addFieldDependencies(activeFields, fields, fieldDependencies = [
     }
 }
 
+export function createPropertyActiveField(property) {
+    const { type } = property;
+
+    const activeField = {
+        context: "{}",
+        invisible: false,
+        readonly: false,
+        required: false,
+        onChange: false,
+    };
+    if (type === "many2many") {
+        activeField.related = {
+            fields: {
+                id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
+                display_name: { name: "display_name", type: "char" },
+            },
+            activeFields: {
+                id: {
+                    context: "{}",
+                    invisible: false,
+                    readonly: false,
+                    required: false,
+                    onChange: false,
+                },
+                display_name: {
+                    context: "{}",
+                    invisible: false,
+                    readonly: false,
+                    required: false,
+                    onChange: false,
+                },
+            },
+        };
+    }
+    return activeField;
+}
+
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
     const activeFields = {};
     fields = { ...fields };

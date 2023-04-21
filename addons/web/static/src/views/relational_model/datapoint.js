@@ -41,12 +41,7 @@ export class DataPoint {
         this.model = model;
         this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification
         this.context = config.context;
-        /** @type {{[key: string]: Field}} */
-        this.fields = {
-            id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
-            display_name: { name: "display_name", type: "char" },
-            ...config.fields,
-        };
+        this.fields = config.fields;
         this.activeFields = config.activeFields;
         this.fieldNames = Object.keys(this.activeFields);
         this._config = config;

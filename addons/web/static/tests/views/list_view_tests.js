@@ -17650,6 +17650,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
+                    <field name="m2o" />
                     <field name="properties" />
                 </tree>
             `,
@@ -18212,6 +18213,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
+                    <field name="m2o" />
                     <field name="properties" />
                 </tree>
             `,
@@ -18339,13 +18341,13 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read_unity",
+            "/web/dataset/call_kw/foo/unity_web_search_read",
         ]);
 
         await toggleFavoriteMenu(target);
         await toggleMenuItem(target, "only one");
 
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/unity_web_search_read"]);
     });
 
     QUnit.test("do not reload properties definitions when page change", async (assert) => {
@@ -18378,12 +18380,12 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/foo/get_views",
-            "/web/dataset/call_kw/foo/web_search_read_unity",
+            "/web/dataset/call_kw/foo/unity_web_search_read",
         ]);
 
         await pagerNext(target);
 
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/unity_web_search_read"]);
     });
 
     QUnit.test("load properties definitions only once when grouped", async (assert) => {
@@ -18421,7 +18423,7 @@ QUnit.module("Views", (hooks) => {
         ]);
 
         await click(target.querySelector(".o_group_header"));
-        assert.verifySteps(["/web/dataset/call_kw/foo/web_search_read_unity"]);
+        assert.verifySteps(["/web/dataset/call_kw/foo/unity_web_search_read"]);
     });
 
     QUnit.test("Invisible Properties", async (assert) => {
@@ -18453,7 +18455,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.containsNone(target, ".o_optional_columns_dropdown_toggle");
-        assert.verifySteps(["get_views", "web_search_read_unity"]);
+        assert.verifySteps(["get_views", "unity_web_search_read"]);
     });
 
     QUnit.test("header buttons in list view", async function (assert) {

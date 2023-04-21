@@ -63,6 +63,58 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
     };
 }
 
+export function getPropertyFieldInfo(propertyField) {
+    const { name, relatedPropertyField, string, type } = propertyField;
+
+    const fieldInfo = {
+        name,
+        string,
+        type,
+        widget: type,
+        options: {},
+        modifiers: {},
+        attrs: {},
+        relatedPropertyField,
+
+        // ??? We don t use it ? But it s in the fieldInfo of the field
+        context: "{}",
+        help: undefined,
+        onChange: false,
+        forceSave: false,
+        alwaysInvisible: false,
+        decorations: {},
+        // ???
+    };
+
+    if (type === "many2one" || type === "many2many") {
+        const { domain, relation } = propertyField;
+        fieldInfo.relation = relation;
+        fieldInfo.domain = domain;
+
+        if (relation === "res.users" || relation === "res.partner") {
+            fieldInfo.widget =
+                propertyField.type === "many2one" ? "many2one_avatar" : "many2many_tags_avatar";
+        } else {
+            fieldInfo.widget = propertyField.type === "many2one" ? type : "many2many_tags";
+        }
+    } else if (type === "tags") {
+        fieldInfo.tags = propertyField.tags;
+        fieldInfo.widget = `property_tags`;
+    } else if (type === "selection") {
+        fieldInfo.selection = propertyField.selection;
+    }
+
+    fieldInfo.field = getFieldFromRegistry(propertyField.type, fieldInfo.widget);
+    let { relatedFields } = fieldInfo.field;
+    if (relatedFields) {
+        if (relatedFields instanceof Function) {
+            relatedFields = relatedFields({ options: {}, attrs: {} });
+        }
+        fieldInfo.relatedFields = Object.fromEntries(relatedFields.map((f) => [f.name, f]));
+    }
+
+    return fieldInfo;
+}
 export class Field extends Component {
     setup() {
         if (this.props.fieldInfo) {

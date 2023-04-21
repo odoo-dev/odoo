@@ -12,7 +12,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable";
 import { getTabableElements } from "@web/core/utils/ui";
-import { Field, getFieldFromRegistry } from "@web/views/fields/field";
+import { Field, getFieldFromRegistry, getPropertyFieldInfo } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { evalDomain, getClassNameFromDecoration } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -256,7 +256,7 @@ export class ListRenderer extends Component {
                         }
 
                         return {
-                            ...propertyField,
+                            ...getPropertyFieldInfo(propertyField),
                             id: `${column.id}_${propertyField.name}`,
                             classNames: column.classNames,
                             optional: "hide",
@@ -264,11 +264,6 @@ export class ListRenderer extends Component {
                             hasLabel: true,
                             label: propertyField.string,
                             sortable: false,
-                            options: {}, // maybe use the options of the properties field ?
-                            modifiers: {}, // maybe use the options of the properties field ?
-                            attrs: {},
-                            field,
-                            widget,
                         };
                     });
             } else {

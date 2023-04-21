@@ -12,7 +12,7 @@ import { DynamicRecordList } from "./dynamic_record_list";
 import { DynamicGroupList } from "./dynamic_group_list";
 import { Group } from "./group";
 import { StaticList } from "./static_list";
-import { getFieldContext, getOnChangeSpec } from "./utils";
+import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./utils";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -169,37 +169,8 @@ export class RelationalModel extends Model {
                                 propertyName: property.name,
                                 relation: property.comodel,
                             };
-                            config.activeFields[propertyFieldName] = {
-                                context: "{}",
-                                invisible: false,
-                                readonly: false,
-                                required: false,
-                                onChange: false,
-                            };
-                            if (property.type === "many2many") {
-                                config.activeFields[propertyFieldName].related = {
-                                    fields: {
-                                        id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
-                                        display_name: { name: "display_name", type: "char" },
-                                    },
-                                    activeFields: {
-                                        id: {
-                                            context: "{}",
-                                            invisible: false,
-                                            readonly: false,
-                                            required: false,
-                                            onChange: false,
-                                        },
-                                        display_name: {
-                                            context: "{}",
-                                            invisible: false,
-                                            readonly: false,
-                                            required: false,
-                                            onChange: false,
-                                        },
-                                    },
-                                };
-                            }
+                            config.activeFields[propertyFieldName] =
+                                createPropertyActiveField(property);
                         }
                     }
                 }
@@ -245,12 +216,13 @@ export class RelationalModel extends Model {
     _getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
         console.log("getFieldsSpec");
         const fieldsSpec = {};
+        const properties = [];
         for (const fieldName in activeFields) {
             if (fields[fieldName].relatedPropertyField) {
                 continue;
             }
             const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
-            fieldsSpec[fieldName] = fieldsSpec[fieldName] || {};
+            fieldsSpec[fieldName] = {};
             // X2M
             if (related) {
                 fieldsSpec[fieldName].fields = this._getFieldsSpec(
@@ -264,10 +236,12 @@ export class RelationalModel extends Model {
                     fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
                 }
             }
+            // Properties
             if (fields[fieldName].type === "properties") {
-                fieldsSpec[fields[fieldName].definition_record] = {
-                    fields: { display_name: {} },
-                };
+                properties.push(fieldName);
+                // fieldsSpec[fields[fieldName].definition_record] = {
+                //     fields: { display_name: {} },
+                // };
             }
             // M2O
             if (fields[fieldName].type === "many2one" && invisible !== true) {
@@ -284,6 +258,10 @@ export class RelationalModel extends Model {
                     fieldsSpec[fieldName].context = context;
                 }
             }
+        }
+
+        for (const fieldName of properties) {
+            fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
         }
         return fieldsSpec;
     }
