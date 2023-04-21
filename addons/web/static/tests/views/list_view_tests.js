@@ -7541,7 +7541,7 @@ QUnit.module("Views", (hooks) => {
                 assert.step(args.method || route);
                 if (args.method === "web_read" && args.model === "res_currency") {
                     assert.deepEqual(args.args, [[1, 2]]);
-                    assert.deepEqual(args.kwargs.fields, { position: {} });
+                    assert.deepEqual(args.kwargs.specification, { position: {} });
                 }
             },
             groupBy: ["currency_id"],

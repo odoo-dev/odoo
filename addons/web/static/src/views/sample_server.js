@@ -606,12 +606,13 @@ export class SampleServer {
     }
 
     _mockWebSearchReadUnity(params) {
-        const result = this._mockWebSearchRead({ ...params, fields: Object.keys(params.fields) });
+        const fields = Object.keys(params.specification);
+        const result = this._mockWebSearchRead({ ...params, fields });
         // populate x2many values
-        for (const fieldName in params.fields) {
+        for (const fieldName in params.specification) {
             const field = this.data[params.model].fields[fieldName];
             if (field.type === "one2many" || field.type === "many2many") {
-                const relFields = Object.keys(params.fields[fieldName].fields || {});
+                const relFields = Object.keys(params.specification[fieldName].fields || {});
                 if (relFields.length) {
                     const relIds = result.records.map((r) => r[fieldName]).flat();
                     const relRecords = {};
