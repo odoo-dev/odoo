@@ -274,10 +274,10 @@ QUnit.module("ViewDialogs", (hooks) => {
 
         assert.containsOnce(target, ".o_dialog .o_form_view");
         assert.containsN(target, ".o_dialog .o_form_view button", 2);
-        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read_unity"]);
+        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read"]);
         await click(target.querySelector(".o_dialog .o_form_view .btn1"));
         assert.containsOnce(target, ".o_dialog .o_form_view");
-        assert.verifySteps(["method1", "web_read_unity"]); // should re-read the record
+        assert.verifySteps(["method1", "web_read"]); // should re-read the record
         await click(target.querySelector(".o_dialog .o_form_view .btn2"));
         assert.containsNone(target, ".o_dialog .o_form_view");
         assert.verifySteps(["method2"]); // should not read as we closed

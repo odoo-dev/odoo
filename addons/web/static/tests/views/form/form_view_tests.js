@@ -804,7 +804,7 @@ QUnit.module("Views", (hooks) => {
             arch: '<form><field name="foo"/></form>',
             resId: 1,
             mockRPC(route, { method, kwargs }) {
-                if (method === "web_read_unity") {
+                if (method === "web_read") {
                     assert.deepEqual(
                         kwargs.fields,
                         { foo: {}, display_name: {} },
@@ -2824,14 +2824,7 @@ QUnit.module("Views", (hooks) => {
             "qux input is properly formatted"
         );
 
-        assert.verifySteps([
-            "get_views",
-            "onchange2",
-            "create",
-            "web_read_unity",
-            "write",
-            "web_read_unity",
-        ]);
+        assert.verifySteps(["get_views", "onchange2", "create", "web_read", "write", "web_read"]);
     });
 
     QUnit.test("separators", async function (assert) {
@@ -3050,11 +3043,11 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_read_unity", // initial read
+            "web_read", // initial read
             "post",
-            "web_read_unity", // reload (successfully clicked on p)
+            "web_read", // reload (successfully clicked on p)
             "some_method",
-            "web_read_unity", // reload (unsuccessfully clicked on s)
+            "web_read", // reload (unsuccessfully clicked on s)
         ]);
     });
 
@@ -3256,7 +3249,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target.querySelector(".o_form_statusbar button.p"));
 
-        assert.verifySteps(["create", "web_read_unity", "execute_action", "web_read_unity"]);
+        assert.verifySteps(["create", "web_read", "execute_action", "web_read"]);
     });
 
     QUnit.test("buttons in form view, new record, with field id in view", async function (assert) {
@@ -3311,9 +3304,9 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "onchange2",
             "create",
-            "web_read_unity",
+            "web_read",
             "execute_action",
-            "web_read_unity",
+            "web_read",
         ]);
     });
 
@@ -3397,7 +3390,7 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, args) {
                 if (args.method === "write") {
                     args.args[1].foo = "apple";
-                } else if (args.method === "web_read_unity") {
+                } else if (args.method === "web_read") {
                     // Block the 'read' call
                     await Promise.resolve(def);
                 }
@@ -3963,11 +3956,11 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_read_unity",
+            "web_read",
             "action_archive",
-            "web_read_unity",
+            "web_read",
             "action_unarchive",
-            "web_read_unity",
+            "web_read",
         ]);
     });
 
@@ -4107,7 +4100,7 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "do_archive") {
                     return false;
                 }
-                if (args.method === "web_read_unity" && args.model === "partner") {
+                if (args.method === "web_read" && args.model === "partner") {
                     if (readPartner === 1) {
                         return [{ id: 1, active: "archived" }];
                     }
@@ -4127,7 +4120,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([
             "/web/webclient/load_menus",
             "get_views: partner",
-            "web_read_unity: partner",
+            "web_read: partner",
         ]);
         await toggleActionMenu(target);
         assert.containsOnce(target, ".o_cp_action_menus span:contains(Archive)");
@@ -4140,9 +4133,9 @@ QUnit.module("Views", (hooks) => {
         await click(target, ".modal footer .myButton");
         assert.verifySteps([
             "create: product",
-            "web_read_unity: product",
+            "web_read: product",
             "do_archive: product",
-            "web_read_unity: partner",
+            "web_read: partner",
         ]);
         assert.containsNone(target, ".modal");
         assert.strictEqual(target.querySelector("[name='active'] input").value, "archived");
@@ -4229,7 +4222,7 @@ QUnit.module("Views", (hooks) => {
             actionMenus: {},
             context: { hey: "hoy" },
             mockRPC(route, args) {
-                if (args.method === "web_read_unity") {
+                if (args.method === "web_read") {
                     assert.step(args.kwargs.context.hey);
                 }
             },
@@ -4318,7 +4311,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsOnce(target, ".o_form_editable", "form view should be in edit mode");
         assert.strictEqual(count, 2, "should have triggered a execute action");
-        assert.verifySteps(["get_views", "web_read_unity", "write", "web_read_unity"]);
+        assert.verifySteps(["get_views", "web_read", "write", "web_read"]);
     });
 
     QUnit.test("clicking on stat buttons save and reload in edit mode", async function (assert) {
@@ -4447,13 +4440,7 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".o_field_widget[name=foo] input", "tralala");
         await click(target.querySelector(".o_content button.btn-primary"));
-        assert.verifySteps([
-            "get_views",
-            "web_read_unity",
-            "write",
-            "web_read_unity",
-            "execute_action",
-        ]);
+        assert.verifySteps(["get_views", "web_read", "write", "web_read", "execute_action"]);
     });
 
     QUnit.test("missing widgets do not crash", async function (assert) {
@@ -5692,7 +5679,7 @@ QUnit.module("Views", (hooks) => {
         await click(document.body.querySelector(".modal-footer button.btn-primary"));
         assert.containsNone(document.body, ".modal", "no confirm modal should be displayed");
 
-        assert.verifySteps(["get_views", "web_read_unity", "unlink", "history-back"]);
+        assert.verifySteps(["get_views", "web_read", "unlink", "history-back"]);
     });
 
     QUnit.test("empty required fields cannot be saved", async function (assert) {
@@ -6388,7 +6375,7 @@ QUnit.module("Views", (hooks) => {
             "input int_field is marked as invalid"
         );
 
-        assert.verifySteps(["get_views", "web_read_unity", "onchange2"]);
+        assert.verifySteps(["get_views", "web_read", "onchange2"]);
     });
 
     QUnit.test("rpc complete after destroying parent", async function (assert) {
@@ -7875,7 +7862,7 @@ QUnit.module("Views", (hooks) => {
                 bin_size: false,
             },
             mockRPC(route, args) {
-                if (args.method === "web_read_unity") {
+                if (args.method === "web_read") {
                     assert.strictEqual(
                         args.kwargs.context.bin_size,
                         false,
@@ -7973,7 +7960,7 @@ QUnit.module("Views", (hooks) => {
         def.resolve();
         await nextTick();
 
-        assert.verifySteps(["get_views", "web_read_unity", "onchange2", "danger"]);
+        assert.verifySteps(["get_views", "web_read", "onchange2", "danger"]);
     });
 
     QUnit.test("display toolbar", async function (assert) {
@@ -8069,9 +8056,9 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_read_unity",
+            "web_read",
             `{"action_id":29,"context":{"lang":"en","uid":7,"tz":"taht","active_id":1,"active_ids":[1],"active_model":"partner","active_domain":[]}}`,
-            "web_read_unity",
+            "web_read",
         ]);
     });
 
@@ -8122,9 +8109,9 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "onchange2",
             "create",
-            "web_read_unity",
+            "web_read",
             `{"action_id":29,"context":{"lang":"en","uid":7,"tz":"taht","active_id":6,"active_ids":[6],"active_model":"partner","active_domain":[]}}`,
-            "web_read_unity",
+            "web_read",
         ]);
 
         assert.strictEqual(target.querySelector(".o_field_widget[name='foo'] input").value, "test");
@@ -8358,7 +8345,7 @@ QUnit.module("Views", (hooks) => {
                     </form>`,
             mockRPC(route, { method, kwargs }) {
                 assert.step(method);
-                if (method === "web_read_unity") {
+                if (method === "web_read") {
                     assert.deepEqual(kwargs.fields, {
                         p: {},
                         product_ids: {},
@@ -8370,7 +8357,7 @@ QUnit.module("Views", (hooks) => {
             resId: 1,
         });
 
-        assert.verifySteps(["get_views", "web_read_unity"]);
+        assert.verifySteps(["get_views", "web_read"]);
     });
 
     QUnit.tttt("default_order on x2many embedded view", async function (assert) {
@@ -9332,7 +9319,7 @@ QUnit.module("Views", (hooks) => {
             await click(target.querySelector(".o_statusbar_buttons button"));
             assert.verifySteps([]);
             await click(target.querySelector(".modal-footer button.btn-primary"));
-            assert.verifySteps(["create", "web_read_unity", "execute_action"]);
+            assert.verifySteps(["create", "web_read", "execute_action"]);
         }
     );
 
@@ -9409,7 +9396,7 @@ QUnit.module("Views", (hooks) => {
         click(target.querySelector(".modal-footer button.btn-primary"));
         await Promise.resolve();
         await click(target.querySelector(".modal-footer button.btn-primary"));
-        assert.verifySteps(["create", "web_read_unity", "execute_action"]);
+        assert.verifySteps(["create", "web_read", "execute_action"]);
     });
 
     QUnit.test(
@@ -9492,9 +9479,9 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.verifySteps([
             "get_views",
-            "web_read_unity", // initial read to render the view
+            "web_read", // initial read to render the view
             "write", // write on save
-            "web_read_unity", // read on reload
+            "web_read", // read on reload
         ]);
     });
 
@@ -9538,10 +9525,10 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "web_read_unity", // initial read to render the view
+            "web_read", // initial read to render the view
             "write", // write on save (it fails, does not trigger a read)
             "write", // write on save (it works)
-            "web_read_unity", // read on reload
+            "web_read", // read on reload
         ]);
     });
 
@@ -9581,8 +9568,8 @@ QUnit.module("Views", (hooks) => {
                         if (failFlag) {
                             return Promise.reject(new Error("Odoo Server Error"));
                         }
-                    } else if (args.method === "web_read_unity") {
-                        assert.step("web_read_unity");
+                    } else if (args.method === "web_read") {
+                        assert.step("web_read");
                     }
                 },
             });
@@ -9610,11 +9597,11 @@ QUnit.module("Views", (hooks) => {
             );
 
             assert.verifySteps([
-                "web_read_unity",
+                "web_read",
                 "write", // fails
-                "web_read_unity", // must reload when saving fails
+                "web_read", // must reload when saving fails
                 "write", // works
-                "web_read_unity", // must reload when saving works
+                "web_read", // must reload when saving works
             ]);
         }
     );
@@ -9952,12 +9939,12 @@ QUnit.module("Views", (hooks) => {
         );
         assert.verifySteps([
             "get_views",
-            "web_read_unity", // main record
+            "web_read", // main record
             "get_formview_id", // id of first form view opened in a dialog
             "get_views", // arch of first form view opened in a dialog
-            "web_read_unity", // first dialog
+            "web_read", // first dialog
             "get_formview_id", // id of second form view opened in a dialog
-            "web_read_unity", // second dialog
+            "web_read", // second dialog
             "write", // save second dialog
             "read", // reload the display_name (first dialog)
         ]);
@@ -10459,7 +10446,7 @@ QUnit.module("Views", (hooks) => {
             "some foo value",
             "foo field should have correct value"
         );
-        assert.verifySteps(["get_views", "onchange2", "create", "web_read_unity"]);
+        assert.verifySteps(["get_views", "onchange2", "create", "web_read"]);
     });
 
     QUnit.test("saving with invalid uncommitted changes", async function (assert) {
@@ -11115,13 +11102,7 @@ QUnit.module("Views", (hooks) => {
             await editInput(target, '.o_field_widget[name="name"] input', "Test Company");
             await clickSave(target);
 
-            assert.verifySteps([
-                "get_views",
-                "onchange2",
-                "create",
-                "reload company",
-                "web_read_unity",
-            ]);
+            assert.verifySteps(["get_views", "onchange2", "create", "reload company", "web_read"]);
         }
     );
 
@@ -11167,13 +11148,7 @@ QUnit.module("Views", (hooks) => {
             await editInput(target, '.o_field_widget[name="name"] input', "Test Company2");
             await clickSave(target);
 
-            assert.verifySteps([
-                "get_views",
-                "web_read_unity",
-                "write",
-                "reload company",
-                "web_read_unity",
-            ]);
+            assert.verifySteps(["get_views", "web_read", "write", "reload company", "web_read"]);
         }
     );
 
@@ -11650,7 +11625,7 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "web_read_unity"]);
+            assert.verifySteps(["get_views", "web_read"]);
         }
     );
 
@@ -11851,7 +11826,7 @@ QUnit.module("Views", (hooks) => {
         window.dispatchEvent(new Event("beforeunload"));
         await nextTick();
 
-        assert.verifySteps(["get_views", "web_read_unity", "write"]);
+        assert.verifySteps(["get_views", "web_read", "write"]);
     });
 
     QUnit.test(
@@ -11907,7 +11882,7 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "web_read_unity", "onchange2", "write"]);
+            assert.verifySteps(["get_views", "web_read", "onchange2", "write"]);
         }
     );
 
@@ -11939,7 +11914,7 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "web_read_unity"]);
+            assert.verifySteps(["get_views", "web_read"]);
         }
     );
 
@@ -11979,7 +11954,7 @@ QUnit.module("Views", (hooks) => {
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
-            assert.verifySteps(["get_views", "web_read_unity", "onchange2"]);
+            assert.verifySteps(["get_views", "web_read", "onchange2"]);
         }
     );
 
@@ -12327,7 +12302,7 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.strictEqual(target.querySelector("[name=foo] span").innerText, "xphone");
-            assert.verifySteps(["get_views", "web_read_unity"]);
+            assert.verifySteps(["get_views", "web_read"]);
         }
     );
 
@@ -12435,7 +12410,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await clickSave(target);
-        assert.verifySteps(["get_views", "onchange2", "create", "web_read_unity"]);
+        assert.verifySteps(["get_views", "onchange2", "create", "web_read"]);
     });
 
     QUnit.test(

@@ -126,7 +126,7 @@ export class SampleServer {
                 return this._mockSearchReadController(params);
             case "web_search_read":
                 return this._mockWebSearchRead(params);
-            case "web_search_read_unity":
+            case "unity_web_search_read":
                 return this._mockWebSearchReadUnity(params);
             case "web_read_group":
                 return this._mockWebReadGroup(params);

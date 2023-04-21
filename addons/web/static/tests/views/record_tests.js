@@ -121,7 +121,7 @@ QUnit.module("Record Component", (hooks) => {
         );
         assert.verifySteps([
             "/web/dataset/call_kw/partner/fields_get",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
     });
 
@@ -148,12 +148,12 @@ QUnit.module("Record Component", (hooks) => {
         await mount(Parent, target, { env, dev: true });
         assert.verifySteps([
             "/web/dataset/call_kw/partner/fields_get",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
         assert.containsOnce(target, ".o_field_char:contains(yop)");
         await click(target.querySelector("button.my-btn"));
         assert.containsOnce(target, ".o_field_char:contains(blip)");
-        assert.verifySteps(["/web/dataset/call_kw/partner/web_read_unity"]);
+        assert.verifySteps(["/web/dataset/call_kw/partner/web_read"]);
     });
 
     QUnit.test("predefined fields and values", async function (assert) {
@@ -390,7 +390,7 @@ QUnit.module("Record Component", (hooks) => {
             }),
         });
 
-        assert.verifySteps([`web_read_unity : [1] - {"foo":{}}`]);
+        assert.verifySteps([`web_read : [1] - {"foo":{}}`]);
         const increment = target.querySelector("#increment");
         const field = target.querySelector("div[name='foo']");
         assert.strictEqual(increment.textContent, "0");
@@ -403,7 +403,7 @@ QUnit.module("Record Component", (hooks) => {
         assert.strictEqual(field.textContent, "yop");
 
         await click(target.querySelector("#next"));
-        assert.verifySteps([`web_read_unity : [5] - {"foo":{}}`]);
+        assert.verifySteps([`web_read : [5] - {"foo":{}}`]);
         assert.strictEqual(increment.textContent, "2");
         assert.strictEqual(field.textContent, "blop");
     });

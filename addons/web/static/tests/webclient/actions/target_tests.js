@@ -150,7 +150,7 @@ QUnit.module("ActionManager", (hooks) => {
         await testUtils.dom.click(`button[name="5"]`);
         assert.verifySteps([
             "/web/dataset/call_kw/partner/create",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
             "/web/dataset/call_kw/partner/onchange2",
@@ -160,7 +160,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([
             "/web/dataset/call_kw/partner/create",
             "/web/dataset/call_button",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
         assert.containsNone(document.body, ".modal");
     });

@@ -555,7 +555,7 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_read_unity"]);
+        assert.verifySteps(["get_views", "web_read"]);
         assert.containsOnce(target, ".o_field_x2many_list_row_add");
         assert.hasAttrValue(target.querySelector(".o_field_x2many_list_row_add"), "colspan", "2");
         assert.containsOnce(target, "td.o_list_record_remove");
@@ -2175,7 +2175,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "web_read_unity") {
+                if (args.method === "web_read") {
                     assert.step(`unity read ${args.args[0]}`);
                 }
             },

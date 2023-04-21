@@ -675,7 +675,7 @@ export class MockServer {
                 return this.mockSearchRead(args.model, args.args, args.kwargs);
             case "unlink":
                 return this.mockUnlink(args.model, args.args);
-            case "web_read_unity":
+            case "web_read":
                 return this.mockWebReadUnity(args.model, args.args, args.kwargs);
             case "web_search_read":
                 return this.mockWebSearchRead(args.model, args.args, args.kwargs);
@@ -683,7 +683,7 @@ export class MockServer {
                 return this.mockReadGroup(args.model, args.kwargs);
             case "web_read_group":
                 return this.mockWebReadGroup(args.model, args.kwargs);
-            case "web_search_read_unity":
+            case "unity_web_search_read":
                 return this.mockWebSearchReadUnity(args.model, args.args, args.kwargs);
             case "read_progress_bar":
                 return this.mockReadProgressBar(args.model, args.kwargs);
