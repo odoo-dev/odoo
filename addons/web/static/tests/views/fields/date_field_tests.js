@@ -620,7 +620,7 @@ QUnit.module("Fields", (hooks) => {
             await triggerEvents(input, null, ["input", "change", "focusout"]);
 
             assert.containsOnce(target, ".o_form_saved");
-            assert.verifySteps(["get_views", "web_read_unity"]); // should not have save as nothing changed
+            assert.verifySteps(["get_views", "web_read"]); // should not have save as nothing changed
         }
     );
 

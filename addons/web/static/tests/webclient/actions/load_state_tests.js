@@ -218,7 +218,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
@@ -240,7 +240,7 @@ QUnit.module("ActionManager", (hooks) => {
             "Second record",
             "should have opened the second record"
         );
-        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read_unity"]);
+        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read"]);
     });
 
     QUnit.test("properly load records with existing first APP", async function (assert) {
@@ -267,7 +267,7 @@ QUnit.module("ActionManager", (hooks) => {
             "should have opened the second record"
         );
         assert.containsNone(target, ".o_menu_brand");
-        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read_unity"]);
+        assert.verifySteps(["/web/webclient/load_menus", "get_views", "web_read"]);
     });
 
     QUnit.test("properly load default record", async function (assert) {
@@ -311,7 +311,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
@@ -351,8 +351,8 @@ QUnit.module("ActionManager", (hooks) => {
                 "/web/webclient/load_menus",
                 "/web/action/load",
                 "get_views",
-                "web_read_unity",
-                "web_search_read_unity",
+                "web_read",
+                "unity_web_search_read",
             ]);
         }
     );
@@ -407,7 +407,7 @@ QUnit.module("ActionManager", (hooks) => {
         async function (assert) {
             assert.expect(3);
             const mockRPC = async function (route, { method, kwargs }) {
-                if (method === "web_read_unity") {
+                if (method === "web_read") {
                     return Promise.reject();
                 }
             };
@@ -469,9 +469,9 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_search_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "web_read",
         ]);
     });
 
@@ -518,9 +518,9 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "web_read",
+            "web_read",
         ]);
     });
 
@@ -723,10 +723,10 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
             "setItem session current_action",
             "getItem session current_action",
-            "web_search_read_unity",
+            "unity_web_search_read",
             "setItem session current_action",
         ]);
     });
@@ -755,7 +755,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_search_read_unity",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
         ]);
     });
 
@@ -805,7 +805,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_search_read_unity",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
         ]);
     });
 
@@ -836,7 +836,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
         await loadState(webClient, {
             action: 999,

@@ -675,15 +675,15 @@ export class MockServer {
                 return this.mockSearchRead(args.model, args.args, args.kwargs);
             case "unlink":
                 return this.mockUnlink(args.model, args.args);
-            case "web_read_unity":
-                return this.mockWebReadUnity(args.model, args.args, args.kwargs);
+            case "web_read":
+                return this.mockWebRead(args.model, args.args, args.kwargs);
             case "web_search_read":
                 return this.mockWebSearchRead(args.model, args.args, args.kwargs);
             case "read_group":
                 return this.mockReadGroup(args.model, args.kwargs);
             case "web_read_group":
                 return this.mockWebReadGroup(args.model, args.kwargs);
-            case "web_search_read_unity":
+            case "unity_web_search_read":
                 return this.mockWebSearchReadUnity(args.model, args.args, args.kwargs);
             case "read_progress_bar":
                 return this.mockReadProgressBar(args.model, args.kwargs);
@@ -1970,16 +1970,16 @@ export class MockServer {
         return result.records;
     }
 
-    mockWebReadUnity(modelName, args, kwargs) {
+    mockWebRead(modelName, args, kwargs) {
         const ids = args[0];
-        let fieldNames = Object.keys(kwargs.fields);
+        let fieldNames = Object.keys(kwargs.specification);
         if (!fieldNames.length) {
             fieldNames = ["id"];
         }
         const records = this.mockRead(modelName, [ids, fieldNames], {
             context: kwargs.context,
         });
-        this._unityReadRecords(modelName, kwargs.fields, records);
+        this._unityReadRecords(modelName, kwargs.specification, records);
         return records;
     }
 
@@ -2001,13 +2001,13 @@ export class MockServer {
     }
 
     mockWebSearchReadUnity(modelName, args, kwargs) {
-        let fieldNames = Object.keys(kwargs.fields);
+        let fieldNames = Object.keys(kwargs.specification);
         if (!fieldNames.length) {
             fieldNames = ["id"];
         }
         const _kwargs = { ...kwargs, fields: fieldNames };
         const result = this.mockWebSearchRead(modelName, [], _kwargs);
-        this._unityReadRecords(modelName, kwargs.fields, result.records);
+        this._unityReadRecords(modelName, kwargs.specification, result.records);
         return result;
     }
 
@@ -2468,24 +2468,24 @@ export class MockServer {
         }
     }
 
-    _unityReadRecords(modelName, fields, records) {
-        for (const fieldName in fields) {
+    _unityReadRecords(modelName, spec, records) {
+        for (const fieldName in spec) {
             const field = this.models[modelName].fields[fieldName];
-            const relatedFields = fields[fieldName].fields;
+            const relatedFields = spec[fieldName].fields;
             switch (field.type) {
                 case "one2many":
                 case "many2many": {
                     if (relatedFields && Object.keys(relatedFields).length) {
                         const ids = unique(records.map((r) => r[fieldName]).flat());
-                        const result = this.mockWebReadUnity(field.relation, [ids], {
-                            fields: relatedFields,
-                            context: fields[fieldName].context,
+                        const result = this.mockWebRead(field.relation, [ids], {
+                            specification: relatedFields,
+                            context: spec[fieldName].context,
                         });
                         const allRelRecords = {};
                         for (const relRecord of result) {
                             allRelRecords[relRecord.id] = relRecord;
                         }
-                        const { limit, order } = fields[fieldName];
+                        const { limit, order } = spec[fieldName];
                         for (const record of records) {
                             const relResIds = record[fieldName];
                             let relRecords = relResIds.map((resId) => allRelRecords[resId]);

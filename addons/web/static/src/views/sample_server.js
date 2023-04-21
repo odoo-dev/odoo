@@ -126,7 +126,7 @@ export class SampleServer {
                 return this._mockSearchReadController(params);
             case "web_search_read":
                 return this._mockWebSearchRead(params);
-            case "web_search_read_unity":
+            case "unity_web_search_read":
                 return this._mockWebSearchReadUnity(params);
             case "web_read_group":
                 return this._mockWebReadGroup(params);
@@ -634,12 +634,13 @@ export class SampleServer {
     }
 
     _mockWebSearchReadUnity(params) {
-        const result = this._mockWebSearchRead({ ...params, fields: Object.keys(params.fields) });
+        const fields = Object.keys(params.specification);
+        const result = this._mockWebSearchRead({ ...params, fields });
         // populate x2many values
-        for (const fieldName in params.fields) {
+        for (const fieldName in params.specification) {
             const field = this.data[params.model].fields[fieldName];
             if (field.type === "one2many" || field.type === "many2many") {
-                const relFields = Object.keys(params.fields[fieldName].fields || {});
+                const relFields = Object.keys(params.specification[fieldName].fields || {});
                 if (relFields.length) {
                     const relIds = result.records.map((r) => r[fieldName]).flat();
                     const relRecords = {};

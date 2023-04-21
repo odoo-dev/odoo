@@ -417,9 +417,9 @@ QUnit.module("SettingsFormView", (hooks) => {
                 "get_views", // initial setting action
                 "onchange2", // this is a setting view => new record transient record
                 "create", // create the record before doing the action
-                "web_read_unity", // read the created record
+                "web_read", // read the created record
                 "get_views", // for other action in breadcrumb,
-                "web_search_read_unity", // with a searchread
+                "unity_web_search_read", // with a searchread
                 "onchange2", // when we come back, we want to restart from scratch
             ]);
         }
@@ -561,7 +561,7 @@ QUnit.module("SettingsFormView", (hooks) => {
 
         assert.verifySteps([
             "create", // settings: create the record before doing the action
-            "web_read_unity", // settings: read the created record
+            "web_read", // settings: read the created record
             "get_views", // dialog: get views
             "onchange2", // dialog: onchange
         ]);
@@ -569,7 +569,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target, ".modal button.btn.btn-primary.o_form_button_save");
         assert.verifySteps([
             "create", // dialog: create the record before doing back to the settings
-            "web_read_unity", // dialog: read the created record
+            "web_read", // dialog: read the created record
             "onchange2", // settings: when we come back, we want to restart from scratch
         ]);
     });
@@ -974,7 +974,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target, ".modal .btn-primary");
         assert.verifySteps([
             "create",
-            "web_read_unity",
+            "web_read",
             'action executed {"name":"execute","type":"object","resModel":"res.config.settings","resId":1,"resIds":[1],"context":{"lang":"en","uid":7,"tz":"taht"},"buttonContext":{}}',
         ]);
     });
@@ -1015,7 +1015,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         await click(target.querySelectorAll(".modal .btn-secondary")[1]);
         assert.verifySteps([
             "create",
-            "web_read_unity",
+            "web_read",
             'action executed {"context":{"lang":"en","uid":7,"tz":"taht"},"type":"object","name":"mymethod","resModel":"res.config.settings","resId":1,"resIds":[1],"buttonContext":{}}',
         ]);
     });
@@ -1226,7 +1226,7 @@ QUnit.module("SettingsFormView", (hooks) => {
 
             let def;
             const mockRPC = async (route, args) => {
-                if (args.method === "web_read_unity") {
+                if (args.method === "web_read") {
                     await def; // slow down reload of settings view
                 }
             };

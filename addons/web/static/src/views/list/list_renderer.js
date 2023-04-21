@@ -594,7 +594,7 @@ export class ListRenderer extends Component {
             let currencyId;
             if (type === "monetary") {
                 const currencyField =
-                    this.props.list.activeFields[column.name].options.currency_field ||
+                    column.options.currency_field ||
                     this.fields[column.name].currency_field ||
                     "currency_id";
                 if (!(currencyField in this.props.list.activeFields)) {

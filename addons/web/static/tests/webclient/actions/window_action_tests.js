@@ -57,7 +57,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
@@ -125,11 +125,11 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_search_read_unity",
-            "web_search_read_unity",
-            "web_read_unity",
-            "web_search_read_unity",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "web_read",
+            "unity_web_search_read",
         ]);
     });
 
@@ -175,12 +175,12 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/action/load",
             "get_views",
             "web_read_group",
-            "web_search_read_unity",
-            "web_search_read_unity",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "onchange2",
             "name_create",
-            "web_read_unity",
-            "web_read_unity",
+            "web_read",
+            "web_read",
         ]);
     });
 
@@ -207,7 +207,7 @@ QUnit.module("ActionManager", (hooks) => {
             ];
             let searchReadCount = 1;
             const mockRPC = async (route, args) => {
-                if (args.method === "web_search_read_unity") {
+                if (args.method === "unity_web_search_read") {
                     args = args || {};
                     if (searchReadCount === 1) {
                         assert.strictEqual(args.model, "partner");
@@ -796,9 +796,9 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
             "onchange2",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
@@ -854,10 +854,10 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "web_read",
             "object",
-            "web_read_unity",
+            "web_read",
         ]);
     });
 
@@ -1003,22 +1003,22 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "web_read",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
     QUnit.test("execute smart button and back", async function (assert) {
         const mockRPC = async (route, { method, kwargs }) => {
-            if (method === "web_read_unity") {
-                assert.step("web_read_unity");
+            if (method === "web_read") {
+                assert.step("web_read");
                 assert.notOk("default_partner" in kwargs.context);
             }
-            if (method === "web_search_read_unity") {
-                assert.step("web_search_read_unity");
+            if (method === "unity_web_search_read") {
+                assert.step("unity_web_search_read");
                 assert.strictEqual(kwargs.context.default_partner, 2);
             }
         };
@@ -1033,14 +1033,14 @@ QUnit.module("ActionManager", (hooks) => {
         await legacyExtraNextTick();
         assert.containsOnce(target, ".o_form_view");
         assert.containsOnce(target, ".o_form_button_create:not([disabled])");
-        assert.verifySteps(["web_read_unity", "web_search_read_unity", "web_read_unity"]);
+        assert.verifySteps(["web_read", "unity_web_search_read", "web_read"]);
     });
 
     QUnit.test("execute smart button and fails", async function (assert) {
         assert.expect(13);
         const mockRPC = async (route, { method }) => {
             assert.step(method || route);
-            if (method === "web_search_read_unity") {
+            if (method === "unity_web_search_read") {
                 return Promise.reject();
             }
         };
@@ -1056,11 +1056,11 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_read_unity",
+            "web_read",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "web_read",
         ]);
     });
 
@@ -1072,7 +1072,7 @@ QUnit.module("ActionManager", (hooks) => {
             const mockRPC = async (route, args) => {
                 if (route === "/web/dataset/call_button") {
                     return Promise.resolve(false);
-                } else if (args.method === "web_read_unity") {
+                } else if (args.method === "web_read") {
                     await def; // block the 'read' call
                 }
             };
@@ -1171,10 +1171,10 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
-            "web_read_unity",
-            "web_search_read_unity",
-            "web_read_unity",
+            "unity_web_search_read",
+            "web_read",
+            "unity_web_search_read",
+            "web_read",
         ]);
     });
 
@@ -1327,11 +1327,11 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_search_read_unity",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
+            "/web/dataset/call_kw/partner/web_read",
             "/web/dataset/call_kw/partner/get_formview_action",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_read_unity",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
     });
 
@@ -1540,7 +1540,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
         ]);
     });
 
@@ -1593,7 +1593,7 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_read_unity",
+            "web_read",
         ]);
     });
 
@@ -1726,7 +1726,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         ];
         const mockRPC = (route, args) => {
-            if (args.method === "web_search_read_unity") {
+            if (args.method === "unity_web_search_read") {
                 assert.deepEqual(args.kwargs.domain, [["bar", "=", 1]]);
             }
         };
@@ -1874,13 +1874,13 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read_unity",
+            "unity_web_search_read",
             "onchange2",
             "get_formview_action",
             "create", // FIXME: to check with mcm
             "get_views",
-            "web_read_unity",
-            "web_read_unity",
+            "web_read",
+            "web_read",
         ]);
     });
 
@@ -2128,7 +2128,7 @@ QUnit.module("ActionManager", (hooks) => {
         // because of how native events are handled in tests
         const searchPromise = testUtils.makeTestPromise();
         const mockRPC = async (route, args) => {
-            if (args.method === "web_search_read_unity") {
+            if (args.method === "unity_web_search_read") {
                 assert.step("search_read " + args.kwargs.domain);
                 if (JSON.stringify(args.domain) === JSON.stringify([["foo", "ilike", "m"]])) {
                     await searchPromise;
@@ -2348,7 +2348,7 @@ QUnit.module("ActionManager", (hooks) => {
             sections: [],
         });
         const mockRPC = async (route, args) => {
-            if (args.method === "web_search_read_unity") {
+            if (args.method === "unity_web_search_read") {
                 assert.deepEqual(args.kwargs.domain, [["id", "=", 99]]);
             }
         };
@@ -2438,18 +2438,18 @@ QUnit.module("ActionManager", (hooks) => {
 
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
-        assert.verifySteps(["/web/action/load", "get_views", "web_search_read_unity"]);
+        assert.verifySteps(["/web/action/load", "get_views", "unity_web_search_read"]);
 
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
 
-        assert.verifySteps(["web_search_read_unity"]);
+        assert.verifySteps(["unity_web_search_read"]);
 
         await webClient.env.services.orm.unlink("ir.actions.act_window", [333]);
         assert.verifySteps(["unlink"]);
         await doAction(webClient, 1);
         // cache was cleared => reload the action
-        assert.verifySteps(["/web/action/load", "web_search_read_unity"]);
+        assert.verifySteps(["/web/action/load", "unity_web_search_read"]);
     });
 
     QUnit.test("pushState also changes the title of the tab", async (assert) => {

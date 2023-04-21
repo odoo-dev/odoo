@@ -504,10 +504,10 @@ export class RelationalModel extends Model {
         }
         const kwargs = {
             context: { bin_size: true, ...context },
-            fields: this._getFieldsSpec(activeFields, fields, context),
+            specification: this._getFieldsSpec(activeFields, fields, context),
         };
         console.log("Unity field spec", kwargs.fields);
-        const records = await this.orm.call(resModel, "web_read_unity", [resIds], kwargs);
+        const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
         if (!records.length) {
             // see test "click on breadcrumb of a deleted record" (might missing a no error dialog assertion)
             throw new Error(`Can't fetch record(s) ${resIds}. They might have been deleted.`);
@@ -525,7 +525,7 @@ export class RelationalModel extends Model {
      */
     async _loadUngroupedList(config) {
         const kwargs = {
-            fields: this._getFieldsSpec(config.activeFields, config.fields, config.context),
+            specification: this._getFieldsSpec(config.activeFields, config.fields, config.context),
             domain: config.domain,
             offset: config.offset,
             order: orderByToString(config.orderBy),
@@ -535,7 +535,7 @@ export class RelationalModel extends Model {
                 config.countLimit !== Number.MAX_SAFE_INTEGER ? config.countLimit + 1 : undefined,
         };
         console.log("Unity field spec", kwargs.fields);
-        const response = await this.orm.call(config.resModel, "web_search_read_unity", [], kwargs);
+        const response = await this.orm.call(config.resModel, "unity_web_search_read", [], kwargs);
         console.log("Unity response", response);
         return response;
     }
