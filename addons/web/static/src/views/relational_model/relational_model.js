@@ -150,7 +150,7 @@ export class RelationalModel extends Model {
         for (const record of records) {
             for (const fieldName in record) {
                 const field = config.fields[fieldName];
-                if (field && field.type === "properties") {
+                if (fieldName !== "id" && field.type === "properties") {
                     const parent = record[field.definition_record];
                     const relatedPropertyField = {
                         fieldName,
@@ -239,9 +239,6 @@ export class RelationalModel extends Model {
             // Properties
             if (fields[fieldName].type === "properties") {
                 properties.push(fieldName);
-                // fieldsSpec[fields[fieldName].definition_record] = {
-                //     fields: { display_name: {} },
-                // };
             }
             // M2O
             if (fields[fieldName].type === "many2one" && invisible !== true) {
@@ -261,7 +258,9 @@ export class RelationalModel extends Model {
         }
 
         for (const fieldName of properties) {
-            fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
+            if (fieldsSpec[fields[fieldName].definition_record]) {
+                fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
+            }
         }
         return fieldsSpec;
     }

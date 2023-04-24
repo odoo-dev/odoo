@@ -39,7 +39,7 @@ export function createPropertyActiveField(property) {
     if (type === "many2many") {
         activeField.related = {
             fields: {
-                id: { name: "id", type: "integer", readonly: true }, //FIXME Try to remove these. If not possible, move to model
+                id: { name: "id", type: "integer", readonly: true },
                 display_name: { name: "display_name", type: "char" },
             },
             activeFields: {

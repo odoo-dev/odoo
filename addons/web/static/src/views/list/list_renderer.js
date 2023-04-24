@@ -12,7 +12,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable";
 import { getTabableElements } from "@web/core/utils/ui";
-import { Field, getFieldFromRegistry, getPropertyFieldInfo } from "@web/views/fields/field";
+import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { evalDomain, getClassNameFromDecoration } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -230,31 +230,6 @@ export class ListRenderer extends Component {
                             field.relatedPropertyField.fieldName === column.name
                     )
                     .map((propertyField) => {
-                        let widget = propertyField.type;
-                        if (["many2one", "many2many"].includes(propertyField.type)) {
-                            if (["res.users", "res.partner"].includes(propertyField.comodel)) {
-                                widget =
-                                    propertyField.type === "many2one"
-                                        ? "many2one_avatar"
-                                        : "many2many_tags_avatar";
-                            } else {
-                                widget =
-                                    propertyField.type === "many2one" ? widget : "many2many_tags";
-                            }
-                        } else if (widget === "tags") {
-                            widget = `property_tags`;
-                        }
-                        const field = getFieldFromRegistry(propertyField.type, widget);
-                        let { relatedFields } = field;
-                        if (relatedFields) {
-                            if (relatedFields instanceof Function) {
-                                relatedFields = relatedFields({ options: {}, attrs: {} });
-                            }
-                            relatedFields = Object.fromEntries(
-                                relatedFields.map((f) => [f.name, f])
-                            );
-                        }
-
                         return {
                             ...getPropertyFieldInfo(propertyField),
                             id: `${column.id}_${propertyField.name}`,
