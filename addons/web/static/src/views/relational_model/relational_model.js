@@ -24,19 +24,14 @@ import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./u
 /**
  * @typedef Params
  * @property {Config} config
+ * @property {Hooks} [hooks]
  * @property {number} [limit]
  * @property {number} [countLimit]
  * @property {number} [groupsLimit]
  * @property {Array<string>} [defaultOrderBy]
  * @property {Array<string>} [defaultGroupBy]
  * @property {number} [maxGroupByDepth]
- * @property {Function} [onRecordSaved]
- * @property {Function} [onWillSaveRecord]
- *
- *
- * @property {number} [countLimit]
- * @property {string} [rootType]
- * @property {string[]} groupBy
+ * @property {boolean} [multiEdit]
  */
 
 /**
@@ -63,6 +58,23 @@ import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./u
  * @property {boolean} [openGroupsByDefault]
  * @property {any} [data]
  */
+
+/**
+ * @typedef Hooks
+ * @property {Function} [onWillSaveRecord]
+ * @property {Function} [onRecordSaved]
+ * @property {Function} [onWillSaveMulti]
+ * @property {Function} [onSavedMulti]
+ * @property {Function} [onWillSetInvalidField]
+ */
+
+const DEFAULT_HOOKS = {
+    onWillSaveRecord: () => {},
+    onRecordSaved: () => {},
+    onWillSaveMulti: () => {},
+    onSavedMulti: () => {},
+    onWillSetInvalidField: () => {},
+};
 
 export class RelationalModel extends Model {
     static services = ["action", "company", "dialog", "notification", "rpc", "user"];
@@ -99,7 +111,8 @@ export class RelationalModel extends Model {
             ...params.config,
         };
 
-        this._urgentSave = false;
+        /** @type {Hooks} */
+        this.hooks = Object.assign({}, DEFAULT_HOOKS, params.hooks);
 
         this.initialLimit = params.limit || this.constructor.DEFAULT_LIMIT;
         this.initialGroupsLimit = params.groupsLimit;
@@ -108,9 +121,9 @@ export class RelationalModel extends Model {
         this.defaultGroupBy = params.defaultGroupBy;
         this.maxGroupByDepth = params.maxGroupByDepth;
         this.groupByInfo = params.groupByInfo || {};
+        this.multiEdit = params.multiEdit;
 
-        this._onWillSaveRecord = params.onWillSaveRecord || (() => {});
-        this._onRecordSaved = params.onRecordSaved || (() => {});
+        this._urgentSave = false;
     }
 
     // -------------------------------------------------------------------------

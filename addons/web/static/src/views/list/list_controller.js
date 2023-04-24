@@ -171,12 +171,14 @@ export class ListController extends Component {
             defaultOrderBy: this.archInfo.defaultOrder,
             defaultGroupBy: this.props.searchMenuTypes.includes("groupBy") ? defaultGroupBy : false,
             groupsLimit: this.archInfo.groupsLimit,
-            multiEdit: this.multiEdit,
-            onRecordSaved: this.onRecordSaved.bind(this),
-            onWillSaveRecord: this.onWillSaveRecord.bind(this),
-            onWillSaveMultiRecords: this.onWillSaveMultiRecords.bind(this),
-            onSavedMultiRecords: this.onSavedMultiRecords.bind(this),
-            onWillSetInvalidField: this.onWillSetInvalidField.bind(this),
+            multiEdit: this.archInfo.multiEdit,
+            hooks: {
+                onRecordSaved: this.onRecordSaved.bind(this),
+                onWillSaveRecord: this.onWillSaveRecord.bind(this),
+                onWillSaveMulti: this.onWillSaveMulti.bind(this),
+                onSavedMulti: this.onSavedMulti.bind(this),
+                onWillSetInvalidField: this.onWillSetInvalidField.bind(this),
+            },
         };
     }
 
@@ -237,12 +239,7 @@ export class ListController extends Component {
     }
 
     onClickDiscard() {
-        const editedRecord = this.model.root.editedRecord;
-        if (editedRecord.isNew) {
-            this.model.root.removeRecord(editedRecord);
-        } else {
-            editedRecord.discard();
-        }
+        this.model.root.leaveEditMode({ discard: true });
     }
 
     async onClickSave() {
@@ -505,7 +502,7 @@ export class ListController extends Component {
 
     async afterExecuteActionButton(clickParams) {}
 
-    onWillSaveMultiRecords(editedRecord, validSelectedRecords) {
+    onWillSaveMulti(editedRecord, changes, validSelectedRecords) {
         if (this.hasMousedownDiscard) {
             this.nextActionAfterMouseup = () => this.model.root.multiSave(editedRecord);
             return false;
@@ -516,22 +513,23 @@ export class ListController extends Component {
                 const dialogProps = {
                     confirm: () => resolve(true),
                     cancel: () => {
-                        editedRecord.discard();
+                        this.model.root.leaveEditMode({ discard: true });
                         resolve(false);
                     },
                     isDomainSelected,
-                    fields: Object.keys(editedRecord.getChanges()).map((fieldName) => {
-                        const activeField = editedRecord.activeFields[fieldName];
+                    fields: Object.keys(changes).map((fieldName) => {
+                        const fieldNode = Object.values(this.archInfo.fieldNodes).find(
+                            (fieldNode) => fieldNode.name === fieldName
+                        );
                         return {
                             name: fieldName,
-                            label: activeField.string || editedRecord.fields[fieldName].string,
-                            widget: activeField.widget,
+                            label: fieldNode.string || editedRecord.fields[fieldName].string,
+                            fieldNode,
                         };
                     }),
                     nbRecords: selection.length,
                     nbValidRecords: validSelectedRecords.length,
                     record: editedRecord,
-                    fieldNodes: this.archInfo.fieldNodes,
                 };
 
                 const focusedCellBeforeDialog = document.activeElement.closest(".o_data_cell");
@@ -540,7 +538,7 @@ export class ListController extends Component {
                         if (focusedCellBeforeDialog) {
                             focusedCellBeforeDialog.focus();
                         }
-                        editedRecord.discard();
+                        this.model.root.leaveEditMode({ discard: true });
                         resolve(false);
                     },
                 });
@@ -557,7 +555,7 @@ export class ListController extends Component {
         return true;
     }
 
-    onSavedMultiRecords(records) {
+    onSavedMulti(records) {
         records.forEach((record) => {
             record.selected = false;
         });

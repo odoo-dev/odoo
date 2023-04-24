@@ -164,7 +164,7 @@ export class StaticList extends DataPoint {
                         }
                         this._commands.push([x2ManyCommands.UPDATE, command[1], record]);
                     }
-                    record._applyChanges(record._applyServerValues(command[2], record.data));
+                    record._applyChanges(record._parseServerValues(command[2], record.data));
                     break;
                 }
                 case x2ManyCommands.DELETE: {

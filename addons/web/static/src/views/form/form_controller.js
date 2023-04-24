@@ -150,8 +150,10 @@ export class FormController extends Component {
                 mode,
                 context: this.props.context,
             },
-            onRecordSaved: this.onRecordSaved.bind(this),
-            onWillSaveRecord: this.onWillSaveRecord.bind(this),
+            hooks: {
+                onRecordSaved: this.onRecordSaved.bind(this),
+                onWillSaveRecord: this.onWillSaveRecord.bind(this),
+            },
         };
         this.model = useState(new this.props.Model(this.env, modelParams, modelServices));
 

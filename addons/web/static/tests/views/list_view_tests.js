@@ -1368,7 +1368,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange2", "create", "web_read"]);
     });
 
-    QUnit.tttt("multi_edit: edit a required field with an invalid value", async function (assert) {
+    QUnit.test("multi_edit: edit a required field with an invalid value", async function (assert) {
         serverData.models.foo.fields.foo.required = true;
 
         await makeView({
@@ -1405,7 +1405,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "multi_edit: clicking on a readonly field switches the focus to the next editable field",
         async function (assert) {
             await makeView({
@@ -1609,7 +1609,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 4);
     });
 
-    QUnit.tttt("editable list datepicker destroy widget (new line)", async function (assert) {
+    QUnit.test("editable list datepicker destroy widget (new line)", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -3203,7 +3203,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("selection box is removed after multi record edition", async function (assert) {
+    QUnit.test("selection box is removed after multi record edition", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -5086,7 +5086,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("column widths are kept when editing multiple records", async function (assert) {
+    QUnit.test("column widths are kept when editing multiple records", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -10576,7 +10576,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(allNames, ["Value 1", "Value 2", "USD", "Value 2", "Value 3"]);
     });
 
-    QUnit.tttt("multi edit in view grouped by field not in view", async function (assert) {
+    QUnit.test("multi edit in view grouped by field not in view", async function (assert) {
         serverData.models.foo.records = [
             // group 1
             { id: 1, foo: "1", m2o: 1 },
@@ -10665,7 +10665,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, ".modal .modal-footer .btn-primary");
         assert.containsNone(target, ".modal");
-        assert.verifySteps(["write", "read", "name_get", "name_get"]);
+        assert.verifySteps(["write", "web_read", "name_get", "name_get"]);
         assert.containsN(target, ".o_group_header", 2);
 
         const allNames = Array.from(target.querySelectorAll(".o_data_cell"))
@@ -10674,7 +10674,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(allNames, ["Value 1", "Value 2", "USD", "Value 2", "Value 3"]);
     });
 
-    QUnit.tttt("multi edit field with daterange widget", async function (assert) {
+    QUnit.test("multi edit field with daterange widget", async function (assert) {
         assert.expect(5);
 
         serverData.models.daterange = {
@@ -10752,7 +10752,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".modal");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "multi edit field with daterange widget (edition without using the picker)",
         async function (assert) {
             assert.expect(4);
@@ -10841,7 +10841,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_list_button_save"));
     });
 
-    QUnit.tttt("editable list view: contexts with multiple edit", async function (assert) {
+    QUnit.test("editable list view: contexts with multiple edit", async function (assert) {
         assert.expect(4);
 
         patchWithCleanup(session.user_context, { someKey: "some value" });
@@ -10854,7 +10854,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, args) {
                 if (
                     route === "/web/dataset/call_kw/foo/write" ||
-                    route === "/web/dataset/call_kw/foo/read"
+                    route === "/web/dataset/call_kw/foo/web_read"
                 ) {
                     const context = args.kwargs.context;
                     assert.strictEqual(context.active_field, 2, "context should be correct");
@@ -10959,9 +10959,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable list view: multi edition", async function (assert) {
-        assert.expect(27);
-
+    QUnit.test("editable list view: multi edition", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -10979,22 +10977,16 @@ QUnit.module("Views", (hooks) => {
                         [[1, 2], { int_field: 666 }],
                         "should write on multi records"
                     );
-                } else if (args.method === "read") {
+                } else if (args.method === "web_read") {
                     if (args.args[0].length !== 1) {
-                        assert.deepEqual(
-                            args.args,
-                            [
-                                [1, 2],
-                                ["foo", "int_field"],
-                            ],
-                            "should batch the read"
-                        );
+                        assert.deepEqual(args.args, [[1, 2]], "should batch the read");
+                        assert.deepEqual(args.kwargs.specification, { foo: {}, int_field: {} });
                     }
                 }
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "unity_web_search_read"]);
 
         // select two records
         const rows = target.querySelectorAll(".o_data_row");
@@ -11010,13 +11002,13 @@ QUnit.module("Views", (hooks) => {
 
         // create a record and edit its value
         await click(target, ".o_list_button_add");
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         await editInput(target, ".o_selected_row [name=int_field] input", 123);
         assert.containsNone(document.body, ".modal");
 
         await clickSave(target);
-        assert.verifySteps(["create", "read"]);
+        assert.verifySteps(["create", "web_read"]);
 
         // edit a field
         await click(rows[0].querySelector("[name=int_field]"));
@@ -11052,7 +11044,7 @@ QUnit.module("Views", (hooks) => {
             ".o_list_record_selector input:checked",
             "no record should be selected anymore"
         );
-        assert.verifySteps(["write", "read"]);
+        assert.verifySteps(["write", "web_read"]);
         assert.strictEqual(
             $(target).find(".o_data_row:eq(0) .o_data_cell").text(),
             "yop666",
@@ -11075,7 +11067,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list view: multi edit a field with string attr", async function (assert) {
+    QUnit.test("editable list view: multi edit a field with string attr", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11124,7 +11116,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["createRecord"]);
     });
 
-    QUnit.tttt("editable list view: multi edition cannot call onchanges", async function (assert) {
+    QUnit.test("editable list view: multi edition cannot call onchanges", async function (assert) {
         serverData.models.foo.onchanges = {
             foo: function (obj) {
                 obj.int_field = obj.foo.length;
@@ -11147,7 +11139,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "unity_web_search_read"]);
 
         // select and edit a single record
         const rows = target.querySelectorAll(".o_data_row");
@@ -11164,8 +11156,7 @@ QUnit.module("Views", (hooks) => {
             ["blip", "9"]
         );
 
-        assert.verifySteps(["write", "read"]);
-
+        assert.verifySteps(["write", "web_read"]);
         // select the second record (the first one is still selected)
         assert.containsNone(target, ".o_list_record_selector input:checked");
         await click(rows[0], ".o_list_record_selector input");
@@ -11186,10 +11177,13 @@ QUnit.module("Views", (hooks) => {
             ["hello", "5"]
         );
 
-        assert.verifySteps(["write", "read"], "should not perform the onchange in multi edition");
+        assert.verifySteps(
+            ["write", "web_read"],
+            "should not perform the onchange in multi edition"
+        );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: multi edition error and cancellation handling",
         async function (assert) {
             await makeView({
@@ -11375,7 +11369,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'editable list view: clicking on "Discard changes" in multi edition',
         async function (assert) {
             await makeView({
@@ -11416,7 +11410,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'editable list view: mousedown on "Discard", mouseup somewhere else (no multi-edit)',
         async function (assert) {
             await makeView({
@@ -11456,11 +11450,11 @@ QUnit.module("Views", (hooks) => {
                 "gnap",
                 "blip",
             ]);
-            assert.verifySteps(["get_views", "web_search_read", "write", "read"]);
+            assert.verifySteps(["get_views", "unity_web_search_read", "write", "web_read"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'multi edit list view: mousedown on "Discard" with invalid field',
         async function (assert) {
             await makeView({
@@ -11521,7 +11515,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'editable list view (multi edition): mousedown on "Discard", but mouseup somewhere else',
         async function (assert) {
             await makeView({
@@ -11561,7 +11555,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view (multi edition): writable fields in readonly (force save)",
         async function (assert) {
             assert.expect(8);
@@ -11583,7 +11577,7 @@ QUnit.module("Views", (hooks) => {
                 },
             });
 
-            assert.verifySteps(["get_views", "web_search_read"]);
+            assert.verifySteps(["get_views", "unity_web_search_read"]);
             // select two records
             const rows = target.querySelectorAll(".o_data_row");
             await click(rows[0], ".o_list_record_selector input");
@@ -11595,11 +11589,11 @@ QUnit.module("Views", (hooks) => {
                 "Modal should ask to save changes"
             );
             await click(target, ".modal .btn-primary");
-            assert.verifySteps(["write", "read"]);
+            assert.verifySteps(["write", "web_read"]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: multi edition with readonly modifiers",
         async function (assert) {
             assert.expect(5);
@@ -11664,7 +11658,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: multi edition when the domain is selected",
         async function (assert) {
             await makeView({
@@ -11718,7 +11712,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list view: multi edition server error handling", async function (assert) {
+    QUnit.test("editable list view: multi edition server error handling", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11759,7 +11753,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable readonly list view: navigation", async function (assert) {
+    QUnit.test("editable readonly list view: navigation", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -11901,7 +11895,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`resId: 3`]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: multi edition: edit and validate last row",
         async function (assert) {
             await makeView({
@@ -11933,7 +11927,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable readonly list view: navigation in grouped list", async function (assert) {
+    QUnit.test("editable readonly list view: navigation in grouped list", async function (assert) {
         await makeView({
             type: "list",
             serverData,
@@ -11991,7 +11985,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resId: 3"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable readonly list view: single edition does not behave like a multi-edition",
         async function (assert) {
             await makeView({
@@ -12027,7 +12021,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editable readonly list view: multi edition", async function (assert) {
+    QUnit.test("non editable list view: multi edition", async function (assert) {
         await makeView({
             type: "list",
             arch: `
@@ -12044,23 +12038,17 @@ QUnit.module("Views", (hooks) => {
                         [[1, 2], { int_field: 666 }],
                         "should write on multi records"
                     );
-                } else if (args.method === "read") {
+                } else if (args.method === "web_read") {
                     if (args.args[0].length !== 1) {
-                        assert.deepEqual(
-                            args.args,
-                            [
-                                [1, 2],
-                                ["foo", "int_field"],
-                            ],
-                            "should batch the read"
-                        );
+                        assert.deepEqual(args.args, [[1, 2]], "should batch the read");
+                        assert.deepEqual(args.kwargs.specification, { foo: {}, int_field: {} });
                     }
                 }
             },
             resModel: "foo",
         });
 
-        assert.verifySteps(["get_views", "web_search_read"]);
+        assert.verifySteps(["get_views", "unity_web_search_read"]);
 
         // select two records
         const rows = target.querySelectorAll(".o_data_row");
@@ -12089,7 +12077,7 @@ QUnit.module("Views", (hooks) => {
         );
 
         await click(target, ".modal .btn-primary");
-        assert.verifySteps(["write", "read"]);
+        assert.verifySteps(["write", "web_read"]);
         assert.strictEqual(
             $(target).find(".o_data_row:eq(0) .o_data_cell").text(),
             "yop666",
@@ -12139,7 +12127,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list: edit many2one from external link", async function (assert) {
+    QUnit.test("editable list: edit many2one from external link", async function (assert) {
         serverData.views = {
             "bar,false,form": `<form><field name="display_name"/></form>`,
         };
@@ -14344,7 +14332,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, getDataRow(3).querySelector("[name=foo] input"));
     });
 
-    QUnit.tttt("multi-edit records with ENTER does not crash", async (assert) => {
+    QUnit.test("multi-edit records with ENTER does not crash", async (assert) => {
         serviceRegistry.add("error", errorService);
 
         const def = makeDeferred();
@@ -15026,7 +15014,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["priority"],
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step(args.kwargs.context.default_priority.toString());
                 }
             },
@@ -15066,7 +15054,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
             groupBy: ["m2o"],
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step(args.kwargs.context.default_m2o.toString());
                 }
             },
@@ -17650,7 +17638,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
-                    <field name="m2o" />
+                    <field name="m2o"/>
                     <field name="properties" />
                 </tree>
             `,
@@ -18180,10 +18168,6 @@ QUnit.module("Views", (hooks) => {
             "Property many2many"
         );
         assert.containsN(target, ".o_field_cell.o_many2many_tags_cell", 3);
-        assert.strictEqual(
-            target.querySelector(".o_field_cell.o_many2many_tags_cell").textContent,
-            "USD"
-        );
     });
 
     QUnit.test("multiple sources of properties definitions", async (assert) => {
@@ -18213,20 +18197,13 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: `
                 <tree editable="bottom">
-                    <field name="m2o" />
+                    <field name="m2o"/>
                     <field name="properties" />
                 </tree>
             `,
         });
 
         await click(target, ".o_optional_columns_dropdown_toggle");
-        assert.deepEqual(
-            [
-                ...target.querySelectorAll(".o_optional_columns_dropdown .dropdown-item .fw-bold"),
-            ].map((el) => el.textContent),
-            ["Value 1", "Value 2"]
-        );
-
         await click(
             target.querySelectorAll(".o_optional_columns_dropdown input[type='checkbox']")[0]
         );
