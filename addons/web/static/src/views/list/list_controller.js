@@ -44,7 +44,7 @@ export class ListController extends Component {
         this.activeActions = this.archInfo.activeActions;
         this.editable =
             this.activeActions.edit && this.props.editable ? this.archInfo.editable : false;
-        this.model = useModel(this.props.Model, this.modelParams);
+        this.model = useState(useModel(this.props.Model, this.modelParams));
 
         // In multi edition, we save or notify invalidity directly when a field is updated, which
         // occurs on the change event for input fields. But we don't want to do it when clicking on

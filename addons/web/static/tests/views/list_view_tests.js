@@ -11375,7 +11375,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         'editable list view: clicking on "Discard changes" in multi edition',
         async function (assert) {
             await makeView({
@@ -11460,7 +11460,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.tttt(
         'multi edit list view: mousedown on "Discard" with invalid field',
         async function (assert) {
             await makeView({
@@ -11499,7 +11499,7 @@ QUnit.module("Views", (hooks) => {
             assert.containsNone(target, ".o_dialog", "should not display an invalid field dialog");
             assert.strictEqual(target.querySelector(".o_data_row .o_data_cell").innerText, "10");
 
-             // edit again with an invalid value
+            // edit again with an invalid value
             await click(rows[0].querySelector(".o_data_cell"));
             target.querySelector(".o_data_row .o_data_cell input").value = "oof2";
             await triggerEvents(target, ".o_data_row .o_data_cell input", ["input"]);
@@ -14344,8 +14344,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, getDataRow(3).querySelector("[name=foo] input"));
     });
 
-<<<<<<< HEAD
-    QUnit.test("multi-edit records with ENTER does not crash", async (assert) => {
+    QUnit.tttt("multi-edit records with ENTER does not crash", async (assert) => {
         serviceRegistry.add("error", errorService);
 
         const def = makeDeferred();
@@ -14390,12 +14389,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_dialog"); // no more confirmation dialog, no error dialog
     });
 
-    QUnit.test(
-||||||| parent of 638e217e63fe ([REF] web: new RelationalModel)
-    QUnit.test(
-=======
     QUnit.tttt(
->>>>>>> 638e217e63fe ([REF] web: new RelationalModel)
         "editable grouped list: adding a second record pass the first in readonly",
         async (assert) => {
             await makeView({

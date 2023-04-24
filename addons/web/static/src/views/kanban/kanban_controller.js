@@ -21,7 +21,7 @@ export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
         const { Model, archInfo } = this.props;
-        this.model = useModel(Model, this.modelParams);
+        this.model = useState(useModel(Model, this.modelParams));
         this.headerButtons = archInfo.headerButtons;
 
         const self = this;
@@ -78,8 +78,8 @@ export class KanbanController extends Component {
     }
 
     get modelParams() {
-        const { resModel, fields, archInfo, limit, defaultGroupBy, state } = this.props;
-        const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, fields);
+        const { resModel, archInfo, limit, defaultGroupBy, state } = this.props;
+        const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
         const modelConfig = state?.modelConfig || {
             resModel,
             activeFields,
