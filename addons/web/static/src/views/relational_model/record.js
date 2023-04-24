@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { markup } from "@odoo/owl";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
@@ -16,11 +17,11 @@ export class Record extends DataPoint {
         this._onChange = options.onChange || (() => {});
 
         if (this.resId) {
-            this._values = this._applyServerValues(data);
+            this._values = this._parseServerValues(data);
             this._changes = {};
         } else {
             this._values = {};
-            this._changes = this._applyServerValues({
+            this._changes = this._parseServerValues({
                 ...this._getDefaultValues(),
                 ...data,
             });
@@ -112,6 +113,10 @@ export class Record extends DataPoint {
         if (this.model._urgentSave) {
             return this._update(changes);
         }
+        if (this.selected && this.model.multiEdit) {
+            this._applyChanges(changes);
+            return this.model.root.multiSave(this);
+        }
         return this.model.mutex.exec(() => this._update(changes));
     }
 
@@ -139,7 +144,7 @@ export class Record extends DataPoint {
             } else {
                 this.model._updateConfig(this.config, { resId: false }, { noReload: true });
                 this.isDirty = false;
-                this._changes = this._applyServerValues(this._getDefaultValues());
+                this._changes = this._parseServerValues(this._getDefaultValues());
                 this._values = {};
                 this.data = { ...this._changes };
                 this._setEvalContext();
@@ -175,7 +180,20 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._save(options));
     }
 
-    setInvalidField(fieldName) {
+    async setInvalidField(fieldName) {
+        const canProceed = this.model.hooks.onWillSetInvalidField(this, fieldName);
+        if (canProceed === false) {
+            return;
+        }
+        if (this.selected && this.model.multiEdit && !this._invalidFields.has(fieldName)) {
+            await this.model.dialog.add(AlertDialog, {
+                body: _t("No valid record to save"),
+                confirm: async () => {
+                    await this.discard();
+                    this.model._updateConfig(this.config, { mode: "readonly" }, { noReload: true });
+                },
+            });
+        }
         this.isDirty = true;
         this._invalidFields.add(fieldName);
     }
@@ -211,7 +229,13 @@ export class Record extends DataPoint {
         this._removeInvalidFields(Object.keys(changes));
     }
 
-    _applyServerValues(serverValues, currentValues = {}) {
+    _applyValues(values) {
+        Object.assign(this._values, this._parseServerValues(values, this._values));
+        Object.assign(this.data, this._values);
+        this._setEvalContext();
+    }
+
+    _parseServerValues(serverValues, currentValues = {}) {
         const parsedValues = {};
         if (!serverValues) {
             return parsedValues;
@@ -443,16 +467,16 @@ export class Record extends DataPoint {
         return this.data[fieldName].records.every((r) => r._checkValidity());
     }
 
-    async _load(nextConfig) {
+    async _load(nextConfig = {}) {
         // FIXME: do not allow to change resId? maybe add a new method on model to re-generate a
         // new root for the new resId
         const record = await this.model._updateConfig(this.config, nextConfig);
         if (this.resId) {
-            this._values = this._applyServerValues(record);
+            this._values = this._parseServerValues(record);
             this._changes = {};
         } else {
             this._values = {};
-            this._changes = this._applyServerValues({ ...this._getDefaultValues(), ...record });
+            this._changes = this._parseServerValues({ ...this._getDefaultValues(), ...record });
         }
         this.isDirty = false;
         this.data = { ...this._values, ...this._changes };
@@ -489,7 +513,7 @@ export class Record extends DataPoint {
         if (!creation && !Object.keys(changes).length) {
             return true;
         }
-        const canProceed = await this.model._onWillSaveRecord(this);
+        const canProceed = await this.model.hooks.onWillSaveRecord(this);
         if (canProceed === false) {
             return false;
         }
@@ -522,7 +546,7 @@ export class Record extends DataPoint {
             this._changes = {};
             this.isDirty = false;
         }
-        await this.model._onRecordSaved(this);
+        await this.model.hooks.onRecordSaved(this);
         return true;
     }
 
@@ -579,7 +603,7 @@ export class Record extends DataPoint {
                 spec: getOnChangeSpec(this.activeFields),
                 context,
             });
-            Object.assign(changes, this._applyServerValues(otherChanges, this.data));
+            Object.assign(changes, this._parseServerValues(otherChanges, this.data));
         }
         this._applyChanges(changes);
         await this._onChange();

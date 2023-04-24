@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { DataPoint } from "./datapoint";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
@@ -111,6 +112,10 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
     }
 
+    async multiSave(record) {
+        return this.model.mutex.exec(() => this._multiSave(record));
+    }
+
     // TODO: keep this??
     selectDomain(value) {
         this.isDomainSelected = value;
@@ -139,11 +144,10 @@ export class DynamicList extends DataPoint {
             let canProceed = true;
             if (discard) {
                 await this.editedRecord.discard();
-                if (this.editedRecord.isNew) {
+                if (this.editedRecord && this.editedRecord.isNew) {
                     this._removeRecords([this.editedRecord]);
                 }
-            }
-            if (!discard && !this.blockUpdate) {
+            } else {
                 canProceed = await this.editedRecord.save();
             }
             if (canProceed && this.editedRecord) {
@@ -202,5 +206,51 @@ export class DynamicList extends DataPoint {
         } else {
             return this._load(0, this.limit, this.orderBy);
         }
+    }
+
+    async _multiSave(record) {
+        const changes = record._getChanges();
+        if (!Object.keys(changes).length) {
+            return;
+        }
+        const validSelection = this.selection.filter((record) => {
+            return Object.keys(changes).every((fieldName) => {
+                if (record._isReadonly(fieldName)) {
+                    return false;
+                } else if (record._isRequired(fieldName) && !changes[fieldName]) {
+                    return false;
+                }
+                return true;
+            });
+        });
+        const canProceed = await this.model.hooks.onWillSaveMulti(record, changes, validSelection);
+        if (canProceed === false) {
+            return false;
+        }
+        if (validSelection.length === 0) {
+            this.model.dialog.add(AlertDialog, {
+                body: _t("No valid record to save"),
+                confirm: () => this.leaveEditMode({ discard: true }),
+            });
+            return false;
+        } else {
+            const resIds = validSelection.map((r) => r.resId);
+            const context = this.context;
+            try {
+                await this.model.orm.write(this.resModel, resIds, changes, { context });
+            } catch (e) {
+                record._discard();
+                this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+                throw e;
+            }
+            const records = await this.model._loadRecords({ ...this.config, resIds });
+            for (const record of validSelection) {
+                record._applyValues(records.find((r) => r.id === record.resId));
+            }
+            record._discard();
+            this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+        }
+        this.model.hooks.onSavedMulti(validSelection);
+        return true;
     }
 }
