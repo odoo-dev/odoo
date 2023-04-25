@@ -48,7 +48,7 @@ export class DynamicList extends DataPoint {
     }
 
     canResequence() {
-        return false;
+        return !!this.model.handleField;
     }
 
     deleteRecords(records = []) {

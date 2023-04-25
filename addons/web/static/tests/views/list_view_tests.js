@@ -9989,7 +9989,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("list with handle widget", async function (assert) {
+    QUnit.test("list with handle widget", async function (assert) {
         assert.expect(11);
 
         await makeView({
@@ -10071,7 +10071,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("result of consecutive resequences is correctly sorted", async function (assert) {
+    QUnit.test("result of consecutive resequences is correctly sorted", async function (assert) {
         assert.expect(9);
         serverData.models = {
             // we want the data to be minimal to have a minimal test
@@ -10191,7 +10191,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list with handle widget", async function (assert) {
+    QUnit.test("editable list with handle widget", async function (assert) {
         assert.expect(12);
 
         // resequence makes sense on a sequence field, not on arbitrary fields
@@ -10284,7 +10284,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable target, handle widget locks and unlocks on sort", async function (assert) {
+    QUnit.test("editable target, handle widget locks and unlocks on sort", async function (assert) {
         // we need another sortable field to lock/unlock the handle
         serverData.models.foo.fields.amount.sortable = true;
         // resequence makes sense on a sequence field, not on arbitrary fields
@@ -10353,7 +10353,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list with handle widget with slow network", async function (assert) {
+    QUnit.test("editable list with handle widget with slow network", async function (assert) {
         assert.expect(15);
 
         // resequence makes sense on a sequence field, not on arbitrary fields

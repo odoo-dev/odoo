@@ -32,6 +32,7 @@ import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./u
  * @property {Array<string>} [defaultGroupBy]
  * @property {number} [maxGroupByDepth]
  * @property {boolean} [multiEdit]
+ * @property {string} [handleField]
  */
 
 /**
@@ -75,6 +76,7 @@ const DEFAULT_HOOKS = {
     onSavedMulti: () => {},
     onWillSetInvalidField: () => {},
 };
+const DEFAULT_HANDLE_FIELD = "sequence";
 
 export class RelationalModel extends Model {
     static services = ["action", "company", "dialog", "notification", "rpc", "user"];
@@ -122,6 +124,12 @@ export class RelationalModel extends Model {
         this.maxGroupByDepth = params.maxGroupByDepth;
         this.groupByInfo = params.groupByInfo || {};
         this.multiEdit = params.multiEdit;
+        this.handleField = params.handleField;
+        if (!this.handleField && !this.config.isMonoRecord) {
+            if (DEFAULT_HANDLE_FIELD in this.config.fields) {
+                this.handleField = DEFAULT_HANDLE_FIELD;
+            }
+        }
 
         this._urgentSave = false;
     }
