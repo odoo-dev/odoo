@@ -2056,7 +2056,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editing a record should change same record in other groups when grouped by m2m field",
         async function (assert) {
             await makeView({
@@ -2085,7 +2085,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "change a record field in readonly should change same record in other groups when grouped by m2m field",
         async function (assert) {
             assert.expect(6);

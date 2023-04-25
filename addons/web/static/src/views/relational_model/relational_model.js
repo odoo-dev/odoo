@@ -603,4 +603,25 @@ export class RelationalModel extends Model {
         this._applyProperties(response.records, config);
         return response;
     }
+
+    /**
+     * When grouped by a many2many field, the same record may be displayed in
+     * several groups. When one of these records is edited, we want all other
+     * occurrences to be updated. The purpose of this function is to find and
+     * update all occurrences of a record that has been reloaded, in a grouped
+     * list view.
+     */
+    _updateSimilarRecords(reloadedRecord, serverValues) {
+        if (this.config.isMonoRecord || !this.config.groupBy.length) {
+            return;
+        }
+        for (const record of this.root.records) {
+            if (record === reloadedRecord) {
+                continue;
+            }
+            if (record.resId === reloadedRecord.resId) {
+                record._applyValues(serverValues);
+            }
+        }
+    }
 }

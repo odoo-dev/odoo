@@ -470,13 +470,14 @@ export class Record extends DataPoint {
     async _load(nextConfig = {}) {
         // FIXME: do not allow to change resId? maybe add a new method on model to re-generate a
         // new root for the new resId
-        const record = await this.model._updateConfig(this.config, nextConfig);
+        const values = await this.model._updateConfig(this.config, nextConfig);
         if (this.resId) {
-            this._values = this._parseServerValues(record);
+            this.model._updateSimilarRecords(this, values);
+            this._values = this._parseServerValues(values);
             this._changes = {};
         } else {
             this._values = {};
-            this._changes = this._parseServerValues({ ...this._getDefaultValues(), ...record });
+            this._changes = this._parseServerValues({ ...this._getDefaultValues(), ...values });
         }
         this.isDirty = false;
         this.data = { ...this._values, ...this._changes };
