@@ -14456,7 +14456,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.tttt("cell-level keyboard navigation in editable grouped list", async function (assert) {
+    QUnit.test("cell-level keyboard navigation in editable grouped list", async function (assert) {
         serverData.models.foo.records[0].bar = false;
         serverData.models.foo.records[1].bar = false;
         serverData.models.foo.records[2].bar = false;
