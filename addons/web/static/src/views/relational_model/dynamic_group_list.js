@@ -106,6 +106,7 @@ export class DynamicGroupList extends DynamicList {
                 context,
                 domain: [[this.groupByField.name, "=", id]],
                 groupBy: [],
+                orderBy: this.orderBy,
             },
         };
         this.model._updateConfig(this.config, { groups: nextConfigGroups }, { noReload: true });
@@ -155,16 +156,23 @@ export class DynamicGroupList extends DynamicList {
      * @param {string} targetGroupId
      */
     async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
-        const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
         const targetGroup = this.groups.find((g) => g.id === targetGroupId);
-
-        const record = sourceGroup.list.records.find((r) => r.id === dataRecordId);
-        if (dataGroupId !== targetGroupId) {
-            // step 1: move record to correct position
-            const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
-            sourceGroup._removeRecords([record]);
-            targetGroup.addRecord(record, refIndex + 1);
+        if (dataGroupId === targetGroupId) {
+            // move a record inside the same group
+            return targetGroup.list._moveRecord(dataRecordId, refId);
         }
-        return targetGroup.list._resequence();
+
+        // move record from a group to another group
+        const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
+        const recordIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
+        const record = sourceGroup.list.records[recordIndex];
+        // step 1: move record to correct position
+        const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+        sourceGroup._removeRecords([record]);
+        targetGroup.addRecord(record, refIndex + 1);
+        const succeeded = await targetGroup.list._moveRecord(dataRecordId, refId);
+        if (!succeeded) {
+            // TODO: put record back to its original group ?
+        }
     }
 }
