@@ -13301,7 +13301,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row:nth-child(5)"), "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "add and discard a record in a multi-level grouped list view",
         async function (assert) {
             await makeView({
@@ -14377,7 +14377,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_dialog"); // no more confirmation dialog, no error dialog
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable grouped list: adding a second record pass the first in readonly",
         async (assert) => {
             await makeView({
@@ -14834,7 +14834,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["some_method"]);
     });
 
-    QUnit.tttt('add a new row in grouped editable="top" list', async function (assert) {
+    QUnit.test('add a new row in grouped editable="top" list', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14871,7 +14871,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    QUnit.tttt('add a new row in grouped editable="bottom" list', async function (assert) {
+    QUnit.test('add a new row in grouped editable="bottom" list', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14895,7 +14895,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "add and discard a line through keyboard navigation without crashing",
         async function (assert) {
             await makeView({
@@ -14976,7 +14976,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("add a new row in (selection) grouped editable list", async function (assert) {
+    QUnit.test("add a new row in (selection) grouped editable list", async function (assert) {
         serverData.models.foo.fields.priority = {
             string: "Priority",
             type: "selection",

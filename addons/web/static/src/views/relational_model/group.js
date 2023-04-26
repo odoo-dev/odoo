@@ -66,9 +66,12 @@ export class Group extends DataPoint {
         return this.list.addExistingRecord(resId, atFirstPosition);
     }
 
-    async createRecord() {
-        await this.list.createRecord();
-        this.count++;
+    async createRecord(_unused, atFirstPosition = false) {
+        const canProceed = await this.model.root.leaveEditMode({ discard: true });
+        if (canProceed) {
+            await this.list.createRecord(atFirstPosition);
+            this.count++;
+        }
     }
 
     async deleteRecords(records) {

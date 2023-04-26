@@ -157,7 +157,7 @@ export class DynamicList extends DataPoint {
                     { noReload: true }
                 );
             } else {
-                return false;
+                return canProceed;
             }
         }
         return true;
