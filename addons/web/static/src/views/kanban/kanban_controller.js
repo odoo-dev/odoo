@@ -91,6 +91,7 @@ export class KanbanController extends Component {
             progressAttributes: archInfo.progressAttributes,
             handleField: archInfo.handleField,
             limit: archInfo.limit || limit || 40,
+            groupsLimit: Number.MAX_SAFE_INTEGER, // no limit
             countLimit: archInfo.countLimit,
             defaultGroupBy,
             defaultOrderBy: archInfo.defaultOrder,
