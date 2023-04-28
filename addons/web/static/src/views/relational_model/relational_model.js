@@ -443,6 +443,7 @@ export class RelationalModel extends Model {
             };
         }
         const proms = [];
+        let nbOpenGroups = 0;
         for (const group of groups) {
             // When group_by_no_leaf key is present FIELD_ID_count doesn't exist
             // we have to get the count from `__count` instead
@@ -455,13 +456,13 @@ export class RelationalModel extends Model {
             delete group.__range;
             group.value = group[config.groupBy[0]];
             // delete group[config.groupBy[0]];
-            if (!config.groups[group[firstGroupByName]]) {
+            if (!config.groups[group.value]) {
                 const context = {
                     ...config.context,
                     // FIXME: doesn't work for many2ones, need to move some logic from group.js to here
-                    [`default_${firstGroupByName}`]: group[firstGroupByName],
+                    [`default_${firstGroupByName}`]: group.value,
                 };
-                config.groups[group[firstGroupByName]] = {
+                config.groups[group.value] = {
                     ...commonConfig,
                     context,
                     groupByFieldName: groupByField.name,
@@ -474,28 +475,34 @@ export class RelationalModel extends Model {
                     },
                 };
                 if (groupRecordConfig) {
-                    const resId = group[firstGroupByName] ? group[firstGroupByName][0] : false;
-                    config.groups[group[firstGroupByName]].record = {
+                    const resId = group.value ? group.value[0] : false;
+                    config.groups[group.value].record = {
                         ...groupRecordConfig,
                         resId,
                     };
                 }
             }
             if (groupRecordConfig) {
-                const resId = config.groups[group[firstGroupByName]].record.resId;
+                const resId = config.groups[group.value].record.resId;
                 if (resId) {
                     groupRecordResIds.push(resId);
                 }
             }
-            const groupConfig = config.groups[group[firstGroupByName]];
+            const groupConfig = config.groups[group.value];
             groupConfig.list.orderBy = config.orderBy;
             if (groupBy.length) {
                 group.groups = [];
             } else {
                 group.records = [];
             }
-            if (isRelational(config.fields[firstGroupByName]) && !group[firstGroupByName]) {
+            if (isRelational(config.fields[firstGroupByName]) && !group.value) {
                 groupConfig.isFolded = true;
+            }
+            if (!groupConfig.isFolded) {
+                nbOpenGroups++;
+                if (nbOpenGroups > 10) {
+                    groupConfig.isFolded = true;
+                }
             }
             if (!groupConfig.isFolded && group.count > 0) {
                 const prom = this._loadData(groupConfig.list).then((response) => {
@@ -515,7 +522,7 @@ export class RelationalModel extends Model {
             }).then((records) => {
                 for (const group of groups) {
                     group.values = records.find(
-                        (r) => group[firstGroupByName] && r.id === group[firstGroupByName][0]
+                        (r) => group.value && r.id === group.value[0]
                     );
                 }
             });

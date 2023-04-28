@@ -193,7 +193,7 @@ export class DynamicList extends DataPoint {
             resIds.length < this.count
         ) {
             const msg = sprintf(
-                _t("Of the %d records selected, only the first %d have been archived/unarchived."),
+                _t("Of the %s records selected, only the first %s have been archived/unarchived."),
                 resIds.length,
                 this.count
             );

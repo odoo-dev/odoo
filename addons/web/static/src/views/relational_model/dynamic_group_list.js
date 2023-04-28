@@ -126,7 +126,7 @@ export class DynamicGroupList extends DynamicList {
     _createGroupDatapoint(data) {
         return new this.model.constructor.Group(
             this.model,
-            this.config.groups[data[this.groupByField.name]],
+            this.config.groups[data.value],
             data
         );
     }
