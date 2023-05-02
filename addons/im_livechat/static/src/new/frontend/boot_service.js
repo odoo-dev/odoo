@@ -6,7 +6,7 @@ import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 import { serverUrl, isAvailable } from "../../livechat_data";
 import { LivechatRoot } from "../core/livechat_root";
-import { createRootNode, initializeLivechatContainer } from "../core/boot_helpers";
+import { makeRoot, makeShadow } from "../core/boot_helpers";
 
 session.origin = serverUrl;
 registry.category("main_components").remove("mail.ChatWindowContainer");
@@ -17,23 +17,24 @@ export const livechatBootService = {
     /**
      * To be overriden in tests.
      */
-    createRootNode() {
-        return createRootNode();
+    getTarget() {
+        return document.body;
     },
 
     start(env) {
         if (!isAvailable) {
             return;
         }
-        const root = this.createRootNode();
-        initializeLivechatContainer(root).then((target) => {
+        const target = this.getTarget();
+        const root = makeRoot(target);
+        makeShadow(root).then((shadow) => {
             new App(LivechatRoot, {
                 env,
                 templates,
                 translatableAttributes: ["data-tooltip"],
                 translateFn: env._t,
                 dev: env.debug,
-            }).mount(target);
+            }).mount(shadow);
         });
     },
 };

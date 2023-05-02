@@ -3,17 +3,7 @@
 import { Component, useState } from "@odoo/owl";
 import { session } from "@web/session";
 import { TranscriptSender } from "./transcript_sender";
-
-export const RATING = Object.freeze({
-    GOOD: 5,
-    OK: 3,
-    BAD: 1,
-});
-
-const STEP = Object.freeze({
-    RATING: "rating",
-    THANKS: "thanks",
-});
+import { RATING } from "../core/livechat_service";
 
 /**
  * @typedef {Object} Props
@@ -27,9 +17,16 @@ export class FeedbackPanel extends Component {
     static props = ["onClickClose?", "sendFeedback?", "thread"];
     static components = { TranscriptSender };
 
+    STEP = Object.freeze({
+        RATING: "rating",
+        THANKS: "thanks",
+    });
+    RATING = RATING;
+
     setup() {
+        this.session = session;
         this.state = useState({
-            step: STEP.RATING,
+            step: this.STEP.RATING,
             rating: null,
             feedback: "",
         });
@@ -44,22 +41,6 @@ export class FeedbackPanel extends Component {
 
     onClickSendFeedback() {
         this.props.sendFeedback?.(this.state.rating, this.state.feedback);
-        this.state.step = STEP.THANKS;
-    }
-
-    get origin() {
-        return session.origin;
-    }
-
-    get RATING() {
-        return RATING;
-    }
-
-    get STEP() {
-        return STEP;
-    }
-
-    get textareaVisible() {
-        return Boolean(this.state.rating) && this.state.step === STEP.RATING;
+        this.state.step = this.STEP.THANKS;
     }
 }

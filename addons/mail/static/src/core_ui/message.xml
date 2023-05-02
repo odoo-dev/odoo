@@ -116,7 +116,7 @@
                                     </t>
                                 </t>
                             </div>
-                            <div t-if="!props.disableActions and message.hasActions"
+                            <div t-if="props.hasActions and message.hasActions"
                             class="o-mail-Message-actions bg-view"
                                 t-att-class="{
                                     'position-absolute top-0': !env.inDiscussApp,

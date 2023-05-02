@@ -7,8 +7,7 @@ import {
     triggerHotkey,
 } from "@im_livechat/../tests/helpers/new/test_utils";
 import { afterNextRender } from "@mail/../tests/helpers/test_utils";
-import { RATING } from "@im_livechat/new/feedback_panel/feedback_panel";
-import { RATING_TO_EMOJI } from "@im_livechat/new/core/livechat_service";
+import { RATING, RATING_TO_EMOJI } from "@im_livechat/new/core/livechat_service";
 
 QUnit.module("feedback panel");
 

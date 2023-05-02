@@ -13,7 +13,7 @@ import {
 } from "@web/../tests/helpers/utils";
 
 import { livechatBootService } from "@im_livechat/new/frontend/boot_service";
-import { publicLivechatService } from "@im_livechat/new/core/livechat_service";
+import { livechatService } from "@im_livechat/new/core/livechat_service";
 import { LivechatButton } from "@im_livechat/new/core_ui/livechat_button";
 
 import { onMounted } from "@odoo/owl";
@@ -51,15 +51,10 @@ patch(setupManager, "im_livechat", {
     setupServices(...args) {
         const services = this._super(...args);
         return {
-            "im_livechat.livechat": publicLivechatService,
+            "im_livechat.livechat": livechatService,
             "im_livechat.boot": {
                 ...livechatBootService,
-                createRootNode() {
-                    const root = document.createElement("div");
-                    root.classList.add("o_livechat_root");
-                    getFixture().appendChild(root);
-                    return root;
-                },
+                getTarget: () => getFixture(),
             },
             ...services,
         };
@@ -124,7 +119,7 @@ export async function start({ mockRPC } = {}) {
         mockRPC,
     });
     await livechatButtonAvailableDeferred;
-    shadowRoot = $(document.querySelector(".o_livechat_root").shadowRoot);
+    shadowRoot = $(document.querySelector(".o-livechat-root").shadowRoot);
     return {
         env,
         root: shadowRoot,

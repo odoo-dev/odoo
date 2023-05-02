@@ -33,11 +33,11 @@ import {
 /**
  * @param {string} selector - any valid jquery selector
  * @param {boolean} inModal
- * @param {string|undefined} shadowDOM - selector of the shadow root host
+ * @param {string|undefined} shadow_dom - selector of the shadow root host
  * @returns {Element | undefined}
  */
-function findTrigger(selector, inModal, shadowDOM) {
-    const $target = $(shadowDOM ? document.querySelector(shadowDOM)?.shadowRoot : document);
+function findTrigger(selector, inModal, shadow_dom) {
+    const $target = $(shadow_dom ? document.querySelector(shadow_dom)?.shadowRoot : document);
     const $visibleModal = $target.find(".modal:visible").last();
     let $el;
     if (inModal !== false && $visibleModal.length) {
@@ -49,23 +49,23 @@ function findTrigger(selector, inModal, shadowDOM) {
 }
 
 /**
- * @param {string|undefined} shadowDOM - selector of the shadow root host
+ * @param {string|undefined} shadow_dom - selector of the shadow root host
  */
-function findExtraTrigger(selector, shadowDOM) {
-    const $target = $(shadowDOM ? document.querySelector(shadowDOM)?.shadowRoot : document);
+function findExtraTrigger(selector, shadow_dom) {
+    const $target = $(shadow_dom ? document.querySelector(shadow_dom)?.shadowRoot : document);
     const $el = getJQueryElementFromSelector(selector, $target);
     return getFirstVisibleElement($el).get(0);
 }
 
 function findStepTriggers(step) {
-    const triggerEl = findTrigger(step.trigger, step.in_modal, step.shadowDOM);
-    const altEl = findTrigger(step.alt_trigger, step.in_modal, step.shadowDOM);
-    const skipEl = findTrigger(step.skip_trigger, step.in_modal, step.shadowDOM);
+    const triggerEl = findTrigger(step.trigger, step.in_modal, step.shadow_dom);
+    const altEl = findTrigger(step.alt_trigger, step.in_modal, step.shadow_dom);
+    const skipEl = findTrigger(step.skip_trigger, step.in_modal, step.shadow_dom);
 
     // `extraTriggerOkay` should be true when `step.extra_trigger` is undefined.
     // No need for it to be in the modal.
     const extraTriggerOkay = step.extra_trigger
-        ? findExtraTrigger(step.extra_trigger, step.shadowDOM)
+        ? findExtraTrigger(step.extra_trigger, step.shadow_dom)
         : true;
 
     return { triggerEl, altEl, extraTriggerOkay, skipEl };

@@ -35,12 +35,13 @@ async function loadFontAwesome() {
 }
 
 /**
+ * @param {HTMLElement} target
  * @returns {HTMLDivElement}
  */
-export function createRootNode() {
+export function makeRoot(target) {
     const root = document.createElement("div");
-    root.classList.add("o_livechat_root");
-    document.body.appendChild(root);
+    root.classList.add("o-livechat-root");
+    target.appendChild(root);
     return root;
 }
 
@@ -48,18 +49,19 @@ export function createRootNode() {
  * Initialize the livechat container by loading the styles and
  * FontAwesome.
  *
- * @param {ShadowRoot} root
+ * @param {HTMLElement} root
+ * @returns {ShadowRoot}
  */
-export async function initializeLivechatContainer(root) {
-    const stylesLink = document.createElement("link");
-    stylesLink.rel = "stylesheet";
-    stylesLink.href = `${serverUrl}/im_livechat/assets_embed.css`;
+export async function makeShadow(root) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${serverUrl}/im_livechat/assets_embed.css`;
     const stylesLoadedPromise = new Promise((res, rej) => {
-        stylesLink.addEventListener("load", res);
-        stylesLink.addEventListener("error", rej);
+        link.addEventListener("load", res);
+        link.addEventListener("error", rej);
     });
     const shadow = root.attachShadow({ mode: "open" });
-    shadow.appendChild(stylesLink);
+    shadow.appendChild(link);
     await Promise.all([stylesLoadedPromise, loadFontAwesome()]);
     return shadow;
 }

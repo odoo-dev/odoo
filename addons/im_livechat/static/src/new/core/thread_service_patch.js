@@ -71,12 +71,6 @@ patch(ThreadService.prototype, "im_livechat", {
         }
     },
 
-    async fetchNewMessages(thread) {
-        if (thread.type !== "livechat") {
-            this._super(thread);
-        }
-    },
-
     avatarUrl(author, thread) {
         if (thread.type !== "livechat") {
             return this._super(...arguments);

@@ -28,7 +28,7 @@ import { callWithUnloadCheck } from "./tour_utils";
  * @property {string} [saveAs]
  * @property {string} [fadeout]
  * @property {number} [checkDelay]
- * @property {string|undefined} [shadowDOM]
+ * @property {string|undefined} [shadow_dom]
  *
  * @typedef TourStep
  * @property {string} [id]
@@ -49,7 +49,7 @@ import { callWithUnloadCheck } from "./tour_utils";
  * @property {string} [consumeEvent]
  * @property {boolean} [mobile]
  * @property {string} [title]
- * @property {string|false|undefined} [shadowDOM]
+ * @property {string|false|undefined} [shadow_dom]
  *
  * @typedef {"manual" | "auto"} TourMode
  */
@@ -61,10 +61,10 @@ function extractRegisteredTours() {
         tours[name] = {
             name: tour.saveAs || name,
             steps: tour.steps.map((step) => {
-                step.shadowDOM = step.shadowDOM ?? tour.shadowDOM;
+                step.shadow_dom = step.shadow_dom ?? tour.shadow_dom;
                 return step;
             }),
-            shadowDOM: tour.shadowDOM,
+            shadow_dom: tour.shadow_dom,
             url: tour.url,
             rainbowMan: tour.rainbowMan === undefined ? true : !!tour.rainbowMan,
             rainbowManMessage: tour.rainbowManMessage,
@@ -266,14 +266,14 @@ export const tourService = {
                 }
             });
             if (!willUnload) {
-                const shadowDOMS = tour.steps.reduce((acc, step) => {
-                    if (step.shadowDOM) {
-                        acc.add(step.shadowDOM);
+                const shadow_doms = tour.steps.reduce((acc, step) => {
+                    if (step.shadow_dom) {
+                        acc.add(step.shadow_dom);
                     }
                     return acc;
                 }, new Set());
-                if (shadowDOMS.size > 0) {
-                    observeShadows(shadowDOMS);
+                if (shadow_doms.size > 0) {
+                    observeShadows(shadow_doms);
                 }
                 pointer.start();
                 activateMacro(macro, options.mode);

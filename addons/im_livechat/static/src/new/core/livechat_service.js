@@ -4,8 +4,13 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
 import { sprintf } from "@web/core/utils/strings";
-import { RATING } from "../feedback_panel/feedback_panel";
 import { reactive } from "@odoo/owl";
+
+export const RATING = Object.freeze({
+    GOOD: 5,
+    OK: 3,
+    BAD: 1,
+});
 
 export const RATING_TO_EMOJI = {
     [RATING.GOOD]: "😊",
@@ -29,17 +34,11 @@ export class LivechatService {
     userName;
 
     constructor(env, services) {
-        this.setup(env, services);
-        return reactive(this);
-    }
-
-    setup(env, { bus_service: busService, cookie, notification, rpc }) {
         this.env = env;
-        this.cookie = cookie;
-        this.notification = notification;
-        this.busService = busService;
-        this.rpc = rpc;
-
+        this.cookie = services.cookie;
+        this.notification = services.notification;
+        this.busService = services.bus_service;
+        this.rpc = services.rpc;
         this.available = session.livechatData?.isAvailable;
         this.userName = this.options.default_username ?? _t("Visitor");
     }
@@ -96,13 +95,12 @@ export class LivechatService {
 
     async getSession({ persisted = false } = {}) {
         let session;
-        const sessionCookie = this.cookie.current[this.SESSION_COOKIE];
-        session = sessionCookie ? JSON.parse(sessionCookie) : undefined;
+        const cookie = this.cookie.current[this.SESSION_COOKIE];
+        session = cookie ? JSON.parse(cookie) : undefined;
         if (session?.uuid && this.state === SESSION_STATE.NONE) {
             // Channel is already created on the server.
             session.messages = await this.rpc("/im_livechat/chat_history", {
                 uuid: session.uuid,
-                limit: this.MESSAGE_HISTORY_LIMIT,
             });
             session.messages.reverse();
             this.busService.addChannel(session.uuid);
@@ -148,15 +146,14 @@ export class LivechatService {
     }
 }
 
-export const publicLivechatService = {
+export const livechatService = {
     dependencies: ["cookie", "notification", "rpc", "bus_service"],
-
     async start(env, services) {
-        const livechat = new LivechatService(env, services);
+        const livechat = reactive(new LivechatService(env, services));
         if (livechat.available) {
             await livechat.initialize();
         }
         return livechat;
     },
 };
-registry.category("services").add("im_livechat.livechat", publicLivechatService);
+registry.category("services").add("im_livechat.livechat", livechatService);

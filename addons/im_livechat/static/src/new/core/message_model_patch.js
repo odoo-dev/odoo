@@ -9,8 +9,4 @@ patch(Message.prototype, "im_livechat", {
         }
         return this.author?.id !== this.originThread.operator?.id;
     },
-
-    get hasActions() {
-        return this.originThread.type !== "livechat" && this._super();
-    },
 });
