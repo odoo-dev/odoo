@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-    import publicWidget from "@web/legacy/js/public/public_widget";
-    import core from "@web/legacy/js/services/core";
-    import { renderToElement } from "@web/core/utils/render";
-    import { Markup } from "@web/legacy/js/core/utils";
-    import { _t } from "@web/core/l10n/translation";
+    import publicWidget from '@web/legacy/js/public/public_widget';
+    import core from '@web/legacy/js/services/core';
+    import { renderToElement } from '@web/core/utils/render';
+    import { Markup } from '@web/legacy/js/core/utils';
+    import { _t } from '@web/core/l10n/translation';
 
     $.blockUI.defaults.css.border = '0';
-    $.blockUI.defaults.css["background-color"] = '';
-    $.blockUI.defaults.overlayCSS["opacity"] = '0.9';
+    $.blockUI.defaults.css['background-color'] = '';
+    $.blockUI.defaults.overlayCSS['opacity'] = '0.9';
 
     publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
         selector: 'div[name="o_payment_status"]',
@@ -47,20 +47,20 @@
                 }
                 else {
                     switch(data.error) {
-                    case "tx_process_retry":
+                    case 'tx_process_retry':
                         break;
-                    case "no_tx_found":
-                        self.displayContent("payment.no_tx_found", {});
+                    case 'no_tx_found':
+                        self.displayContent('payment.no_tx_found', {});
                         break;
                     default: // if an exception is raised
-                        self.displayContent("payment.exception", {exception_msg: data.error});
+                        self.displayContent('payment.exception', {exception_msg: data.error});
                         break;
                     }
                 }
                 self.startPolling();
 
             }).guardedCatch(function() {
-                self.displayContent("payment.rpc_error", {});
+                self.displayContent('payment.rpc_error', {});
                 self.startPolling();
             });
         },
@@ -78,7 +78,7 @@
             display_values_list.forEach(function (display_values) {
                 var key = 'tx_' + display_values.state;
                 if(key in render_values) {
-                    if (display_values["display_message"]) {
+                    if (display_values['display_message']) {
                         display_values.display_message = Markup(display_values.display_message)
                     }
                     render_values[key].push(display_values);
@@ -120,7 +120,7 @@
                 }
             }
 
-            this.displayContent("payment.display_tx_list", render_values);
+            this.displayContent('payment.display_tx_list', render_values);
         },
         displayContent: function (xmlid, render_values) {
             $.unblockUI();

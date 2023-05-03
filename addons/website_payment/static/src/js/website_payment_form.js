@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import core, { _t } from "@web/legacy/js/services/core";
+import core, { _t } from '@web/legacy/js/services/core';
 import checkoutForm from '@payment/js/checkout_form';
 
 checkoutForm.include({
@@ -63,6 +63,7 @@ checkoutForm.include({
         }
         return this._super(...arguments);
     },
+
     /**
      * Add params used by the donation snippet to the transaction route params.
      *
@@ -102,6 +103,7 @@ checkoutForm.include({
      _updateShippingCost: function (amount) {
         this.txContext.amount = amount;
      },
+
     /**
      * Update the fees associated to each provider.
      *
@@ -114,14 +116,14 @@ checkoutForm.include({
      */
     _onFeeParameterChange: function (ev) {
         const targetId = ev.target.id;
-        if (targetId.indexOf("amount") >= 0) {
+        if (targetId.indexOf('amount') >= 0) {
             this.txContext.amount = ev.target.value;
         }
         const providerIds = [];
         for (const card of this.$('.o_payment_option_card:has(.o_payment_fee)')) {
             const radio = $(card).find('input[name="o_payment_radio"]');
-            if (radio.data("paymentOptionType") === 'provider') {
-                providerIds.push(radio.data("paymentOptionId"));
+            if (radio.data('paymentOptionType') === 'provider') {
+                providerIds.push(radio.data('paymentOptionId'));
             }
         }
         const countryId = this.$('select[name="country_id"]').val();
@@ -140,10 +142,10 @@ checkoutForm.include({
                 for (const card of this.$('.o_payment_option_card:has(.o_payment_fee)')) {
                     const radio = $(card).find('input[name="o_payment_radio"]');
                     let providerId;
-                    if (radio.data("paymentOptionType") === 'provider') {
-                        providerId = radio.data("paymentOptionId");
+                    if (radio.data('paymentOptionType') === 'provider') {
+                        providerId = radio.data('paymentOptionId');
                     } else { // token
-                        providerId = radio.data("paymentProviderId");
+                        providerId = radio.data('paymentProviderId');
                     }
                     const chunk = $(card).find('.o_payment_fee .oe_currency_value')[0];
                     chunk.innerText = (feesPerProvider[providerId] || 0).toFixed(2);
@@ -158,4 +160,5 @@ checkoutForm.include({
             });
         }
     },
+
 });
