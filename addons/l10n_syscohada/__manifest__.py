@@ -24,8 +24,5 @@ Countries that use OHADA are the following:
     'data': [
         'data/menuitem_data.xml',
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
     'license': 'LGPL-3',
 }

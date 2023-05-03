@@ -13,7 +13,6 @@ from psycopg2.extras import Json
 
 from odoo import Command, _, models, api
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
-from odoo.addons.account import SYSCOHADA_LIST
 from odoo.exceptions import AccessError
 from odoo.tools import file_open, groupby
 from odoo.tools.translate import TranslationImporter
@@ -107,7 +106,6 @@ class AccountChartTemplate(models.AbstractModel):
             (template_code, template['name'])
             for template_code, template in sorted(chart_template_mapping.items(), key=(lambda t: (
                 t[1]['name'] != 'generic_coa' if not country
-                else t[1]['name'] != 'syscohada' if country.code in SYSCOHADA_LIST
                 else t[1]['country_id'] != country.id
             )))
         ]
@@ -566,7 +564,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_chart_template_data(self, template_code):
         template_data = defaultdict(lambda: defaultdict(dict))
         template_data['res.company']  # ensure it's the first property when iterating
-        for code in [None] + self._get_parent_template(template_code):
+        for code, _module in [(None, None)] + self._get_parent_template(template_code):
             for model, funcs in sorted(
                 self._template_register[code].items(),
                 key=lambda i: TEMPLATE_MODELS.index(i[0]) if i[0] in TEMPLATE_MODELS else 1000
@@ -932,7 +930,7 @@ class AccountChartTemplate(models.AbstractModel):
         parents = []
         template_mapping = self._get_chart_template_mapping(get_all=True)
         while template_mapping.get(code):
-            parents.append(code)
+            parents.append((code, template_mapping[code].get('module')))
             code = template_mapping.get(code).get('parent')
         return parents
 
@@ -957,14 +955,12 @@ class AccountChartTemplate(models.AbstractModel):
         Model = self.env[model]
         model_fields = Model._fields
 
-        if module is None:
-            module = self._get_chart_template_mapping().get(template_code)['module']
-        assert re.fullmatch(r"[a-z0-9_]+", module)
-
         res = {}
-        for template in self._get_parent_template(template_code)[::-1] or ['']:
+        for template, module_template in self._get_parent_template(template_code)[::-1] or ['']:
+            module_template = module or module_template
+            assert re.fullmatch(r"[a-z0-9_]+", module_template)
             try:
-                with file_open(f"{module}/data/template/{model}{f'-{template}' if template else ''}.csv", 'r') as csv_file:
+                with file_open(f"{module_template}/data/template/{model}{f'-{template}' if template else ''}.csv", 'r') as csv_file:
                     for row in csv.DictReader(csv_file):
                         if row['id']:
                             last_id = row['id']
