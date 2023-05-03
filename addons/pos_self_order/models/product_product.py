@@ -79,6 +79,7 @@ class ProductProduct(models.Model):
                 "product_id": product.id,
                 "description_sale": product.description_sale,
                 "tag": product.pos_categ_id.name if product.pos_categ_id else "Other",
+                "is_pos_groupable": product.uom_id.is_pos_groupable,
             }
             for product in self
         ]
