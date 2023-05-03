@@ -11,20 +11,29 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
             trigger: "body:not(:has(a:contains('No products found')))",
             isCheck: true,
         },
-
+        {
+            content: "Test that the default `View Menu` button is present",
+            trigger: ".btn",
+        },
+        // We should now be on the product list screen
         ...addProductsToCart([1, 2]),
+        {
+            content: "View Cart",
+            // TODO: add a class name to the button
+            trigger: ".btn",
+        },
+        ...checkThatProductsAreInCart([1, 2]),
         {
             content: "Order",
             // TODO: add a class name to the button
             trigger: ".btn",
         },
 
-        // We should now be on the landing page screen
+        // We should now be on the landing page screen ( because ordering redirects to the landing page )
         {
             content: "Go to `My Orders`",
             trigger: "a:contains('My Orders')",
         },
-        // We should now be on the orders screen
         {
             content: "Test that the first item is in the order",
             // TODO: add trigger
@@ -35,11 +44,8 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
             // TODO: add trigger
             isCheck: true,
         },
-        {
-            content: "Go back to the landing page using the navbar back button",
-            trigger: "nav.o_self_order_navbar > button",
-        },
-        // We should now be on the Langind Page
+        ...clickBackButton(),
+        // We should now be on the Landing Page
 
         // We will now repeat the same steps as above, ordering again.
         // The idea is to test that the previous order is not present in the cart
@@ -96,16 +102,21 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
     ],
 });
 
+// HELPERS ////////////////////////////////
+// All the functions below return an array of steps
+// (even those that return a single step, for consistency)
+
+/**
+ * START: product list screen
+ * END: product list screen
+ * @param {int[]} product_ids
+ * @returns Array of steps
+ */
 function addProductsToCart(product_ids) {
     return [
-        {
-            content: "Test that the default `View Menu` button is present",
-            trigger: ".btn",
-        },
-        // We should now be on the product list screen
         ...product_ids.map((id) => [
             {
-                content: "Go to one of the product's details page",
+                content: `Go to one of the details page of Product ${id}`,
                 // TODO: add trigger to order the 1st product
             },
             // We should now be on the product main view screen
@@ -115,19 +126,31 @@ function addProductsToCart(product_ids) {
                 trigger: ".btn",
             },
         ]),
-        // We should now be on the product list screen
+    ];
+}
+
+/**
+ * START: cart screen
+ * END: cart screen
+ * @param {int[]} product_ids
+ * @returns Array of steps
+ */
+function checkThatProductsAreInCart(product_ids) {
+    return product_ids.map((id) => ({
+        content: `Test that Product ${id} is in the cart`,
+        trigger: `#product_${id}`,
+        isCheck: true,
+    }));
+}
+
+/**
+ * @returns Array of steps
+ */
+function clickBackButton() {
+    return [
         {
-            content: "View Cart",
-            // TODO: add a class name to the button
-            trigger: ".btn",
+            content: "Click the navbar back button",
+            trigger: "nav.o_self_order_navbar > button",
         },
-        // We should now be on the cart screen
-        ...product_ids.map((id) => [
-            {
-                content: "Test that the n^th item is in the cart",
-                // TODO: add trigger
-                isCheck: true,
-            },
-        ]),
     ];
 }
