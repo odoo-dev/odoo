@@ -36,13 +36,13 @@ class TestFrontend(odoo.tests.HttpCase):
             }
         )
         basic_product = lambda i: {
-            "name": f"Test Product {i}",
+            "name": f"Product {i}",
             "type": "product",
             "available_in_pos": True,
-            "list_price": i + 1,
+            "list_price": i,
             "taxes_id": False,
         }
-        self.env["product.product"].create([basic_product for i in range(1000)])
+        self.env["product.product"].create([basic_product(i) for i in range(1, 1000)])
 
     def test_self_order_view_mode_tour(self):
         self.start_tour(
