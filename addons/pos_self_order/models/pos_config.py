@@ -15,7 +15,7 @@ class PosConfig(models.Model):
 
     def _self_order_default_image_name(self) -> str:
         return "default_background.jpg"
-
+# FIXME: this image does not get applied to the demo data pos
     def _self_order_default_image(self) -> bytes:
         image_path = modules.get_module_resource(
             "pos_self_order", "static/img", self._self_order_default_image_name()

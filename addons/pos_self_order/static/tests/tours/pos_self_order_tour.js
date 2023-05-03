@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { clickOn, clickOnBackButton, testProductCard, addProductsToCart } from "./tour_utils";
 
 // TODO: use custom class names for the selectors instead of bootstrap classes
 registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
@@ -11,39 +12,35 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
             trigger: "body:not(:has(a:contains('No products found')))",
             isCheck: true,
         },
-        {
-            content: "Test that the default `View Menu` button is present",
-            trigger: ".btn",
-        },
+        ...clickOn("View Menu"),
         // We should now be on the product list screen
         ...addProductsToCart([1, 2]),
+        // this will allow us to test if the merging of orderlines works
+        ...addProductsToCart([1]),
+        ...clickOn("Review"),
+        // check that the products are in the card
+        ...[1, 2].map((id) => testProductCard(id)).flat(),
         {
-            content: "View Cart",
-            // TODO: add a class name to the button
-            trigger: ".btn",
+            content: "Check that Product 1 is present twice in the cart",
+            trigger:
+                ".o_self_order_item_card:has(p:contains('2 x ').o_self_order_item_card:contains('Product 1'))",
+            isCheck: true,
         },
-        ...checkThatProductsAreInCart([1, 2]),
-        {
-            content: "Order",
-            // TODO: add a class name to the button
-            trigger: ".btn",
-        },
-
+        ...clickOn("Order"),
         // We should now be on the landing page screen ( because ordering redirects to the landing page )
+        ...clickOn("My Orders"),
         {
-            content: "Go to `My Orders`",
-            trigger: "a:contains('My Orders')",
+            content: "Check if the status of the first order is `Draft`",
+            trigger: ".badge:contains('draft')",
+            isCheck: true,
         },
         {
             content: "Test that the first item is in the order",
-            // TODO: add trigger
+            trigger:
+                ".o_self_order_item_card:has(p:contains('2 x ').o_self_order_item_card:contains('Product 1'))",
             isCheck: true,
         },
-        {
-            content: "Test that the second item is in the order",
-            // TODO: add trigger
-            isCheck: true,
-        },
+        ...testProductCard(2),
         ...clickOnBackButton(),
         // We should now be on the Landing Page
 
@@ -52,13 +49,10 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
         // and that the previous order is present in the `My Orders` screen
         // along with the new order.
 
-        {
-            content: "Test that the default `View Menu` button is present",
-            trigger: ".btn",
-        },
+        ...clickOn("View Menu"),
         // We should now be on the product list screen
         ...addProductsToCart([3, 4]),
-        ...clickOn("View Cart"),
+        ...clickOn("Review"),
         // We should now be on the cart screen
         [1, 2].map((id) => ({
             content: `Test that Product ${id} is not in the cart`,
@@ -92,66 +86,3 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
         },
     ],
 });
-
-// HELPERS ////////////////////////////////
-// Each of the functions below returns an array of steps
-// (even those that return a single step, for consistency)
-
-/**
- * START: product list screen
- * END: product list screen
- * @param {int[]} product_ids
- * @returns Array of steps
- */
-function addProductsToCart(product_ids) {
-    return product_ids
-        .map((id) => [
-            {
-                content: `Go to the Product Main View of Product ${id}`,
-                trigger: `p:contains('Product ${id}')`,
-            },
-            // We should now be on the product main view screen
-            {
-                content: "Add product to cart",
-                // TODO: add a class name to the button
-                trigger: ".btn",
-            },
-            // We should now be on the product list screen
-        ])
-        .flat();
-}
-
-/**
- * START: cart screen
- * END: cart screen
- * @param {int[]} product_ids
- * @returns Array of steps
- */
-function checkThatProductsAreInCart(product_ids) {
-    return product_ids.map((id) => ({
-        content: `Test that Product ${id} is in the cart`,
-        trigger: `p:contains('Product ${id}')`,
-        isCheck: true,
-    }));
-}
-
-/**
- * @returns Array of steps
- */
-function clickOnBackButton() {
-    return [
-        {
-            content: "Click the navbar back button",
-            trigger: "nav.o_self_order_navbar > button",
-        },
-    ];
-}
-
-function clickOn(element) {
-    return [
-        {
-            content: `Click on '${element}' button`,
-            trigger: `.btn:contains('${element}')`,
-        },
-    ];
-}
