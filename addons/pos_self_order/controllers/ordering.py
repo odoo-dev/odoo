@@ -228,15 +228,17 @@ class PosSelfOrderController(http.Controller):
         """
         return any(self._is_same_product(item, line) for line in existing_orderlines)
 
-    #  TODO: take into account "is_pos_groupable" field
     def _is_same_product(self, item, orderline):
         """
         :return: True if the item is the same product as the one in the orderline, False otherwise
         """
-        return all(
-            item.get(key) == orderline.get(key)
+        return self._is_pos_groupable(item["product_id"]) and all(
+            item.get(key, '') == orderline.get(key, '')
             for key in PosSelfOrderUtils._get_product_uniqueness_keys(self)
         )
+
+    def _is_pos_groupable(self, product_id: int) -> bool:
+        return request.env["product.product"].sudo().browse(int(product_id)).uom_id.is_pos_groupable
 
     def _get_full_product_name(self, name: str, description: str) -> str:
         """
@@ -261,7 +263,7 @@ class PosSelfOrderController(http.Controller):
                 self._create_orderline(
                     item,
                     pos_config_sudo,
-                ),
+                )
             ]
             # having the "full product name" means that the orderline is already in the db
             # so we don't need to create a new object

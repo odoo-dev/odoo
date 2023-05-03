@@ -102,7 +102,10 @@ export class SelfOrder {
     }
 
     is_same_product(item, orderline) {
-        return this.product_uniqueness_keys.every((key) => item[key] === orderline[key]);
+        return (
+            item.is_pos_groupable &&
+            this.product_uniqueness_keys.every((key) => item[key] === orderline[key])
+        );
     }
 
     combineOrders(orders, new_order) {

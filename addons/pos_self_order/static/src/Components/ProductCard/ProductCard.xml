@@ -10,7 +10,7 @@
                 alt="Product image" 
                 loading="lazy" 
                 onerror="this.remove()" />
-            <div class="d-flex flex-column w-100">
+            <div class="d-flex flex-column w-100 ms-2">
                 <h3 t-attf-class="mb-0 text-900 fw-bold fs-6" 
                     t-esc="props.product.name" />
                 <!-- this description represents the list of attributes of the product  -->
