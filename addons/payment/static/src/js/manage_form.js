@@ -45,7 +45,7 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      *
      * @private
      * @param {number} tokenId - The id of the token to assign
-     * @return {undefined}
+     * @return {void}
      */
     _assignToken: function (tokenId) {
         // Call the assign route to assign the token to a record
@@ -124,7 +124,7 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      *
      * @private
      * @param {number} tokenId - The id of the token to delete
-     * @return {undefined}
+     * @return {void}
      */
     _deleteToken: function (tokenId) {
         const execute = () => {
@@ -180,7 +180,7 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      *
      * @private
      * @param {Event} ev
-     * @return {undefined}
+     * @return {void}
      */
     _onClickDeleteToken: function (ev) {
         ev.preventDefault();
@@ -200,9 +200,9 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      *
      * @private
      * @param {Event} ev
-     * @return {undefined}
+     * @return {void}
      */
-    _onClickSaveToken: async function (ev) {
+    _onClickSaveToken: function (ev) {
         ev.stopPropagation();
         ev.preventDefault();
 
@@ -241,7 +241,7 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      *
      * @private
      * @param {Event} ev
-     * @return {undefined}
+     * @return {void}
      */
     _onSubmit: function (ev) {
         ev.stopPropagation();
