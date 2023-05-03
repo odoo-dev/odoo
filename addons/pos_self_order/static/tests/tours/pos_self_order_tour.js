@@ -44,7 +44,7 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
             // TODO: add trigger
             isCheck: true,
         },
-        ...clickBackButton(),
+        ...clickOnBackButton(),
         // We should now be on the Landing Page
 
         // We will now repeat the same steps as above, ordering again.
@@ -58,26 +58,17 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
         },
         // We should now be on the product list screen
         ...addProductsToCart([3, 4]),
+        ...clickOn("View Cart"),
         // We should now be on the cart screen
-        ...[1, 2].map(() => [
-            {
-                content: "Test that the n^th item is not in the cart",
-                // TODO: add trigger
-                isCheck: true,
-            },
-        ]),
+        [1, 2].map((id) => ({
+            content: `Test that Product ${id} is not in the cart`,
+            trigger: `body:not(:has(p:contains('Product ${id}')))`,
+            isCheck: true,
+        })),
 
-        {
-            content: "Order",
-            // TODO: add a class name to the button
-            trigger: ".btn",
-        },
-
+        ...clickOn("Order"),
         // We should now be on the landing page screen
-        {
-            content: "Go to `My Orders`",
-            trigger: "a:contains('My Orders')",
-        },
+        ...clickOn("My Orders"),
         // We should now be on the orders screen
         {
             content: "Test that the 1st item is in the 1st order",
@@ -103,7 +94,7 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
 });
 
 // HELPERS ////////////////////////////////
-// All the functions below return an array of steps
+// Each of the functions below returns an array of steps
 // (even those that return a single step, for consistency)
 
 /**
@@ -113,11 +104,11 @@ registry.category("web_tour.tours").add("pos_self_order_pay_after_each_tour", {
  * @returns Array of steps
  */
 function addProductsToCart(product_ids) {
-    return [
-        ...product_ids.map((id) => [
+    return product_ids
+        .map((id) => [
             {
-                content: `Go to one of the details page of Product ${id}`,
-                // TODO: add trigger to order the 1st product
+                content: `Go to the Product Main View of Product ${id}`,
+                trigger: `p:contains('Product ${id}')`,
             },
             // We should now be on the product main view screen
             {
@@ -125,8 +116,9 @@ function addProductsToCart(product_ids) {
                 // TODO: add a class name to the button
                 trigger: ".btn",
             },
-        ]),
-    ];
+            // We should now be on the product list screen
+        ])
+        .flat();
 }
 
 /**
@@ -138,7 +130,7 @@ function addProductsToCart(product_ids) {
 function checkThatProductsAreInCart(product_ids) {
     return product_ids.map((id) => ({
         content: `Test that Product ${id} is in the cart`,
-        trigger: `#product_${id}`,
+        trigger: `p:contains('Product ${id}')`,
         isCheck: true,
     }));
 }
@@ -146,11 +138,20 @@ function checkThatProductsAreInCart(product_ids) {
 /**
  * @returns Array of steps
  */
-function clickBackButton() {
+function clickOnBackButton() {
     return [
         {
             content: "Click the navbar back button",
             trigger: "nav.o_self_order_navbar > button",
+        },
+    ];
+}
+
+function clickOn(element) {
+    return [
+        {
+            content: `Click on '${element}' button`,
+            trigger: `.btn:contains('${element}')`,
         },
     ];
 }
