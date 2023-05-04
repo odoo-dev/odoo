@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { NavBar } from "@pos_self_order/Components/NavBar/NavBar";
 import { FloatingButton } from "@pos_self_order/Components/FloatingButton/FloatingButton";
@@ -17,8 +17,11 @@ export class ProductMainView extends Component {
         this.selfOrder = useSelfOrder();
         this.main = useRef("main");
         onMounted(() => {
-            // TODO: replace this logic with dvh once it is supported
             this.main.el.style.height = `${window.innerHeight}px`;
+        });
+
+        onWillUnmount(() => {
+            this.selfOrder.cartItem = null;
         });
 
         // we want to keep track of the last product that was viewed
@@ -107,13 +110,9 @@ export class ProductMainView extends Component {
 
     addToCartButtonClicked() {
         this.selfOrder.updateCart(this.formOrderLine());
-        if (this.selfOrder.cartItem) {
-            this.closeComponent();
-            return;
-        }
-        this.env.navigate("/products");
+        this.env.navigate(this.returnRoute());
     }
-    closeComponent() {
-        this.selfOrder.cartItem = null;
+    returnRoute() {
+        return this.selfOrder.cartItem ? "/cart" : "/products";
     }
 }
