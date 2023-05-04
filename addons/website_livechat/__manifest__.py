@@ -26,12 +26,12 @@ Allow website visitors to chat with the collaborators. This module also brings a
     ],
     'assets': {
         'im_livechat.assets_public_livechat': [
-            'website_livechat/static/src/legacy/public_models/**/*',
-            'website_livechat/static/src/legacy/widgets/**/*',
+            # 'website_livechat/static/src/legacy/public_models/**/*',
+            # 'website_livechat/static/src/legacy/widgets/**/*',
         ],
         'web.assets_frontend': [
-            'website_livechat/static/src/legacy/public_livechat.js',
-            'website_livechat/static/src/legacy/public_livechat.scss',
+            # 'website_livechat/static/src/legacy/public_livechat.js',
+            # 'website_livechat/static/src/legacy/public_livechat.scss',
         ],
         'website.assets_wysiwyg': [
             'website_livechat/static/src/scss/**/*',
