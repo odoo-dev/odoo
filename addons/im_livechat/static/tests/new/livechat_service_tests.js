@@ -2,12 +2,7 @@
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
-import {
-    click,
-    loadDefaultConfig,
-    start,
-    setCookie,
-} from "@im_livechat/../tests/helpers/new/test_utils";
+import { loadDefaultConfig, start, setCookie } from "@im_livechat/../tests/helpers/new/test_utils";
 
 QUnit.module("livechat service");
 
@@ -25,6 +20,5 @@ QUnit.test("persisted session history", async (assert) => {
     });
 
     const { root } = await start();
-    await click(".o-livechat-LivechatButton");
     assert.containsOnce(root, ".o-mail-Message:contains(Old message in history)");
 });

@@ -16,6 +16,7 @@ import {
 
 import { livechatBootService } from "@im_livechat/new/frontend/boot_service";
 import { livechatService } from "@im_livechat/new/core/livechat_service";
+import { autoPopupService } from "@im_livechat/new/core/autopopup_service";
 import { LivechatButton } from "@im_livechat/new/core_ui/livechat_button";
 
 import { App, onMounted } from "@odoo/owl";
@@ -115,6 +116,7 @@ patch(setupManager, "im_livechat", {
         const services = this._super(...args);
         return {
             "im_livechat.livechat": livechatService,
+            "im_livechat.autopopup": autoPopupService,
             "im_livechat.boot": {
                 ...livechatBootService,
                 getTarget: () => getFixture(),

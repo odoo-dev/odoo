@@ -6,6 +6,12 @@ import { session } from "@web/session";
 import { sprintf } from "@web/core/utils/strings";
 import { reactive } from "@odoo/owl";
 
+/**
+ * @typedef LivechatRule
+ * @property {"auto_popup"|undefined} [action]
+ * @property {number?} [auto_popup_timer]
+ */
+
 export const RATING = Object.freeze({
     GOOD: 5,
     OK: 3,
@@ -29,6 +35,8 @@ export class LivechatService {
     SESSION_COOKIE = "im_livechat_session";
     /** @type {keyof typeof SESSION_STATE} */
     state = SESSION_STATE.NONE;
+    /** @type {LivechatRule} */
+    rule;
     available = false;
     /** @type {string} */
     userName;
@@ -48,6 +56,7 @@ export class LivechatService {
             channel_id: this.options.channel_id,
         });
         this.available = init.available_for_me ?? this.available;
+        this.rule = init.rule;
     }
 
     async _createSession() {
@@ -117,6 +126,14 @@ export class LivechatService {
 
     get options() {
         return session.livechatData?.options ?? {};
+    }
+
+    get shouldRestoreSession() {
+        if (this.state !== SESSION_STATE.NONE) {
+            return false;
+        }
+        const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
+        return Boolean(session.uuid);
     }
 
     /**
