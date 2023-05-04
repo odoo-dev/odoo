@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <t t-name="FloatingButton" owl="1">
+    <t t-name="pos_self_order.FloatingButton" owl="1">
             <button
                 class="btn btn-primary btn-lg btn-block w-75 text-white
                  position-fixed bottom-0 mb-3 start-50 translate-middle">
@@ -10,4 +10,3 @@
             </button>
     </t>
 </templates>
-
