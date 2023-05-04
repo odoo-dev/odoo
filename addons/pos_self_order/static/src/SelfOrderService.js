@@ -146,7 +146,7 @@ export class SelfOrder {
             table_access_token: this?.table?.access_token,
             // The last order is always the first one in the array
             // The orders are kept in reverse chronological order
-            order_id: this.orders?.[0]?.pos_reference,
+            order_pos_reference: this.orders?.[0]?.pos_reference,
             order_access_token: this.orders?.[0]?.access_token,
         };
     }

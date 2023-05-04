@@ -25,7 +25,7 @@ class PosSelfOrderController(http.Controller):
         cart: List[Dict],
         pos_config_id: int,
         table_access_token: Optional[str] = None,
-        pos_reference: Optional[str] = None,
+        order_pos_reference: Optional[str] = None,
         order_access_token: Optional[str] = None,
     ) -> Dict[str, str]:
         """
@@ -67,7 +67,7 @@ class PosSelfOrderController(http.Controller):
                                 cart,
                                 pos_config_sudo,
                                 table_access_token,
-                                pos_reference,
+                                order_pos_reference,
                                 order_access_token,
                             )
                         )
