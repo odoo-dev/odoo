@@ -5,13 +5,17 @@ import {
     insertText,
     start,
     triggerHotkey,
+    loadDefaultConfig,
 } from "@im_livechat/../tests/helpers/new/test_utils";
 import { afterNextRender } from "@mail/../tests/helpers/test_utils";
 import { RATING, RATING_TO_EMOJI } from "@im_livechat/new/core/livechat_service";
+import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 QUnit.module("feedback panel");
 
 QUnit.test("Do not ask feedback if empty", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start();
     await click(".o-livechat-LivechatButton");
     assert.containsOnce(root, ".o-mail-ChatWindow");
@@ -20,6 +24,8 @@ QUnit.test("Do not ask feedback if empty", async (assert) => {
 });
 
 QUnit.test("Close without feedback", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start({
         mockRPC(route) {
             if (route === "/im_livechat/visitor_leave_session") {
@@ -41,6 +47,8 @@ QUnit.test("Close without feedback", async (assert) => {
 });
 
 QUnit.test("Feedback with rating and comment", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     let messageCount = 0;
     const { root } = await start({
         mockRPC(route, args) {

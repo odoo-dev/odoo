@@ -1,10 +1,12 @@
 /** @odoo-module */
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { getPyEnv } from "@bus/../tests/helpers/mock_python_environment";
 
 import { patch } from "@web/core/utils/patch";
 import { session } from "@web/session";
+import { fakeCookieService } from "@web/../tests/helpers/mock_services";
 import { createWebClient } from "@web/../tests/webclient/helpers";
+import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import {
     patchWithCleanup,
     makeDeferred,
@@ -16,7 +18,7 @@ import { livechatBootService } from "@im_livechat/new/frontend/boot_service";
 import { livechatService } from "@im_livechat/new/core/livechat_service";
 import { LivechatButton } from "@im_livechat/new/core_ui/livechat_button";
 
-import { onMounted } from "@odoo/owl";
+import { App, onMounted } from "@odoo/owl";
 
 import {
     setupManager,
@@ -43,24 +45,44 @@ export function triggerHotkey(key) {
     return getTriggerHotkey({ target: shadowRoot[0] })(key);
 }
 
+let cookie = {};
+QUnit.testDone(() => (cookie = {}));
+
+/**
+ * Set a cookie to be used by the current test.
+ *
+ * @param {string} key
+ * @param {string} val
+ */
+export function setCookie(key, val) {
+    cookie[key] = val;
+}
+
 // =============================================================================
 // SETUP
 // =============================================================================
 
-patch(setupManager, "im_livechat", {
-    setupServices(...args) {
-        const services = this._super(...args);
-        return {
-            "im_livechat.livechat": livechatService,
-            "im_livechat.boot": {
-                ...livechatBootService,
-                getTarget: () => getFixture(),
-            },
-            ...services,
-        };
-    },
-    setupLivechatData({ channelId, currentPartnerId }) {
-        return {
+/**
+ * Setup the server side of the livechat app.
+ *
+ * @returns {Promise<number>} the id of the livechat channel.
+ */
+export async function loadDefaultConfig() {
+    const pyEnv = await getPyEnv();
+    const livechatChannelId = pyEnv["im_livechat.channel"].create({
+        user_ids: [pyEnv.currentUserId],
+    });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: pyEnv.publicPartnerId }],
+        ],
+        channel_type: "livechat",
+        livechat_channel_id: livechatChannelId,
+        livechat_operator_id: pyEnv.currentPartnerId,
+    });
+    patchWithCleanup(session, {
+        livechatData: {
             isAvailable: true,
             serverUrl: window.origin,
             options: {
@@ -73,9 +95,45 @@ patch(setupManager, "im_livechat", {
                 default_message: "Hello, how may I help you?",
                 channel_name: "YourWebsite.com",
                 channel_id: channelId,
-                current_partner_id: currentPartnerId,
+                current_partner_id: pyEnv.currentPartnerId,
                 default_username: "Visitor",
             },
+        },
+    });
+    return channelId;
+}
+
+patch(App.prototype, "im_livechat", {
+    mount() {
+        registerCleanup(() => this.destroy());
+        return this._super(...arguments);
+    },
+});
+
+patch(setupManager, "im_livechat", {
+    setupServices(...args) {
+        const services = this._super(...args);
+        return {
+            "im_livechat.livechat": livechatService,
+            "im_livechat.boot": {
+                ...livechatBootService,
+                getTarget: () => getFixture(),
+            },
+            cookie: {
+                start() {
+                    const service = fakeCookieService.start(...arguments);
+                    return {
+                        ...service,
+                        get current() {
+                            return {
+                                ...service.current,
+                                ...cookie,
+                            };
+                        },
+                    };
+                },
+            },
+            ...services,
         };
     },
 });
@@ -87,22 +145,6 @@ patch(setupManager, "im_livechat", {
  * @returns {Promise<any>}
  */
 export async function start({ mockRPC } = {}) {
-    const pyEnv = await startServer();
-    const livechatChannelId = pyEnv["im_livechat.channel"].create({
-        user_ids: [pyEnv.currentUserId],
-    });
-    const channelId = pyEnv["discuss.channel"].create({
-        channel_member_ids: [[0, 0, { partner_id: pyEnv.currentPartnerId }]],
-        channel_type: "livechat",
-        livechat_channel_id: livechatChannelId,
-        livechat_operator_id: pyEnv.currentPartnerId,
-    });
-    patchWithCleanup(session, {
-        livechatData: setupManager.setupLivechatData({
-            channelId,
-            currentPartnerId: pyEnv.currentPartnerId,
-        }),
-    });
     await setupMessagingServiceRegistries();
     const livechatButtonAvailableDeferred = makeDeferred();
     patchWithCleanup(LivechatButton.prototype, {
@@ -111,6 +153,7 @@ export async function start({ mockRPC } = {}) {
             onMounted(() => livechatButtonAvailableDeferred.resolve());
         },
     });
+    const pyEnv = await getPyEnv();
     const { env } = await createWebClient({
         serverData: {
             models: pyEnv.getData(),

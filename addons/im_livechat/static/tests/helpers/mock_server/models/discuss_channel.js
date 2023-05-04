@@ -53,6 +53,21 @@ patch(MockServer.prototype, "im_livechat/models/discuss_channel", {
     },
 
     /**
+     * Simulates `_channel_fetch_message` on `discuss.channel`.
+     */
+    _mockDiscussChannel_channel_fetch_message(channelId, lastId, limit) {
+        const domain = [
+            ["model", "=", "discuss.channel"],
+            ["res_id", "=", channelId],
+        ];
+        if (lastId) {
+            domain.push(["id", "<", lastId]);
+        }
+        const messages = this._mockMailMessage_MessageFetch(domain, limit);
+        return this._mockMailMessageMessageFormat(messages.map(({ id }) => id));
+    },
+
+    /**
      * Simulates `_get_visitor_leave_message` on `discuss.channel`.
      */
     _mockDiscussChannel_getVisitorLeaveMessage() {

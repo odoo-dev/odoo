@@ -5,10 +5,14 @@ import {
     start,
     insertText,
     triggerHotkey,
+    loadDefaultConfig,
 } from "@im_livechat/../tests/helpers/new/test_utils";
 import { afterNextRender } from "@mail/../tests/helpers/test_utils";
+import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 QUnit.test("open/close temporary channel", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start();
     assert.containsOnce(root, ".o-livechat-LivechatButton");
     await click(".o-livechat-LivechatButton");
@@ -20,6 +24,8 @@ QUnit.test("open/close temporary channel", async (assert) => {
 });
 
 QUnit.test("open/close persisted channel", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start();
     assert.containsOnce(root, ".o-livechat-LivechatButton");
     await click(".o-livechat-LivechatButton");
@@ -32,6 +38,8 @@ QUnit.test("open/close persisted channel", async (assert) => {
 });
 
 QUnit.test("livechat not available", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start({
         mockRPC(route) {
             if (route === "/im_livechat/init") {

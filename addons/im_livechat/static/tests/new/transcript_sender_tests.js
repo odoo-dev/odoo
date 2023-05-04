@@ -5,12 +5,16 @@ import {
     insertText,
     start,
     triggerHotkey,
+    loadDefaultConfig,
 } from "@im_livechat/../tests/helpers/new/test_utils";
 import { afterNextRender } from "@mail/../tests/helpers/test_utils";
+import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 QUnit.module("transcript sender");
 
 QUnit.test("send", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start({
         mockRPC(route, args) {
             if (route === "/im_livechat/email_livechat_transcript") {
@@ -31,6 +35,8 @@ QUnit.test("send", async (assert) => {
 });
 
 QUnit.test("send failed", async (assert) => {
+    await startServer();
+    await loadDefaultConfig();
     const { root } = await start({
         mockRPC(route) {
             if (route === "/im_livechat/email_livechat_transcript") {
