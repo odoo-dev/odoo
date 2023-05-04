@@ -3,7 +3,7 @@
     <t t-name="pos_self_order.ProductMainView" owl="1">
 
     <div t-ref="main" class="d-flex flex-column">
-        <NavBar goBack="selfOrder.cartItem ? '' : '/products'" />
+        <NavBar goBack="returnRoute()"/>
         <div class="bg-white d-flex flex-column pt-3 overflow-auto h-100">
             <div class="px-3 border-bottom">
                 <img t-if="props.product.has_image"
@@ -106,7 +106,7 @@
         <div class="d-flex flex-column align-items-center w-100 p-3 bg-white shadow-lg z-index-1">
             <IncrementCounter onClick="incrementQty" value="this.privateState.qty"/>
             <button t-on-click="addToCartButtonClicked" class="o_self_order_floating_button btn btn-primary w-100 px-2 py-3 mt-2 rounded">
-                    <t t-if="selfOrder.cart.some(item => item.product_id === selfOrder.currentProduct)">
+                    <t t-if="selfOrder.cartItem">
                         Update Cart
                     </t>
                     <t t-else="">

@@ -13,12 +13,13 @@ export class ProductCard extends Component {
     }
     clickOnProduct(product) {
         const cartItem = this.props?.cartItem;
-        if (cartItem) {
-            this.selfOrder.cartItem = cartItem;
-            return;
-        }
+
         if (!this.canOpenProductMainView(product)) {
             return;
+        }
+
+        if (cartItem) {
+            this.selfOrder.cartItem = cartItem;
         }
         this.env.navigate("/products/" + product.product_id);
     }
