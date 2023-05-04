@@ -17,7 +17,7 @@ export class ProductCard extends Component {
         if (!this.canOpenProductMainView(product)) {
             return;
         }
-
+        // TODO: add condition to only run this `if` if we are on the `cartView` page
         if (cartItem) {
             this.selfOrder.cartItem = cartItem;
         }
