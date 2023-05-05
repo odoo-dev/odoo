@@ -6,7 +6,7 @@ import { useForwardRefToParent } from "@web/core/utils/hooks";
 
 export class ProductCard extends Component {
     static template = "pos_self_order.ProductCard";
-    static props = ["product", "cartItem?", "currentProductCard?"];
+    static props = ["product", "orderLine?", "currentProductCard?"];
     setup() {
         this.selfOrder = useSelfOrder();
         useForwardRefToParent("currentProductCard");
@@ -15,8 +15,10 @@ export class ProductCard extends Component {
         if (!this.canOpenProductMainView(product)) {
             return;
         }
-        this.selfOrder.currentlyEditedOrderLine =
-            this.selfOrder.page === "/cart" && this.props?.cartItem;
+        if (this.selfOrder.page === "/cart") {
+            this.selfOrder.setCurrentlyEditedOrderLine(this.props?.orderLine);
+        }
+
 
         this.selfOrder.setPage("/products/" + product.product_id);
     }

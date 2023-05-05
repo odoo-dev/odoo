@@ -118,13 +118,13 @@ export class ProductMainView extends Component {
     }
 
     addToCartButtonClicked() {
-        this.selfOrder.cart = this.selfOrder.cart.filter(
-            (x) => JSON.stringify(x) !== JSON.stringify(this.selfOrder.currentlyEditedOrderLine)
-        );
         this.selfOrder.updateCart(this.formOrderLine());
         this.selfOrder.setPage(this.returnRoute());
     }
     returnRoute() {
+        // if (this.selfOrder.currentlyEditedOrderLine) {
+        //     this.selfOrder.updateCart(this.selfOrder.currentlyEditedOrderLine);
+        // }
         return this.selfOrder.currentlyEditedOrderLine ? "/cart" : "/products";
     }
 }
