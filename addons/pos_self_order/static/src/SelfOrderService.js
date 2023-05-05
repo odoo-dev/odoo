@@ -31,6 +31,7 @@ export class SelfOrder {
         // We want to keep a backup of some of the state in local storage
         effect(
             (state) => {
+                console.log(state.cart);
                 localStorage.setItem("cart", JSON.stringify(state.cart));
             },
             [this]
@@ -47,27 +48,32 @@ export class SelfOrder {
         this.navigate(page, this.pos_config_id);
     }
 
+    setCurrentlyEditedOrderLine(orderLine) {
+        this.currentlyEditedOrderLine = orderLine;
+    }
+
     formatMonetary(price) {
         return formatMonetary(price, { currencyId: this.currency_id });
     }
 
     getTotalCartQty() {
         const cart = this.cart;
-        return cart.reduce((sum, cartItem) => {
-            return sum + cartItem.qty;
+        return cart.reduce((sum, orderLine) => {
+            return sum + orderLine.qty;
         }, 0);
     }
     getTotalCartCost() {
         const cart = this.cart;
-        return cart.reduce((sum, cartItem) => {
+        return cart.reduce((sum, orderLine) => {
             return (
                 sum +
-                (this.getProduct({ id: cartItem.product_id }).price_info.price_with_tax +
-                    cartItem.price_extra.price_with_tax) *
-                    cartItem.qty
+                (this.getProduct({ id: orderLine.product_id }).price_info.price_with_tax +
+                    orderLine.price_extra.price_with_tax) *
+                    orderLine.qty
             );
         }, 0);
     }
+
     getTotalCartTax = () => {
         return this._getTotalCartTax(this.cart, this.products);
     };
@@ -80,10 +86,12 @@ export class SelfOrder {
      * @returns {number}
      */
     _getTotalCartTax(cart, products) {
-        return cart.reduce((sum, cartItem) => {
-            const product = this.getProduct({ id: cartItem.product_id });
+        return cart.reduce((sum, orderLine) => {
+            const product = this.getProduct({ id: orderLine.product_id });
             const getTax = (x) => x.price_with_tax - x.price_without_tax;
-            return sum + (getTax(product.price_info) + getTax(cartItem.price_extra)) * cartItem.qty;
+            return (
+                sum + (getTax(product.price_info) + getTax(orderLine.price_extra)) * orderLine.qty
+            );
         }, 0);
     }
 
@@ -92,6 +100,13 @@ export class SelfOrder {
      */
     updateCart(orderline) {
         this.cart = this.getUpdatedCart(this.cart, orderline);
+    }
+
+    deleteOrderLine(orderline) {
+        if (!orderline) {
+            return;
+        }
+        this.cart = this.cart.filter((x) => JSON.stringify(x) !== JSON.stringify(orderline));
     }
 
     /**
@@ -161,11 +176,11 @@ export class SelfOrder {
      * @returns {import("@pos_self_order/jsDocTypes").OrderLine[]}
      */
     extractCartData(cart) {
-        return cart.map((cartItem) => ({
-            product_id: cartItem.product_id,
-            qty: cartItem.qty,
-            description: cartItem.description,
-            customer_note: cartItem.customer_note,
+        return cart.map((orderLine) => ({
+            product_id: orderLine.product_id,
+            qty: orderLine.qty,
+            description: orderLine.description,
+            customer_note: orderLine.customer_note,
         }));
     }
 
@@ -197,8 +212,8 @@ export class SelfOrder {
             return (({ state, ...rest }) => ({ state: "not found", ...rest }))(order);
         }
     }
-    showProductMainView(cartItem) {
-        this.cartItem = cartItem;
+    showProductMainView(orderLine) {
+        this.orderLine = orderLine;
     }
 }
 

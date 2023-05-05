@@ -27,12 +27,12 @@ export class ProductMainView extends Component {
         // we want to keep track of the last product that was viewed
         this.selfOrder.currentProduct = this.props.product.product_id;
         this.privateState = useState({
-            qty: this.selfOrder?.cartItem?.qty || 1,
-            customer_note: this.selfOrder?.cartItem?.customer_note || "",
+            qty: this.selfOrder?.currentlyEditedOrderLine?.qty || 1,
+            customer_note: this.selfOrder?.currentlyEditedOrderLine?.customer_note || "",
             selectedVariants: Object.fromEntries(
                 this.props.product.attributes.map((attribute, key) => [
                     attribute.name,
-                    this.selfOrder?.cartItem?.description?.split(", ")?.[key] ||
+                    this.selfOrder?.currentlyEditedOrderLine?.description?.split(", ")?.[key] ||
                         attribute.values[0].name,
                 ])
             ),
@@ -40,14 +40,20 @@ export class ProductMainView extends Component {
     }
 
     incrementQty = (up) => {
-        if (up) {
-            this.privateState.qty += 1;
-            return;
-        }
-        if (this.privateState.qty >= 1) {
-            this.privateState.qty -= 1;
-        }
+        this.privateState.qty = this.computeNewQty(this.privateState.qty, up);
     };
+    computeNewQty(qty, up) {
+        if (up) {
+            return qty + 1;
+        }
+        if (qty > 1) {
+            return qty - 1;
+        }
+        if (this.selfOrder.currentlyEditedOrderLine) {
+            return 0;
+        }
+        return 1;
+    }
     /**
      * @param {Object} selectedVariants
      * @param {[]} attributes
@@ -88,9 +94,10 @@ export class ProductMainView extends Component {
      * already in the cart.
      */
     findQty() {
-        return this.selfOrder.currentlyEditedOrderLine
-            ? this.privateState.qty
-            : (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty;
+        return (
+            this.privateState.qty &&
+            (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty
+        );
     }
     findMergeableOrderLine() {
         return this.selfOrder.cart.find((item) =>
@@ -118,6 +125,9 @@ export class ProductMainView extends Component {
     }
 
     addToCartButtonClicked() {
+        // if we are editing an orderline, instead of trying to change the existing orderline
+        // we delete it and add a new one
+        this.selfOrder.deleteOrderLine(this.selfOrder.currentlyEditedOrderLine);
         this.selfOrder.updateCart(this.formOrderLine());
         this.selfOrder.setPage(this.returnRoute());
     }
