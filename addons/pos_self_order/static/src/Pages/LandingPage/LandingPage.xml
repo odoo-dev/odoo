@@ -20,7 +20,7 @@
                     <hr class="bg-500"/>
                     <a 
                         type="button" 
-                        t-on-click="()=> env.navigate('/orders')"
+                        t-on-click="()=> selfOrder.setPage('/orders')"
                         t-attf-class="btn btn-outline-light py-3 my-2">
                         My orders
                     </a>

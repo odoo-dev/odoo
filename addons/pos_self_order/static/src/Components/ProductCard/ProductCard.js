@@ -21,7 +21,7 @@ export class ProductCard extends Component {
         if (cartItem) {
             this.selfOrder.cartItem = cartItem;
         }
-        this.env.navigate("/products/" + product.product_id);
+        this.selfOrder.setPage("/products/" + product.product_id);
     }
     canOpenProductMainView(product) {
         return (

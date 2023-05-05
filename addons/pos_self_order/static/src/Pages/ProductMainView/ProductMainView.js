@@ -26,7 +26,7 @@ export class ProductMainView extends Component {
 
         // we want to keep track of the last product that was viewed
         this.selfOrder.currentProduct = this.props.product.product_id;
-// TODO: replace this qty with qtyShown and qtyTotal
+        // TODO: replace this qty with qtyShown and qtyTotal
         this.privateState = useState({
             qty: this.selfOrder?.cartItem?.qty || 1,
             customer_note: this.selfOrder?.cartItem?.customer_note || "",
@@ -110,7 +110,7 @@ export class ProductMainView extends Component {
 
     addToCartButtonClicked() {
         this.selfOrder.updateCart(this.formOrderLine());
-        this.env.navigate(this.returnRoute());
+        this.selfOrder.setPage(this.returnRoute());
     }
     returnRoute() {
         return this.selfOrder.cartItem ? "/cart" : "/products";
