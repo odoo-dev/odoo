@@ -2,7 +2,14 @@
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
-import { loadDefaultConfig, start, setCookie } from "@im_livechat/../tests/helpers/new/test_utils";
+import {
+    click,
+    loadDefaultConfig,
+    start,
+    setCookie,
+} from "@im_livechat/../tests/helpers/new/test_utils";
+
+import { nextTick } from "@web/../tests/helpers/utils";
 
 QUnit.module("livechat service");
 
@@ -21,4 +28,25 @@ QUnit.test("persisted session history", async (assert) => {
 
     const { root } = await start();
     assert.containsOnce(root, ".o-mail-Message:contains(Old message in history)");
+});
+
+QUnit.test("previous operator used when available", async (assert) => {
+    const pyEnv = await startServer();
+    const channelId = await loadDefaultConfig();
+    const [channel] = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]]);
+    setCookie("im_livechat_previous_operator_pid", JSON.stringify(channel.livechat_operator_id[0]));
+    await start({
+        mockRPC(route, args) {
+            if (route === "/im_livechat/get_session") {
+                assert.step("get_session");
+                assert.strictEqual(
+                    parseInt(args.previous_operator_id),
+                    channel.livechat_operator_id[0]
+                );
+            }
+        },
+    });
+    await click(".o-livechat-LivechatButton");
+    await nextTick();
+    assert.verifySteps(["get_session"]);
 });
