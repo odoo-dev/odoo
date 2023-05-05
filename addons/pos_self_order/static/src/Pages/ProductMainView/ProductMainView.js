@@ -21,12 +21,11 @@ export class ProductMainView extends Component {
         });
 
         onWillUnmount(() => {
-            this.selfOrder.cartItem = null;
+            this.selfOrder.currentlyEditedOrderLine = null;
         });
 
         // we want to keep track of the last product that was viewed
         this.selfOrder.currentProduct = this.props.product.product_id;
-        // TODO: replace this qty with qtyShown and qtyTotal
         this.privateState = useState({
             qty: this.selfOrder?.cartItem?.qty || 1,
             customer_note: this.selfOrder?.cartItem?.customer_note || "",
@@ -78,16 +77,22 @@ export class ProductMainView extends Component {
             price_with_tax: this.getPriceExtra(selectedVariants, attributes, "price_with_tax"),
         };
     }
+    /**
+     * The selfOrder.updateCart method expects us to give it the
+     * total qty the orderline should have. If we are editing an orderline.
+     * If we are currently editing an existing orderline ( that means that we came to this
+     * page from the cart page), it means that we are editing the total qty itself,
+     * so we just return privateState.qty.
+     * If we came to this page from the products page, it means that we are adding items,
+     * so we need to add the qty of the current product to the qty of the product that is
+     * already in the cart.
+     */
     findQty() {
-        const cartItem = this.selfOrder.cartItem;
-        if (cartItem) {
-            return this.privateState.qty;
-        }
-        return (
-            (this.selfOrder.cart.find((item) =>
-                this.selfOrder.isSameProduct(item, this.preFormOrderline())
-            )?.qty || 0) + this.privateState.qty
-        );
+        return this.selfOrder.currentlyEditedOrderLine
+            ? this.privateState.qty
+            : (this.selfOrder.cart.find((item) =>
+                  this.selfOrder.canBeMerged(item, this.preFormOrderline())
+              )?.qty || 0) + this.privateState.qty;
     }
     preFormOrderline() {
         return {
@@ -113,6 +118,6 @@ export class ProductMainView extends Component {
         this.selfOrder.setPage(this.returnRoute());
     }
     returnRoute() {
-        return this.selfOrder.cartItem ? "/cart" : "/products";
+        return this.selfOrder.currentlyEditedOrderLine ? "/cart" : "/products";
     }
 }
