@@ -52,8 +52,8 @@ patch(ThreadService.prototype, "im_livechat", {
         if (thread.type === "livechat" && isUnknown) {
             thread.welcomeMessage = this.messageService.insert({
                 body: this.livechatService.options.default_message,
-                resId: thread.id,
-                resModel: thread.model,
+                res_id: thread.id,
+                model: thread.model,
                 author: thread.operator,
             });
         }
