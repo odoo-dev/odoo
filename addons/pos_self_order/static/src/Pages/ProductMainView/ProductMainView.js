@@ -125,6 +125,8 @@ export class ProductMainView extends Component {
     }
 
     addToCartButtonClicked() {
+        // if we are editing an orderline, instead of trying to change the existing orderline
+        // we delete it and add a new one
         this.selfOrder.deleteOrderLine(this.selfOrder.currentlyEditedOrderLine);
         this.selfOrder.updateCart(this.formOrderLine());
         this.selfOrder.setPage(this.returnRoute());
