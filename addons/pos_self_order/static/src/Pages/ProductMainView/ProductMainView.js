@@ -40,14 +40,20 @@ export class ProductMainView extends Component {
     }
 
     incrementQty = (up) => {
-        if (up) {
-            this.privateState.qty += 1;
-            return;
-        }
-        if (this.privateState.qty >= 1) {
-            this.privateState.qty -= 1;
-        }
+        this.privateState.qty = this.computeNewQty(this.privateState.qty, up);
     };
+    computeNewQty(qty, up) {
+        if (up) {
+            return qty + 1;
+        }
+        if (qty > 1) {
+            return qty - 1;
+        }
+        if (this.selfOrder.currentlyEditedOrderLine) {
+            return 0;
+        }
+        return 1;
+    }
     /**
      * @param {Object} selectedVariants
      * @param {[]} attributes
@@ -88,9 +94,10 @@ export class ProductMainView extends Component {
      * already in the cart.
      */
     findQty() {
-        return this.selfOrder.currentlyEditedOrderLine
-            ? this.privateState.qty
-            : (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty;
+        return (
+            this.privateState.qty &&
+            (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty
+        );
     }
     findMergeableOrderLine() {
         return this.selfOrder.cart.find((item) =>
@@ -118,13 +125,11 @@ export class ProductMainView extends Component {
     }
 
     addToCartButtonClicked() {
+        this.selfOrder.deleteOrderLine(this.selfOrder.currentlyEditedOrderLine);
         this.selfOrder.updateCart(this.formOrderLine());
         this.selfOrder.setPage(this.returnRoute());
     }
     returnRoute() {
-        // if (this.selfOrder.currentlyEditedOrderLine) {
-        //     this.selfOrder.updateCart(this.selfOrder.currentlyEditedOrderLine);
-        // }
         return this.selfOrder.currentlyEditedOrderLine ? "/cart" : "/products";
     }
 }

@@ -31,6 +31,7 @@ export class SelfOrder {
         // We want to keep a backup of some of the state in local storage
         effect(
             (state) => {
+                console.log(state.cart);
                 localStorage.setItem("cart", JSON.stringify(state.cart));
             },
             [this]
@@ -49,10 +50,6 @@ export class SelfOrder {
 
     setCurrentlyEditedOrderLine(orderLine) {
         this.currentlyEditedOrderLine = orderLine;
-
-        this.cart = this.cart.filter(
-            (x) => JSON.stringify(x) !== JSON.stringify(this.currentlyEditedOrderLine)
-        );
     }
 
     formatMonetary(price) {
@@ -102,6 +99,13 @@ export class SelfOrder {
      */
     updateCart(orderline) {
         this.cart = this.getUpdatedCart(this.cart, orderline);
+    }
+
+    deleteOrderLine(orderline) {
+        if (!orderline) {
+            return;
+        }
+        this.cart = this.cart.filter((x) => JSON.stringify(x) !== JSON.stringify(orderline));
     }
 
     /**

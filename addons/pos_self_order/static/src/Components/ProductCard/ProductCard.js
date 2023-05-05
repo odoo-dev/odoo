@@ -19,7 +19,6 @@ export class ProductCard extends Component {
             this.selfOrder.setCurrentlyEditedOrderLine(this.props?.orderLine);
         }
 
-
         this.selfOrder.setPage("/products/" + product.product_id);
     }
 
