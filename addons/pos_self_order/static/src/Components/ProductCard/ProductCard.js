@@ -18,7 +18,7 @@ export class ProductCard extends Component {
         this.selfOrder.currentlyEditedOrderLine =
             this.selfOrder.page === "/cart" && this.props?.cartItem;
 
-        this.selfOrder.setPage("/products" + product.product_id);
+        this.selfOrder.setPage("/products/" + product.product_id);
     }
 
     canOpenProductMainView(product) {

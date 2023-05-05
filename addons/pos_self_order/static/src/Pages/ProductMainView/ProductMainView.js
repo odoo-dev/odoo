@@ -27,12 +27,12 @@ export class ProductMainView extends Component {
         // we want to keep track of the last product that was viewed
         this.selfOrder.currentProduct = this.props.product.product_id;
         this.privateState = useState({
-            qty: this.selfOrder?.cartItem?.qty || 1,
-            customer_note: this.selfOrder?.cartItem?.customer_note || "",
+            qty: this.selfOrder?.currentlyEditedOrderLine?.qty || 1,
+            customer_note: this.selfOrder?.currentlyEditedOrderLine?.customer_note || "",
             selectedVariants: Object.fromEntries(
                 this.props.product.attributes.map((attribute, key) => [
                     attribute.name,
-                    this.selfOrder?.cartItem?.description?.split(", ")?.[key] ||
+                    this.selfOrder?.currentlyEditedOrderLine?.description?.split(", ")?.[key] ||
                         attribute.values[0].name,
                 ])
             ),
@@ -118,6 +118,9 @@ export class ProductMainView extends Component {
     }
 
     addToCartButtonClicked() {
+        this.selfOrder.cart = this.selfOrder.cart.filter(
+            (x) => JSON.stringify(x) !== JSON.stringify(this.selfOrder.currentlyEditedOrderLine)
+        );
         this.selfOrder.updateCart(this.formOrderLine());
         this.selfOrder.setPage(this.returnRoute());
     }
