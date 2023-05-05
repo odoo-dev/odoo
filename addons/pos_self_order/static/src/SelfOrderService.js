@@ -47,7 +47,6 @@ export class SelfOrder {
         this.navigate(page);
     }
 
-
     formatMonetary(price) {
         return formatMonetary(price, { currencyId: this.currency_id });
     }
@@ -60,12 +59,10 @@ export class SelfOrder {
     }
     getTotalCartCost() {
         const cart = this.cart;
-        const products = this.products;
         return cart.reduce((sum, cartItem) => {
             return (
                 sum +
-                (products.find((x) => x.product_id === cartItem.product_id).price_info
-                    .price_with_tax +
+                (this.getProduct({ id: cartItem.product_id }).price_info.price_with_tax +
                     cartItem.price_extra.price_with_tax) *
                     cartItem.qty
             );
@@ -84,7 +81,7 @@ export class SelfOrder {
      */
     _getTotalCartTax(cart, products) {
         return cart.reduce((sum, cartItem) => {
-            const product = products.find((x) => x.product_id === cartItem.product_id);
+            const product = this.getProduct({ id: cartItem.product_id });
             const getTax = (x) => x.price_with_tax - x.price_without_tax;
             return sum + (getTax(product.price_info) + getTax(cartItem.price_extra)) * cartItem.qty;
         }, 0);
@@ -111,11 +108,11 @@ export class SelfOrder {
 
     isSameProduct(item, orderline) {
         return (
-            this.getProductWithId(item.product_id).is_pos_groupable &&
+            this.getProduct({ id: item.product_id }).is_pos_groupable &&
             this.product_uniqueness_keys.every((key) => item[key] === orderline[key])
         );
     }
-    getProductWithId(id) {
+    getProduct({ id }) {
         return this.products.find((product) => product.product_id === id);
     }
 
