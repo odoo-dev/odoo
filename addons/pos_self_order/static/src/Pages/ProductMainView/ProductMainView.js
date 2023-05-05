@@ -79,21 +79,25 @@ export class ProductMainView extends Component {
     }
     /**
      * The selfOrder.updateCart method expects us to give it the
-     * total qty the orderline should have. If we are editing an orderline.
+     * total qty the orderline should have.
      * If we are currently editing an existing orderline ( that means that we came to this
      * page from the cart page), it means that we are editing the total qty itself,
      * so we just return privateState.qty.
      * If we came to this page from the products page, it means that we are adding items,
-     * so we need to add the qty of the current product to the qty of the product that is
+     * so we need to add the qty of the current product to the qty that is
      * already in the cart.
      */
     findQty() {
         return this.selfOrder.currentlyEditedOrderLine
             ? this.privateState.qty
-            : (this.selfOrder.cart.find((item) =>
-                  this.selfOrder.canBeMerged(item, this.preFormOrderline())
-              )?.qty || 0) + this.privateState.qty;
+            : (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty;
     }
+    findMergeableOrderLine() {
+        return this.selfOrder.cart.find((item) =>
+            this.selfOrder.canBeMerged(item, this.preFormOrderline())
+        );
+    }
+
     preFormOrderline() {
         return {
             product_id: this.selfOrder.currentProduct,
