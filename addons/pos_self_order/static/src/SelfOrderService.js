@@ -44,7 +44,7 @@ export class SelfOrder {
     }
     setPage(page) {
         this.page = page;
-        this.navigate(page);
+        this.navigate(page, this.pos_config_id);
     }
 
     formatMonetary(price) {
