@@ -18,9 +18,12 @@ export class SelfOrder {
             rpc,
             notification,
             ...session.pos_self_order,
+            // Global state
             currentProduct: 0,
             cart: JSON.parse(localStorage.getItem("cart")) ?? [],
             orders: JSON.parse(localStorage.getItem("orders")) ?? [],
+            currentlyEditedOrderLine: null,
+            page: null,
         });
         // we create a set with all the tags that are present in the menu
         this.tagList = new Set(this.products.map((product) => product.tag));
@@ -39,6 +42,12 @@ export class SelfOrder {
             [this]
         );
     }
+    setPage(page) {
+        this.page = page;
+        this.navigate(page);
+    }
+
+
     formatMonetary(price) {
         return formatMonetary(price, { currencyId: this.currency_id });
     }
