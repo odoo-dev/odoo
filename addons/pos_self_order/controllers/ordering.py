@@ -183,12 +183,12 @@ class PosSelfOrderController(http.Controller):
         """
         orderlines = {
             "to_be_merged": [
-                item for item in incoming_orderlines if self._is_in_cart(item, existing_orderlines)
+                item for item in incoming_orderlines if self._has_merge_candidate(item, existing_orderlines)
             ],
             "to_be_appended": [
                 item
                 for item in incoming_orderlines
-                if not self._is_in_cart(item, existing_orderlines)
+                if not self._has_merge_candidate(item, existing_orderlines)
             ],
         }
 
@@ -197,7 +197,7 @@ class PosSelfOrderController(http.Controller):
             + orderlines["to_be_appended"]
         )
 
-    def _is_in_cart(self, item: Dict, existing_orderlines: List[Dict]) -> bool:
+    def _has_merge_candidate(self, item: Dict, existing_orderlines: List[Dict]) -> bool:
         return any(self._can_be_merged(item, line) for line in existing_orderlines)
 
     def _can_be_merged(self, orderline1, orderline2):
