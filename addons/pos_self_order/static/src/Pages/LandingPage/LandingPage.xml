@@ -11,7 +11,7 @@
                 <t t-foreach="selfOrder.custom_links" t-as="link" t-key="link.id">
                     <a type="button" 
                         t-attf-href="{{!link.url.startsWith('/') and link.url}}"
-                        t-on-click="(event)=> link.url.startsWith('/') and env.navigate(link.url, event)"
+                        t-on-click="(event)=> link.url.startsWith('/') and selfOrder.setPage(link.url)"
                         t-attf-class="btn btn-{{link.style}} py-3 my-1 rounded">
                         <t t-esc="link.name"/>
                     </a>
