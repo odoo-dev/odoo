@@ -73,6 +73,7 @@ export class SelfOrder {
             );
         }, 0);
     }
+
     getTotalCartTax = () => {
         return this._getTotalCartTax(this.cart, this.products);
     };
