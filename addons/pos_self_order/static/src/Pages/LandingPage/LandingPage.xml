@@ -12,7 +12,7 @@
                     <a type="button" 
                         t-attf-href="{{!link.url.startsWith('/') and link.url}}"
                         t-on-click="(event)=> link.url.startsWith('/') and selfOrder.setPage(link.url)"
-                        t-attf-class="btn btn-{{link.style}} py-3 my-1 rounded">
+                        class="btn btn-{{link.style}} py-3 my-1 rounded">
                         <t t-esc="link.name"/>
                     </a>
                 </t>
@@ -21,7 +21,7 @@
                     <a 
                         type="button" 
                         t-on-click="()=> selfOrder.setPage('/orders')"
-                        t-attf-class="btn btn-outline-light py-3 my-2">
+                        class="btn btn-outline-light py-3 my-2">
                         My orders
                     </a>
                 </t>
