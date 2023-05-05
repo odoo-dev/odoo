@@ -102,11 +102,11 @@ export class SelfOrder {
      */
     getUpdatedCart(cart, orderline) {
         return cart
-            .filter((item) => !this.isSameProduct(item, orderline))
+            .filter((item) => !this.canBeMerged(item, orderline))
             .concat((orderline.qty && [orderline]) || []);
     }
 
-    isSameProduct(item, orderline) {
+    canBeMerged(item, orderline) {
         return (
             this.getProduct({ id: item.product_id }).is_pos_groupable &&
             this.product_uniqueness_keys.every((key) => item[key] === orderline[key])

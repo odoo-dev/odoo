@@ -12,17 +12,15 @@ export class ProductCard extends Component {
         useForwardRefToParent("currentProductCard");
     }
     clickOnProduct(product) {
-        const cartItem = this.props?.cartItem;
-
         if (!this.canOpenProductMainView(product)) {
             return;
         }
-        // TODO: add condition to only run this `if` if we are on the `cartView` page
-        if (cartItem) {
-            this.selfOrder.cartItem = cartItem;
-        }
-        this.selfOrder.setPage("/products/" + product.product_id);
+        this.selfOrder.currentlyEditedOrderLine =
+            this.selfOrder.page === "/cart" && this.props?.cartItem;
+
+        this.selfOrder.setPage("/products" + product.product_id);
     }
+
     canOpenProductMainView(product) {
         return (
             this.selfOrder.table ||
