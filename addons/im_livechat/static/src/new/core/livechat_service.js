@@ -33,6 +33,7 @@ export const SESSION_STATE = Object.freeze({
 
 export class LivechatService {
     SESSION_COOKIE = "im_livechat_session";
+    OPERATOR_COOKIE = "im_livechat_previous_operator_pid";
     /** @type {keyof typeof SESSION_STATE} */
     state = SESSION_STATE.NONE;
     /** @type {LivechatRule} */
@@ -61,35 +62,29 @@ export class LivechatService {
         this.initialized = true;
     }
 
-    async _createSession() {
-        // TODO - MISSING PREVIOUS OPERATOR ID IN RPC
+    async _createSession({ persisted = false } = {}) {
         const session = await this.rpc(
             "/im_livechat/get_session",
             {
                 channel_id: this.options.channel_id,
                 anonymous_name: this.userName,
-                persisted: false,
+                previous_operator_id: this.cookie.current[this.OPERATOR_COOKIE],
+                persisted,
             },
             { shadow: true }
         );
-        if (session) {
-            this.state = SESSION_STATE.CREATED;
+        if (session && session.operator_pid) {
+            this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
             this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
-        }
-        return session;
-    }
-
-    async _persistSession() {
-        const session = await this.rpc("/im_livechat/get_session", {
-            channel_id: this.options.channel_id,
-            anonymous_name: this.userName,
-            persisted: true,
-        });
-        if (!session || !session.operator_pid) {
-            this.cookie.deleteCookie(this.SESSION_COOKIE);
+            if (session?.operator_pid) {
+                this.cookie.setCookie(
+                    this.OPERATOR_COOKIE,
+                    session.operator_pid[0],
+                    7 * 24 * 60 * 60
+                ); // 1 week cookie.
+            }
         } else {
-            this.state = SESSION_STATE.PERSISTED;
-            this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
+            this.cookie.deleteCookie(this.SESSION_COOKIE);
         }
         return session;
     }
@@ -105,9 +100,7 @@ export class LivechatService {
     }
 
     async getSession({ persisted = false } = {}) {
-        let session;
-        const cookie = this.cookie.current[this.SESSION_COOKIE];
-        session = cookie ? JSON.parse(cookie) : undefined;
+        let session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? false);
         if (session?.uuid && this.state === SESSION_STATE.NONE) {
             // Channel is already created on the server.
             session.messages = await this.rpc("/im_livechat/chat_history", {
@@ -115,13 +108,12 @@ export class LivechatService {
             });
             session.messages.reverse();
             this.busService.addChannel(session.uuid);
-        } else if (!session && this.state === SESSION_STATE.NONE) {
-            // First time visitor or not yet created channel.
-            session = await this._createSession();
         }
-        if (session && persisted && !session.uuid) {
-            session = await this._persistSession();
-            this.busService.addChannel(session.uuid);
+        if (!session || (!session.uuid && persisted)) {
+            session = await this._createSession({ persisted });
+            if (session.uuid) {
+                this.busService.addChannel(session.uuid);
+            }
         }
         return session;
     }
