@@ -36,7 +36,7 @@
             <t t-set="description">
                 Connect your financial accounts in seconds.
             </t>
-            <t t-set="image" t-value="'/base/static/img/onboarding_bank-account.png'"/>
+            <t t-set="image" t-value="'/base/static/img/onboarding_puzzle.png'"/>
             <t t-set="alt" t-value="'Onboarding Bank Account'"/>
             <t t-set="btn_text">Add a bank account</t>
             <t t-set="done_text">Step Completed!</t>
@@ -122,6 +122,8 @@
             <t t-set="title">Taxes</t>
             <t t-set="description">Choose a default sales tax for your products.</t>
             <t t-set="btn_text">Set taxes</t>
+            <t t-set="image" t-value="'/base/static/img/onboarding_taxes.png'"/>
+            <t t-set="alt" t-value="'Onboarding Taxes'"/>
             <t t-set="done_text">Step Completed!</t>
             <t t-set="method" t-value="'action_open_account_onboarding_sale_tax'" />
             <t t-set="model" t-value="'res.company'" />

@@ -26,6 +26,21 @@ $o-onboarding-step-width: map-get($container-max-widths, 'lg') / 4 !default;
             }
         }
 
+        &:last-child,
+        &:first-child {
+            .o_onboarding_progress_overlay {
+                background-color: $o-onboarding-main-bg;
+            }
+        }
+
+        &:last-child .o_onboarding_progress_overlay {
+            right: 0;
+        }
+
+        &:first-child .o_onboarding_progress_overlay {
+            left: 0;
+        }
+
         .o_onboarding_step_content {
             width: $o-onboarding-step-width;
         }
