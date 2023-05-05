@@ -37,6 +37,7 @@ export class LivechatService {
     state = SESSION_STATE.NONE;
     /** @type {LivechatRule} */
     rule;
+    initialized = false;
     available = false;
     /** @type {string} */
     userName;
@@ -57,6 +58,7 @@ export class LivechatService {
         });
         this.available = init.available_for_me ?? this.available;
         this.rule = init.rule;
+        this.initialized = true;
     }
 
     async _createSession() {
@@ -165,10 +167,10 @@ export class LivechatService {
 
 export const livechatService = {
     dependencies: ["cookie", "notification", "rpc", "bus_service"],
-    async start(env, services) {
+    start(env, services) {
         const livechat = reactive(new LivechatService(env, services));
         if (livechat.available) {
-            await livechat.initialize();
+            livechat.initialize();
         }
         return livechat;
     },
