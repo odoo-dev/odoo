@@ -7,7 +7,11 @@ import uuid
 from odoo import http, fields
 from odoo.http import request
 
-from odoo.addons.pos_self_order.controllers.utils import PosSelfOrderUtils
+from odoo.addons.pos_self_order.controllers.utils import (
+    _get_pos_config_sudo,
+    _get_table_sudo,
+    _get_orderline_unique_keys,
+)
 from odoo.addons.point_of_sale.models.product import ProductProduct
 from odoo.addons.point_of_sale.models.pos_order import PosOrder
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
@@ -49,7 +53,7 @@ class PosSelfOrderController(http.Controller):
         # we will only respond with the order "access_token" and "id". After clicking on order, the customer will be redirected to the landing page,
         # from where the view order route will be automatically called anyways, so he will get the order details that way
 
-        pos_config_sudo = PosSelfOrderUtils._get_pos_config_sudo(self, pos_config_id)
+        pos_config_sudo = _get_pos_config_sudo(pos_config_id)
 
         if not pos_config_sudo.self_order_table_mode:
             raise werkzeug.exceptions.BadRequest()
@@ -129,7 +133,11 @@ class PosSelfOrderController(http.Controller):
                 or self._create_new_order_data(pos_config_sudo, table_access_token)
             ),
             "lines": self._create_orderlines(
-                order_sudo and self._merge_orderlines(cart, order_sudo.lines.export_for_ui()) or cart,
+                order_sudo
+                and self._merge_orderlines(
+                    cart, order_sudo.lines.export_for_ui(), order_sudo.config_id
+                )
+                or cart,
                 pos_config_sudo,
             ),
         }
@@ -155,7 +163,7 @@ class PosSelfOrderController(http.Controller):
         :param table_access_token: the access token of the table for which we want to create the order
         :return: a dictionary containing the data that we need to create a new order
         """
-        table_sudo = PosSelfOrderUtils._get_table_sudo(self, table_access_token)
+        table_sudo = _get_table_sudo(table_access_token)
         pos_session_sudo = pos_config_sudo.current_session_id
         if not table_sudo or not pos_session_sudo:
             raise werkzeug.exceptions.Unauthorized()
@@ -174,6 +182,7 @@ class PosSelfOrderController(http.Controller):
         self,
         incoming_orderlines: List[Dict],
         existing_orderlines: List[Dict],
+        pos_config_sudo: PosConfig,
     ) -> List[Dict]:
         """
         If the customer has an existing order, we will add the items from the existing order to the current cart.
@@ -181,20 +190,22 @@ class PosSelfOrderController(http.Controller):
         :param cart: The cart from the frontend.
         :return: list of dictionaries with the items from the cart and the items from the existing order
         """
-        orderlines = {
-            "to_be_merged": [
-                item for item in incoming_orderlines if self._has_merge_candidate(item, existing_orderlines)
-            ],
-            "to_be_appended": [
-                item
-                for item in incoming_orderlines
-                if not self._has_merge_candidate(item, existing_orderlines)
-            ],
-        }
+        orderlines_to_be_merged = [
+            item
+            for item in incoming_orderlines
+            if self._has_merge_candidate(item, existing_orderlines)
+        ]
+        orderlines_to_be_appended = [
+            item
+            for item in incoming_orderlines
+            if not self._has_merge_candidate(item, existing_orderlines)
+        ]
 
         return (
-            self._get_updated_orderlines(existing_orderlines, orderlines["to_be_merged"])
-            + orderlines["to_be_appended"]
+            self._get_updated_orderlines(
+                existing_orderlines, orderlines_to_be_merged, pos_config_sudo
+            )
+            + orderlines_to_be_appended
         )
 
     def _has_merge_candidate(self, item: Dict, existing_orderlines: List[Dict]) -> bool:
@@ -203,15 +214,17 @@ class PosSelfOrderController(http.Controller):
     def _can_be_merged(self, orderline1, orderline2):
         return self._is_pos_groupable(orderline1["product_id"]) and all(
             orderline1.get(key, "") == orderline2.get(key, "")
-            for key in PosSelfOrderUtils._get_product_uniqueness_keys(self)
+            for key in _get_orderline_unique_keys()
         )
 
-    def _get_updated_orderlines(self, orderlines: List[Dict], cart: List[Dict]) -> List[Dict]:
+    def _get_updated_orderlines(
+        self, orderlines: List[Dict], cart: List[Dict], pos_config_sudo: PosConfig
+    ) -> List[Dict]:
         """
         :returns updated version of orderlines that takes into account the new items from the cart
         """
         return [
-            self._get_updated_orderline(line, updated_item)
+            self._get_updated_orderline(line, updated_item, pos_config_sudo)
             if (
                 updated_item := next(
                     (item for item in cart if self._can_be_merged(item, line)), None
@@ -221,19 +234,26 @@ class PosSelfOrderController(http.Controller):
             for line in orderlines
         ]
 
-
-    def _get_updated_orderline(self, line: Dict, updated_item: Dict) -> Dict:
+    def _get_updated_orderline(
+        self, line: Dict, updated_item: Dict, pos_config_sudo: PosConfig
+    ) -> Dict:
         """
         This function assumes that the price of the product was not changed between the time the
         first items were added to the order and the time the new items were added to the order.
         """
-        qty_ratio = (updated_item["qty"] + line["qty"]) / line["qty"]
+        new_qty = updated_item["qty"] + line["qty"]
+        new_price = (
+            request.env["product.product"]
+            .sudo()
+            .browse(int(line["product_id"]))
+            ._get_self_order_price(pos_config_sudo, qty=new_qty)
+        )
         return {
             **line,
             **{
-                "price_subtotal": line["price_subtotal"] * qty_ratio,
-                "price_subtotal_incl": line["price_subtotal_incl"] * qty_ratio,
-                "qty": line["qty"] + updated_item["qty"],
+                "price_subtotal": new_price["price_without_tax"],
+                "price_subtotal_incl": new_price["price_with_tax"],
+                "qty": new_qty,
                 "customer_note": updated_item.get("customer_note") or line.get("customer_note"),
             },
         }
