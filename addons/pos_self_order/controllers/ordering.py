@@ -17,7 +17,7 @@ from odoo.addons.point_of_sale.models.pos_order import PosOrder
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 
 
-class PosnelfOrderController(http.Controller):
+class PosSelfOrderController(http.Controller):
     @http.route(
         "/pos-self-order/send-order",
         auth="public",
