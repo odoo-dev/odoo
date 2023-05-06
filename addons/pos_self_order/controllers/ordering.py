@@ -129,7 +129,9 @@ class PosSelfOrderController(http.Controller):
                 or self._create_new_order_data(pos_config_sudo, table_access_token)
             ),
             "lines": self._create_orderlines(
-                order_sudo and self._merge_orderlines(cart, order_sudo.lines.export_for_ui()) or cart,
+                order_sudo
+                and self._merge_orderlines(cart, order_sudo.lines.export_for_ui())
+                or cart,
                 pos_config_sudo,
             ),
         }
@@ -181,20 +183,20 @@ class PosSelfOrderController(http.Controller):
         :param cart: The cart from the frontend.
         :return: list of dictionaries with the items from the cart and the items from the existing order
         """
-        orderlines = {
-            "to_be_merged": [
-                item for item in incoming_orderlines if self._has_merge_candidate(item, existing_orderlines)
-            ],
-            "to_be_appended": [
-                item
-                for item in incoming_orderlines
-                if not self._has_merge_candidate(item, existing_orderlines)
-            ],
-        }
+        orderlines_to_be_merged = [
+            item
+            for item in incoming_orderlines
+            if self._has_merge_candidate(item, existing_orderlines)
+        ]
+        orderlines_to_be_appended = [
+            item
+            for item in incoming_orderlines
+            if not self._has_merge_candidate(item, existing_orderlines)
+        ]
 
         return (
-            self._get_updated_orderlines(existing_orderlines, orderlines["to_be_merged"])
-            + orderlines["to_be_appended"]
+            self._get_updated_orderlines(existing_orderlines, orderlines_to_be_merged)
+            + orderlines_to_be_appended
         )
 
     def _has_merge_candidate(self, item: Dict, existing_orderlines: List[Dict]) -> bool:
@@ -220,7 +222,6 @@ class PosSelfOrderController(http.Controller):
             else line
             for line in orderlines
         ]
-
 
     def _get_updated_orderline(self, line: Dict, updated_item: Dict) -> Dict:
         """
