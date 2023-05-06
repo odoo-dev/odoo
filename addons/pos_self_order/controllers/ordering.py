@@ -7,13 +7,17 @@ import uuid
 from odoo import http, fields
 from odoo.http import request
 
-from odoo.addons.pos_self_order.controllers.utils import PosSelfOrderUtils
+from odoo.addons.pos_self_order.controllers.utils import (
+    _get_pos_config_sudo,
+    _get_table_sudo,
+    _get_orderline_unique_keys,
+)
 from odoo.addons.point_of_sale.models.product import ProductProduct
 from odoo.addons.point_of_sale.models.pos_order import PosOrder
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 
 
-class PosSelfOrderController(http.Controller):
+class PosnelfOrderController(http.Controller):
     @http.route(
         "/pos-self-order/send-order",
         auth="public",
@@ -49,7 +53,7 @@ class PosSelfOrderController(http.Controller):
         # we will only respond with the order "access_token" and "id". After clicking on order, the customer will be redirected to the landing page,
         # from where the view order route will be automatically called anyways, so he will get the order details that way
 
-        pos_config_sudo = PosSelfOrderUtils._get_pos_config_sudo(self, pos_config_id)
+        pos_config_sudo = _get_pos_config_sudo(pos_config_id)
 
         if not pos_config_sudo.self_order_table_mode:
             raise werkzeug.exceptions.BadRequest()
@@ -159,7 +163,7 @@ class PosSelfOrderController(http.Controller):
         :param table_access_token: the access token of the table for which we want to create the order
         :return: a dictionary containing the data that we need to create a new order
         """
-        table_sudo = PosSelfOrderUtils._get_table_sudo(self, table_access_token)
+        table_sudo = _get_table_sudo(table_access_token)
         pos_session_sudo = pos_config_sudo.current_session_id
         if not table_sudo or not pos_session_sudo:
             raise werkzeug.exceptions.Unauthorized()
@@ -210,7 +214,7 @@ class PosSelfOrderController(http.Controller):
     def _can_be_merged(self, orderline1, orderline2):
         return self._is_pos_groupable(orderline1["product_id"]) and all(
             orderline1.get(key, "") == orderline2.get(key, "")
-            for key in PosSelfOrderUtils._get_product_uniqueness_keys(self)
+            for key in _get_orderline_unique_keys()
         )
 
     def _get_updated_orderlines(

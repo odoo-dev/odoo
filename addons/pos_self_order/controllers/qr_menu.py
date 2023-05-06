@@ -6,7 +6,12 @@ import werkzeug
 from odoo import http
 from odoo.http import request
 
-from odoo.addons.pos_self_order.controllers.utils import PosSelfOrderUtils
+from odoo.addons.pos_self_order.controllers.utils import (
+    _raise,
+    _get_pos_config_sudo,
+    _get_table_sudo,
+    _get_orderline_unique_keys,
+)
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 from odoo.addons.pos_self_order.models.pos_restaurant import RestaurantTable
 
@@ -16,10 +21,6 @@ TODO:
 test custom links name, url , color,  order, pos id restriction
 test pos restrict categ
 test pos categs orderer
-
-- with this module each restaurant table gets a unique access token; The restaurant owner would 
-    need to print the QR code with the access token and place it on the table. What happens if the access tokens
-    of the tables change?
 """
 
 
@@ -70,8 +71,8 @@ class PosQRMenuController(http.Controller):
                     **request.env["ir.http"].get_frontend_session_info(),
                     "currencies": request.env["ir.http"].get_currencies(),
                     "pos_self_order": self._get_self_order_config(
-                        PosSelfOrderUtils._get_pos_config_sudo(self, pos_name),
-                        PosSelfOrderUtils._get_table_sudo(self, table_access_token=id),
+                        _get_pos_config_sudo(pos_name),
+                        _get_table_sudo(table_access_token=id),
                     ),
                 }
             },
@@ -93,7 +94,7 @@ class PosQRMenuController(http.Controller):
             or an exception if there is no pos configured as self order.
         :rtype: binary
         """
-        if not PosSelfOrderUtils._get_any_pos_config_sudo(self):
+        if not self._get_any_pos_config_sudo():
             raise werkzeug.exceptions.Unauthorized()
 
         return (
@@ -114,7 +115,7 @@ class PosQRMenuController(http.Controller):
         :return: the bg image
         :rtype: binary
         """
-        pos_config_sudo = PosSelfOrderUtils._get_pos_config_sudo(self, pos_config_id)
+        pos_config_sudo = _get_pos_config_sudo(pos_config_id)
 
         if not pos_config_sudo.self_order_image:
             raise werkzeug.exceptions.NotFound()
@@ -124,6 +125,15 @@ class PosQRMenuController(http.Controller):
             ._get_image_stream_from(pos_config_sudo, field_name="self_order_image")
             .get_response()
         )
+
+    def _get_any_pos_config_sudo(self) -> PosConfig:
+        """
+        Returns a PosConfig that allows the QR code menu, if there is one,
+        or raises a NotFound otherwise
+        """
+        return (
+            request.env["pos.config"].sudo().search([("self_order_view_mode", "=", True)], limit=1)
+        ) or _raise(werkzeug.exceptions.NotFound)
 
     def _get_self_order_config(
         self, pos_config_sudo: PosConfig, table_sudo: RestaurantTable
@@ -141,7 +151,7 @@ class PosQRMenuController(http.Controller):
                 pos_config_sudo
             ),
             "has_active_session": pos_config_sudo.has_active_session,
-            "product_uniqueness_keys": PosSelfOrderUtils._get_product_uniqueness_keys(self),
+            "product_uniqueness_keys": _get_orderline_unique_keys(),
             **(
                 table_sudo
                 and pos_config_sudo.has_active_session
