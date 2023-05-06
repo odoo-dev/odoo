@@ -130,7 +130,9 @@ class PosSelfOrderController(http.Controller):
             ),
             "lines": self._create_orderlines(
                 order_sudo
-                and self._merge_orderlines(cart, order_sudo.lines.export_for_ui())
+                and self._merge_orderlines(
+                    cart, order_sudo.lines.export_for_ui(), order_sudo.config_id
+                )
                 or cart,
                 pos_config_sudo,
             ),
@@ -176,6 +178,7 @@ class PosSelfOrderController(http.Controller):
         self,
         incoming_orderlines: List[Dict],
         existing_orderlines: List[Dict],
+        pos_config_sudo: PosConfig,
     ) -> List[Dict]:
         """
         If the customer has an existing order, we will add the items from the existing order to the current cart.
@@ -195,7 +198,9 @@ class PosSelfOrderController(http.Controller):
         ]
 
         return (
-            self._get_updated_orderlines(existing_orderlines, orderlines_to_be_merged)
+            self._get_updated_orderlines(
+                existing_orderlines, orderlines_to_be_merged, pos_config_sudo
+            )
             + orderlines_to_be_appended
         )
 
@@ -208,12 +213,14 @@ class PosSelfOrderController(http.Controller):
             for key in PosSelfOrderUtils._get_product_uniqueness_keys(self)
         )
 
-    def _get_updated_orderlines(self, orderlines: List[Dict], cart: List[Dict]) -> List[Dict]:
+    def _get_updated_orderlines(
+        self, orderlines: List[Dict], cart: List[Dict], pos_config_sudo: PosConfig
+    ) -> List[Dict]:
         """
         :returns updated version of orderlines that takes into account the new items from the cart
         """
         return [
-            self._get_updated_orderline(line, updated_item)
+            self._get_updated_orderline(line, updated_item, pos_config_sudo)
             if (
                 updated_item := next(
                     (item for item in cart if self._can_be_merged(item, line)), None
@@ -223,18 +230,26 @@ class PosSelfOrderController(http.Controller):
             for line in orderlines
         ]
 
-    def _get_updated_orderline(self, line: Dict, updated_item: Dict) -> Dict:
+    def _get_updated_orderline(
+        self, line: Dict, updated_item: Dict, pos_config_sudo: PosConfig
+    ) -> Dict:
         """
         This function assumes that the price of the product was not changed between the time the
         first items were added to the order and the time the new items were added to the order.
         """
-        qty_ratio = (updated_item["qty"] + line["qty"]) / line["qty"]
+        new_qty = updated_item["qty"] + line["qty"]
+        new_price = (
+            request.env["product.product"]
+            .sudo()
+            .browse(int(line["product_id"]))
+            ._get_self_order_price(pos_config_sudo, qty=new_qty)
+        )
         return {
             **line,
             **{
-                "price_subtotal": line["price_subtotal"] * qty_ratio,
-                "price_subtotal_incl": line["price_subtotal_incl"] * qty_ratio,
-                "qty": line["qty"] + updated_item["qty"],
+                "price_subtotal": new_price["price_without_tax"],
+                "price_subtotal_incl": new_price["price_with_tax"],
+                "qty": new_qty,
                 "customer_note": updated_item.get("customer_note") or line.get("customer_note"),
             },
         }
