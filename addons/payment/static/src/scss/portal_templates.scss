@@ -2,6 +2,12 @@ div[name="o_payment_status_alert"] div > p {
     margin-bottom: 0;
 }
 
+.o_payment_summary_left_separator {
+    @include media-breakpoint-up(md) {
+        border-left: $border-width solid $border-color;
+    }
+}
+
 .o_payment_details .col:not(:last-child) {
     border-bottom: $border-width solid $border-color;
 

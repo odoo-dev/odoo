@@ -1,10 +1,16 @@
 /** @odoo-module **/
 
-import core, from '@web/legacy/js/services/core';
-import checkoutForm from '@payment/js/checkout_form';
-import { _t } from "@web/core/l10n/translation";
+import core from '@web/legacy/js/services/core';
+import { _t } from '@web/core/l10n/translation';
 
-checkoutForm.include({
+import PaymentForm from '@payment/js/payment_form';
+
+PaymentForm.include({
+    events: Object.assign({}, PaymentForm.prototype.events || {}, {
+        'change input[name="o_donation_amount"]': '_updateAmount',
+    }),
+
+    // #=== WIDGET LIFECYCLE ===#
 
     /**
      * @override
@@ -14,21 +20,47 @@ checkoutForm.include({
         return await this._super.apply(this, arguments);
     },
 
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
+    // #=== EVENT HANDLERS ===#
 
     /**
-     * Perform some validations for donations before performing payment
+     * Update the amount in the payment context with the user input.
      *
-     * @override method from @payment/js/payment_form_mixin
      * @private
-     * @param {string} code - The code of the payment option's provider
-     * @param {number} paymentOptionId - The id of the payment option handling the transaction
-     * @param {string} flow - The online payment flow of the transaction
+     * @param {Event} ev
      * @return {void}
      */
-    _processPayment: function (code, paymentOptionId, flow) {
+    _updateAmount(ev) {
+        if (ev.target.value > 0) {
+            this.paymentContext.amount = ev.target.value;
+        }
+    },
+
+    /**
+     * Update the total amount to be paid.
+     *
+     * Called upon change of shipping method
+     *
+     * @private
+     * @param {float} amount
+     */
+     _updateShippingCost: function (amount) {
+        this.paymentContext.amount = amount;
+     },
+
+    // #=== PAYMENT FLOW ===#
+
+    /**
+     * Perform some validations for donations before processing the payment flow.
+     *
+     * @override method from @payment/js/payment_form
+     * @private
+     * @param {string} providerCode - The code of the selected payment option's provider.
+     * @param {number} paymentOptionId - The id of the selected payment option.
+     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
+     * @param {string} flow - The payment flow of the selected payment option.
+     * @return {void}
+     */
+    async _initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow) {
         if ($('.o_donation_payment_form').length) {
             const errorFields = {};
             if (!this.$('input[name="email"]')[0].checkValidity()) {
@@ -52,26 +84,24 @@ checkoutForm.include({
                     $field.addClass('is-invalid');
                     $field.popover({content: errorFields[id], trigger: 'hover', container: 'body', placement: 'top'});
                 }
-                this._displayError(
-                    _t("Validation Error"),
+                this._displayErrorDialog(
+                    _t("Payment processing failed"),
                     _t("Some information is missing to process your payment.")
                 );
+                return;
             }
         }
-        this._super(...arguments);
+        await this._super(...arguments);
     },
 
     /**
-     * Add params used by the donation snippet to the transaction route params.
+     * Add params used by the donation snippet for the RPC to the transaction route.
      *
-     * @override method from @payment/js/payment_form_mixin
+     * @override method from @payment/js/payment_form
      * @private
-     * @param {string} code - The code of the selected payment option's provider
-     * @param {number} paymentOptionId - The id of the selected payment option
-     * @param {string} flow - The online payment flow of the selected payment option
-     * @return {object} The extended transaction route params
+     * @return {object} The extended transaction route params.
      */
-    _prepareTransactionRouteParams: function (code, paymentOptionId, flow) {
+    _prepareTransactionRouteParams() {
         const transactionRouteParams = this._super(...arguments);
         return $('.o_donation_payment_form').length ? {
             ...transactionRouteParams,
@@ -84,21 +114,5 @@ checkoutForm.include({
             'donation_recipient_email': this.$('input[name="donation_recipient_email"]').val(),
         } : transactionRouteParams;
     },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * Update the total amount to be paid.
-     *
-     * Called upon change of shipping method
-     *
-     * @private
-     * @param {float} amount
-     */
-     _updateShippingCost: function (amount) {
-        this.txContext.amount = amount;
-     },
 
 });

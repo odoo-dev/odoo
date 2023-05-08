@@ -76,3 +76,21 @@ PAYMENT_STATUS_MAPPING = {
     'cancel': (1,),
     'declined': (2,),
 }
+
+
+# Mapping of payment method codes to Ogone codes.
+PAYMENT_METHODS_MAPPING = {
+    'card': 'CreditCard',
+    'paylib': 'Paylib',
+    'p24': 'Przelewy24',
+    'bancontact': 'BCMC',
+    'paypal': 'PAYPAL',
+    'ideal': 'IDEAL',
+    'eps': 'EPS',
+    'visa': 'VISA',
+    'mastercard': 'MasterCard',
+    'jcb': 'JCB',
+    'klarna_paynow': 'KLARNA_PAYNOW',
+    'klarna_pot': 'KLARNA_PAYLATER',
+    'sofort': 'DirectEbanking',
+}
