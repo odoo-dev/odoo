@@ -53,14 +53,14 @@ class ProductProduct(models.Model):
             for value in attribute["values"]:
                 value.update(
                     {
-                        "price_extra": self._get_self_order_price(
+                        "price_extra": self._get_price_info(
                             pos_config_sudo, value.get("price_extra")
                         )
                     }
                 )
         return attributes
 
-    def _get_self_order_price(
+    def _get_price_info(
         self, pos_config: PosConfig, price: Optional[float] = None, qty: int = 1
     ) -> Dict[str, float]:
         """
@@ -88,7 +88,7 @@ class ProductProduct(models.Model):
         """
         return [
             {
-                "price_info": product._get_self_order_price(pos_config),
+                "price_info": product._get_price_info(pos_config),
                 "has_image": bool(product.image_1920),
                 "attributes": product._get_attributes(pos_config),
                 "name": product._get_name(),

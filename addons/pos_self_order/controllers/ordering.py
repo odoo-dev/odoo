@@ -250,7 +250,7 @@ class PosSelfOrderController(http.Controller):
             request.env["product.product"]
             .sudo()
             .browse(int(line["product_id"]))
-            ._get_self_order_price(pos_config_sudo, qty=new_qty)
+            ._get_price_info(pos_config_sudo, qty=new_qty)
         )
         return {
             **line,
@@ -332,7 +332,7 @@ class PosSelfOrderController(http.Controller):
             else 0
         )
         price_unit = product_sudo.lst_price + price_extra
-        price_subtotal_info = product_sudo._get_self_order_price(
+        price_subtotal_info = product_sudo._get_price_info(
             pos_config_sudo, price_unit, item.get("qty")
         )
 
