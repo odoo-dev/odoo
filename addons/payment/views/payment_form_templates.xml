@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Payment form
+        - 'reference_prefix' - The custom prefix to compute the full transaction reference.
+        - 'amount' - The amount to pay; optional for Subscriptions.
+        - 'currency' - The currency of the transaction, as a `res.currency` record.
+        - 'partner_id' - The id of the partner on behalf of whom the payment should be made.
+        #- 'providers' - The payment providers compatible with the current transaction
+        - 'payment_methods_sudo' - The compatible payment methods, as a sudoed `payment.method`
+                                   recordset.
+        - 'tokens_sudo' - The available payment tokens of the current partner, as a sudoed
+                          `payment.token` recordset.
+        #- 'default_token_id' - The id of the token that should be pre-selected. Optional
+        #- 'fees_by_provider' - The dict of transaction fees for each provider. Optional
+        #- 'show_tokenize_input' - Whether the option to save the payment method is shown
+        - 'transaction_route' - The route to call to create the transaction.
+        - 'landing_route' - The route the user is redirected to after payment.
+        - 'access_token' - The access token used to authenticate the partner.
+        #- 'footer_template_xmlid' - The XMLID of the template for footer (optional).
+    -->
+    <template id="payment.form" name="Payment Form">
+        <form name="o_payment_form"
+              class="w-75"
+              t-att-data-reference-prefix="reference_prefix"
+              t-att-data-amount="amount"
+              t-att-data-currency-id="currency and currency.id"
+              t-att-data-partner-id="partner_id"
+              t-att-data-transaction-route="transaction_route"
+              t-att-data-landing-route="landing_route"
+              t-att-data-access-token="access_token"
+        >
+            <span class="fs-4 d-block">Saved payment methods</span> <!-- TODO ANV remove d-block if not needed later -->
+            <t t-foreach="tokens_sudo" t-as="token_sudo">
+                <t t-set="provider_sudo" t-value="token_sudo.provider_id"/>
+                <t t-out="token_sudo.display_name"/> (debug: <t t-out="provider_sudo.name"/>) <br/>
+            </t>
+            <span class="fs-4 d-block">Add a new payment method</span>
+            <t t-foreach="payment_methods_sudo" t-as="pm_sudo">
+                <t t-set="provider_sudo" t-value="pm_sudo.provider_ids[0]"/>
+                <t t-set="inline_form_xml_id" t-value="provider_sudo.inline_form_view_id.xml_id"/>
+                <div class="card mb-2"> <!-- TODO ANV add a template to display cards -->
+                    <div class="card-body"> <!-- TODO ANV store data on the card -->
+                        <input name="o_payment_radio"
+                               type="radio"
+                               class="align-middle me-2"
+                               t-att-data-payment-option-id="provider_sudo.id"
+                               t-att-data-provider="provider_sudo.code"
+                               t-att-data-payment-method-id="pm_sudo.id"
+                        />
+                        <span t-esc="pm_sudo.image_payment_form"
+                              t-att-title="pm_sudo.name"
+                              t-options="{'widget': 'image', 'alt-field': 'name'}"
+                              class="me-2"
+                        />
+                        <span class="card-title fs-5 align-middle">
+                            <t t-out="pm_sudo.name"/> (debug: <t t-out="provider_sudo.name"/>)
+                        </span>
+                    </div>
+                    <div class="card-footer">
+                        <t t-if="inline_form_xml_id" t-call="{{inline_form_xml_id}}">
+                            <t t-set="provider_id" t-value="provider_sudo.id"/>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <button name="o_payment_submit_button"
+                    type="submit"
+                    class="btn btn-primary btn-lg w-100"
+                    t-att-data-icon-class="'fa-lock'"
+            >
+                <i t-attf-class="fa fa-lock"/> <t t-esc="'Pay'"/>
+            </button>
+        </form>
+    </template>
+
+</odoo>

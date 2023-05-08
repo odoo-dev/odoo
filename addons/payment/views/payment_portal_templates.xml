@@ -45,10 +45,10 @@
                             <div t-elif="company_mismatch">
                                 <t t-call="payment.company_mismatch_warning"/>
                             </div>
-                            <div t-elif="not providers and not tokens" class="alert alert-warning">
-                                <strong>No suitable payment option could be found.</strong><br/>
-                                If you believe that it is an error, please contact the website administrator.
-                            </div>
+<!--                            <div t-elif="not providers and not tokens" class="alert alert-warning">-->
+<!--                                <strong>No suitable payment option could be found.</strong><br/>-->
+<!--                                If you believe that it is an error, please contact the website administrator.-->
+<!--                            </div> TODO ANV-->
                             <t t-else="">
                                 <div t-if="partner_is_different" class="alert alert-warning">
                                     <strong>Warning</strong> Make sure your are logged in as the right partner before making this payment.
@@ -60,7 +60,8 @@
                                 <b>Amount:</b>
                                 <t t-esc="amount"
                                    t-options="{'widget': 'monetary', 'display_currency': currency}"/>
-                                <t t-call="payment.checkout"/>
+                                <!-- <t t-call="payment.checkout"/> TODO ANV -->
+                                <t t-call="payment.form"/>
                             </t>
                         </div>
                     </div>
@@ -131,6 +132,16 @@
                         <div class="col-lg-6">
                             <div>
                                 <t t-call="payment.transaction_status"/>
+                                <div class="mb-3 row">
+                                    <label for="payment_method" class="col-md-3 col-form-label">
+                                        Payment Method
+                                    </label>
+                                    <span name="payment_method"
+                                          class="col-md-9 col-form-label"
+                                          t-esc="tx.payment_method_id.name"
+                                    />
+                                </div>
+                                <hr/>
                                 <div class="mb-3 row">
                                     <label for="form_partner_name" class="col-md-3 col-form-label">
                                         From

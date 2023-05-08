@@ -4,7 +4,7 @@
     <template id="inline_form">
         <div t-attf-id="demo-container-{{provider_id}}">
             <div class="row">
-                <div class="mb-3">
+                <div>
                     <input name="provider_id" type="hidden" id="provider_id" t-att-value="id"/>
                     <input name="partner_id" type="hidden" t-att-value="partner_id"/>
                 </div>
