@@ -2,7 +2,7 @@
 <templates>
     <t t-name="spreadsheet_edition.FilterValue"
         owl="1">
-        <div class="o-filter-value d-flex align-items-start w-100">
+        <div class="o-filter-value d-flex align-items-start w-100 mx-2">
             <t t-set="filter"
                 t-value="props.filter"/>
             <t t-set="filterValue"

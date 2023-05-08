@@ -59,23 +59,21 @@
         align-items: flex-start;
         flex: 4;
         min-width: 0;
+    }
 
-        .o-filter-value {
-            min-height: 25px;
-            margin-left: 8px;
-            margin-right: 8px;
-            min-width: 100px;
+    .o_control_panel_actions .o-filter-value {
+        min-height: 25px;
+        min-width: 100px;
 
-            .o_field_many2many_tags {
-                width: 100%;
-            }
+        .o_field_many2many_tags {
+            width: 100%;
+        }
 
-            .o_field_many2manytags,
-            .date_filter_values {
-                display: flex;
-                gap: 3px;
-                align-items: baseline;
-            }
+        .o_field_many2manytags,
+        .date_filter_values {
+            display: flex;
+            gap: 3px;
+            align-items: baseline;
         }
     }
 }
