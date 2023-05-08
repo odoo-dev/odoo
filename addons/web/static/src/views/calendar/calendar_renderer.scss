@@ -264,7 +264,6 @@
 
             .fc-week-number {
                 background: none;
-                font-size: 1.2rem;
                 padding: 0.1rem 0.3rem 0.1rem 0 !important;
                 line-height: 1;
             }
@@ -280,7 +279,6 @@
             .fc-day-number {
                 margin: 5px;
                 padding: 0.1rem 0.3rem 0.1rem 0;
-                font-size: 1.2rem;
                 color: map-get($grays, "900");
                 font-weight: 400;
                 line-height: 1;
@@ -314,7 +312,6 @@
                 background: $o-cw-color-today-accent;
                 text-align: center;
                 color: white;
-                font-size: 1.1rem;
             }
 
             .fc-more-cell {
