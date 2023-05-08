@@ -1,8 +1,5 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
-import { session } from "@web/session";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import {
     click,
@@ -13,6 +10,10 @@ import {
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
+import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
+import { session } from "@web/session";
 
 import { EventBus } from "@odoo/owl";
 
@@ -126,7 +127,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("StatusBarField");
 
-    QUnit.tttt("static statusbar widget on many2one field", async function (assert) {
+    QUnit.test("static statusbar widget on many2one field", async function (assert) {
         serverData.models.partner.fields.trululu.domain = "[('bar', '=', True)]";
         serverData.models.partner.records[1].bar = false;
 
@@ -201,7 +202,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("static statusbar widget on many2one field with domain", async function (assert) {
+    QUnit.test("static statusbar widget on many2one field with domain", async function (assert) {
         assert.expect(1);
 
         patchWithCleanup(session, { uid: 17 });
@@ -347,7 +348,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("statusbar with no value in readonly", async function (assert) {
+    QUnit.test("statusbar with no value in readonly", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -383,7 +384,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, ".o_statusbar_status button:disabled", 2);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "clickable statusbar should change m2o fetching domain in edit mode",
         async function (assert) {
             serverData.models.partner.fields.trululu.domain = "[('bar', '=', True)]";
@@ -410,7 +411,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "statusbar fold_field option and statusbar_visible attribute",
         async function (assert) {
             patchWithCleanup(browser, {
@@ -441,7 +442,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("statusbar: choose an item from the 'More' menu", async function (assert) {
+    QUnit.test("statusbar: choose an item from the 'More' menu", async function (assert) {
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
         });
@@ -483,7 +484,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("statusbar with dynamic domain", async function (assert) {
+    QUnit.test("statusbar with dynamic domain", async function (assert) {
         serverData.models.partner.fields.trululu.domain = "[('int_field', '>', qux)]";
         serverData.models.partner.records[2].int_field = 0;
 
@@ -621,4 +622,48 @@ QUnit.module("Fields", (hooks) => {
         await click(clickableButtons[clickableButtons.length - 1]);
         assert.verifySteps(["write"]);
     });
+
+    QUnit.test(
+        "For the same record, a single rpc is done to recover the specialData",
+        async function (assert) {
+            serverData.views = {
+                "partner,3,list": '<tree><field name="display_name"/></tree>',
+                "partner,9,search": `<search></search>`,
+                "partner,false,form": `<form>
+                <header>
+                    <field name="trululu" widget="statusbar" readonly="1"/>
+                </header>
+            </form>`,
+            };
+
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Partners",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                },
+            };
+
+            const mockRPC = (route, args) => {
+                if (args.method === "search_read") {
+                    assert.step("search_read");
+                }
+            };
+
+            const webClient = await createWebClient({ serverData, mockRPC });
+            await doAction(webClient, 1);
+
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.verifySteps(["search_read"]);
+
+            await click(target, ".o_back_button");
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.verifySteps([]);
+        }
+    );
 });

@@ -150,6 +150,7 @@ export class FormController extends Component {
                 mode,
                 context: this.props.context,
             },
+            state: this.props.state?.modelState,
             hooks: {
                 onRecordSaved: this.onRecordSaved.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
@@ -226,9 +227,9 @@ export class FormController extends Component {
             beforeLeave: () => this.beforeLeave(),
             beforeUnload: (ev) => this.beforeUnload(ev),
             getLocalState: () => {
-                // TODO: export the whole model?
                 return {
                     activeNotebookPages: !this.model.root.isNew ? activeNotebookPages : {},
+                    modelState: this.model.exportState(),
                     resId: this.model.root.resId,
                 };
             },

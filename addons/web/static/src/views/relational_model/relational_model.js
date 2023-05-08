@@ -23,7 +23,7 @@ import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./u
 
 /**
  * @typedef Params
- * @property {Config} config
+ * @property {State} state
  * @property {Hooks} [hooks]
  * @property {number} [limit]
  * @property {number} [countLimit]
@@ -67,6 +67,12 @@ import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./u
  * @property {Function} [onWillSaveMulti]
  * @property {Function} [onSavedMulti]
  * @property {Function} [onWillSetInvalidField]
+ */
+
+/**
+ * @typedef State
+ * @property {Config} config
+ * @property {Object} specialDataCaches
  */
 
 const DEFAULT_HOOKS = {
@@ -130,6 +136,7 @@ export class RelationalModel extends Model {
                 this.handleField = DEFAULT_HANDLE_FIELD;
             }
         }
+        this.specialDataCaches = params.state?.specialDataCaches || {};
 
         this._urgentSave = false;
     }
@@ -140,6 +147,12 @@ export class RelationalModel extends Model {
 
     exportConfig() {
         return this.config;
+    }
+
+    exportState() {
+        return {
+            specialDataCaches: this.specialDataCaches,
+        };
     }
 
     hasData() {
@@ -521,9 +534,7 @@ export class RelationalModel extends Model {
                 resIds: groupRecordResIds,
             }).then((records) => {
                 for (const group of groups) {
-                    group.values = records.find(
-                        (r) => group.value && r.id === group.value[0]
-                    );
+                    group.values = records.find((r) => group.value && r.id === group.value[0]);
                 }
             });
             proms.push(prom);

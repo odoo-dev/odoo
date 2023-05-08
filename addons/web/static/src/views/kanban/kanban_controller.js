@@ -55,6 +55,7 @@ export class KanbanController extends Component {
             getLocalState: () => {
                 return {
                     modelConfig: this.model.exportConfig(),
+                    modelState: this.model.exportState(),
                 };
             },
         });
@@ -78,9 +79,9 @@ export class KanbanController extends Component {
     }
 
     get modelParams() {
-        const { resModel, archInfo, limit, defaultGroupBy, state } = this.props;
+        const { resModel, archInfo, limit, defaultGroupBy } = this.props;
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
-        const modelConfig = state?.modelConfig || {
+        const modelConfig = this.props.state?.modelConfig || {
             resModel,
             activeFields,
             fields,
@@ -88,6 +89,7 @@ export class KanbanController extends Component {
         };
         return {
             config: modelConfig,
+            state: this.props.state?.modelState,
             progressAttributes: archInfo.progressAttributes,
             handleField: archInfo.handleField,
             limit: archInfo.limit || limit || 40,

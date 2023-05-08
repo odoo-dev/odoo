@@ -98,7 +98,8 @@ export class ListController extends Component {
             getLocalState: () => {
                 const renderer = this.rootRef.el.querySelector(".o_list_renderer");
                 return {
-                    modelConfig: this.model.exportConfig(), //TODOPRO: rename everywhere
+                    modelConfig: this.model.exportConfig(),
+                    modelState: this.model.exportState(),
                     rendererScrollPositions: {
                         left: renderer.scrollLeft,
                         top: renderer.scrollTop,
@@ -155,6 +156,7 @@ export class ListController extends Component {
             const fields = this.archInfo.groupBy.fields[fieldName].fields;
             groupByInfo[fieldName] = extractFieldsFromArchInfo({ fieldNodes }, fields);
         }
+
         const modelConfig = this.props.state?.modelConfig || {
             resModel: this.props.resModel,
             fields,
@@ -164,6 +166,7 @@ export class ListController extends Component {
 
         return {
             config: modelConfig,
+            state: this.props.state?.modelState,
             handleField: this.archInfo.handleField,
             groupByInfo,
             limit: this.archInfo.limit || this.props.limit,

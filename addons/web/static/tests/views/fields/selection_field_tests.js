@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { click, editSelect, editInput, getFixture, clickSave } from "@web/../tests/helpers/utils";
+import { click, clickSave, editSelect, getFixture } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 
 let serverData;
@@ -90,7 +90,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(td.children.length, 1, "select tag should be only child of td");
     });
 
-    QUnit.tttt("SelectionField, edition and on many2one field", async function (assert) {
+    QUnit.test("SelectionField, edition and on many2one field", async function (assert) {
         serverData.models.partner.onchanges = { product_id: function () {} };
         serverData.models.partner.records[0].product_id = 37;
         serverData.models.partner.records[0].trululu = false;
@@ -147,7 +147,7 @@ QUnit.module("Fields", (hooks) => {
             "should have correct value in color field"
         );
 
-        assert.verifySteps(["get_views", "read", "name_search", "name_search", "onchange"]);
+        assert.verifySteps(["get_views", "web_read", "name_search", "name_search", "onchange2"]);
     });
 
     QUnit.test("unset selection field with 0 as key", async function (assert) {
@@ -215,7 +215,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("unset selection on a many2one field", async function (assert) {
+    QUnit.test("unset selection on a many2one field", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -239,7 +239,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("field selection with many2ones and special characters", async function (assert) {
+    QUnit.test("field selection with many2ones and special characters", async function (assert) {
         // edit the partner with id=4
         serverData.models.partner.records[2].display_name = "<span>hey</span>";
 
@@ -256,59 +256,6 @@ QUnit.module("Fields", (hooks) => {
             "<span>hey</span>"
         );
     });
-
-    QUnit.tttt(
-        "SelectionField on a many2one: domain updated by an onchange",
-        async function (assert) {
-            assert.expect(4);
-
-            serverData.models.partner.onchanges = {
-                int_field() {},
-            };
-
-            let domain = [];
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                resId: 1,
-                serverData,
-                arch: `
-                    <form>
-                        <field name="int_field" />
-                        <field name="trululu" widget="selection" />
-                    </form>`,
-                mockRPC(route, { args, method }) {
-                    if (method === "onchange") {
-                        domain = [["id", "in", [10]]];
-                        return Promise.resolve({
-                            domain: {
-                                trululu: domain,
-                            },
-                        });
-                    }
-                    if (method === "name_search") {
-                        assert.deepEqual(args[1], domain, "sent domain should be correct");
-                    }
-                },
-            });
-
-            assert.containsN(
-                target,
-                ".o_field_widget[name='trululu'] option",
-                4,
-                "should be 4 options in the selection"
-            );
-
-            // trigger an onchange that will update the domain
-            await editInput(target, ".o_field_widget[name='int_field'] input", 2);
-
-            assert.containsOnce(
-                target,
-                ".o_field_widget[name='trululu'] option",
-                "should be 1 option in the selection"
-            );
-        }
-    );
 
     QUnit.test("required selection widget should not have blank option", async function (assert) {
         serverData.models.partner.fields.feedback_value = {
@@ -404,7 +351,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("selection field with placeholder", async function (assert) {
+    QUnit.test("selection field with placeholder", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",

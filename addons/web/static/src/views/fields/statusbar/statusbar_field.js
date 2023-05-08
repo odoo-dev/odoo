@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
+import { Component } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
+import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { groupBy } from "@web/core/utils/arrays";
-import { useService } from "@web/core/utils/hooks";
-import { escape, sprintf } from "@web/core/utils/strings";
-import { Domain } from "@web/core/domain";
 import { _lt } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { groupBy } from "@web/core/utils/arrays";
+import { escape, sprintf } from "@web/core/utils/strings";
+import { useSpecialData } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "../standard_field_props";
-import { Component, onWillStart } from "@odoo/owl";
 
 export class StatusBarField extends Component {
     static template = "web.StatusBarField";
@@ -32,7 +32,6 @@ export class StatusBarField extends Component {
     static defaultProps = {
         visibleSelection: [],
     };
-    static specialDataCache = {};
 
     setup() {
         if (this.props.withCommand) {
@@ -95,43 +94,24 @@ export class StatusBarField extends Component {
             );
         }
 
-        this.orm = useService("orm");
-        onWillStart(async () => {
-            const fieldName = this.props.name;
-            const field = this.props.record.fields[fieldName];
-            if (field.type === "selection") {
-                return;
-            }
-            // FIXME: find a way to invalidate this at some point? e.g. when leaving action?
-            const fieldNames = ["id", "display_name"];
-            if (this.props.foldField) {
-                fieldNames.push(this.props.foldField);
-            }
-
-            const value = this.props.record.data[fieldName];
-            const context = this.props.record.evalContext;
-            let domain = this.domain.toList(context);
-            if (domain.length && value) {
-                domain = Domain.or([[["id", "=", value[0]]], domain]).toList(context);
-            }
-            const relation = field.relation;
-            const key = JSON.stringify({ fieldNames, domain, relation });
-            const cache = this.constructor.specialDataCache;
-            if (!cache[key]) {
-                cache[key] = this.orm.searchRead(relation, domain, fieldNames);
-            }
-            this.specialData = await cache[key];
-        });
-    }
-
-    get domain() {
-        if (this.props.domain) {
-            return this.props.domain;
+        if (this.type === "many2one") {
+            this.specialData = useSpecialData((orm, props) => {
+                const { foldField, name: fieldName, record } = props;
+                const { relation } = record.fields[fieldName];
+                const fieldNames = ["display_name"];
+                if (foldField) {
+                    fieldNames.push(foldField);
+                }
+                const value = props.record.data[fieldName];
+                let domain = props.domain;
+                if (domain.length && value) {
+                    domain = Domain.or([[["id", "=", value[0]]], domain]).toList(
+                        props.record.evalContext
+                    );
+                }
+                return orm.searchRead(relation, domain, fieldNames);
+            });
         }
-        if (this.props.record.fields[this.props.name].domain) {
-            return new Domain(this.props.record.fields[this.props.name].domain);
-        }
-        return new Domain();
     }
 
     get currentName() {
@@ -156,7 +136,7 @@ export class StatusBarField extends Component {
     get options() {
         switch (this.type) {
             case "many2one":
-                return this.specialData;
+                return this.specialData.data;
             case "selection":
                 return this.props.record.fields[this.props.name].selection;
             default:
@@ -190,7 +170,7 @@ export class StatusBarField extends Component {
             return {
                 id: i.id,
                 name: i.display_name,
-                isFolded: i.fold,
+                isFolded: i[this.props.foldField],
             };
         });
         return items.map((item) => ({
@@ -277,7 +257,7 @@ export const statusBarField = {
     ],
     supportedTypes: ["many2one", "selection"],
     isEmpty: (record, fieldName) => record.model.env.isSmall && !record.data[fieldName],
-    extractProps: ({ attrs, options, viewType }) => ({
+    extractProps: ({ attrs, options, viewType }, dynamicInfo) => ({
         canCreate: Boolean(attrs.can_create),
         canWrite: Boolean(attrs.can_write),
         isDisabled: !options.clickable,
@@ -285,7 +265,7 @@ export const statusBarField = {
             attrs.statusbar_visible && attrs.statusbar_visible.trim().split(/\s*,\s*/g),
         withCommand: viewType === "form",
         foldField: options.fold_field,
-        domain: attrs.domain ? new Domain(attrs.domain) : undefined,
+        domain: dynamicInfo.domain(),
     }),
 };
 

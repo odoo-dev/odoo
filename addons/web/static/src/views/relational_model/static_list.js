@@ -53,7 +53,7 @@ export class StaticList extends DataPoint {
     // -------------------------------------------------------------------------
 
     get currentIds() {
-        return this.records.map((r) => r.resId);
+        return this.records.map((r) => r.resId).filter((id) => this._currentIds.includes(id));
     }
 
     get editedRecord() {
@@ -135,6 +135,12 @@ export class StaticList extends DataPoint {
     enterEditMode(record) {
         this.leaveEditMode();
         this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+    }
+
+    replaceWith(ids) {
+        this._commands = [x2ManyCommands.replaceWith(ids)];
+        this._currentIds = [...ids];
+        this._onChange();
     }
 
     // -------------------------------------------------------------------------
@@ -224,7 +230,11 @@ export class StaticList extends DataPoint {
         // TODO: encapsulate commands in a class?
         return this._commands.map((c) => {
             if (c[2]) {
-                return [c[0], c[1], c[2]._getChanges()];
+                if (c[0] === x2ManyCommands.REPLACE_WITH) {
+                    return [c[0], c[1], c[2]];
+                } else {
+                    return [c[0], c[1], c[2]._getChanges()];
+                }
             }
             return [c[0], c[1]];
         });
