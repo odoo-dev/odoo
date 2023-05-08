@@ -59,7 +59,7 @@ class PosOrder(models.Model):
                     "product_id": line.product_id.id,
                     "qty": line.qty,
                     "customer_note": line.customer_note,
-                    "price_extra": line.product_id._get_self_order_price(
+                    "price_extra": line.product_id._get_price_info(
                         self.config_id,
                         line.price_extra,
                     ),

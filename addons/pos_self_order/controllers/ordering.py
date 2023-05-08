@@ -11,7 +11,7 @@ from odoo.addons.pos_self_order.controllers.utils import (
     _get_pos_config_sudo,
     _get_table_sudo,
 )
-from odoo.addons.point_of_sale.models.product import ProductProduct
+from odoo.addons.pos_self_order.models.product_product import ProductProduct
 from odoo.addons.pos_self_order.models.pos_order import PosOrder, PosOrderLine
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 
@@ -49,36 +49,41 @@ class PosSelfOrderController(http.Controller):
         :param order_access_token: the access token of the order that is being edited (UUID v4)
         :return: dictionary with keys: pos_reference, order_access_token
         """
-        # we will only respond with the order "access_token" and "id". After clicking on order, the customer will be redirected to the landing page,
-        # from where the view order route will be automatically called anyways, so he will get the order details that way
+        # we will only respond with the order "access_token" and "id". After clicking on the `Order` button,
+        # the customer will be redirected to the landing page.
+        # From the `landing page`, the customer can go to the `My Orders` page.
+        # on this page, the app will autmatically make a request to the `view-order` route,
+        # so the customer will get the order details that way
 
         pos_config_sudo = _get_pos_config_sudo(pos_config_id)
 
         if not pos_config_sudo.self_order_table_mode:
             raise werkzeug.exceptions.BadRequest()
 
+        posted_order_id = (
+            request.env["pos.order"]
+            .sudo()
+            .create_from_ui(
+                [
+                    self._form_order(
+                        self._create_order_data(
+                            cart,
+                            pos_config_sudo,
+                            table_access_token,
+                            order_pos_reference,
+                            order_access_token,
+                        )
+                    )
+                ],
+                draft=True,
+            )[0]
+            .get("id")
+        )
+
         return (
             request.env["pos.order"]
             .sudo()
-            .browse(
-                request.env["pos.order"]
-                .sudo()
-                .create_from_ui(
-                    [
-                        self._form_order(
-                            self._create_order_data(
-                                cart,
-                                pos_config_sudo,
-                                table_access_token,
-                                order_pos_reference,
-                                order_access_token,
-                            )
-                        )
-                    ],
-                    draft=True,
-                )[0]
-                .get("id")
-            )
+            .browse(posted_order_id)
             .read(["pos_reference", "access_token"])[0]
         )
 
@@ -245,7 +250,7 @@ class PosSelfOrderController(http.Controller):
             request.env["product.product"]
             .sudo()
             .browse(int(line["product_id"]))
-            ._get_self_order_price(pos_config_sudo, qty=new_qty)
+            ._get_price_info(pos_config_sudo, qty=new_qty)
         )
         return {
             **line,
@@ -327,7 +332,7 @@ class PosSelfOrderController(http.Controller):
             else 0
         )
         price_unit = product_sudo.lst_price + price_extra
-        price_subtotal_info = product_sudo._get_self_order_price(
+        price_subtotal_info = product_sudo._get_price_info(
             pos_config_sudo, price_unit, item.get("qty")
         )
 
