@@ -28,6 +28,16 @@ def _get_pos_config_sudo(pos_config_name: str) -> PosConfig:
         )
     ) or _raise(werkzeug.exceptions.NotFound)
 
+def _get_any_pos_config_sudo() -> PosConfig:
+    """
+    Returns a PosConfig that allows the QR code menu, if there is one,
+    or raises a NotFound otherwise
+    """
+    return (
+        request.env["pos.config"].sudo().search([("self_order_view_mode", "=", True)], limit=1)
+    ) or _raise(werkzeug.exceptions.NotFound)
+
+
 def _get_table_sudo(table_access_token: str) -> RestaurantTable:
     return table_access_token and (
         request.env["restaurant.table"]
@@ -36,8 +46,6 @@ def _get_table_sudo(table_access_token: str) -> RestaurantTable:
     )
 
 
-def _get_orderline_unique_keys() -> List[str]:
-    return ["product_id", "description", "customer_note"]
 
 
 def _raise(e):

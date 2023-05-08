@@ -9,8 +9,8 @@ from odoo.http import request
 from odoo.addons.pos_self_order.controllers.utils import (
     _raise,
     _get_pos_config_sudo,
+    _get_any_pos_config_sudo,
     _get_table_sudo,
-    _get_orderline_unique_keys,
 )
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 from odoo.addons.pos_self_order.models.pos_restaurant import RestaurantTable
@@ -36,7 +36,7 @@ class PosQRMenuController(http.Controller):
 
     @http.route("/menu", auth="public")
     def pos_self_order_redirect(self):
-        return request.redirect(f"/menu/{PosSelfOrderUtils._get_any_pos_config_sudo(self).id}")
+        return request.redirect(f"/menu/{_get_any_pos_config_sudo().id}")
 
     @http.route(
         [
@@ -94,7 +94,7 @@ class PosQRMenuController(http.Controller):
             or an exception if there is no pos configured as self order.
         :rtype: binary
         """
-        if not self._get_any_pos_config_sudo():
+        if not _get_any_pos_config_sudo():
             raise werkzeug.exceptions.Unauthorized()
 
         return (
@@ -126,15 +126,6 @@ class PosQRMenuController(http.Controller):
             .get_response()
         )
 
-    def _get_any_pos_config_sudo(self) -> PosConfig:
-        """
-        Returns a PosConfig that allows the QR code menu, if there is one,
-        or raises a NotFound otherwise
-        """
-        return (
-            request.env["pos.config"].sudo().search([("self_order_view_mode", "=", True)], limit=1)
-        ) or _raise(werkzeug.exceptions.NotFound)
-
     def _get_self_order_config(
         self, pos_config_sudo: PosConfig, table_sudo: RestaurantTable
     ) -> Dict:
@@ -142,16 +133,7 @@ class PosQRMenuController(http.Controller):
         Returns the necessary information for the POS Self Order App
         """
         return {
-            "pos_config_id": pos_config_sudo.id,
-            "company_name": pos_config_sudo.company_id.name,
-            "currency_id": pos_config_sudo.currency_id.id,
-            "show_prices_with_tax_included": pos_config_sudo.iface_tax_included == "total",
-            "custom_links": pos_config_sudo._get_self_order_custom_links(),
-            "products": pos_config_sudo._get_available_products()._get_self_order_data(
-                pos_config_sudo
-            ),
-            "has_active_session": pos_config_sudo.has_active_session,
-            "product_uniqueness_keys": _get_orderline_unique_keys(),
+            **pos_config_sudo._get_self_order_data(),
             **(
                 table_sudo
                 and pos_config_sudo.has_active_session

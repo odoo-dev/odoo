@@ -31,7 +31,6 @@ export class SelfOrder {
         // We want to keep a backup of some of the state in local storage
         effect(
             (state) => {
-                console.log(state.cart);
                 localStorage.setItem("cart", JSON.stringify(state.cart));
             },
             [this]
@@ -118,13 +117,13 @@ export class SelfOrder {
     getUpdatedCart(cart, orderline) {
         return cart
             .filter((item) => !this.canBeMerged(item, orderline))
-            .concat((orderline.qty && [orderline]) || []);
+            .concat(orderline.qty ? [orderline] : []);
     }
 
     canBeMerged(item, orderline) {
         return (
             this.getProduct({ id: item.product_id }).is_pos_groupable &&
-            this.product_uniqueness_keys.every((key) => item[key] === orderline[key])
+            this.orderline_unique_keys.every((key) => item[key] === orderline[key])
         );
     }
     getProduct({ id }) {
