@@ -22,6 +22,11 @@ class ProductProduct(models.Model):
         return self.code and self.display_name[len(self.code) + 3 :] or self.display_name
 
     def _filter_applicable_attributes(self, attributes_by_ptal_id: Dict) -> List[Dict]:
+        """
+        The attributes_by_ptal_id is a dictionary that contains all the attributes that have
+        [('create_variant', '=', 'no_variant')]
+        This method filters out the attributes that are not applicable to the product in self
+        """
         self.ensure_one()
         return [
             attributes_by_ptal_id[id]
@@ -31,8 +36,6 @@ class ProductProduct(models.Model):
 
     def _get_attributes(self, pos_config_sudo: PosConfig) -> List[Dict]:
         self.ensure_one()
-        # Here we replace the price_extra of each attribute value with a price_extra
-        # dictionary that includes the price with taxes included and the price with taxes excluded
         return self._add_price_info_to_attributes(
             self._filter_applicable_attributes(
                 self.env["pos.session"].sudo()._get_attributes_by_ptal_id()
@@ -40,7 +43,12 @@ class ProductProduct(models.Model):
             pos_config_sudo,
         )
 
-    def _add_price_info_to_attributes(self, attributes: List, pos_config_sudo: PosConfig) -> List:
+    def _add_price_info_to_attributes(self, attributes: List[Dict], pos_config_sudo: PosConfig) -> List[Dict]:
+        """
+        Here we replace the price_extra of each attribute value with a price_extra
+        dictionary that includes the price with taxes included and the price with taxes excluded
+        """
+        self.ensure_one()
         for attribute in attributes:
             for value in attribute["values"]:
                 value.update(
