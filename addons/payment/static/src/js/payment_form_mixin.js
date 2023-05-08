@@ -195,8 +195,8 @@ import { _t } from '@web/core/l10n/translation';
      *
      * As some providers implement both the direct payment and the payment with redirection, the
      * flow cannot be inferred from the radio button only. The radio button only indicates
-     * whether the payment option is a token. If not, the transaction context is looked up to
-     * determine whether the flow is 'direct' or 'redirect'.
+     * whether the payment option is a token. If not, the payment context is looked up to determine
+     * whether the flow is 'direct' or 'redirect'.
      *
      * @private
      * @param {HTMLInputElement} radio - The radio button linked to the payment option

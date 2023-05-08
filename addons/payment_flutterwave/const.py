@@ -29,6 +29,16 @@ SUPPORTED_CURRENCIES = [
     'ZMW',
 ]
 
+# Mapping of payment method codes to Flutterwave codes.
+PAYMENT_METHODS_MAPPING = {
+    'bank_transfer': 'banktransfer',
+    'card': 'credit_card',
+    'bbva_bancomer': 'bancomer',
+    'citibanamex': 'banamex',
+    'klarna_pay_over_time': 'larnasliceit',
+    'p24': 'przelewy24',
+    'sepa_debit': 'directdebit',
+}
 
 # Mapping of transaction states to Flutterwave payment statuses.
 PAYMENT_STATUS_MAPPING = {

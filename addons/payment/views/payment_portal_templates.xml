@@ -18,10 +18,11 @@
 
     <!-- Display of /payment/pay -->
     <template id="pay">
-        <!-- Variables description:
-            - 'company_mismatch' - Whether the user should make the payment in another company.
-            - 'expected_company' - The record of the company that the user should switch to.
-            - 'partner_is_different' - Whether the partner logged in is the one making the payment
+        <!-- Parameters description:
+            - res_company: The company in which the payment if made.
+            - company_mismatch: Whether the user should make the payment in another company.
+            - expected_company: The record of the company that the user should switch to.
+            - partner_is_different: Whether the partner logged in is the one making the payment.
         -->
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment'"/>
@@ -45,13 +46,17 @@
                             <div t-elif="company_mismatch">
                                 <t t-call="payment.company_mismatch_warning"/>
                             </div>
-                            <div t-elif="not providers and not tokens" class="alert alert-warning">
-                                <strong>No suitable payment option could be found.</strong><br/>
-                                If you believe that it is an error, please contact the website administrator.
+                            <div t-elif="not payment_methods_sudo and not tokens_sudo"
+                                 class="alert alert-warning"
+                            >
+                                <strong>No suitable payment method could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website
+                                administrator.
                             </div>
                             <t t-else="">
                                 <div t-if="partner_is_different" class="alert alert-warning">
-                                    <strong>Warning</strong> Make sure your are logged in as the right partner before making this payment.
+                                    <strong>Warning</strong> Make sure your are logged in as the
+                                    correct partner before making this payment.
                                 </div>
                                 <t t-if="reference_prefix">
                                     <b>Reference:</b>
@@ -59,8 +64,9 @@
                                 </t>
                                 <b>Amount:</b>
                                 <t t-esc="amount"
-                                   t-options="{'widget': 'monetary', 'display_currency': currency}"/>
-                                <t t-call="payment.checkout"/>
+                                   t-options="{'widget': 'monetary', 'display_currency': currency}"
+                                />
+                                <t t-call="payment.form"/>
                             </t>
                         </div>
                     </div>
@@ -78,14 +84,17 @@
                 <div class="container">
                     <!-- Portal breadcrumb -->
                     <t t-call="payment.portal_breadcrumb"/>
-                    <!-- Manage page -->
+                    <!-- Payment methods page -->
                     <div class="row">
                         <div class="col-lg-7">
-                            <t t-if="providers or tokens" t-call="payment.manage"/>
-                            <div t-else="" class="alert alert-warning">
-                                <p><strong>No suitable payment provider could be found.</strong></p>
-                                <p>If you believe that it is an error, please contact the website administrator.</p>
+                            <div t-if="not payment_methods_sudo and not tokens_sudo"
+                                 class="alert alert-warning"
+                            >
+                                <strong>No suitable payment method could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website
+                                administrator.
                             </div>
+                            <t t-else="" t-call="payment.form"/>
                         </div>
                     </div>
                 </div>
@@ -116,8 +125,8 @@
 
     <!-- Display of /payment/confirmation -->
     <template id="confirm">
-        <!-- Variables description:
-            - 'tx' - The transaction to display
+        <!-- Parameters description:
+            - tx: The transaction to display.
         -->
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Confirmation'"/>
@@ -131,6 +140,16 @@
                         <div class="col-lg-6">
                             <div>
                                 <t t-call="payment.transaction_status"/>
+                                <div class="mb-3 row">
+                                    <label for="payment_method" class="col-md-3 col-form-label">
+                                        Payment Method
+                                    </label>
+                                    <span name="payment_method"
+                                          class="col-md-9 col-form-label"
+                                          t-esc="tx.payment_method_id.name"
+                                    />
+                                </div>
+                                <hr/>
                                 <div class="mb-3 row">
                                     <label for="form_partner_name" class="col-md-3 col-form-label">
                                         From
@@ -181,8 +200,8 @@
 
     <!-- Breadcrumb for the portal -->
     <template id="portal_breadcrumb">
-        <!-- Variables description:
-            - 'page_title' - The title of the breadcrumb item
+        <!-- Parameters description:
+            - page_title: The title of the breadcrumb item.
         -->
         <div class="row">
             <div class="col-md-6">

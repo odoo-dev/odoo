@@ -110,7 +110,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             'access_token': access_token,
             'transaction_route': f'/pos/pay/transaction/{pos_order_sudo.id}?access_token={access_token}{exit_route_arg}',
             'landing_route': self._get_landing_route(pos_order_sudo.id, access_token, exit_route_arg=exit_route_arg),
-            **self._get_custom_rendering_context_values(**kwargs),
+            **self._get_extra_payment_form_values(**kwargs),
         }
 
         currency_id = pos_order_sudo.currency_id
@@ -141,7 +141,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             'providers': providers_sudo,
             'tokens': tokens_sudo,
             'show_tokenize_input': show_tokenize_input,
-            **self._get_custom_rendering_context_values(**kwargs),
+            **self._get_extra_payment_form_values(**kwargs),
         })
         return self._render_pay(rendering_context)
 
