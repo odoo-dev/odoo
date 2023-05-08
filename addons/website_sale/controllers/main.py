@@ -156,7 +156,8 @@ class Website(main.Website):
             'position': request.website.currency_id.position,
         }
 
-class WebsiteSale(http.Controller):
+# TODO split controllers -> payment needed here to call _get_extra_payment_form_values
+class WebsiteSale(payment_portal.PaymentPortal):
     _express_checkout_route = '/shop/express_checkout'
     _express_checkout_shipping_route = '/shop/express/shipping_address_change'
 
@@ -1520,7 +1521,7 @@ class WebsiteSale(http.Controller):
         return payment_form_values
 
     def _get_shop_payment_values(self, order, **kwargs):
-        portal_page_values = {
+        checkout_page_values = {
             'website_sale_order': order,
             'errors': [],
             'partner': order.partner_invoice_id,
@@ -1534,10 +1535,11 @@ class WebsiteSale(http.Controller):
             **sale_portal.CustomerPortal._get_payment_values(
                 self, order, website_id=request.website.id
             ),
+            'display_submit_button': False,  # The submit button is re-added outside the form.
             'transaction_route': f'/shop/payment/transaction/{order.id}',
             'landing_route': '/shop/payment/validate',
         }
-        values = {**portal_page_values, **payment_form_values}
+        values = {**checkout_page_values, **payment_form_values}
         if request.website.enabled_delivery:
             has_storable_products = any(
                 line.product_id.type in ['consu', 'product'] for line in order.order_line
@@ -1595,8 +1597,8 @@ class WebsiteSale(http.Controller):
         render_values['only_services'] = order and order.only_services or False
 
         if render_values['errors']:
-            render_values.pop('providers', '')
-            render_values.pop('tokens', '')
+            render_values.pop('payment_methods_sudo', '')
+            render_values.pop('tokens_sudo', '')
 
         return request.render("website_sale.payment", render_values)
 

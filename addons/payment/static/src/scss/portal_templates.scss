@@ -1,0 +1,9 @@
+div#o_payment_status_alert > p {
+    margin-bottom: 0;
+}
+
+.o_payment_summary_left_separator {
+    @include media-breakpoint-up(md) {
+        border-left: $border-width solid $border-color;
+    }
+}

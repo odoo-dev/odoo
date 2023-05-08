@@ -12,3 +12,20 @@ SUPPORTED_CURRENCIES = [
     'PEN',
     'USD'
 ]
+
+# Mapping of payment method codes to Ogone codes.
+PAYMENT_METHODS_MAPPING = {
+    'pagofacil': 'PAGOFACIL',
+    'bank_reference': 'BANK_REFERENCED',
+    'boleto_bancario': 'BOLETO_BANCARIO',
+    'pix': 'PIX',
+    'red_compra': 'TRANSBANK_DEBIT',
+    'pse': 'PSE',
+    'efecty': 'EFECTY',
+    'su_red': 'OTHERS_CASH',
+    'oxxo': 'OXXO',
+    'klap': 'MULTICAJA',
+    'pagoefectivo': 'PAGOEFECTIVO',
+    'rapipago': 'RAPIPAGO',
+    'spei': 'SPEI'
+}

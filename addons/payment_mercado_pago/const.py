@@ -27,6 +27,14 @@ SUPPORTED_CURRENCIES = [
     'VES',  # Sovereign Bolivar
 ]
 
+# Mapping of payment method codes to Mercado Pago codes.
+PAYMENT_METHODS_MAPPING = {
+    'santander': 'serfin',
+    'card': 'credit_card',
+    'bbva_bancomer': 'bancomer',
+    'citibanamex': 'banamex',
+}
+
 # Mapping of transaction states to Mercado Pago payment statuses.
 # See https://www.mercadopago.com.mx/developers/en/reference/payments/_payments_id/get.
 TRANSACTION_STATUS_MAPPING = {

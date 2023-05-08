@@ -235,7 +235,6 @@ class PaymentTransaction(models.Model):
             'payment_details': notification_data.get('CARDNO')[-4:],  # Ogone pads details with X's.
             'partner_id': self.partner_id.id,
             'provider_ref': notification_data['ALIAS'],
-            'verified': True,  # The payment is authorized, so the payment method is valid
         })
         self.write({
             'token_id': token.id,

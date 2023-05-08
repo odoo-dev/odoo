@@ -46,3 +46,15 @@ SUPPORTED_CURRENCIES = [
     'USD',
     'ZAR'
 ]
+
+# Mapping of payment method codes to Mollie codes.
+PAYMENT_METHODS_MAPPING = {
+    'apple_pay': 'applepay',
+    'card': 'creditcard',
+    'klarna': 'klarnapaylater',
+    'klarna_paynow': 'klarnapaynow',
+    'klarna_pay_over_time': 'klarnasliceit',
+    'bank_transfer': 'banktransfer',
+    'p24': 'przelewy24',
+    'sepa_debit': 'directdebit',
+}

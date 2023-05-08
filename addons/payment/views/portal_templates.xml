@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- Integration of a conditional "Manage payment methods" link in /my -->
-    <template id="pay_meth_link" inherit_id="portal.portal_layout">
+    <template id="payment.pay_meth_link" inherit_id="portal.portal_layout">
         <xpath expr="//div[hasclass('o_portal_my_details')]" position="inside">
             <t t-set="partner" t-value="request.env.user.partner_id"/>
             <t t-set="providers_allowing_tokenization"
@@ -17,11 +17,19 @@
     </template>
 
     <!-- Display of /payment/pay -->
-    <template id="pay">
-        <!-- Variables description:
-            - 'company_mismatch' - Whether the user should make the payment in another company.
-            - 'expected_company' - The record of the company that the user should switch to.
-            - 'partner_is_different' - Whether the partner logged in is the one making the payment
+    <template id="payment.pay">
+        <!-- Parameters description:
+            - reference_prefix: The custom prefix to compute the full transaction reference.
+            - amount: The amount to pay.
+            - currency: The currency of the payment, as a `res.currency` record.
+            - partner_id: The id of the partner on behalf of whom the payment should be made.
+            - payment_methods_sudo: The compatible payment methods, as a sudoed `payment.method`
+                                    recordset.
+            - tokens_sudo: The available payment tokens, as a sudoed `payment.token` recordset.
+            - res_company: The company in which the payment if made (for the company logo).
+            - company_mismatch: Whether the user should make the payment in another company.
+            - expected_company: The record of the company that the user should switch to.
+            - partner_is_different: Whether the partner logged in is the one making the payment.
         -->
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment'"/>
@@ -45,22 +53,20 @@
                             <div t-elif="company_mismatch">
                                 <t t-call="payment.company_mismatch_warning"/>
                             </div>
-                            <div t-elif="not providers and not tokens" class="alert alert-warning">
-                                <strong>No suitable payment option could be found.</strong><br/>
-                                If you believe that it is an error, please contact the website administrator.
+                            <div t-elif="not payment_methods_sudo and not tokens_sudo"
+                                 class="alert alert-warning"
+                            >
+                                <strong>No suitable payment method could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website
+                                administrator.
                             </div>
                             <t t-else="">
                                 <div t-if="partner_is_different" class="alert alert-warning">
-                                    <strong>Warning</strong> Make sure your are logged in as the right partner before making this payment.
+                                    <strong>Warning</strong> Make sure your are logged in as the
+                                    correct partner before making this payment.
                                 </div>
-                                <t t-if="reference_prefix">
-                                    <b>Reference:</b>
-                                    <t t-esc="reference_prefix"/><br/>
-                                </t>
-                                <b>Amount:</b>
-                                <t t-esc="amount"
-                                   t-options="{'widget': 'monetary', 'display_currency': currency}"/>
-                                <t t-call="payment.checkout"/>
+                                <t t-call="payment.pay_summary"/>
+                                <t t-call="payment.form"/>
                             </t>
                         </div>
                     </div>
@@ -69,8 +75,47 @@
         </t>
     </template>
 
+    <template id="payment.company_mismatch_warning" name="Company Mismatch Warning">
+        <!-- Parameters description:
+            - expected_company: The record of the company that the user should switch to.
+        -->
+        <div class="row mr16">
+            <div class="alert alert-warning col-lg-12 ms-3 me-3" role="alert">
+                <p>
+                    Please switch to company <t t-esc="expected_company.name"/> to make this
+                    payment.
+                </p>
+            </div>
+        </div>
+    </template>
+
+    <template id="payment.pay_summary">
+        <div class="o_cc o_cc2 row row-cols-1 row-cols-md-2 mx-0 py-2 rounded">
+            <div class="col my-3">
+                <label for="o_payment_summary_amount" class="d-block small text-muted">
+                    Amount
+                </label>
+                <span id="o_payment_summary_amount"
+                      t-out="amount"
+                      t-options="{'widget': 'monetary', 'display_currency': currency}"
+                      class="fs-4 fw-bold"
+                />
+            </div>
+            <hr class="d-md-none m-0 text-300 opacity-100"/>
+            <div class="o_payment_summary_left_separator col my-3">
+                <label for="o_payment_summary_reference" class="d-block small text-muted">
+                    Reference
+                </label>
+                <span id="o_payment_summary_reference"
+                      t-out="reference_prefix"
+                      class="fs-4 fw-bold"
+                />
+            </div>
+        </div>
+    </template>
+
     <!-- Display of /my/payment_methods -->
-    <template id="payment_methods" name="Payment Methods">
+    <template id="payment.payment_methods" name="Payment Methods">
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Methods'"/>
             <t t-set="additional_title"><t t-esc="page_title"/></t>
@@ -78,14 +123,17 @@
                 <div class="container">
                     <!-- Portal breadcrumb -->
                     <t t-call="payment.portal_breadcrumb"/>
-                    <!-- Manage page -->
+                    <!-- Payment methods page -->
                     <div class="row">
                         <div class="col-lg-7">
-                            <t t-if="providers or tokens" t-call="payment.manage"/>
-                            <div t-else="" class="alert alert-warning">
-                                <p><strong>No suitable payment provider could be found.</strong></p>
-                                <p>If you believe that it is an error, please contact the website administrator.</p>
+                            <div t-if="not payment_methods_sudo and not tokens_sudo"
+                                 class="alert alert-warning"
+                            >
+                                <strong>No suitable payment method could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website
+                                administrator.
                             </div>
+                            <t t-else="" t-call="payment.form"/>
                         </div>
                     </div>
                 </div>
@@ -94,7 +142,7 @@
     </template>
 
     <!-- Display of /payment/status -->
-    <template id="payment_status" name="Payment Status">
+    <template id="payment.payment_status" name="Payment Status">
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Status'"/>
             <t t-set="additional_title"><t t-esc="page_title"/></t>
@@ -115,9 +163,9 @@
     </template>
 
     <!-- Display of /payment/confirmation -->
-    <template id="confirm">
-        <!-- Variables description:
-            - 'tx' - The transaction to display
+    <template id="payment.confirm">
+        <!-- Parameters description:
+            - tx: The transaction to display.
         -->
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Confirmation'"/>
@@ -131,6 +179,16 @@
                         <div class="col-lg-6">
                             <div>
                                 <t t-call="payment.transaction_status"/>
+                                <div class="mb-3 row">
+                                    <label for="payment_method" class="col-md-3 col-form-label">
+                                        Payment Method
+                                    </label>
+                                    <span name="payment_method"
+                                          class="col-md-9 col-form-label"
+                                          t-esc="tx.payment_method_id.name"
+                                    />
+                                </div>
+                                <hr/>
                                 <div class="mb-3 row">
                                     <label for="form_partner_name" class="col-md-3 col-form-label">
                                         From
@@ -179,15 +237,59 @@
         </t>
     </template>
 
+    <template id="payment.transaction_status">
+        <!-- Parameters description:
+            - tx: The transaction whose status must be displayed.
+        -->
+        <t t-if="tx.state == 'draft'">
+            <t t-set="alert_style">info</t>
+            <t t-set="status_message">
+                <p>Your payment has not been processed yet.</p>
+            </t>
+        </t>
+        <t t-elif="tx.state == 'pending'">
+            <t t-set="alert_style">warning</t>
+            <t t-set="status_message" t-value="tx.provider_id.sudo().pending_msg"/>
+        </t>
+        <t t-elif="tx.state == 'authorized'">
+            <t t-set="alert_style">success</t>
+            <t t-set="status_message" t-value="tx.provider_id.sudo().auth_msg"/>
+        </t>
+        <t t-elif="tx.state == 'done'">
+            <t t-set="alert_style">success</t>
+            <t t-set="status_message" t-value="tx.provider_id.sudo().done_msg"/>
+        </t>
+        <t t-elif="tx.state == 'cancel'">
+            <t t-set="alert_style">danger</t>
+            <t t-set="status_message" t-value="tx.provider_id.sudo().cancel_msg"/>
+        </t>
+        <t t-elif="tx.state == 'error'">
+            <t t-set="alert_style">danger</t>
+            <t t-set="status_message">
+                <p>An error occurred during the processing of your payment.</p>
+            </t>
+        </t>
+
+        <t t-if="is_html_empty(status_message)" t-set="status_message" t-value="''"/>
+
+        <div t-if="status_message or tx.state_message"
+             id="o_payment_status_alert"
+             t-attf-class="alert alert-{{alert_style}} alert-dismissible">
+            <button class="btn-close" data-bs-dismiss="alert" title="Dismiss"/>
+            <t t-if="status_message" t-out="status_message"/>
+            <t t-if="tx.state_message" t-out="tx.state_message"/>
+        </div>
+    </template>
+
     <!-- Breadcrumb for the portal -->
-    <template id="portal_breadcrumb">
-        <!-- Variables description:
-            - 'page_title' - The title of the breadcrumb item
+    <template id="payment.portal_breadcrumb">
+        <!-- Parameters description:
+            - page_title: The title of the breadcrumb item.
         -->
         <div class="row">
             <div class="col-md-6">
                 <ol class="breadcrumb mt8">
-                    <li class="breadcrumb-item">
+                    <li id="o_payment_portal_home" class="breadcrumb-item">
                         <a href="/my/home">
                             <i class="fa fa-home"
                                role="img"

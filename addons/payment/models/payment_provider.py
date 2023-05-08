@@ -124,9 +124,6 @@ class PaymentProvider(models.Model):
     )
 
     # Message fields
-    display_as = fields.Char(
-        string="Displayed as", help="Description of the provider for customers",
-        translate=True)
     pre_msg = fields.Html(
         string="Help Message", help="The message displayed to explain and help the payment process",
         translate=True)
@@ -428,11 +425,12 @@ class PaymentProvider(models.Model):
         self, company_id, partner_id, amount, currency_id=None, force_tokenization=False,
         is_express_checkout=False, is_validation=False, **kwargs
     ):
-        """ Select and return the providers matching the criteria.
+        """ Select and return the providers matching the compatibility criteria.
 
-        The criteria are that providers must not be disabled, be in the company that is provided,
-        support the country of the partner if it exists, and be compatible with the currency if
-        provided. The criteria can be further refined by providing the keyword arguments.
+        The compatibility criteria are that providers must: not be disabled; be in the company that
+        is provided; support the country of the partner if it exists; be compatible with the
+        currency if provided. If provided, the optional keyword arguments further refine the
+        criteria.
 
         :param int company_id: The company to which providers must belong, as a `res.company` id.
         :param int partner_id: The partner making the payment, as a `res.partner` id.
@@ -443,7 +441,7 @@ class PaymentProvider(models.Model):
         :param bool is_validation: Whether the operation is a validation.
         :param dict kwargs: Optional data. This parameter is not used here.
         :return: The compatible providers.
-        :rtype: recordset of `payment.provider`
+        :rtype: payment.provider
         """
         # Compute the base domain for compatible providers.
         domain = [
@@ -520,10 +518,10 @@ class PaymentProvider(models.Model):
     def _is_tokenization_required(self, **kwargs):
         """ Return whether tokenizing the transaction is required given its context.
 
-        For a module to make the tokenization required based on the transaction context, it must
+        For a module to make the tokenization required based on the payment context, it must
         override this method and return whether it is required.
 
-        :param dict kwargs: The transaction context. This parameter is not used here.
+        :param dict kwargs: The payment context. This parameter is not used here.
         :return: Whether tokenizing the transaction is required.
         :rtype: bool
         """

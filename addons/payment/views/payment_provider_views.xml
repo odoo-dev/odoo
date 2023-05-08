@@ -78,8 +78,8 @@
                         <page string="Configuration" name="configuration">
                             <group name="provider_config">
                                 <group string="Payment Form" name="payment_form">
-                                    <field name="display_as" placeholder="If not defined, the provider name will be used."/>
                                     <field name="payment_method_ids"
+                                           domain="[('parent_id', '=', False)]"
                                            options="{'no_create': True, 'no_edit': True}"
                                            widget="many2many_tags"
                                            invisible="not show_payment_method_ids" />

@@ -182,7 +182,6 @@ class PaymentTransaction(models.Model):
             'partner_id': self.partner_id.id,
             'provider_ref': notification_data['card']['token'],
             'flutterwave_customer_email': notification_data['customer']['email'],
-            'verified': True,  # The payment is confirmed, so the payment method is valid.
         })
         self.write({
             'token_id': token,

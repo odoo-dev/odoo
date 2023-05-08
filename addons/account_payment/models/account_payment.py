@@ -192,6 +192,7 @@ class AccountPayment(models.Model):
         self.ensure_one()
         return {
             'provider_id': self.payment_token_id.provider_id.id,
+            'payment_method_id': self.payment_token_id.payment_method_id.id,
             'reference': self.ref,
             'amount': self.amount,
             'currency_id': self.currency_id.id,
