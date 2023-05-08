@@ -7,6 +7,7 @@ import base64
 from odoo import api, fields, models, modules
 
 from odoo.addons.pos_self_order.models.product_product import ProductProduct
+from odoo.addons.pos_self_order.models.pos_order import PosOrderLine
 
 
 class PosConfig(models.Model):
@@ -130,6 +131,19 @@ class PosConfig(models.Model):
                 order="pos_categ_id.sequence asc nulls last",
             )
         )
+
+    def _get_self_order_data(self) -> Dict:
+        self.ensure_one()
+        return {
+            "pos_config_id": self.id,
+            "company_name": self.company_id.name,
+            "currency_id": self.currency_id.id,
+            "show_prices_with_tax_included": self.iface_tax_included == "total",
+            "custom_links": self._get_self_order_custom_links(),
+            "products": self._get_available_products()._get_self_order_data(self),
+            "has_active_session": self.has_active_session,
+            "orderline_unique_keys": PosOrderLine._get_unique_keys(),
+        }
 
     @api.model
     def set_default_image(self):

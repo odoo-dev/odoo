@@ -10,10 +10,9 @@ from odoo.http import request
 from odoo.addons.pos_self_order.controllers.utils import (
     _get_pos_config_sudo,
     _get_table_sudo,
-    _get_orderline_unique_keys,
 )
 from odoo.addons.point_of_sale.models.product import ProductProduct
-from odoo.addons.point_of_sale.models.pos_order import PosOrder
+from odoo.addons.pos_self_order.models.pos_order import PosOrder, PosOrderLine
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 
 
@@ -214,7 +213,7 @@ class PosSelfOrderController(http.Controller):
     def _can_be_merged(self, orderline1, orderline2):
         return self._is_pos_groupable(orderline1["product_id"]) and all(
             orderline1.get(key, "") == orderline2.get(key, "")
-            for key in _get_orderline_unique_keys()
+            for key in PosOrderLine._get_unique_keys()
         )
 
     def _get_updated_orderlines(

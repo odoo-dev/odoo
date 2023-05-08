@@ -26,7 +26,7 @@ export class ProductMainView extends Component {
 
         // we want to keep track of the last product that was viewed
         this.selfOrder.currentProduct = this.props.product.product_id;
-        this.privateState = useState({
+        this.orderLine = useState({
             qty: this.selfOrder?.currentlyEditedOrderLine?.qty || 1,
             customer_note: this.selfOrder?.currentlyEditedOrderLine?.customer_note || "",
             selectedVariants: Object.fromEntries(
@@ -40,7 +40,7 @@ export class ProductMainView extends Component {
     }
 
     incrementQty = (up) => {
-        this.privateState.qty = this.computeNewQty(this.privateState.qty, up);
+        this.orderLine.qty = this.computeNewQty(this.orderLine.qty, up);
     };
     computeNewQty(qty, up) {
         if (up) {
@@ -88,16 +88,13 @@ export class ProductMainView extends Component {
      * total qty the orderline should have.
      * If we are currently editing an existing orderline ( that means that we came to this
      * page from the cart page), it means that we are editing the total qty itself,
-     * so we just return privateState.qty.
+     * so we just return orderLine.qty.
      * If we came to this page from the products page, it means that we are adding items,
      * so we need to add the qty of the current product to the qty that is
      * already in the cart.
      */
     findQty() {
-        return (
-            this.privateState.qty &&
-            (this.findMergeableOrderLine()?.qty || 0) + this.privateState.qty
-        );
+        return this.orderLine.qty && (this.findMergeableOrderLine()?.qty || 0) + this.orderLine.qty;
     }
     findMergeableOrderLine() {
         return this.selfOrder.cart.find((item) =>
@@ -107,9 +104,9 @@ export class ProductMainView extends Component {
 
     preFormOrderline() {
         return {
-            product_id: this.selfOrder.currentProduct,
-            customer_note: this.privateState.customer_note,
-            description: Object.values(this.privateState.selectedVariants).join(", "),
+            product_id: this.props.product.product_id,
+            customer_note: this.orderLine.customer_note,
+            description: Object.values(this.orderLine.selectedVariants).join(", "),
         };
     }
 
@@ -118,7 +115,7 @@ export class ProductMainView extends Component {
             ...this.preFormOrderline(),
             qty: this.findQty(),
             price_extra: this.getAllPricesExtra(
-                this.privateState.selectedVariants,
+                this.orderLine.selectedVariants,
                 this.props.product.attributes
             ),
         };

@@ -34,6 +34,10 @@ class PosOrderLine(models.Model):
             return description[-1]
         return ""
 
+    @staticmethod
+    def _get_unique_keys():
+        return ["product_id", "description", "customer_note"]
+
 
 class PosOrder(models.Model):
     _inherit = "pos.order"
