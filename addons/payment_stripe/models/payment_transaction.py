@@ -74,7 +74,7 @@ class PaymentTransaction(models.Model):
         self._handle_notification_data('stripe', notification_data)
 
     def _stripe_create_intent(self):
-        """ Create and return a PaymentIntent or a SetupIntent, depending on the operation.
+        """ Create and return a PaymentIntent or a SetupIntent object, depending on the operation.
 
         :return: The created PaymentIntent or SetupIntent object.
         :rtype: dict
@@ -115,7 +115,7 @@ class PaymentTransaction(models.Model):
         return intent
 
     def _stripe_prepare_setup_intent_payload(self):
-        """ Prepare the payload for the creation of a SetupIntent in Stripe format.
+        """ Prepare the payload for the creation of a SetupIntent object in Stripe format.
 
         Note: This method serves as a hook for modules that would fully implement Stripe Connect.
 
@@ -131,7 +131,7 @@ class PaymentTransaction(models.Model):
         }
 
     def _stripe_prepare_payment_intent_payload(self):
-        """ Prepare the payload for the creation of a PaymentIntent in Stripe format.
+        """ Prepare the payload for the creation of a PaymentIntent object in Stripe format.
 
         Note: This method serves as a hook for modules that would fully implement Stripe Connect.
 
@@ -340,7 +340,7 @@ class PaymentTransaction(models.Model):
         return tx
 
     def _process_notification_data(self, notification_data):
-        """ Override of payment to process the transaction based on Stripe data.
+        """ Override of `payment` to process the transaction based on Stripe data.
 
         Note: self.ensure_one()
 
@@ -356,7 +356,14 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'stripe':
             return
 
-        # Handle the provider reference and the status.
+        # Update the payment method.
+        payment_method_type = notification_data.get('payment_method', {}).get('type')
+        if self.payment_method_id.code == payment_method_type == 'card':
+            payment_method_code = notification_data['payment_method']['card']['brand']
+            payment_method = self.env['payment.method']._get_from_code(payment_method_code)
+            self.payment_method_id = payment_method or self.payment_method_id
+
+        # Update the provider reference and the payment state.
         if self.operation == 'validation':
             self.provider_reference = notification_data['setup_intent']['id']
             status = notification_data['setup_intent']['status']
@@ -370,7 +377,6 @@ class PaymentTransaction(models.Model):
             raise ValidationError(
                 "Stripe: " + _("Received data with missing intent status.")
             )
-
         if status in STATUS_MAPPING['draft']:
             pass
         elif status in STATUS_MAPPING['pending']:
@@ -443,6 +449,7 @@ class PaymentTransaction(models.Model):
         # Create the token.
         token = self.env['payment.token'].create({
             'provider_id': self.provider_id.id,
+            'payment_method_id': self.payment_method_id.id,
             'payment_details': payment_method[payment_method['type']]['last4'],
             'partner_id': self.partner_id.id,
             'provider_ref': customer_id,
