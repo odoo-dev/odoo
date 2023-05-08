@@ -31,12 +31,16 @@ class ProductProduct(models.Model):
 
     def _get_attributes(self, pos_config_sudo: PosConfig) -> List[Dict]:
         self.ensure_one()
-
-        attributes_by_ptal_id = self.env["pos.session"].sudo()._get_attributes_by_ptal_id()
-
-        attributes = self._filter_applicable_attributes(attributes_by_ptal_id)
         # Here we replace the price_extra of each attribute value with a price_extra
         # dictionary that includes the price with taxes included and the price with taxes excluded
+        return self._add_price_info_to_attributes(
+            self._filter_applicable_attributes(
+                self.env["pos.session"].sudo()._get_attributes_by_ptal_id()
+            ),
+            pos_config_sudo,
+        )
+
+    def _add_price_info_to_attributes(self, attributes: List, pos_config_sudo: PosConfig) -> List:
         for attribute in attributes:
             for value in attribute["values"]:
                 value.update(
