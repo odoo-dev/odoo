@@ -4,7 +4,7 @@ import urllib.parse
 import werkzeug
 
 from odoo import _, http
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
 from odoo.addons.payment import utils as payment_utils
@@ -106,15 +106,38 @@ class PaymentPortal(portal.CustomerPortal):
         if not currency or not currency.active:
             raise werkzeug.exceptions.NotFound()  # The currency must exist and be active.
 
-        # Select all providers and tokens that match the constraints
+        # Select all the payment methods and tokens that match the constraints.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company_id, partner_sudo.id, amount, currency_id=currency.id, **kwargs
-        )  # In sudo mode to read the fields of providers and partner (if not logged in)
-        if provider_id in providers_sudo.ids:  # Only keep the desired provider if it's suitable
-            providers_sudo = providers_sudo.browse(provider_id)
-        tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
-            providers_sudo.ids, partner_sudo.id
-        )  # In sudo mode to be able to read tokens of other partners.
+        )  # In sudo mode to read the fields of providers and partner (if logged out).
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+            providers_sudo.ids
+        )
+        # if provider_id in providers_sudo.ids:  # Only keep the desired provider if it's suitable TODO ANV re-implement
+        #     providers_sudo = providers_sudo.browse(provider_id)
+        # tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
+        #     providers_sudo.ids, partner_sudo.id
+        # )  # In sudo mode to be able to read tokens of other partners. TODO ANV re-implement
+        # TODO remove me
+        request.env['payment.token'].sudo().search([]).unlink()
+        demo_provider = request.env['payment.provider'].search([('code', '=', 'demo')], limit=1)
+        stripe_provider = request.env['payment.provider'].search([('code', '=', 'stripe')], limit=1)
+        token_1 = request.env['payment.token'].sudo().create({
+            'provider_id': demo_provider.id,
+            'payment_method_id': demo_provider.payment_method_ids[0].id,
+            'payment_details': 'some bullshit test data',
+            'partner_id': partner_sudo.id,
+            'provider_ref': 'nope',
+        })
+        token_2 = request.env['payment.token'].sudo().create({
+            'provider_id': stripe_provider.id,
+            'payment_method_id': stripe_provider.payment_method_ids[0].id,
+            'payment_details': '1234',
+            'partner_id': partner_sudo.id,
+            'provider_ref': 'nope',
+        })
+        # TODO remove me
+        tokens_sudo = request.env['payment.token'].sudo().search([])
 
         # Make sure that the partner's company matches the company passed as parameter.
         company_mismatch = not PaymentPortal._can_partner_pay_in_company(partner_sudo, company)
@@ -123,27 +146,33 @@ class PaymentPortal(portal.CustomerPortal):
         access_token = payment_utils.generate_access_token(partner_sudo.id, amount, currency.id)
 
         portal_page_values = {
+            'res_company': company,  # Display the correct logo in a multi-company environment.
             'company_mismatch': company_mismatch,
             'expected_company': company,
             'partner_is_different': partner_is_different,
         }
         payment_form_values = {
-            'providers': providers_sudo,
-            'tokens': tokens_sudo,
-            'show_tokenize_input': self._compute_show_tokenize_input_mapping(
+            'mode': 'payment',
+            # 'mode': 'validation',  # TODO remove me
+            # 'allow_token_selection': False,  # TODO remove me
+            # 'default_token_id': token_1.id,  # TODO remove me
+            'show_tokenize_input_mapping': self._compute_show_tokenize_input_mapping(
                 providers_sudo, **kwargs
             ),
+        }
+        tx_context = {  # TODO ANV
             'reference_prefix': reference,
             'amount': amount,
             'currency': currency,
             'partner_id': partner_sudo.id,
-            'access_token': access_token,
+            'payment_methods_sudo': payment_methods_sudo,
+            'tokens_sudo': tokens_sudo,
             'transaction_route': '/payment/transaction',
             'landing_route': '/payment/confirmation',
-            'res_company': company,  # Display the correct logo in a multi-company environment
-            **self._get_custom_rendering_context_values(**kwargs),
+            'access_token': access_token,
+            # **self._get_custom_rendering_context_values(**kwargs),
         }
-        rendering_context = {**portal_page_values, **payment_form_values}
+        rendering_context = {**portal_page_values, **payment_form_values, **tx_context}
         return request.render(self._get_payment_page_template_xmlid(**kwargs), rendering_context)
 
     @staticmethod
@@ -231,38 +260,39 @@ class PaymentPortal(portal.CustomerPortal):
         tx_sudo = self._create_transaction(
             amount=amount, currency_id=currency_id, partner_id=partner_id, **kwargs
         )
-        self._update_landing_route(tx_sudo, access_token)  # Add the required parameters to the route
+        self._update_landing_route(tx_sudo, access_token)  # Add the required params to the route.
         return tx_sudo._get_processing_values()
 
     def _create_transaction(
-        self, payment_option_id, reference_prefix, amount, currency_id, partner_id, flow,
-        tokenization_requested, landing_route, is_validation=False,
+        self, provider_id, payment_method_id, token_id, reference_prefix, amount, currency_id,
+        partner_id, flow, tokenization_requested, landing_route, is_validation=False,
         custom_create_values=None, **kwargs
     ):
         """ Create a draft transaction based on the payment context and return it.
 
-        :param int payment_option_id: The payment option handling the transaction, as a
-                                      `payment.provider` id or a `payment.token` id
-        :param str reference_prefix: The custom prefix to compute the full reference
-        :param float|None amount: The amount to pay in the given currency.
-                                  None if in a payment method validation operation
-        :param int|None currency_id: The currency of the transaction, as a `res.currency` id.
-                                     None if in a payment method validation operation
-        :param int partner_id: The partner making the payment, as a `res.partner` id
-        :param str flow: The online payment flow of the transaction: 'redirect', 'direct' or 'token'
-        :param bool tokenization_requested: Whether the user requested that a token is created
-        :param str landing_route: The route the user is redirected to after the transaction
-        :param bool is_validation: Whether the operation is a validation
-        :param dict custom_create_values: Additional create values overwriting the default ones
+        :param int provider_id: The provider of the provider payment method or token, as a
+                                `payment.provider` id.
+        :param int|None payment_method_id: The payment method, if any, as a `payment.method` id.
+        :param int|None token_id: The token, if any, as a `payment.token` id.
+        :param str reference_prefix: The custom prefix to compute the full reference.
+        :param float|None amount: The amount to pay, or `None` if in a validation operation.
+        :param int|None currency_id: The currency of the amount, as a `res.currency` id, or `None`
+                                     if in a validation operation.
+        :param int partner_id: The partner making the payment, as a `res.partner` id.
+        :param str flow: The online payment flow of the transaction: 'redirect', 'direct' or 'token'.
+        :param bool tokenization_requested: Whether the user requested that a token is created.
+        :param str landing_route: The route the user is redirected to after the transaction.
+        :param bool is_validation: Whether the operation is a validation.
+        :param dict custom_create_values: Additional create values overwriting the default ones.
         :param dict kwargs: Locally unused data passed to `_is_tokenization_required` and
-                            `_compute_reference`
-        :return: The sudoed transaction that was created
-        :rtype: recordset of `payment.transaction`
-        :raise: UserError if the flow is invalid
+                            `_compute_reference`.
+        :return: The sudoed transaction that was created.
+        :rtype: payment.transaction
+        :raise UserError: If the flow is invalid.
         """
         # Prepare create values
         if flow in ['redirect', 'direct']:  # Direct payment or payment with redirection
-            provider_sudo = request.env['payment.provider'].sudo().browse(payment_option_id)
+            provider_sudo = request.env['payment.provider'].sudo().browse(provider_id)
             token_id = None
             tokenize = bool(
                 # Don't tokenize if the user tried to force it through the browser's developer tools
@@ -271,7 +301,7 @@ class PaymentPortal(portal.CustomerPortal):
                 and (provider_sudo._is_tokenization_required(**kwargs) or tokenization_requested)
             )
         elif flow == 'token':  # Payment by token
-            token_sudo = request.env['payment.token'].sudo().browse(payment_option_id)
+            token_sudo = request.env['payment.token'].sudo().browse(token_id)
 
             # Prevent from paying with a token that doesn't belong to the current partner (either
             # the current user's partner if logged in, or the partner on behalf of whom the payment
@@ -281,10 +311,10 @@ class PaymentPortal(portal.CustomerPortal):
                 raise AccessError(_("You do not have access to this payment token."))
 
             provider_sudo = token_sudo.provider_id
-            token_id = payment_option_id
+            payment_method_id = token_sudo.payment_method_id.id  # TODO check if should be the parent method's id
             tokenize = False
         else:
-            raise UserError(
+            raise ValidationError(
                 _("The payment should either be direct, with redirection, or made by a token.")
             )
 
@@ -301,6 +331,7 @@ class PaymentPortal(portal.CustomerPortal):
         # Create the transaction
         tx_sudo = request.env['payment.transaction'].sudo().create({
             'provider_id': provider_sudo.id,
+            'payment_method_id': payment_method_id,
             'reference': reference,
             'amount': amount,
             'currency_id': currency_id,
