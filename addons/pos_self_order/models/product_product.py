@@ -21,16 +21,20 @@ class ProductProduct(models.Model):
         # and the space after the brackets (hence the +3)
         return self.code and self.display_name[len(self.code) + 3 :] or self.display_name
 
-    def _get_attributes(self, pos_config_sudo: PosConfig) -> List[Dict]:
+    def _filter_applicable_attributes(self, attributes_by_ptal_id: Dict) -> List[Dict]:
         self.ensure_one()
-        attributes_by_ptal_id = self.env["pos.session"].sudo()._get_attributes_by_ptal_id()
-
-        attributes = [
+        return [
             attributes_by_ptal_id[id]
             for id in self.attribute_line_ids.ids
             if id in attributes_by_ptal_id and attributes_by_ptal_id[id] is not None
         ]
 
+    def _get_attributes(self, pos_config_sudo: PosConfig) -> List[Dict]:
+        self.ensure_one()
+
+        attributes_by_ptal_id = self.env["pos.session"].sudo()._get_attributes_by_ptal_id()
+
+        attributes = self._filter_applicable_attributes(attributes_by_ptal_id)
         # Here we replace the price_extra of each attribute value with a price_extra
         # dictionary that includes the price with taxes included and the price with taxes excluded
         for attribute in attributes:
@@ -55,7 +59,7 @@ class ProductProduct(models.Model):
         # it could happen that a price was passed, but it was 0; in that case we want to use this 0 as the argument,
         # and not the product's list price
         price_info = self.taxes_id.compute_all(
-            self.lst_price if price == None else price, pos_config.currency_id, qty, self
+            self.lst_price if price is None else price, pos_config.currency_id, qty, self
         )
 
         return {
