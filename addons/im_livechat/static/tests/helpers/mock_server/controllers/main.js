@@ -17,7 +17,7 @@ patch(MockServer.prototype, "im_livechat/controllers/main", {
             return this._mockRouteImLivechatGetSession(
                 channel_id,
                 anonymous_name,
-                previous_operator_id,
+                parseInt(previous_operator_id),
                 persisted,
                 context
             );

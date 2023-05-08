@@ -96,6 +96,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/webclient/actions/action_service.js',
             'web/static/src/webclient/actions/action_hook.js',
             'web/static/src/webclient/actions/action_dialog.js',
+            'web/static/src/webclient/actions/reports/utils.js',
             'web/static/src/webclient/actions/reports/report_action.js',
             'web/static/src/webclient/actions/reports/report_hook.js',
             'web/static/src/views/utils.js',
@@ -132,6 +133,7 @@ Help your customers with this chat, and analyse their feedback.
             ('remove', 'web/static/src/legacy/js/services/ajax_service.js'),
             'web/static/src/views/fields/formatters.js',
             'web/static/src/views/fields/file_handler.*',
+            'web/static/src/webclient/actions/reports/utils.js',
 
             'web/static/src/legacy/js/core/misc.js',
             'web/static/src/legacy/js/env.js',

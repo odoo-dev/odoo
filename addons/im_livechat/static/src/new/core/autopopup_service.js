@@ -14,16 +14,17 @@ export class AutopopupService {
     ) {
         this.threadService = threadService;
         this.storeService = storeService;
-
-        if (livechatService.shouldRestoreSession) {
-            threadService.openChat();
-        } else if (!storeService.isSmall && livechatService.rule?.action === "auto_popup") {
-            browser.setTimeout(() => {
-                if (this.shouldOpenChatWindow) {
-                    threadService.openChat();
-                }
-            }, livechatService.rule.auto_popup_timer * 1000);
-        }
+        livechatService.initializedDeferred.then(() => {
+            if (livechatService.shouldRestoreSession) {
+                threadService.openChat();
+            } else if (!storeService.isSmall && livechatService.rule?.action === "auto_popup") {
+                browser.setTimeout(() => {
+                    if (this.shouldOpenChatWindow) {
+                        threadService.openChat();
+                    }
+                }, livechatService.rule.auto_popup_timer * 1000);
+            }
+        });
     }
 
     /**

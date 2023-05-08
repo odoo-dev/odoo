@@ -73,15 +73,6 @@ export async function loadDefaultConfig() {
     const livechatChannelId = pyEnv["im_livechat.channel"].create({
         user_ids: [pyEnv.currentUserId],
     });
-    const channelId = pyEnv["discuss.channel"].create({
-        channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: pyEnv.publicPartnerId }],
-        ],
-        channel_type: "livechat",
-        livechat_channel_id: livechatChannelId,
-        livechat_operator_id: pyEnv.currentPartnerId,
-    });
     patchWithCleanup(session, {
         livechatData: {
             isAvailable: true,
@@ -95,13 +86,13 @@ export async function loadDefaultConfig() {
                 input_placeholder: false,
                 default_message: "Hello, how may I help you?",
                 channel_name: "YourWebsite.com",
-                channel_id: channelId,
+                channel_id: livechatChannelId,
                 current_partner_id: pyEnv.currentPartnerId,
                 default_username: "Visitor",
             },
         },
     });
-    return channelId;
+    return livechatChannelId;
 }
 
 patch(App.prototype, "im_livechat", {

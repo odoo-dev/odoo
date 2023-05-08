@@ -5,6 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
 import { sprintf } from "@web/core/utils/strings";
 import { reactive } from "@odoo/owl";
+import { Deferred } from "@web/core/utils/concurrency";
 
 /**
  * @typedef LivechatRule
@@ -38,6 +39,7 @@ export class LivechatService {
     state = SESSION_STATE.NONE;
     /** @type {LivechatRule} */
     rule;
+    initializedDeferred = new Deferred();
     initialized = false;
     available = false;
     /** @type {string} */
@@ -60,6 +62,7 @@ export class LivechatService {
         this.available = init.available_for_me ?? this.available;
         this.rule = init.rule;
         this.initialized = true;
+        this.initializedDeferred.resolve();
     }
 
     async _createSession({ persisted = false } = {}) {
