@@ -12,7 +12,7 @@ from odoo.addons.pos_self_order.controllers.utils import (
     _get_table_sudo,
 )
 from odoo.addons.point_of_sale.models.product import ProductProduct
-from odoo.addons.point_of_sale.models.pos_order import PosOrder, PosOrderLine
+from odoo.addons.pos_self_order.models.pos_order import PosOrder, PosOrderLine
 from odoo.addons.pos_self_order.models.pos_config import PosConfig
 
 
