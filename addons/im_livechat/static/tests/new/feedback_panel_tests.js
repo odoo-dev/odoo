@@ -20,7 +20,7 @@ QUnit.test("Do not ask feedback if empty", async (assert) => {
     await click(".o-livechat-LivechatButton");
     assert.containsOnce(root, ".o-mail-ChatWindow");
     await click(".o-mail-ChatWindow-command[title*='Close']");
-    assert.containsOnce(root, ".o-livechat-LivechatButton");
+    assert.containsNone(root, ".o-livechat-LivechatButton");
 });
 
 QUnit.test("Close without feedback", async (assert) => {

@@ -65,6 +65,13 @@ export class LivechatService {
         this.initializedDeferred.resolve();
     }
 
+    _updateSession(session) {
+        this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
+        if (session?.operator_pid) {
+            this.cookie.setCookie(this.OPERATOR_COOKIE, session.operator_pid[0], 7 * 24 * 60 * 60); // 1 week cookie.
+        }
+    }
+
     async _createSession({ persisted = false } = {}) {
         const session = await this.rpc(
             "/im_livechat/get_session",
@@ -78,14 +85,7 @@ export class LivechatService {
         );
         if (session && session.operator_pid) {
             this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
-            this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
-            if (session?.operator_pid) {
-                this.cookie.setCookie(
-                    this.OPERATOR_COOKIE,
-                    session.operator_pid[0],
-                    7 * 24 * 60 * 60
-                ); // 1 week cookie.
-            }
+            this._updateSession(session);
         } else {
             this.cookie.deleteCookie(this.SESSION_COOKIE);
         }
@@ -129,8 +129,18 @@ export class LivechatService {
         if (this.state !== SESSION_STATE.NONE) {
             return false;
         }
+        return Boolean(this.cookie.current[this.SESSION_COOKIE]);
+    }
+
+    /**
+     * Update the fold state of the session.
+     *
+     * @param {"folded"|"open"|"closed"} state
+     */
+    async updateFoldState(state) {
         const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
-        return Boolean(session.uuid);
+        session.state = state;
+        this._updateSession(session);
     }
 
     /**

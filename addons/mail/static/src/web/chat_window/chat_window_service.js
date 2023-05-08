@@ -12,6 +12,10 @@ export const CHAT_WINDOW_HIDDEN_WIDTH = 55;
 
 export class ChatWindowService {
     constructor(env, services) {
+        this.setup(env, services);
+    }
+
+    setup(env, services) {
         this.env = env;
         /** @type {import("@mail/core/store_service").Store} */
         this.store = services["mail.store"];

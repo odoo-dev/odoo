@@ -42,7 +42,10 @@ patch(ThreadService.prototype, "im_livechat", {
         if (!thread) {
             return;
         }
-        const chatWindow = this.chatWindowService.insert({ thread });
+        const chatWindow = this.chatWindowService.insert({
+            thread,
+            folded: thread.state === "folded",
+        });
         chatWindow.autofocus++;
     },
 

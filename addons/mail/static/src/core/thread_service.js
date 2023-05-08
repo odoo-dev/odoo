@@ -108,7 +108,7 @@ export class ThreadService {
             await new Promise(setTimeout);
         }
         const newestPersistentMessage = thread.newestPersistentMessage;
-        thread.seen_message_id = thread.newestPersistentMessage?.id ?? false;
+        thread.seen_message_id = newestPersistentMessage?.id ?? false;
         if (
             thread.message_unread_counter > 0 &&
             thread.allowSetLastSeenMessage &&
@@ -836,6 +836,11 @@ export class ThreadService {
             return thread;
         }
         let thread = new Thread(this.store, data);
+        onChange(thread, "message_unread_counter", () => {
+            if (thread.channel) {
+                thread.channel.message_unread_counter = thread.message_unread_counter;
+            }
+        });
         onChange(thread, "isLoaded", () => thread.isLoadedDeferred.resolve());
         onChange(thread, "channelMembers", () => this.store.updateBusSubscription());
         onChange(thread, "is_pinned", () => {

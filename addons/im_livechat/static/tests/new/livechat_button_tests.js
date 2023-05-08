@@ -20,7 +20,7 @@ QUnit.test("open/close temporary channel", async (assert) => {
     assert.containsNone(root, ".o-livechat-LivechatButton");
     await click(".o-mail-ChatWindow-command[title='Close chat window']");
     assert.containsNone(root, ".o-mail-ChatWindow");
-    assert.containsOnce(root, ".o-livechat-LivechatButton");
+    assert.containsNone(root, ".o-livechat-LivechatButton");
 });
 
 QUnit.test("open/close persisted channel", async (assert) => {
