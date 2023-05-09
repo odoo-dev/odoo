@@ -114,6 +114,7 @@ Help your customers with this chat, and analyse their feedback.
             'mail/static/src/web/discuss_app/context_service.js',
             'mail/static/src/discuss_app/**/*',
             ('remove', 'mail/static/src/**/*.dark.scss'),
+            ('remove', 'mail/static/src/emoji_picker/emoji_data.js'),
 
             'im_livechat/static/src/new/**/*',
             'im_livechat/static/src/livechat_data.js',

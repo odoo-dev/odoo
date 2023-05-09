@@ -20,6 +20,23 @@ patch(ThreadService.prototype, "im_livechat", {
         this.notification = services.notification;
     },
 
+    getMessagePostRoute(thread) {
+        if (thread.type === "livechat") {
+            return "/im_livechat/chat_post";
+        }
+        return this._super(thread);
+    },
+
+    getMessagePostParams({ thread, body }) {
+        if (thread.type !== "livechat") {
+            return this._super(thread, body);
+        }
+        return {
+            uuid: thread.uuid,
+            message_content: body,
+        };
+    },
+
     async post(thread, body, params) {
         const _super = this._super;
         if (this.livechatService.state !== SESSION_STATE.PERSISTED && thread.type === "livechat") {
@@ -54,6 +71,7 @@ patch(ThreadService.prototype, "im_livechat", {
         const thread = this._super(data);
         if (thread.type === "livechat" && isUnknown) {
             thread.welcomeMessage = this.messageService.insert({
+                id: -1,
                 body: this.livechatService.options.default_message,
                 res_id: thread.id,
                 model: thread.model,
