@@ -6,5 +6,8 @@
                 <Message message="props.thread.welcomeMessage" thread="props.thread"/>
             </div>
         </xpath>
+        <xpath expr="//*[hasclass('o-mail-Thread-empty')]" position="replace">
+            <t t-if="props.thread.type !== 'livechat'">$0</t>
+        </xpath>
     </t>
 </templates>

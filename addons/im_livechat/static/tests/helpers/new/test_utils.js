@@ -25,7 +25,12 @@ import {
     setupManager,
     setupMessagingServiceRegistries,
 } from "@mail/../tests/helpers/webclient_setup";
-import { afterNextRender, getClick, getInsertText } from "@mail/../tests/helpers/test_utils";
+import {
+    afterNextRender,
+    getClick,
+    getInsertText,
+    getWaitUntil,
+} from "@mail/../tests/helpers/test_utils";
 
 // =============================================================================
 // HELPERS
@@ -44,6 +49,10 @@ export function insertText(selector, text, options) {
 
 export function triggerHotkey(key) {
     return getTriggerHotkey({ target: shadowRoot[0] })(key);
+}
+
+export function waitUntil(selector, count) {
+    return getWaitUntil({ target: shadowRoot[0] })(selector, count);
 }
 
 let cookie = {};

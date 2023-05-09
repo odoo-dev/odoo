@@ -45,10 +45,6 @@ patch(Thread.prototype, "im_livechat/disabled", {
     get allowOpenInDiscuss() {
         return false;
     },
-
-    get hasNewMessageSeparator() {
-        return false;
-    },
 });
 
 patch(ThreadService.prototype, "im_livechat/disabled", {

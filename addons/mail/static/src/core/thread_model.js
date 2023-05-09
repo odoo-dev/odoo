@@ -413,10 +413,6 @@ export class Thread {
         return this.memberCount - this.channelMembers.length;
     }
 
-    get hasNewMessageSeparator() {
-        return true;
-    }
-
     get hasTypingMembers() {
         return this.typingMembers.length !== 0;
     }

@@ -120,6 +120,8 @@ export class ThreadService {
             }).then(() => {
                 this.updateSeen(thread, newestPersistentMessage.id);
             });
+        } else if (newestPersistentMessage) {
+            this.updateSeen(thread);
         }
         if (thread.hasNeedactionMessages) {
             this.markAllMessagesAsRead(thread);

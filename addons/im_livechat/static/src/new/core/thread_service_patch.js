@@ -2,7 +2,7 @@
 
 import { SESSION_STATE } from "@im_livechat/new/core/livechat_service";
 import { ThreadService, threadService } from "@mail/core/thread_service";
-import { createLocalId } from "@mail/utils/misc";
+import { createLocalId, onChange } from "@mail/utils/misc";
 import { markup } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
@@ -21,15 +21,15 @@ patch(ThreadService.prototype, "im_livechat", {
     },
 
     getMessagePostRoute(thread) {
-        if (thread.type === "livechat") {
-            return "/im_livechat/chat_post";
+        if (thread.type !== "livechat") {
+            return this._super(...arguments);
         }
-        return this._super(thread);
+        return "/im_livechat/chat_post";
     },
 
     getMessagePostParams({ thread, body }) {
         if (thread.type !== "livechat") {
-            return this._super(thread, body);
+            return this._super(...arguments);
         }
         return {
             uuid: thread.uuid,
@@ -38,6 +38,9 @@ patch(ThreadService.prototype, "im_livechat", {
     },
 
     async post(thread, body, params) {
+        if (thread.type !== "livechat") {
+            return this._super(...arguments);
+        }
         const _super = this._super;
         if (this.livechatService.state !== SESSION_STATE.PERSISTED && thread.type === "livechat") {
             const chatWindow = this.store.chatWindows.find(
@@ -68,7 +71,7 @@ patch(ThreadService.prototype, "im_livechat", {
 
     insert(data) {
         const isUnknown = !(createLocalId(data.model, data.id) in this.store.threads);
-        const thread = this._super(data);
+        const thread = this._super(...arguments);
         if (thread.type === "livechat" && isUnknown) {
             thread.welcomeMessage = this.messageService.insert({
                 id: -1,
@@ -77,13 +80,22 @@ patch(ThreadService.prototype, "im_livechat", {
                 model: thread.model,
                 author: thread.operator,
             });
+            onChange(thread, "state", () =>
+                this.livechatService.updateSession({ state: thread.state })
+            );
+            onChange(thread, "seen_message_id", () =>
+                this.livechatService.updateSession({ seen_message_id: thread.seen_message_id })
+            );
+            onChange(thread, "message_unread_counter", () => {
+                this.livechatService.updateSession({ channel: thread.channel });
+            });
         }
         return thread;
     },
 
     async update(thread, data) {
-        this._super(thread, data);
-        if (data?.operator_pid) {
+        this._super(...arguments);
+        if (data.operator_pid) {
             thread.operator = this.personaService.insert({
                 type: "partner",
                 id: data.operator_pid[0],

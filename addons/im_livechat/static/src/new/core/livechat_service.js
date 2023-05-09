@@ -65,13 +65,6 @@ export class LivechatService {
         this.initializedDeferred.resolve();
     }
 
-    _updateSession(session) {
-        this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
-        if (session?.operator_pid) {
-            this.cookie.setCookie(this.OPERATOR_COOKIE, session.operator_pid[0], 7 * 24 * 60 * 60); // 1 week cookie.
-        }
-    }
-
     async _createSession({ persisted = false } = {}) {
         const session = await this.rpc(
             "/im_livechat/get_session",
@@ -83,13 +76,37 @@ export class LivechatService {
             },
             { shadow: true }
         );
-        if (session && session.operator_pid) {
-            this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
-            this._updateSession(session);
-        } else {
+        if (!session) {
             this.cookie.deleteCookie(this.SESSION_COOKIE);
+            return;
+        }
+        session.isLoaded = true;
+        session.status = "ready";
+        if (session.operator_pid) {
+            this.state = persisted ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
+            this.updateSession(session);
         }
         return session;
+    }
+
+    /**
+     * Update the session with the given values and update the cookies.
+     * Ignore if the session is not active.
+     *
+     * @param {Object} values
+     */
+    updateSession(values) {
+        if ([SESSION_STATE.NONE, SESSION_STATE.CLOSED].includes(this.state)) {
+            return;
+        }
+        const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
+        Object.assign(session, values);
+        this.cookie.deleteCookie(this.SESSION_COOKIE);
+        this.cookie.deleteCookie(this.OPERATOR_COOKIE);
+        this.cookie.setCookie(this.SESSION_COOKIE, JSON.stringify(session), 60 * 60 * 24); // 1 day cookie.
+        if (session?.operator_pid) {
+            this.cookie.setCookie(this.OPERATOR_COOKIE, session.operator_pid[0], 7 * 24 * 60 * 60); // 1 week cookie.
+        }
     }
 
     async leaveSession() {
@@ -99,6 +116,7 @@ export class LivechatService {
         if (!session?.uuid) {
             return;
         }
+        this.busService.deleteChannel(session.uuid);
         await this.rpc("/im_livechat/visitor_leave_session", { uuid: session.uuid });
     }
 
@@ -114,9 +132,12 @@ export class LivechatService {
         }
         if (!session || (!session.uuid && persisted)) {
             session = await this._createSession({ persisted });
-            if (session.uuid) {
+            if (session?.uuid) {
                 this.busService.addChannel(session.uuid);
             }
+        }
+        if (this.state === SESSION_STATE.NONE && session) {
+            this.state = session?.uuid ? SESSION_STATE.PERSISTED : SESSION_STATE.CREATED;
         }
         return session;
     }
@@ -130,17 +151,6 @@ export class LivechatService {
             return false;
         }
         return Boolean(this.cookie.current[this.SESSION_COOKIE]);
-    }
-
-    /**
-     * Update the fold state of the session.
-     *
-     * @param {"folded"|"open"|"closed"} state
-     */
-    async updateFoldState(state) {
-        const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
-        session.state = state;
-        this._updateSession(session);
     }
 
     /**

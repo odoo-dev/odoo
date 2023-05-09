@@ -682,31 +682,39 @@ export const click = getClick({ afterNextRender });
 export const insertText = getInsertText();
 
 /**
- * Function that wait until a selector is present in the DOM
- *
- * @param {string} selector
+ * @param {Object} param0
+ * @param {HTMLElement|undefined} param0.target
  */
-export function waitUntil(selector, count = 1) {
-    return new Promise((resolve, reject) => {
-        if ($(selector).length === count) {
-            return resolve($(selector));
-        }
-        const timer = setTimeout(() => {
-            observer.disconnect();
-            reject(new Error(`Waited 5 second for ${selector}`));
-            console.error(`Waited 5 second for ${selector}`);
-        }, 5000);
-        const observer = new MutationObserver((mutations) => {
-            if ($(selector).length === count) {
-                resolve($(selector));
-                observer.disconnect();
-                clearTimeout(timer);
+export function getWaitUntil({ target } = {}) {
+    const $target = $(target ?? document);
+    /**
+     * Function that wait until a selector is present in the DOM
+     *
+     * @param {string} selector
+     */
+    return function waitUntil(selector, count = 1) {
+        return new Promise((resolve, reject) => {
+            if ($target.find(selector).length === count) {
+                return resolve($target.find(selector));
             }
-        });
+            const timer = setTimeout(() => {
+                observer.disconnect();
+                reject(new Error(`Waited 5 second for ${selector}`));
+                console.error(`Waited 5 second for ${selector}`);
+            }, 5000);
+            const observer = new MutationObserver((mutations) => {
+                if ($target.find(selector).length === count) {
+                    resolve($target.find(selector));
+                    observer.disconnect();
+                    clearTimeout(timer);
+                }
+            });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
+            observer.observe($target[0], {
+                childList: true,
+                subtree: true,
+            });
         });
-    });
+    };
 }
+export const waitUntil = getWaitUntil();
