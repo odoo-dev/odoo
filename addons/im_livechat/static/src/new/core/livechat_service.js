@@ -109,11 +109,17 @@ export class LivechatService {
         }
     }
 
-    async leaveSession() {
+    /**
+     * @param {object} param0
+     * @param {boolean} param0.notifyServer Whether to call the
+     * `visitor_leave_session` route. Note that this route will
+     * never be called if the session was not persisted.
+     */
+    async leaveSession({ notifyServer = true } = {}) {
         const session = JSON.parse(this.cookie.current[this.SESSION_COOKIE] ?? "{}");
         this.cookie.deleteCookie(this.SESSION_COOKIE);
         this.state = SESSION_STATE.CLOSED;
-        if (!session?.uuid) {
+        if (!session?.uuid || !notifyServer) {
             return;
         }
         this.busService.deleteChannel(session.uuid);

@@ -39,10 +39,8 @@ patch(ThreadService.prototype, "im_livechat", {
 
     async post(thread, body, params) {
         const _super = this._super;
+        const chatWindow = this.store.chatWindows.find((c) => c.threadLocalId === thread.localId);
         if (this.livechatService.state !== SESSION_STATE.PERSISTED && thread.type === "livechat") {
-            const chatWindow = this.store.chatWindows.find(
-                (c) => c.threadLocalId === thread.localId
-            );
             thread = await this.getLivechatThread({ persisted: true });
             if (!thread) {
                 this.chatWindowService.close(chatWindow);
@@ -51,7 +49,12 @@ patch(ThreadService.prototype, "im_livechat", {
             // replace temporary thread by the persisted one.
             chatWindow.thread = thread;
         }
-        return _super(thread, body, params);
+        const message = await _super(thread, body, params);
+        if (!message) {
+            this.notificationService.add(_t("Session expired... Please refresh and try again."));
+            this.chatWindowService.close(chatWindow);
+            this.livechatService.leaveSession({ notifyServer: false });
+        }
     },
 
     async openChat() {

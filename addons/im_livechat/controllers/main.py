@@ -240,6 +240,9 @@ class LivechatController(http.Controller):
             message_type='comment',
             subtype_xmlid='mail.mt_comment'
         )
+        message_format = message.message_format()[0]
+        if 'temporary_id' in request.env.context:
+            message_format['temporary_id'] = request.env.context['temporary_id']
         return message.message_format()[0] if message else False
 
     @http.route(['/im_livechat/chat_history'], type="json", auth="public", cors="*")

@@ -899,6 +899,9 @@ export class ThreadService {
             rawMentions,
             thread,
         });
+        const lastMessageId = this.messageService.getLastMessageId();
+        const tmpId = lastMessageId + 0.01;
+        params.context = { ...params.context, temporary_id: tmpId };
         if (parentId) {
             params.post_data.parent_id = parentId;
         }
@@ -907,7 +910,7 @@ export class ThreadService {
             params.thread_model = thread.model;
         } else {
             const tmpData = {
-                id: params.context?.temporary_id,
+                id: tmpId,
                 attachments: attachments,
                 res_id: thread.id,
                 model: "discuss.channel",
@@ -940,12 +943,19 @@ export class ThreadService {
                 body: markup(prettyContent),
                 res_id: thread.id,
                 model: thread.model,
-                temporary_id: params.context?.temporary_id,
+                temporary_id: tmpId,
             });
             thread.messages.push(tmpMsg);
             thread.seen_message_id = tmpMsg.id;
         }
         const data = await this.rpc(this.getMessagePostRoute(thread), params);
+        if (thread.type !== "chatter") {
+            removeFromArrayWithPredicate(thread.messages, ({ id }) => id === tmpMsg.id);
+            delete this.store.messages[tmpMsg.id];
+        }
+        if (!data) {
+            return;
+        }
         if (data.parentMessage) {
             data.parentMessage.body = data.parentMessage.body
                 ? markup(data.parentMessage.body)
@@ -962,10 +972,6 @@ export class ThreadService {
         }
         if (!message.isEmpty && this.store.hasLinkPreviewFeature) {
             this.rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
-        }
-        if (thread.type !== "chatter") {
-            removeFromArrayWithPredicate(thread.messages, ({ id }) => id === tmpMsg.id);
-            delete this.store.messages[tmpMsg.id];
         }
         return message;
     }
@@ -985,12 +991,9 @@ export class ThreadService {
                 .map((recipient) => recipient.persona.id);
             partner_ids?.push(...recipientIds);
         }
-        const lastMessageId = this.messageService.getLastMessageId();
-        const tmpId = lastMessageId + 0.01;
         return {
             context: {
                 mail_post_autofollow: !isNote && thread.hasWriteAccess,
-                temporary_id: tmpId,
             },
             post_data: {
                 body: await prettifyMessageContent(body, validMentions),
