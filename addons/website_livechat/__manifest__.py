@@ -60,6 +60,9 @@ Allow website visitors to chat with the collaborators. This module also brings a
             'website_livechat/static/src/external_lib/**/*',
             'website_livechat/static/src/legacy/public_livechat.scss',
         ],
+        'im_livechat.assets_embed': [
+            'website_livechat/static/src/external_lib/new/**/*',
+        ],
     },
     'license': 'LGPL-3',
 }
