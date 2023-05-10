@@ -18,8 +18,8 @@ export class AutopopupService {
             if (livechatService.shouldRestoreSession) {
                 threadService.openChat();
             } else if (!storeService.isSmall && livechatService.rule?.action === "auto_popup") {
-                browser.setTimeout(() => {
-                    if (this.shouldOpenChatWindow) {
+                browser.setTimeout(async () => {
+                    if (await this.shouldOpenChatWindow()) {
                         threadService.openChat();
                     }
                 }, livechatService.rule.auto_popup_timer * 1000);
@@ -32,10 +32,10 @@ export class AutopopupService {
      * there is an available operator and if no chat window linked to
      * the session exists.
      *
-     * @returns {boolean}
+     * @returns {Promise<boolean>}
      */
-    get shouldOpenChatWindow() {
-        const thread = this.threadService.getLivechatThread();
+    async shouldOpenChatWindow() {
+        const thread = await this.threadService.getLivechatThread();
         return this.storeService.chatWindows.every(
             (chatWindow) => chatWindow.thread.localId !== thread?.localId
         );

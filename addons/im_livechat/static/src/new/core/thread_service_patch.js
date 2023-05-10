@@ -38,9 +38,6 @@ patch(ThreadService.prototype, "im_livechat", {
     },
 
     async post(thread, body, params) {
-        if (thread.type !== "livechat") {
-            return this._super(...arguments);
-        }
         const _super = this._super;
         if (this.livechatService.state !== SESSION_STATE.PERSISTED && thread.type === "livechat") {
             const chatWindow = this.store.chatWindows.find(
