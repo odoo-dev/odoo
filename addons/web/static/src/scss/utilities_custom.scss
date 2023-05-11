@@ -182,6 +182,33 @@ $utilities: map-merge(
             property: min-width,
             values: 0,
         ),
+
+        // For the other 'text-X' classes.
+        // See bootstrap_review_backend.scss
+        "color": map-merge( 
+            map-get($utilities, "color"),
+            (
+                values: (
+                    "body": $body-color,
+                    "muted": $text-muted,
+                    "reset": inherit,
+                ),
+                local-vars: (
+                    "text-opacity": 1
+                ),
+            ),
+        ),
+        "background-color": map-merge( 
+            map-get($utilities, "background-color"),
+            (
+                values: (
+                    "transparent": transparent,
+                ),
+                local-vars: (
+                    "bg-opacity": inherit
+                ),
+            ),
+        )
     )
 );
 
