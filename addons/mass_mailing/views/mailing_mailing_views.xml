@@ -74,7 +74,7 @@
 
                         <field name="state" readonly="1" widget="statusbar"/>
                     </header>
-                    <div class="alert alert-info my-0 mx-3 text-center" role="alert"
+                    <div class="alert alert-info mb-2 text-center" role="alert"
                         attrs="{'invisible': ['&amp;','&amp;','&amp;','&amp;','&amp;',('state', '!=', 'in_queue'),('sent', '=', 0),('canceled', '=', 0),('scheduled', '=', 0),('failed', '=', 0),('warning_message', '=', False)]}">
                         <div class="o_mails_canceled" attrs="{'invisible': [('canceled', '=', 0)]}">
                             <button class="btn-link py-0"
