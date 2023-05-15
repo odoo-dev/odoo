@@ -1096,6 +1096,73 @@
   --secondaryToolbarButton-spreadOdd-icon: url(images/secondaryToolbarButton-spreadOdd.svg);
   --secondaryToolbarButton-spreadEven-icon: url(images/secondaryToolbarButton-spreadEven.svg);
   --secondaryToolbarButton-documentProperties-icon: url(images/secondaryToolbarButton-documentProperties.svg);
+
+
+  --gray-100-rgb: 249, 250, 251;
+  --gray-200-rgb: 231, 233, 237;
+  --gray-300-rgb: 216, 218, 221;
+  --gray-400-rgb: 154, 156, 165;
+  --gray-500-rgb: 124, 127, 137;
+  --gray-600-rgb: 95, 99, 111;
+  --gray-700-rgb: 55, 65, 81;
+  --gray-800-rgb: 31, 41, 55;
+  --gray-900-rgb: 17, 24, 39;
+  --bs-primary-rgb: 113, 75, 103;
+  --bs-secondary-rgb: var(--gray-200-rgb);
+  --bs-success-rgb: 40, 167, 69;
+  --bs-info-rgb: 23, 162, 184;
+  --bs-warning-rgb: 233, 157, 0;
+  --bs-danger-rgb: 212, 76, 89;
+  --bs-light-rgb: 255, 255, 255;
+  --bs-dark-rgb: 17, 24, 39;
+  --bs-white-rgb: 255, 255, 255;
+  --bs-black-rgb: 0, 0, 0;
+  --bs-body-color-rgb: 55, 65, 81;
+  --bs-body-bg-rgb: 249, 250, 251;
+  --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, "Odoo Unicode Support Noto", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --body-font-family: var(--font-sans-serif);
+  --body-font-size: 0.875rem;
+  --body-font-weight: 400;
+  --body-line-height: 1.5;
+  --btn-font-weight: 500;
+  --btn-font-size: var(--body-font-size);
+  --btn-line-height: var(--body-line-height);
+  --border-radius: 0.25rem;
+}
+
+.btn {
+  display: inline-block;
+  font-weight: var(--btn-font-weight);
+  line-height: var(--btn-line-height);
+  color: rgba(var(--btn-body-color-rgb, --bs-body-color-rgba), 1);
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: rgba(var(--btn-bg-color-rgb, --bs-body-bg-rgb), 1);
+  border: 1px solid rgba(var(--btn-border-color-rgb, --bs-body-bg-rgb), 1);
+  padding: 0.3125rem 0.625rem;
+  font-size: var(--btn-font-weight);
+  border-radius: var(--border-radius);
+  transition: none;
+}
+
+.btn-primary {
+  --btn-body-color-rgb: var(--bs-white-rgb);
+  --btn-bg-color-rgb: var(--bs-primary-rgb);
+}
+
+.btn-primary:hover {
+  --btn-bg-color-rgb: 98, 65, 89;
+}
+
+.btn-secondary {
+  --btn-bg-color-rgb: var(--bs-secondary-rgb);
+}
+
+.btn-secondary:hover {
+  --btn-bg-color-rgb: var(--gray-300-rgb);
 }
 
 [dir="rtl"]:root {
@@ -1367,7 +1434,7 @@ select {
   position: relative;
   left: 0;
   right: 0;
-  z-index: 9999;
+  z-index: 1020;
   cursor: default;
 }
 
@@ -2056,7 +2123,7 @@ select {
   width: var(--scale-select-container-width);
   padding: 0;
   overflow: hidden;
-  background-color: var(--dropdown-btn-bg-color);
+  background-color: var(--bs-white-rgb);
 }
 [dir="ltr"] .dropdownToolbarButton::after {
   right: 7px;
@@ -2092,11 +2159,10 @@ select {
   -webkit-padding-start: 4px;
           padding-inline-start: 4px;
   border: none;
-  background-color: var(--dropdown-btn-bg-color);
 }
 .dropdownToolbarButton > select:hover,
 .dropdownToolbarButton > select:focus-visible {
-  background-color: var(--button-hover-color);
+  background-color: rgb(var(--gray-200-rgb));
   color: var(--toggled-btn-color);
 }
 .dropdownToolbarButton > select > option {

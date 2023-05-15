@@ -25,6 +25,10 @@ tfoot {
   position: relative; // normally useless but required by bootstrap-datepicker
   background-color: $o-webclient-background-color;
   color-scheme: $o-webclient-color-scheme;
+
+  .o_input {
+    background-color: $o-webclient-background-color;
+  }
 }
 
 // ------------------------------------------------------------------
