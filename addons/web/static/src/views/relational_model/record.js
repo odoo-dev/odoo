@@ -49,6 +49,10 @@ export class Record extends DataPoint {
     // Getter
     // -------------------------------------------------------------------------
 
+    get canBeAbandoned() {
+        return this.isNew && !this.isDirty;
+    }
+
     get hasData() {
         return true;
     }
@@ -194,7 +198,6 @@ export class Record extends DataPoint {
                 },
             });
         }
-        this.isDirty = true;
         this._invalidFields.add(fieldName);
     }
 

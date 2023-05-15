@@ -10489,7 +10489,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("multiple clicks on Add do not create invalid rows", async function (assert) {
+    QUnit.test("multiple clicks on Add do not create invalid rows", async function (assert) {
         serverData.models.foo.onchanges = {
             m2o: function () {},
         };
@@ -10914,7 +10914,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: non dirty record with required fields",
         async function (assert) {
             await makeView({
@@ -11339,7 +11339,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "editable list view: multi edition of many2one: set same value",
         async function (assert) {
             assert.expect(4);
@@ -11357,7 +11357,7 @@ QUnit.module("Views", (hooks) => {
                     if (args.method === "write") {
                         assert.deepEqual(
                             args.args,
-                            [[1, 2, 3, 4], { m2o: 1 }],
+                            [[1, 2, 3, 4], { m2o: 2 }],
                             "should force write value on all selected records"
                         );
                     }
@@ -11374,14 +11374,14 @@ QUnit.module("Views", (hooks) => {
 
             // set m2o to 1 in first record
             await click(target.querySelector(".o_data_row .o_data_cell"));
-            await editInput(target, ".o_data_row [name=m2o] input", "Value 1");
+            await editInput(target, ".o_data_row [name=m2o] input", "Value 2");
             await click(target.querySelector(".o-autocomplete--dropdown-item"));
             assert.containsOnce(target, ".modal");
 
             await click(target, ".modal .modal-footer .btn-primary");
             assert.strictEqual(
                 $(target).find(".o_list_many2one").text(),
-                "Value 1Value 1Value 1Value 1"
+                "Value 2Value 2Value 2Value 2"
             );
         }
     );
@@ -13619,7 +13619,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("editing then pressing TAB in editable grouped list", async function (assert) {
+    QUnit.test("editing then pressing TAB in editable grouped list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14010,7 +14010,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resId: 3"]);
     });
 
-    QUnit.tttt("keyboard navigation from last cell in editable list", async (assert) => {
+    QUnit.test("keyboard navigation from last cell in editable list", async (assert) => {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14097,7 +14097,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_selected_row");
     });
 
-    QUnit.tttt("keyboard navigation from last cell in editable grouped list", async (assert) => {
+    QUnit.test("keyboard navigation from last cell in editable grouped list", async (assert) => {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -14223,7 +14223,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(document.activeElement, getDataRow(3).querySelector("[name=foo] input"));
     });
 
-    QUnit.tttt("keyboard navigation from last cell in multi-edit list", async (assert) => {
+    QUnit.test("keyboard navigation from last cell in multi-edit list", async (assert) => {
         await makeView({
             type: "list",
             resModel: "foo",

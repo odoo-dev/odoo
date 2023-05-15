@@ -237,19 +237,25 @@ export class ListController extends Component {
         }
     }
 
-    onClickCreate() {
-        this.createRecord();
+    async onClickCreate() {
+        this.disableButtons();
+        await this.createRecord();
+        this.enableButtons();
     }
 
-    onClickDiscard() {
-        this.model.root.leaveEditMode({ discard: true });
+    async onClickDiscard() {
+        this.disableButtons();
+        await this.model.root.leaveEditMode({ discard: true });
+        this.enableButtons();
     }
 
     async onClickSave() {
+        this.disableButtons();
         const saved = await this.model.root.editedRecord.save({ force: true });
         if (saved) {
-            this.model.root.leaveEditMode();
+            await this.model.root.leaveEditMode();
         }
+        this.enableButtons();
     }
 
     onMouseDownDiscard(mouseDownEvent) {
@@ -504,6 +510,21 @@ export class ListController extends Component {
     }
 
     async afterExecuteActionButton(clickParams) {}
+
+    disableButtons() {
+        const btns = [...this.rootRef.el.querySelectorAll("button:not([disabled])")];
+        for (const btn of btns) {
+            btn.setAttribute("disabled", "1");
+        }
+        this.disabledButtons = btns;
+    }
+
+    enableButtons() {
+        for (const btn of this.disabledButtons) {
+            btn.removeAttribute("disabled");
+        }
+        this.disabledButtons = null;
+    }
 
     onWillSaveMulti(editedRecord, changes, validSelectedRecords) {
         if (this.hasMousedownDiscard) {

@@ -148,8 +148,19 @@ export class DynamicList extends DataPoint {
                     this._removeRecords([this.editedRecord]);
                 }
             } else {
-                canProceed = await this.editedRecord.save();
+                if (!this.model._urgentSave) {
+                    await this.editedRecord.checkValidity();
+                    if (!this.editedRecord) {
+                        return true;
+                    }
+                }
+                if (this.editedRecord.isNew && !this.editedRecord.isDirty) {
+                    this._removeRecords([this.editedRecord]);
+                } else {
+                    canProceed = await this.editedRecord.save();
+                }
             }
+
             if (canProceed && this.editedRecord) {
                 this.model._updateConfig(
                     this.editedRecord.config,
@@ -164,6 +175,9 @@ export class DynamicList extends DataPoint {
     }
 
     async enterEditMode(record) {
+        if (this.editedRecord === record) {
+            return true;
+        }
         const canProceed = await this.leaveEditMode();
         if (canProceed) {
             this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });

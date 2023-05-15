@@ -534,7 +534,17 @@ QUnit.module("Fields", (hooks) => {
 
             await editInput(target, ".o_progressbar_value .o_input", "trente sept virgule neuf");
             await clickSave(target);
-            assert.containsOnce(target, ".o_form_dirty", "The form has not been saved");
+            assert.containsOnce(
+                target,
+                ".o_form_status_indicator span.text-danger",
+                "The form has not been saved"
+            );
+            assert.strictEqual(
+                target
+                    .querySelector(".o_form_status_indicator span.text-danger")
+                    .textContent.trim(),
+                "Unable to save"
+            );
             assert.verifySteps(["Show error message"], "The error message was shown correctly");
         }
     );
