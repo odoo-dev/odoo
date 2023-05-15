@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from werkzeug.urls import url_quote
-
 from odoo import models, fields, api
-from odoo.tools import split_every
 
 
 class ResConfigSettings(models.TransientModel):
@@ -13,7 +10,7 @@ class ResConfigSettings(models.TransientModel):
         compute="_compute_pos_module_pos_self_order", store=True, readonly=False
     )
     pos_self_order_table_mode = fields.Boolean(
-        compute="_compute_pos_module_pos_self_order", store=True, readonly=False
+        compute="_compute_pos_self_order_table_mode", store=True, readonly=False
     )
     pos_self_order_pay_after = fields.Selection(
         [("each", "Each Order"), ("meal", "Meal")],
@@ -34,15 +31,13 @@ class ResConfigSettings(models.TransientModel):
         compute="_compute_pos_module_pos_self_order", store=True, readonly=False
     )
 
-    @api.depends("pos_config_id")
+    @api.depends("pos_config_id", "pos_module_pos_restaurant")
     def _compute_pos_module_pos_self_order(self):
         for res_config in self:
-            if not res_config.pos_config_id.self_order_view_mode:
+            if not res_config.pos_module_pos_restaurant:
                 res_config.update(
                     {
                         "pos_self_order_view_mode": False,
-                        "pos_self_order_table_mode": False,
-                        "pos_self_order_pay_after": "each",
                         "pos_self_order_image": False,
                         "pos_self_order_image_name": False,
                     }
@@ -51,23 +46,28 @@ class ResConfigSettings(models.TransientModel):
                 res_config.update(
                     {
                         "pos_self_order_view_mode": res_config.pos_config_id.self_order_view_mode,
-                        "pos_self_order_table_mode": res_config.pos_config_id.self_order_table_mode,
-                        "pos_self_order_pay_after": res_config.pos_config_id.self_order_pay_after,
                         "pos_self_order_image": res_config.pos_config_id.self_order_image,
                         "pos_self_order_image_name": res_config.pos_config_id.self_order_image_name,
                     }
                 )
 
-    # self_order_table_mode is only available if self_order_view_mode is True
-    @api.onchange("pos_self_order_view_mode")
-    def _onchange_pos_self_order_view_mode(self):
-        if not self.pos_self_order_view_mode:
-            self.pos_self_order_table_mode = False
-
-    @api.onchange("pos_self_order_table_mode")
-    def _onchange_pos_self_order_table_mode(self):
-        if self.pos_self_order_table_mode:
-            self.pos_self_order_view_mode = True
+    @api.depends("pos_config_id", "pos_self_order_view_mode")
+    def _compute_pos_self_order_table_mode(self):
+        for res_config in self:
+            if not res_config.pos_self_order_view_mode:
+                res_config.update(
+                    {
+                        "pos_self_order_table_mode": False,
+                        "pos_self_order_pay_after": "each",
+                    }
+                )
+            else:
+                res_config.update(
+                    {
+                        "pos_self_order_table_mode": res_config.pos_config_id.self_order_table_mode,
+                        "pos_self_order_pay_after": res_config.pos_config_id.self_order_pay_after,
+                    }
+                )
 
     def generate_qr_codes_page(self):
         """
