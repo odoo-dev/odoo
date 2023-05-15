@@ -21,23 +21,31 @@
     <template id="qr_codes_page">
         <t t-call="web.basic_layout">
             <div class="page">
-                <h1 class="text-center mb-5">
+                <h1 class="text-center">
                     QR Code Menu
                 </h1>
                 <!-- There is a very annoying problem here:
                 wkhtmltopdf does not handle flex-wrap. ( at least not in this version )
                 This makes it so the bootstrap grid system does not work.
                 We have to do a workaround -->
-                <t t-foreach="pages_of_tables" t-as="page_of_tables">
-                    <div style="break-after: page;">
-                        <t t-foreach="page_of_tables" t-as="row_of_tables">
-                            <div class="d-flex">
-                                <t t-foreach="row_of_tables" t-as="table">
-                                    <t t-call="pos_self_order.qr_code"/>
-                                </t>
+
+                <t t-foreach="floors" t-as="floor">
+                <!-- MDN states that "page-break-after" has been replaced by "break-after",
+                but "break-after" is not supported in this version of wkhtmltopdf so we 
+                have to keep using "page-break-after" -->
+                    <div style="page-break-after: always;">
+                        <h3 t-if="floor.get('name')" t-out="floor['name']" class="mb-5"/>
+                            <div 
+                                t-foreach="floor['rows_of_tables']" 
+                                t-as="row_of_tables"
+                                class="d-flex"
+                                >
+                                <t t-foreach="row_of_tables" 
+                                    t-as="table"
+                                    t-call="pos_self_order.qr_code"
+                                    />
                             </div>
-                        </t>
-                    </div>
+                    </div>  
                 </t>
             </div>
         </t>
@@ -45,9 +53,12 @@
 
     <template id="qr_code">
         <t t-set="qr_code_size" t-value="180"/>
-        <div style="padding: 0px 40px; margin-bottom:40px;">
-            <h4 class="fw-bold text-center" style="margin-top: 20px;" t-if="table['id']">
-                Table: <t t-esc="table['name']"/>
+        <div style="padding: 0px 40px; margin-bottom:40px; page-break-inside: avoid;">
+            <h4 class="fw-bold text-center" 
+                style="margin-top: 20px" 
+                t-if="table['id']"
+                >
+                Table: <t t-esc="table['name']"/>   
             </h4>
             <div class="p-3" >
                 <div class="mt-1 mb-4 position-relative top-0 start-0">

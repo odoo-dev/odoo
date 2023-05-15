@@ -2,6 +2,7 @@
 
 
 import werkzeug
+from typing import Optional
 
 from odoo.http import request
 from odoo.addons.http_routing.models.ir_http import unslug
@@ -25,7 +26,7 @@ def get_pos_config_sudo(pos_config_name: str) -> PosConfig:
             ],
             limit=1,
         )
-    ) or _raise(werkzeug.exceptions.NotFound)
+    ) or _raise(werkzeug.exceptions.NotFound())
 
 
 def get_any_pos_config_sudo() -> PosConfig:
@@ -35,10 +36,10 @@ def get_any_pos_config_sudo() -> PosConfig:
     """
     return (
         request.env["pos.config"].sudo().search([("self_order_view_mode", "=", True)], limit=1)
-    ) or _raise(werkzeug.exceptions.NotFound)
+    ) or _raise(werkzeug.exceptions.NotFound())
 
 
-def get_table_sudo(table_access_token: str) -> RestaurantTable:
+def get_table_sudo(table_access_token: Optional[str]) -> Optional[RestaurantTable]:
     return table_access_token and (
         request.env["restaurant.table"]
         .sudo()

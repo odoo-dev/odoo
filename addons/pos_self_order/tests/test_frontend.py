@@ -15,7 +15,6 @@ class TestFrontendMobile(odoo.tests.HttpCase):
             {
                 "name": "BarTest",
                 "module_pos_restaurant": True,
-                "is_table_management": True,
                 "self_order_view_mode": True,
                 "self_order_table_mode": False,
             }

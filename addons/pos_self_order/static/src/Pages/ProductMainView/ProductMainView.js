@@ -35,9 +35,9 @@ export class ProductMainView extends Component {
         });
     }
 
-    incrementQty = (up) => {
+    incrementQty(up) {
         this.orderLine.qty = this.computeNewQty(this.orderLine.qty, up);
-    };
+    }
     computeNewQty(qty, up) {
         if (up) {
             return qty + 1;

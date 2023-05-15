@@ -37,7 +37,7 @@
                 </t>
                 <div t-if="selfOrder.table">
                     <label class="form-label fw-bold" for="note">Add a note:</label>
-                    <textarea class="form-control rounded bg-white" id="note" type="textarea" rows="1" placeholder="No onions please" t-model="this.orderLine.customer_note"/>
+                    <textarea class="form-control rounded bg-white" id="note" type="textarea" rows="1" placeholder="No onions please" t-model="orderLine.customer_note"/>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
                     t-att-name="attribute.id" 
                     t-att-value="value.name"
                     t-attf-id="{{ attribute.id }}_{{ value.id }}" 
-                    t-model="this.orderLine.selectedVariants[attribute.name]"
+                    t-model="orderLine.selectedVariants[attribute.name]"
                     />
                 <span class="flex-grow-1">
                     <t t-esc="value.name"/>
@@ -68,7 +68,7 @@
 
     <t t-name="pos_self_order.SelectProductAttribute" owl="1">
         <select class="configurator_select form-select"
-            t-model="this.orderLine.selectedVariants[attribute.name]">
+            t-model="orderLine.selectedVariants[attribute.name]">
             <option t-foreach="attribute.values" t-as="value" t-key="value.id" t-att-value="value.name">
                 <t t-esc="value.name"/>
                 <t t-if="value.price_extra.list_price">
@@ -91,7 +91,7 @@
                             t-att-name="attribute.id" 
                             t-att-value="value.name"
                             t-attf-id="{{ attribute.id }}_{{ value.id }}" 
-                            t-model="this.orderLine.selectedVariants[attribute.name]"
+                            t-model="orderLine.selectedVariants[attribute.name]"
                             />
                     </label>
                     <span class="flex-grow-1">
@@ -107,7 +107,7 @@
     <t t-name="pos_self_order.AddToCartButton" owl="1">
         <MainButton onClick.bind="addToCartButtonClicked">
             <t t-set-slot="above">
-                <IncrementCounter onClick="incrementQty" value="this.orderLine.qty"/>
+                <IncrementCounter onClick.bind="incrementQty" value="this.orderLine.qty"/>
             </t>
             <t t-if="selfOrder.currentlyEditedOrderLine">
                 Update Cart

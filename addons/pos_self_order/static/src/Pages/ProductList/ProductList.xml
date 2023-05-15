@@ -6,9 +6,8 @@
             <t t-call="pos_self_order.Header"/>
             <!-- the body is set to overflow: hidden and this div is set to overflow-auto
             this way we only scroll on the product list, and not on the whole page, which includes the navbar -->
-            <!-- <main t-ref="productsList" class="bg-white overflow-auto flex-shrink-1 d-flex flex-row flex-wrap"> -->
             <main t-ref="productsList" class="bg-white overflow-auto d-flex flex-row flex-wrap">
-                    <t t-if="this.search.isFocused" t-call="pos_self_order.SearchResults"/>
+                    <t t-if="search.isFocused" t-call="pos_self_order.SearchResults"/>
                     <t t-else="" t-call="pos_self_order.productsGroupedByTag"/>
             </main>
             <!-- we use flex-grow-1 to push the button to the bottom of the page 

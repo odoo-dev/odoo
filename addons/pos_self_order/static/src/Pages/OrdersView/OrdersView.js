@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillStart } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/SelfOrderService";
 import { Order } from "@pos_self_order/Components/Order/Order";
 import { NavBar } from "@pos_self_order/Components/NavBar/NavBar";
@@ -11,8 +11,6 @@ export class OrdersView extends Component {
     static props = [];
     setup() {
         this.selfOrder = useSelfOrder();
-        onWillStart(async () => {
-            this.selfOrder.updateOrders();
-        });
+        this.selfOrder.updateOrders();
     }
 }

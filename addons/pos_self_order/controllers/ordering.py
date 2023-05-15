@@ -62,21 +62,20 @@ class PosSelfOrderController(http.Controller):
         if not pos_config_sudo.self_order_table_mode or not pos_config_sudo.has_active_session:
             raise werkzeug.exceptions.BadRequest()
 
+        order = self._form_order(
+            self._create_order_data(
+                cart,
+                pos_config_sudo,
+                table_access_token,
+                order_pos_reference,
+                order_access_token,
+            )
+        )
         posted_order_id = (
             request.env["pos.order"]
             .sudo()
             .create_from_ui(
-                [
-                    self._form_order(
-                        self._create_order_data(
-                            cart,
-                            pos_config_sudo,
-                            table_access_token,
-                            order_pos_reference,
-                            order_access_token,
-                        )
-                    )
-                ],
+                [order],
                 draft=True,
             )[0]
             .get("id")
@@ -410,6 +409,8 @@ class PosSelfOrderController(http.Controller):
     # where 901 is the login number of the table with id = 1,
     # 902 is the login number of the table with id = 2, etc
     # TODO: make it so the regular pos can't have a login number of 900 or more
+    # FIXME: what happens if `table_id` is larger that 100?
+    # [possible fix: using a different pos session for the self order an synchronizing the orders]
     def _generate_unique_id(self, pos_session_id: int, table_id: int, sequence_number: int) -> str:
         """
         Generates a public identification number for the order.

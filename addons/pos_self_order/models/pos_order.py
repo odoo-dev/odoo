@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
-from typing import Dict
+from typing import Dict, Union
 
 from odoo import models
 
@@ -73,7 +73,7 @@ class PosOrder(models.Model):
             ],
         }
 
-    def _get_self_order_data(self) -> Dict[str, Dict[str, str]]:
+    def _get_self_order_data(self) -> Dict[str, Union[str, int]]:
         return {
             "id": self.pos_reference,
             "sequence_number": self.sequence_number,

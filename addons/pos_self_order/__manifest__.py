@@ -29,6 +29,7 @@
             "web/static/lib/bootstrap/scss/_functions.scss",
             "web/static/lib/bootstrap/scss/_variables.scss",
             ("include", "web._assets_bootstrap"),
+            ('include', 'web._assets_bootstrap_backend'),
             "web/static/src/boot.js",
             "web/static/src/env.js",
             "web/static/src/session.js",

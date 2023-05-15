@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from typing import Optional, List, Dict
+from werkzeug.urls import url_quote
 import base64
 
+
 from odoo import api, fields, models, modules
-from odoo.tools import file_open
+from odoo.tools import file_open, split_every
 
 from odoo.addons.pos_self_order.models.product_product import ProductProduct
 from odoo.addons.pos_self_order.models.pos_order import PosOrderLine
@@ -26,14 +28,10 @@ class PosConfig(models.Model):
     self_order_view_mode = fields.Boolean(
         string="QR Code Menu",
         help="Allow customers to view the menu on their phones by scanning the QR code on the table",
-        compute="_compute_self_order",
-        store=True,
     )
     self_order_table_mode = fields.Boolean(
         string="Self Order",
         help="Allow customers to Order from their phones",
-        compute="_compute_self_order",
-        store=True,
     )
     self_order_pay_after = fields.Selection(
         [("each", "Each Order"), ("meal", "Meal")],
@@ -55,11 +53,34 @@ class PosConfig(models.Model):
         default=_self_order_default_image_name,
     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        We want self ordering to be enabled by default
+        (This would have been nicer to do using a default value
+        directly on the fields, but `module_pos_restaurant` would not 
+        known at the time that the function for this default value
+        would run)
+        """
+        for vals in vals_list:
+            if vals.get("module_pos_restaurant"):
+                vals.update(
+                    {
+                        "self_order_view_mode": True,
+                        "self_order_table_mode": True,
+                    }
+                )
+        return super().create(vals_list)
+
     @api.depends("module_pos_restaurant")
     def _compute_self_order(self):
+        """
+        Self ordering will only be enabled for restaurants
+        """
         for record in self:
-            record.self_order_view_mode = record.module_pos_restaurant
-            record.self_order_table_mode = record.module_pos_restaurant
+            if not record.module_pos_restaurant:
+                record.self_order_view_mode = False
+                record.self_order_table_mode = False
 
     def _get_self_order_route(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()
@@ -74,6 +95,10 @@ class PosConfig(models.Model):
             .access_token
         )
         return f"{base_route}?id={table_access_token}"
+
+    def _get_self_order_url(self, table_id: Optional[int] = None) -> str:
+        self.ensure_one()
+        return url_quote(self.get_base_url() + self._get_self_order_route(table_id))
 
     def preview_self_order_app(self):
         """
@@ -144,11 +169,38 @@ class PosConfig(models.Model):
             "orderline_unique_keys": PosOrderLine._get_unique_keys(),
         }
 
-    @api.model
-    def set_default_image(self):
-        """
-        We need to do this because the default image is not set in the demo data
-        """
-        for pos_config in self.env["pos.config"].search([("self_order_view_mode", "=", True)]):
-            pos_config.self_order_image = pos_config._self_order_default_image()
-            pos_config.self_order_image_name = pos_config._self_order_default_image_name()
+    def _generate_data_for_qr_codes_page(self, cols=4):
+        return {
+            "floors": self._split_qr_codes_list(
+                self._get_qr_codes_info(cols * cols),
+                cols,
+            )
+        }
+
+    def _get_qr_codes_info(self, total_number):
+        if self.self_order_table_mode:
+            return self.floor_ids._get_data_for_qr_codes_page(self._get_self_order_url)
+        else:
+            return self._get_default_qr_codes(total_number, self._get_self_order_url)
+
+    def _split_qr_codes_list(self, floors, rows):
+        return [
+            {
+                "name": floor.get("name"),
+                "rows_of_tables": list(split_every(rows, floor["tables"], list)),
+            }
+            for floor in floors
+        ]
+
+    def _get_default_qr_codes(self, number, url):
+        return [
+            {
+                "tables": [
+                    {
+                        "id": 0,
+                        "url": url(),
+                    }
+                ]
+                * number,
+            }
+        ]

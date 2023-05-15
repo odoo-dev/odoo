@@ -121,6 +121,7 @@ export class SelfOrder {
      */
     setPage(page) {
         this.closeNotification?.();
+        // TODO: remove coupling between self order and router
         this.page = page;
         this.navigate(page, this.pos_config_id);
     }
@@ -168,9 +169,9 @@ export class SelfOrder {
     /**
      * @returns {number}
      */
-    getTotalCartTax = () => {
+    getTotalCartTax() {
         return this._getTotalCartTax(this.cart);
-    };
+    }
     /**
      * From the server, for each product we get both the price with and without tax.
      * We never actually compute taxes on the frontend.
@@ -250,7 +251,7 @@ export class SelfOrder {
         ];
     }
 
-    sendOrder = async () => {
+    async sendOrder() {
         try {
             /*
             If this is the first time the user is sending an order
@@ -272,7 +273,7 @@ export class SelfOrder {
         } finally {
             this.setPage("/");
         }
-    };
+    }
     /**
      * @returns {{pos_config_id: number, cart: ReducedOrderLine[], table_access_token: string, order_pos_reference: string, order_access_token: string}}}
      */
@@ -332,8 +333,7 @@ export class SelfOrder {
                 pos_reference: order.pos_reference,
                 access_token: order.access_token,
             });
-        } catch (error) {
-            console.log(error);
+        } catch {
             return { ...order, state: "not found" };
         }
     }

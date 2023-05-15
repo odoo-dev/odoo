@@ -73,41 +73,8 @@ class ResConfigSettings(models.TransientModel):
         """
         Generate the data needed to print the QR codes page
         """
-        no_OF_QR_CODES_PER_PAGE = 16
-        no_OF_QR_CODES_PER_LINE = 4
-
-        if self.pos_config_id.self_order_table_mode:
-            tables_sudo = self.env["restaurant.table"].search(
-                [("floor_id.pos_config_ids", "=", self.pos_config_id.id), ("active", "=", True)]
-            )
-            qr_codes_to_print = [
-                {
-                    "id": table.id,
-                    "name": table.name,
-                    "url": url_quote(
-                        self.get_base_url() + self.pos_config_id._get_self_order_route(table.id)
-                    ),
-                }
-                for table in tables_sudo
-            ]
-        else:
-            qr_codes_to_print = [
-                {
-                    "id": 0,
-                    "url": url_quote(self.get_base_url() + self.pos_config_id._get_self_order_route()),
-                }
-                for i in range(no_OF_QR_CODES_PER_PAGE)
-            ]
-        rows_of_tables = list(split_every(no_OF_QR_CODES_PER_LINE, qr_codes_to_print, list))
-        pages_of_tables = list(
-            split_every(no_OF_QR_CODES_PER_PAGE // no_OF_QR_CODES_PER_LINE, rows_of_tables, list)
-        )
-        # TODO: we might also want to group the tables by floor
-        data = {
-            "pages_of_tables": pages_of_tables,
-        }
         return self.env.ref("pos_self_order.report_self_order_qr_codes_page").report_action(
-            [], data=data
+            [], data=self.pos_config_id._generate_data_for_qr_codes_page(cols=3)
         )
 
     def preview_self_order_app(self):

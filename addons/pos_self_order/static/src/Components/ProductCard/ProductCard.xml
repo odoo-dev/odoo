@@ -3,7 +3,7 @@
     <t t-name="pos_self_order.ProductCard" owl="1">
         <div 
             t-attf-class="{{props.class}} o_self_order_item_card position-relative d-flex align-items-start w-100 bg-white px-3 py-2 overflow-hidden"
-            t-on-click="this.clickOnProduct"
+            t-on-click="clickOnProduct"
             t-ref="currentProductCard"
             >
             <div t-attf-class="d-flex {{ props.product.has_image ? 'flex-column' : 'flex-row justify-content-between' }} w-100 py-1">

@@ -11,12 +11,11 @@
     </t>
         
     <t t-name="pos_self_order.OrderButton" owl="1">
-        <MainButton onClick="this.selfOrder.sendOrder">
+        <MainButton onClick="() => selfOrder.sendOrder()">
             <t t-set-slot="above">
                 <PriceDetails tax="selfOrder.getTotalCartTax()" total="selfOrder.getTotalCartCost()"/>
             </t>
             Order
         </MainButton>
     </t>
-
 </templates>

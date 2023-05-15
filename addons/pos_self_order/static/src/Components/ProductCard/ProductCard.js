@@ -11,7 +11,7 @@ export class ProductCard extends Component {
     setup() {
         this.selfOrder = useSelfOrder();
         useForwardRefToParent("currentProductCard");
-        this.qtyInCart = !this.props.orderLine && this.qtyInCart();
+        this.qtyInCart = !this.props.orderLine && this.getQtyInCart();
     }
     clickOnProduct() {
         const product = this.props.product;
@@ -34,7 +34,7 @@ export class ProductCard extends Component {
             product.attributes.length
         );
     }
-    qtyInCart() {
+    getQtyInCart() {
         const cart = this.selfOrder.cart;
         const product = this.props.product;
         return cart
