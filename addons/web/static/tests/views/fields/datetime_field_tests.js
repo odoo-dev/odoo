@@ -330,7 +330,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "multi edition of DatetimeField in list view: edit date in input",
         async function (assert) {
             await makeView({
@@ -365,7 +365,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "multi edition of DatetimeField in list view: clear date in input",
         async function (assert) {
             serverData.models.partner.records[1].datetime = "2017-02-08 10:00:00";

@@ -37,7 +37,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.module("Concurrency management");
 
-    QUnit.tttt("drop previous actions if possible", async function (assert) {
+    QUnit.test("drop previous actions if possible", async function (assert) {
         assert.expect(7);
         const def = makeDeferred();
         const mockRPC = async function (route) {
@@ -58,17 +58,17 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/action/load",
             "/web/action/load",
             "/web/dataset/call_kw/pony/get_views",
-            "/web/dataset/call_kw/pony/web_search_read",
+            "/web/dataset/call_kw/pony/unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("handle switching view and switching back on slow network", async function (assert) {
+    QUnit.test("handle switching view and switching back on slow network", async function (assert) {
         assert.expect(9);
         const def = makeDeferred();
         const defs = [Promise.resolve(), def, Promise.resolve()];
         const mockRPC = async function (route, { method }) {
             assert.step(route);
-            if (method === "web_search_read") {
+            if (method === "unity_web_search_read") {
                 await defs.shift();
             }
         };
@@ -84,9 +84,9 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/web_search_read",
-            "/web/dataset/call_kw/partner/web_search_read",
-            "/web/dataset/call_kw/partner/web_search_read",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
+            "/web/dataset/call_kw/partner/unity_web_search_read",
         ]);
         // we resolve def => list view is now ready (but we want to ignore it)
         def.resolve();
@@ -121,7 +121,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.expect(1);
         let def;
         const mockRPC = async function (route, args) {
-            if (args && args.method === "read") {
+            if (args && args.method === "web_read") {
                 await def;
             }
         };
@@ -147,14 +147,14 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "execute a new action while loading a lazy-loaded controller",
         async function (assert) {
             assert.expect(16);
             let def;
             const mockRPC = async function (route, { method, model }) {
                 assert.step(method || route);
-                if (method === "web_search_read" && model === "partner") {
+                if (method === "unity_web_search_read" && model === "partner") {
                     await def;
                 }
             };
@@ -181,11 +181,11 @@ QUnit.module("ActionManager", (hooks) => {
                 "/web/webclient/load_menus",
                 "/web/action/load",
                 "get_views",
-                "read",
-                "web_search_read",
+                "web_read",
+                "unity_web_search_read",
                 "/web/action/load",
                 "get_views",
-                "web_search_read",
+                "unity_web_search_read",
             ]);
             // unblock the switch to Kanban in action 4
             def.resolve();
@@ -200,7 +200,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.tttt("execute a new action while handling a call_button", async function (assert) {
+    QUnit.test("execute a new action while handling a call_button", async function (assert) {
         assert.expect(17);
         const def = makeDeferred();
         const mockRPC = async function (route, args) {
@@ -230,12 +230,12 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read",
-            "read",
+            "unity_web_search_read",
+            "web_read",
             "object",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
         ]);
         // unblock the call_button request
         def.resolve();
@@ -249,7 +249,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "execute a new action while switching to another controller",
         async function (assert) {
             assert.expect(16);
@@ -264,7 +264,7 @@ QUnit.module("ActionManager", (hooks) => {
             let def;
             const mockRPC = async function (route, args) {
                 assert.step((args && args.method) || route);
-                if (args && args.method === "read") {
+                if (args && args.method === "web_read") {
                     await def;
                 }
             };
@@ -291,11 +291,11 @@ QUnit.module("ActionManager", (hooks) => {
                 "/web/webclient/load_menus",
                 "/web/action/load",
                 "get_views",
-                "web_search_read",
-                "read",
+                "unity_web_search_read",
+                "web_read",
                 "/web/action/load",
                 "get_views",
-                "web_search_read",
+                "unity_web_search_read",
             ]);
             // unblock the switch to the form view in action 3
             def.resolve();
@@ -314,7 +314,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.tttt("execute a new action while loading views", async function (assert) {
+    QUnit.test("execute a new action while loading views", async function (assert) {
         assert.expect(11);
         const def = makeDeferred();
         const mockRPC = async function (route, args) {
@@ -346,16 +346,16 @@ QUnit.module("ActionManager", (hooks) => {
             "get_views",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("execute a new action while loading data of default view", async function (assert) {
+    QUnit.test("execute a new action while loading data of default view", async function (assert) {
         assert.expect(12);
         const def = makeDeferred();
         const mockRPC = async function (route, { method }) {
             assert.step(method || route);
-            if (method === "web_search_read") {
+            if (method === "unity_web_search_read") {
                 await def;
             }
         };
@@ -379,10 +379,10 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
@@ -444,7 +444,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "restoring a controller when doing an action -- load_action slow",
         async function (assert) {
             assert.expect(14);
@@ -477,15 +477,15 @@ QUnit.module("ActionManager", (hooks) => {
                 "/web/webclient/load_menus",
                 "/web/action/load",
                 "get_views",
-                "web_search_read",
-                "read",
+                "unity_web_search_read",
+                "web_read",
                 "/web/action/load",
-                "web_search_read",
+                "unity_web_search_read",
             ]);
         }
     );
 
-    QUnit.tttt("switching when doing an action -- load_action slow", async function (assert) {
+    QUnit.test("switching when doing an action -- load_action slow", async function (assert) {
         assert.expect(12);
         let def;
         const mockRPC = async (route, args) => {
@@ -514,13 +514,13 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
             "/web/action/load",
-            "web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("switching when doing an action -- get_views slow", async function (assert) {
+    QUnit.test("switching when doing an action -- get_views slow", async function (assert) {
         assert.expect(13);
         let def;
         const mockRPC = async (route, args) => {
@@ -549,20 +549,20 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("switching when doing an action -- search_read slow", async function (assert) {
+    QUnit.test("switching when doing an action -- search_read slow", async function (assert) {
         assert.expect(13);
         const def = makeDeferred();
         const defs = [null, def, null];
         const mockRPC = async (route, { method }) => {
             assert.step(method || route);
-            if (method === "web_search_read") {
+            if (method === "unity_web_search_read") {
                 await Promise.resolve(defs.shift());
             }
         };
@@ -584,19 +584,19 @@ QUnit.module("ActionManager", (hooks) => {
             "/web/webclient/load_menus",
             "/web/action/load",
             "get_views",
-            "web_search_read",
+            "unity_web_search_read",
             "/web/action/load",
             "get_views",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("click multiple times to open a record", async function (assert) {
+    QUnit.test("click multiple times to open a record", async function (assert) {
         const def = makeDeferred();
         const defs = [null, def];
         const mockRPC = async (route, args) => {
-            if (args.method === "read") {
+            if (args.method === "web_read") {
                 await Promise.resolve(defs.shift());
             }
         };

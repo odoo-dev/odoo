@@ -74,7 +74,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(getIframeViewerParams(), "model=partner&field=document&id=1");
     });
 
-    QUnit.tttt("PdfViewerField: upload rendering", async function (assert) {
+    QUnit.test("PdfViewerField: upload rendering", async function (assert) {
         assert.expect(5);
 
         await makeView({
@@ -84,7 +84,7 @@ QUnit.module("Fields", (hooks) => {
             arch: '<form><field name="document" widget="pdf_viewer"/></form>',
             async mockRPC(_route, { method, args }) {
                 if (method === "create") {
-                    assert.deepEqual(args[0], { document: btoa("test") });
+                    assert.deepEqual(args[0], [{ document: btoa("test") }]);
                 }
             },
         });

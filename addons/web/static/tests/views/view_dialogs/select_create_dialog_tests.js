@@ -134,7 +134,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                         },
                         "should search with the complete domain (domain + search), and group by 'bar'"
                     );
-                } else if (args.method === "web_search_read") {
+                } else if (args.method === "unity_web_search_read") {
                     if (search === 0) {
                         assert.deepEqual(
                             args.kwargs,
@@ -199,7 +199,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         }
     );
 
-    QUnit.tttt("SelectCreateDialog correctly evaluates domains", async function (assert) {
+    QUnit.test("SelectCreateDialog correctly evaluates domains", async function (assert) {
         assert.expect(1);
 
         serverData.views = {
@@ -216,7 +216,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 `,
         };
         const mockRPC = async (route, args) => {
-            if (args.method === "web_search_read") {
+            if (args.method === "unity_web_search_read") {
                 assert.deepEqual(
                     args.kwargs.domain,
                     [["id", "=", 2]],

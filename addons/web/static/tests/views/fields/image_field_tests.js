@@ -77,7 +77,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ImageField");
 
-    QUnit.tttt("ImageField is correctly rendered", async function (assert) {
+    QUnit.test("ImageField is correctly rendered", async function (assert) {
         assert.expect(10);
 
         serverData.models.partner.records[0].write_date = "2017-02-08 10:00:00";
@@ -92,11 +92,15 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="document" widget="image" options="{'size': [90, 90]}" />
                 </form>`,
-            mockRPC(route, { args }) {
-                if (route === "/web/dataset/call_kw/partner/read") {
+            mockRPC(route, { args, kwargs }) {
+                if (route === "/web/dataset/call_kw/partner/web_read") {
                     assert.deepEqual(
-                        args[1],
-                        ["write_date", "document", "display_name"],
+                        kwargs.specification,
+                        {
+                            display_name: {},
+                            document: {},
+                            write_date: {},
+                        },
                         "The fields document, display_name and write_date should be present when reading an image"
                     );
                 }
@@ -668,7 +672,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("unique in url doesn't change on onchange", async (assert) => {
+    QUnit.test("unique in url doesn't change on onchange", async (assert) => {
         serverData.models.partner.onchanges = {
             foo: () => {},
         };
@@ -689,7 +693,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             mockRPC(route, { method, args }) {
                 assert.step(method);
-                if (method === "onchange") {
+                if (method === "onchange2") {
                     return {
                         value: {
                             write_date: "", // actual return of the server
@@ -702,7 +706,7 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
         assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
 
         assert.verifySteps([]);
@@ -710,12 +714,12 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
 
         await editInput(target, ".o_field_widget[name='foo'] input", "grrr");
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
         // also same unique
         assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
 
         await clickSave(target);
-        assert.verifySteps(["write", "read"]);
+        assert.verifySteps(["write", "web_read"]);
 
         assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
     });

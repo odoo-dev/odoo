@@ -6,6 +6,7 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
+import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
 import { getOnChangeSpec } from "./utils";

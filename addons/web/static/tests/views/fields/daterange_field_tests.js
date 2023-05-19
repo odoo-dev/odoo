@@ -525,7 +525,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "DateRangeField manually input wrong value should show toaster",
         async function (assert) {
             serverData.models.partner.fields.date_end = { string: "Date End", type: "date" };

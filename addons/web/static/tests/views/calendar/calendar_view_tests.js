@@ -817,7 +817,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
     });
 
-    QUnit.tttt(`create and change events`, async (assert) => {
+    QUnit.test(`create and change events`, async (assert) => {
         assert.expect(28);
 
         await makeView({
@@ -3259,7 +3259,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(target, ".fc-event", 7, "should display all records");
     });
 
-    QUnit.tttt(`create event with filters (no quickCreate)`, async (assert) => {
+    QUnit.test(`create event with filters (no quickCreate)`, async (assert) => {
         serverData.views["event,false,form"] = `
             <form>
                 <group>
@@ -4449,7 +4449,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         }
     );
 
-    QUnit.tttt(`create event and resize to next day (24h) on week mode`, async (assert) => {
+    QUnit.test(`create event and resize to next day (24h) on week mode`, async (assert) => {
         // WOWL FYI Legacy test name: "drag and drop 24h event on week mode"
         await makeView({
             type: "calendar",
@@ -4460,14 +4460,16 @@ QUnit.module("Views", ({ beforeEach }) => {
             `,
             mockRPC(route, { args, method }) {
                 if (method === "create") {
-                    assert.deepEqual(args[0], {
-                        allday: false,
-                        name: "foobar",
-                        start: "2016-12-13 07:00:00",
-                        start_date: false,
-                        stop: "2016-12-13 15:00:00",
-                        stop_date: false,
-                    });
+                    assert.deepEqual(args[0], [
+                        {
+                            allday: false,
+                            name: "foobar",
+                            start: "2016-12-13 07:00:00",
+                            start_date: false,
+                            stop: "2016-12-13 15:00:00",
+                            stop_date: false,
+                        },
+                    ]);
                 }
                 if (method === "write") {
                     assert.deepEqual(args[1], {
