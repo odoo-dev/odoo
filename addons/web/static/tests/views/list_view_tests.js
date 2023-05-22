@@ -7780,8 +7780,12 @@ QUnit.module("Views", (hooks) => {
                     assert.deepEqual(
                         args.args[3],
                         {
-                            foo: "1",
-                            currency_id: "",
+                            currency_id: {
+                                fields: {
+                                    display_name: {},
+                                },
+                            },
+                            foo: {},
                         },
                         "onchange spec should not follow relation of many2one fields"
                     );
@@ -18623,7 +18627,6 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, args) {
                 if (args.method === "onchange2") {
                     assert.step("onchange");
-                    await nextTick();
                     return { value: { m2o: [3, "Value 3"] } };
                 }
             },
