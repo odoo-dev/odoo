@@ -9,7 +9,6 @@ import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
-import { getOnChangeSpec } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -119,8 +118,22 @@ export class Record extends DataPoint {
             return this._update(changes);
         }
         if (this.selected && this.model.multiEdit) {
-            this._applyChanges(changes);
-            return this.model.root.multiSave(this);
+            return this.model.mutex.exec(async () => {
+                const proms = [];
+                for (const [fieldName, value] of Object.entries(changes)) {
+                    if (this.fields[fieldName].type === "many2one") {
+                        const prom = this._processMany2oneValue(fieldName, value, changes);
+                        if (prom) {
+                            proms.push(prom);
+                        }
+                    }
+                }
+                if (proms.length) {
+                    await Promise.all(proms);
+                }
+                this._applyChanges(changes);
+                return this.model.root._multiSave(this);
+            });
         }
         return this.model.mutex.exec(() => this._update(changes));
     }
@@ -489,6 +502,58 @@ export class Record extends DataPoint {
         this._invalidFields.clear();
     }
 
+    async _processMany2oneValue(fieldName, value, changes) {
+        if (!value) {
+            changes[fieldName] = false;
+            return;
+        }
+        const [id, displayName] = value;
+        if (!id && !displayName) {
+            changes[fieldName] = [false, ""];
+            return;
+        }
+
+        const activeField = this.activeFields[fieldName];
+
+        if (!activeField) {
+            changes[fieldName] = value;
+            return;
+        }
+
+        const relation = this.fields[fieldName].relation;
+
+        let context = { ...this.context };
+        // TODO: utils to sanitize context
+        for (const key in context) {
+            if (key.startsWith("default_") || key.endsWith("_view_ref")) {
+                delete context[key];
+            }
+        }
+        context = {
+            ...makeContext([context, activeField.context], this.evalContext),
+        };
+
+        if (!id && displayName !== undefined) {
+            return this.model.orm
+                .call(relation, "name_create", [displayName], {
+                    context,
+                })
+                .then((result) => {
+                    changes[fieldName] = result ? result : [false, ""];
+                });
+        } else if (id && displayName === undefined) {
+            const kwargs = {
+                context,
+                specification: { display_name: {} },
+            };
+            return this.model.orm.call(relation, "web_read", [[id]], kwargs).then((records) => {
+                changes[fieldName] = [records[0].id, records[0].display_name];
+            });
+        } else {
+            changes[fieldName] = value;
+        }
+    }
+
     _removeInvalidFields(fieldNames) {
         for (const fieldName of fieldNames) {
             this._invalidFields.delete(fieldName);
@@ -547,8 +612,9 @@ export class Record extends DataPoint {
             await this._load(nextConfig);
         } else {
             this.model._updateConfig(this.config, { resId }, { noReload: true });
-            this._values = { ...this._values, ...this._changes };
+            this._values = { ...this._values, ...this._changes, id: resId };
             this._changes = {};
+            this.data = { ...this._values };
             this.isDirty = false;
         }
         await this.model.hooks.onRecordSaved(this);
@@ -582,6 +648,7 @@ export class Record extends DataPoint {
 
     async _update(changes) {
         this.isDirty = true;
+        const proms = [];
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
             if (field && field.relatedPropertyField) {
@@ -589,7 +656,15 @@ export class Record extends DataPoint {
                 changes[propertyFieldName] = this.data[propertyFieldName].map((property) =>
                     property.name === field.propertyName ? { ...property, value } : property
                 );
+            } else if (field.type === "many2one") {
+                const prom = this._processMany2oneValue(fieldName, value, changes);
+                if (prom) {
+                    proms.push(prom);
+                }
             }
+        }
+        if (!this.model._urgentSave) {
+            await Promise.all(proms);
         }
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
@@ -605,7 +680,7 @@ export class Record extends DataPoint {
                 resIds: this.resId ? [this.resId] : [],
                 changes: this._getChanges({ ...this._changes, ...changes }),
                 fieldNames: onChangeFields,
-                spec: getOnChangeSpec(this.activeFields),
+                spec: this.model._getFieldsSpec(this.activeFields, this.fields, this.evalContext),
                 context,
             });
             Object.assign(changes, this._parseServerValues(otherChanges, this.data));

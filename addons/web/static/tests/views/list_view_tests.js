@@ -7913,8 +7913,12 @@ QUnit.module("Views", (hooks) => {
                     assert.deepEqual(
                         args.args[3],
                         {
-                            foo: "1",
-                            currency_id: "",
+                            currency_id: {
+                                fields: {
+                                    display_name: {},
+                                },
+                            },
+                            foo: {},
                         },
                         "onchange spec should not follow relation of many2one fields"
                     );
