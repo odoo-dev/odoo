@@ -2,6 +2,7 @@
 
 import { makeContext } from "@web/core/context";
 import { omit } from "@web/core/utils/objects";
+import { orderByToString } from "@web/views/utils";
 
 function makeActiveField({ context, invisible, readonly, required, onChange, forceSave } = {}) {
     return {
@@ -128,21 +129,58 @@ export function getFieldContext(fieldName, activeFields, evalContext, parentActi
     }
 }
 
-function _populateOnChangeSpec(activeFields, spec, path = false) {
-    const prefix = path ? `${path}.` : "";
-    for (const [fieldName, field] of Object.entries(activeFields)) {
-        const key = `${prefix}${fieldName}`;
-        spec[key] = field.onChange ? "1" : "";
-        if (field.related) {
-            _populateOnChangeSpec(field.related.activeFields, spec, key);
+const DEFAULT_X2M_LIMIT = 40;
+export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
+    console.log("getFieldsSpec");
+    const fieldsSpec = {};
+    const properties = [];
+    for (const fieldName in activeFields) {
+        if (fields[fieldName].relatedPropertyField) {
+            continue;
+        }
+        const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
+        fieldsSpec[fieldName] = {};
+        // X2M
+        if (related) {
+            fieldsSpec[fieldName].fields = getFieldsSpec(
+                related.activeFields,
+                related.fields,
+                evalContext,
+                activeFields
+            );
+            fieldsSpec[fieldName].limit = limit || DEFAULT_X2M_LIMIT;
+            if (defaultOrderBy) {
+                fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
+            }
+        }
+        // Properties
+        if (fields[fieldName].type === "properties") {
+            properties.push(fieldName);
+        }
+        // M2O
+        if (fields[fieldName].type === "many2one" && invisible !== true) {
+            fieldsSpec[fieldName].fields = { display_name: {} };
+        }
+        if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
+            const context = getFieldContext(
+                fieldName,
+                activeFields,
+                evalContext,
+                parentActiveFields
+            );
+            if (context) {
+                fieldsSpec[fieldName].context = context;
+            }
         }
     }
+
+    for (const fieldName of properties) {
+        if (fieldsSpec[fields[fieldName].definition_record]) {
+            fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
+        }
+    }
+    return fieldsSpec;
 }
-export const getOnChangeSpec = (activeFields) => {
-    const spec = {};
-    _populateOnChangeSpec(activeFields, spec);
-    return spec;
-};
 
 let nextId = 0;
 /**
