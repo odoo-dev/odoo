@@ -208,6 +208,7 @@ export class StaticList extends DataPoint {
         if (!resId && !params.virtualId) {
             throw new Error("You must provide a virtualId if the record has no id");
         }
+        const id = resId || params.virtualId;
         const config = {
             context: this.context,
             activeFields: params.activeFields || this.activeFields,
@@ -218,23 +219,32 @@ export class StaticList extends DataPoint {
             mode: params.mode || "readonly",
             isMonoRecord: true,
         };
+        const { CREATE, UPDATE } = x2ManyCommands;
         const options = {
             parentRecord: this._parent,
-            onChange: this._onChange,
+            onChange: () => {
+                const hasCommand = this._commands.some(
+                    (c) => (c[0] === CREATE || c[0] === UPDATE) && c[1] === id
+                );
+                if (!hasCommand) {
+                    this._commands.push([UPDATE, id, record]);
+                }
+                this._onChange();
+            },
         };
         const record = new this.model.constructor.Record(this.model, config, data, options);
-        this._cache[resId || params.virtualId] = record;
+        this._cache[id] = record;
         return record;
     }
 
-    _getCommands() {
+    _getCommands({ withReadonly } = {}) {
         // TODO: encapsulate commands in a class?
         return this._commands.map((c) => {
             if (c[2]) {
                 if (c[0] === x2ManyCommands.REPLACE_WITH) {
                     return [c[0], c[1], c[2]];
                 } else {
-                    return [c[0], c[1], c[2]._getChanges()];
+                    return [c[0], c[1], c[2]._getChanges()]; // propagate withReadonly
                 }
             }
             return [c[0], c[1]];

@@ -12,7 +12,7 @@ import { DynamicRecordList } from "./dynamic_record_list";
 import { Group } from "./group";
 import { Record } from "./record";
 import { StaticList } from "./static_list";
-import { createPropertyActiveField, getFieldContext } from "./utils";
+import { createPropertyActiveField, getFieldsSpec } from "./utils";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -92,7 +92,6 @@ export class RelationalModel extends Model {
     static DynamicGroupList = DynamicGroupList;
     static StaticList = StaticList;
     static DEFAULT_LIMIT = 80;
-    static DEFAULT_X2M_LIMIT = 40;
     static DEFAULT_COUNT_LIMIT = 10000;
     static DEFAULT_GROUP_LIMIT = 80;
     static DEFAULT_OPEN_GROUP_LIMIT = 10;
@@ -247,57 +246,6 @@ export class RelationalModel extends Model {
         return count;
     }
 
-    _getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
-        console.log("getFieldsSpec");
-        const fieldsSpec = {};
-        const properties = [];
-        for (const fieldName in activeFields) {
-            if (fields[fieldName].relatedPropertyField) {
-                continue;
-            }
-            const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
-            fieldsSpec[fieldName] = {};
-            // X2M
-            if (related) {
-                fieldsSpec[fieldName].fields = this._getFieldsSpec(
-                    related.activeFields,
-                    related.fields,
-                    evalContext,
-                    activeFields
-                );
-                fieldsSpec[fieldName].limit = limit || this.constructor.DEFAULT_X2M_LIMIT;
-                if (defaultOrderBy) {
-                    fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
-                }
-            }
-            // Properties
-            if (fields[fieldName].type === "properties") {
-                properties.push(fieldName);
-            }
-            // M2O
-            if (fields[fieldName].type === "many2one" && invisible !== true) {
-                fieldsSpec[fieldName].fields = { display_name: {} };
-            }
-            if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
-                const context = getFieldContext(
-                    fieldName,
-                    activeFields,
-                    evalContext,
-                    parentActiveFields
-                );
-                if (context) {
-                    fieldsSpec[fieldName].context = context;
-                }
-            }
-        }
-
-        for (const fieldName of properties) {
-            if (fieldsSpec[fields[fieldName].definition_record]) {
-                fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
-            }
-        }
-        return fieldsSpec;
-    }
     /**
      * @param {*} params
      * @returns {Config}
@@ -551,11 +499,8 @@ export class RelationalModel extends Model {
     _loadNewRecord(config) {
         // Maybe we should add _applyProperties for the form view ?
         const { fields, activeFields, context, resModel } = config;
-        return this._onchange({
-            resModel,
-            context,
-            spec: this._getFieldsSpec(activeFields, fields, context),
-        });
+        const spec = getFieldsSpec(activeFields, fields, context);
+        return this._onchange({ context, resModel, spec });
     }
 
     async _onchange({ resModel, spec, resIds, changes, fieldNames, context }) {
@@ -591,7 +536,7 @@ export class RelationalModel extends Model {
         }
         const kwargs = {
             context: { bin_size: true, ...context },
-            specification: this._getFieldsSpec(activeFields, fields, context),
+            specification: getFieldsSpec(activeFields, fields, context),
         };
         console.log("Unity field spec", kwargs.fields);
         const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
@@ -614,7 +559,7 @@ export class RelationalModel extends Model {
      */
     async _loadUngroupedList(config) {
         const kwargs = {
-            specification: this._getFieldsSpec(config.activeFields, config.fields, config.context),
+            specification: getFieldsSpec(config.activeFields, config.fields, config.context),
             domain: config.domain,
             offset: config.offset,
             order: orderByToString(config.orderBy),
