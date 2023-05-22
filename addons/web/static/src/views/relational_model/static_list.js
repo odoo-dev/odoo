@@ -90,6 +90,7 @@ export class StaticList extends DataPoint {
         const values = await this.model._loadNewRecord({
             resModel: this.resModel,
             activeFields: this.activeFields,
+            fields: this.fields,
             context: Object.assign({}, this.context, params.context),
         });
         const virtualId = getId("virtual");

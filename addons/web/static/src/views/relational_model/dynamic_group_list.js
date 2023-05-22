@@ -124,11 +124,7 @@ export class DynamicGroupList extends DynamicList {
     }
 
     _createGroupDatapoint(data) {
-        return new this.model.constructor.Group(
-            this.model,
-            this.config.groups[data.value],
-            data
-        );
+        return new this.model.constructor.Group(this.model, this.config.groups[data.value], data);
     }
 
     async _load(offset, limit, orderBy) {
@@ -171,7 +167,10 @@ export class DynamicGroupList extends DynamicList {
         sourceGroup._removeRecords([record]);
         targetGroup.addRecord(record, refIndex + 1);
         // step 2: update record value
-        const value = targetGroup.value;
+        const value =
+            targetGroup.groupByField.type === "many2one"
+                ? [targetGroup.value, targetGroup.displayName]
+                : targetGroup.value;
         await record.update({ [this.groupByField.name]: value });
         await record.save({ noReload: true });
         const succeeded = await targetGroup.list._moveRecord(dataRecordId, refId);
