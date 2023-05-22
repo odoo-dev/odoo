@@ -599,13 +599,13 @@ export class MockServer {
      * @param {Object} values: an object representing a record
      * @returns {Object}
      */
-    convertToOnChange(modelName, values) {
+    convertToOnChange(modelName, values, specification) {
         Object.entries(values).forEach(([fname, val]) => {
             const field = this.models[modelName].fields[fname];
             if (field.type === "many2one" && typeof val === "number") {
-                // implicit name_get
-                const m2oRecord = this.models[field.relation].records.find((r) => r.id === val);
-                values[fname] = [val, m2oRecord.display_name];
+                values[fname] = this.mockWebRead(field.relation, [[val]], {
+                    specification: specification[fname].fields || {},
+                })[0];
             } else if (field.type === "one2many" || field.type === "many2many") {
                 // TESTS ONLY
                 // one2many_ids = [1,2,3] is a simpler way to express it than orm commands
@@ -615,7 +615,11 @@ export class MockServer {
                 } else {
                     val.forEach((cmd) => {
                         if (cmd[0] === 0 || cmd[0] === 1) {
-                            cmd[2] = this.convertToOnChange(field.relation, cmd[2]);
+                            cmd[2] = this.convertToOnChange(
+                                field.relation,
+                                cmd[2],
+                                specification[fname].fields || {}
+                            );
                         }
                     });
                 }
@@ -931,41 +935,36 @@ export class MockServer {
 
     mockOnchange2(modelName, args, kwargs) {
         const resId = args[0][0];
-        const currentData = args[1];
-        const onChangeSpec = args[3];
+        const changes = args[1];
+        const specification = args[3];
         let fields = args[2] ? (Array.isArray(args[2]) ? args[2] : [args[2]]) : [];
+
         const onchanges = this.models[modelName].onchanges || {};
         const firstOnChange = !fields.length;
         const onchangeVals = {};
-        let defaultVals;
+        let serverValues;
         const nullValues = {};
-        const fieldsFromView = Object.keys(onChangeSpec).reduce((acc, fname) => {
-            fname = fname.split(".", 1)[0];
-            if (!acc.includes(fname)) {
-                acc.push(fname);
-            }
-            return acc;
-        }, []);
-        const defaultingFields = fieldsFromView.filter((fname) => !(fname in currentData));
+        const fieldsFromView = Object.keys(specification);
+
         if (firstOnChange) {
-            defaultVals = this.mockDefaultGet(modelName, [defaultingFields], kwargs);
+            serverValues = this.mockDefaultGet(modelName, [fieldsFromView], kwargs);
             // It is the new semantics: no field in arguments means we are in
             // a default_get + onchange situation
             fields = fieldsFromView;
             fields
-                .filter((fName) => !Object.keys(defaultVals).includes(fName) && fName !== "id")
+                .filter((fName) => !Object.keys(serverValues).includes(fName) && fName !== "id")
                 .forEach((fName) => {
                     nullValues[fName] = false;
                 });
         } else if (resId) {
-            defaultVals = this.mockRead(modelName, [defaultingFields], kwargs);
+            serverValues = this.mockRead(modelName, [args[0], fieldsFromView], kwargs)[0];
         }
-        Object.assign(currentData, defaultVals);
+
+        const currentData = Object.assign({}, nullValues, serverValues, changes);
         fields.forEach((field) => {
             if (field in onchanges) {
-                const changes = Object.assign({}, nullValues, currentData);
-                onchanges[field](changes);
-                Object.entries(changes).forEach(([key, value]) => {
+                onchanges[field](currentData);
+                Object.entries(currentData).forEach(([key, value]) => {
                     if (currentData[key] !== value) {
                         onchangeVals[key] = value;
                     }
@@ -974,7 +973,8 @@ export class MockServer {
         });
         const value = this.convertToOnChange(
             modelName,
-            Object.assign(nullValues, defaultVals, onchangeVals)
+            Object.assign({}, currentData, onchangeVals),
+            specification
         );
         return { value };
     }

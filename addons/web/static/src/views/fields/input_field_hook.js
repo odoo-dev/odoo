@@ -41,6 +41,8 @@ export function useInputField(params) {
      */
     let pendingUpdate = false;
 
+    let lastUpdate = null;
+
     /**
      * When a user types, we need to set the field as dirty.
      */
@@ -135,6 +137,9 @@ export function useInputField(params) {
             return;
         }
 
+        if (!urgent) {
+            await lastUpdate;
+        }
         isDirty = inputRef.el.value !== lastSetValue;
         if (isDirty || (urgent && pendingUpdate)) {
             let isInvalid = false;
@@ -159,7 +164,8 @@ export function useInputField(params) {
 
             if ((val || false) !== (component.props.record.data[component.props.name] || false)) {
                 const nextValue = inputRef.el.value;
-                await component.props.record.update({ [component.props.name]: val });
+                lastUpdate = component.props.record.update({ [component.props.name]: val });
+                await lastUpdate;
                 component.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
                 lastSetValue = nextValue;
             }
