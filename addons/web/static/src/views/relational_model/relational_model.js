@@ -7,12 +7,12 @@ import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { Model } from "@web/views/model";
 import { isRelational, orderByToString } from "@web/views/utils";
-import { Record } from "./record";
-import { DynamicRecordList } from "./dynamic_record_list";
 import { DynamicGroupList } from "./dynamic_group_list";
+import { DynamicRecordList } from "./dynamic_record_list";
 import { Group } from "./group";
+import { Record } from "./record";
 import { StaticList } from "./static_list";
-import { createPropertyActiveField, getFieldContext, getOnChangeSpec } from "./utils";
+import { createPropertyActiveField, getFieldContext } from "./utils";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -550,10 +550,11 @@ export class RelationalModel extends Model {
      */
     _loadNewRecord(config) {
         // Maybe we should add _applyProperties for the form view ?
+        const { fields, activeFields, context, resModel } = config;
         return this._onchange({
-            resModel: config.resModel,
-            spec: getOnChangeSpec(config.activeFields),
-            context: config.context,
+            resModel,
+            context,
+            spec: this._getFieldsSpec(activeFields, fields, context),
         });
     }
 

@@ -247,7 +247,7 @@ export class Many2XAutocomplete extends Component {
         }
         const record = {
             id: option.value,
-            name: option.label,
+            display_name: option.displayName,
         };
         this.props.update([record], params);
     }
@@ -265,6 +265,7 @@ export class Many2XAutocomplete extends Component {
         return {
             value: result[0],
             label: result[1].split("\n")[0],
+            displayName: result[1],
         };
     }
     async loadOptionsSource(request) {

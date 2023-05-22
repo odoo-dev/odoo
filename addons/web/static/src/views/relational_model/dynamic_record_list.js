@@ -83,6 +83,7 @@ export class DynamicRecordList extends DynamicList {
         const values = await this.model._loadNewRecord({
             resModel: this.resModel,
             activeFields: this.activeFields,
+            fields: this.fields,
             context: this.context,
         });
         const record = this._createRecordDatapoint(values, "edit");

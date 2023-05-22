@@ -2518,7 +2518,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "readonly attrs on lines are re-evaluated on field change 2",
         async function (assert) {
             serverData.models.partner.records[0].product_ids = [37];
@@ -3220,7 +3220,7 @@ QUnit.module("Views", (hooks) => {
                 }
             },
         });
-        assert.verifySteps(["read1", "willStart"]);
+        assert.verifySteps(["web_read1", "willStart"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
         assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps"]);
@@ -3541,13 +3541,27 @@ QUnit.module("Views", (hooks) => {
                     assert.deepEqual(
                         args.args[3],
                         {
-                            display_name: "",
-                            foo: "1",
-                            p: "",
-                            "p.bar": "",
-                            "p.product_id": "",
-                            timmy: "",
-                            "timmy.name": "",
+                            display_name: {},
+                            foo: {},
+                            p: {
+                                fields: {
+                                    bar: {},
+                                    product_id: {
+                                        fields: {
+                                            display_name: {},
+                                        },
+                                    },
+                                },
+                                limit: 40,
+                                order: "",
+                            },
+                            timmy: {
+                                fields: {
+                                    name: {},
+                                },
+                                limit: 40,
+                                order: "",
+                            },
                         },
                         "should send only the fields used in the views"
                     );
@@ -3581,7 +3595,7 @@ QUnit.module("Views", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, args) {
-                if (args.method === "onchange" && checkOnchange) {
+                if (args.method === "onchange2" && checkOnchange) {
                     assert.deepEqual(
                         args.args[1],
                         {
@@ -3707,9 +3721,14 @@ QUnit.module("Views", (hooks) => {
                         assert.deepEqual(
                             args.args[3],
                             {
-                                display_name: "",
-                                p: "",
-                                "p.foo": "1",
+                                display_name: {},
+                                p: {
+                                    fields: {
+                                        foo: {},
+                                    },
+                                    limit: 40,
+                                    order: "",
+                                },
                             },
                             "onchangeSpec should be correct (with sub fields)"
                         );
@@ -3720,7 +3739,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("remove default value in subviews", async function (assert) {
+    QUnit.test("remove default value in subviews", async function (assert) {
         assert.expect(2);
 
         serverData.models.product.onchanges = {};
@@ -3739,14 +3758,14 @@ QUnit.module("Views", (hooks) => {
                     </field>
                 </form>`,
             mockRPC: function (route, args) {
-                if (route === "/web/dataset/call_kw/partner/onchange") {
+                if (route === "/web/dataset/call_kw/partner/onchange2") {
                     assert.deepEqual(args.kwargs.context, {
                         default_state: "ab",
                         lang: "en",
                         tz: "taht",
                         uid: 7,
                     });
-                } else if (route === "/web/dataset/call_kw/product/onchange") {
+                } else if (route === "/web/dataset/call_kw/product/onchange2") {
                     assert.deepEqual(args.kwargs.context, {
                         default_product_uom_qty: 68,
                         lang: "en",
@@ -4921,7 +4940,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("Domain: allow empty domain on fieldInfo", async function (assert) {
+    QUnit.test("Domain: allow empty domain on fieldInfo", async function (assert) {
         assert.expect(1);
         serverData.models.partner.fields.product_id.domain = "[('display_name', '=', name)]";
         await makeView({
@@ -4948,7 +4967,7 @@ QUnit.module("Views", (hooks) => {
         });
     });
 
-    QUnit.tttt("discard form with specialdata", async function (assert) {
+    QUnit.test("discard form with specialdata", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -7352,9 +7371,9 @@ QUnit.module("Views", (hooks) => {
                     // foo should be saved because of the "force_save" attribute
                     // qux should be saved because it isn't readonly
                     // int_field should not be saved as it is readonly
-                    assert.deepEqual(args.args[0].p, [[0, 1, { foo: "some value", qux: 6.5 }]]);
+                    assert.deepEqual(args.args[0][0].p, [[0, 1, { foo: "some value", qux: 6.5 }]]);
                 }
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     return {
                         value: {
                             p: [[5], [0, 1, { foo: "some value", int_field: 44, qux: 6.5 }]],
@@ -8873,7 +8892,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("can save without any dirty translatable fields", async function (assert) {
+    QUnit.test("can save without any dirty translatable fields", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
         patchWithCleanup(localization, {
@@ -8894,7 +8913,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
         assert.containsOnce(target, ".o_form_editable");
         // o_field_translate is on the input and on the translate button
         assert.containsN(target, "div[name='foo'] > .o_field_translate", 2);
@@ -10562,7 +10581,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("leave the form view while saving", async function (assert) {
+    QUnit.test("leave the form view while saving", async function (assert) {
         serverData.models.partner.onchanges = {
             foo: function (obj) {
                 obj.display_name = obj.foo === "trigger onchange" ? "changed" : "default";
@@ -10598,7 +10617,7 @@ QUnit.module("Views", (hooks) => {
         const createDef = makeDeferred();
 
         const mockRPC = async (route, args) => {
-            if (args.method === "onchange") {
+            if (args.method === "onchange2") {
                 await onchangeDef;
             }
             if (args.method === "create") {
@@ -12475,7 +12494,7 @@ QUnit.module("Views", (hooks) => {
                 mockRPC(route, args) {
                     assert.step(args.method);
                     if (args.method === "create") {
-                        assert.deepEqual(args.args[0].p[0][2], { int_field: 1, text: false });
+                        assert.deepEqual(args.args[0][0].p[0][2], { int_field: 1, text: false });
                     }
                 },
             });
@@ -12491,7 +12510,14 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_list_renderer .o_data_row [name='int_field']").textContent,
                 "1"
             );
-            assert.verifySteps(["get_views", "onchange", "onchange", "create", "read", "read"]);
+            assert.verifySteps([
+                "get_views",
+                "onchange2",
+                "onchange2",
+                "create",
+                "web_read",
+                "web_read",
+            ]);
         }
     );
 
