@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { markup } from "@odoo/owl";
+import { markup, reactive } from "@odoo/owl";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { evalDomain } from "@web/views/utils";
 import { getId } from "./utils";
@@ -29,7 +29,13 @@ import { getId } from "./utils";
  * @property {boolean} onChange
  */
 
-export class DataPoint {
+class Reactive {
+    constructor() {
+        return reactive(this);
+    }
+}
+
+export class DataPoint extends Reactive {
     /**
      * @param {import("./relational_model").RelationalModel} model
      * @param {import("./relational_model").Config"} config
@@ -37,6 +43,7 @@ export class DataPoint {
      * @param {Object} [options]
      */
     constructor(model, config, data, options) {
+        super(...arguments);
         this.id = getId("datapoint");
         this.model = model;
         this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification

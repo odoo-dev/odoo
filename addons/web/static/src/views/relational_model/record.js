@@ -9,6 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
+import { getFieldsSpec } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -680,7 +681,7 @@ export class Record extends DataPoint {
                 resIds: this.resId ? [this.resId] : [],
                 changes: this._getChanges({ ...this._changes, ...changes }),
                 fieldNames: onChangeFields,
-                spec: this.model._getFieldsSpec(this.activeFields, this.fields, this.evalContext),
+                spec: getFieldsSpec(this.activeFields, this.fields, this.evalContext),
                 context,
             });
             Object.assign(changes, this._parseServerValues(otherChanges, this.data));
