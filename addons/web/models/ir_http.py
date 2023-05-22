@@ -67,12 +67,17 @@ class IrHttp(models.AbstractModel):
 
     def webclient_rendering_context(self):
         return {
+            'color_scheme': self.color_scheme(),
+            'menu_data': request.env['ir.ui.menu'].load_menus(request.session.debug),
             'session_info': self.session_info(),
         }
 
     @api.model
     def lazy_session_info(self):
         return {}
+
+    def color_scheme(self):
+        return request.httprequest.cookies.get('color_scheme')
 
     def session_info(self):
         user = self.env.user
