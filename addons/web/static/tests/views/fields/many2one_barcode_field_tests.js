@@ -113,7 +113,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("barcode button with single results", async function (assert) {
+    QUnit.test("barcode button with single results", async function (assert) {
         assert.expect(2);
 
         // The product selected (mock) for the barcode scanner
@@ -134,7 +134,7 @@ QUnit.module("Fields", (hooks) => {
             `,
             async mockRPC(route, args, performRPC) {
                 if (args.method === CREATE && args.model === SALE_ORDER_LINE) {
-                    const selectedId = args.args[0][PRODUCT_FIELD_NAME];
+                    const selectedId = args.args[0][0][PRODUCT_FIELD_NAME];
                     assert.equal(
                         selectedId,
                         selectedRecordTest.id,
@@ -153,7 +153,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("barcode button with multiple results", async function (assert) {
+    QUnit.test("barcode button with multiple results", async function (assert) {
         assert.expect(4);
 
         // The product selected (mock) for the barcode scanner
@@ -173,7 +173,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             async mockRPC(route, args, performRPC) {
                 if (args.method === CREATE && args.model === SALE_ORDER_LINE) {
-                    const selectedId = args.args[0][PRODUCT_FIELD_NAME];
+                    const selectedId = args.args[0][0][PRODUCT_FIELD_NAME];
                     assert.equal(
                         selectedId,
                         selectedRecordTest.id,

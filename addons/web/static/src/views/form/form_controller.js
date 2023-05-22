@@ -124,9 +124,11 @@ export class FormController extends Component {
             this.archInfo,
             this.props.fields
         );
-        addFieldDependencies(activeFields, fields, [
-            { name: "display_name", type: "char", readonly: true },
-        ]);
+        if (this.props.display.controlPanel) {
+            addFieldDependencies(activeFields, fields, [
+                { name: "display_name", type: "char", readonly: true },
+            ]);
+        }
 
         const { create, edit } = this.archInfo.activeActions;
         this.canCreate = create && !this.props.preventCreate;
