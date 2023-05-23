@@ -129,7 +129,6 @@ export function getFieldContext(fieldName, activeFields, evalContext, parentActi
     }
 }
 
-const DEFAULT_X2M_LIMIT = 40;
 export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
     console.log("getFieldsSpec");
     const fieldsSpec = {};
@@ -148,7 +147,7 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
                 evalContext,
                 activeFields
             );
-            fieldsSpec[fieldName].limit = limit || DEFAULT_X2M_LIMIT;
+            fieldsSpec[fieldName].limit = limit;
             if (defaultOrderBy) {
                 fieldsSpec[fieldName].order = orderByToString(defaultOrderBy);
             }

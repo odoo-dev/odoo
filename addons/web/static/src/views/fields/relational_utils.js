@@ -656,7 +656,7 @@ async function getFormViewInfo({ list, activeField, viewService, userService, en
     }
 
     await loadSubViews(
-        formViewInfo.activeFields,
+        formViewInfo.fieldNodes,
         formViewInfo.fields,
         {}, // context
         comodel,
