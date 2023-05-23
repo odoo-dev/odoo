@@ -119,18 +119,7 @@ export class Record extends DataPoint {
         }
         if (this.selected && this.model.multiEdit) {
             return this.model.mutex.exec(async () => {
-                const proms = [];
-                for (const [fieldName, value] of Object.entries(changes)) {
-                    if (this.fields[fieldName].type === "many2one") {
-                        const prom = this._processMany2oneValue(fieldName, value, changes);
-                        if (prom) {
-                            proms.push(prom);
-                        }
-                    }
-                }
-                if (proms.length) {
-                    await Promise.all(proms);
-                }
+                await this._preprocessMany2oneChanges(changes);
                 this._applyChanges(changes);
                 return this.model.root._multiSave(this);
             });
@@ -502,56 +491,67 @@ export class Record extends DataPoint {
         this._invalidFields.clear();
     }
 
-    async _processMany2oneValue(fieldName, value, changes) {
-        if (!value) {
-            changes[fieldName] = false;
-            return;
-        }
-        const [id, displayName] = value;
-        if (!id && !displayName) {
-            changes[fieldName] = [false, ""];
-            return;
-        }
+    async _preprocessMany2oneChanges(changes) {
+        const proms = [];
+        for (const [fieldName, value] of Object.entries(changes)) {
+            if (this.fields[fieldName].type !== "many2one") {
+                continue;
+            }
+            if (!value) {
+                changes[fieldName] = false;
+                continue;
+            }
+            const [id, displayName] = value;
+            if (!id && !displayName) {
+                changes[fieldName] = [false, ""];
+                continue;
+            }
 
-        const activeField = this.activeFields[fieldName];
+            const activeField = this.activeFields[fieldName];
 
-        if (!activeField) {
-            changes[fieldName] = value;
-            return;
-        }
+            if (!activeField) {
+                changes[fieldName] = value;
+                continue;
+            }
 
-        const relation = this.fields[fieldName].relation;
+            const relation = this.fields[fieldName].relation;
 
-        let context = { ...this.context };
-        // TODO: utils to sanitize context
-        for (const key in context) {
-            if (key.startsWith("default_") || key.endsWith("_view_ref")) {
-                delete context[key];
+            let context = { ...this.context };
+            // TODO: utils to sanitize context
+            for (const key in context) {
+                if (key.startsWith("default_") || key.endsWith("_view_ref")) {
+                    delete context[key];
+                }
+            }
+            context = {
+                ...makeContext([context, activeField.context], this.evalContext),
+            };
+
+            if (!id && displayName !== undefined) {
+                proms.push(
+                    this.model.orm
+                        .call(relation, "name_create", [displayName], {
+                            context,
+                        })
+                        .then((result) => {
+                            changes[fieldName] = result ? result : [false, ""];
+                        })
+                );
+            } else if (id && displayName === undefined) {
+                const kwargs = {
+                    context,
+                    specification: { display_name: {} },
+                };
+                proms.push(
+                    this.model.orm.call(relation, "web_read", [[id]], kwargs).then((records) => {
+                        changes[fieldName] = [records[0].id, records[0].display_name];
+                    })
+                );
+            } else {
+                changes[fieldName] = value;
             }
         }
-        context = {
-            ...makeContext([context, activeField.context], this.evalContext),
-        };
-
-        if (!id && displayName !== undefined) {
-            return this.model.orm
-                .call(relation, "name_create", [displayName], {
-                    context,
-                })
-                .then((result) => {
-                    changes[fieldName] = result ? result : [false, ""];
-                });
-        } else if (id && displayName === undefined) {
-            const kwargs = {
-                context,
-                specification: { display_name: {} },
-            };
-            return this.model.orm.call(relation, "web_read", [[id]], kwargs).then((records) => {
-                changes[fieldName] = [records[0].id, records[0].display_name];
-            });
-        } else {
-            changes[fieldName] = value;
-        }
+        return Promise.all(proms);
     }
 
     _removeInvalidFields(fieldNames) {
@@ -648,7 +648,6 @@ export class Record extends DataPoint {
 
     async _update(changes) {
         this.isDirty = true;
-        const proms = [];
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
             if (field && field.relatedPropertyField) {
@@ -656,15 +655,11 @@ export class Record extends DataPoint {
                 changes[propertyFieldName] = this.data[propertyFieldName].map((property) =>
                     property.name === field.propertyName ? { ...property, value } : property
                 );
-            } else if (field.type === "many2one") {
-                const prom = this._processMany2oneValue(fieldName, value, changes);
-                if (prom) {
-                    proms.push(prom);
-                }
             }
         }
+        const prom = this._preprocessMany2oneChanges(changes);
         if (!this.model._urgentSave) {
-            await Promise.all(proms);
+            await prom;
         }
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
