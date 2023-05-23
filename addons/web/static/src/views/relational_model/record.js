@@ -390,7 +390,12 @@ export class Record extends DataPoint {
         const result = {};
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
-            if (!withReadonly && fieldName in this.activeFields && this._isReadonly(fieldName)) {
+            if (
+                !withReadonly &&
+                fieldName in this.activeFields &&
+                this._isReadonly(fieldName) &&
+                !this.activeFields[fieldName].forceSave
+            ) {
                 continue;
             }
             if (field.relatedPropertyField) {

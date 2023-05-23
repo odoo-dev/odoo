@@ -3,16 +3,21 @@
 import { makeContext } from "@web/core/context";
 import { omit } from "@web/core/utils/objects";
 
+function makeActiveField({ context, invisible, readonly, required, onChange, forceSave } = {}) {
+    return {
+        context: context || "{}",
+        invisible: invisible || false,
+        readonly: readonly || false,
+        required: required || false,
+        onChange: onChange || false,
+        forceSave: forceSave || false,
+    };
+}
+
 export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
         if (!activeFields[field.name]) {
-            activeFields[field.name] = {
-                context: field.context || "{}",
-                invisible: field.invisible || false,
-                readonly: field.readonly || false,
-                required: field.required || false,
-                onChange: field.onChange || false,
-            };
+            activeFields[field.name] = makeActiveField(field);
         }
         if (!fields[field.name]) {
             fields[field.name] = omit(field, [
@@ -29,13 +34,7 @@ export function addFieldDependencies(activeFields, fields, fieldDependencies = [
 export function createPropertyActiveField(property) {
     const { type } = property;
 
-    const activeField = {
-        context: "{}",
-        invisible: false,
-        readonly: false,
-        required: false,
-        onChange: false,
-    };
+    const activeField = makeActiveField();
     if (type === "many2many") {
         activeField.related = {
             fields: {
@@ -43,20 +42,8 @@ export function createPropertyActiveField(property) {
                 display_name: { name: "display_name", type: "char" },
             },
             activeFields: {
-                id: {
-                    context: "{}",
-                    invisible: false,
-                    readonly: false,
-                    required: false,
-                    onChange: false,
-                },
-                display_name: {
-                    context: "{}",
-                    invisible: false,
-                    readonly: false,
-                    required: false,
-                    onChange: false,
-                },
+                id: makeActiveField(),
+                display_name: makeActiveField(),
             },
         };
     }
@@ -70,13 +57,14 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
         const fieldName = fieldNode.name;
         const modifiers = fieldNode.modifiers || {};
         if (!(fieldName in activeFields)) {
-            activeFields[fieldName] = {
-                context: fieldNode.context || "{}",
-                invisible: modifiers.invisible || modifiers.column_invisible || false,
-                readonly: modifiers.readonly || false,
-                required: modifiers.required || false,
-                onChange: fieldNode.onChange || false,
-            };
+            activeFields[fieldName] = makeActiveField({
+                context: fieldNode.context,
+                invisible: modifiers.invisible || modifiers.column_invisible,
+                readonly: modifiers.readonly,
+                required: modifiers.required,
+                onChange: fieldNode.onChange,
+                forceSave: fieldNode.forceSave,
+            });
             if (modifiers.invisible === true || modifiers.column_invisible === true) {
                 continue; // always invisible
             }
