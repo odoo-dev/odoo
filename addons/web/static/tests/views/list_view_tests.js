@@ -15913,7 +15913,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("quickcreate in a many2one in a list", async function (assert) {
+    QUnit.test("quickcreate in a many2one in a list", async function (assert) {
         await makeView({
             type: "list",
             arch: '<tree editable="top"><field name="m2o"/></tree>',
@@ -17809,7 +17809,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector("thead th[data-name=foo]"), "table-active");
     });
 
-    QUnit.tttt("Search more in a many2one", async function (assert) {
+    QUnit.test("Search more in a many2one", async function (assert) {
         serverData.views = {
             "bar,false,list": `
                 <list>
@@ -17837,9 +17837,8 @@ QUnit.module("Views", (hooks) => {
                 </tree>
             `,
             mockRPC(_, args) {
-                if (args.method === "name_get") {
-                    assert.step("name_get");
-                    assert.deepEqual(args.args[0], [3]);
+                if (args.method === "web_read") {
+                    assert.step(`web_read ${args.args[0]}`);
                 }
             },
         });
@@ -17857,13 +17856,14 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, ".modal .o_data_row:nth-child(3) td[name=display_name]");
 
-        assert.verifySteps(["name_get"]);
+        assert.verifySteps(["web_read 3"]);
 
         await clickSave(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_row td[name=m2o]")].map((el) => el.innerText),
             ["Value 3", "Value 2", "Value 1", "Value 1"]
         );
+        assert.verifySteps(["web_read 1"]);
     });
 
     QUnit.test("view's context is passed down as evalContext", async (assert) => {
