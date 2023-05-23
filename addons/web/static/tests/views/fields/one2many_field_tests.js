@@ -676,11 +676,9 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "use the limit attribute in arch (in field o2m non inline tree view)",
         async function (assert) {
-            assert.expect(2);
-
             serverData.models.partner.records[0].turtles = [1, 2, 3];
             serverData.views = {
                 "turtle,false,list": `<tree limit="2"><field name="turtle_foo"/></tree>`,
@@ -692,16 +690,27 @@ QUnit.module("Fields", (hooks) => {
                 arch: `<form><field name="turtles" widget="one2many"/></form>`,
                 resId: 1,
                 mockRPC(route, args) {
-                    if (args.model === "turtle" && args.method === "read") {
-                        assert.deepEqual(args.args[0], [1, 2]);
+                    assert.step(args.method);
+                    if (args.method === "web_read") {
+                        assert.deepEqual(args.kwargs.specification, {
+                            display_name: {},
+                            turtles: {
+                                fields: {
+                                    turtle_foo: {},
+                                },
+                                limit: 2,
+                                order: "",
+                            },
+                        });
                     }
                 },
             });
             assert.containsN(target, ".o_data_row", 2);
+            assert.verifySteps(["get_views", "get_views", "web_read"]);
         }
     );
 
-    QUnit.tttt("one2many with default_order on view not inline", async function (assert) {
+    QUnit.test("one2many with default_order on view not inline", async function (assert) {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
         serverData.views = {
             "turtle,false,list": `

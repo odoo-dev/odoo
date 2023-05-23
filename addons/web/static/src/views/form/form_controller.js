@@ -40,7 +40,7 @@ import {
 const viewRegistry = registry.category("views");
 
 export async function loadSubViews(
-    activeFields,
+    fieldNodes,
     fields,
     context,
     resModel,
@@ -48,20 +48,20 @@ export async function loadSubViews(
     userService,
     isSmall
 ) {
-    for (const fieldName in activeFields) {
+    for (const fieldInfo of Object.values(fieldNodes)) {
+        const fieldName = fieldInfo.name;
         const field = fields[fieldName];
         if (!isX2Many(field)) {
             continue; // what follows only concerns x2many fields
         }
-        const fieldInfo = activeFields[fieldName];
-        if (fieldInfo.modifiers.invisible === true) {
+        if (fieldInfo.alwaysInvisible) {
             continue; // no need to fetch the sub view if the field is always invisible
         }
-
         if (!fieldInfo.field.useSubView) {
             continue; // the FieldComponent used to render the field doesn't need a sub view
         }
 
+        fieldInfo.views = fieldInfo.views || {};
         let viewType = fieldInfo.viewMode || "list,kanban";
         viewType = viewType.replace("tree", "list");
         if (viewType.includes(",")) {
@@ -103,7 +103,11 @@ export async function loadSubViews(
         });
         const { ArchParser } = viewRegistry.get(viewType);
         const archInfo = new ArchParser().parse(views[viewType].arch, relatedModels, comodel);
-        fieldInfo.views[viewType] = { ...archInfo, fields: comodelFields };
+        fieldInfo.views[viewType] = {
+            ...archInfo,
+            limit: archInfo.limit || 40,
+            fields: comodelFields,
+        };
         fieldInfo.relatedFields = comodelFields;
     }
 }
@@ -120,16 +124,6 @@ export class FormController extends Component {
         useBus(this.ui.bus, "resize", this.render);
 
         this.archInfo = this.props.archInfo;
-        const { activeFields, fields } = extractFieldsFromArchInfo(
-            this.archInfo,
-            this.props.fields
-        );
-        if (this.props.display.controlPanel) {
-            addFieldDependencies(activeFields, fields, [
-                { name: "display_name", type: "char", readonly: true },
-            ]);
-        }
-
         const { create, edit } = this.archInfo.activeActions;
         this.canCreate = create && !this.props.preventCreate;
         this.canEdit = edit && !this.props.preventEdit;
@@ -152,8 +146,8 @@ export class FormController extends Component {
                 resModel: this.props.resModel,
                 resId: this.props.resId || false,
                 resIds: this.props.resIds || (this.props.resId ? [this.props.resId] : []),
-                fields,
-                activeFields,
+                fields: this.props.fields,
+                activeFields: {}, // will be generated after loading sub views (see willStart)
                 isMonoRecord: true,
                 mode,
                 context: this.props.context,
@@ -168,7 +162,7 @@ export class FormController extends Component {
 
         onWillStart(async () => {
             await loadSubViews(
-                this.archInfo.activeFields,
+                this.archInfo.fieldNodes,
                 this.props.fields,
                 this.props.context,
                 this.props.resModel,
@@ -176,6 +170,17 @@ export class FormController extends Component {
                 this.user,
                 this.env.isSmall
             );
+            const { activeFields, fields } = extractFieldsFromArchInfo(
+                this.archInfo,
+                this.props.fields
+            );
+            if (this.props.display.controlPanel) {
+                addFieldDependencies(activeFields, fields, [
+                    { name: "display_name", type: "char", readonly: true },
+                ]);
+            }
+            this.model.config.activeFields = activeFields;
+            this.model.config.fields = fields;
             return this.model.load();
         });
         onWillUpdateProps((nextProps) => {
@@ -196,14 +201,6 @@ export class FormController extends Component {
                 this.updateURL();
             }
         });
-
-        // enable the archive feature in Actions menu only if the active field is in the view
-        this.archiveEnabled =
-            "active" in activeFields
-                ? !this.props.fields.active.readonly
-                : "x_active" in activeFields
-                ? !this.props.fields.x_active.readonly
-                : false;
 
         // select footers that are not in subviews and move them to another arch
         // that will be moved to the dialog's footer (if we are in a dialog)
@@ -416,6 +413,15 @@ export class FormController extends Component {
             action: [...staticActionItems, ...(actionMenus.action || [])],
             print: actionMenus.print,
         };
+    }
+
+    // enable the archive feature in Actions menu only if the active field is in the view
+    get archiveEnabled() {
+        return "active" in this.model.root.activeFields
+            ? !this.props.fields.active.readonly
+            : "x_active" in this.model.root.activeFields
+            ? !this.props.fields.x_active.readonly
+            : false;
     }
 
     async shouldExecuteAction(item) {
