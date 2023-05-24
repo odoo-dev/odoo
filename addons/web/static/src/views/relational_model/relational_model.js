@@ -12,7 +12,14 @@ import { DynamicRecordList } from "./dynamic_record_list";
 import { Group } from "./group";
 import { Record } from "./record";
 import { StaticList } from "./static_list";
-import { createPropertyActiveField, getFieldsSpec } from "./utils";
+import {
+    getFieldsSpec,
+    createPropertyActiveField,
+    getAggregatesFromGroupData,
+    getDisplayNameFromGroupData,
+    getValueFromGroupData,
+} from "./utils";
+import { Domain } from "@web/core/domain";
 
 // WOWL TOREMOVE BEFORE MERGE
 // Changes:
@@ -420,31 +427,26 @@ export class RelationalModel extends Model {
             delete group.__count;
             delete group[`${firstGroupByName}_count`];
             delete group.__range;
-            group.value = group[config.groupBy[0]];
+            group.value = getValueFromGroupData(group, groupByField, group[config.groupBy[0]]);
+            group.displayName = getDisplayNameFromGroupData(groupByField, group[config.groupBy[0]]);
+            group.aggregates = getAggregatesFromGroupData(group, config.fields);
             // delete group[config.groupBy[0]];
             if (!config.groups[group.value]) {
-                const context = {
-                    ...config.context,
-                    // FIXME: doesn't work for many2ones, need to move some logic from group.js to here
-                    [`default_${firstGroupByName}`]: group.value,
-                };
                 config.groups[group.value] = {
                     ...commonConfig,
-                    context,
                     groupByFieldName: groupByField.name,
                     isFolded: group.__fold || !config.openGroupsByDefault,
+                    extraDomain: false,
+                    value: group.value,
                     list: {
                         ...commonConfig,
-                        context,
-                        domain: group.__domain,
                         groupBy,
                     },
                 };
                 if (groupRecordConfig) {
-                    const resId = group.value ? group.value[0] : false;
                     config.groups[group.value].record = {
                         ...groupRecordConfig,
-                        resId,
+                        resId: group.value ?? false,
                     };
                 }
             }
@@ -456,6 +458,21 @@ export class RelationalModel extends Model {
             }
             const groupConfig = config.groups[group.value];
             groupConfig.list.orderBy = config.orderBy;
+            groupConfig.initialDomain = group.__domain;
+            if (groupConfig.extraDomain) {
+                groupConfig.list.domain = Domain.and([
+                    group.__domain,
+                    groupConfig.extraDomain,
+                ]).toList();
+            } else {
+                groupConfig.list.domain = group.__domain;
+            }
+            const context = {
+                ...config.context,
+                [`default_${firstGroupByName}`]: group.value,
+            };
+            groupConfig.list.context = context;
+            groupConfig.context = context;
             if (groupBy.length) {
                 group.groups = [];
             } else {
@@ -487,12 +504,32 @@ export class RelationalModel extends Model {
                 resIds: groupRecordResIds,
             }).then((records) => {
                 for (const group of groups) {
-                    group.values = records.find((r) => group.value && r.id === group.value[0]);
+                    group.values = records.find((r) => group.value && r.id === group.value);
                 }
             });
             proms.push(prom);
         }
         await Promise.all(proms);
+
+        // if a group becomes empty at some point (e.g. we dragged its last record out of it), and the view is reloaded
+        // with the same domain and groupbys, we want to keep the empty group in the UI
+        if (
+            config.currentGroups &&
+            config.currentGroups.params ===
+                JSON.stringify([config.domain, config.groupBy, config.offset, config.limit])
+        ) {
+            const currentGroups = config.currentGroups.groups;
+            for (const group of currentGroups) {
+                if (!groups.some((g) => JSON.stringify(g.value) === JSON.stringify(group.value))) {
+                    groups.push(Object.assign({}, group, { count: 0, records: [] }));
+                }
+            }
+        }
+        config.currentGroups = {
+            params: JSON.stringify([config.domain, config.groupBy, config.offset, config.limit]),
+            groups,
+        };
+
         return { groups, length };
     }
 

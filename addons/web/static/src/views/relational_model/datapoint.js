@@ -1,7 +1,6 @@
 /* @odoo-module */
 
-import { markup, reactive } from "@odoo/owl";
-import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { reactive } from "@odoo/owl";
 import { evalDomain } from "@web/views/utils";
 import { getId } from "./utils";
 
@@ -83,64 +82,5 @@ export class DataPoint extends Reactive {
         // FIXME: if modifiers has readonly or not ?
         const { readonly } = activeField || this.fields[fieldName];
         return readonly && evalDomain(readonly, this.evalContext);
-    }
-
-    // -------------------------------------------------------------------------
-    // Protected
-    // -------------------------------------------------------------------------
-
-    /**
-     * @param {Field | false} field
-     * @param {any} value
-     * @returns {any}
-     */
-    _parseServerValue(field, value) {
-        if (!field) {
-            field = { type: "integer" }; //TODOPRO integer seems not be used in the switch case, why not return value directly ?
-        }
-        switch (field.type) {
-            case "char":
-            case "text": {
-                return value || "";
-            }
-            case "date": {
-                return value ? deserializeDate(value) : false;
-            }
-            case "datetime": {
-                return value ? deserializeDateTime(value) : false;
-            }
-            case "html": {
-                return markup(value || "");
-            }
-            case "selection": {
-                if (value === false) {
-                    // process selection: convert false to 0, if 0 is a valid key
-                    const hasKey0 = field.selection.find((option) => option[0] === 0);
-                    return hasKey0 ? 0 : value;
-                }
-                return value;
-            }
-            case "many2one": {
-                if (Array.isArray(value)) {
-                    // for now, onchange still returns many2one values as pairs [id, display_name]
-                    return value;
-                }
-                if (Number.isInteger(value)) {
-                    // for always invisible many2ones, unity directly returns the id, not a pair
-                    // FIXME: should return an object with only the id
-                    return [value, ""];
-                }
-                return value ? [value.id, value.display_name] : false;
-            }
-            case "properties": {
-                return value
-                    ? value.map((property) => ({
-                          ...property,
-                          value: this._parseServerValue(property, property.value ?? false),
-                      }))
-                    : [];
-            }
-        }
-        return value;
     }
 }

@@ -931,7 +931,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_field_widget[name=foo]"), "col-lg-6");
     });
 
-    QUnit.tttt("Form and subview with _view_ref contexts", async function (assert) {
+    QUnit.test("Form and subview with _view_ref contexts", async function (assert) {
         assert.expect(3);
 
         serverData.models.product.fields.partner_type_ids = {
@@ -7242,7 +7242,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("*_view_ref in context are passed correctly", async function (assert) {
+    QUnit.test("*_view_ref in context are passed correctly", async function (assert) {
         serverData.views = {
             "partner_type,module.tree_view_ref,list": "<tree/>",
         };
@@ -7279,7 +7279,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["354"]);
     });
 
-    QUnit.tttt("non inline subview and create=0 in action context", async function (assert) {
+    QUnit.test("non inline subview and create=0 in action context", async function (assert) {
         // the create=0 should apply on the main view (form), but not on subviews
         // this works because we pass the "base_model" in the context for the "get_views" call
         serverData.views = {
@@ -10008,7 +10008,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("process the context for subview not inline", async function (assert) {
+    QUnit.test("process the context for subview not inline", async function (assert) {
         serverData.models.partner.records[0].p = [2];
 
         serverData.views = {
@@ -10033,7 +10033,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("can toggle column in x2many in sub form view", async function (assert) {
+    QUnit.test("can toggle column in x2many in sub form view", async function (assert) {
         serverData.models.partner.records[2].p = [1, 2];
         serverData.models.partner.fields.foo.sortable = true;
         serverData.views = {
@@ -10377,7 +10377,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("keep editing after call_button fail", async function (assert) {
+    QUnit.test("keep editing after call_button fail", async function (assert) {
         assert.expect(4);
 
         let values;
@@ -12136,7 +12136,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_error_dialog");
     });
 
-    QUnit.tttt("no 'oh snap' error in form view in dialog", async (assert) => {
+    QUnit.test("no 'oh snap' error in form view in dialog", async (assert) => {
         assert.expect(5);
 
         registry.category("services").add("error", errorService);
