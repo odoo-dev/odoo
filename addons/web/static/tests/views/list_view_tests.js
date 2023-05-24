@@ -8688,7 +8688,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "modifiers of other x2many rows a re-evaluated when a subrecord is updated",
         async function (assert) {
             // In an x2many, a change on a subrecord might trigger an onchange on the x2many that

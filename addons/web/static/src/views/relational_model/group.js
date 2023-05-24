@@ -1,8 +1,7 @@
 /* @odoo-module */
 
+import { Domain } from "@web/core/domain";
 import { DataPoint } from "./datapoint";
-
-const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
 
 /**
  * @typedef Params
@@ -17,14 +16,13 @@ export class Group extends DataPoint {
     setup(config, data) {
         super.setup(...arguments);
         this.groupByField = this.fields[config.groupByFieldName];
-        this.progressBars = []; // FIXME: remove from model?
         this.range = data.range;
         this._rawValue = data[this.groupByField.name];
         /** @type {number} */
         this.count = data.count;
-        this.value = this._getValueFromGroupData(data, this.groupByField);
-        this.displayName = this._getDisplayNameFromGroupData(data, this.groupByField);
-        this.aggregates = this._getAggregatesFromGroupData(data);
+        this.value = data.value;
+        this.displayName = data.displayName;
+        this.aggregates = data.aggregates;
         let List;
         if (config.list.groupBy.length) {
             List = this.model.constructor.DynamicGroupList;
@@ -58,6 +56,17 @@ export class Group extends DataPoint {
 
     empty() {
         this.list.empty();
+    }
+
+    async applyFilter(filter) {
+        if (filter) {
+            await this.list.load({
+                domain: Domain.and([this.config.initialDomain, filter]).toList(),
+            });
+        } else {
+            await this.list.load({ domain: this.config.initialDomain });
+        }
+        this.model._updateConfig(this.config, { extraDomain: filter }, { noReload: true });
     }
 
     addRecord(record, index) {
@@ -109,58 +118,6 @@ export class Group extends DataPoint {
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
-
-    /**
-     * @param {Object} groupData
-     * @returns {Object}
-     */
-    _getAggregatesFromGroupData(groupData) {
-        const aggregates = {};
-        for (const [key, value] of Object.entries(groupData)) {
-            if (key in this.fields && AGGREGATABLE_FIELD_TYPES.includes(this.fields[key].type)) {
-                aggregates[key] = value;
-            }
-        }
-        return aggregates;
-    }
-
-    /**
-     * @param {Object} groupData
-     * @param {import("./datapoint").Field} field
-     * @returns {string | false}
-     */
-    _getDisplayNameFromGroupData(groupData, field) {
-        if (field.type === "selection") {
-            return Object.fromEntries(field.selection)[groupData.value];
-        }
-        if (["many2one", "many2many"].includes(field.type)) {
-            return groupData.value ? groupData.value[1] : false;
-        }
-        return groupData.value;
-    }
-
-    /**
-     * @param {Object} groupData
-     * @param {import("./datapoint").Field} field
-     * @returns {any}
-     */
-    _getValueFromGroupData(groupData, field) {
-        if (["date", "datetime"].includes(field.type)) {
-            const range = groupData.range;
-            if (!range) {
-                return false;
-            }
-            const dateValue = this._parseServerValue(field, range.to);
-            return dateValue.minus({
-                [field.type === "date" ? "day" : "second"]: 1,
-            });
-        }
-        const value = this._parseServerValue(field, groupData.value);
-        if (["many2one", "many2many"].includes(field.type)) {
-            return value ? value[0] : false;
-        }
-        return value;
-    }
 
     async _removeRecords(records) {
         const recordsToRemove = records.filter((record) => this.list.records.includes(record));

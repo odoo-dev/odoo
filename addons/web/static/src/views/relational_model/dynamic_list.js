@@ -13,7 +13,6 @@ export class DynamicList extends DataPoint {
      */
     setup(config) {
         super.setup(...arguments);
-        this.domain = config.domain;
         this.groupBy = [];
         this.isDomainSelected = false;
         this.evalContext = this.context;
@@ -25,6 +24,9 @@ export class DynamicList extends DataPoint {
 
     get orderBy() {
         return this.config.orderBy;
+    }
+    get domain() {
+        return this.config.domain;
     }
     get editedRecord() {
         return this.records.find((record) => record.isInEdition);
@@ -108,8 +110,9 @@ export class DynamicList extends DataPoint {
         const limit = params.limit === undefined ? this.limit : params.limit;
         const offset = params.offset === undefined ? this.offset : params.offset;
         const orderBy = params.orderBy === undefined ? this.orderBy : params.orderBy;
+        const domain = params.domain === undefined ? this.domain : params.domain;
         console.log(orderBy);
-        return this.model.mutex.exec(() => this._load(offset, limit, orderBy));
+        return this.model.mutex.exec(() => this._load(offset, limit, orderBy, domain));
     }
 
     async multiSave(record) {
@@ -192,7 +195,7 @@ export class DynamicList extends DataPoint {
     _leaveSampleMode() {
         if (this.model.useSampleModel) {
             this.model.useSampleModel = false;
-            return this._load(this.offset, this.limit, this.orderBy);
+            return this._load(this.offset, this.limit, this.orderBy, this.domain);
         }
     }
 
@@ -213,12 +216,13 @@ export class DynamicList extends DataPoint {
             );
             this.model.notification.add(msg, { title: _t("Warning") });
         }
+        const reload = () => this.model.load();
         if (action && Object.keys(action).length) {
             this.model.action.doAction(action, {
-                onClose: () => this._load(this.offset, this.limit, this.orderBy),
+                onClose: reload,
             });
         } else {
-            return this._load(0, this.limit, this.orderBy);
+            return reload();
         }
     }
 
