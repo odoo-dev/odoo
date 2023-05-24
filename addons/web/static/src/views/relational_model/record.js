@@ -9,7 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
-import { getFieldsSpec } from "./utils";
+import { getFieldsSpec, parseServerValue } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -273,7 +273,7 @@ export class Record extends DataPoint {
                 }
                 parsedValues[fieldName] = staticList;
             } else {
-                parsedValues[fieldName] = this._parseServerValue(field, value);
+                parsedValues[fieldName] = parseServerValue(field, value);
                 if (field.type === "properties") {
                     for (const property of parsedValues[fieldName]) {
                         const fieldPropertyName = `${fieldName}.${property.name}`;
