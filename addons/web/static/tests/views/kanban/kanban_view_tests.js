@@ -9018,7 +9018,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(2).querySelector(".o_widget").innerText, '{"foo":"gnap"}');
     });
 
-    QUnit.tttt("column progressbars properly work", async (assert) => {
+    QUnit.test("column progressbars properly work", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9056,12 +9056,12 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt('column progressbars: "false" bar is clickable', async (assert) => {
+    QUnit.test('column progressbars: "false" bar is clickable', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -9122,13 +9122,13 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt('column progressbars: "false" bar with sum_field', async (assert) => {
+    QUnit.test('column progressbars: "false" bar with sum_field', async (assert) => {
         serverData.models.partner.records.push({
             id: 5,
             bar: true,
@@ -9175,10 +9175,10 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "web_read_group",
+            "unity_web_search_read",
         ]);
     });
 
@@ -9250,15 +9250,15 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "create",
                 "/web/dataset/resequence",
             ]);
         }
     );
 
-    QUnit.tttt("column progressbars on quick create properly update counter", async (assert) => {
+    QUnit.test("column progressbars on quick create properly update counter", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9296,13 +9296,13 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "onchange",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "onchange2",
             "name_create",
-            "read",
+            "web_read",
             "read_progress_bar",
-            "onchange",
+            "onchange2",
         ]);
     });
 
@@ -9343,7 +9343,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column progressbars with an active filter are working with load more",
         async (assert) => {
             serverData.models.partner.records.push(
@@ -9382,15 +9382,15 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
             ]);
         }
     );
 
-    QUnit.tttt("column progressbars on archiving records update counter", async (assert) => {
+    QUnit.test("column progressbars on archiving records update counter", async (assert) => {
         // add active field on partner model and make all records active
         serverData.models.partner.fields.active = { string: "Active", type: "char", default: true };
 
@@ -9439,17 +9439,17 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "action_archive",
             "web_read_group",
-            "web_search_read",
+            "unity_web_search_read",
             "read_progress_bar",
             "web_read_group",
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "kanban with progressbars: correctly update env when archiving records",
         async (assert) => {
             // add active field on partner model and make all records active
@@ -9505,7 +9505,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("RPCs when (re)loading kanban view progressbars", async (assert) => {
+    QUnit.test("RPCs when (re)loading kanban view progressbars", async (assert) => {
         const kanban = await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9640,9 +9640,9 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "write",
             "read_progress_bar",
             "read",
@@ -9661,7 +9661,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("progress bar subgroup count recompute", async (assert) => {
+    QUnit.test("progress bar subgroup count recompute", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9689,9 +9689,9 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
@@ -9731,8 +9731,8 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "write",
                 "read_progress_bar",
                 "read",
@@ -9783,7 +9783,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column progressbars on quick create with quick_create_view are updated",
         async (assert) => {
             serverData.views[
@@ -9825,15 +9825,15 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "get_views",
-                "onchange",
+                "onchange2",
                 "create",
-                "read",
+                "web_read",
                 "read_progress_bar",
                 "web_read_group",
-                "onchange",
+                "onchange2",
             ]);
         }
     );
@@ -9898,25 +9898,25 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "web_read_group",
                 "get_views",
-                "onchange",
+                "onchange2",
                 "create",
                 "read",
                 "read_progress_bar",
                 "web_read_group",
                 "web_read_group",
-                "onchange",
-                "onchange",
+                "onchange2",
+                "onchange2",
                 "create",
                 "read",
                 "read_progress_bar",
                 "web_read_group",
                 "web_read_group",
-                "onchange",
+                "onchange2",
             ]);
         }
     );
@@ -10817,7 +10817,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "progressbar filter state is kept unchanged when domain is updated (records still in group)",
         async (assert) => {
             const kanban = await makeView({
@@ -10889,21 +10889,21 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
+                "unity_web_search_read",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
             ]);
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "progressbar filter state is kept unchanged when domain is updated (emptying group)",
         async (assert) => {
             const kanban = await makeView({
@@ -10985,18 +10985,18 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
             ]);
         }
     );
@@ -11077,9 +11077,9 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
                 "write",
                 "read_progress_bar",
                 "read",
@@ -11406,7 +11406,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_record", 2);
     });
 
-    QUnit.tttt("filter groups are kept when leaving and coming back", async (assert) => {
+    QUnit.test("filter groups are kept when leaving and coming back", async (assert) => {
         serverData.models.partner.records[1].state = "abc";
         serverData.views = {
             "partner,false,kanban": `
@@ -11867,7 +11867,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_kanban_record").innerText, "ged");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "Color '200' (gray) can be used twice (for false value and another value) in progress bar",
         async (assert) => {
             serverData.models.partner.records.push({ id: 5, bar: true }, { id: 6, bar: false });
@@ -11945,11 +11945,11 @@ QUnit.module("Views", (hooks) => {
                 "get_views",
                 "web_read_group",
                 "read_progress_bar",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
-                "web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
+                "unity_web_search_read",
             ]);
         }
     );
@@ -12029,18 +12029,18 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "write",
             "read",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
         ]);
     });
 
-    QUnit.tttt("load more button shouldn't be visible when unfiltering column", async (assert) => {
+    QUnit.test("load more button shouldn't be visible when unfiltering column", async (assert) => {
         serverData.models.partner.records.push({ id: 5, state: "abc", bar: true });
 
         let def;
@@ -12725,8 +12725,8 @@ QUnit.module("Views", (hooks) => {
             "get_views",
             "web_read_group",
             "read_progress_bar",
-            "web_search_read",
-            "web_search_read",
+            "unity_web_search_read",
+            "unity_web_search_read",
             "write",
             "read_progress_bar",
             "web_read_group",
@@ -12822,7 +12822,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("Move new record with onchanges and different active fields", async (assert) => {
+    QUnit.test("Move new record with onchanges and different active fields", async (assert) => {
         serverData.models.partner.fields.foo.default = "abc";
         serverData.models.partner.onchanges = {
             bar(obj) {
@@ -13298,7 +13298,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_kanban_group .o_kanban_record", 16);
     });
 
-    QUnit.tttt("scroll on group unfold and progressbar click", async (assert) => {
+    QUnit.test("scroll on group unfold and progressbar click", async (assert) => {
         assert.expect(7);
 
         await makeView({
