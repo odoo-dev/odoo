@@ -181,7 +181,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    QUnit.tttt("Form dialog and subview with _view_ref contexts", async function (assert) {
+    QUnit.test("Form dialog and subview with _view_ref contexts", async function (assert) {
         assert.expect(2);
 
         serverData.models.instrument.records = [{ id: 1, name: "Tromblon", badassery: [1] }];

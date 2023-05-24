@@ -123,13 +123,13 @@ export class DynamicRecordList extends DynamicList {
         if (this.offset && !_records.length) {
             // we weren't on the first page, and we removed all records of the current page
             const offset = Math.max(this.offset - this.limit, 0);
-            return this._load(offset, this.limit, this.orderBy);
+            return this._load(offset, this.limit, this.orderBy, this.domain);
         }
         const nbRemovedRecords = this.records.length - _records.length;
         if (nbRemovedRecords > 0) {
             if (this.count > this.offset + this.limit) {
                 // we removed some records, and there are other pages after the current one
-                return this._load(this.offset, this.limit, this.orderBy);
+                return this._load(this.offset, this.limit, this.orderBy, this.domain);
             } else {
                 // we are on the last page and there are still records remaining
                 this.count -= nbRemovedRecords;
@@ -149,11 +149,12 @@ export class DynamicRecordList extends DynamicList {
         }
     }
 
-    async _load(offset, limit, orderBy) {
+    async _load(offset, limit, orderBy, domain) {
         const response = await this.model._updateConfig(this.config, {
             offset,
             limit,
             orderBy,
+            domain,
         });
         this.records = response.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(response);
