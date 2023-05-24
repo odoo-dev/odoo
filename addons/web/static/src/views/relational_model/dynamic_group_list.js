@@ -101,7 +101,7 @@ export class DynamicGroupList extends DynamicList {
             [`default_${this.groupByField.name}`]: id,
         };
         const nextConfigGroups = { ...this.config.groups };
-        nextConfigGroups[id + "," + groupName] = {
+        nextConfigGroups[id] = {
             ...commonConfig,
             context,
             groupByFieldName: this.groupByField.name,
@@ -122,7 +122,8 @@ export class DynamicGroupList extends DynamicList {
             records: [],
             __domain: [[this.groupByField.name, "=", id]],
             [this.groupByField.name]: [id, groupName],
-            value: [id, groupName],
+            value: id,
+            displayName: groupName,
         };
 
         this.groups.push(this._createGroupDatapoint(data));
@@ -132,11 +133,12 @@ export class DynamicGroupList extends DynamicList {
         return new this.model.constructor.Group(this.model, this.config.groups[data.value], data);
     }
 
-    async _load(offset, limit, orderBy) {
+    async _load(offset, limit, orderBy, domain) {
         const response = await this.model._updateConfig(this.config, {
             offset,
             limit,
             orderBy,
+            domain,
         });
         this.groups = response.groups.map((group) => this._createGroupDatapoint(group));
         this.count = response.length;

@@ -1,6 +1,8 @@
 /* @odoo-module */
 
+import { markup } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
+import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { omit } from "@web/core/utils/objects";
 import { orderByToString } from "@web/views/utils";
 
@@ -14,6 +16,8 @@ function makeActiveField({ context, invisible, readonly, required, onChange, for
         forceSave: forceSave || false,
     };
 }
+
+const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that can be aggregated in grouped views
 
 export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
@@ -188,4 +192,110 @@ let nextId = 0;
  */
 export function getId(prefix = "") {
     return `${prefix}_${++nextId}`;
+}
+
+/**
+ * @protected
+ * @param {Field | false} field
+ * @param {any} value
+ * @returns {any}
+ */
+export function parseServerValue(field, value) {
+    switch (field.type) {
+        case "char":
+        case "text": {
+            return value || "";
+        }
+        case "date": {
+            return value ? deserializeDate(value) : false;
+        }
+        case "datetime": {
+            return value ? deserializeDateTime(value) : false;
+        }
+        case "html": {
+            return markup(value || "");
+        }
+        case "selection": {
+            if (value === false) {
+                // process selection: convert false to 0, if 0 is a valid key
+                const hasKey0 = field.selection.find((option) => option[0] === 0);
+                return hasKey0 ? 0 : value;
+            }
+            return value;
+        }
+        case "many2one": {
+            if (Array.isArray(value)) {
+                // for now, onchange still returns many2one values as pairs [id, display_name]
+                return value;
+            }
+            if (Number.isInteger(value)) {
+                // for always invisible many2ones, unity directly returns the id, not a pair
+                // FIXME: should return an object with only the id
+                return [value, ""];
+            }
+            return value ? [value.id, value.display_name] : false;
+        }
+        case "properties": {
+            return value
+                ? value.map((property) => ({
+                      ...property,
+                      value: parseServerValue(property, property.value ?? false),
+                  }))
+                : [];
+        }
+    }
+    return value;
+}
+
+/**
+ * @param {Object} groupData
+ * @returns {Object}
+ */
+export function getAggregatesFromGroupData(groupData, fields) {
+    const aggregates = {};
+    for (const [key, value] of Object.entries(groupData)) {
+        if (key in fields && AGGREGATABLE_FIELD_TYPES.includes(fields[key].type)) {
+            aggregates[key] = value;
+        }
+    }
+    return aggregates;
+}
+
+/**
+ * @param {import("./datapoint").Field} field
+ * @param {any} rawValue
+ * @returns {string | false}
+ */
+export function getDisplayNameFromGroupData(field, rawValue) {
+    if (field.type === "selection") {
+        return Object.fromEntries(field.selection)[rawValue];
+    }
+    if (["many2one", "many2many"].includes(field.type)) {
+        return rawValue ? rawValue[1] : false;
+    }
+    return rawValue;
+}
+
+/**
+ * @param {Object} groupData
+ * @param {import("./datapoint").Field} field
+ * @param {any} rawValue
+ * @returns {any}
+ */
+export function getValueFromGroupData(groupData, field, rawValue) {
+    if (["date", "datetime"].includes(field.type)) {
+        const range = groupData.range;
+        if (!range) {
+            return false;
+        }
+        const dateValue = parseServerValue(field, range.to);
+        return dateValue.minus({
+            [field.type === "date" ? "day" : "second"]: 1,
+        });
+    }
+    const value = parseServerValue(field, rawValue);
+    if (["many2one", "many2many"].includes(field.type)) {
+        return value ? value[0] : false;
+    }
+    return value;
 }
