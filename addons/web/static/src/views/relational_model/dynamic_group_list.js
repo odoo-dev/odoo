@@ -24,6 +24,11 @@ export class DynamicGroupList extends DynamicList {
     // Getters
     // -------------------------------------------------------------------------
 
+    empty() {
+        this.groups = [];
+        this.count = 0;
+    }
+
     get hasData() {
         if (this.count === 0) {
             return false;
