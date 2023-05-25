@@ -62,8 +62,18 @@ export class KanbanController extends Component {
                 return result;
             }
 
-            getSampleGroups() {
-                return this.initialSampleGroups;
+            removeSampleDataInGroups() {
+                if (this.useSampleModel) {
+                    for (const group of this.root.groups) {
+                        const list = group.list;
+                        list.count = 0;
+                        if (list.records) {
+                            list.records = [];
+                        } else {
+                            list.groups = [];
+                        }
+                    }
+                }
             }
         }
 
@@ -86,8 +96,8 @@ export class KanbanController extends Component {
             },
             set groupId(groupId) {
                 if (self.model.useSampleModel) {
+                    self.model.removeSampleDataInGroups();
                     self.model.useSampleModel = false;
-                    self.model.root.groups.forEach((g) => g.empty());
                 }
                 this._groupId = groupId;
             },
