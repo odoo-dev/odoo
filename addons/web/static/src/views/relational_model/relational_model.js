@@ -157,6 +157,7 @@ export class RelationalModel extends Model {
     hasData() {
         return this.root.hasData;
     }
+
     /**
      * @param {Object} [params={}]
      * @param {Comparison | null} [params.comparison]
@@ -355,6 +356,22 @@ export class RelationalModel extends Model {
         return this._loadUngroupedList(config);
     }
 
+    async _webReadGroup(config, firstGroupByName, orderBy) {
+        return this.orm.webReadGroup(
+            config.resModel,
+            config.domain,
+            unique([...Object.keys(config.activeFields), firstGroupByName]),
+            [config.groupBy[0]], // TODO: expand attribute in list views
+            {
+                orderby: orderByToString(orderBy),
+                lazy: true, // maybe useless
+                offset: config.offset,
+                limit: config.limit,
+                context: config.context,
+            }
+        );
+    }
+
     /**
      * @param {Config} config
      */
@@ -373,19 +390,7 @@ export class RelationalModel extends Model {
         const orderBy = config.orderBy.filter(
             (o) => o.name === firstGroupByName || config.fields[o.name].group_operator !== undefined
         );
-        const response = await this.orm.webReadGroup(
-            config.resModel,
-            config.domain,
-            unique([...Object.keys(config.activeFields), firstGroupByName]),
-            [config.groupBy[0]], // TODO: expand attribute in list views
-            {
-                orderby: orderByToString(orderBy),
-                lazy: true, // maybe useless
-                offset: config.offset,
-                limit: config.limit,
-                context: config.context,
-            }
-        );
+        const response = await this._webReadGroup(config, firstGroupByName, orderBy);
         const { groups, length } = response;
         const groupBy = config.groupBy.slice(1);
         const groupByField = config.fields[config.groupBy[0].split(":")[0]];
