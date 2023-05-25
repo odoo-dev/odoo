@@ -73,9 +73,30 @@ export class DynamicGroupList extends DynamicList {
         await this.model.mutex.exec(() => this._createGroup(groupName, groupData, isFolded));
     }
 
+    async deleteGroups(groups) {
+        await this.model.mutex.exec(() => this._deleteGroups(groups));
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    async _deleteGroups(groups) {
+        const proms = [];
+        for (const group of groups) {
+            proms.push(group._deleteRecords(group.records));
+        }
+        await Promise.all(proms);
+        for (const group of groups) {
+            this._removeGroup(group);
+        }
+    }
+
+    _removeGroup(group) {
+        const index = this.groups.findIndex((g) => g.id === group.id);
+        this.groups.splice(index, 1);
+        this.count--;
+    }
 
     async _createGroup(groupName, groupData = {}, isFolded = false) {
         groupData = { ...groupData, name: groupName };
