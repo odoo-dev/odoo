@@ -56,6 +56,10 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
+    empty() {
+        this.list.empty();
+    }
+
     addRecord(record, index) {
         this.list._addRecord(record, index);
         this.count++;

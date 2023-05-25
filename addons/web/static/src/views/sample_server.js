@@ -13,6 +13,8 @@ import { cartesian, sortBy as arraySortBy } from "@web/core/utils/arrays";
 
 class UnimplementedRouteError extends Error {}
 
+let searchReadNumber = 0;
+
 /**
  * Helper function returning the value from a list of sample strings
  * corresponding to the given ID.
@@ -24,15 +26,19 @@ function getSampleFromId(id, sampleTexts) {
     return sampleTexts[(id - 1) % sampleTexts.length];
 }
 
-function serializeGroupValue(value, type) {
-    switch (type) {
-        case "date":
-            return serializeDate(value);
-        case "datetime":
-            return serializeDateTime(value);
-        default:
-            return value;
+function serializeGroupValue(group, field) {
+    if (["date", "datetime"].includes(field.type)) {
+        const range = group.range;
+        if (!range) {
+            return false;
+        } else {
+            let dateValue =
+                field.type === "date" ? deserializeDate(range.to) : deserializeDateTime(range.to);
+            dateValue = dateValue.minus({ [field.type === "date" ? "day" : "second"]: 1 });
+            return field.type === "date" ? serializeDate(dateValue) : serializeDateTime(dateValue);
+        }
     }
+    return group.value;
 }
 
 /**
@@ -635,7 +641,17 @@ export class SampleServer {
 
     _mockWebSearchReadUnity(params) {
         const fields = Object.keys(params.specification);
-        const result = this._mockWebSearchRead({ ...params, fields });
+        let result;
+        if (this.existingGroups) {
+            const groups = this.existingGroups;
+            const group = groups[searchReadNumber++ % groups.length];
+            result = {
+                records: group.__data.records,
+                length: group.__data.records.length,
+            };
+        } else {
+            result = this._mockWebSearchRead({ ...params, fields });
+        }
         // populate x2many values
         for (const fieldName in params.specification) {
             const field = this.data[params.model].fields[fieldName];
@@ -696,22 +712,19 @@ export class SampleServer {
      * @param {string[]} params.groupBy
      */
     _populateExistingGroups(params) {
-        if (!this.existingGroupsPopulated) {
-            const groups = this.existingGroups;
-            const groupBy = params.groupBy[0].split(":")[0];
-            const groupByField = this.data[params.model].fields[groupBy];
-            const groupedByM2O = groupByField.type === "many2one";
-            if (groupedByM2O) {
-                // re-populate co model with relevant records
-                this.data[groupByField.relation].records = groups.map((g) => {
-                    return { id: g.value, display_name: g.displayName };
-                });
-            }
-            for (const r of this.data[params.model].records) {
-                const group = getSampleFromId(r.id, groups);
-                r[groupBy] = serializeGroupValue(group.value, groupByField.type);
-            }
-            this.existingGroupsPopulated = true;
+        const groups = this.existingGroups;
+        const groupBy = params.groupBy[0].split(":")[0];
+        const groupByField = this.data[params.model].fields[groupBy];
+        const groupedByM2O = groupByField.type === "many2one";
+        if (groupedByM2O) {
+            // re-populate co model with relevant records
+            this.data[groupByField.relation].records = groups.map((g) => {
+                return { id: g.value, display_name: g.displayName };
+            });
+        }
+        for (const r of this.data[params.model].records) {
+            const group = getSampleFromId(r.id, groups);
+            r[groupBy] = serializeGroupValue(group, groupByField);
         }
     }
 
@@ -776,10 +789,10 @@ export class SampleServer {
         const records = this.data[params.model].records;
         for (const g of groups) {
             const recordsInGroup = records.filter((r) => {
-                return r[groupBy] === serializeGroupValue(g.value, groupByField.type);
+                return r[groupBy] === serializeGroupValue(g, groupByField);
             });
             g[`${groupBy}_count`] = recordsInGroup.length;
-            g[fullGroupBy] = g.__rawValue;
+            g[fullGroupBy] = g.value;
             for (const field of params.fields) {
                 const fieldType = this.data[params.model].fields[field].type;
                 if (["integer, float", "monetary"].includes(fieldType)) {
