@@ -54,10 +54,6 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    empty() {
-        this.list.empty();
-    }
-
     async applyFilter(filter) {
         if (filter) {
             await this.list.load({
