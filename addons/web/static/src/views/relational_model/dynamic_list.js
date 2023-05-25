@@ -54,35 +54,37 @@ export class DynamicList extends DataPoint {
     }
 
     deleteRecords(records = []) {
-        return this.model.mutex.exec(async () => {
-            let resIds;
-            if (records.length) {
-                resIds = records.map((r) => r.resId);
-            } else {
-                resIds = await this.getResIds(true);
-                records = this.records.filter((r) => resIds.includes(r.resId));
-            }
-            const unliked = await this.model.orm.unlink(this.resModel, resIds, {
-                context: this.context,
-            });
-            if (!unliked) {
-                return false;
-            }
-            if (
-                this.isDomainSelected &&
-                resIds.length === session.active_ids_limit &&
-                resIds.length < this.count
-            ) {
-                const msg = sprintf(
-                    _t(`Only the first %s records have been deleted (out of %s selected)`),
-                    resIds.length,
-                    this.count
-                );
-                this.model.notification.add(msg, { title: _t("Warning") });
-            }
-            await this._removeRecords(records);
-            return unliked;
+        return this.model.mutex.exec(async () => this._deleteRecords(records));
+    }
+
+    async _deleteRecords(records) {
+        let resIds;
+        if (records.length) {
+            resIds = records.map((r) => r.resId);
+        } else {
+            resIds = await this.getResIds(true);
+            records = this.records.filter((r) => resIds.includes(r.resId));
+        }
+        const unliked = await this.model.orm.unlink(this.resModel, resIds, {
+            context: this.context,
         });
+        if (!unliked) {
+            return false;
+        }
+        if (
+            this.isDomainSelected &&
+            resIds.length === session.active_ids_limit &&
+            resIds.length < this.count
+        ) {
+            const msg = sprintf(
+                _t(`Only the first %s records have been deleted (out of %s selected)`),
+                resIds.length,
+                this.count
+            );
+            this.model.notification.add(msg, { title: _t("Warning") });
+        }
+        await this._removeRecords(records);
+        return unliked;
     }
 
     /**

@@ -84,7 +84,11 @@ export class Group extends DataPoint {
     }
 
     async deleteRecords(records) {
-        await this.list.deleteRecords(records);
+        await this.model.mutex.exec(async () => this._deleteRecords(records));
+    }
+
+    async _deleteRecords(records) {
+        await this.list._deleteRecords(records);
         this.count -= records.length;
     }
 
