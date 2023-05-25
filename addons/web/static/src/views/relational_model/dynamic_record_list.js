@@ -24,11 +24,6 @@ export class DynamicRecordList extends DynamicList {
     // Public
     // -------------------------------------------------------------------------
 
-    empty() {
-        this.records = [];
-        this._updateCount({ length: 0 });
-    }
-
     /**
      * @param {number} resId
      * @param {boolean} [atFirstPosition]
