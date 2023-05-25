@@ -116,13 +116,13 @@ export function useModel(ModelClass, params, options = {}) {
     let sampleORM = globalState.sampleORM;
     const user = useService("user");
     let started = false;
+
     async function load(props) {
         const searchParams = getSearchParams(props);
         await model.load(searchParams);
         if (useSampleModel && !model.hasData()) {
             sampleORM =
                 sampleORM || buildSampleORM(component.props.resModel, component.props.fields, user);
-            sampleORM.setGroups(model.getGroups());
             // Load data with sampleORM then restore real ORM.
             model.orm = sampleORM;
             await model.load(searchParams);

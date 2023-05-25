@@ -25,7 +25,49 @@ export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
         const { Model, archInfo } = this.props;
-        this.model = useState(useModel(Model, this.modelParams));
+
+        class KanbanSampleModel extends Model {
+            setup() {
+                super.setup(...arguments);
+                this.initialSampleGroups = undefined;
+            }
+
+            /**
+             * @override
+             */
+            hasData() {
+                if (this.root.groups) {
+                    if (!this.root.groups.length) {
+                        // While we don't have any data, we want to display the column quick create and
+                        // example background. Return true so that we don't get sample data instead
+                        return true;
+                    }
+                    return this.root.groups.some((group) => group.hasData);
+                }
+                return super.hasData();
+            }
+
+            async load() {
+                if (this.orm.isSample && this.initialSampleGroups) {
+                    this.orm.setGroups(this.initialSampleGroups);
+                }
+                return super.load(...arguments);
+            }
+
+            async _webReadGroup() {
+                const result = await super._webReadGroup(...arguments);
+                if (!this.initialSampleGroups) {
+                    this.initialSampleGroups = result.groups;
+                }
+                return result;
+            }
+
+            getSampleGroups() {
+                return this.initialSampleGroups;
+            }
+        }
+
+        this.model = useState(useModel(KanbanSampleModel, this.modelParams, {}));
         if (archInfo.progressAttributes) {
             const { activeBars } = this.props.state || {};
             this.progressBarState = useProgressBar(
@@ -46,7 +88,6 @@ export class KanbanController extends Component {
                 if (self.model.useSampleModel) {
                     self.model.useSampleModel = false;
                     self.model.root.groups.forEach((g) => g.empty());
-                    self.render();
                 }
                 this._groupId = groupId;
             },

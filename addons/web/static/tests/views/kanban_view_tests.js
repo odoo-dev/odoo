@@ -7113,7 +7113,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("empty grouped kanban with sample data and no columns", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data and no columns", async (assert) => {
         serverData.models.partner.records = [];
 
         await makeView({
@@ -7138,7 +7138,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_kanban_example_background_container");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "empty kanban with sample data grouped by date range (fill temporal)",
         async (assert) => {
             serverData.models.partner.records = [];
@@ -7199,7 +7199,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("empty grouped kanban with sample data and click quick create", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data and click quick create", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7259,7 +7259,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_view_nocontent");
     });
 
-    QUnit.tttt("empty grouped kanban with sample data and cancel quick create", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data and cancel quick create", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7314,7 +7314,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.tttt("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data: keyboard navigation", async (assert) => {
         await makeView({
             arch: `
                 <kanban sample="1">
@@ -7384,7 +7384,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.tttt("empty grouped kanban with sample data and many2many_tags", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data and many2many_tags", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -7431,7 +7431,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read_group"], "should not read the tags");
     });
 
-    QUnit.tttt("sample data does not change after reload with sample data", async (assert) => {
+    QUnit.test("sample data does not change after reload with sample data", async (assert) => {
         Object.assign(serverData, {
             views: {
                 "partner,false,kanban": `
@@ -7517,7 +7517,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_kanban_record:not(.o_kanban_ghost)");
     });
 
-    QUnit.tttt("empty grouped kanban with sample data: add a column", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data: add a column", async (assert) => {
         await makeView({
             arch: `
                 <kanban sample="1">
@@ -7567,7 +7567,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty grouped kanban with sample data: cannot fold a column", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data: cannot fold a column", async (assert) => {
         // folding a column in grouped kanban with sample data is disabled, for the sake of simplicity
         await makeView({
             arch: `
