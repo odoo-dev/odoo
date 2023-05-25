@@ -580,7 +580,7 @@ export class RelationalModel extends Model {
             context: { bin_size: true, ...context },
             specification: getFieldsSpec(activeFields, fields, context),
         };
-        console.log("Unity field spec", kwargs.fields);
+        console.log("Unity field spec", kwargs.specification);
         const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
         if (!records.length) {
             // see test "click on breadcrumb of a deleted record" (might missing a no error dialog assertion)
@@ -610,7 +610,7 @@ export class RelationalModel extends Model {
             count_limit:
                 config.countLimit !== Number.MAX_SAFE_INTEGER ? config.countLimit + 1 : undefined,
         };
-        console.log("Unity field spec", kwargs.fields);
+        console.log("Unity field spec", kwargs.specification);
         const response = await this.orm.call(config.resModel, "unity_web_search_read", [], kwargs);
         console.log("Unity response", response);
 

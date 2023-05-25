@@ -5959,7 +5959,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["create"]);
     });
 
-    QUnit.tttt("create a column, delete it and create another one", async (assert) => {
+    QUnit.test("create a column, delete it and create another one", async (assert) => {
         patchDialog((_cls, props) => props.confirm());
 
         await makeView({
@@ -7660,7 +7660,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("empty grouped kanban with sample data: delete a column", async (assert) => {
+    QUnit.test("empty grouped kanban with sample data: delete a column", async (assert) => {
         serverData.models.partner.records = [];
 
         patchDialog((_cls, props) => props.confirm());
@@ -7715,7 +7715,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_column_quick_create .o_quick_create_unfolded");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "empty grouped kanban with sample data: add a column and delete it right away",
         async (assert) => {
             patchDialog((_cls, props) => props.confirm());
