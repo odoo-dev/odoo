@@ -38,12 +38,13 @@ export class StaticList extends DataPoint {
         this._parent = options.parent;
         this._onChange = options.onChange;
         this._cache = markRaw({});
+        this._commands = [];
+        this._unknownRecordCommands = {}; // tracks update commands on records we haven't fetched yet
+        this._currentIds = [...this.resIds];
+        this._needsReordering = false;
         this.records = data
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
-        this._commands = [];
-        this._currentIds = [...this.resIds];
-        this._needsReordering = false;
         this.count = this.resIds.length;
     }
 
@@ -178,16 +179,24 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case UPDATE: {
-                    const hasCommand = this._commands.some((c) => {
+                    let record = this._cache[command[1]];
+                    if (!record) {
+                        record = this._createRecordDatapoint({ id: command[1] });
+                        // the record isn't in the cache, it means it is on a page we haven't loaded
+                        // so we say the record is "unknown", and store all update commands we
+                        // receive about it in a separated structure, s.t. we can easily apply them
+                        // later on after loading the record, if we ever load it.
+                        this._unknownRecordCommands[command[1]] = [];
+                    }
+                    if (command[1] in this._unknownRecordCommands) {
+                        // the record is currently unknown, store the command in case we need it later
+                        this._unknownRecordCommands[command[1]].push(command);
+                    }
+                    const existingCommand = this._commands.find((c) => {
                         return (c[0] === CREATE || c[0] === UPDATE) && c[1] === command[1];
                     });
-                    if (!hasCommand) {
+                    if (!existingCommand) {
                         this._commands.push([UPDATE, command[1]]);
-                    }
-                    const record = this._cache[command[1]];
-                    if (!record) {
-                        // TODO: might be in another page, so this scenario is valid and the datapoint needs to be created
-                        throw new Error(`Can't find record ${command[1]}`);
                     }
                     record._applyChanges(record._parseServerValues(command[2], record.data));
                     break;
@@ -251,6 +260,10 @@ export class StaticList extends DataPoint {
             throw new Error("You must provide a virtualId if the record has no id");
         }
         const id = resId || params.virtualId;
+        if (this._cache[id] && !(id in this._unknownRecordCommands)) {
+            // we should never come here
+            throw new Error("Record already exists in cache");
+        }
         const config = {
             context: this.context,
             activeFields: params.activeFields || this.activeFields,
@@ -276,6 +289,11 @@ export class StaticList extends DataPoint {
         };
         const record = new this.model.constructor.Record(this.model, config, data, options);
         this._cache[id] = record;
+        const commands = this._unknownRecordCommands[id];
+        if (commands) {
+            delete this._unknownRecordCommands[id];
+            this._applyCommands(commands);
+        }
         return record;
     }
 
