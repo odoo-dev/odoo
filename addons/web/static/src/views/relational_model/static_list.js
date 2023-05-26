@@ -143,10 +143,6 @@ export class StaticList extends DataPoint {
     }
 
     async replaceWith(ids) {
-        this._commands = [x2ManyCommands.replaceWith(ids)];
-        this._currentIds = [...ids];
-        this._onChange();
-
         const resIds = ids.filter((id) => !this._cache[id]);
         if (resIds.length) {
             const records = await this.model._loadRecords({
@@ -159,6 +155,9 @@ export class StaticList extends DataPoint {
             }
         }
         this.records = ids.map((id) => this._cache[id]);
+        this._commands = [x2ManyCommands.replaceWith(ids)];
+        this._currentIds = [...ids];
+        this._onChange();
     }
 
     // -------------------------------------------------------------------------
@@ -194,6 +193,9 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case DELETE: {
+                    if (!this._commands.find((c) => c[0] === CREATE && c[1] === command[1])) {
+                        this._commands.push([DELETE, command[1]]);
+                    }
                     this._commands = this._commands.filter((c) => {
                         return !(c[0] === CREATE || c[0] === UPDATE) || c[1] !== command[1];
                     });
