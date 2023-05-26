@@ -836,6 +836,8 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("onchange for embedded one2many in a one2many", async function (assert) {
+        assert.expect(3);
+
         serverData.models.turtle.fields.partner_ids.type = "one2many";
         serverData.models.turtle.records[0].partner_ids = [1];
         serverData.models.partner.records[0].turtles = [1];
@@ -847,8 +849,7 @@ QUnit.module("Fields", (hooks) => {
                         1,
                         1,
                         {
-                            turtle_foo: "hop",
-                            partner_ids: [[4, 1, false]],
+                            partner_ids: [[4, 2]],
                         },
                     ],
                 ];
@@ -871,14 +872,26 @@ QUnit.module("Fields", (hooks) => {
             resId: 1,
             mockRPC(route, args) {
                 if (args.method === "write") {
-                    const expectedResultTurtles = [[1, 1, { turtle_foo: "hop" }]];
+                    const expectedResultTurtles = [
+                        [1, 1, { turtle_foo: "hop", partner_ids: [[4, 2]] }],
+                    ];
                     assert.deepEqual(args.args[1].turtles, expectedResultTurtles);
                 }
             },
         });
 
+        assert.deepEqual(target.querySelector(".o_field_many2many_tags").innerText.split("\n"), [
+            "first record",
+        ]);
+
         await click(target.querySelectorAll(".o_data_cell")[1]);
         await editInput(target, ".o_selected_row .o_field_widget[name=turtle_foo] input", "hop");
+
+        assert.deepEqual(target.querySelector(".o_field_many2many_tags").innerText.split("\n"), [
+            "first record",
+            "second record",
+        ]);
+
         await clickSave(target);
     });
 
@@ -966,7 +979,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange for embedded one2many in a one2many updated by server",
         async function (assert) {
             // here we test that after an onchange, the embedded one2many field has
@@ -985,7 +998,6 @@ QUnit.module("Fields", (hooks) => {
                             1,
                             2,
                             {
-                                turtle_foo: "hop",
                                 partner_ids: [
                                     [4, 2],
                                     [4, 4],
@@ -1018,8 +1030,8 @@ QUnit.module("Fields", (hooks) => {
                                 2,
                                 {
                                     partner_ids: [
-                                        [4, 2, false],
-                                        [4, 4, false],
+                                        [4, 2],
+                                        [4, 4],
                                     ],
                                     turtle_foo: "hop",
                                 },
@@ -7402,13 +7414,18 @@ QUnit.module("Fields", (hooks) => {
         // this test reproduces a subtle behavior that may occur in a form view:
         // the user adds a record in a one2many field, and directly clicks on a
         // datetime field of the form view which has an onchange, which totally
-        // overrides the value of the one2many (commands 5 and 0). The handler
+        // erases the value from the one2many (command 2 + command 0). The handler
         // that switches the edited row to readonly is then called after the
         // new value of the one2many field is applied (the one returned by the
         // onchange), so the row that must go to readonly doesn't exist anymore.
         serverData.models.partner.onchanges = {
             datetime: function (obj) {
-                obj.turtles = [[5], [0, 0, { display_name: "new" }]];
+                if (obj.turtles.length) {
+                    obj.turtles = [
+                        [2, obj.turtles[0][1]],
+                        [0, 0, { display_name: "new" }],
+                    ];
+                }
             },
         };
 
