@@ -799,10 +799,9 @@ export function useX2ManyCrud(getList, isMany2Many) {
         return list.model.updateRecord(list, record, { isM2M: isMany2Many });
     };
 
-    const operation = isMany2Many ? "FORGET" : "DELETE";
     const removeRecord = (record) => {
         const list = getList();
-        return list.delete(record.id, operation);
+        return list.delete(record.resId);
     };
 
     return {
