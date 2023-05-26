@@ -9,7 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
-import { getFieldsSpec, parseServerValue } from "./utils";
+import { getFieldContext, getFieldsSpec, parseServerValue } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -175,12 +175,12 @@ export class Record extends DataPoint {
         });
     }
 
-    load(resId = this.resId) {
+    load(resId = this.resId, context = this.context) {
         let mode = this.config.mode;
         if (!resId) {
             mode = "edit";
         }
-        return this.model.mutex.exec(() => this._load({ resId, mode }));
+        return this.model.mutex.exec(() => this._load({ resId, mode, context }));
     }
 
     async save(options) {
@@ -321,7 +321,10 @@ export class Record extends DataPoint {
                     continue;
                 case "one2many":
                 case "many2many":
-                    if (!this._isX2ManyValid(fieldName)) {
+                    if (
+                        (this._isRequired(fieldName) && !this.data[fieldName].count) ||
+                        !this._isX2ManyValid(fieldName)
+                    ) {
                         this.setInvalidField(fieldName);
                     }
                     break;
@@ -346,6 +349,7 @@ export class Record extends DataPoint {
             resIds: data.map((r) => r.id),
             orderBy: defaultOrderBy,
             limit,
+            context: getFieldContext(this, fieldName),
         };
         let staticList;
         const options = {
@@ -521,17 +525,7 @@ export class Record extends DataPoint {
             }
 
             const relation = this.fields[fieldName].relation;
-
-            let context = { ...this.context };
-            // TODO: utils to sanitize context
-            for (const key in context) {
-                if (key.startsWith("default_") || key.endsWith("_view_ref")) {
-                    delete context[key];
-                }
-            }
-            context = {
-                ...makeContext([context, activeField.context], this.evalContext),
-            };
+            const context = getFieldContext(this, fieldName);
 
             if (!id && displayName !== undefined) {
                 proms.push(
