@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
@@ -12,6 +11,7 @@ import {
     X2M_TYPES,
 } from "@web/views/utils";
 import { getTooltipInfo } from "./field_tooltip";
+import { getFieldContext } from "../relational_model/utils";
 
 import { Component, xml } from "@odoo/owl";
 
@@ -189,17 +189,7 @@ export class Field extends Component {
                 }
                 const dynamicInfo = {
                     get context() {
-                        const context = {};
-                        for (const key in record.context) {
-                            if (!key.startsWith("default_") && !key.endsWith("_view_ref")) {
-                                context[key] = record.context[key];
-                            }
-                        }
-
-                        return {
-                            ...context,
-                            ...makeContext([fieldInfo.context], record.evalContext),
-                        };
+                        return getFieldContext(record, fieldInfo.name, fieldInfo.context);
                     },
                     domain() {
                         const evalContext = record.getEvalContext

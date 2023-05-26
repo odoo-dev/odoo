@@ -45,7 +45,7 @@ export class FormViewDialog extends Component {
                                 delete context[k];
                             }
                         });
-                        await record.load(false);
+                        await record.load(false, context);
                         // await record.model.load({ resId: null, context }); // FIXME context
                     } else {
                         this.props.close();
