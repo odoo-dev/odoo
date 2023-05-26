@@ -895,7 +895,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange for embedded one2many in a one2many with a second page",
         async function (assert) {
             serverData.models.turtle.fields.partner_ids.type = "one2many";
@@ -906,16 +906,11 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner.onchanges = {
                 turtles: function (obj) {
                     obj.turtles = [
-                        [5, false, false],
                         [
                             1,
                             1,
                             {
-                                turtle_foo: "hop",
-                                partner_ids: [
-                                    [5, false, false],
-                                    [4, 1, false],
-                                ],
+                                partner_ids: [[4, 2]],
                             },
                         ],
                         [
@@ -923,11 +918,7 @@ QUnit.module("Fields", (hooks) => {
                             2,
                             {
                                 turtle_foo: "blip",
-                                partner_ids: [
-                                    [5, false, false],
-                                    [4, 2, false],
-                                    [4, 4, false],
-                                ],
+                                partner_ids: [[4, 1]],
                             },
                         ],
                     ];
@@ -951,15 +942,12 @@ QUnit.module("Fields", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "write") {
                         const expectedResultTurtles = [
-                            [1, 1, { turtle_foo: "hop" }],
+                            [1, 1, { turtle_foo: "hop", partner_ids: [[4, 2]] }],
                             [
                                 1,
                                 2,
                                 {
-                                    partner_ids: [
-                                        [4, 2, false],
-                                        [4, 4, false],
-                                    ],
+                                    partner_ids: [[4, 1]],
                                     turtle_foo: "blip",
                                 },
                             ],
@@ -998,10 +986,7 @@ QUnit.module("Fields", (hooks) => {
                             1,
                             2,
                             {
-                                partner_ids: [
-                                    [4, 2],
-                                    [4, 4],
-                                ],
+                                partner_ids: [[4, 4]],
                             },
                         ],
                     ];
@@ -1029,10 +1014,7 @@ QUnit.module("Fields", (hooks) => {
                                 1,
                                 2,
                                 {
-                                    partner_ids: [
-                                        [4, 2],
-                                        [4, 4],
-                                    ],
+                                    partner_ids: [[4, 4]],
                                     turtle_foo: "hop",
                                 },
                             ],
