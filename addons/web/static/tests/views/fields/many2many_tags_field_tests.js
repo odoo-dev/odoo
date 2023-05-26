@@ -688,7 +688,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Many2ManyTagsField keeps focus when being edited", async function (assert) {
+    QUnit.test("Many2ManyTagsField keeps focus when being edited", async function (assert) {
         serverData.models.partner.records[0].timmy = [12];
         serverData.models.partner.onchanges.foo = function (obj) {
             obj.timmy = [[3, 12]];
