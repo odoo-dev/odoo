@@ -2523,18 +2523,15 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             serverData.models.partner.records[0].product_ids = [37];
             serverData.models.partner.records[0].trululu = false;
+            let onchangeApplied = false;
             serverData.models.partner.onchanges = {
                 trululu(record) {
                     // when trululu changes, push another record in product_ids.
                     // only push a second record once.
-
-                    if (record.product_ids.map((command) => command[1]).includes(41)) {
-                        return;
+                    if (!onchangeApplied) {
+                        record.product_ids = [[4, 41]];
+                        onchangeApplied = true;
                     }
-                    // copy the list to force it as different from the original
-                    record.product_ids = record.product_ids.slice();
-                    record.product_ids.unshift([5]);
-                    record.product_ids.push([4, 41, false]);
                 },
             };
 
