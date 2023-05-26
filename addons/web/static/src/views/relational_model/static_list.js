@@ -213,7 +213,25 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case FORGET: {
-                    // TODO
+                    const index = this._commands.findIndex(
+                        (c) => c[0] === LINK_TO && c[1] === command[1]
+                    );
+                    if (index === -1) {
+                        this._commands.push([FORGET, command[1]]);
+                    } else {
+                        this._commands.splice(index, 1);
+                    }
+                    const record = this._cache[command[1]];
+                    delete this._cache[command[1]];
+                    this.records.splice(
+                        this.records.findIndex((r) => r === record),
+                        1
+                    );
+                    if (record.resId) {
+                        const index = this._currentIds.findIndex((id) => id === record.resId);
+                        this._currentIds.splice(index, 1);
+                    }
+                    this.count--;
                     break;
                 }
                 case LINK_TO: {
