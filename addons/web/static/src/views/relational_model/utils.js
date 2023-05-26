@@ -82,6 +82,9 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeFields[fieldName].limit = viewDescr.limit;
                 activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
             }
+            if (fieldNode.type === "many2many" && fieldNode.field?.useSubView) {
+                activeFields[fieldName].required = false;
+            }
         } else {
             // TODO (see task description for multiple occurrences of fields)
         }
@@ -103,11 +106,40 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
     return { activeFields, fields };
 }
 
+export function getFieldContext(
+    record,
+    fieldName,
+    rawContext = record.activeFields[fieldName].context
+) {
+    const context = {};
+    for (const key in record.context) {
+        if (
+            !key.startsWith("default_") &&
+            !key.startsWith("search_default_") &&
+            !key.endsWith("_view_ref")
+        ) {
+            context[key] = record.context[key];
+        }
+    }
+
+    return {
+        ...context,
+        ...record.fields[fieldName].context,
+        ...makeContext([rawContext], record.evalContext),
+    };
+}
+
 const SENTINEL = Symbol("sentinel");
-export function getFieldContext(fieldName, activeFields, evalContext, parentActiveFields = null) {
+function _getFieldContextSpec(
+    fieldName,
+    activeFields,
+    fields,
+    evalContext,
+    parentActiveFields = null
+) {
     const rawContext = activeFields[fieldName].context;
     if (!rawContext || rawContext === "{}") {
-        return;
+        return fields[fieldName].context;
     }
 
     evalContext = { ...evalContext };
@@ -120,7 +152,7 @@ export function getFieldContext(fieldName, activeFields, evalContext, parentActi
             evalContext.parent[fieldName] = SENTINEL;
         }
     }
-    const evaluatedContext = makeContext([rawContext], evalContext);
+    const evaluatedContext = makeContext([fields[fieldName].context, rawContext], evalContext);
     for (const key in evaluatedContext) {
         if (evaluatedContext[key] === SENTINEL || key.startsWith("default_")) {
             // FIXME: this isn't perfect, a value might be evaluted to something else
@@ -165,9 +197,10 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
             fieldsSpec[fieldName].fields = { display_name: {} };
         }
         if (["many2one", "one2many", "many2many"].includes(fields[fieldName].type)) {
-            const context = getFieldContext(
+            const context = _getFieldContextSpec(
                 fieldName,
                 activeFields,
+                fields,
                 evalContext,
                 parentActiveFields
             );

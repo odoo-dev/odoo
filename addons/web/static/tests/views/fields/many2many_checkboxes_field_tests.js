@@ -367,7 +367,7 @@ QUnit.module("Fields", (hooks) => {
             mockRPC: function (route, args) {
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args[0].timmy,
+                        args.args[0][0].timmy,
                         [[6, false, [12]]],
                         "correct values should have been sent to create"
                     );

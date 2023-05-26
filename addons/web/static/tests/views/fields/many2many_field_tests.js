@@ -671,8 +671,13 @@ QUnit.module("Fields", (hooks) => {
 
             let modal = target.querySelector(".modal");
             await click(modal, ".o_create_button");
-            assert.verifySteps(["get_views", "read", "get_views", "web_search_read", "onchange"]);
-
+            assert.verifySteps([
+                "get_views",
+                "web_read",
+                "get_views",
+                "unity_web_search_read",
+                "onchange2",
+            ]);
             modal = target.querySelector(".modal");
             await editInput(modal, "[name='display_name'] input", "Hello");
             assert.strictEqual(modal.querySelector("[name='display_name'] input").value, "Hello");
