@@ -102,7 +102,7 @@ export class StaticList extends DataPoint {
             this.records.unshift(record);
             this._currentIds.splice(this.offset, 0, virtualId);
         }
-        this._commands.push([x2ManyCommands.CREATE, virtualId, record]);
+        this._commands.push([x2ManyCommands.CREATE, virtualId]);
         this._needsReordering = true;
         this._onChange();
     }
@@ -149,54 +149,59 @@ export class StaticList extends DataPoint {
     // -------------------------------------------------------------------------
 
     _applyCommands(commands) {
+        const { CREATE, UPDATE, DELETE, FORGET, LINK_TO } = x2ManyCommands;
         for (const command of commands) {
             switch (command[0]) {
-                case x2ManyCommands.CREATE: {
+                case CREATE: {
                     const virtualId = getId("virtual");
                     const record = this._createRecordDatapoint(command[2], { virtualId });
                     this.records.push(record);
-                    this._commands.push([x2ManyCommands.CREATE, virtualId, record]);
+                    this._commands.push([CREATE, virtualId]);
                     this._currentIds.splice(this.offset + this.limit, 0, virtualId);
+                    this.count++;
                     break;
                 }
-                case x2ManyCommands.UPDATE: {
-                    const existingCommand = this._commands.find((c) => c[1] === command[1]);
-                    let record;
-                    if (existingCommand) {
-                        record = existingCommand[2];
-                    } else {
-                        record = this.records.find((record) => record.resId === command[1]);
-                        if (!record) {
-                            throw new Error(`Can't find record ${command[1]}`);
-                        }
-                        this._commands.push([x2ManyCommands.UPDATE, command[1], record]);
+                case UPDATE: {
+                    const hasCommand = this._commands.some((c) => {
+                        return (c[0] === CREATE || c[0] === UPDATE) && c[1] === command[1];
+                    });
+                    if (!hasCommand) {
+                        this._commands.push([UPDATE, command[1]]);
+                    }
+                    const record = this._cache[command[1]];
+                    if (!record) {
+                        // TODO: might be in another page, so this scenario is valid and the datapoint needs to be created
+                        throw new Error(`Can't find record ${command[1]}`);
                     }
                     record._applyChanges(record._parseServerValues(command[2], record.data));
                     break;
                 }
-                case x2ManyCommands.DELETE: {
+                case DELETE: {
+                    this._commands = this._commands.filter((c) => {
+                        return !(c[0] === CREATE || c[0] === UPDATE) || c[1] !== command[1];
+                    });
+                    const record = this._cache[command[1]];
+                    delete this._cache[command[1]];
+                    this.records.splice(
+                        this.records.findIndex((r) => r === record),
+                        1
+                    );
+                    if (record.resId) {
+                        const index = this._currentIds.findIndex((id) => id === record.resId);
+                        this._currentIds.splice(index, 1);
+                    }
+                    this.count--;
+                    break;
+                }
+                case FORGET: {
                     // TODO
                     break;
                 }
-                case x2ManyCommands.FORGET: {
-                    // TODO
-                    break;
-                }
-                case x2ManyCommands.LINK_TO: {
-                    // TODO (needs unity + onchange2)
-                    // const record = this._createRecordDatapoint(command[2]);
-                    // this.records.push(record);
-                    // this._commands.push([command[0], command[1]]);
-                    break;
-                }
-                case x2ManyCommands.DELETE_ALL: {
-                    // TODO
-                    this.records = [];
-                    this._currentIds = [];
-                    break;
-                }
-                case x2ManyCommands.REPLACE_WITH: {
-                    // TODO (needs unity + onchange2)
+                case LINK_TO: {
+                    const record = this._createRecordDatapoint(command[2]);
+                    this.records.push(record);
+                    this._commands.push([command[0], command[1]]);
+                    this.count++;
                     break;
                 }
             }
@@ -227,7 +232,7 @@ export class StaticList extends DataPoint {
                     (c) => (c[0] === CREATE || c[0] === UPDATE) && c[1] === id
                 );
                 if (!hasCommand) {
-                    this._commands.push([UPDATE, id, record]);
+                    this._commands.push([UPDATE, id]);
                 }
                 this._onChange();
             },
@@ -238,16 +243,12 @@ export class StaticList extends DataPoint {
     }
 
     _getCommands({ withReadonly } = {}) {
-        // TODO: encapsulate commands in a class?
         return this._commands.map((c) => {
-            if (c[2]) {
-                if (c[0] === x2ManyCommands.REPLACE_WITH) {
-                    return [c[0], c[1], c[2]];
-                } else {
-                    return [c[0], c[1], c[2]._getChanges()]; // propagate withReadonly
-                }
+            if (c[0] === x2ManyCommands.CREATE || c[0] === x2ManyCommands.UPDATE) {
+                const record = this._cache[c[1]];
+                return [c[0], c[1], record._getChanges(record._changes, { withReadonly })];
             }
-            return [c[0], c[1]];
+            return c;
         });
     }
 
