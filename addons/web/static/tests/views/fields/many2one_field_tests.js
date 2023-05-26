@@ -2034,7 +2034,6 @@ QUnit.module("Fields", (hooks) => {
                 "",
                 "should have empty string in the required field on this record"
             );
-            // FIXME: I added the await here and 6 lines below
             await click(target.querySelector(".o_data_row .o_data_cell"));
             assert.hasClass(
                 target.querySelectorAll(".o_selected_row .o_data_cell")[1],
