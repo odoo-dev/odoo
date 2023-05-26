@@ -3,8 +3,8 @@
 import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
-import { getId } from "./utils";
 import { DataPoint } from "./datapoint";
+import { getId } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
@@ -45,7 +45,6 @@ export class StaticList extends DataPoint {
         this._currentIds = [...this.resIds];
         this._needsReordering = false;
         this.count = this.resIds.length;
-        this.context = {}; // FIXME: should receive context (remove this when it does, see datapoint.js)
     }
 
     // -------------------------------------------------------------------------
@@ -107,6 +106,11 @@ export class StaticList extends DataPoint {
         this._onChange();
     }
 
+    delete(recordId) {
+        this._applyCommands([[x2ManyCommands.DELETE, recordId]]);
+        this._onChange();
+    }
+
     canResequence() {
         return false;
     }
@@ -138,10 +142,23 @@ export class StaticList extends DataPoint {
         this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
     }
 
-    replaceWith(ids) {
+    async replaceWith(ids) {
         this._commands = [x2ManyCommands.replaceWith(ids)];
         this._currentIds = [...ids];
         this._onChange();
+
+        const resIds = ids.filter((id) => !this._cache[id]);
+        if (resIds.length) {
+            const records = await this.model._loadRecords({
+                ...this.config,
+                resIds: ids.filter((id) => !this._cache[id]),
+                context: this.context,
+            });
+            for (const record of records) {
+                this._createRecordDatapoint(record);
+            }
+        }
+        this.records = ids.map((id) => this._cache[id]);
     }
 
     // -------------------------------------------------------------------------

@@ -71,7 +71,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("widget many2many_tags_avatar in list view", async function (assert) {
+    QUnit.test("widget many2many_tags_avatar in list view", async function (assert) {
         const records = [];
         for (let id = 5; id <= 15; id++) {
             records.push({
@@ -276,7 +276,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("widget many2many_tags_avatar in kanban view", async function (assert) {
+    QUnit.test("widget many2many_tags_avatar in kanban view", async function (assert) {
         assert.expect(21);
 
         for (let id = 5; id <= 15; id++) {
@@ -443,7 +443,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("widget many2many_tags_avatar delete tag", async function (assert) {
+    QUnit.test("widget many2many_tags_avatar delete tag", async function (assert) {
         await makeView({
             type: "form",
             resModel: "turtle",
