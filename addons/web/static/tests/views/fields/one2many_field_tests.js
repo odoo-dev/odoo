@@ -3077,7 +3077,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("one2many list: deleting one records", async function (assert) {
+    QUnit.test("one2many list: deleting one records", async function (assert) {
         assert.expect(3);
         serverData.models.partner.records[0].p = [1, 2, 4];
         serverData.views = {
@@ -3102,11 +3102,7 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (route === "/web/dataset/call_kw/partner/write") {
                     const commands = args.args[1].p;
-                    assert.deepEqual(commands, [
-                        [4, 2, false],
-                        [4, 4, false],
-                        [2, 1, false],
-                    ]);
+                    assert.deepEqual(commands, [[2, 1]]);
                 }
             },
         });
