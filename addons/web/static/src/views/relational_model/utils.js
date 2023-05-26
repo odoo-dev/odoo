@@ -82,7 +82,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeFields[fieldName].limit = viewDescr.limit;
                 activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
             }
-            if (fieldNode.type === "many2many" && fieldNode.field?.useSubView) {
+            if (fieldNode.field?.useSubView) {
                 activeFields[fieldName].required = false;
             }
         } else {
