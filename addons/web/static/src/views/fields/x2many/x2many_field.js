@@ -256,7 +256,7 @@ export class X2ManyField extends Component {
                 const proms = [];
                 this.list.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
                 await Promise.all([...proms, this.list.editedRecord._updatePromise]);
-                this.list.leaveEditMode();
+                await this.list.leaveEditMode({ canAbandon: false });
             }
             if (!this.list.editedRecord) {
                 return this.addInLine({ context, editable });

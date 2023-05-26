@@ -54,7 +54,7 @@ export class DynamicList extends DataPoint {
     }
 
     deleteRecords(records = []) {
-        return this.model.mutex.exec(async () => this._deleteRecords(records));
+        return this.model.mutex.exec(() => this._deleteRecords(records));
     }
 
     async _deleteRecords(records) {
