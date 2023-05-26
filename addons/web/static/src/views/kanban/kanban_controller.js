@@ -57,7 +57,7 @@ export class KanbanController extends Component {
             async _webReadGroup() {
                 const result = await super._webReadGroup(...arguments);
                 if (!this.initialSampleGroups) {
-                    this.initialSampleGroups = result.groups;
+                    this.initialSampleGroups = JSON.parse(JSON.stringify(result.groups));
                 }
                 return result;
             }
