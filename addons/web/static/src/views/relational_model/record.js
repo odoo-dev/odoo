@@ -16,6 +16,7 @@ export class Record extends DataPoint {
     setup(config, data, options = {}) {
         this._parentRecord = options.parentRecord;
         this._onChange = options.onChange || (() => {});
+        this.virtualId = options.virtualId || false;
 
         if (this.resId) {
             this._values = this._parseServerValues(data);
@@ -40,9 +41,11 @@ export class Record extends DataPoint {
         }
         this._setEvalContext();
 
+        this._canNeverBeAbandoned = options.canNeverBeAbandoned === true;
         this.selected = false; // TODO: rename into isSelected?
         this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
+        this._unsetRequiredFields = new Set();
         this._closeInvalidFieldsNotification = () => {};
     }
 
@@ -51,7 +54,7 @@ export class Record extends DataPoint {
     // -------------------------------------------------------------------------
 
     get canBeAbandoned() {
-        return this.isNew && !this.isDirty;
+        return this.isNew && !this.isDirty && !this._canNeverBeAbandoned;
     }
 
     get hasData() {
@@ -294,6 +297,7 @@ export class Record extends DataPoint {
         return parsedValues;
     }
 
+    // FIXME: move to model?
     _askChanges() {
         const proms = [];
         this.model.bus.trigger("NEED_LOCAL_CHANGES", { proms });
@@ -301,6 +305,10 @@ export class Record extends DataPoint {
     }
 
     _checkValidity() {
+        for (const fieldName of Array.from(this._unsetRequiredFields)) {
+            this._invalidFields.delete(fieldName);
+        }
+        this._unsetRequiredFields.clear();
         for (const fieldName in this.activeFields) {
             const fieldType = this.fields[fieldName].type;
             if (this._isInvisible(fieldName)) {
@@ -319,11 +327,13 @@ export class Record extends DataPoint {
                         !this._isX2ManyValid(fieldName)
                     ) {
                         this.setInvalidField(fieldName);
+                        this._unsetRequiredFields.add(fieldName);
                     }
                     break;
                 default:
                     if (!this.data[fieldName] && this._isRequired(fieldName)) {
                         this.setInvalidField(fieldName);
+                        this._unsetRequiredFields.add(fieldName);
                     }
             }
         }
@@ -346,7 +356,8 @@ export class Record extends DataPoint {
         };
         let staticList;
         const options = {
-            onChange: () => this._update({ [fieldName]: staticList }),
+            onChange: ({ withoutOnchange } = {}) =>
+                this._update({ [fieldName]: staticList }, { withoutOnchange }),
             parent: this,
         };
         staticList = new this.model.constructor.StaticList(this.model, config, data, options);
@@ -355,6 +366,11 @@ export class Record extends DataPoint {
 
     _discard() {
         this.isDirty = false;
+        for (const fieldName in this._changes) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                this._changes[fieldName]._discard();
+            }
+        }
         this._changes = {};
         this.data = { ...this._values };
         this._setEvalContext();
@@ -399,6 +415,9 @@ export class Record extends DataPoint {
         const result = {};
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
+            if (fieldName === "id") {
+                continue;
+            }
             if (
                 !withReadonly &&
                 fieldName in this.activeFields &&
@@ -572,6 +591,12 @@ export class Record extends DataPoint {
         if (!this.isDirty && !force) {
             return true;
         }
+        // before saving, abandon new invalid, untouched records in x2manys
+        for (const fieldName in this.activeFields) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                this.data[fieldName]._abandonRecords();
+            }
+        }
         if (!this._checkValidity()) {
             const items = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
@@ -654,7 +679,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async _update(changes) {
+    async _update(changes, { withoutOnchange } = {}) {
         this.isDirty = true;
         const prom = this._preprocessMany2oneChanges(changes);
         if (prom && !this.model._urgentSave) {
@@ -676,7 +701,7 @@ export class Record extends DataPoint {
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
         );
-        if (onChangeFields.length && !this.model._urgentSave) {
+        if (onChangeFields.length && !this.model._urgentSave && !withoutOnchange) {
             let context = this.context;
             if (onChangeFields.length === 1) {
                 const fieldContext = this.activeFields[onChangeFields[0]].context;
