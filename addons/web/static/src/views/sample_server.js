@@ -26,19 +26,15 @@ function getSampleFromId(id, sampleTexts) {
     return sampleTexts[(id - 1) % sampleTexts.length];
 }
 
-function serializeGroupValue(group, field) {
-    if (["date", "datetime"].includes(field.type)) {
-        const range = group.range;
-        if (!range) {
-            return false;
-        } else {
-            let dateValue =
-                field.type === "date" ? deserializeDate(range.to) : deserializeDateTime(range.to);
-            dateValue = dateValue.minus({ [field.type === "date" ? "day" : "second"]: 1 });
-            return field.type === "date" ? serializeDate(dateValue) : serializeDateTime(dateValue);
-        }
+function serializeGroupValue(value, type) {
+    switch (type) {
+        case "date":
+            return serializeDate(value);
+        case "datetime":
+            return serializeDateTime(value);
+        default:
+            return value;
     }
-    return group.value;
 }
 
 /**
@@ -724,7 +720,7 @@ export class SampleServer {
         }
         for (const r of this.data[params.model].records) {
             const group = getSampleFromId(r.id, groups);
-            r[groupBy] = serializeGroupValue(group, groupByField);
+            r[groupBy] = serializeGroupValue(group[params.groupBy[0]], groupByField);
         }
     }
 
@@ -789,16 +785,15 @@ export class SampleServer {
         const records = this.data[params.model].records;
         for (const g of groups) {
             const recordsInGroup = records.filter((r) => {
-                return r[groupBy] === serializeGroupValue(g, groupByField);
+                return r[groupBy] === serializeGroupValue(g[fullGroupBy], groupByField);
             });
-            g[`${groupBy}_count`] = recordsInGroup.length;
-            g[fullGroupBy] = g.value;
             for (const field of params.fields) {
                 const fieldType = this.data[params.model].fields[field].type;
                 if (["integer, float", "monetary"].includes(fieldType)) {
                     g[field] = recordsInGroup.reduce((acc, r) => acc + r[field], 0);
                 }
             }
+            g[`${groupBy}_count`] = recordsInGroup.length;
             g.__data = {
                 records: this._mockRead({
                     model: params.model,
@@ -806,7 +801,6 @@ export class SampleServer {
                 }),
                 length: recordsInGroup.length,
             };
-            g.__range = { ...g.range };
         }
     }
 }
