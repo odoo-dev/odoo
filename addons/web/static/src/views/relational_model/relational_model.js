@@ -281,13 +281,13 @@ export class RelationalModel extends Model {
 
             // orderBy
             config.orderBy = "orderBy" in params ? params.orderBy : config.orderBy;
-            // apply default order if no order
-            if (this.defaultOrderBy && !config.orderBy.length) {
-                config.orderBy = this.defaultOrderBy;
-            }
             // re-apply previous orderBy if not given (or no order)
             if (!config.orderBy.length) {
                 config.orderBy = currentConfig.orderBy || [];
+            }
+            // apply default order if no order
+            if (this.defaultOrderBy && !config.orderBy.length) {
+                config.orderBy = this.defaultOrderBy;
             }
 
             // keep current root config if any, if the groupBy parameter is the same
