@@ -2792,7 +2792,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("sorting one2many fields", async function (assert) {
+    QUnit.test("sorting one2many fields", async function (assert) {
         serverData.models.partner.fields.foo.sortable = true;
         serverData.models.partner.records.push({ id: 23, foo: "abc" });
         serverData.models.partner.records.push({ id: 24, foo: "xyz" });
@@ -6232,7 +6232,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("many2many list in a one2many opened by a many2one", async function (assert) {
+    QUnit.test("many2many list in a one2many opened by a many2one", async function (assert) {
         assert.expect(1);
 
         serverData.models.turtle.records[1].turtle_trululu = 2;
@@ -10141,7 +10141,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".some_button4");
     });
 
-    QUnit.tttt("field context is correctly passed to x2m subviews", async function (assert) {
+    QUnit.test("field context is correctly passed to x2m subviews", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -10514,7 +10514,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector('th[data-name="date"]').style.width, width);
     });
 
-    QUnit.tttt("column widths are kept when remove last record in o2m", async function (assert) {
+    QUnit.test("column widths are kept when remove last record in o2m", async function (assert) {
         serverData.models.partner.records[0].p = [2];
 
         await makeView({
@@ -11126,7 +11126,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views on partner", "onchange on partner"]);
     });
 
-    QUnit.tttt("x2many default_order multiple fields", async function (assert) {
+    QUnit.test("x2many default_order multiple fields", async function (assert) {
         serverData.models.partner.records = [
             { int_field: 10, id: 1, display_name: "record1" },
             { int_field: 12, id: 2, display_name: "record2" },
@@ -11162,7 +11162,7 @@ QUnit.module("Fields", (hooks) => {
         assert.deepEqual(recordIdList, expectedOrderId);
     });
 
-    QUnit.tttt("x2many default_order multiple fields with limit", async function (assert) {
+    QUnit.test("x2many default_order multiple fields with limit", async function (assert) {
         serverData.models.partner.records = [
             { int_field: 10, id: 1, display_name: "record1" },
             { int_field: 12, id: 2, display_name: "record2" },
@@ -11543,7 +11543,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many column_invisible on view not inline", async function (assert) {
+    QUnit.test("one2many column_invisible on view not inline", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         serverData.views = {
             "partner,false,list": `
@@ -11707,7 +11707,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("x2many list sorted by many2one", async function (assert) {
+    QUnit.test("x2many list sorted by many2one", async function (assert) {
         serverData.models.partner.records[0].p = [1, 2, 4];
         serverData.models.partner.fields.trululu.sortable = true;
 
@@ -12660,7 +12660,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("nested one2manys, multi page, onchange", async function (assert) {
+    QUnit.test("nested one2manys, multi page, onchange", async function (assert) {
         serverData.models.partner.records[2].int_field = 5;
         serverData.models.partner.records[0].p = [2, 4]; // limit 1 -> record 4 will be on second page
         serverData.models.partner.records[1].turtles = [1];
