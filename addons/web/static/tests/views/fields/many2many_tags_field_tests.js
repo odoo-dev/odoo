@@ -20,9 +20,6 @@ import {
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { browser } from "@web/core/browser/browser";
-import { many2ManyTagsFieldColorEditable } from "@web/views/fields/many2many_tags/many2many_tags_field";
 
 let serverData;
 let target;

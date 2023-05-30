@@ -3,6 +3,7 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
+import { RPCError } from "@web/core/network/rpc_service";
 import { Cache } from "@web/core/utils/cache";
 import {
     useBus,
@@ -286,26 +287,13 @@ export class Many2XAutocomplete extends Component {
                         await this.props.quickCreate(request, params);
                     } catch (e) {
                         if (
-                            e &&
-                            e.name === "RPC_ERROR" &&
+                            e instanceof RPCError &&
                             e.exceptionName === "odoo.exceptions.ValidationError"
                         ) {
                             const context = this.getCreationContext(request);
                             return this.openMany2X({ context });
                         }
-                        // Compatibility with legacy code
-                        if (
-                            e &&
-                            e.message &&
-                            e.message.name === "RPC_ERROR" &&
-                            e.message.exceptionName === "odoo.exceptions.ValidationError"
-                        ) {
-                            // The event.preventDefault() is necessary because we still use the legacy
-                            e.event.preventDefault();
-                            const context = this.getCreationContext(request);
-                            return this.openMany2X({ context });
-                        }
-                        throw e.message ? e.message : e;
+                        throw e;
                     }
                 },
             });
