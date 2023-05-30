@@ -118,13 +118,6 @@ export class Record extends DataPoint {
         if (this.model._urgentSave) {
             return this._update(changes);
         }
-        if (this.selected && this.model.multiEdit) {
-            return this.model.mutex.exec(async () => {
-                await this._preprocessMany2oneChanges(changes);
-                this._applyChanges(changes);
-                return this.model.root._multiSave(this);
-            });
-        }
         return this.model.mutex.exec(() => this._update(changes));
     }
 
@@ -237,7 +230,7 @@ export class Record extends DataPoint {
     }
 
     _applyValues(values) {
-        Object.assign(this._values, this._parseServerValues(values, this._values));
+        Object.assign(this._values, this._parseServerValues(values));
         Object.assign(this.data, this._values);
         this._setEvalContext();
     }
@@ -648,6 +641,14 @@ export class Record extends DataPoint {
 
     async _update(changes) {
         this.isDirty = true;
+        const prom = this._preprocessMany2oneChanges(changes);
+        if (prom && !this.model._urgentSave) {
+            await prom;
+        }
+        if (this.selected && this.model.multiEdit) {
+            this._applyChanges(changes);
+            return this.model.root._multiSave(this);
+        }
         for (const [fieldName, value] of Object.entries(changes)) {
             const field = this.fields[fieldName];
             if (field && field.relatedPropertyField) {
@@ -656,10 +657,6 @@ export class Record extends DataPoint {
                     property.name === field.propertyName ? { ...property, value } : property
                 );
             }
-        }
-        const prom = this._preprocessMany2oneChanges(changes);
-        if (!this.model._urgentSave) {
-            await prom;
         }
         const onChangeFields = Object.keys(changes).filter(
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange

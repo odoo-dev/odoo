@@ -263,7 +263,9 @@ export class DynamicList extends DataPoint {
             }
             const records = await this.model._loadRecords({ ...this.config, resIds });
             for (const record of validSelection) {
-                record._applyValues(records.find((r) => r.id === record.resId));
+                const serverValues = records.find((r) => r.id === record.resId);
+                record._applyValues(serverValues);
+                this.model._updateSimilarRecords(record, serverValues);
             }
             record._discard();
             this.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
