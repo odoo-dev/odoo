@@ -1757,7 +1757,7 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget[name=int_field] input", 2);
     });
 
-    QUnit.tttt("many2many list add *many* records, remove, re-add", async function (assert) {
+    QUnit.test("many2many list add *many* records, remove, re-add", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.fields.timmy.domain = [["color", "=", 2]];

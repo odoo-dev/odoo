@@ -58,7 +58,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual($(iframeDoc).find(".nice_div p").css("color"), "rgb(255, 0, 0)");
     });
 
-    QUnit.tttt("IframeWrapperField in form view with onchange", async function (assert) {
+    QUnit.test("IframeWrapperField in form view with onchange", async function (assert) {
         serverData.models.report.onchanges = {
             int_field(record) {
                 record.html_field = record.html_field.replace("Some content", "New content");
