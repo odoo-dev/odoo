@@ -166,6 +166,7 @@ export class DynamicGroupList extends DynamicList {
         const record = sourceGroup.list.records[recordIndex];
         // step 1: move record to correct position
         const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+        const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
         sourceGroup._removeRecords([record]);
         targetGroup.addRecord(record, refIndex + 1);
         // step 2: update record value
@@ -173,11 +174,15 @@ export class DynamicGroupList extends DynamicList {
             targetGroup.groupByField.type === "many2one"
                 ? [targetGroup.value, targetGroup.displayName]
                 : targetGroup.value;
-        await record.update({ [this.groupByField.name]: value });
-        await record.save({ noReload: true });
-        const succeeded = await targetGroup.list._moveRecord(dataRecordId, refId);
-        if (!succeeded) {
-            // TODO: put record back to its original group ?
+        try {
+            await record.update({ [targetGroup.groupByField.name]: value });
+            await record.save({ noReload: true });
+        } catch (e) {
+            // revert changes
+            targetGroup._removeRecords([record]);
+            sourceGroup.addRecord(record, oldIndex);
+            throw e;
         }
+        await targetGroup.list._moveRecord(dataRecordId, refId);
     }
 }

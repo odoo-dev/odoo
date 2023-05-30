@@ -70,23 +70,34 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 onChange: fieldNode.onChange,
                 forceSave: fieldNode.forceSave,
             });
-            if (modifiers.invisible === true || modifiers.column_invisible === true) {
-                continue; // always invisible
-            }
-            if (fieldNode.views) {
-                const viewDescr = fieldNode.views[fieldNode.viewMode];
-                activeFields[fieldName].related = extractFieldsFromArchInfo(
-                    viewDescr,
-                    viewDescr.fields
-                );
-                activeFields[fieldName].limit = viewDescr.limit;
-                activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
-            }
-            if (fieldNode.field?.useSubView) {
-                activeFields[fieldName].required = false;
-            }
         } else {
-            // TODO (see task description for multiple occurrences of fields)
+            // TODO (see task description for multiple occurrences of fields) (we need to do context merging)
+            activeFields[fieldName].invisible =
+                activeFields[fieldName].invisible &&
+                (modifiers.invisible || modifiers.column_invisible);
+            activeFields[fieldName].readonly =
+                activeFields[fieldName].readonly && modifiers.readonly;
+            activeFields[fieldName].required =
+                activeFields[fieldName].required || modifiers.required;
+            activeFields[fieldName].onChange =
+                activeFields[fieldName].onChange || fieldNode.onChange;
+            activeFields[fieldName].forceSave =
+                activeFields[fieldName].forceSave || fieldNode.forceSave;
+        }
+        if (activeFields[fieldName].invisible === true) {
+            continue; // always invisible
+        }
+        if (fieldNode.views) {
+            const viewDescr = fieldNode.views[fieldNode.viewMode];
+            activeFields[fieldName].related = extractFieldsFromArchInfo(
+                viewDescr,
+                viewDescr.fields
+            );
+            activeFields[fieldName].limit = viewDescr.limit;
+            activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
+        }
+        if (fieldNode.field?.useSubView) {
+            activeFields[fieldName].required = false;
         }
         if (fieldNode.field) {
             let fieldDependencies = fieldNode.field.fieldDependencies;
