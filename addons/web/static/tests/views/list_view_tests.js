@@ -11318,7 +11318,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("multi edition: many2many_tags in many2many field", async function (assert) {
+    QUnit.test("multi edition: many2many_tags in many2many field", async function (assert) {
         for (let i = 4; i <= 10; i++) {
             serverData.models.bar.records.push({ id: i, display_name: "Value" + i });
         }
@@ -11361,7 +11361,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("multi edition: many2many field in grouped list", async function (assert) {
+    QUnit.test("multi edition: many2many field in grouped list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -12166,7 +12166,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("editable list view: m2m tags in grouped list", async function (assert) {
+    QUnit.test("editable list view: m2m tags in grouped list", async function (assert) {
         await makeView({
             arch: `
                 <tree editable="top" multi_edit="1">
@@ -15233,7 +15233,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["2"]);
     });
 
-    QUnit.tttt("add a new row in (m2o) grouped editable list", async function (assert) {
+    QUnit.test("add a new row in (m2o) grouped editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -18704,7 +18704,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("x2many onchange, check result", async function (assert) {
+    QUnit.test("x2many onchange, check result", async function (assert) {
         const def = makeDeferred();
         serverData.models.foo.onchanges = {
             m2m: function () {},
