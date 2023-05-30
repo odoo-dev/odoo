@@ -3748,7 +3748,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.debug("quick create record fail in grouped by many2one", async (assert) => {
+    QUnit.test("quick create record fail in grouped by many2one", async (assert) => {
         serverData.views["partner,false,form"] = `
             <form>
                 <field name="product_id"/>
