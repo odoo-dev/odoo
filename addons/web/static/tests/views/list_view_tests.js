@@ -18802,7 +18802,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["a"]);
     });
 
-    QUnit.tttt("restore orderBy from state when using default order", async (assert) => {
+    QUnit.test("restore orderBy from state when using default order", async (assert) => {
         serverData.models.foo.fields.amount.sortable = true;
         serverData.models.foo.fields.foo.sortable = true;
         serverData.actions = {
