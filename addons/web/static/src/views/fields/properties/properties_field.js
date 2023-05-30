@@ -91,9 +91,7 @@ export class PropertiesField extends Component {
      * @returns {array}
      */
     get propertiesList() {
-        const propertiesValues = JSON.parse(
-            JSON.stringify(this.props.record.data[this.props.name] || [])
-        );
+        const propertiesValues = this.props.record.data[this.props.name] || [];
         return propertiesValues.filter((definition) => !definition.definition_deleted);
     }
 
