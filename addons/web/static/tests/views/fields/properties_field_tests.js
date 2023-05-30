@@ -1029,7 +1029,7 @@ QUnit.module("Fields", (hooks) => {
      * and changes the co-model of the field, the model loaded by the "Search more..."
      * modal should correspond to the selected model and should be updated dynamically.
      */
-    QUnit.tttt("properties: many2one 'Search more...'", async function (assert) {
+    QUnit.test("properties: many2one 'Search more...'", async function (assert) {
         async function mockRPC(route, { method, model }) {
             if (["check_access_rights", "check_access_rule"].includes(method)) {
                 return true;
@@ -1390,7 +1390,8 @@ QUnit.module("Fields", (hooks) => {
         });
 
         await click(target, ".o_switch_view.o_list");
-        assert.ok(target.querySelector(".o_optional_columns_dropdown"),
+        assert.ok(
+            target.querySelector(".o_optional_columns_dropdown"),
             "Properties should be added as optional columns."
         );
     });
