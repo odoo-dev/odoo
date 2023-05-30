@@ -16,7 +16,7 @@ import { intersection, unique } from "@web/core/utils/arrays";
 import { deepCopy, pick } from "@web/core/utils/objects";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
 import { patchWithCleanup } from "./utils";
-import { makeErrorFromResponse, RPCError } from "@web/core/network/rpc_service";
+import { makeErrorFromResponse } from "@web/core/network/rpc_service";
 
 const serviceRegistry = registry.category("services");
 
@@ -2559,14 +2559,7 @@ export async function makeMockServer(serverData, mockRPC) {
             args = JSON.parse(JSON.stringify(args));
         }
         if (mockRPC) {
-            // try {
-                res = await mockRPC(route, args, mockServer.performRPC.bind(mockServer));
-            // } catch (e) {
-            //     // if (e instanceof RPCError) {
-            //     //     return Promise.reject(e);
-            //     // }
-            //     throw e;
-            // }
+            res = await mockRPC(route, args, mockServer.performRPC.bind(mockServer));
         }
         if (res === undefined) {
             res = await mockServer.performRPC(route, args);
