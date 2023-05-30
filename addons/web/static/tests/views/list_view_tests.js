@@ -18851,7 +18851,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("x2many onchange, check result", async function (assert) {
+    QUnit.test("x2many onchange, check result", async function (assert) {
         const def = makeDeferred();
         serverData.models.foo.onchanges = {
             m2m: function () {},

@@ -5939,7 +5939,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("properly apply onchange on one2many fields", async function (assert) {
+    QUnit.test("properly apply onchange on one2many fields", async function (assert) {
         serverData.models.partner.records[0].p = [4];
         serverData.models.partner.onchanges = {
             foo: function (obj) {
@@ -6049,7 +6049,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("update many2many value in one2many after onchange", async function (assert) {
+    QUnit.test("update many2many value in one2many after onchange", async function (assert) {
         serverData.models.partner.records[1].p = [4];
         serverData.models.partner.onchanges = {
             foo: function (obj) {
