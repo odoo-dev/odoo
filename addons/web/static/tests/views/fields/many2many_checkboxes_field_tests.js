@@ -349,7 +349,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("Many2ManyCheckBoxesField with default values", async function (assert) {
+    QUnit.test("Many2ManyCheckBoxesField with default values", async function (assert) {
         assert.expect(7);
 
         serverData.models.partner.fields.timmy.default = [3];
