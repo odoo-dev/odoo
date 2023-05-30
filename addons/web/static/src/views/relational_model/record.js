@@ -373,13 +373,24 @@ export class Record extends DataPoint {
         } else if (fieldType === "many2one") {
             return value ? value[0] : false;
         } else if (fieldType === "properties") {
-            return value.map((property) => ({
-                ...property,
-                value:
-                    property.type === "many2one"
-                        ? property.value
-                        : this._formatServerValue(property.type, property.value),
-            }));
+            return value.map((property) => {
+                let value;
+                if (property.type === "many2one") {
+                    value = property.value;
+                } else if (
+                    (property.type === "date" || property.type === "datetime") &&
+                    typeof property.value === "string"
+                ) {
+                    // TO REMOVE: need refactoring PropertyField to use the same format as the server
+                    value = property.value;
+                } else {
+                    value = this._formatServerValue(property.type, property.value);
+                }
+                return {
+                    ...property,
+                    value,
+                };
+            });
         }
         return value;
     }
@@ -449,6 +460,10 @@ export class Record extends DataPoint {
                 evalContext[fieldName] = value[0];
             } else if (value && field.type === "reference") {
                 evalContext[fieldName] = `${value.resModel},${value.resId}`;
+            } else if (field.type === "properties") {
+                evalContext[fieldName] = value.filter(
+                    (property) => !property.definition_deleted !== false
+                );
             } else {
                 evalContext[fieldName] = value;
             }
