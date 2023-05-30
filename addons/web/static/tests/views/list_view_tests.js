@@ -15366,7 +15366,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["2"]);
     });
 
-    QUnit.tttt("add a new row in (m2o) grouped editable list", async function (assert) {
+    QUnit.test("add a new row in (m2o) grouped editable list", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",

@@ -5298,7 +5298,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("prevent drag and drop of record if onchange fails", async (assert) => {
+    QUnit.test("prevent drag and drop of record if onchange fails", async (assert) => {
         serverData.models.partner.onchanges = {
             product_id() {},
         };
@@ -5320,7 +5320,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["product_id"],
             async mockRPC(route, { model, method }) {
                 if (model === "partner" && method === "onchange2") {
-                    throw {}; // TODO: return Promise.reject
+                    return Promise.reject({});
                 }
             },
         });
@@ -13194,7 +13194,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("sample server: _mockWebReadGroup API", async (assert) => {
+    QUnit.test("sample server: _mockWebReadGroup API", async (assert) => {
         serverData.models.partner.records = [];
 
         patchWithCleanup(SampleServer.prototype, {
