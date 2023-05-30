@@ -211,8 +211,12 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
     }
 
     for (const fieldName of properties) {
-        if (fieldsSpec[fields[fieldName].definition_record]) {
-            fieldsSpec[fields[fieldName].definition_record].fields.display_name = {};
+        const fieldSpec = fieldsSpec[fields[fieldName].definition_record];
+        if (fieldSpec) {
+            if (!fieldSpec.fields) {
+                fieldSpec.fields = {};
+            }
+            fieldSpec.fields.display_name = {};
         }
     }
     return fieldsSpec;
