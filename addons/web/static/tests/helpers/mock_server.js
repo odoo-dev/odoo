@@ -2490,6 +2490,24 @@ export class MockServer {
             const field = this.models[modelName].fields[fieldName];
             const relatedFields = spec[fieldName].fields;
             switch (field.type) {
+                case "reference": {
+                    for (const record of records) {
+                        if (!record[fieldName]) {
+                            continue;
+                        }
+                        const [model, id] = record[fieldName].split(",");
+                        record[fieldName] = {};
+                        if (relatedFields && Object.keys(relatedFields).length) {
+                            const result = this.mockWebRead(model, [[id]], {
+                                specification: relatedFields,
+                                context: spec[fieldName].context,
+                            });
+                            record[fieldName] = result[0];
+                        }
+                        record[fieldName].id = { id, model };
+                    }
+                    break;
+                }
                 case "one2many":
                 case "many2many": {
                     if (relatedFields && Object.keys(relatedFields).length) {
