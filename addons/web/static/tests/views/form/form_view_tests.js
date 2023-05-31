@@ -2342,7 +2342,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_field_invalid");
     });
 
-    QUnit.tttt("required field computed by another field in a x2m", async function (assert) {
+    QUnit.test("required field computed by another field in a x2m", async function (assert) {
         serverData.models.partner.fields.foo.default = false;
         serverData.models.partner.onchanges = {
             foo(record) {

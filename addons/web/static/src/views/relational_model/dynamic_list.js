@@ -5,6 +5,7 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
+import { Record } from "./record";
 
 export class DynamicList extends DataPoint {
     /**
@@ -273,5 +274,98 @@ export class DynamicList extends DataPoint {
         }
         this.model.hooks.onSavedMulti(validSelection);
         return true;
+    }
+
+    async _resequence(originalList, resModel, movedId, targetId) {
+        if (this.resModel === resModel && !this.canResequence()) {
+            return originalList;
+        }
+        const handleField = this.model.handleField;
+        const dataPoints = [...originalList];
+        const order = this.orderBy.find((o) => o.name === handleField);
+        const asc = !order || order.asc;
+
+        // Find indices
+        const fromIndex = dataPoints.findIndex((d) => d.id === movedId);
+        let toIndex = 0;
+        if (targetId !== null) {
+            const targetIndex = dataPoints.findIndex((d) => d.id === targetId);
+            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+        }
+
+        const getSequence = (dp) => dp && this.getDPHandleField(dp, handleField);
+
+        // Determine which records/groups need to be modified
+        const firstIndex = Math.min(fromIndex, toIndex);
+        const lastIndex = Math.max(fromIndex, toIndex) + 1;
+        let reorderAll = dataPoints.some(
+            (dp) => this.getDPHandleField(dp, handleField) === undefined
+        );
+        if (!reorderAll) {
+            let lastSequence = (asc ? -1 : 1) * Infinity;
+            for (let index = 0; index < dataPoints.length; index++) {
+                const sequence = getSequence(dataPoints[index]);
+                if (
+                    ((index < firstIndex || index >= lastIndex) &&
+                        ((asc && lastSequence >= sequence) ||
+                            (!asc && lastSequence <= sequence))) ||
+                    (index >= firstIndex && index < lastIndex && lastSequence === sequence)
+                ) {
+                    reorderAll = true;
+                }
+                lastSequence = sequence;
+            }
+        }
+
+        // Perform the resequence in the list of records/groups
+        const [dp] = dataPoints.splice(fromIndex, 1);
+        dataPoints.splice(toIndex, 0, dp);
+
+        // Creates the list of records/groups to modify
+        let toReorder = dataPoints;
+        if (!reorderAll) {
+            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
+            if (fromIndex < toIndex) {
+                toReorder.push(dp);
+            } else {
+                toReorder.unshift(dp);
+            }
+        }
+        if (!asc) {
+            toReorder.reverse();
+        }
+
+        const resIds = toReorder.map((d) => this.getDPresId(d)).filter((id) => id && !isNaN(id));
+        const sequences = toReorder.map(getSequence);
+        const offset = sequences.length && Math.min(...sequences);
+
+        // Try to write new sequences on the affected records/groups
+        const params = {
+            model: resModel,
+            ids: resIds,
+            context: this.context,
+            field: handleField,
+        };
+        if (offset) {
+            params.offset = offset;
+        }
+        const wasResequenced = await this.model.rpc("/web/dataset/resequence", params);
+        if (!wasResequenced) {
+            return originalList;
+        }
+
+        // Read the actual values set by the server and update the records/groups
+        const kwargs = { context: this.context };
+        const result = await this.model.orm.read(resModel, resIds, [handleField], kwargs);
+        for (const dpData of result) {
+            const dp = dataPoints.find((d) => this.getDPresId(d) === dpData.id);
+            if (dp instanceof Record) {
+                dp._applyValues(dpData);
+            } else {
+                dp[handleField] = dpData[handleField];
+            }
+        }
+
+        return dataPoints;
     }
 }

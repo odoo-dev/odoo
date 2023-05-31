@@ -2288,7 +2288,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         'item dropped on discard with empty required field with "Add an item" (invalid on "ADD")',
         async function (assert) {
             // when a record in a list is added with "Add an item", it should
