@@ -4757,7 +4757,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("fetch reference in only one batch", async (assert) => {
+    QUnit.test("fetch reference in only one batch", async (assert) => {
         serverData.models.partner.records[0].ref_product = "product,3";
         serverData.models.partner.records[1].ref_product = "product,5";
         serverData.models.partner.fields.ref_product = {
@@ -4790,12 +4790,15 @@ QUnit.module("Views", (hooks) => {
             "web_read_group",
             "unity_web_search_read",
             "unity_web_search_read",
-            "name_get",
             "web_read_group",
             "unity_web_search_read",
             "unity_web_search_read",
-            "name_get",
         ]);
+        const allNames = Array.from(
+            target.querySelectorAll(".o_kanban_record span"),
+            (node) => node.textContent
+        );
+        assert.deepEqual(allNames, ["hello", "", "xmo", ""]);
     });
 
     QUnit.test("can drag and drop a record from one column to the next", async (assert) => {

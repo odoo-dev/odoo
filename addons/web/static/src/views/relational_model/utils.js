@@ -219,6 +219,10 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
                 fieldsSpec[fieldName].context = context;
             }
         }
+        // Reference
+        if (fields[fieldName].type === "reference") {
+            fieldsSpec[fieldName].fields = { display_name: {} };
+        }
     }
 
     for (const fieldName of properties) {

@@ -10722,7 +10722,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5, "only one record should have been created");
     });
 
-    QUnit.tttt("reference field rendering", async function (assert) {
+    QUnit.test("reference field rendering", async function (assert) {
         serverData.models.foo.records.push({
             id: 5,
             reference: "res_currency,2",
@@ -10733,17 +10733,8 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: '<tree><field name="reference"/></tree>',
-            mockRPC(route, args) {
-                if (args.method === "name_get") {
-                    assert.step(args.model);
-                }
-            },
         });
 
-        assert.verifySteps(
-            ["bar", "res_currency"],
-            "should have done 1 name_get by model in reference values"
-        );
         assert.strictEqual(
             $(target).find("tbody td:not(.o_list_record_selector)").text(),
             "Value 1USDEUREUR",
@@ -10751,8 +10742,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("reference field batched in grouped list", async function (assert) {
-        assert.expect(9);
+    QUnit.test("reference field batched in grouped list", async function (assert) {
+        assert.expect(7);
 
         serverData.models.foo.records = [
             // group 1
@@ -10775,17 +10766,14 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["foo"],
             mockRPC(route, args) {
                 assert.step(args.method || route);
-                if (args.method === "name_get") {
-                    if (args.model === "bar") {
-                        assert.deepEqual(args.args[0], [1, 2, 3]);
-                    }
-                    if (args.model === "res_currency") {
-                        assert.deepEqual(args.args[0], [1]);
-                    }
-                }
             },
         });
-        assert.verifySteps(["get_views", "web_read_group", "name_get", "name_get"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "unity_web_search_read",
+            "unity_web_search_read",
+        ]);
         assert.containsN(target, ".o_group_header", 2);
         const allNames = Array.from(
             target.querySelectorAll(".o_data_cell"),
@@ -10830,8 +10818,8 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(allNames, ["test", "test", "1", "2", "2"]);
     });
 
-    QUnit.tttt("multi edit reference field batched in grouped list", async function (assert) {
-        assert.expect(19);
+    QUnit.test("multi edit reference field batched in grouped list", async function (assert) {
+        assert.expect(13);
 
         serverData.models.foo.records = [
             // group 1
@@ -10843,7 +10831,6 @@ QUnit.module("Views", (hooks) => {
             { id: 5, foo: "2", reference: "bar,3" },
         ];
         // Field boolean_toggle just to simplify the test flow
-        let nameGetCount = 0;
         await makeView({
             type: "list",
             resModel: "foo",
@@ -10860,21 +10847,15 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "write") {
                     assert.deepEqual(args.args, [[1, 2, 3], { bar: true }]);
                 }
-                if (args.method === "name_get") {
-                    if (nameGetCount === 2) {
-                        assert.strictEqual(args.model, "bar");
-                        assert.deepEqual(args.args[0], [1, 2]);
-                    }
-                    if (nameGetCount === 3) {
-                        assert.strictEqual(args.model, "res_currency");
-                        assert.deepEqual(args.args[0], [1]);
-                    }
-                    nameGetCount++;
-                }
             },
         });
 
-        assert.verifySteps(["get_views", "web_read_group", "name_get", "name_get"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read_group",
+            "unity_web_search_read",
+            "unity_web_search_read",
+        ]);
         await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[0]);
         await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[1]);
         await click(target.querySelectorAll(".o_data_row .o_list_record_selector input")[2]);
@@ -10883,7 +10864,7 @@ QUnit.module("Views", (hooks) => {
 
         await click(target, ".modal .modal-footer .btn-primary");
         assert.containsNone(target, ".modal");
-        assert.verifySteps(["write", "web_read", "name_get", "name_get"]);
+        assert.verifySteps(["write", "web_read"]);
         assert.containsN(target, ".o_group_header", 2);
 
         const allNames = Array.from(target.querySelectorAll(".o_data_cell"))
