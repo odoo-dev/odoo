@@ -120,7 +120,11 @@ export class ListRenderer extends Component {
             this.allColumns = this.processAllColumn(nextProps.archInfo.columns, nextProps.list);
             this.state.columns = this.getActiveColumns(nextProps.list);
         });
-        onPatched(() => {
+        onPatched(async () => {
+            // HACK: we need to wait for the next tick to be sure that the Field components are patched.
+            // OWL don't wait the patch for the children components if the children trigger a patch by himself.
+            await Promise.resolve();
+
             const editedRecord = this.props.list.editedRecord;
             if (editedRecord && this.activeRowId !== editedRecord.id) {
                 if (this.cellToFocus && this.cellToFocus.record === editedRecord) {
@@ -850,7 +854,10 @@ export class ListRenderer extends Component {
         // This is only necessary for some field types, as for the others, we hardcode
         // a minimum column width that should be enough to display the entire value.
         // Also, we don't set title for json fields, because it's not human readable anyway.
-        if (!(fieldType in FIXED_FIELD_COLUMN_WIDTHS) && !['json', 'one2many', 'many2many'].includes(fieldType)) {
+        if (
+            !(fieldType in FIXED_FIELD_COLUMN_WIDTHS) &&
+            !["json", "one2many", "many2many"].includes(fieldType)
+        ) {
             return this.getFormattedValue(column, record);
         }
     }
