@@ -24,6 +24,14 @@ export class DynamicRecordList extends DynamicList {
     // Public
     // -------------------------------------------------------------------------
 
+    getDPresId(record) {
+        return record.resId;
+    }
+
+    getDPHandleField(record, handleField) {
+        return record.data[handleField];
+    }
+
     /**
      * @param {number} resId
      * @param {boolean} [atFirstPosition]
@@ -72,7 +80,15 @@ export class DynamicRecordList extends DynamicList {
     }
 
     async resequence(movedRecordId, targetRecordId) {
-        return this.model.mutex.exec(() => this._moveRecord(movedRecordId, targetRecordId));
+        return this.model.mutex.exec(
+            async () =>
+                (this.records = await this._resequence(
+                    this.records,
+                    this.resModel,
+                    movedRecordId,
+                    targetRecordId
+                ))
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -153,94 +169,5 @@ export class DynamicRecordList extends DynamicList {
         });
         this.records = response.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(response);
-    }
-
-    async _moveRecord(movedRecordId, targetRecordId) {
-        if (!this.canResequence()) {
-            return false;
-        }
-        const handleField = this.model.handleField;
-        const originalList = [...this.records];
-        const records = this.records;
-        const order = this.orderBy.find((o) => o.name === handleField);
-        const asc = !order || order.asc;
-
-        // Find indices
-        const fromIndex = records.findIndex((r) => r.id === movedRecordId);
-        let toIndex = 0;
-        if (targetRecordId !== null) {
-            const targetIndex = records.findIndex((r) => r.id === targetRecordId);
-            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
-        }
-
-        const getSequence = (rec) => rec && rec.data[handleField];
-
-        // Determine which records need to be modified
-        const firstIndex = Math.min(fromIndex, toIndex);
-        const lastIndex = Math.max(fromIndex, toIndex) + 1;
-        // let reorderAll = records.some((record) => record.data[handleField] === undefined);
-        // if (!reorderAll) {
-        // let lastSequence = (asc ? -1 : 1) * Infinity;
-        // for (let index = 0; index < records.length; index++) {
-        //     const sequence = getSequence(records[index]);
-        //     if (
-        //         ((index < firstIndex || index >= lastIndex) &&
-        //             ((asc && lastSequence >= sequence) ||
-        //                 (!asc && lastSequence <= sequence))) ||
-        //         (index >= firstIndex && index < lastIndex && lastSequence === sequence)
-        //     ) {
-        //         reorderAll = true;
-        //     }
-        //     lastSequence = sequence;
-        // }
-        // }
-
-        // Perform the resequence in the list of records
-        const [record] = records.splice(fromIndex, 1);
-        records.splice(toIndex, 0, record);
-
-        // Creates the list of records to modify
-        let toReorder = records;
-        // if (!reorderAll) {
-        toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedRecordId);
-        if (fromIndex < toIndex) {
-            toReorder.push(record);
-        } else {
-            toReorder.unshift(record);
-        }
-        // }
-        if (!asc) {
-            toReorder.reverse();
-        }
-
-        const resIds = toReorder.map((r) => r.resId).filter((resId) => resId && !isNaN(resId));
-        const sequences = toReorder.map(getSequence);
-        const offset = sequences.length && Math.min(...sequences);
-
-        // Try to write new sequences on the affected records
-        const params = {
-            model: this.resModel,
-            ids: resIds,
-            context: this.context,
-            field: handleField,
-        };
-        if (offset) {
-            params.offset = offset;
-        }
-        const wasResequenced = await this.model.rpc("/web/dataset/resequence", params);
-        if (!wasResequenced) {
-            this.records = originalList;
-            return false;
-        }
-
-        // Read the actual values set by the server and update the records
-        const kwargs = { context: this.context };
-        const result = await this.model.orm.read(this.resModel, resIds, [handleField], kwargs);
-        for (const recordData of result) {
-            const record = records.find((r) => r.resId === recordData.id);
-            record._applyValues(recordData);
-        }
-
-        return true;
     }
 }
