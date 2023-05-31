@@ -420,12 +420,12 @@ function formatProperties(value, field) {
 /**
  * Returns a string representing the value of the reference field.
  *
- * @param {Object|false} value Object with keys "id" and "display_name"
+ * @param {Object|false} value Object with keys "resId" and "displayName"
  * @param {Object} [options={}]
  * @returns {string}
  */
 export function formatReference(value, options) {
-    return formatMany2one(value ? [value.id.id, value.display_name] : false, options);
+    return formatMany2one(value ? [value.resId, value.displayName] : false, options);
 }
 
 /**
