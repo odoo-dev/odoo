@@ -275,6 +275,16 @@ export function parseServerValue(field, value) {
             }
             return value;
         }
+        case "reference": {
+            if (value === false) {
+                return false;
+            }
+            return {
+                resId: value.id.id,
+                resModel: value.id.model,
+                displayName: value.display_name,
+            };
+        }
         case "many2one": {
             if (Array.isArray(value)) {
                 // for now, onchange still returns many2one values as pairs [id, display_name]
