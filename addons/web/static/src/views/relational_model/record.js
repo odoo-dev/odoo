@@ -22,11 +22,11 @@ export class Record extends DataPoint {
             this._values = this._parseServerValues(data);
             this._changes = {};
         } else {
-            this._values = {};
-            this._changes = this._parseServerValues({
+            this._values = this._parseServerValues({
                 ...this._getDefaultValues(),
                 ...data,
             });
+            this._changes = { ...this._values };
         }
         this.data = { ...this._values, ...this._changes };
         const parentRecord = this._parentRecord;
@@ -371,7 +371,7 @@ export class Record extends DataPoint {
                 this._changes[fieldName]._discard();
             }
         }
-        this._changes = {};
+        this._changes = this.resId ? {} : { ...this.values };
         this.data = { ...this._values };
         this._setEvalContext();
         this._invalidFields.clear();

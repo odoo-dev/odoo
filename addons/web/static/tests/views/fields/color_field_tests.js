@@ -32,7 +32,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ColorField");
 
-    QUnit.tttt("field contains a color input", async function (assert) {
+    QUnit.test("field contains a color input", async function (assert) {
         serverData.models.partner.onchanges = {
             hex_color: () => {},
         };
@@ -68,7 +68,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_color input").value, "#000000");
         await editInput(target, ".o_field_color input", "#fefefe");
         assert.verifySteps([
-            'onchange [[1],{"id":1,"hex_color":"#fefefe"},"hex_color",{"hex_color":"1"}]',
+            'onchange [[1],{"hex_color":"#fefefe"},["hex_color"],{"hex_color":{},"display_name":{}}]',
         ]);
         assert.strictEqual(target.querySelector(".o_field_color input").value, "#fefefe");
         assert.strictEqual(
@@ -142,7 +142,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("color field change via another field's onchange", async (assert) => {
+    QUnit.test("color field change via another field's onchange", async (assert) => {
         serverData.models.partner.onchanges = {
             foo: (rec) => {
                 rec.hex_color = "#fefefe";
@@ -173,7 +173,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_field_color input").value, "#000000");
         await editInput(target, ".o_field_char[name='foo'] input", "someValue");
         assert.verifySteps([
-            'onchange [[1],{"id":1,"foo":"someValue","hex_color":false},"foo",{"foo":"1","hex_color":""}]',
+            'onchange [[1],{"foo":"someValue"},["foo"],{"foo":{},"hex_color":{},"display_name":{}}]',
         ]);
         assert.strictEqual(target.querySelector(".o_field_color input").value, "#fefefe");
         assert.strictEqual(
