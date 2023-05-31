@@ -5509,7 +5509,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["1", "3", "2", "4"]);
     });
 
-    QUnit.tttt("create a column in grouped on m2o", async (assert) => {
+    QUnit.test("create a column in grouped on m2o", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -5522,9 +5522,12 @@ QUnit.module("Views", (hooks) => {
                 "</t></templates>" +
                 "</kanban>",
             groupBy: ["product_id"],
-            async mockRPC(route, { method }) {
-                if (method === "create" || route === "/web/dataset/resequence") {
-                    assert.step(method || route);
+            async mockRPC(route, args) {
+                if (args.method === "create" || route === "/web/dataset/resequence") {
+                    assert.step(args.method || route);
+                    if (route === "/web/dataset/resequence") {
+                        assert.step(args.ids.toString());
+                    }
                 }
             },
         });
@@ -5571,7 +5574,7 @@ QUnit.module("Views", (hooks) => {
             "o_column_folded",
             "the created column should not be folded"
         );
-        assert.verifySteps(["create", "/web/dataset/resequence"]);
+        assert.verifySteps(["create", "/web/dataset/resequence", "3,5,6"]);
 
         // fold and unfold the created column, and check that no RPCs are done (as there are no records)
         const clickColumnAction = await toggleColumnActions(2);
@@ -8209,7 +8212,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("resequence columns in grouped by m2o", async (assert) => {
+    QUnit.test("resequence columns in grouped by m2o", async (assert) => {
         serverData.models.product.fields.sequence = { type: "integer" };
 
         await makeView({
@@ -8248,7 +8251,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(getCardTexts(), ["2", "4", "1", "3"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "resequence all when create(ing) a new record + partial resequencing",
         async (assert) => {
             let resequenceOffset;
@@ -9170,7 +9173,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "column progressbars: creating a new column should create a new progressbar",
         async (assert) => {
             await makeView({
@@ -9702,7 +9705,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("load more should load correct records after drag&drop event", async (assert) => {
+    QUnit.test("load more should load correct records after drag&drop event", async (assert) => {
         // Add a sequence number and initialize
         serverData.models.partner.records.forEach((el, i) => (el.sequence = i));
         await makeView({
