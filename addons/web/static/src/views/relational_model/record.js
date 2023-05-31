@@ -332,7 +332,7 @@ export class Record extends DataPoint {
 
     _createStaticListDatapoint(data, fieldName) {
         const { related, limit, defaultOrderBy } = this.activeFields[fieldName];
-        // TODO: generate the config in relational model
+        // FIXME: generate the config in relational model ?
         const config = {
             // FIXME: can't do that here, no context... yes, we do, but need to pass rawContext
             resModel: this.fields[fieldName].relation,

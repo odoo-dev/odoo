@@ -55,7 +55,7 @@ export class DataPoint extends Reactive {
     }
 
     get config() {
-        return this._config; //TODOPRO Remove this, it's only for dev purpose to see if the config is updated somewhere
+        return this._config; //FIXME Remove this, it's only for dev purpose to see if the config is updated somewhere
     }
 
     // -------------------------------------------------------------------------
@@ -69,17 +69,12 @@ export class DataPoint extends Reactive {
      */
     setup() {}
 
-    // FIXME: not sure we want to keep this mecanism
-    exportState() {}
-
     /**
-     * FIXME: memoize this at some point?
      * @param {string} fieldName
      * @returns {boolean}
      */
     isFieldReadonly(fieldName) {
         const activeField = this.activeFields[fieldName];
-        // FIXME: if modifiers has readonly or not ?
         const { readonly } = activeField || this.fields[fieldName];
         return readonly && evalDomain(readonly, this.evalContext);
     }
