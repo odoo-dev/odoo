@@ -402,6 +402,10 @@ export class Record extends DataPoint {
             return value !== "" ? value : false;
         } else if (fieldType === "many2one") {
             return value ? value[0] : false;
+        } else if (fieldType === "reference") {
+            return value && value.resModel && value.resId
+                ? `${value.resModel},${value.resId}`
+                : false;
         } else if (fieldType === "properties") {
             return value.map((property) => {
                 let value;
@@ -534,6 +538,70 @@ export class Record extends DataPoint {
         this.data = { ...this._values, ...this._changes };
         this._setDataContext();
         this._invalidFields.clear();
+    }
+
+    async _preprocessChanges(changes) {
+        await Promise.all([
+            this._preprocessMany2oneChanges(changes),
+            this._preprocessReferenceChanges(changes),
+        ]);
+    }
+
+    async _preprocessReferenceChanges(changes) {
+        const proms = [];
+        for (const [fieldName, value] of Object.entries(changes)) {
+            if (this.fields[fieldName].type !== "reference") {
+                continue;
+            }
+            if (!value) {
+                changes[fieldName] = false;
+                continue;
+            }
+            const id = value.resId;
+            const displayName = value.displayName;
+            if (!id && !displayName) {
+                changes[fieldName] = false;
+                continue;
+            }
+            const context = getFieldContext(this, fieldName);
+
+            if (!id && displayName !== undefined) {
+                proms.push(
+                    this.model.orm
+                        .call(value.resModel, "name_create", [displayName], {
+                            context,
+                        })
+                        .then((result) => {
+                            changes[fieldName] = result
+                                ? {
+                                      resModel: value.resModel,
+                                      resId: result[0],
+                                      displayName,
+                                  }
+                                : false;
+                        })
+                );
+            } else if (id && displayName === undefined) {
+                const kwargs = {
+                    context,
+                    specification: { display_name: {} },
+                };
+                proms.push(
+                    this.model.orm
+                        .call(value.resModel, "web_read", [[id]], kwargs)
+                        .then((records) => {
+                            changes[fieldName] = {
+                                resModel: value.resModel,
+                                resId: id,
+                                displayName: records[0].display_name,
+                            };
+                        })
+                );
+            } else {
+                changes[fieldName] = value;
+            }
+        }
+        return Promise.all(proms);
     }
 
     async _preprocessMany2oneChanges(changes) {
@@ -698,7 +766,7 @@ export class Record extends DataPoint {
 
     async _update(changes, { withoutOnchange } = {}) {
         this.isDirty = true;
-        const prom = this._preprocessMany2oneChanges(changes);
+        const prom = this._preprocessChanges(changes);
         if (prom && !this.model._urgentSave) {
             await prom;
         }
