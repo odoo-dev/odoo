@@ -234,7 +234,7 @@ export class RelationalModel extends Model {
      * @param {boolean} [options.noReload=false]
      */
     async _updateConfig(config, patch, options = {}) {
-        const tmpConfig = { ...config, ...patch }; //TODOPRO I wonder if we should not use deepCopy here
+        const tmpConfig = { ...config, ...patch }; //FIXME I wonder if we should not use deepCopy here
         let response;
         if (!options.noReload) {
             response = await this._loadData(tmpConfig);
@@ -326,7 +326,6 @@ export class RelationalModel extends Model {
     async _loadData(config) {
         if (config.isMonoRecord) {
             if (!config.resId) {
-                // FIXME: this will be handled by unity at some point
                 return this._loadNewRecord(config);
             }
             const context = {
@@ -349,7 +348,6 @@ export class RelationalModel extends Model {
             return this._loadRecords({ ...config, resIds });
         }
         if (config.groupBy.length) {
-            // FIXME: this *might* be handled by unity at some point
             return this._loadGroupedList(config);
         }
         Object.assign(config, {
@@ -368,7 +366,7 @@ export class RelationalModel extends Model {
             config.resModel,
             config.domain,
             unique([...Object.keys(config.activeFields), firstGroupByName]),
-            [config.groupBy[0]], // TODO: expand attribute in list views
+            [config.groupBy[0]],
             {
                 orderby: orderByToString(orderBy),
                 lazy: true, // maybe useless
@@ -383,7 +381,7 @@ export class RelationalModel extends Model {
      * @param {Config} config
      */
     async _loadGroupedList(config) {
-        //TODOPRO Not a great fan of method that have a side effect on config. I think we should return the new config instead
+        //FIXME Not a great fan of method that have a side effect on config. I think we should return the new config instead
         //modifying the config in place. It's a source of confusion
         config.offset = config.offset || 0;
         config.limit = config.limit || this.initialGroupsLimit;
