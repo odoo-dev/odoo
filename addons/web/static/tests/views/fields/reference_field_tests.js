@@ -225,7 +225,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("ReferenceField");
 
-    QUnit.tttt("ReferenceField can quick create models", async function (assert) {
+    QUnit.test("ReferenceField can quick create models", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -247,13 +247,12 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(
             [
                 "get_views",
-                "onchange",
+                "onchange2",
                 "name_search", // for the select
                 "name_search", // for the spawned many2one
                 "name_create",
                 "create",
-                "read",
-                "name_get",
+                "web_read",
             ],
             "The name_create method should have been called"
         );
@@ -373,7 +372,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("reference in form view", async function (assert) {
+    QUnit.test("reference in form view", async function (assert) {
         assert.expect(11);
 
         serverData.views = {
@@ -730,7 +729,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("reference and list navigation", async function (assert) {
+    QUnit.test("reference and list navigation", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",

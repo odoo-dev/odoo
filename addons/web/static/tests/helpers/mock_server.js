@@ -2495,7 +2495,8 @@ export class MockServer {
                         if (!record[fieldName]) {
                             continue;
                         }
-                        const [model, id] = record[fieldName].split(",");
+                        const [model, i] = record[fieldName].split(",");
+                        const id = parseInt(i, 10);
                         record[fieldName] = {};
                         if (relatedFields && Object.keys(relatedFields).length) {
                             const result = this.mockWebRead(model, [[id]], {
