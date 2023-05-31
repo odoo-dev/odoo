@@ -67,6 +67,10 @@ export class DynamicGroupList extends DynamicList {
     }
 
     async createGroup(groupName, groupData, isFolded) {
+        if (!this.groupByField || this.groupByField.type !== "many2one") {
+            throw new Error("Cannot create a group on a non many2one group field");
+        }
+
         await this.model.mutex.exec(() => this._createGroup(groupName, groupData, isFolded));
     }
 
@@ -100,6 +104,7 @@ export class DynamicGroupList extends DynamicList {
         const [id] = await this.model.orm.create(this.groupByField.relation, [groupData], {
             context: this.context,
         });
+        const lastGroup = this.groups.at(-1);
 
         // This is almost a copy/past of the code in relational_model.js
         // Maybe we can create an addGroup method in relational_model.js
@@ -139,7 +144,18 @@ export class DynamicGroupList extends DynamicList {
             displayName: groupName,
         };
 
-        this.groups.push(this._createGroupDatapoint(data));
+        const group = this._createGroupDatapoint(data);
+        if (lastGroup) {
+            const groups = [...this.groups, group];
+            this.groups = await this._resequence(
+                groups,
+                this.groupByField.relation,
+                group.id,
+                lastGroup.id
+            );
+        } else {
+            this.groups.push(group);
+        }
     }
 
     _createGroupDatapoint(data) {
@@ -165,6 +181,29 @@ export class DynamicGroupList extends DynamicList {
         return Promise.all(proms);
     }
 
+    async resequence(movedGroupId, targetGroupId) {
+        if (!this.groupByField || this.groupByField.type !== "many2one") {
+            throw new Error("Cannot resequence a group on a non many2one group field");
+        }
+
+        return this.model.mutex.exec(async () => {
+            this.groups = await this._resequence(
+                this.groups,
+                this.groupByField.relation,
+                movedGroupId,
+                targetGroupId
+            );
+        });
+    }
+
+    getDPresId(group) {
+        return group.value;
+    }
+
+    getDPHandleField(group, handleField) {
+        return group[handleField];
+    }
+
     /**
      * @param {string} dataRecordId
      * @param {string} dataGroupId
@@ -175,7 +214,13 @@ export class DynamicGroupList extends DynamicList {
         const targetGroup = this.groups.find((g) => g.id === targetGroupId);
         if (dataGroupId === targetGroupId) {
             // move a record inside the same group
-            return targetGroup.list._moveRecord(dataRecordId, refId);
+            targetGroup.list.records = await targetGroup.list._resequence(
+                targetGroup.list.records,
+                this.resModel,
+                dataRecordId,
+                refId
+            );
+            return;
         }
 
         // move record from a group to another group
@@ -201,6 +246,11 @@ export class DynamicGroupList extends DynamicList {
             sourceGroup.addRecord(record, oldIndex);
             throw e;
         }
-        await targetGroup.list._moveRecord(dataRecordId, refId);
+        targetGroup.list.records = await targetGroup.list._resequence(
+            targetGroup.list.records,
+            this.resModel,
+            dataRecordId,
+            refId
+        );
     }
 }
