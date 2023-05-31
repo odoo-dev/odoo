@@ -397,7 +397,7 @@ export class ListController extends Component {
 
     get nbTotal() {
         const list = this.model.root;
-        return list.isGrouped ? list.nbTotalRecords : list.count;
+        return list.isGrouped ? list.recordCount : list.count;
     }
 
     get defaultExportList() {
