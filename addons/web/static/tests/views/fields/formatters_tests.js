@@ -353,7 +353,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("formatReference", function (assert) {
         assert.strictEqual(formatReference(false), "");
-        const value = { resModel: "product", resId: 2, displayName: "Chair" };
+        const value = { id: { model: "product", id: 2 }, display_name: "Chair" };
         assert.strictEqual(formatReference(value), "Chair");
     });
 });
