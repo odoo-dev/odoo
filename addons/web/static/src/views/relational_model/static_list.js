@@ -309,7 +309,6 @@ export class StaticList extends DataPoint {
 
     async _load({ limit, offset, orderBy }) {
         const records = await this.model._updateConfig(this.config, { limit, offset, orderBy });
-        // FIXME: might need to keep references to the records of previous page (for changes)
         this.records = records.map((r) => this._createRecordDatapoint(r));
     }
 
