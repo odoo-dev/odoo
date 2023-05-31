@@ -82,7 +82,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.module("SelectCreateDialog");
 
-    QUnit.tttt(
+    QUnit.test(
         "SelectCreateDialog use domain, group_by and search default",
         async function (assert) {
             assert.expect(3);
@@ -124,9 +124,6 @@ QUnit.module("ViewDialogs", (hooks) => {
                             fields: ["display_name", "foo", "bar"],
                             groupby: ["bar"],
                             orderby: "",
-                            expand: false,
-                            expand_orderby: null,
-                            expand_limit: null,
                             lazy: true,
                             limit: 80,
                             offset: 0,
@@ -151,7 +148,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                                     ["display_name", "ilike", "piou"],
                                     ["foo", "ilike", "piou"],
                                 ],
-                                fields: ["display_name", "foo"],
+                                specification: { display_name: {}, foo: {} },
                                 limit: 80,
                                 offset: 0,
                                 order: "",
@@ -170,7 +167,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                                     uid: 7,
                                 }, // not part of the test, may change
                                 domain: [["display_name", "like", "a"]],
-                                fields: ["display_name", "foo"],
+                                specification: { display_name: {}, foo: {} },
                                 limit: 80,
                                 offset: 0,
                                 order: "",
@@ -262,7 +259,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         );
     });
 
-    QUnit.tttt("SelectCreateDialog cascade x2many in create mode", async function (assert) {
+    QUnit.test("SelectCreateDialog cascade x2many in create mode", async function (assert) {
         assert.expect(5);
         serverData.views = {
             "partner,false,form": `
@@ -310,11 +307,11 @@ QUnit.module("ViewDialogs", (hooks) => {
                 }
                 if (route === "/web/dataset/call_kw/instrument/create") {
                     assert.deepEqual(
-                        args.args,
+                        args.args[0],
                         [{ badassery: [[6, false, [1]]], name: "ABC" }],
                         "The method create should have been called with the right arguments"
                     );
-                    return Promise.resolve(false);
+                    return Promise.resolve([90]);
                 }
             },
         });

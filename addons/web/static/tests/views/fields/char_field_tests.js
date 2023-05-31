@@ -721,7 +721,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "input field: change value before pending onchange returns (with fieldDebounce)",
         async function (assert) {
             // this test is exactly the same as the previous one, except that in
@@ -749,7 +749,7 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
                 async mockRPC(route, { method }) {
-                    if (method === "onchange") {
+                    if (method === "onchange2") {
                         await def;
                     }
                 },
