@@ -1515,7 +1515,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("navigation in tags (mode 'edit')", async function (assert) {
+    QUnit.test("navigation in tags (mode 'edit')", async function (assert) {
         // keep a single line with 2 badges
         serverData.models.partner.records = serverData.models.partner.records.slice(0, 1);
         serverData.models.partner.records[0].timmy = [12, 14];
