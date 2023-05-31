@@ -242,7 +242,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_data_row:nth-child(4) .o_field_tags span .o_delete");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "widget many2many_tags_avatar list view - don't crash on keyboard navigation",
         async function (assert) {
             await makeView({
