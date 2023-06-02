@@ -818,7 +818,7 @@ QUnit.module("Fields", (hooks) => {
 
         // Save
         await clickSave(target);
-        assert.verifySteps(["write", "web_read", "search_count"]);
+        assert.verifySteps(["write", "web_read"]);
         assert.strictEqual(target.querySelector(".o_domain_debug_input").value, rawDomain);
     });
 
