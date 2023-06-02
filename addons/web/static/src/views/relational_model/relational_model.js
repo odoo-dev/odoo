@@ -346,21 +346,24 @@ export class RelationalModel extends Model {
      */
     async _loadData(config) {
         if (config.isMonoRecord) {
-            if (!config.resId) {
-                return this._loadNewRecord(config);
-            }
-            const context = {
+            const evalContext = {
                 ...config.context,
                 active_id: config.resId,
                 active_ids: [config.resId],
                 active_model: config.resModel,
                 current_company_id: this.company.currentCompany.id,
             };
-            const records = await this._loadRecords({
-                ...config,
-                resIds: [config.resId],
-                context,
-            });
+            if (!config.resId) {
+                return this._loadNewRecord(config, evalContext);
+            }
+
+            const records = await this._loadRecords(
+                {
+                    ...config,
+                    resIds: [config.resId],
+                },
+                evalContext
+            );
             return records[0];
         }
         if (config.resIds) {
@@ -557,18 +560,13 @@ export class RelationalModel extends Model {
      * @param {Config} config
      * @param {Object} param
      * @param {Object} param.changes
+     * @param {Object} param.evalContext
      * @returns
      */
-    _loadNewRecord(config, { changes } = {}) {
+    _loadNewRecord(config, { changes = {}, evalContext = config.context } = {}) {
         // Maybe we should add _applyProperties for the form view ?
         const { fields, activeFields, context, resModel } = config;
-        const spec = getFieldsSpec(activeFields, fields, {
-            ...context,
-            active_id: false,
-            active_ids: [false],
-            active_model: resModel,
-            current_company_id: this.company.currentCompany.id,
-        });
+        const spec = getFieldsSpec(activeFields, fields, evalContext);
         return this._onchange({ changes, context, resModel, spec });
     }
 
@@ -596,16 +594,17 @@ export class RelationalModel extends Model {
     /**
      *
      * @param {Config} config
+     * @param {object} evalContext
      * @returns
      */
-    async _loadRecords(config) {
+    async _loadRecords(config, evalContext = config.context) {
         const { resModel, resIds, activeFields, fields, context } = config;
         if (!resIds.length) {
             return [];
         }
         const kwargs = {
             context: { bin_size: true, ...context },
-            specification: getFieldsSpec(activeFields, fields, context),
+            specification: getFieldsSpec(activeFields, fields, evalContext),
         };
         console.log("Unity field spec", kwargs.specification);
         const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
