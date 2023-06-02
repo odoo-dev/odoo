@@ -46,7 +46,6 @@ export class DataPoint extends Reactive {
         this.id = getId("datapoint");
         this.model = model;
         this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification
-        this.context = config.context;
         this.fields = config.fields;
         this.activeFields = config.activeFields;
         this.fieldNames = Object.keys(this.activeFields);
@@ -56,6 +55,10 @@ export class DataPoint extends Reactive {
 
     get config() {
         return this._config; //FIXME Remove this, it's only for dev purpose to see if the config is updated somewhere
+    }
+
+    get context() {
+        return this.config.context;
     }
 
     // -------------------------------------------------------------------------

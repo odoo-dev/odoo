@@ -4951,7 +4951,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many list, editable, with a date in the context", async function (assert) {
+    QUnit.test("one2many list, editable, with a date in the context", async function (assert) {
         assert.expect(1);
 
         serverData.models.partner.records[0].p = [2];
@@ -5008,7 +5008,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     const expected =
                         counter === 0
                             ? [[4, 2, false]]
@@ -5071,7 +5071,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many list, the context is properly evaluated and sent",
         async function (assert) {
             assert.expect(2);
@@ -5091,7 +5091,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC(route, args) {
-                    if (args.method === "onchange") {
+                    if (args.method === "onchange2") {
                         var context = args.kwargs.context;
                         assert.strictEqual(context.hello, "world");
                         assert.strictEqual(context.abc, 10);
@@ -5332,7 +5332,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("new record, the context is properly evaluated and sent", async function (assert) {
+    QUnit.test("new record, the context is properly evaluated and sent", async function (assert) {
         assert.expect(2);
 
         serverData.models.partner.fields.int_field.default = 17;
@@ -5352,7 +5352,7 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     n++;
                     if (n === 2) {
                         var context = args.kwargs.context;
