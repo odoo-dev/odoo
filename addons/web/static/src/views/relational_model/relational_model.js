@@ -539,7 +539,13 @@ export class RelationalModel extends Model {
     _loadNewRecord(config) {
         // Maybe we should add _applyProperties for the form view ?
         const { fields, activeFields, context, resModel } = config;
-        const spec = getFieldsSpec(activeFields, fields, context);
+        const spec = getFieldsSpec(activeFields, fields, {
+            ...context,
+            active_id: false,
+            active_ids: [false],
+            active_model: resModel,
+            current_company_id: this.company.currentCompany.id,
+        });
         return this._onchange({ context, resModel, spec });
     }
 
