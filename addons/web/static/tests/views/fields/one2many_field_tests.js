@@ -1560,7 +1560,10 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("onchange returning a commands 4 for an x2many", async function (assert) {
         serverData.models.partner.onchanges = {
             foo(obj) {
-                obj.turtles = [[4, 1], [4, 3]];
+                obj.turtles = [
+                    [4, 1],
+                    [4, 3],
+                ];
             },
         };
 
@@ -1595,7 +1598,12 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.turtle.records[0].partner_ids = [1];
             serverData.models.partner.onchanges = {
                 foo: function (obj) {
-                    obj.turtles = [[3, 2], [4, 1], [4, 2], [4, 3]];
+                    obj.turtles = [
+                        [3, 2],
+                        [4, 1],
+                        [4, 2],
+                        [4, 3],
+                    ];
                 },
             };
 
@@ -1619,7 +1627,8 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 mockRPC(route, args) {
                     if (args.method === "onchange2") {
-                        assert.deepEqual(args.args[3], { // spec
+                        assert.deepEqual(args.args[3], {
+                            // spec
                             display_name: {},
                             foo: {},
                             turtles: {
@@ -4062,7 +4071,14 @@ QUnit.module("Fields", (hooks) => {
             "9"
         );
 
-        assert.verifySteps(["get_views", "web_read", "onchange2", "onchange2", "write", "web_read"]);
+        assert.verifySteps([
+            "get_views",
+            "web_read",
+            "onchange2",
+            "onchange2",
+            "write",
+            "web_read",
+        ]);
     });
 
     QUnit.test("editable o2m, pressing ESC discard current changes", async function (assert) {
@@ -4978,8 +4994,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <group>
-                        <field name="company_id"/>
-                        <field name="turtles" context="{'company':company_id}">
+                        <field name="turtles" context="{'turtles':turtles}">
                             <tree editable="bottom">
                                 <field name="turtle_foo"/>
                             </tree>
@@ -5457,7 +5472,10 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("id in one2many obtained in onchange is properly set", async function (assert) {
         serverData.models.partner.onchanges.turtles = function (obj) {
-            obj.turtles = [[4, 3], [1, 3, { turtle_foo: "kawa" }]];
+            obj.turtles = [
+                [4, 3],
+                [1, 3, { turtle_foo: "kawa" }],
+            ];
         };
         await makeView({
             type: "form",
@@ -6772,7 +6790,9 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "write") {
                     const commands = args.args[1].turtles;
-                    assert.deepEqual(commands, [[0, commands[0][1], { turtle_foo: "default foo turtle" }]]);
+                    assert.deepEqual(commands, [
+                        [0, commands[0][1], { turtle_foo: "default foo turtle" }],
+                    ]);
                 }
             },
         });
@@ -6817,7 +6837,9 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "write") {
                     const commands = args.args[1].turtles;
-                    assert.deepEqual(commands, [[0, commands[0][1], { turtle_foo: "default foo turtle" }]]);
+                    assert.deepEqual(commands, [
+                        [0, commands[0][1], { turtle_foo: "default foo turtle" }],
+                    ]);
                 }
             },
         });
