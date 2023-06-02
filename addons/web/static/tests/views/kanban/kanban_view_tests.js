@@ -2361,7 +2361,7 @@ QUnit.module("Views", (hooks) => {
                     assert.deepEqual(default_category_ids, [6]);
                     return [5];
                 }
-                if (method === "web_read" && kwargs.context.active_id === 5) {
+                if (method === "web_read" && args[0][0] === 5) {
                     return [{ id: 5, foo: "new partner", category_ids: [6] }];
                 }
             },
