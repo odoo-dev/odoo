@@ -318,11 +318,8 @@ export class Record extends DataPoint {
         return Promise.all(proms);
     }
 
-    _checkValidity() {
-        for (const fieldName of Array.from(this._unsetRequiredFields)) {
-            this._invalidFields.delete(fieldName);
-        }
-        this._unsetRequiredFields.clear();
+    _checkValidity({ silent } = {}) {
+        const unsetRequiredFields = [];
         for (const fieldName in this.activeFields) {
             const fieldType = this.fields[fieldName].type;
             if (this._isInvisible(fieldName)) {
@@ -335,21 +332,34 @@ export class Record extends DataPoint {
                 case "monetary":
                     continue;
                 case "one2many":
-                case "many2many":
+                case "many2many": {
+                    const list = this.data[fieldName];
                     if (
-                        (this._isRequired(fieldName) && !this.data[fieldName].count) ||
-                        !this._isX2ManyValid(fieldName)
+                        (this._isRequired(fieldName) && !list.count) ||
+                        !list.records.every((r) => r._checkValidity({ silent }))
                     ) {
-                        this.setInvalidField(fieldName);
-                        this._unsetRequiredFields.add(fieldName);
+                        unsetRequiredFields.push(fieldName);
                     }
                     break;
+                }
                 default:
                     if (!this.data[fieldName] && this._isRequired(fieldName)) {
-                        this.setInvalidField(fieldName);
-                        this._unsetRequiredFields.add(fieldName);
+                        unsetRequiredFields.push(fieldName);
                     }
             }
+        }
+
+        if (silent) {
+            return !unsetRequiredFields.length;
+        }
+
+        for (const fieldName of Array.from(this._unsetRequiredFields)) {
+            this._invalidFields.delete(fieldName);
+        }
+        this._unsetRequiredFields.clear();
+        for (const fieldName of unsetRequiredFields) {
+            this._unsetRequiredFields.add(fieldName);
+            this.setInvalidField(fieldName);
         }
         return !this._invalidFields.size;
     }
@@ -516,10 +526,6 @@ export class Record extends DataPoint {
     _isRequired(fieldName) {
         const required = this.activeFields[fieldName].required;
         return required ? evalDomain(required, this.evalContext) : false;
-    }
-
-    _isX2ManyValid(fieldName) {
-        return this.data[fieldName].records.every((r) => r._checkValidity());
     }
 
     async _load(nextConfig = {}) {
