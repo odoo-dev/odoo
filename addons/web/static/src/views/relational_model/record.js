@@ -31,15 +31,15 @@ export class Record extends DataPoint {
         this.data = { ...this._values, ...this._changes };
         const parentRecord = this._parentRecord;
         if (parentRecord) {
-            this.evalContext = {
+            this._dataContext = {
                 get parent() {
                     return parentRecord.evalContext;
                 },
             };
         } else {
-            this.evalContext = {};
+            this._dataContext = {};
         }
-        this._setEvalContext();
+        this._setDataContext();
 
         this._canNeverBeAbandoned = options.canNeverBeAbandoned === true;
         this.selected = false; // TODO: rename into isSelected?
@@ -55,6 +55,20 @@ export class Record extends DataPoint {
 
     get canBeAbandoned() {
         return this.isNew && !this.isDirty && !this._canNeverBeAbandoned;
+    }
+
+    get evalContext() {
+        return Object.assign(
+            {},
+            this.context,
+            {
+                active_id: this.resId || false,
+                active_ids: this.resId ? [this.resId] : [],
+                active_model: this.resModel,
+                current_company_id: this.model.company.currentCompany.id,
+            },
+            this._dataContext
+        );
     }
 
     get hasData() {
@@ -151,7 +165,7 @@ export class Record extends DataPoint {
                 this._changes = this._parseServerValues(this._getDefaultValues());
                 this._values = {};
                 this.data = { ...this._changes };
-                this._setEvalContext();
+                this._setDataContext();
             }
         });
     }
@@ -228,14 +242,14 @@ export class Record extends DataPoint {
     _applyChanges(changes) {
         Object.assign(this._changes, changes);
         Object.assign(this.data, changes);
-        this._setEvalContext();
+        this._setDataContext();
         this._removeInvalidFields(Object.keys(changes));
     }
 
     _applyValues(values) {
         Object.assign(this._values, this._parseServerValues(values));
         Object.assign(this.data, this._values);
-        this._setEvalContext();
+        this._setDataContext();
     }
 
     _parseServerValues(serverValues, currentValues = {}) {
@@ -352,7 +366,7 @@ export class Record extends DataPoint {
             resIds: data.map((r) => r.id),
             orderBy: defaultOrderBy,
             limit,
-            context: getFieldContext(this, fieldName),
+            context: {},
         };
         let staticList;
         const options = {
@@ -373,7 +387,7 @@ export class Record extends DataPoint {
         }
         this._changes = this.resId ? {} : { ...this.values };
         this.data = { ...this._values };
-        this._setEvalContext();
+        this._setDataContext();
         this._invalidFields.clear();
         this._closeInvalidFieldsNotification();
         this._closeInvalidFieldsNotification = () => {};
@@ -456,39 +470,33 @@ export class Record extends DataPoint {
         return defaultValues;
     }
 
-    _computeEvalContext() {
-        const evalContext = {
-            ...this.context,
-            active_id: this.resId || false,
-            active_ids: this.resId ? [this.resId] : [],
-            active_model: this.resModel,
-            current_company_id: this.model.company.currentCompany.id,
-        };
+    _computeDataContext() {
+        const dataContext = {};
         for (const fieldName in this.data) {
             const value = this.data[fieldName];
             const field = this.fields[fieldName];
             if (["char", "text"].includes(field.type)) {
-                evalContext[fieldName] = value !== "" ? value : false;
+                dataContext[fieldName] = value !== "" ? value : false;
             } else if (["one2many", "many2many"].includes(field.type)) {
-                evalContext[fieldName] = value.resIds;
+                dataContext[fieldName] = value.resIds;
             } else if (value && field.type === "date") {
-                evalContext[fieldName] = serializeDate(value);
+                dataContext[fieldName] = serializeDate(value);
             } else if (value && field.type === "datetime") {
-                evalContext[fieldName] = serializeDateTime(value);
+                dataContext[fieldName] = serializeDateTime(value);
             } else if (value && field.type === "many2one") {
-                evalContext[fieldName] = value[0];
+                dataContext[fieldName] = value[0];
             } else if (value && field.type === "reference") {
-                evalContext[fieldName] = `${value.resModel},${value.resId}`;
+                dataContext[fieldName] = `${value.resModel},${value.resId}`;
             } else if (field.type === "properties") {
-                evalContext[fieldName] = value.filter(
+                dataContext[fieldName] = value.filter(
                     (property) => !property.definition_deleted !== false
                 );
             } else {
-                evalContext[fieldName] = value;
+                dataContext[fieldName] = value;
             }
         }
-        evalContext.id = this.resId || false;
-        return evalContext;
+        dataContext.id = this.resId || false;
+        return dataContext;
     }
 
     _isInvisible(fieldName) {
@@ -524,7 +532,7 @@ export class Record extends DataPoint {
         }
         this.isDirty = false;
         this.data = { ...this._values, ...this._changes };
-        this._setEvalContext();
+        this._setDataContext();
         this._invalidFields.clear();
     }
 
@@ -660,8 +668,17 @@ export class Record extends DataPoint {
      * registered to the evalContext (but not necessarily keys inside it), and would
      * be uselessly re-rendered if we replace it by a brand new object.
      */
-    _setEvalContext() {
-        Object.assign(this.evalContext, this._computeEvalContext());
+    _setDataContext() {
+        Object.assign(this._dataContext, this._computeDataContext());
+
+        for (const [fieldName, value] of Object.entries(this.data)) {
+            if (
+                this.fields[fieldName].type === "one2many" ||
+                this.fields[fieldName].type === "many2many"
+            ) {
+                value._updateContext(getFieldContext(this, fieldName));
+            }
+        }
     }
 
     /**
