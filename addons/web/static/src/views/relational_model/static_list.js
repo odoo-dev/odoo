@@ -425,4 +425,8 @@ export class StaticList extends DataPoint {
         this.records = currentPageRecords;
         this._needsReordering = false;
     }
+
+    _updateContext(context) {
+        Object.assign(this.context, context);
+    }
 }
