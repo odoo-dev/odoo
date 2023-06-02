@@ -119,8 +119,8 @@ export class StaticList extends DataPoint {
         this._onChange({ withoutOnchange: !record._checkValidity() });
     }
 
-    delete(recordId) {
-        this._applyCommands([[x2ManyCommands.DELETE, recordId]]);
+    delete(record) {
+        this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
         this._onChange();
     }
 
@@ -217,6 +217,7 @@ export class StaticList extends DataPoint {
     }
 
     _applyCommands(commands) {
+        const isOnLastPage = this.limit + this.offset >= this.count;
         const { CREATE, UPDATE, DELETE, FORGET, LINK_TO } = x2ManyCommands;
         for (const command of commands) {
             switch (command[0]) {
@@ -252,6 +253,12 @@ export class StaticList extends DataPoint {
                     if (!existingCommand) {
                         this._commands.push([UPDATE, command[1]]);
                     }
+                    // FIXME: this is theoretically incorrect: if we receive an update command for
+                    // record we don't know yet (so not loaded), and that command modifies an x2many
+                    // field, it's likely that it will crash because we won't be able to properly
+                    // apply the commands on that x2many (as we haven't loaded it).
+                    // A solution would be that onchange2 returns the values of that record when
+                    // we don't know it yet
                     record._applyChanges(record._parseServerValues(command[2], record.data));
                     break;
                 }
@@ -264,7 +271,7 @@ export class StaticList extends DataPoint {
                     });
                     const record = this._cache[command[1]];
                     this.records.splice(
-                        this.records.findIndex((r) => r === record),
+                        this.records.findIndex((r) => r.id === record.id),
                         1
                     );
                     if (record.resId) {
@@ -285,7 +292,7 @@ export class StaticList extends DataPoint {
                     }
                     const record = this._cache[command[1]];
                     this.records.splice(
-                        this.records.findIndex((r) => r === record),
+                        this.records.findIndex((r) => r.id === record.id),
                         1
                     );
                     if (record.resId) {
@@ -303,6 +310,42 @@ export class StaticList extends DataPoint {
                     break;
                 }
             }
+        }
+        // if we aren't on the last page, and *n* records of the current page have been removed
+        // removed, the first *n* records of the next page become the last *n* ones of the current
+        // page, so we need to add (and maybe load) them.
+        const nbMissingRecords = this.limit - this.records.length;
+        if (!isOnLastPage && nbMissingRecords > 0) {
+            const lastRecordIndex = this.limit + this.offset;
+            const firstRecordIndex = lastRecordIndex - nbMissingRecords;
+            const nextRecordIds = this._currentIds.slice(firstRecordIndex, lastRecordIndex);
+            const recordsToLoad = [];
+            for (const id of nextRecordIds) {
+                if (this._cache[id]) {
+                    this.records.push(this._cache[id]);
+                    if (id in this._unknownRecordCommands) {
+                        // the record exists but hasn't been loaded yet ; we know it's not virtual
+                        recordsToLoad.push(this._cache[id]);
+                    }
+                } else {
+                    // id isn't in the cache, so we know it's not a virtual id
+                    const record = this._createRecordDatapoint({ id }, { dontApplyCommands: true });
+                    this.records.push(record);
+                    recordsToLoad.push(record);
+                }
+            }
+            const resIds = recordsToLoad.map((r) => r.resId);
+            this.model._loadRecords({ ...this.config, resIds }).then((recordValues) => {
+                for (let i = 0; i < recordsToLoad.length; i++) {
+                    const record = recordsToLoad[i];
+                    record._applyValues(recordValues[i]);
+                    const commands = this._unknownRecordCommands[record.resId];
+                    if (commands) {
+                        delete this._unknownRecordCommands[record.resId];
+                        this._applyCommands(commands);
+                    }
+                }
+            });
         }
     }
 
@@ -339,10 +382,12 @@ export class StaticList extends DataPoint {
         };
         const record = new this.model.constructor.Record(this.model, config, data, options);
         this._cache[id] = record;
-        const commands = this._unknownRecordCommands[id];
-        if (commands) {
-            delete this._unknownRecordCommands[id];
-            this._applyCommands(commands);
+        if (!params.dontApplyCommands) {
+            const commands = this._unknownRecordCommands[id];
+            if (commands) {
+                delete this._unknownRecordCommands[id];
+                this._applyCommands(commands);
+            }
         }
         return record;
     }

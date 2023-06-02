@@ -789,7 +789,7 @@ export function useX2ManyCrud(getList, isMany2Many) {
 
     const removeRecord = (record) => {
         const list = getList();
-        return list.delete(record.resId);
+        return list.delete(record);
     };
 
     return {
