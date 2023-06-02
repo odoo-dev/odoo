@@ -8040,7 +8040,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many with invalid value and click on another row", async function (assert) {
+    QUnit.test("one2many with invalid value and click on another row", async function (assert) {
         serverData.models.partner.records[0].p = [2, 4];
 
         await makeView({

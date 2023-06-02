@@ -193,6 +193,7 @@ export class DynamicGroupList extends DynamicList {
                 ? [targetGroup.value, targetGroup.displayName]
                 : targetGroup.value;
         try {
+            // FIXME: add "save" option to update? And do not do onchange in this case? ask rco
             await record.update({ [targetGroup.groupByField.name]: value });
             await record.save({ noReload: true });
         } catch (e) {
