@@ -3,6 +3,7 @@
 import { markup } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
+import { x2ManyCommands } from "@web/core/orm_service";
 import { omit } from "@web/core/utils/objects";
 import { orderByToString } from "@web/views/utils";
 
@@ -350,4 +351,43 @@ export function getValueFromGroupData(groupData, field, rawValue) {
         return value ? value[0] : false;
     }
     return value;
+}
+
+/**
+ * Onchanges sometimes return update commands for records we don't know (e.g. if
+ * they are on a page we haven't loaded yet). We may actually never load them.
+ * When this happens, we must still be able to send back those commands to the
+ * server when saving. However, we can't send the commands exactly as we received
+ * them, since the values they contain have been "unity read". The purpose of this
+ * function is to transform field values from the unity format to the format
+ * expected by the server for a write.
+ * For instance, for a many2one: { id: 3, display_name: "Marc" } => 3.
+ */
+export function fromUnityToServerValues(values, fields, activeFields) {
+    const { CREATE, UPDATE} = x2ManyCommands;
+    const serverValues = {};
+    for (const fieldName in values) {
+        let value = values[fieldName];
+        switch (fields[fieldName].type) {
+            case "one2many":
+            case "many2many":
+                value = value.map((c) => {
+                    if (c[0] === CREATE || c[0] === UPDATE) {
+                        const _fields = activeFields[fieldName].related.fields;
+                        const _activeFields = activeFields[fieldName].related.activeFields;
+                        return [c[0], c[1], fromUnityToServerValues(c[2], _fields, _activeFields)];
+                    }
+                    return [c[0], c[1]];
+                });
+                break;
+            case "many2one":
+                value = value ? value.id : false;
+                break;
+            // case "reference":
+            //     // TODO
+            //     break;
+        }
+        serverValues[fieldName] = value;
+    }
+    return serverValues;
 }

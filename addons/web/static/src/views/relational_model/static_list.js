@@ -4,7 +4,7 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { DataPoint } from "./datapoint";
-import { getId } from "./utils";
+import { getId, fromUnityToServerValues } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
@@ -240,32 +240,30 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case UPDATE: {
-                    let record = this._cache[command[1]];
-                    if (!record) {
-                        record = this._createRecordDatapoint({ id: command[1] });
-                        // the record isn't in the cache, it means it is on a page we haven't loaded
-                        // so we say the record is "unknown", and store all update commands we
-                        // receive about it in a separated structure, s.t. we can easily apply them
-                        // later on after loading the record, if we ever load it.
-                        this._unknownRecordCommands[command[1]] = [];
-                    }
-                    if (command[1] in this._unknownRecordCommands) {
-                        // the record is currently unknown, store the command in case we need it later
-                        this._unknownRecordCommands[command[1]].push(command);
-                    }
                     const existingCommand = this._commands.find((c) => {
                         return (c[0] === CREATE || c[0] === UPDATE) && c[1] === command[1];
                     });
                     if (!existingCommand) {
                         this._commands.push([UPDATE, command[1]]);
                     }
-                    // FIXME: this is theoretically incorrect: if we receive an update command for
-                    // record we don't know yet (so not loaded), and that command modifies an x2many
-                    // field, it's likely that it will crash because we won't be able to properly
-                    // apply the commands on that x2many (as we haven't loaded it).
-                    // A solution would be that onchange2 returns the values of that record when
-                    // we don't know it yet
-                    record._applyChanges(record._parseServerValues(command[2], record.data));
+                    const record = this._cache[command[1]];
+                    if (!record) {
+                        // the record isn't in the cache, it means it is on a page we haven't loaded
+                        // so we say the record is "unknown", and store all update commands we
+                        // receive about it in a separated structure, s.t. we can easily apply them
+                        // later on after loading the record, if we ever load it.
+                        if (!(command[1] in this._unknownRecordCommands)) {
+                            this._unknownRecordCommands[command[1]] = [];
+                        }
+                        this._unknownRecordCommands[command[1]].push(command);
+                    } else if (command[1] in this._unknownRecordCommands) {
+                        // this case is more tricky: the record is in the cache, but it isn't loaded
+                        // yet, as we are currently loading it (see below, where we load missing
+                        // records for the current page)
+                        this._unknownRecordCommands[command[1]].push(command);
+                    } else {
+                        record._applyChanges(record._parseServerValues(command[2], record.data));
+                    }
                     break;
                 }
                 case DELETE: {
@@ -329,10 +327,6 @@ export class StaticList extends DataPoint {
             for (const id of nextRecordIds) {
                 if (this._cache[id]) {
                     this.records.push(this._cache[id]);
-                    if (id in this._unknownRecordCommands) {
-                        // the record exists but hasn't been loaded yet ; we know it's not virtual
-                        recordsToLoad.push(this._cache[id]);
-                    }
                 } else {
                     // id isn't in the cache, so we know it's not a virtual id
                     const record = this._createRecordDatapoint({ id }, { dontApplyCommands: true });
@@ -415,13 +409,30 @@ export class StaticList extends DataPoint {
     }
 
     _getCommands({ withReadonly } = {}) {
-        return this._commands.map((c) => {
-            if (c[0] === x2ManyCommands.CREATE || c[0] === x2ManyCommands.UPDATE) {
-                const record = this._cache[c[1]];
-                return [c[0], c[1], record._getChanges(record._changes, { withReadonly })];
+        const { CREATE, UPDATE } = x2ManyCommands;
+        const commands = [];
+        for (const command of this._commands) {
+            if (command[0] === UPDATE && command[1] in this._unknownRecordCommands) {
+                // the record has never been loaded, but we received update commands from the
+                // server for it, so we need to sanitize them (as they contained unity values)
+                const uCommands = this._unknownRecordCommands[command[1]];
+                for (const uCommand of uCommands) {
+                    const values = fromUnityToServerValues(
+                        uCommand[2],
+                        this.fields,
+                        this.activeFields
+                    );
+                    commands.push([uCommand[0], uCommand[1], values]);
+                }
+            } else if (command[0] === CREATE || command[0] === UPDATE) {
+                const record = this._cache[command[1]];
+                const values = record._getChanges(record._changes, { withReadonly });
+                commands.push([command[0], command[1], values]);
+            } else {
+                commands.push(command);
             }
-            return c;
-        });
+        }
+        return commands;
     }
 
     async _load({ limit, offset, orderBy }) {
