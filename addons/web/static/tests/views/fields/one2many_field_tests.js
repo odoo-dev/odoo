@@ -5810,7 +5810,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "many2manytag in one2many, onchange, some modifiers, and more than one page",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [1, 2, 3];
@@ -5844,17 +5844,15 @@ QUnit.module("Fields", (hooks) => {
 
             assert.verifySteps([
                 "get_views", // main form view
-                "read", // initial read on partner
-                "read", // initial read on turtle
-                "read", // batched read on partner (field partner_ids)
-                "read", // after first delete, read on turtle (to fetch 3rd record)
-                "onchange", // after first delete, onchange on field turtles
-                "onchange", // onchange after second delete
+                "web_read", // initial read on partner
+                "web_read", // after first delete, read on turtle (to fetch 3rd record)
+                "onchange2", // after first delete, onchange on field turtles
+                "onchange2", // onchange after second delete
             ]);
         }
     );
 
-    QUnit.tttt("onchange many2many in one2many list editable", async function (assert) {
+    QUnit.test("onchange many2many in one2many list editable", async function (assert) {
         serverData.models.product.records.push({
             id: 1,
             display_name: "xenomorphe",
@@ -5862,36 +5860,37 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.models.turtle.onchanges = {
             product_id: function (rec) {
-                if (rec.product_id) {
-                    rec.partner_ids = [[5], [4, rec.product_id === 41 ? 1 : 2]];
+                if (rec.product_id === 41) {
+                    rec.partner_ids = [[4, 1]];
+                } else if (rec.product_id === 37) {
+                    rec.partner_ids = [[4, 2]];
                 }
             },
         };
+        let enableOnchange = false;
         const partnerOnchange = function (rec) {
-            if (!rec.int_field || !rec.turtles.length) {
+            if (!enableOnchange) {
                 return;
             }
             rec.turtles = [
-                [5],
-                [
-                    0,
-                    0,
-                    {
-                        display_name: "new line",
-                        product_id: [37, "xphone"],
-                        partner_ids: [[5], [4, 1]],
-                    },
-                ],
-                [
-                    0,
-                    rec.turtles[0][1],
-                    {
-                        display_name: rec.turtles[0][2].display_name,
-                        product_id: [1, "xenomorphe"],
-                        partner_ids: [[5], [4, 2]],
-                    },
-                ],
-            ];
+            [
+                0,
+                0,
+                {
+                    display_name: "new line",
+                    product_id: [37, "xphone"],
+                    partner_ids: [[4, 1]],
+                },
+            ],
+            [
+                1,
+                rec.turtles[0][1],
+                {
+                    product_id: [1, "xenomorphe"],
+                    partner_ids: rec.turtles[0][2].partner_ids ? [[3, 1], [4, 2]] : [[4, 2]],
+                },
+            ],
+        ];
         };
 
         serverData.models.partner.onchanges = {
@@ -5954,6 +5953,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // enable the many2many onchange and generate it
+        enableOnchange = true;
         await editInput(target, 'div[name="int_field"] input', "10");
 
         assert.deepEqual(
@@ -5962,15 +5962,14 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // disable the many2many onchange
-        await editInput(target, 'div[name="int_field"] input', "0");
+        enableOnchange = false;
 
         // remove and start over
         await click(target.querySelector(".o_list_record_remove button"));
         await click(target.querySelector(".o_list_record_remove button"));
 
         // enable the many2many onchange
-        await editInput(target, 'div[name="int_field"] input', "10");
-
+        enableOnchange = true;
         // add new line (first, xenomorphe)
         await addRow(target);
         await editInput(target, 'div[name="display_name"] input', "first");
