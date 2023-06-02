@@ -10241,8 +10241,8 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("coming to a form view from a grouped and sorted list", async function (assert) {
-        assert.expect(19);
+    QUnit.test("coming to a form view from a grouped and sorted list", async function (assert) {
+        assert.expect(20);
         serverData.actions = {
             1: {
                 id: 1,
