@@ -87,36 +87,38 @@ export class StaticList extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
-    async addNew(params) {
-        const values = await this.model._loadNewRecord({
-            resModel: this.resModel,
-            activeFields: this.activeFields,
-            fields: this.fields,
-            context: Object.assign({}, this.context, params.context),
+    addNew(params) {
+        return this.model.mutex.exec(async () => {
+            const values = await this.model._loadNewRecord({
+                resModel: this.resModel,
+                activeFields: this.activeFields,
+                fields: this.fields,
+                context: Object.assign({}, this.context, params.context),
+            });
+            const virtualId = getId("virtual");
+            const record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
+            const command = [x2ManyCommands.CREATE, virtualId];
+            if (params.position === "bottom") {
+                this.records.push(record);
+                this._currentIds.splice(this.offset + this.limit, 0, virtualId);
+                if (this.records.length > this.limit) {
+                    this._tmpIncreaseLimit++;
+                    const nextLimit = this.limit + 1;
+                    this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
+                }
+                this._commands.push(command);
+            } else {
+                this.records.unshift(record);
+                if (this.records.length > this.limit) {
+                    this.records.pop();
+                }
+                this._currentIds.splice(this.offset, 0, virtualId);
+                this._commands.unshift(command);
+            }
+            this.count++;
+            this._needsReordering = true;
+            this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
         });
-        const virtualId = getId("virtual");
-        const record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
-        const command = [x2ManyCommands.CREATE, virtualId];
-        if (params.position === "bottom") {
-            this.records.push(record);
-            this._currentIds.splice(this.offset + this.limit, 0, virtualId);
-            if (this.records.length > this.limit) {
-                this._tmpIncreaseLimit++;
-                const nextLimit = this.limit + 1;
-                this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
-            }
-            this._commands.push(command);
-        } else {
-            this.records.unshift(record);
-            if (this.records.length > this.limit) {
-                this.records.pop();
-            }
-            this._currentIds.splice(this.offset, 0, virtualId);
-            this._commands.unshift(command);
-        }
-        this.count++;
-        this._needsReordering = true;
-        this._onChange({ withoutOnchange: !record._checkValidity() });
     }
 
     delete(record) {
@@ -128,36 +130,40 @@ export class StaticList extends DataPoint {
         return false;
     }
 
-    async load({ limit, offset, orderBy }) {
-        if (this.editedRecord && !(await this.editedRecord.checkValidity())) {
-            return;
-        }
-        limit = limit !== undefined ? limit : this.limit;
-        offset = offset !== undefined ? offset : this.offset;
-        orderBy = orderBy !== undefined ? orderBy : this.orderBy;
-        return this.model.mutex.exec(() => this._load({ limit, offset, orderBy }));
+    load({ limit, offset, orderBy }) {
+        return this.model.mutex.exec(async () => {
+            if (this.editedRecord && !(await this.editedRecord.checkValidity())) {
+                return;
+            }
+            limit = limit !== undefined ? limit : this.limit;
+            offset = offset !== undefined ? offset : this.offset;
+            orderBy = orderBy !== undefined ? orderBy : this.orderBy;
+            return this._load({ limit, offset, orderBy });
+        });
     }
 
     sortBy(fieldName) {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
-    async leaveEditMode({ discard, canAbandon } = {}) {
-        if (this.editedRecord) {
-            const isValid = await this.editedRecord.checkValidity();
-            if (canAbandon !== false) {
-                this._abandonRecords([this.editedRecord], { force: discard || !isValid });
+    leaveEditMode({ discard, canAbandon } = {}) {
+        return this.model.mutex.exec(async () => {
+            if (this.editedRecord) {
+                const isValid = await this.editedRecord.checkValidity();
+                if (canAbandon !== false) {
+                    this._abandonRecords([this.editedRecord], { force: discard || !isValid });
+                }
+                // if we still have an editedRecord, it means it hasn't been abandonned
+                if (this.editedRecord && (isValid || this.editedRecord._canNeverBeAbandoned)) {
+                    this.model._updateConfig(
+                        this.editedRecord.config,
+                        { mode: "readonly" },
+                        { noReload: true }
+                    );
+                }
             }
-            // if we still have an editedRecord, it means it hasn't been abandonned
-            if (this.editedRecord && (isValid || this.editedRecord._canNeverBeAbandoned)) {
-                this.model._updateConfig(
-                    this.editedRecord.config,
-                    { mode: "readonly" },
-                    { noReload: true }
-                );
-            }
-        }
-        return !this.editedRecord;
+            return !this.editedRecord;
+        });
     }
 
     async enterEditMode(record) {
@@ -375,7 +381,7 @@ export class StaticList extends DataPoint {
                 if (!hasCommand) {
                     this._commands.push([UPDATE, id]);
                 }
-                this._onChange({ withoutOnchange: !record._checkValidity() });
+                this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
             },
             virtualId: params.virtualId,
             canNeverBeAbandoned: params.canNeverBeAbandoned,
