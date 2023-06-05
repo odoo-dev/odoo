@@ -31,6 +31,7 @@ export class X2ManyField extends Component {
         widget: { type: String, optional: true },
         crudOptions: { type: Object, optional: true },
         string: { type: String, optional: true },
+        relatedFields: { type: Object, optional: true },
         views: { type: Object, optional: true },
         domain: { type: [Array, Function], optional: true },
         context: { type: Object },
@@ -126,6 +127,7 @@ export class X2ManyField extends Component {
 
     get activeField() {
         return {
+            fields: this.props.relatedFields,
             views: this.props.views,
             viewMode: this.props.viewMode,
             string: this.props.string,
@@ -278,7 +280,7 @@ export const x2ManyField = {
     displayName: _lt("Relational table"),
     supportedTypes: ["one2many", "many2many"],
     useSubView: true,
-    extractProps: ({ attrs, viewMode, views, widget, options, string }, dynamicInfo) => {
+    extractProps: ({ attrs, relatedFields, viewMode, views, widget, options, string }, dynamicInfo) => {
         const props = {
             addLabel: attrs["add-label"],
             context: dynamicInfo.context,
@@ -289,6 +291,7 @@ export const x2ManyField = {
         if (viewMode) {
             props.views = views;
             props.viewMode = viewMode;
+            props.relatedFields = relatedFields;
         }
         if (widget) {
             props.widget = widget;
