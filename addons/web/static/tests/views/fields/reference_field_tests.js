@@ -258,7 +258,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ReferenceField in modal readonly mode", async function (assert) {
+    QUnit.test("ReferenceField in modal readonly mode", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         serverData.models.partner.records[1].trululu = 1;
         serverData.models.partner.records[1].reference = "product,41";
@@ -311,7 +311,7 @@ QUnit.module("Fields", (hooks) => {
         await click(document.body, ".modal .o_form_button_cancel");
     });
 
-    QUnit.tttt("ReferenceField in modal write mode", async function (assert) {
+    QUnit.test("ReferenceField in modal write mode", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         serverData.models.partner.records[1].trululu = 1;
         serverData.models.partner.records[1].reference = "product,41";
