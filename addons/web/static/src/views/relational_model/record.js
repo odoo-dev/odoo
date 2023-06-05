@@ -193,6 +193,22 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._load({ resId, mode, context }));
     }
 
+    // FIXME: a single usecase, challenge the API (add an option to checkValidity?)
+    openInvalidFieldsNotification() {
+        if (this._invalidFields.size) {
+            const items = [...this._invalidFields].map((fieldName) => {
+                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
+            }, this);
+            this._closeInvalidFieldsNotification = this.model.notification.add(
+                markup(`<ul>${items.join("")}</ul>`),
+                {
+                    title: _t("Invalid fields: "),
+                    type: "danger",
+                }
+            );
+        }
+    }
+
     async save(options) {
         await this._askChanges();
         return this.model.mutex.exec(() => this._save(options));
@@ -680,16 +696,7 @@ export class Record extends DataPoint {
             }
         }
         if (!this._checkValidity()) {
-            const items = [...this._invalidFields].map((fieldName) => {
-                return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
-            }, this);
-            this._closeInvalidFieldsNotification = this.model.notification.add(
-                markup(`<ul>${items.join("")}</ul>`),
-                {
-                    title: _t("Invalid fields: "),
-                    type: "danger",
-                }
-            );
+            this.openInvalidFieldsNotification();
             return false;
         }
         const changes = this._getChanges();
