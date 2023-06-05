@@ -12807,7 +12807,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_data_row td[name=display_name]");
     });
 
-    QUnit.tttt('Add a line, click on "Save & New" with an invalid form', async function (assert) {
+    QUnit.test('Add a line, click on "Save & New" with an invalid form', async function (assert) {
         const form = await makeView({
             type: "form",
             resModel: "partner",
@@ -12892,19 +12892,19 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        assert.verifySteps(["get_views: partner", "onchange: partner"]);
+        assert.verifySteps(["get_views: partner", "onchange2: partner"]);
         await click(target, ".o_field_x2many_list_row_add a");
-        assert.verifySteps(["get_views: partner_type", "onchange: partner_type"]);
+        assert.verifySteps(["get_views: partner_type", "onchange2: partner_type"]);
         await editInput(
             target.querySelector(".modal"),
             ".o_field_widget[name='display_name'] input",
             "changed"
         );
-        assert.verifySteps(["onchange: partner_type"]);
+        assert.verifySteps(["onchange2: partner_type"]);
         await click(target.querySelector(".modal .o_form_button_save"));
         assert.strictEqual(target.querySelector(".o_data_row").textContent, "changed5");
         await click(target, ".o_form_button_save");
-        assert.verifySteps(["create: partner", "read: partner", "read: partner_type"]);
+        assert.verifySteps(["create: partner", "web_read: partner"]);
         assert.strictEqual(target.querySelector(".o_data_row").textContent, "changed5");
     });
 
