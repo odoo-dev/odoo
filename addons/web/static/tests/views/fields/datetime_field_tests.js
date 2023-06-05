@@ -397,7 +397,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "DatetimeField with date/datetime widget (with day change) does not care about widget",
         async (assert) => {
             patchTimeZone(-240);
@@ -440,7 +440,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "DatetimeField with date/datetime widget (without day change) does not care about widget",
         async (assert) => {
             patchTimeZone(-240);
