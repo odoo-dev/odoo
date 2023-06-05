@@ -2534,7 +2534,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector('.o_btn_remove').textContent, 'Delete');
     });
 
-    QUnit.tttt("open a record in a one2many kanban (mode 'readonly')", async function (assert) {
+    QUnit.test("open a record in a one2many kanban (mode 'readonly')", async function (assert) {
         serverData.views = {
             "turtle,false,form": `
                 <form>
@@ -2574,7 +2574,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("open a record in a one2many kanban (mode 'edit')", async function (assert) {
+    QUnit.test("open a record in a one2many kanban (mode 'edit')", async function (assert) {
         serverData.views = {
             "turtle,false,form": `
                 <form>
@@ -2614,7 +2614,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many in kanban: add a line custom control create editable",
         async function (assert) {
             serverData.views = {
@@ -2740,7 +2740,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("add record in a one2many non editable list with context", async function (assert) {
+    QUnit.test("add record in a one2many non editable list with context", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -3344,7 +3344,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_field_x2many_kanban .delete_icon");
     });
 
-    QUnit.tttt("one2many kanban: conditional create/delete actions", async function (assert) {
+    QUnit.test("one2many kanban: conditional create/delete actions", async function (assert) {
         serverData.models.partner.records[0].p = [2, 4];
 
         await makeView({
@@ -4177,7 +4177,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("pressing escape in editable o2m list in dialog", async function (assert) {
+    QUnit.test("pressing escape in editable o2m list in dialog", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -5126,7 +5126,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many list not editable, the context is properly evaluated and sent",
         async function (assert) {
             assert.expect(3);
@@ -6023,7 +6023,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("load view for x2many in one2many", async function (assert) {
+    QUnit.test("load view for x2many in one2many", async function (assert) {
         serverData.models.turtle.records[1].product_id = 37;
         serverData.models.partner.records[0].turtles = [2, 3];
         serverData.models.partner.records[2].turtles = [1, 3];
@@ -6065,7 +6065,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, '.modal div[name="partner_ids"] .o_list_renderer');
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many (who contains a one2many) with tree view and without form view",
         async function (assert) {
             await makeView({
@@ -6366,7 +6366,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "nested x2many (non inline views and no widget on inner x2many in list)",
         async function (assert) {
             serverData.models.partner.records[0].p = [1];
@@ -6402,7 +6402,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many (who contains display_name) with tree view and without form view",
         async function (assert) {
             serverData.views = {
@@ -6436,7 +6436,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "open a record in a one2many list (mode 'readonly') with a notebook",
         async function (assert) {
             serverData.views = {
@@ -6939,7 +6939,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt('one2many list edition, no "Remove" button in modal', async function (assert) {
+    QUnit.test('one2many list edition, no "Remove" button in modal', async function (assert) {
         serverData.models.partner.fields.foo.default = false;
 
         await makeView({
@@ -8269,7 +8269,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "nested one2manys with no widget in list and as invisible list in form",
         async function (assert) {
             serverData.models.partner.records[0].p = [1];
@@ -8619,7 +8619,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with sequence field, override default_get, not last page",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
@@ -11931,7 +11931,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "when Navigating to a one2many with tabs, editing in a popup, the popup should receive the focus then give it back",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [];
@@ -12311,7 +12311,7 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".o_list_renderer");
         }
     );
-    QUnit.tttt("open a one2many record containing a one2many", async (assert) => {
+    QUnit.test("open a one2many record containing a one2many", async (assert) => {
         serverData.views = {
             "partner,1234,form": `<form><field name="turtles" >
                 <tree><field name="display_name" /></tree></field>
@@ -12666,7 +12666,7 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(target.querySelector(".o_data_row:first-child"), "o_selected_row");
     });
 
-    QUnit.tttt("kanban one2many in opened view form", async function (assert) {
+    QUnit.test("kanban one2many in opened view form", async function (assert) {
         serverData.models.partner.records[0].p = [1];
         await makeView({
             type: "form",
@@ -12708,7 +12708,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_kanban_record:not('.o_kanban_ghost')");
     });
 
-    QUnit.tttt("kanban one2many in opened view form (with _view_ref)", async (assert) => {
+    QUnit.test("kanban one2many in opened view form (with _view_ref)", async (assert) => {
         serverData.views = {
             "partner,1234,kanban": /* xml */ `
                 <kanban class="o-custom-class">
@@ -12753,7 +12753,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_kanban_record:not('.o_kanban_ghost')");
     });
 
-    QUnit.tttt("list one2many in opened view form", async function (assert) {
+    QUnit.test("list one2many in opened view form", async function (assert) {
         serverData.models.partner.records[0].p = [1];
         await makeView({
             type: "form",
@@ -12790,7 +12790,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_data_row td[name=display_name]");
     });
 
-    QUnit.tttt("list one2many in opened view form (with _view_ref)", async function (assert) {
+    QUnit.test("list one2many in opened view form (with _view_ref)", async function (assert) {
         serverData.views = {
             "partner,1234,list": /* xml */ `
                 <tree editable="1" class="o-custom-class">

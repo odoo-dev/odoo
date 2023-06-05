@@ -183,6 +183,27 @@ export class RelationalModel extends Model {
         window.root = this.root; //FIXME Remove this
     }
 
+    async duplicateDatapoint(record, params) {
+        const config = {
+            ...record.config,
+            ...params,
+        };
+        const data = await this._loadData(config);
+        return this._createRoot(config, data);
+    }
+
+    async addNewRecord(list, params /*, withParentId*/) {
+        const config = {
+            ...params,
+            resModel: list.resModel,
+            resId: false,
+            resIds: [],
+            isMonoRecord: true,
+        };
+        const data = await this._loadData(config);
+        return this._createRoot(config, data);
+    }
+
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
