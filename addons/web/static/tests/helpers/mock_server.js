@@ -779,7 +779,11 @@ export class MockServer {
             const field = model.fields[fieldName];
             const key = "default_" + fieldName;
             if (kwargs.context && key in kwargs.context) {
-                result[fieldName] = kwargs.context[key];
+                if (field.type === "one2many" || field.type === "many2many") {
+                    result[fieldName] = kwargs.context[key].map((id) => [4, id]);
+                } else {
+                    result[fieldName] = kwargs.context[key];
+                }
                 continue;
             }
             if ("default" in field) {
