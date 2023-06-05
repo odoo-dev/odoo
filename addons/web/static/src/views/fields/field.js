@@ -341,7 +341,7 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
             fieldInfo.viewMode = viewMode;
         }
         if (Object.keys(views).length) {
-            fieldInfo.relatedFields = models[field.relation];
+            fieldInfo.relatedFields = models[fields[name].relation];
             fieldInfo.views = views;
         }
     }
