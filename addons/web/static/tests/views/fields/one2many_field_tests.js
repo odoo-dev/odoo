@@ -11384,7 +11384,7 @@ QUnit.module("Fields", (hooks) => {
         await clickDiscard(target.querySelector(".modal"));
     });
 
-    QUnit.tttt("quickly switch between pages in one2many list", async function (assert) {
+    QUnit.test("quickly switch between pages in one2many list", async function (assert) {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
 
         const readDefs = [Promise.resolve(), makeDeferred(), Promise.resolve()];
@@ -11401,7 +11401,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             async mockRPC(route, args) {
-                if (args.method === "read") {
+                if (args.method === "web_read") {
                     const recordID = args.args[0][0];
                     await Promise.resolve(readDefs[recordID - 1]);
                 }
@@ -11423,15 +11423,15 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(" .o_data_cell").innerText, "raphael");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many column visiblity depends on onchange of parent field",
         async function (assert) {
             serverData.models.partner.records[0].p = [2];
             serverData.models.partner.records[0].bar = false;
 
+            let triggerOnchange = false;
             serverData.models.partner.onchanges.p = function (obj) {
-                // set bar to true when line is added
-                if (obj.p.length > 1 && obj.p[1][2].foo === "New line") {
+                if (triggerOnchange) {
                     obj.bar = true;
                 }
             };
@@ -11459,7 +11459,7 @@ QUnit.module("Fields", (hooks) => {
 
             // add a new o2m record
             await addRow(target);
-            target.querySelector(".o_field_one2many input").focus(); // useless?
+            triggerOnchange = true;
             await editInput(target, ".o_field_one2many input", "New line");
             await click(target, ".o_form_view");
 
@@ -12190,7 +12190,6 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             resId: 1,
-            mode: "edit",
         });
 
         await click(target.querySelector(".o_data_cell")); // edit the first row
@@ -12219,7 +12218,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_invalid_cell");
     });
 
-    QUnit.tttt("Check onchange with two consecutive one2one", async function (assert) {
+    QUnit.test("Check onchange with two consecutive one2one", async function (assert) {
         serverData.models.product.fields.product_partner_ids = {
             string: "User",
             type: "one2many",
@@ -12239,8 +12238,11 @@ QUnit.module("Fields", (hooks) => {
         };
         serverData.models.turtle.onchanges = {
             turtle_trululu: function (record) {
-                record.product_ids = [37];
-                record.user_ids = [17, 19];
+                record.product_ids = [[4, 37]];
+                record.user_ids = [
+                    [4, 17],
+                    [4, 19],
+                ];
             },
         };
 
@@ -12435,7 +12437,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("toggle boolean in o2m with the formView in edition", async function (assert) {
+    QUnit.test("toggle boolean in o2m with the formView in edition", async function (assert) {
         serverData.models.partner.onchanges = {
             turtles: () => {},
         };
@@ -12460,10 +12462,15 @@ QUnit.module("Fields", (hooks) => {
                 assert.step(args.method + " " + args.model);
             },
         });
-        assert.verifySteps(["get_views partner", "read partner", "read turtle"]);
+        assert.verifySteps(["get_views partner", "web_read partner"]);
 
         await click(target, ".o_boolean_toggle");
-        assert.verifySteps(["onchange turtle", "onchange partner", "write turtle", "read turtle"]);
+        assert.verifySteps([
+            "onchange2 turtle",
+            "onchange2 partner",
+            "write turtle",
+            "web_read turtle",
+        ]);
     });
 
     QUnit.tttt("create a new record with an x2m invisible", async function (assert) {
@@ -12481,7 +12488,7 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step(args.method);
                     assert.deepEqual(args.args[3], {
                         p: "",
@@ -12493,10 +12500,10 @@ QUnit.module("Fields", (hooks) => {
         });
 
         assert.containsNone(target, "[name='p']");
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
     });
 
-    QUnit.tttt("edit a record with an x2m invisible", async function (assert) {
+    QUnit.test("edit a record with an x2m invisible", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12523,11 +12530,11 @@ QUnit.module("Fields", (hooks) => {
         });
 
         assert.containsNone(target, "[name='p']");
-        assert.verifySteps(["get_views partner", "read partner"]);
+        assert.verifySteps(["get_views partner", "web_read partner"]);
 
         await editInput(target, "[name='foo'] input", "plop");
         await clickSave(target);
-        assert.verifySteps(["write partner", "read partner"]);
+        assert.verifySteps(["write partner", "web_read partner"]);
     });
 
     QUnit.test("can't select a record in a one2many", async function (assert) {
