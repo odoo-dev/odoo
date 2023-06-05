@@ -17,6 +17,7 @@ import { createElement } from "@web/core/utils/xml";
 import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { loadSubViews } from "@web/views/form/form_controller";
 import { FormRenderer } from "@web/views/form/form_renderer";
+import { extractFieldsFromArchInfo } from "@web/views/relational_model/utils";
 import { computeViewClassName, evalDomain, isNull } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
@@ -628,24 +629,29 @@ X2ManyFieldDialog.props = {
 X2ManyFieldDialog.template = "web.X2ManyFieldDialog";
 
 async function getFormViewInfo({ list, activeField, viewService, userService, env }) {
-    let formViewInfo = activeField.views.form;
+    let formArchInfo = activeField.views.form;
+    let fields = activeField.fields;
     const comodel = list.resModel;
-    if (!formViewInfo) {
-        const { fields, relatedModels, views } = await viewService.loadViews({
+    if (!formArchInfo) {
+        const {
+            fields: formFields,
+            relatedModels,
+            views,
+        } = await viewService.loadViews({
             context: list.context,
             resModel: comodel,
             views: [[false, "form"]],
         });
-        const archInfo = new FormArchParser().parse(views.form.arch, relatedModels, comodel);
+        formArchInfo = new FormArchParser().parse(views.form.arch, relatedModels, comodel);
         // Fields that need to be defined are the ones in the form view, this is natural,
-        // plus the ones that the list record has, that is, present in either the list arch or the kanban arch
-        // of the one2many field
-        formViewInfo = { ...archInfo, fields: { ...list.fields, ...fields } }; // should be good to memorize this on activeField
+        // plus the ones that the list record has, that is, present in either the list arch
+        // or the kanban arch of the one2many field
+        fields = { ...list.fields, ...formFields }; // FIXME: update in place?
     }
 
     await loadSubViews(
-        formViewInfo.fieldNodes,
-        formViewInfo.fields,
+        formArchInfo.fieldNodes,
+        fields,
         {}, // context
         comodel,
         viewService,
@@ -653,7 +659,7 @@ async function getFormViewInfo({ list, activeField, viewService, userService, en
         env.isSmall
     );
 
-    return formViewInfo;
+    return { archInfo: formArchInfo, fields };
 }
 
 export function useAddInlineRecord({ addNew }) {
@@ -674,7 +680,7 @@ export function useAddInlineRecord({ addNew }) {
 
 export function useOpenX2ManyRecord({
     resModel,
-    activeField,
+    activeField, // TODO: this should be renamed (object with keys "viewMode", "views" and "string")
     activeActions,
     getList,
     updateRecord,
@@ -695,39 +701,39 @@ export function useOpenX2ManyRecord({
         }
         const list = getList();
         const model = list.model;
-        const form = await getFormViewInfo({ list, activeField, viewService, userService, env });
+        const { archInfo, fields: _fields } = await getFormViewInfo({
+            list,
+            activeField,
+            viewService,
+            userService,
+            env,
+        });
+
+        const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, _fields);
 
         let deleteRecord;
         const isDuplicate = !!record;
 
         if (record) {
             const _record = record;
-            record = await model.duplicateDatapoint(record, {
-                mode,
-                viewMode: "form",
-                fields: { ...form.fields },
-                views: { form },
-            });
+            record = await model.duplicateDatapoint(record, { mode, fields, activeFields });
             const { delete: canDelete, onDelete } = activeActions;
             deleteRecord = viewMode === "kanban" && canDelete ? () => onDelete(_record) : null;
         } else {
-            const recordParams = {
+            const params = {
                 context: makeContext([list.context, context]),
-                resModel: resModel,
-                activeFields: form.activeFields,
-                fields: { ...form.fields },
-                views: { form },
+                activeFields,
+                fields,
                 mode: "edit",
-                viewType: "form",
             };
-            record = await model.addNewRecord(list, recordParams, withParentId);
+            record = await model.addNewRecord(list, params, withParentId);
         }
 
         addDialog(
             X2ManyFieldDialog,
             {
                 config: env.config,
-                archInfo: form,
+                archInfo,
                 record,
                 save: async (rec, { saveAndNew }) => {
                     if (isDuplicate && rec.id === record.id) {
@@ -740,12 +746,9 @@ export function useOpenX2ManyRecord({
                             list,
                             {
                                 context: makeContext([list.context, context]),
-                                resModel: resModel,
-                                activeFields: form.activeFields,
-                                fields: { ...form.fields },
-                                views: { form },
+                                activeFields,
+                                fields,
                                 mode: "edit",
-                                viewType: "form",
                             },
                             withParentId
                         );
