@@ -764,7 +764,7 @@ export function useOpenX2ManyRecord({
 }
 
 export function useX2ManyCrud(getList, isMany2Many) {
-    let saveRecord;
+    let saveRecord; // FIXME: isn't this "createRecord" instead?
     if (isMany2Many) {
         saveRecord = (object) => {
             const list = getList();
