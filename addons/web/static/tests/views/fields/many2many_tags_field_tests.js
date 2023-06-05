@@ -982,7 +982,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Many2ManyTagsField in one2many with display_name", async function (assert) {
+    QUnit.test("Many2ManyTagsField in one2many with display_name", async function (assert) {
         serverData.models.turtle.records[0].partner_ids = [2];
         serverData.views = {
             "partner,false,list": '<tree><field name="foo"/></tree>',

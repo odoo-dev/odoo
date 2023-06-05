@@ -670,7 +670,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector('.o_field_widget[name="foo"]'), "text-danger");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "form with o2m having a many2many fields using the many2many_tags widget along the color_field option",
         async function (assert) {
             // In this scenario, the x2many form view isn't inline, so when we click on the record,
@@ -717,7 +717,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("form with o2m having a field with fieldDependencies", async function (assert) {
+    QUnit.test("form with o2m having a field with fieldDependencies", async function (assert) {
         // In this scenario, the x2many form view isn't inline, so when we click on the record,
         // it does an independant getView, which doesn't return all fields of the model. In the
         // x2many list view, there's a field with fieldDependencies, and the dependency field
@@ -2154,7 +2154,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "input ids for multiple occurrences of fields in sub form view (inline)",
         async function (assert) {
             // A same field can occur several times in the view, but its id must be
@@ -2209,7 +2209,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "input ids for multiple occurrences of fields in sub form view (not inline)",
         async function (assert) {
             // A same field can occur several times in the view, but its id must be
@@ -3773,7 +3773,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.tttt("reference field in one2many list", async function (assert) {
+    QUnit.test("reference field in one2many list", async function (assert) {
         serverData.models.partner.records[0].reference = "partner,2";
         serverData.views = {
             "partner,false,form": '<form><field name="display_name"/></form>',
@@ -4579,7 +4579,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("circular many2many's", async function (assert) {
+    QUnit.test("circular many2many's", async function (assert) {
         serverData.models.partner_type.fields.partner_ids = {
             string: "partners",
             type: "many2many",
@@ -8826,7 +8826,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("custom open record dialog title", async function (assert) {
+    QUnit.test("custom open record dialog title", async function (assert) {
         serverData.models.partner.records[0].p = [2];
         await makeView({
             type: "form",
@@ -10726,7 +10726,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_notification");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many create record dialog shouldn't have a 'remove' button",
         async function (assert) {
             await makeView({

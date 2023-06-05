@@ -1802,7 +1802,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("name_create in form dialog", async function (assert) {
+    QUnit.test("name_create in form dialog", async function (assert) {
         await makeView({
             serverData,
             type: "form",

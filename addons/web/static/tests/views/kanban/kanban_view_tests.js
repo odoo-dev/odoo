@@ -2398,7 +2398,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("quick create record in grouped on m2m (field in the form view)", async (assert) => {
+    QUnit.test("quick create record in grouped on m2m (field in the form view)", async (assert) => {
         serverData.views["partner,some_view_ref,form"] = `
             <form>
                 <field name="foo"/>
@@ -2421,9 +2421,9 @@ QUnit.module("Views", (hooks) => {
             async mockRPC(route, { method, args, kwargs }) {
                 assert.step(method || route);
                 if (method === "create") {
-                    assert.deepEqual(args, [
+                    assert.deepEqual(args[0], [
                         {
-                            category_ids: [[6, false, [6]]],
+                            category_ids: [[4, 6]],
                             foo: "new partner",
                         },
                     ]);
@@ -2466,11 +2466,9 @@ QUnit.module("Views", (hooks) => {
             "unity_web_search_read", // initial search_read (second column)
             "get_views", // get form view
             "onchange2", // quick create
-            "read",
             "create", // should perform a create to create the record
-            "read",
+            "web_read",
             "onchange2",
-            "read",
         ]);
     });
 

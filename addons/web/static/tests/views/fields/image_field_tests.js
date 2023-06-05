@@ -515,7 +515,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("ImageField in subviews is loaded correctly", async function (assert) {
+    QUnit.test("ImageField in subviews is loaded correctly", async function (assert) {
         serverData.models.partner.records[0].write_date = "2017-02-08 10:00:00";
         serverData.models.partner.records[0].document = MY_IMAGE;
         serverData.models.partner_type.fields.image = { name: "image", type: "binary" };

@@ -551,7 +551,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("many2many kanban: conditional create/delete actions", async function (assert) {
+    QUnit.test("many2many kanban: conditional create/delete actions", async function (assert) {
         serverData.views = {
             "partner_type,false,form": '<form><field name="name"/></form>',
             "partner_type,false,list": '<tree><field name="name"/></tree>',
