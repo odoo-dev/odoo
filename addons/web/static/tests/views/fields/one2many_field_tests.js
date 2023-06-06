@@ -2772,7 +2772,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "edition of one2many field, with onchange and not inline sub view",
         async function (assert) {
             serverData.models.turtle.onchanges.turtle_int = function (obj) {
@@ -4765,7 +4765,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_data_cell[data-tooltip='xpad']");
     });
 
-    QUnit.tttt("one2many list with inline form view", async function (assert) {
+    QUnit.test("one2many list with inline form view", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.records[0].p = [];
@@ -5572,7 +5572,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("sub form view with a required field", async function (assert) {
+    QUnit.test("sub form view with a required field", async function (assert) {
         serverData.models.partner.fields.foo.required = true;
         serverData.models.partner.fields.foo.default = null;
 
@@ -9015,7 +9015,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt('add a line, edit it and "Save & New"', async function (assert) {
+    QUnit.test('add a line, edit it and "Save & New"', async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9064,7 +9064,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         'add a line with a context depending on the parent record, created a second record with "Save & New"',
         async function (assert) {
             await makeView({
@@ -9184,7 +9184,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("o2m add a line custom control create non-editable", async function (assert) {
+    QUnit.test("o2m add a line custom control create non-editable", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9877,7 +9877,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many with extra field from server not in form", async function (assert) {
+    QUnit.test("one2many with extra field from server not in form", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -11679,7 +11679,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with extra field from server not in (inline) form",
         async function (assert) {
             await makeView({
@@ -11711,7 +11711,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with extra X2many field from server not in inline form",
         async function (assert) {
             await makeView({
@@ -12399,7 +12399,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many can delete a new record", async (assert) => {
+    QUnit.test("one2many can delete a new record", async (assert) => {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12440,6 +12440,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_kanban_record:not(.o_kanban_ghost)");
 
         await clickSave(target);
+        assert.verifySteps([]);
     });
 
     QUnit.test("toggle boolean in o2m with the formView in edition", async function (assert) {
@@ -12934,7 +12935,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("field in list but not in fetched form", async function (assert) {
+    QUnit.test("field in list but not in fetched form", async function (assert) {
         serverData.models.partner.fields.o2m = {
             type: "one2many",
             relation: "partner_type",
