@@ -2995,8 +2995,8 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, "td.o_list_record_remove button");
     });
 
-    QUnit.tttt("many2many list: unlink two records", async function (assert) {
-        assert.expect(7);
+    QUnit.test("many2many list: unlink two records", async function (assert) {
+        assert.expect(4);
         serverData.models.partner.records[0].p = [1, 2, 4];
         serverData.views = {
             "partner,false,form": `
@@ -3020,19 +3020,7 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (route === "/web/dataset/call_kw/partner/write") {
                     const commands = args.args[1].p;
-                    assert.strictEqual(commands.length, 3, "should have generated three commands");
-                    assert.ok(
-                        commands[0][0] === 4 && commands[0][1] === 2,
-                        "should have generated the command 4 (LINK_TO) with id 4"
-                    );
-                    assert.ok(
-                        commands[1][0] === 4 && commands[1][1] === 4,
-                        "should have generated the command 4 (LINK_TO) with id 4"
-                    );
-                    assert.ok(
-                        commands[2][0] === 3 && commands[2][1] === 1,
-                        "should have generated the command 3 (UNLINK) with id 1"
-                    );
+                    assert.deepEqual(commands, [[3, 1]], "should send a command 3 (unlink)");
                 }
             },
         });
