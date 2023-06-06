@@ -510,7 +510,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "show_address works in a view embedded in a view of another type",
         async function (assert) {
             serverData.models.turtle.records[1].turtle_trululu = 2;
@@ -537,8 +537,20 @@ QUnit.module("Fields", (hooks) => {
                         <field name="turtles" />
                     </form>`,
                 mockRPC(route, { kwargs, method, model }) {
-                    if (method === "name_get" && kwargs.context.show_address) {
-                        return [[2, "second record\nrue morgue\nparis 75013"]];
+                    if (method === "web_read" && model === "turtle") {
+                        assert.deepEqual(kwargs.specification.turtle_trululu.context, {
+                            show_address: 1,
+                        });
+                        return [
+                            {
+                                id: 1,
+                                display_name: "donatello",
+                                turtle_trululu: {
+                                    id: 2,
+                                    display_name: "second record\nrue morgue\nparis 75013",
+                                },
+                            },
+                        ];
                     }
                 },
             });
@@ -547,50 +559,6 @@ QUnit.module("Fields", (hooks) => {
 
             assert.strictEqual(
                 target.querySelector('[name="turtle_trululu"]').textContent,
-                "second recordrue morgueparis 75013",
-                "The partner's address should be displayed"
-            );
-        }
-    );
-
-    QUnit.tttt(
-        "many2one data is reloaded if there is a context to take into account",
-        async function (assert) {
-            serverData.models.turtle.records[1].turtle_trululu = 2;
-            serverData.views = {
-                "turtle,false,form": `
-                    <form>
-                        <field name="display_name" />
-                        <field name="turtle_trululu" context="{'show_address': 1}" options="{'always_reload': 1}" />
-                    </form>`,
-                "turtle,false,list": `
-                    <tree>
-                        <field name="display_name" />
-                        <field name="turtle_trululu" />
-                    </tree>`,
-            };
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                resId: 1,
-                arch: `
-                    <form edit="0">
-                        <field name="display_name" />
-                        <field name="turtles" />
-                    </form>`,
-                mockRPC(route, { kwargs, method, model }) {
-                    if (method === "name_get" && kwargs.context.show_address) {
-                        return [[2, "second record\nrue morgue\nparis 75013"]];
-                    }
-                },
-            });
-            // click the turtle field, opens a modal with the turtle form view
-            await click(target.querySelector(".o_data_row td.o_data_cell"));
-
-            assert.strictEqual(
-                target.querySelector('.modal [name="turtle_trululu"]').textContent,
                 "second recordrue morgueparis 75013",
                 "The partner's address should be displayed"
             );
@@ -1835,7 +1803,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["name_create"]);
     });
 
-    QUnit.tttt("list in form: quick create then add a new line directly", async function (assert) {
+    QUnit.test("list in form: quick create then add a new line directly", async function (assert) {
         // required many2one inside a one2many list: directly after quick creating
         // a new many2one value (before the name_create returns), click on add an item:
         // at this moment, the many2one has still no value, and as it is required,
@@ -1869,7 +1837,7 @@ QUnit.module("Fields", (hooks) => {
                     await def;
                 }
                 if (method === "create") {
-                    assert.deepEqual(args[0].p[0][2].trululu, newRecordId);
+                    assert.deepEqual(args[0][0].p[0][2].trululu, newRecordId);
                 }
             },
         });
@@ -1888,7 +1856,7 @@ QUnit.module("Fields", (hooks) => {
             "the row should still be in edition"
         );
 
-        await def.resolve();
+        def.resolve();
         await nextTick();
 
         assert.strictEqual(
@@ -2420,7 +2388,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     // WARNING: this does not seem to be a many2one field test
-    QUnit.tttt("list in form: default_get with x2many create", async function (assert) {
+    QUnit.test("list in form: default_get with x2many create", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner.fields.timmy.default = [
@@ -2451,17 +2419,8 @@ QUnit.module("Fields", (hooks) => {
                     assert.deepEqual(
                         args[0][0],
                         {
-                            int_field: 2,
-                            timmy: [
-                                [6, false, []],
-                                // LPE TODO 1 taskid-2261084: remove this entire comment including code snippet
-                                // when the change in behavior has been thoroughly tested.
-                                // We can't distinguish a value coming from a default_get
-                                // from one coming from the onchange, and so we can either store and
-                                // send it all the time, or never.
-                                // [0, args[0].timmy[1][1], { display_name: displayName, name: 'brandon' }],
-                                [0, args[0][0].timmy[1][1], { display_name: displayName }],
-                            ],
+                            int_field: 1,
+                            timmy: [[0, args[0][0].timmy[0][1], { display_name: "new value" }]],
                         },
                         "should send the correct values to create"
                     );
@@ -2488,12 +2447,15 @@ QUnit.module("Fields", (hooks) => {
     });
 
     // WARNING: this does not seem to be a many2one field test
-    QUnit.tttt(
+    QUnit.test(
         "list in form: default_get with x2many create and onchange",
         async function (assert) {
             assert.expect(1);
 
-            serverData.models.partner.fields.turtles.default = [[6, 0, [2, 3]]];
+            serverData.models.partner.fields.turtles.default = [
+                [4, 2],
+                [4, 3],
+            ];
 
             await makeView({
                 type: "form",
@@ -2513,10 +2475,10 @@ QUnit.module("Fields", (hooks) => {
                 mockRPC(route, { args, method }) {
                     if (method === "create") {
                         assert.deepEqual(
-                            args[0].turtles,
+                            args[0][0].turtles,
                             [
-                                [4, 2, false],
-                                [4, 3, false],
+                                [4, 2],
+                                [4, 3],
                             ],
                             "should send proper commands to create method"
                         );
@@ -2860,7 +2822,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "domain and context are correctly used when doing a name_search in a m2o",
         async function (assert) {
             assert.expect(4);

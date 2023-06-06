@@ -183,13 +183,20 @@ export class RelationalModel extends Model {
         window.root = this.root; //FIXME Remove this
     }
 
-    async duplicateDatapoint(record, params) {
-        const config = {
-            ...record.config,
-            ...params,
-        };
-        const data = await this._loadData(config);
-        return this._createRoot(config, data);
+    duplicateDatapoint(record, params) {
+        return this.mutex.exec(async () => {
+            const config = {
+                ...record.config,
+                ...params,
+            };
+            const data = await this._loadData(config);
+            const duplicatedRecord = this._createRoot(config, data);
+            // FIXME: this is naive, doesn't work for x2manys
+            duplicatedRecord._applyChanges(record._getChanges(record._changes), {
+                withReadonly: true,
+            });
+            return duplicatedRecord;
+        });
     }
 
     async addNewRecord(list, params /*, withParentId*/) {
