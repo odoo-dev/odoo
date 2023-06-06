@@ -85,9 +85,6 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
             activeFields[fieldName].forceSave =
                 activeFields[fieldName].forceSave || fieldNode.forceSave;
         }
-        if (activeFields[fieldName].invisible === true) {
-            continue; // always invisible
-        }
         if (fieldNode.views) {
             const viewDescr = fieldNode.views[fieldNode.viewMode];
             activeFields[fieldName].related = extractFieldsFromArchInfo(
@@ -177,7 +174,12 @@ function _getFieldContextSpec(
     }
 }
 
-export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFields = null) {
+export function getFieldsSpec(
+    activeFields,
+    fields,
+    evalContext,
+    { parentActiveFields, withInvisible } = {}
+) {
     console.log("getFieldsSpec");
     const fieldsSpec = {};
     const properties = [];
@@ -188,12 +190,12 @@ export function getFieldsSpec(activeFields, fields, evalContext, parentActiveFie
         const { related, limit, defaultOrderBy, invisible } = activeFields[fieldName];
         fieldsSpec[fieldName] = {};
         // X2M
-        if (related) {
+        if (related && (invisible !== true || withInvisible)) {
             fieldsSpec[fieldName].fields = getFieldsSpec(
                 related.activeFields,
                 related.fields,
                 evalContext,
-                activeFields
+                { parentActiveFields: activeFields, withInvisible }
             );
             fieldsSpec[fieldName].limit = limit;
             if (defaultOrderBy) {
@@ -374,7 +376,7 @@ export function getValueFromGroupData(groupData, field, rawValue) {
  * For instance, for a many2one: { id: 3, display_name: "Marc" } => 3.
  */
 export function fromUnityToServerValues(values, fields, activeFields) {
-    const { CREATE, UPDATE} = x2ManyCommands;
+    const { CREATE, UPDATE } = x2ManyCommands;
     const serverValues = {};
     for (const fieldName in values) {
         let value = values[fieldName];

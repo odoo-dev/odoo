@@ -815,7 +815,9 @@ export class Record extends DataPoint {
                 resIds: this.resId ? [this.resId] : [],
                 changes: localChanges,
                 fieldNames: onChangeFields,
-                spec: getFieldsSpec(this.activeFields, this.fields, this.evalContext),
+                spec: getFieldsSpec(this.activeFields, this.fields, this.evalContext, {
+                    withInvisible: true,
+                }),
                 context,
             });
             Object.assign(changes, this._parseServerValues(otherChanges, this.data));
