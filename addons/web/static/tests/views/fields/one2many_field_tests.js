@@ -5353,7 +5353,7 @@ QUnit.module("Fields", (hooks) => {
         await addRow(target);
     });
 
-    QUnit.tttt("parent data is properly sent on an onchange rpc", async function (assert) {
+    QUnit.test("parent data is properly sent on an onchange rpc", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -5362,6 +5362,7 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
+                    <field name="display_name"/>
                     <field name="foo"/>
                     <field name="p">
                         <tree editable="top">
@@ -5373,38 +5374,44 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "onchange2") {
                     const fieldValues = args.args[1];
-                    assert.strictEqual(
-                        fieldValues.trululu.foo,
-                        "yop",
-                        "should have properly sent the parent foo value"
+                    assert.deepEqual(
+                        fieldValues.trululu,
+                        { foo: "hello" },
+                        "should have properly sent the parent changes"
                     );
                 }
             },
         });
 
+        await editInput(target, "[name=foo] input", "hello");
         await addRow(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "parent data is properly sent on an onchange rpc (existing x2many record)",
         async function (assert) {
             assert.expect(4);
 
             serverData.models.partner.onchanges = {
                 display_name: function () {},
+                foo: function () {},
             };
             serverData.models.partner.records[0].p = [1];
             serverData.models.partner.records[0].turtles = [2];
+
+            let count = 0;
             await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
                 arch: `
                 <form>
+                    <field name="display_name"/>
                     <field name="foo"/>
                     <field name="p">
                         <tree editable="top">
                             <field name="display_name"/>
+                            <field name="foo"/>
                             <field name="turtles" widget="many2many_tags"/>
                         </tree>
                     </field>
@@ -5413,16 +5420,23 @@ QUnit.module("Fields", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "onchange2") {
                         const fieldValues = args.args[1];
-                        assert.strictEqual(fieldValues.trululu.foo, "yop");
-                        // we only send fields that changed inside the reverse many2one
-                        assert.deepEqual(fieldValues.trululu.p, [
-                            [1, 1, { display_name: "new val" }],
-                        ]);
+                        if (count === 1) {
+                            assert.deepEqual(fieldValues.trululu, {
+                                foo: "hello",
+                            });
+                        } else if (count === 2) {
+                            assert.deepEqual(fieldValues.trululu, {
+                                foo: "hello",
+                                p: [[1, 1, { display_name: "new val" }]],
+                            });
+                        }
+                        count++;
                     }
                 },
             });
             assert.containsOnce(target, ".o_data_row");
 
+            await editInput(target, "[name=foo] input", "hello");
             await click(target.querySelector(".o_data_row .o_data_cell"));
             assert.containsOnce(target, ".o_data_row.o_selected_row");
 
@@ -5431,10 +5445,11 @@ QUnit.module("Fields", (hooks) => {
                 ".o_selected_row .o_field_widget[name=display_name] input",
                 "new val"
             );
+            await editInput(target, ".o_selected_row .o_field_widget[name=foo] input", "new foo");
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "parent data is properly sent on an onchange rpc, new record",
         async function (assert) {
             assert.expect(5);
@@ -5466,7 +5481,7 @@ QUnit.module("Fields", (hooks) => {
                 },
             });
             await addRow(target);
-            assert.verifySteps(["get_views", "onchange", "onchange"]);
+            assert.verifySteps(["get_views", "onchange2", "onchange2"]);
         }
     );
 
