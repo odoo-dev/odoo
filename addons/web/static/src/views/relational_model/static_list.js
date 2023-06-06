@@ -87,22 +87,44 @@ export class StaticList extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
+    /**
+     * Adds a new record to an x2many relation. If params.record is given, adds
+     * given record (use case: after saving the form dialog in a, e.g., non
+     * editable x2many list). Otherwise, do an onchange to get the initial
+     * values and create a new Record (e.g. after clicking on Add a line in an
+     * editable x2many list).
+     * 
+     * @param {Object} params
+     * @param {"top"|"bottom"} [params.position="bottom"]
+     * @param {Record} [params.record]
+     */
     addNew(params) {
         return this.model.mutex.exec(async () => {
-            const changes = { [this.config.relationField]: this._parent._getChanges() };
-            const values = await this.model._loadNewRecord(
-                {
-                    resModel: this.resModel,
-                    activeFields: this.activeFields,
-                    fields: this.fields,
-                    context: Object.assign({}, this.context, params.context),
-                },
-                { changes }
-            );
-            const virtualId = getId("virtual");
-            const record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
+            let record = params.record;
+            let virtualId = record?.virtualId;
+            if (!record) {
+                const changes = { [this.config.relationField]: this._parent._getChanges() };
+                const values = await this.model._loadNewRecord(
+                    {
+                        resModel: this.resModel,
+                        activeFields: this.activeFields,
+                        fields: this.fields,
+                        context: Object.assign({}, this.context, params.context),
+                    },
+                    { changes }
+                );
+                virtualId = getId("virtual");
+                record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
+            }
             const command = [x2ManyCommands.CREATE, virtualId];
-            if (params.position === "bottom") {
+            if (params.position === "top") {
+                this.records.unshift(record);
+                if (this.records.length > this.limit) {
+                    this.records.pop();
+                }
+                this._currentIds.splice(this.offset, 0, virtualId);
+                this._commands.unshift(command);
+            } else {
                 this.records.push(record);
                 this._currentIds.splice(this.offset + this.limit, 0, virtualId);
                 if (this.records.length > this.limit) {
@@ -111,13 +133,6 @@ export class StaticList extends DataPoint {
                     this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
                 }
                 this._commands.push(command);
-            } else {
-                this.records.unshift(record);
-                if (this.records.length > this.limit) {
-                    this.records.pop();
-                }
-                this._currentIds.splice(this.offset, 0, virtualId);
-                this._commands.unshift(command);
             }
             this.count++;
             this._needsReordering = true;
@@ -495,5 +510,47 @@ export class StaticList extends DataPoint {
 
     _updateContext(context) {
         Object.assign(this.context, context);
+    }
+
+
+    // x2many dialog
+    addNewRecord(params /*, withParentId*/) {
+        return this.model.mutex.exec(async () => {
+            const activeFields = Object.assign({}, this.activeFields, params.activeFields);
+            const fields = Object.assign({}, this.fields, params.fields);
+            const config = {
+                ...params,
+                activeFields,
+                fields,
+                resModel: this.resModel,
+                resId: false,
+                resIds: [],
+                isMonoRecord: true,
+            };
+            const data = await this.model._loadData(config);
+            const virtualId = getId("virtual");
+            return this.model._createRoot(config, data, { virtualId });
+            // const record = this._createRecordDatapoint(data, { virtualId });
+            // return this.duplicateDatapoint(record, params);
+        });
+    }
+    duplicateDatapoint(record, params) {
+        return this.model.mutex.exec(async () => {
+            const config = {
+                ...record.config,
+                ...params,
+            };
+            // TODO: mix config
+            const data = await this.model._loadData(config);
+            const duplicatedRecord = this.model._createRoot(config, data);
+            duplicatedRecord._applyChanges(this._copyChanges(record));
+            return duplicatedRecord;
+        });
+    }
+    _copyChanges(sourceRecord, targetRecord) {
+        // FIXME: this is naive, doesn't work for x2manys
+        return sourceRecord._changes;
+        // const changes = sourceRecord._changes;
+        // targetRecord._applyChanges(changes);
     }
 }

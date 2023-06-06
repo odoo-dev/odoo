@@ -700,7 +700,6 @@ export function useOpenX2ManyRecord({
             title = sprintf(title, activeField.string);
         }
         const list = getList();
-        const model = list.model;
         const { archInfo, fields: _fields } = await getFormViewInfo({
             list,
             activeField,
@@ -716,7 +715,7 @@ export function useOpenX2ManyRecord({
 
         if (record) {
             const _record = record;
-            record = await model.duplicateDatapoint(record, { mode, fields, activeFields });
+            record = await list.duplicateDatapoint(record, { mode, fields, activeFields });
             const { delete: canDelete, onDelete } = activeActions;
             deleteRecord = viewMode === "kanban" && canDelete ? () => onDelete(_record) : null;
         } else {
@@ -726,7 +725,7 @@ export function useOpenX2ManyRecord({
                 fields,
                 mode: "edit",
             };
-            record = await model.addNewRecord(list, params, withParentId);
+            record = await list.addNewRecord(params, withParentId);
         }
 
         addDialog(
@@ -742,8 +741,7 @@ export function useOpenX2ManyRecord({
                         await saveRecord(rec);
                     }
                     if (saveAndNew) {
-                        return model.addNewRecord(
-                            list,
+                        return list.addNewRecord(
                             {
                                 context: makeContext([list.context, context]),
                                 activeFields,
@@ -775,19 +773,32 @@ export function useX2ManyCrud(getList, isMany2Many) {
             } else if (object.resId) {
                 resIds = [...currentIds, object.resId];
             } else {
+                // FIXME: this line would crash
                 return list.add(object, { isM2M: isMany2Many });
             }
             return list.replaceWith(resIds);
         };
     } else {
         saveRecord = (record) => {
-            return getList().add(record);
+            const list = getList();
+            const _record = list._createRecordDatapoint({}, { virtualId: record.virtualId });
+            const changes = list._copyChanges(record);
+            _record._applyChanges(changes);
+            return getList().addNew({ record: _record });
         };
     }
 
     const updateRecord = (record) => {
-        const list = getList();
-        return list.model.updateRecord(list, record, { isM2M: isMany2Many });
+        if (isMany2Many) {
+            return record.save();
+            // operation = { operation: "TRIGGER_ONCHANGE" };
+            // FIXME: incomplete, check updateRecord in BasicRelationalModel
+        } else {
+            const changes = record._getChanges();
+            const list = getList();
+            // FIXME: doesn't work for x2manys I guess
+            return list._cache[record.resId || record.virtualId].update(changes, { withoutOnchange: true });
+        }
     };
 
     const removeRecord = (record) => {
