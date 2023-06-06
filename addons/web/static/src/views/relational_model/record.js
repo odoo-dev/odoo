@@ -388,6 +388,7 @@ export class Record extends DataPoint {
             resModel: this.fields[fieldName].relation,
             activeFields: (related && related.activeFields) || {},
             fields: (related && related.fields) || {},
+            relationField: this.fields[fieldName].relation_field || false,
             offset: 0,
             resIds: data.map((r) => r.id),
             orderBy: defaultOrderBy,
@@ -805,10 +806,14 @@ export class Record extends DataPoint {
                 const fieldContext = this.activeFields[onChangeFields[0]].context;
                 context = makeContext([context, fieldContext], this.evalContext);
             }
+            const localChanges = this._getChanges({ ...this._changes, ...changes });
+            if (this.config.relationField) {
+                localChanges[this.config.relationField] = this._parentRecord._getChanges();
+            }
             const otherChanges = await this.model._onchange({
                 resModel: this.resModel,
                 resIds: this.resId ? [this.resId] : [],
-                changes: this._getChanges({ ...this._changes, ...changes }),
+                changes: localChanges,
                 fieldNames: onChangeFields,
                 spec: getFieldsSpec(this.activeFields, this.fields, this.evalContext),
                 context,

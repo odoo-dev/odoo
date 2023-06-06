@@ -555,9 +555,11 @@ export class RelationalModel extends Model {
     /**
      *
      * @param {Config} config
+     * @param {Object} param
+     * @param {Object} param.changes
      * @returns
      */
-    _loadNewRecord(config) {
+    _loadNewRecord(config, { changes } = {}) {
         // Maybe we should add _applyProperties for the form view ?
         const { fields, activeFields, context, resModel } = config;
         const spec = getFieldsSpec(activeFields, fields, {
@@ -567,7 +569,7 @@ export class RelationalModel extends Model {
             active_model: resModel,
             current_company_id: this.company.currentCompany.id,
         });
-        return this._onchange({ context, resModel, spec });
+        return this._onchange({ changes, context, resModel, spec });
     }
 
     async _onchange({ resModel, spec, resIds, changes, fieldNames, context }) {

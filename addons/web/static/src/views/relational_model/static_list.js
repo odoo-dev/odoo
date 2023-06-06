@@ -89,12 +89,16 @@ export class StaticList extends DataPoint {
 
     addNew(params) {
         return this.model.mutex.exec(async () => {
-            const values = await this.model._loadNewRecord({
-                resModel: this.resModel,
-                activeFields: this.activeFields,
-                fields: this.fields,
-                context: Object.assign({}, this.context, params.context),
-            });
+            const changes = { [this.config.relationField]: this._parent._getChanges() };
+            const values = await this.model._loadNewRecord(
+                {
+                    resModel: this.resModel,
+                    activeFields: this.activeFields,
+                    fields: this.fields,
+                    context: Object.assign({}, this.context, params.context),
+                },
+                { changes }
+            );
             const virtualId = getId("virtual");
             const record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
             const command = [x2ManyCommands.CREATE, virtualId];
@@ -360,6 +364,7 @@ export class StaticList extends DataPoint {
             activeFields: params.activeFields || this.activeFields,
             resModel: this.resModel,
             fields: this.fields,
+            relationField: this.config.relationField,
             resId,
             resIds: resId ? [resId] : [],
             mode: params.mode || "readonly",
