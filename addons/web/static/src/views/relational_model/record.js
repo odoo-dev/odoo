@@ -2,14 +2,13 @@
 
 import { markup } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
-import { getFieldContext, getFieldsSpec, parseServerValue } from "./utils";
+import { getFieldContext, parseServerValue } from "./utils";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -801,24 +800,14 @@ export class Record extends DataPoint {
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
         );
         if (onChangeFields.length && !this.model._urgentSave && !withoutOnchange) {
-            let context = this.context;
-            if (onChangeFields.length === 1) {
-                const fieldContext = this.activeFields[onChangeFields[0]].context;
-                context = makeContext([context, fieldContext], this.evalContext);
-            }
             const localChanges = this._getChanges({ ...this._changes, ...changes });
             if (this.config.relationField) {
                 localChanges[this.config.relationField] = this._parentRecord._getChanges();
             }
-            const otherChanges = await this.model._onchange({
-                resModel: this.resModel,
-                resIds: this.resId ? [this.resId] : [],
+            const otherChanges = await this.model._onchange(this.config, {
                 changes: localChanges,
                 fieldNames: onChangeFields,
-                spec: getFieldsSpec(this.activeFields, this.fields, this.evalContext, {
-                    withInvisible: true,
-                }),
-                context,
+                evalContext: this.evalContext,
             });
             Object.assign(changes, this._parseServerValues(otherChanges, this.data));
         }
