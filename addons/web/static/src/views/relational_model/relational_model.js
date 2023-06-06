@@ -18,6 +18,7 @@ import {
     createPropertyActiveField,
     getAggregatesFromGroupData,
     getDisplayNameFromGroupData,
+    getId,
     getValueFromGroupData,
 } from "./utils";
 import { Domain } from "@web/core/domain";
@@ -184,34 +185,6 @@ export class RelationalModel extends Model {
         window.root = this.root; //FIXME Remove this
     }
 
-    duplicateDatapoint(record, params) {
-        return this.mutex.exec(async () => {
-            const config = {
-                ...record.config,
-                ...params,
-            };
-            const data = await this._loadData(config);
-            const duplicatedRecord = this._createRoot(config, data);
-            // FIXME: this is naive, doesn't work for x2manys
-            duplicatedRecord._applyChanges(record._getChanges(record._changes), {
-                withReadonly: true,
-            });
-            return duplicatedRecord;
-        });
-    }
-
-    async addNewRecord(list, params /*, withParentId*/) {
-        const config = {
-            ...params,
-            resModel: list.resModel,
-            resId: false,
-            resIds: [],
-            isMonoRecord: true,
-        };
-        const data = await this._loadData(config);
-        return this._createRoot(config, data);
-    }
-
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
@@ -336,11 +309,12 @@ export class RelationalModel extends Model {
      *
      * @param {Config} config
      * @param {*} data
+     * @param {Object} [options={}]
      * @returns {DataPoint}
      */
-    _createRoot(config, data) {
+    _createRoot(config, data, options) {
         if (config.isMonoRecord) {
-            return new this.constructor.Record(this, config, data);
+            return new this.constructor.Record(this, config, data, options);
         }
         if (config.groupBy.length) {
             return new this.constructor.DynamicGroupList(this, config, data);

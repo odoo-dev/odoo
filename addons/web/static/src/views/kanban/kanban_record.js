@@ -316,7 +316,7 @@ export class KanbanRecord extends Component {
                 } else {
                     // FIXME: uniformize APIs...
                     // static list case
-                    listOrGroup.removeRecord(record);
+                    listOrGroup.delete(record);
                 }
                 return;
             }

@@ -3090,8 +3090,8 @@ QUnit.module("Fields", (hooks) => {
         // if the changes haven't been saved
     });
 
-    QUnit.tttt("one2many kanban: edition", async function (assert) {
-        assert.expect(20);
+    QUnit.test("one2many kanban: edition", async function (assert) {
+        assert.expect(17);
 
         serverData.models.partner.records[0].p = [2];
         await makeView({
@@ -3126,16 +3126,18 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (route === "/web/dataset/call_kw/partner/write") {
                     const commands = args.args[1].p;
-                    assert.strictEqual(commands.length, 2);
-
-                    assert.strictEqual(commands[0][0], 0);
-                    assert.deepEqual(commands[0][2], {
-                        color: "red",
-                        display_name: "new subrecord 3",
-                        foo: "My little Foo Value",
-                    });
-
-                    assert.deepEqual(commands[1], [2, 2, false]);
+                    assert.deepEqual(commands, [
+                        [
+                            0,
+                            commands[0][1],
+                            {
+                                color: "red",
+                                display_name: "new subrecord 3",
+                                foo: "My little Foo Value",
+                            },
+                        ],
+                        [2, 2],
+                    ]);
                 }
             },
         });
@@ -3396,7 +3398,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("one2many list (non editable): edition", async function (assert) {
+    QUnit.test("one2many list (non editable): edition", async function (assert) {
         assert.expect(10);
 
         let nbWrite = 0;
@@ -3412,7 +3414,7 @@ QUnit.module("Fields", (hooks) => {
                             <field name="display_name"/>
                             <field name="qux"/>
                         </tree>
-                        <form string="Partners">
+                        <form>
                             <field name="display_name"/>
                         </form>
                     </field>
@@ -3424,7 +3426,7 @@ QUnit.module("Fields", (hooks) => {
                     assert.deepEqual(args.args[1], {
                         p: [
                             [1, 2, { display_name: "new name" }],
-                            [2, 4, false],
+                            [2, 4],
                         ],
                     });
                 }
