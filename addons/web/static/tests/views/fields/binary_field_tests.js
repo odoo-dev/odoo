@@ -482,7 +482,6 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("isUploading state should be set to false after upload", async function (assert) {
-        assert.expect(1);
         serviceRegistry.add("error", errorService);
 
         serverData.models.partner.onchanges = {
