@@ -1014,7 +1014,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector('.o_field_widget[name="product_id"] .o_external_button'));
     });
 
-    QUnit.tttt("Form and subsubview with default_ or _view_ref contexts", async function (assert) {
+    QUnit.test("Form and subsubview with default_ or _view_ref contexts", async function (assert) {
         serverData.models.partner_type.fields.company_ids = {
             string: "one2many field",
             type: "one2many",
@@ -1063,7 +1063,7 @@ QUnit.module("Views", (hooks) => {
                 </form>`,
             resId: 2,
             mockRPC: (route, { method, model, kwargs }) => {
-                if (["get_views", "onchange"].includes(method)) {
+                if (["get_views", "onchange2"].includes(method)) {
                     const { context } = kwargs;
                     assert.step(`${method} (${model})`);
                     assert.deepEqual(context, expectedContexts.get(model));
@@ -1084,7 +1084,7 @@ QUnit.module("Views", (hooks) => {
 
         // Create a new timmy
         await click(target, ".modal .o_create_button");
-        assert.verifySteps(["get_views (partner_type)", "onchange (partner_type)"]);
+        assert.verifySteps(["get_views (partner_type)", "onchange2 (partner_type)"]);
 
         // Create a new company
         expectedContexts.clear();
@@ -1094,7 +1094,7 @@ QUnit.module("Views", (hooks) => {
             form_view_ref: "bar_rescompany_form_view",
         });
         await click(target, ".modal [name=company_ids] .o_field_x2many_list_row_add a");
-        assert.verifySteps(["get_views (res.company)", "onchange (res.company)"]);
+        assert.verifySteps(["get_views (res.company)", "onchange2 (res.company)"]);
     });
 
     QUnit.test("invisible fields are properly hidden", async function (assert) {
@@ -5945,7 +5945,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("properly apply onchange on one2many fields direct click", async function (assert) {
+    QUnit.test("properly apply onchange on one2many fields direct click", async function (assert) {
         const def = makeDeferred();
 
         serverData.views = {
@@ -5959,7 +5959,6 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.onchanges = {
             int_field: function (obj) {
                 obj.p = [
-                    [5],
                     [1, 2, { display_name: "updated record 1", int_field: obj.int_field }],
                     [1, 4, { display_name: "updated record 2", int_field: obj.int_field * 2 }],
                 ];
@@ -6561,7 +6560,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".o_field_widget[name=foo] input", "trigger an onchange");
     });
 
-    QUnit.tttt("onchange value are not discarded on o2m edition", async function (assert) {
+    QUnit.test("onchange value are not discarded on o2m edition", async function (assert) {
         assert.expect(4);
 
         serverData.models.partner.records[1].p = [4];
@@ -6589,10 +6588,10 @@ QUnit.module("Views", (hooks) => {
                 </form>`,
             resId: 2,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     return Promise.resolve({
                         value: {
-                            p: [[5], [1, 4, { foo: "foo changed" }]],
+                            p: [[1, 4, { foo: "foo changed" }]],
                         },
                     });
                 }
@@ -6838,7 +6837,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".oe_stat_button"));
     });
 
-    QUnit.tttt("clicking on a stat button with x2many in context", async function (assert) {
+    QUnit.test("clicking on a stat button with x2many in context", async function (assert) {
         assert.expect(1);
         serverData.models.partner.records[1].timmy = [12];
 
@@ -6846,12 +6845,7 @@ QUnit.module("Views", (hooks) => {
             start() {
                 return {
                     doActionButton(args) {
-                        // button context should have been evaluated, the x2many
-                        // should be in the form of x2m commands when serialized
-                        assert.equal(
-                            JSON.stringify(args.buttonContext),
-                            '{"test":[[6,false,[12]]]}'
-                        );
+                        assert.equal(JSON.stringify(args.buttonContext), '{"test":[12]}');
                     },
                 };
             },
@@ -7161,7 +7155,7 @@ QUnit.module("Views", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "create") {
                         assert.deepEqual(
-                            args.args[0].p,
+                            args.args[0][0].p,
                             [
                                 [
                                     0,
@@ -7369,7 +7363,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".o_field_widget[name=timmy] .o_tag");
     });
 
-    QUnit.tttt("check if id and active_id are defined", async function (assert) {
+    QUnit.test("check if id and active_id are defined", async function (assert) {
         assert.expect(2);
 
         let checkOnchange = false;
@@ -7385,7 +7379,7 @@ QUnit.module("Views", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange" && checkOnchange) {
+                if (args.method === "onchange2" && checkOnchange) {
                     assert.strictEqual(
                         args.kwargs.context.current_id,
                         false,
@@ -7548,7 +7542,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("open one2many form containing one2many", async function (assert) {
+    QUnit.test("open one2many form containing one2many", async function (assert) {
         serverData.models.partner.records[0].product_ids = [37];
         serverData.models.product.fields.partner_type_ids = {
             string: "one2many partner",
@@ -7605,7 +7599,7 @@ QUnit.module("Views", (hooks) => {
             "the value of the fields should be fetched and displayed"
         );
         assert.verifySteps(
-            ["get_views", "read", "read", "get_views", "read", "read"],
+            ["get_views", "web_read", "get_views", "web_read"],
             "there should be 4 read rpcs"
         );
     });
@@ -7883,7 +7877,7 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("open one2many form containing many2many_tags", async function (assert) {
+    QUnit.test("open one2many form containing many2many_tags", async function (assert) {
         serverData.models.partner.records[0].product_ids = [37];
         serverData.models.product.fields.partner_type_ids = {
             string: "many2many partner_type",
@@ -7920,7 +7914,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         await click(target.querySelector(".o_data_cell"));
-        assert.verifySteps(["get_views", "read", "read", "read"]);
+        assert.verifySteps(["get_views", "web_read", "web_read"]);
     });
 
     QUnit.test("onchanges are applied before checking if it can be saved", async function (assert) {
@@ -12198,12 +12192,12 @@ QUnit.module("Views", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "create") {
                         assert.deepEqual(
-                            args.args[0],
+                            args.args[0][0],
                             {
                                 p: [
                                     [
                                         0,
-                                        args.args[0].p[0][1],
+                                        args.args[0][0].p[0][1],
                                         { length: 0, display_name: "readonly" },
                                     ],
                                 ],
