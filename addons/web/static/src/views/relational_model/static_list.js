@@ -383,7 +383,7 @@ export class StaticList extends DataPoint {
             context: this.context,
             activeFields: params.activeFields || this.activeFields,
             resModel: this.resModel,
-            fields: this.fields,
+            fields: params.fields || this.fields,
             relationField: this.config.relationField,
             resId,
             resIds: resId ? [resId] : [],
@@ -533,7 +533,7 @@ export class StaticList extends DataPoint {
             };
             const data = await this.model._loadData(config);
             const virtualId = getId("virtual");
-            return this.model._createRoot(config, data, { virtualId });
+            return this.model._createRoot(config, data, { virtualId, parentRecord: this._parent });
             // const record = this._createRecordDatapoint(data, { virtualId });
             // return this.duplicateDatapoint(record, params);
         });
@@ -546,15 +546,18 @@ export class StaticList extends DataPoint {
             };
             // TODO: mix config
             const data = await this.model._loadData(config);
-            const duplicatedRecord = this.model._createRoot(config, data);
-            duplicatedRecord._applyChanges(this._copyChanges(record));
+            const duplicatedRecord = this.model._createRoot(config, data, {
+                parentRecord: this._parent,
+                virtualId: record.virtualId,
+            });
+            await this._copyChanges(record, duplicatedRecord);
             return duplicatedRecord;
         });
     }
     _copyChanges(sourceRecord, targetRecord) {
         // FIXME: this is naive, doesn't work for x2manys
-        return sourceRecord._changes;
-        // const changes = sourceRecord._changes;
-        // targetRecord._applyChanges(changes);
+        const changes = sourceRecord._changes;
+        targetRecord._applyChanges(changes);
+        return targetRecord._onChange(changes);
     }
 }
