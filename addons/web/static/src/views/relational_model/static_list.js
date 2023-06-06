@@ -93,7 +93,7 @@ export class StaticList extends DataPoint {
      * editable x2many list). Otherwise, do an onchange to get the initial
      * values and create a new Record (e.g. after clicking on Add a line in an
      * editable x2many list).
-     * 
+     *
      * @param {Object} params
      * @param {"top"|"bottom"} [params.position="bottom"]
      * @param {Record} [params.record]
@@ -142,6 +142,11 @@ export class StaticList extends DataPoint {
 
     delete(record) {
         this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
+        this._onChange();
+    }
+
+    forget(record) {
+        this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
         this._onChange();
     }
 
@@ -511,7 +516,6 @@ export class StaticList extends DataPoint {
     _updateContext(context) {
         Object.assign(this.context, context);
     }
-
 
     // x2many dialog
     addNewRecord(params /*, withParentId*/) {
