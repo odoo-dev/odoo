@@ -18,7 +18,6 @@ import {
     createPropertyActiveField,
     getAggregatesFromGroupData,
     getDisplayNameFromGroupData,
-    getId,
     getValueFromGroupData,
 } from "./utils";
 import { Domain } from "@web/core/domain";
