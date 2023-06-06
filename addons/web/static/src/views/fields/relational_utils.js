@@ -797,12 +797,17 @@ export function useX2ManyCrud(getList, isMany2Many) {
             const changes = record._getChanges();
             const list = getList();
             // FIXME: doesn't work for x2manys I guess
-            return list._cache[record.resId || record.virtualId].update(changes, { withoutOnchange: true });
+            return list._cache[record.resId || record.virtualId].update(changes, {
+                withoutOnchange: true,
+            });
         }
     };
 
     const removeRecord = (record) => {
         const list = getList();
+        if (isMany2Many) {
+            return list.forget(record);
+        }
         return list.delete(record);
     };
 
