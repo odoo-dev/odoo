@@ -2,6 +2,7 @@
 // @ts-check
 
 import { EventBus, markRaw } from "@odoo/owl";
+import { makeContext } from "@web/core/context";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { shallowEqual, unique } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
@@ -361,7 +362,7 @@ export class RelationalModel extends Model {
                 current_company_id: this.company.currentCompany.id,
             };
             if (!config.resId) {
-                return this._loadNewRecord(config, evalContext);
+                return this._loadNewRecord(config, { evalContext });
             }
 
             const records = await this._loadRecords(
@@ -563,23 +564,32 @@ export class RelationalModel extends Model {
     }
 
     /**
-     *
      * @param {Config} config
-     * @param {Object} param
-     * @param {Object} param.changes
-     * @param {Object} param.evalContext
-     * @returns
+     * @param {Object} [params={}]
+     * @returns Promise<Object>
      */
-    _loadNewRecord(config, { changes = {}, evalContext = config.context } = {}) {
-        // Maybe we should add _applyProperties for the form view ?
-        const { fields, activeFields, context, resModel } = config;
-        const spec = getFieldsSpec(activeFields, fields, evalContext, { withInvisible: true });
-        return this._onchange({ changes, context, resModel, spec });
+    _loadNewRecord(config, params = {}) {
+        return this._onchange(config, params);
     }
 
-    async _onchange({ resModel, spec, resIds, changes, fieldNames, context }) {
+    /**
+     * @param {Config} config
+     * @param {Object} param
+     * @param {Object} [param.changes={}]
+     * @param {string[]} [param.fieldNames=[]]
+     * @param {Object} [param.evalContext=config.context]
+     * @returns Promise<Object>
+     */
+    async _onchange(config, { changes = {}, fieldNames = [], evalContext = config.context }) {
+        const { fields, activeFields, resModel, resId } = config;
+        let context = config.context;
+        if (fieldNames.length === 1) {
+            const fieldContext = config.activeFields[fieldNames[0]].context;
+            context = makeContext([context, fieldContext], evalContext);
+        }
+        const spec = getFieldsSpec(activeFields, fields, evalContext, { withInvisible: true });
         console.log("Onchange spec", spec);
-        const args = [resIds || [], changes || {}, fieldNames || [], spec];
+        const args = [resId ? [resId] : [], changes, fieldNames, spec];
         const response = await this.orm.call(resModel, "onchange2", args, { context });
         console.log("Onchange response", response);
         if (response.warning) {
