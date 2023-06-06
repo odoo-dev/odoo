@@ -779,11 +779,14 @@ export function useX2ManyCrud(getList, isMany2Many) {
             return list.replaceWith(resIds);
         };
     } else {
-        saveRecord = (record) => {
+        saveRecord = async (record) => {
             const list = getList();
-            const _record = list._createRecordDatapoint({}, { virtualId: record.virtualId });
-            const changes = list._copyChanges(record);
-            _record._applyChanges(changes);
+            const _record = list._createRecordDatapoint({}, {
+                activeFields: record.activeFields,
+                fields: record.fields,
+                virtualId: record.virtualId,
+            });
+            _record._applyChanges(record._changes); // FIXME: find a way to use _copyChanges
             return getList().addNew({ record: _record });
         };
     }
@@ -794,12 +797,9 @@ export function useX2ManyCrud(getList, isMany2Many) {
             // operation = { operation: "TRIGGER_ONCHANGE" };
             // FIXME: incomplete, check updateRecord in BasicRelationalModel
         } else {
-            const changes = record._getChanges();
             const list = getList();
-            // FIXME: doesn't work for x2manys I guess
-            return list._cache[record.resId || record.virtualId].update(changes, {
-                withoutOnchange: true,
-            });
+            const listRecord = list._cache[record.resId || record.virtualId];
+            return list._copyChanges(record, listRecord);
         }
     };
 
