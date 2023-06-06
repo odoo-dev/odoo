@@ -12452,7 +12452,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("create a new record with an x2m invisible", async function (assert) {
+    QUnit.test("create a new record with an x2m invisible", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -12467,19 +12467,56 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
             mockRPC(route, args) {
+                assert.step(args.method);
                 if (args.method === "onchange2") {
-                    assert.step(args.method);
                     assert.deepEqual(args.args[3], {
-                        p: "",
-                        "p.int_field": "",
-                        "p.trululu": "",
+                        display_name: {},
+                        p: {
+                            fields: {
+                                int_field: {},
+                                trululu: {
+                                    fields: {
+                                        display_name: {},
+                                    },
+                                },
+                            },
+                            limit: 40,
+                            order: "",
+                        },
+                    });
+                    return {
+                        value: {
+                            p: [
+                                [
+                                    0,
+                                    false,
+                                    {
+                                        int_field: 4,
+                                        trululu: { id: 1, display_name: "first record" },
+                                    },
+                                ],
+                            ],
+                        },
+                    };
+                }
+                if (args.method === "create") {
+                    const commands = args.args[0][0].p;
+                    assert.deepEqual(commands, [[0, commands[0][1], { int_field: 4, trululu: 1 }]]);
+                }
+                if (args.method === "web_read") {
+                    assert.deepEqual(args.kwargs.specification, {
+                        display_name: {},
+                        p: {},
                     });
                 }
             },
         });
 
         assert.containsNone(target, "[name='p']");
-        assert.verifySteps(["onchange2"]);
+        assert.verifySteps(["get_views", "onchange2"]);
+
+        await click(target, ".o_form_button_save");
+        assert.verifySteps(["create", "web_read"]);
     });
 
     QUnit.test("edit a record with an x2m invisible", async function (assert) {
@@ -12499,6 +12536,13 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
             mockRPC(route, args) {
                 assert.step(`${args.method} ${args.model}`);
+                if (args.method === "web_read") {
+                    assert.deepEqual(args.kwargs.specification, {
+                        display_name: {},
+                        foo: {},
+                        turtles: {},
+                    });
+                }
                 if (args.method === "write") {
                     assert.deepEqual(args.args[1], {
                         foo: "plop",
