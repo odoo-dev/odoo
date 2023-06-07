@@ -6458,7 +6458,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many field with virtual ids", async function (assert) {
+    QUnit.test("one2many field with virtual ids", async function (assert) {
         serverData.views = {
             "partner,false,form": '<form><field name="foo"/></form>',
         };
