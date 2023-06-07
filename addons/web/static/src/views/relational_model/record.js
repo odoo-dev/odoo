@@ -489,7 +489,7 @@ export class Record extends DataPoint {
         const defaultValues = {};
         for (const fieldName of this.fieldNames) {
             const field = this.fields[fieldName];
-            if (isNumeric(field)) {
+            if (isNumeric(field) && fieldName !== "id") {
                 defaultValues[fieldName] = 0;
             } else if (isX2Many(field)) {
                 defaultValues[fieldName] = [];
