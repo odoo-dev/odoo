@@ -21,7 +21,6 @@
     -->
     <template id="payment.form" name="Payment Form">
         <form name="o_payment_form"
-              class="w-75"
               t-att-data-reference-prefix="reference_prefix"
               t-att-data-amount="amount"
               t-att-data-currency-id="currency and currency.id"
@@ -30,48 +29,187 @@
               t-att-data-landing-route="landing_route"
               t-att-data-access-token="access_token"
         >
-            <span class="fs-4 d-block">Saved payment methods</span> <!-- TODO ANV remove d-block if not needed later -->
-            <t t-foreach="tokens_sudo" t-as="token_sudo">
-                <t t-set="provider_sudo" t-value="token_sudo.provider_id"/>
-                <t t-out="token_sudo.display_name"/> (debug: <t t-out="provider_sudo.name"/>) <br/>
-            </t>
-            <span class="fs-4 d-block">Add a new payment method</span>
-            <t t-foreach="payment_methods_sudo" t-as="pm_sudo">
-                <t t-set="provider_sudo" t-value="pm_sudo.provider_ids[0]"/>
-                <t t-set="inline_form_xml_id" t-value="provider_sudo.inline_form_view_id.xml_id"/>
-                <div class="card mb-2"> <!-- TODO ANV add a template to display cards -->
-                    <div class="card-body"> <!-- TODO ANV store data on the card -->
-                        <input name="o_payment_radio"
-                               type="radio"
-                               class="align-middle me-2"
-                               t-att-data-payment-option-id="provider_sudo.id"
-                               t-att-data-provider="provider_sudo.code"
-                               t-att-data-payment-method-id="pm_sudo.id"
-                        />
-                        <span t-esc="pm_sudo.image_payment_form"
-                              t-att-title="pm_sudo.name"
-                              t-options="{'widget': 'image', 'alt-field': 'name'}"
-                              class="me-2"
-                        />
-                        <span class="card-title fs-5 align-middle">
-                            <t t-out="pm_sudo.name"/> (debug: <t t-out="provider_sudo.name"/>)
-                        </span>
-                    </div>
-                    <div class="card-footer">
-                        <t t-if="inline_form_xml_id" t-call="{{inline_form_xml_id}}">
-                            <t t-set="provider_id" t-value="provider_sudo.id"/>
-                        </t>
+
+            <div class="accordion" id="o_payment_methods">
+                <!-- [BRD to ANV] if saved token exist, display this accordion-item -->
+                <div class="accordion-item border border-bottom-0">
+                    <h4 id="o_saved_tokens_heading" class="mb-0">
+                        <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#o_saved_tokens" aria-expanded="true" aria-controls="o_saved_tokens">Registered payment methods</button>
+                    </h4>
+                    <!-- [BRD to ANV] if saved token exist, add "show" class -->
+                     <div id="o_saved_tokens" class="accordion-collapse collapse show" aria-labelledby="o_saved_tokens_heading" data-bs-parent="#o_payment_methods">
+                        <div class="accordion-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <t t-foreach="tokens_sudo" t-as="token_sudo" t-key="token_sudo_index">
+                                    <t t-set="provider_sudo" t-value="token_sudo.provider_id"/>
+                                    <t t-out="token_sudo.display_name"/> (debug: <t t-out="provider_sudo.name"/>) <br/>
+                                    <!-- TODO ANV store data on the card -->
+                                </t>
+
+                                <!-- Demos -->
+                                <t t-call="payment.saved_token">
+                                    <t t-set="method_name" t-valuef="Visa"/>
+                                    <t t-set="method_number" t-valuef="•••• 4533"/>
+                                    <t t-set="method_provider" t-valuef="Stripe"/>
+                                    <t t-set="method_id" t-valuef="example_1"/>
+                                    <t t-set="_checked" t-value="true"/>
+                                </t>
+                                <t t-call="payment.saved_token">
+                                    <t t-set="method_name" t-valuef="Mastercard"/>
+                                    <t t-set="method_number" t-valuef="917303675704"/>
+                                    <t t-set="method_provider" t-valuef="UPI"/>
+                                    <t t-set="method_id" t-valuef="example_2"/>
+                                    <t t-set="_checked" t-value="false"/>
+                                    <t t-set="_demo_is_debug" t-value="true"/>
+                                </t>
+                                <t t-call="payment.saved_token">
+                                    <t t-set="method_name" t-valuef="aVeryLongMethodName"/>
+                                    <t t-set="method_number" t-valuef="AZ70HJQI66369178775965729429"/>
+                                    <t t-set="method_provider" t-valuef="aLongProviderName"/>
+                                    <t t-set="method_id" t-valuef="example_3"/>
+                                    <t t-set="_checked" t-value="false"/>
+                                </t>
+                                <!-- End Demos -->
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </t>
-            <button name="o_payment_submit_button"
-                    type="submit"
-                    class="btn btn-primary btn-lg w-100"
-                    t-att-data-icon-class="'fa-lock'"
-            >
-                <i t-attf-class="fa fa-lock"/> <t t-esc="'Pay'"/>
-            </button>
+                <div class="accordion-item border">
+                    <h4 id="o_new_methods_heading" class="mb-0">
+                        <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#o_new_method" aria-expanded="true" aria-controls="o_new_method">Add a new payment method</button>
+                    </h4>
+                    <!-- [BRD to ANV] if no saved token, add "show" class -->
+                    <div id="o_new_method" class="accordion-collapse collapse" aria-labelledby="o_new_methods_heading" data-bs-parent="#o_payment_methods">
+                        <div class="accordion-body p-0">
+                            <ul class="list-group list-group-flush" id="o_payment_methods">
+                                <t t-foreach="payment_methods_sudo" t-as="pm_sudo" t-key="pm_sudo_index">
+                                    <t t-set="provider_sudo" t-value="pm_sudo.provider_ids[0]"/>
+                                    <t t-set="inline_form_xml_id" t-value="provider_sudo.inline_form_view_id.xml_id"/>
+
+                                    <li class="o_payment_method_item list-group-item d-flex flex-column gap-3 py-3">
+                                        
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-0 p-0" for="o_payment_radio">
+                                            <div class="o_payment_method_header form-check d-flex flex-grow-1 flex-wrap mb-0">
+                                                <div class="d-flex justify-content-between align-items-start gap-2 w-100">
+                                                    <input name="o_payment_radio"
+                                                        type="radio"
+                                                        class="o_payment_radio o_payment_radio_list form-check-input"
+                                                        t-att-data-payment-option-id="provider_sudo.id"
+                                                        t-att-data-provider="provider_sudo.code"
+                                                        t-att-data-payment-method-id="pm_sudo.id"
+                                                        t-att-id="'o_payment_radio_' + str(pm_sudo.id)"
+                                                    />
+                                                    <div class="d-flex gap-1 flex-column flex-md-row align-items-md-center flex-grow-1">
+                                                        <label class="o_payment_method_name mb-0 text-break" t-att-for="'o_payment_radio_' + str(pm_sudo.id)">
+                                                            <t t-out="pm_sudo.name"/> (debug: <t t-out="provider_sudo.name"/>)
+                                                        </label>
+                                                        <!-- [BRD to ANV] If extra fees ... -->
+                                                        <span class="badge me-auto px-2 rounded-pill text-bg-warning">+ $5.71 Fees</span>
+                                                    </div>
+                                                    <div class="o_payment_logo_methods gap-1 flex-wrap flex-grow-1 justify-content-end d-flex">
+                                                        <!-- [BRD to ANV] Method logos, single or multiple -->
+                                                        <!-- Would it be possible to return the image directly instead of adding a span as parent ? -->
+                                                        <span t-esc="pm_sudo.image_payment_form"
+                                                            t-att-title="pm_sudo.name"
+                                                            t-options="{'widget': 'image', 'alt-field': 'name'}"
+                                                            class="rounded overflow-hidden"
+                                                        />
+                                                        <span t-esc="pm_sudo.image_payment_form"
+                                                            t-att-title="pm_sudo.name"
+                                                            t-options="{'widget': 'image', 'alt-field': 'name'}"
+                                                            class="rounded overflow-hidden"
+                                                        />
+                                                        <span t-esc="pm_sudo.image_payment_form"
+                                                            t-att-title="pm_sudo.name"
+                                                            t-options="{'widget': 'image', 'alt-field': 'name'}"
+                                                            class="rounded overflow-hidden"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- [BRD to ANV] If help text is enabled ... -->
+                                            <p class="o_payment_help_text w-100 mb-0 ms-4 small text-muted">This Inmensae subtilitatis, obscuris et malesuada fames. Salutantibus vitae elit libero, a pharetra augue. Non equidem invideo, miror magis posuere velit aliquet.</p>
+                                        </div>
+
+                                        <!-- 
+                                            [BRD to ANV] Is it possible to remove this div if there's no inline form ?
+                                            Otherwise it creates an unwanted gap between elements
+                                        -->
+                                        <div t-if="inline_form_xml_id" class="position-relative ms-4">
+                                            <t t-call="{{inline_form_xml_id}}">
+                                                <t t-set="provider_id" t-value="provider_sudo.id"/>
+                                                <!--
+                                                    [BRD to ANV] Saw the demo inline form from `payment_demo`
+                                                    is not responsive. Should we improve it ?
+                                                -->
+                                            </t>
+                                        </div>
+
+                                        <!-- [BRD to ANV] If "unpublished" or "test demo" are enabled ... -->
+                                        <div class="d-flex gap-1 ms-4 rounded-pill bg-light py-1 px-2">
+                                            <!-- [BRD to ANV] If "Unpublished" is enabled ... -->
+                                            <span class="badge badge-pill text-body"><i class="o_payment_debug_info fa fa-eye-slash text-danger"/> Unpublished</span>
+                                            <!-- [BRD to ANV] If "Test mode" is enabled ... -->
+                                            <span class="badge badge-pill text-body"><i class="o_payment_debug_info fa fa-exclamation-triangle text-warning"/> Test mode</span>
+                                        </div>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end mt-2">
+                <button name="o_payment_submit_button"
+                        type="submit"
+                        class="btn btn-primary btn-lg w-100 w-md-auto"
+                        t-att-data-icon-class="'fa-lock'"
+                >
+                    <i t-attf-class="fa fa-lock"/> <t t-esc="'Pay'"/>
+                </button>
+            </div>
         </form>
+    </template>
+
+    <!--[BRD to ANV] Here, I created a template, not sure if we need to keep it or not. -->
+    <template id="payment.saved_token" name="Saved token">
+        <li class="o_payment_method_item list-group-item position-relative d-flex flex-column gap-2 py-3">
+            <div class="d-flex gap-3">
+                <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3">
+                    <div class="col col-lg-5">
+                        <div class="form-check mb-0">
+                            <input name="o_payment_radio"
+                                type="radio"
+                                class="o_payment_radio o_payment_radio_token form-check-input"
+                                t-att-id="method_id"
+                                t-att-checked="_checked"
+                            />
+                            <div class="d-flex align-items-center gap-1 flex-wrap">
+                                <label class="o_payment_method_name text-break" t-att-for="method_id" t-out="method_name"/>
+                                <!-- [BRD to ANV] If extra fees ... -->
+                                <span class="badge px-2 rounded-pill text-bg-warning">+ $5.71 Fees</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col mt-1">
+                        <p t-out="method_number" class="mb-0 ms-4 ms-lg-0 font-monospace small fw-bold text-break"/>
+                    </div>
+                    <div class="col mt-1">
+                        <p class="mb-0 ms-4 ms-lg-0 small"><span class="text-muted">Managed by</span> <strong t-out="method_provider" class="text-break"/></p>
+                    </div>
+                </div>
+                
+                <!-- [BRD to ANV] To removed after importing the logos -->
+                <span class="demo_logo d-block flex-shrink-0 rounded bg-300 small text-center" style="width: 45px; height: 27px;">Logo</span>    
+            </div>
+            <!-- [BRD to ANV] If "unpublished" or "test demo" are enabled ... -->
+            <div t-if="_demo_is_debug" class="d-flex gap-1 mt-2 rounded-pill bg-light py-1 px-2">
+                <!-- [BRD to ANV] If "Unpublished" is enabled ... -->
+                <span class="badge badge-pill text-body"><i class="o_payment_debug_info fa fa-eye-slash text-danger"/> Unpublished</span>
+                <!-- [BRD to ANV] If "Test mode" is enabled ... -->
+                <span class="badge badge-pill text-body"><i class="o_payment_debug_info fa fa-exclamation-triangle text-warning"/> Test mode</span>
+            </div>
+        </li>
     </template>
 
 </odoo>

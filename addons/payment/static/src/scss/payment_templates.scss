@@ -1,3 +1,17 @@
 div#o_payment_status_alert > p {
     margin-bottom: 0;
 }
+
+.o_payment_method_item {
+
+    .o_payment_method_name:before {
+        position: absolute;
+        inset: 0;
+        content: '';
+        cursor: pointer;
+    }
+
+    &:hover .o_payment_method_name:before {
+        outline: $border-width solid $primary;
+    }
+}
