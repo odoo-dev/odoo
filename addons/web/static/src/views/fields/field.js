@@ -295,6 +295,9 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
             fieldInfo.attrs[name] = value;
         }
     }
+    if (name === "id") {
+        fieldInfo.modifiers.readonly = true;
+    }
 
     if (X2M_TYPES.includes(fields[name].type)) {
         const views = {};
