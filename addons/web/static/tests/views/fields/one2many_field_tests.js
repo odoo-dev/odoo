@@ -7735,8 +7735,8 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".modal .modal-footer .btn-primary"));
     });
 
-    QUnit.tttt("editing tabbed one2many (editable=bottom)", async function (assert) {
-        assert.expect(13);
+    QUnit.test("editing tabbed one2many (editable=bottom)", async function (assert) {
+        assert.expect(11);
 
         serverData.models.partner.records[0].turtles = [];
         for (let i = 0; i < 42; i++) {
@@ -7764,11 +7764,11 @@ QUnit.module("Fields", (hooks) => {
                 assert.step(args.method);
                 if (args.method === "write") {
                     assert.strictEqual(
-                        args.args[1].turtles[40][0],
+                        args.args[1].turtles[0][0],
                         0,
                         "should send a create command"
                     );
-                    assert.deepEqual(args.args[1].turtles[40][2], { turtle_foo: "rainbow dash" });
+                    assert.deepEqual(args.args[1].turtles[0][2], { turtle_foo: "rainbow dash" });
                 }
             },
         });
@@ -7780,7 +7780,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
         assert.containsN(target, "tr.o_data_row", 40);
 
-        assert.verifySteps(["get_views", "read", "read", "onchange", "write", "read", "read"]);
+        assert.verifySteps(["get_views", "web_read", "onchange2", "write", "web_read"]);
     });
 
     QUnit.tttt("editing tabbed one2many (editable=bottom), again...", async function (assert) {
@@ -7813,8 +7813,8 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, "tr.o_data_row", 2);
     });
 
-    QUnit.tttt("editing tabbed one2many (editable=top)", async function (assert) {
-        assert.expect(16);
+    QUnit.test("editing tabbed one2many (editable=top)", async function (assert) {
+        assert.expect(14);
 
         serverData.models.partner.records[0].turtles = [];
         serverData.models.turtle.fields.turtle_foo.default = "default foo";
@@ -7842,8 +7842,8 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 assert.step(args.method);
                 if (args.method === "write") {
-                    assert.strictEqual(args.args[1].turtles[40][0], 0);
-                    assert.deepEqual(args.args[1].turtles[40][2], { turtle_foo: "rainbow dash" });
+                    assert.strictEqual(args.args[1].turtles[0][0], 0);
+                    assert.deepEqual(args.args[1].turtles[0][2], { turtle_foo: "rainbow dash" });
                 }
             },
         });
@@ -7859,16 +7859,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
         assert.containsN(target, "tr.o_data_row", 40);
 
-        assert.verifySteps([
-            "get_views",
-            "read",
-            "read",
-            "read",
-            "onchange",
-            "write",
-            "read",
-            "read",
-        ]);
+        assert.verifySteps(["get_views", "web_read", "web_read", "onchange2", "write", "web_read"]);
     });
 
     QUnit.test(
