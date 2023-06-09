@@ -54,7 +54,7 @@ export class StaticList extends DataPoint {
     // -------------------------------------------------------------------------
 
     get currentIds() {
-        return this.records.map((r) => r.resId).filter((id) => this._currentIds.includes(id));
+        return this._currentIds;
     }
 
     get editedRecord() {
@@ -332,7 +332,10 @@ export class StaticList extends DataPoint {
                 }
                 case LINK_TO: {
                     const record = this._createRecordDatapoint(command[2]);
-                    this.records.push(record);
+                    if (!this.limit || this.records.length < this.limit) {
+                        this.records.push(record);
+                    }
+                    this._currentIds.push(record.resId);
                     this._commands.push([command[0], command[1]]);
                     this.count++;
                     break;
@@ -461,8 +464,17 @@ export class StaticList extends DataPoint {
     }
 
     async _load({ limit, offset, orderBy }) {
-        const records = await this.model._updateConfig(this.config, { limit, offset, orderBy });
-        this.records = records.map((r) => this._createRecordDatapoint(r));
+        const currentIds = this._currentIds.slice(offset, offset + limit);
+        // FIXME: record in cache could be not yet loaded
+        const resIds = currentIds.filter((id) => typeof id === "number" && !this._cache[id]);
+        if (resIds.length) {
+            const records = await this.model._loadRecords({ ...this.config, resIds });
+            for (const record of records) {
+                this._createRecordDatapoint(record);
+            }
+        }
+        this.records = currentIds.map((id) => this._cache[id]);
+        await this.model._updateConfig(this.config, { limit, offset, orderBy }, { noReload: true });
     }
 
     async _sortBy(fieldName) {

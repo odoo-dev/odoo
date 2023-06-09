@@ -7467,7 +7467,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.tttt("contexts of nested x2manys are correctly sent (add line)", async function (assert) {
         assert.expect(2);
 
-        serverData.models.partner.fields.timmy.default = [12];
+        serverData.models.partner.fields.timmy.default = [[4, 12]];
 
         patchWithCleanup(session, { user_context: { someKey: "some value" } });
 
@@ -7657,7 +7657,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("onchange and required fields with override in arch", async function (assert) {
+    QUnit.test("onchange and required fields with override in arch", async function (assert) {
         serverData.models.partner.onchanges = {
             turtles: function () {},
         };
@@ -7685,10 +7685,10 @@ QUnit.module("Fields", (hooks) => {
         // triggers an onchange on partner, because the new record is valid
         await addRow(target);
 
-        assert.verifySteps(["get_views", "read", "onchange", "onchange"]);
+        assert.verifySteps(["get_views", "web_read", "onchange2", "onchange2"]);
     });
 
-    QUnit.tttt("onchange on a one2many containing a one2many", async function (assert) {
+    QUnit.test("onchange on a one2many containing a one2many", async function (assert) {
         // the purpose of this test is to ensure that the onchange specs are
         // correctly and recursively computed
         assert.expect(1);
@@ -7718,12 +7718,17 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange" && checkOnchange) {
-                    assert.strictEqual(
-                        args.args[3]["p.p.display_name"],
-                        "",
-                        "onchange specs should be computed recursively"
-                    );
+                if (args.method === "onchange2" && checkOnchange) {
+                    assert.deepEqual(args.args[3], {
+                        display_name: {},
+                        p: {
+                            fields: {
+                                display_name: {},
+                            },
+                            limit: 40,
+                            order: "",
+                        },
+                    });
                 }
             },
         });
@@ -7783,7 +7788,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views", "web_read", "onchange2", "write", "web_read"]);
     });
 
-    QUnit.tttt("editing tabbed one2many (editable=bottom), again...", async function (assert) {
+    QUnit.test("editing tabbed one2many (editable=bottom), again...", async function (assert) {
         serverData.models.partner.records[0].turtles = [];
         for (let i = 0; i < 9; i++) {
             const id = 100 + i;
@@ -8072,7 +8077,7 @@ QUnit.module("Fields", (hooks) => {
         assert.doesNotHaveClass(rows[1], "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "default value for nested one2manys (coming from onchange)",
         async function (assert) {
             assert.expect(3);
@@ -8101,13 +8106,13 @@ QUnit.module("Fields", (hooks) => {
                 mockRPC(route, args) {
                     if (args.method === "create") {
                         assert.strictEqual(
-                            args.args[0].p[0][0],
+                            args.args[0][0].p[0][0],
                             0,
                             "should send a command 0 (CREATE) for p"
                         );
                         assert.deepEqual(
-                            args.args[0].p[0][2],
-                            { turtles: [[4, 1, false]] },
+                            args.args[0][0].p[0][2],
+                            { turtles: [[4, 1]] },
                             "should send the correct values"
                         );
                     }
@@ -8143,7 +8148,7 @@ QUnit.module("Fields", (hooks) => {
                     </sheet>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     if (args.args[1].turtles[0][2].turtle_foo === "pinky") {
                         // we simulate a validation error.  In the 'real' web client,
                         // the server error will be used by the session to display
@@ -8181,8 +8186,8 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("propagate context to sub views without default_* keys", async function (assert) {
-        assert.expect(8);
+    QUnit.test("propagate context to sub views without default_* keys", async function (assert) {
+        assert.expect(7);
 
         await makeView({
             type: "form",
@@ -8204,7 +8209,7 @@ QUnit.module("Fields", (hooks) => {
                     "shy",
                     "view context key should be used for every rpcs"
                 );
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     if (args.model === "partner") {
                         assert.strictEqual(
                             args.kwargs.context.default_flutter,
@@ -8356,7 +8361,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("one2many with multiple pages and sequence field", async function (assert) {
+    QUnit.test("one2many with multiple pages and sequence field", async function (assert) {
         serverData.models.partner.records[0].turtles = [3, 2, 1];
         serverData.models.partner.onchanges.turtles = function () {};
 
@@ -8375,16 +8380,22 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             resId: 1,
-            mockRPC(route, args) {
-                if (args.method === "onchange") {
-                    return Promise.resolve({
+            async mockRPC(route, args) {
+                if (args.method === "onchange2") {
+                    return {
                         value: {
                             turtles: [
-                                [5],
-                                [1, 1, { turtle_foo: "from onchange", partner_ids: [[5]] }],
+                                [2, 2],
+                                [2, 3],
+                                [
+                                    4,
+                                    1,
+                                    { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] },
+                                ],
+                                [1, 1, { turtle_foo: "from onchange" }],
                             ],
                         },
-                    });
+                    };
                 }
             },
         });
@@ -8395,7 +8406,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("one2many with multiple pages and sequence field, part2", async function (assert) {
+    QUnit.test("one2many with multiple pages and sequence field, part2", async function (assert) {
         serverData.models.partner.records[0].turtles = [3, 2, 1];
         serverData.models.partner.onchanges.turtles = function () {};
 
@@ -8415,17 +8426,22 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
             resId: 1,
-            mockRPC(route, args) {
-                if (args.method === "onchange") {
-                    return Promise.resolve({
+            async mockRPC(route, args) {
+                if (args.method === "onchange2") {
+                    return {
                         value: {
                             turtles: [
-                                [5],
-                                [1, 1, { turtle_foo: "from onchange id2", partner_ids: [[5]] }],
-                                [1, 3, { turtle_foo: "from onchange id3", partner_ids: [[5]] }],
+                                [2, 2],
+                                [
+                                    4,
+                                    1,
+                                    { id: 1, turtle_int: 0, turtle_foo: "yop", partner_ids: [] },
+                                ],
+                                [1, 1, { turtle_foo: "from onchange id2" }],
+                                [1, 3, { turtle_foo: "from onchange id3" }],
                             ],
                         },
-                    });
+                    };
                 }
             },
         });
@@ -8436,7 +8452,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_list_record_remove button"));
         assert.deepEqual(
             getNodesTextContent(target.querySelectorAll(".o_data_row .o_data_cell.o_list_char")),
-            ["from onchange id2", "from onchange id3"]
+            ["from onchange id3", "from onchange id2"]
         );
     });
 
