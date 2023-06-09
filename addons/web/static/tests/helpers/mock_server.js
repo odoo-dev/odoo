@@ -854,6 +854,7 @@ export class MockServer {
                 modelFields[modelName] = modelFields[modelName] || new Set();
                 fields.forEach((field) => modelFields[modelName].add(field));
             });
+            delete views[viewType].models;
         });
 
         // For each model, fetch the information of the fields used in the views only
