@@ -2068,7 +2068,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "list in form: show name of many2one fields in multi-page (default_get)",
         async function (assert) {
             serverData.models.partner.fields.p.default = [
@@ -2639,18 +2639,18 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route) {
-                if (route === "/web/dataset/call_kw/product/read") {
+                if (route === "/web/dataset/call_kw/product/web_read") {
                     return Promise.resolve([
                         { id: 37, name: "xphone", display_name: "leonardo", turtle_ids: [1] },
                     ]);
                 }
-                if (route === "/web/dataset/call_kw/turtle/read") {
+                if (route === "/web/dataset/call_kw/turtle/web_read") {
                     return Promise.resolve([{ id: 1, type_id: [12, "gold"] }]);
                 }
                 if (route === "/web/dataset/call_kw/partner_type/get_formview_id") {
                     return Promise.resolve(false);
                 }
-                if (route === "/web/dataset/call_kw/partner_type/read") {
+                if (route === "/web/dataset/call_kw/partner_type/web_read") {
                     return Promise.resolve([{ id: 12, partner_ids: [1, 2], display_name: "gold" }]);
                 }
                 if (route === "/web/dataset/call_kw/partner_type/write") {
