@@ -88,7 +88,7 @@ export class X2ManyField extends Component {
             getList: () => this.list,
             saveRecord,
             updateRecord,
-            withParentId: this.props.widget !== "many2many",
+            isMany2Many: this.isMany2Many,
         });
         this._openRecord = (params) => {
             const activeElement = document.activeElement;
@@ -280,7 +280,10 @@ export const x2ManyField = {
     displayName: _lt("Relational table"),
     supportedTypes: ["one2many", "many2many"],
     useSubView: true,
-    extractProps: ({ attrs, relatedFields, viewMode, views, widget, options, string }, dynamicInfo) => {
+    extractProps: (
+        { attrs, relatedFields, viewMode, views, widget, options, string },
+        dynamicInfo
+    ) => {
         const props = {
             addLabel: attrs["add-label"],
             context: dynamicInfo.context,

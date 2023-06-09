@@ -1742,7 +1742,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("onchange on one2many containing x2many in form view", async function (assert) {
+    QUnit.test("onchange on one2many containing x2many in form view", async function (assert) {
         serverData.models.partner.onchanges = {
             foo: function (obj) {
                 obj.turtles = [[0, false, { turtle_foo: "new record" }]];
@@ -1853,7 +1853,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange on one2many with x2many in list (no widget) and form view (list)",
         async function (assert) {
             serverData.models.turtle.fields.turtle_foo.default = "a default value";
@@ -1913,7 +1913,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange on one2many with x2many in list (many2many_tags) and form view (list)",
         async function (assert) {
             serverData.models.turtle.fields.turtle_foo.default = "a default value";
@@ -3429,8 +3429,8 @@ QUnit.module("Fields", (hooks) => {
         assert.containsN(target, ".o_list_record_remove", 2);
         assert.containsOnce(target, ".o_field_x2many_list_row_add");
 
-        // edit existing subrecord
-        await click(target.querySelectorAll(".o_list_renderer tbody tr td")[1]); // ?
+        // edit first record
+        await click(target.querySelector(".o_list_renderer .o_data_cell"));
 
         await editInput(target, ".modal .o_form_editable input", "new name");
 
@@ -3441,7 +3441,7 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.strictEqual(nbWrite, 0, "should not have write anything in DB");
 
-        // remove subrecords
+        // remove second record
         await click(target.querySelectorAll(".o_list_record_remove")[1]);
         assert.containsOnce(target, "td.o_list_number");
         assert.strictEqual(
@@ -4815,7 +4815,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many list with inline form view with context with parent key",
         async function (assert) {
             assert.expect(2);
@@ -6079,7 +6079,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many with x2many in form view (but not in list view)", async function (assert) {
+    QUnit.test("one2many with x2many in form view (but not in list view)", async function (assert) {
         assert.expect(1);
 
         // avoid error when saving the edited related record (because the
@@ -7607,7 +7607,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("multi level of nested x2manys, onchange and rawChanges", async function (assert) {
+    QUnit.test("multi level of nested x2manys, onchange and rawChanges", async function (assert) {
         assert.expect(7);
         serverData.models.partner.records[0].p = [1];
         serverData.models.partner.onchanges = {
@@ -9320,7 +9320,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(tds[1].textContent, "Add a line");
     });
 
-    QUnit.tttt("one2many form view with action button", async function (assert) {
+    QUnit.test("one2many form view with action button", async function (assert) {
         // once the action button is clicked, the record is reloaded (via the
         // onClose handler, executed because the python method does not return
         // any action, or an ir.action.act_window_close) ; this test ensures that
@@ -10544,14 +10544,17 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.test(
         "one2many with many2many_tags in list and list in form with a limit",
         async function (assert) {
-            // This test is skipped for now, as it doesn't work, and it can't be fixed in the current
-            // architecture (without large changes). However, this is unlikely to happen as the default
-            // limit is 80, and it would be useless to display so many records with a many2many_tags
-            // widget. So it would be nice if we could make it work in the future, but it's no big
-            // deal for now.
+            // This test encodes a limitation of the current model architecture:
+            // we have an nested x2manys, and the inner one is displayed as tags
+            // in the list, and as a list in the form. As both the list and the
+            // form will use the same Record datapoint, the config of their static
+            // list will be the same. We obviously don't want to see the limit
+            // applied on the tags (in the background) when opening the form. So
+            // the stategy is to keep the initial config, and to ignore the
+            // limit set on the list
             serverData.models.partner.records[0].p = [1];
             serverData.models.partner.records[0].turtles = [1, 2, 3];
 
@@ -10579,44 +10582,22 @@ QUnit.module("Fields", (hooks) => {
             });
 
             assert.containsOnce(target, ".o_field_widget[name=p] .o_data_row");
-            assert.containsN(target, ".o_data_row .o_field_many2manytags .badge", 3);
+            assert.containsN(target, ".o_data_row .o_field_many2many_tags .badge", 3);
 
-            await click(target.querySelector(".o_data_row"));
+            await click(target.querySelector(".o_data_cell"));
 
             assert.containsOnce(document.body, ".modal .o_form_view");
-            assert.containsN(document.body, ".modal .o_field_widget[name=turtles] .o_data_row", 2);
-            assert.isVisible(target.querySelector(".modal .o_field_x2many_list .o_pager"));
-            assert.strictEqual(
-                target.querySelector(".modal .o_field_x2many_list .o_pager").textContent.trim(),
-                "1-2 / 3"
-            );
+            assert.containsN(document.body, ".modal .o_field_widget[name=turtles] .o_data_row", 3);
+            assert.isNotVisible(target.querySelector(".modal .o_field_x2many_list .o_pager"));
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with many2many_tags in list and list in form, and onchange",
         async function (assert) {
             serverData.models.partner.onchanges = {
                 bar: function (obj) {
-                    obj.p = [
-                        [5],
-                        [
-                            0,
-                            0,
-                            {
-                                turtles: [
-                                    [5],
-                                    [
-                                        0,
-                                        0,
-                                        {
-                                            display_name: "new turtle",
-                                        },
-                                    ],
-                                ],
-                            },
-                        ],
-                    ];
+                    obj.p = [[0, 0, { turtles: [[0, 0, { display_name: "new turtle" }]] }]];
                 },
             };
 
