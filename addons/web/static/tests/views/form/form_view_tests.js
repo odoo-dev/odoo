@@ -3165,7 +3165,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(buttons[3].attributes.name.textContent, "3");
     });
 
-    QUnit.tttt("button in form view and long willStart", async function (assert) {
+    QUnit.test("button in form view and long willStart", async function (assert) {
         const mockedActionService = {
             start() {
                 return {
@@ -3185,7 +3185,7 @@ QUnit.module("Views", (hooks) => {
                 });
                 owl.onWillUpdateProps(async () => {
                     assert.step("willUpdateProps");
-                    if (rpcCount === 2) {
+                    if (rpcCount === 1) {
                         return new Promise(() => {});
                     }
                 });
@@ -3220,10 +3220,10 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["web_read1", "willStart"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read2", "willUpdateProps"]);
+        assert.verifySteps(["web_read2", "willUpdateProps"]);
 
         await click(target.querySelector(".o_form_statusbar button.p"));
-        assert.verifySteps(["willUpdateProps", "read3", "willUpdateProps"]);
+        assert.verifySteps(["web_read3", "willUpdateProps"]);
     });
 
     QUnit.test("buttons in form view, new record", async function (assert) {
@@ -6144,7 +6144,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read", "onchange2", "write", "web_read"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "form with domain widget: opening a many2many form and save should not crash",
         async function (assert) {
             assert.expect(0);
@@ -6179,8 +6179,8 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("display_name not sent for onchanges if not in view", async function (assert) {
-        assert.expect(7);
+    QUnit.test("display_name not sent for onchanges if not in view", async function (assert) {
+        assert.expect(6);
 
         serverData.models.partner.records[0].timmy = [12];
         serverData.models.partner.onchanges = {
@@ -6189,7 +6189,6 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner_type.onchanges = {
             name: function () {},
         };
-        let readInModal = false;
         await makeView({
             type: "form",
             resModel: "partner",
@@ -6208,64 +6207,66 @@ QUnit.module("Views", (hooks) => {
                     </group>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "read" && args.model === "partner") {
+                if (args.method === "web_read" && args.model === "partner") {
                     assert.deepEqual(
-                        args.args[1],
-                        ["foo", "timmy", "display_name"],
+                        args.kwargs.specification,
+                        {
+                            display_name: {},
+                            foo: {},
+                            timmy: {
+                                fields: {
+                                    name: {},
+                                },
+                                limit: 40,
+                                order: "",
+                            },
+                        },
                         "should read display_name even if not in the view"
                     );
                 }
-                if (args.method === "read" && args.model === "partner_type") {
-                    if (!readInModal) {
-                        assert.deepEqual(
-                            args.args[1],
-                            ["name"],
-                            "should not read display_name for records in the list"
-                        );
-                    } else {
-                        assert.deepEqual(
-                            args.args[1],
-                            ["color", "display_name"],
-                            "should read display_name when opening the subrecord"
-                        );
-                    }
+                if (args.method === "web_read" && args.model === "partner_type") {
+                    assert.deepEqual(
+                        args.kwargs.specification,
+                        {
+                            color: {},
+                            name: {},
+                        },
+                        "should read display_name when opening the subrecord"
+                    );
                 }
-                if (args.method === "onchange" && args.model === "partner") {
+                if (args.method === "onchange2" && args.model === "partner") {
                     assert.deepEqual(
                         args.args[1],
                         {
-                            id: 1,
                             foo: "coucou",
-                            timmy: [[6, false, [12]]],
                         },
-                        "should only send the value of fields in the view (+ id)"
+                        "should only send the changes"
                     );
-                    assert.deepEqual(
-                        args.args[3],
-                        {
-                            foo: "1",
-                            timmy: "",
-                            "timmy.name": "1",
-                            "timmy.color": "",
+                    assert.deepEqual(args.args[3], {
+                        display_name: {},
+                        foo: {},
+                        timmy: {
+                            fields: {
+                                name: {},
+                            },
+                            limit: 40,
+                            order: "",
                         },
-                        "only the fields in the view should be in the onchange spec"
-                    );
+                    });
                 }
-                if (args.method === "onchange" && args.model === "partner_type") {
+                if (args.method === "onchange2" && args.model === "partner_type") {
                     assert.deepEqual(
                         args.args[1],
                         {
-                            id: 12,
                             name: "new name",
-                            color: 2,
                         },
-                        "should only send the value of fields in the view (+ id)"
+                        "should only send the changes"
                     );
                     assert.deepEqual(
                         args.args[3],
                         {
-                            name: "1",
-                            color: "",
+                            name: {},
+                            color: {},
                         },
                         "only the fields in the view should be in the onchange spec"
                     );
@@ -6278,7 +6279,6 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".o_field_widget[name=foo] input", "coucou");
 
         // open a subrecord and trigger an onchange
-        readInModal = true;
         await click(target.querySelector(".o_data_row .o_data_cell"));
         await editInput(target, ".modal .o_field_widget[name=name] input", "new name");
     });
@@ -6692,7 +6692,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "args of onchanges in o2m fields are correct (dialog edition)",
         async function (assert) {
             serverData.models.partner.records[1].p = [4];
@@ -7130,7 +7130,7 @@ QUnit.module("Views", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2manys (list editable) inside one2manys are saved correctly",
         async function (assert) {
             assert.expect(3);
@@ -7159,12 +7159,12 @@ QUnit.module("Views", (hooks) => {
                             [
                                 [
                                     0,
-                                    args.args[0].p[0][1],
+                                    args.args[0][0].p[0][1],
                                     {
                                         p: [
                                             [
                                                 0,
-                                                args.args[0].p[0][2].p[0][1],
+                                                args.args[0][0].p[0][2].p[0][1],
                                                 { display_name: "xtv" },
                                             ],
                                         ],
@@ -8133,7 +8133,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_control_panel");
     });
 
-    QUnit.tttt("check interactions between multiple FormViewDialogs", async function (assert) {
+    QUnit.test("check interactions between multiple FormViewDialogs", async function (assert) {
         assert.expect(9);
 
         serverData.models.product.fields.product_ids = {
