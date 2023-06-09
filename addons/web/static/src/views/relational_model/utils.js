@@ -56,47 +56,68 @@ export function createPropertyActiveField(property) {
     return activeField;
 }
 
+// TODO (see task description for multiple occurrences of fields) (we need to do context merging)
+export function patchActiveFields(activeField, patch) {
+    activeField.invisible = activeField.invisible && patch.invisible;
+    activeField.readonly = activeField.readonly && patch.readonly;
+    activeField.required = activeField.required || patch.required;
+    activeField.onChange = activeField.onChange || patch.onChange;
+    activeField.forceSave = activeField.forceSave || patch.forceSave;
+    // x2manys
+    const related = activeField.related;
+    if (related && patch.related) {
+        for (const fieldName in patch.related.activeFields) {
+            if (fieldName in related.activeFields) {
+                patchActiveFields(
+                    related.activeFields[fieldName],
+                    patch.related.activeFields[fieldName]
+                );
+            } else {
+                related.activeFields[fieldName] = { ...patch.related.activeFields[fieldName] };
+            }
+        }
+        Object.assign(related.fields, patch.related.fields);
+    }
+    if ("limit" in patch) {
+        activeField.limit = patch.limit;
+    }
+    if ("defaultOrderBy" in patch) {
+        activeField.defaultOrderBy = patch.defaultOrderBy;
+    }
+}
+
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
     const activeFields = {};
     fields = { ...fields };
     for (const fieldNode of Object.values(fieldNodes)) {
         const fieldName = fieldNode.name;
         const modifiers = fieldNode.modifiers || {};
-        if (!(fieldName in activeFields)) {
-            activeFields[fieldName] = makeActiveField({
-                context: fieldNode.context,
-                invisible: modifiers.invisible || modifiers.column_invisible,
-                readonly: modifiers.readonly,
-                required: modifiers.required,
-                onChange: fieldNode.onChange,
-                forceSave: fieldNode.forceSave,
-            });
+        const activeField = makeActiveField({
+            context: fieldNode.context,
+            invisible: modifiers.invisible || modifiers.column_invisible,
+            readonly: modifiers.readonly,
+            required: modifiers.required,
+            onChange: fieldNode.onChange,
+            forceSave: fieldNode.forceSave,
+        });
+        if (["one2many", "many2many"].includes(fields[fieldName].type)) {
+            if (fieldNode.views) {
+                const viewDescr = fieldNode.views[fieldNode.viewMode];
+                activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
+                activeField.limit = viewDescr.limit;
+                activeField.defaultOrderBy = viewDescr.defaultOrder;
+            }
+            if (fieldNode.field?.useSubView) {
+                activeField.required = false;
+            }
+        }
+
+        if (fieldName in activeFields) {
+            patchActiveFields(activeFields[fieldName], activeField);
         } else {
-            // TODO (see task description for multiple occurrences of fields) (we need to do context merging)
-            activeFields[fieldName].invisible =
-                activeFields[fieldName].invisible &&
-                (modifiers.invisible || modifiers.column_invisible);
-            activeFields[fieldName].readonly =
-                activeFields[fieldName].readonly && modifiers.readonly;
-            activeFields[fieldName].required =
-                activeFields[fieldName].required || modifiers.required;
-            activeFields[fieldName].onChange =
-                activeFields[fieldName].onChange || fieldNode.onChange;
-            activeFields[fieldName].forceSave =
-                activeFields[fieldName].forceSave || fieldNode.forceSave;
+            activeFields[fieldName] = activeField;
         }
-        if (fieldNode.views) {
-            const viewDescr = fieldNode.views[fieldNode.viewMode];
-            activeFields[fieldName].related = extractFieldsFromArchInfo(
-                viewDescr,
-                viewDescr.fields
-            );
-            activeFields[fieldName].limit = viewDescr.limit;
-            activeFields[fieldName].defaultOrderBy = viewDescr.defaultOrder;
-        }
-        if (fieldNode.field?.useSubView) {
-            activeFields[fieldName].required = false;
-        }
+
         if (fieldNode.field) {
             let fieldDependencies = fieldNode.field.fieldDependencies;
             if (typeof fieldDependencies === "function") {
@@ -105,6 +126,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
             addFieldDependencies(activeFields, fields, fieldDependencies);
         }
     }
+
     for (const widgetInfo of Object.values(widgetNodes || {})) {
         let fieldDependencies = widgetInfo.widget.fieldDependencies;
         if (typeof fieldDependencies === "function") {
