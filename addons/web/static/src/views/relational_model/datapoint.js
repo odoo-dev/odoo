@@ -45,12 +45,24 @@ export class DataPoint extends Reactive {
         super(...arguments);
         this.id = getId("datapoint");
         this.model = model;
-        this.resModel = config.resModel; //FIXME We should transform this into a getter to avoid having to update it and to avoid modification
-        this.fields = config.fields;
-        this.activeFields = config.activeFields;
-        this.fieldNames = Object.keys(this.activeFields);
         this._config = config;
         this.setup(config, data, options);
+    }
+
+    get activeFields() {
+        return this.config.activeFields;
+    }
+
+    get fields() {
+        return this.config.fields;
+    }
+
+    get fieldNames() {
+        return Object.keys(this.activeFields);
+    }
+
+    get resModel() {
+        return this.config.resModel;
     }
 
     get config() {

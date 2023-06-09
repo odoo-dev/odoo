@@ -308,12 +308,11 @@ export class RelationalModel extends Model {
      *
      * @param {Config} config
      * @param {*} data
-     * @param {Object} [options={}]
      * @returns {DataPoint}
      */
-    _createRoot(config, data, options) {
+    _createRoot(config, data) {
         if (config.isMonoRecord) {
-            return new this.constructor.Record(this, config, data, options);
+            return new this.constructor.Record(this, config, data);
         }
         if (config.groupBy.length) {
             return new this.constructor.DynamicGroupList(this, config, data);
