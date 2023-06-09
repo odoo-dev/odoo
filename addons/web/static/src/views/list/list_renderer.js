@@ -265,7 +265,7 @@ export class ListRenderer extends Component {
     }
 
     getFieldProps(record, column) {
-        if (this.isCellReadonly(column, record) || (this.props.activeActions?.edit === false && !record.isNew)) {
+        if (this.isCellReadonly(column, record) || this.isRecordReadonly(record)) {
             return {
                 readonly: true,
             };
@@ -427,7 +427,15 @@ export class ListRenderer extends Component {
     }
 
     canUseFormatter(column, record) {
-        return !record.isInEdition && !column.widget;
+        return !record.isInEdition && !column.widget && !this.isLocked(record);
+    }
+
+    isRecordReadonly(record) {
+        return (this.props.activeActions?.edit === false && !record.isNew) || this.isLocked(record);
+    }
+
+    isLocked(record) {
+        return this.props.list._lockedRecord?.id === record.id;
     }
 
     focusCell(column, forward = true) {

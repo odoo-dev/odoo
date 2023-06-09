@@ -4,7 +4,7 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { DataPoint } from "./datapoint";
-import { getId, fromUnityToServerValues } from "./utils";
+import { patchActiveFields, getId, fromUnityToServerValues } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
@@ -39,6 +39,7 @@ export class StaticList extends DataPoint {
         this._onChange = options.onChange;
         this._cache = markRaw({});
         this._commands = [];
+        this._savePoint = markRaw({});
         this._unknownRecordCommands = {}; // tracks update commands on records we haven't fetched yet
         this._currentIds = [...this.resIds];
         this._needsReordering = false;
@@ -96,47 +97,19 @@ export class StaticList extends DataPoint {
      *
      * @param {Object} params
      * @param {"top"|"bottom"} [params.position="bottom"]
-     * @param {Record} [params.record]
+     * @param {Object} [params.activeFields=this.activeFields]
+     * @param {boolean} [params.withoutParent=false]
      */
     addNew(params) {
         return this.model.mutex.exec(async () => {
-            let record = params.record;
-            let virtualId = record?.virtualId;
-            if (!record) {
-                const changes = { [this.config.relationField]: this._parent._getChanges() };
-                const values = await this.model._loadNewRecord(
-                    {
-                        resModel: this.resModel,
-                        activeFields: this.activeFields,
-                        fields: this.fields,
-                        context: Object.assign({}, this.context, params.context),
-                    },
-                    { changes }
-                );
-                virtualId = getId("virtual");
-                record = this._createRecordDatapoint(values, { mode: "edit", virtualId });
-            }
-            const command = [x2ManyCommands.CREATE, virtualId];
-            if (params.position === "top") {
-                this.records.unshift(record);
-                if (this.records.length > this.limit) {
-                    this.records.pop();
-                }
-                this._currentIds.splice(this.offset, 0, virtualId);
-                this._commands.unshift(command);
-            } else {
-                this.records.push(record);
-                this._currentIds.splice(this.offset + this.limit, 0, virtualId);
-                if (this.records.length > this.limit) {
-                    this._tmpIncreaseLimit++;
-                    const nextLimit = this.limit + 1;
-                    this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
-                }
-                this._commands.push(command);
-            }
-            this.count++;
-            this._needsReordering = true;
+            const record = await this._createNewRecordDatapoint({
+                activeFields: params.activeFields,
+                context: params.context,
+                withoutParent: params.withoutParent,
+            });
+            this._addRecord(record, { position: params.position });
             this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+            return record;
         });
     }
 
@@ -244,6 +217,39 @@ export class StaticList extends DataPoint {
                 }
             }
         }
+    }
+
+    _addRecord(record, { position } = {}) {
+        const command = [x2ManyCommands.CREATE, record.virtualId];
+        if (position === "top") {
+            this.records.unshift(record);
+            if (this.records.length > this.limit) {
+                this.records.pop();
+            }
+            this._currentIds.splice(this.offset, 0, record.virtualId);
+            this._commands.unshift(command);
+        } else {
+            this.records.push(record);
+            this._currentIds.splice(this.offset + this.limit, 0, record.virtualId);
+            if (this.records.length > this.limit) {
+                this._tmpIncreaseLimit++;
+                const nextLimit = this.limit + 1;
+                this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
+            }
+            this._commands.push(command);
+        }
+        this.count++;
+        this._needsReordering = true;
+        delete record._notAddedYet;
+    }
+
+    _addSavePoint() {
+        for (const id in this._cache) {
+            this._cache[id]._addSavePoint();
+        }
+        this._savePoint._commands = [...this._commands];
+        this._savePoint._currentIds = [...this._currentIds];
+        this._savePoint.count = this.count;
     }
 
     _applyCommands(commands) {
@@ -397,6 +403,9 @@ export class StaticList extends DataPoint {
         const options = {
             parentRecord: this._parent,
             onChange: () => {
+                if (record._notAddedYet) {
+                    return;
+                }
                 const hasCommand = this._commands.some(
                     (c) => (c[0] === CREATE || c[0] === UPDATE) && c[1] === id
                 );
@@ -420,14 +429,44 @@ export class StaticList extends DataPoint {
         return record;
     }
 
+    async _createNewRecordDatapoint(params = {}) {
+        const changes = {};
+        if (!params.withoutParent) {
+            changes[this.config.relationField] = this._parent._getChanges();
+        }
+        const values = await this.model._loadNewRecord(
+            {
+                resModel: this.resModel,
+                activeFields: params.activeFields || this.activeFields,
+                fields: this.fields,
+                context: Object.assign({}, this.context, params.context),
+            },
+            { changes }
+        );
+        return this._createRecordDatapoint(values, {
+            mode: "edit",
+            virtualId: getId("virtual"),
+            activeFields: params.activeFields,
+        });
+    }
+
     _discard() {
         for (const id in this._cache) {
             this._cache[id]._discard();
         }
-        this._commands = [];
+        if (this._savePoint._commands) {
+            this._commands = this._savePoint._commands;
+            this._currentIds = this._savePoint._currentIds;
+            this.count = this._savePoint.count;
+            delete this._savePoint._commands;
+            delete this._savePoint._currentIds;
+            delete this._savePoint.count;
+        } else {
+            this._commands = [];
+            this._currentIds = [...this.resIds];
+            this.count = this.resIds.length;
+        }
         this._unknownRecordCommands = [];
-        this._currentIds = [...this.resIds];
-        this.count = this.resIds.length;
         const limit = this.limit - this._tmpIncreaseLimit;
         this._tmpIncreaseLimit = 0;
         this.model._updateConfig(this.config, { limit }, { noReload: true });
@@ -530,46 +569,96 @@ export class StaticList extends DataPoint {
     }
 
     // x2many dialog
-    addNewRecord(params /*, withParentId*/) {
+    addNewRecord(params, withoutParent) {
         return this.model.mutex.exec(async () => {
-            const activeFields = Object.assign({}, this.activeFields, params.activeFields);
-            const fields = Object.assign({}, this.fields, params.fields);
-            const config = {
-                ...params,
+            Object.assign(this.fields, params.fields);
+            const activeFields = { ...params.activeFields };
+            for (const fieldName in this.activeFields) {
+                if (fieldName in activeFields) {
+                    patchActiveFields(activeFields[fieldName], this.activeFields[fieldName]);
+                } else {
+                    activeFields[fieldName] = this.activeFields[fieldName];
+                }
+            }
+            const record = await this._createNewRecordDatapoint({
                 activeFields,
-                fields,
-                resModel: this.resModel,
-                resId: false,
-                resIds: [],
-                isMonoRecord: true,
-            };
-            const data = await this.model._loadData(config);
-            const virtualId = getId("virtual");
-            return this.model._createRoot(config, data, { virtualId, parentRecord: this._parent });
+                context: params.context,
+                withoutParent,
+            });
+            record._hasBeenDuplicated = true;
+            record._notAddedYet = true;
+            return record;
+            // const virtualId = getId("virtual");
+            // const record = this._createRecordDatapoint()
+            // const config = {
+            //     ...params,
+            //     activeFields,
+            //     fields,
+            //     resModel: this.resModel,
+            //     resId: false,
+            //     resIds: [],
+            //     isMonoRecord: true,
+            // };
+            // const data = await this.model._loadData(config);
+            // return new this.model.constructor.Record(this.model, config, data, {
+            //     virtualId,
+            //     parentRecord: this._parent,
+            // });
             // const record = this._createRecordDatapoint(data, { virtualId });
             // return this.duplicateDatapoint(record, params);
         });
     }
     duplicateDatapoint(record, params) {
         return this.model.mutex.exec(async () => {
+            if (record._hasBeenDuplicated) {
+                this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+                record._addSavePoint();
+                this._lockedRecord = record;
+                return record;
+            }
+            Object.assign(this.fields, params.fields);
+            const activeFields = { ...params.activeFields };
+            for (const fieldName in record.activeFields) {
+                if (fieldName in activeFields) {
+                    patchActiveFields(activeFields[fieldName], record.activeFields[fieldName]);
+                } else {
+                    activeFields[fieldName] = record.activeFields[fieldName];
+                }
+            }
             const config = {
                 ...record.config,
                 ...params,
+                activeFields,
             };
-            // TODO: mix config
-            const data = await this.model._loadData(config);
-            const duplicatedRecord = this.model._createRoot(config, data, {
-                parentRecord: this._parent,
-                virtualId: record.virtualId,
-            });
-            await this._copyChanges(record, duplicatedRecord);
-            return duplicatedRecord;
+            let data = {};
+            if (!record.isNew) {
+                const evalContext = Object.assign({}, record.evalContext, config.context);
+                const resIds = [record.resId];
+                [data] = await this.model._loadRecords({ ...config, resIds }, evalContext);
+            }
+            this.model._updateConfig(record.config, config, { noReload: true });
+            record._applyDefaultValues();
+            for (const fieldName in record.activeFields) {
+                if (["one2many", "many2many"].includes(record.fields[fieldName].type)) {
+                    if (activeFields[fieldName].related) {
+                        const list = record.data[fieldName];
+                        const patch = {
+                            activeFields: activeFields[fieldName].related.activeFields,
+                            fields: activeFields[fieldName].related.fields,
+                        };
+                        for (const subRecord of Object.values(list._cache)) {
+                            this.model._updateConfig(subRecord.config, patch, { noReload: true });
+                        }
+                        this.model._updateConfig(list.config, patch, { noReload: true });
+                    }
+                }
+            }
+            record._applyValues(data);
+            record._applyRawChanges();
+            record._addSavePoint();
+            record._hasBeenDuplicated = true;
+            this._lockedRecord = record;
+            return record;
         });
-    }
-    _copyChanges(sourceRecord, targetRecord) {
-        // FIXME: this is naive, doesn't work for x2manys
-        const changes = sourceRecord._changes;
-        targetRecord._applyChanges(changes);
-        return targetRecord._onChange(changes);
     }
 }

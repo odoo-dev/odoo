@@ -686,7 +686,7 @@ export function useOpenX2ManyRecord({
     getList,
     updateRecord,
     saveRecord,
-    withParentId,
+    isMany2Many,
 }) {
     const viewService = useService("view");
     const userService = useService("user");
@@ -728,7 +728,7 @@ export function useOpenX2ManyRecord({
                 fields,
                 mode: "edit",
             };
-            record = await list.addNewRecord(params, withParentId);
+            record = await list.addNewRecord(params, isMany2Many);
         }
 
         addDialog(
@@ -751,7 +751,7 @@ export function useOpenX2ManyRecord({
                                 fields,
                                 mode: "edit",
                             },
-                            withParentId
+                            isMany2Many
                         );
                     }
                 },
@@ -785,13 +785,9 @@ export function useX2ManyCrud(getList, isMany2Many) {
     } else {
         saveRecord = async (record) => {
             const list = getList();
-            const _record = list._createRecordDatapoint({}, {
-                activeFields: record.activeFields,
-                fields: record.fields,
-                virtualId: record.virtualId,
-            });
-            _record._applyChanges(record._changes); // FIXME: find a way to use _copyChanges
-            return getList().addNew({ record: _record });
+            record.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+            list._addRecord(record);
+            list._onChange();
         };
     }
 
@@ -802,8 +798,7 @@ export function useX2ManyCrud(getList, isMany2Many) {
             // FIXME: incomplete, check updateRecord in BasicRelationalModel
         } else {
             const list = getList();
-            const listRecord = list._cache[record.resId || record.virtualId];
-            return list._copyChanges(record, listRecord);
+            list._onChange();
         }
     };
 

@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { markup } from "@odoo/owl";
+import { markRaw, markup } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
@@ -17,16 +17,22 @@ export class Record extends DataPoint {
         this._onChange = options.onChange || (() => {});
         this.virtualId = options.virtualId || false;
 
+        this._rawChanges = {};
+
+        let savePoint;
         if (this.resId) {
             this._values = this._parseServerValues(data);
             this._changes = {};
+            savePoint = {};
         } else {
-            this._values = this._parseServerValues({
+            this._values = {};
+            this._changes = this._parseServerValues({
                 ...this._getDefaultValues(),
                 ...data,
             });
-            this._changes = { ...this._values };
+            savePoint = { ...this._changes };
         }
+        this._savePoint = markRaw(savePoint);
         this.data = { ...this._values, ...this._changes };
         const parentRecord = this._parentRecord;
         if (parentRecord) {
@@ -254,6 +260,15 @@ export class Record extends DataPoint {
     // Protected
     // -------------------------------------------------------------------------
 
+    _addSavePoint() {
+        Object.assign(this._savePoint, this._changes);
+        for (const fieldName in this._changes) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                this._changes[fieldName]._addSavePoint();
+            }
+        }
+    }
+
     _applyChanges(changes) {
         Object.assign(this._changes, changes);
         Object.assign(this.data, changes);
@@ -261,9 +276,56 @@ export class Record extends DataPoint {
         this._removeInvalidFields(Object.keys(changes));
     }
 
+    _applyDefaultValues() {
+        const fieldNames = this.fieldNames.filter((fieldName) => {
+            return !(fieldName in this.data);
+        });
+        const defaultValues = this._getDefaultValues(fieldNames);
+        if (this.isNew) {
+            this._applyChanges(this._parseServerValues(defaultValues));
+        } else {
+            this._applyValues(defaultValues);
+        }
+    }
+
+    _applyRawChanges() {
+        const changes = this._parseServerValues(this._rawChanges);
+        this._applyChanges(changes);
+        for (const fieldName in this.activeFields) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
+                const list = this.data[fieldName];
+                for (const subRecord of Object.values(list._cache)) {
+                    subRecord._applyRawChanges();
+                }
+            }
+        }
+        this._rawChanges = {};
+    }
+
+    // _applyNewConfig(config, data) {
+    //     this.model._updateConfig(record.config, config, { noReload: true });
+    //     record._applyValues(data);
+    //     record._applyRawChanges();
+    //     for (const fieldName in record.activeFields) {
+    //         if (["one2many", "many2many"].includes(record.fields[fieldName].type)) {
+    //             if (activeFields[fieldName].related) {
+    //                 const list = record.data[fieldName];
+    //                 const patch = {
+    //                     activeFields: activeFields[fieldName].related.activeFields,
+    //                     fields:activeFields[fieldName].related.fields,
+    //                 };
+    //                 for (const subRecord of Object.values(list._cache)) {
+    //                     this.model._updateConfig(subRecord.config, patch, { noReload: true });
+    //                 }
+    //                 this.model._updateConfig(list.config, patch, { noReload: true });
+    //             }
+    //         }
+    //     }
+    // }
+
     _applyValues(values) {
         Object.assign(this._values, this._parseServerValues(values));
-        Object.assign(this.data, this._values);
+        Object.assign(this.data, this._values, this._changes);
         this._setDataContext();
     }
 
@@ -273,10 +335,11 @@ export class Record extends DataPoint {
             return parsedValues;
         }
         for (const fieldName in serverValues) {
-            if (!this.activeFields[fieldName]) {
-                continue; // ignore fields not in activeFields
-            }
             const value = serverValues[fieldName];
+            if (!this.activeFields[fieldName]) {
+                this._rawChanges[fieldName] = value;
+                continue;
+            }
             const field = this.fields[fieldName];
             if (field.type === "one2many" || field.type === "many2many") {
                 let staticList = currentValues[fieldName];
@@ -390,8 +453,8 @@ export class Record extends DataPoint {
             relationField: this.fields[fieldName].relation_field || false,
             offset: 0,
             resIds: data.map((r) => r.id),
-            orderBy: defaultOrderBy,
-            limit,
+            orderBy: defaultOrderBy || [],
+            limit: limit || Number.MAX_SAFE_INTEGER,
             context: {},
         };
         let staticList;
@@ -411,8 +474,8 @@ export class Record extends DataPoint {
                 this._changes[fieldName]._discard();
             }
         }
-        this._changes = this.resId ? {} : { ...this.values };
-        this.data = { ...this._values };
+        this._changes = { ...this._savePoint };
+        this.data = { ...this._values, ...this._changes };
         this._setDataContext();
         this._invalidFields.clear();
         this._closeInvalidFieldsNotification();
@@ -485,9 +548,9 @@ export class Record extends DataPoint {
         return result;
     }
 
-    _getDefaultValues() {
+    _getDefaultValues(fieldNames = this.fieldNames) {
         const defaultValues = {};
-        for (const fieldName of this.fieldNames) {
+        for (const fieldName of fieldNames) {
             const field = this.fields[fieldName];
             if (isNumeric(field) && fieldName !== "id") {
                 defaultValues[fieldName] = 0;
