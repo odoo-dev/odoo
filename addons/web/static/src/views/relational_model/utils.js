@@ -173,7 +173,14 @@ function _getFieldContextSpec(
         return fields[fieldName].context;
     }
 
-    evalContext = { ...evalContext, id: SENTINEL };
+    evalContext = {
+        ids: SENTINEL,
+        active_id: SENTINEL,
+        active_ids: SENTINEL,
+        active_model: SENTINEL,
+        ...evalContext,
+        id: SENTINEL,
+    };
     for (const fieldName in activeFields) {
         evalContext[fieldName] = SENTINEL;
     }
