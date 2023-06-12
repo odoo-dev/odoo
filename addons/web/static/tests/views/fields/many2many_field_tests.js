@@ -1943,7 +1943,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Search: pokemon");
     });
 
-    QUnit.tttt("many2many basic keys in field evalcontext -- in list", async (assert) => {
+    QUnit.test("many2many basic keys in field evalcontext -- in list", async (assert) => {
         assert.expect(6);
         serverData.models.partner_type.fields.partner_id = {
             string: "Partners",
@@ -1991,7 +1991,6 @@ QUnit.module("Fields", (hooks) => {
 
         await click(target.querySelector(".o_data_cell"));
         await editInput(target, ".o_field_many2many_selection input", "indianapolis");
-        await nextTick();
         await clickOpenedDropdownItem(target, "timmy", "Create and edit...");
         assert.containsOnce(target, ".modal .o_field_many2one");
         assert.strictEqual(
