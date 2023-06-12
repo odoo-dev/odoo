@@ -6153,7 +6153,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("nested x2many (inline form view) and onchanges", async function (assert) {
+    QUnit.test("nested x2many (inline form view) and onchanges", async function (assert) {
         serverData.models.partner.onchanges.bar = function (obj) {
             if (!obj.bar) {
                 obj.p = [
@@ -6503,7 +6503,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("one2many field with virtual ids with kanban button", async function (assert) {
+    QUnit.test("one2many field with virtual ids with kanban button", async function (assert) {
         assert.expect(36);
 
         // this is a way to avoid the debounce of triggerAction
@@ -6543,8 +6543,8 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "write") {
                     assert.step(args.method);
-                    assert.strictEqual(args.args[1].p.length, 2);
-                    const command = args.args[1].p[1];
+                    assert.strictEqual(args.args[1].p.length, 1);
+                    const command = args.args[1].p[0];
                     assert.strictEqual(command[0], 0);
                     assert.deepEqual(command[2], {
                         foo: "My little Foo Value",
