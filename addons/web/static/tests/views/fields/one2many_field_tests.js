@@ -2240,9 +2240,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("edition of one2many field with pager", async function (assert) {
-        assert.expect(30);
-
+    QUnit.test("edition of one2many field with pager", async function (assert) {
         const ids = [];
         for (let i = 0; i < 45; i++) {
             const id = 10 + i;
@@ -2286,75 +2284,25 @@ QUnit.module("Fields", (hooks) => {
                     checkRead = false;
                 }
                 if (args.method === "write") {
+                    assert.step("write");
                     saveCount++;
-                    const nbCommands = args.args[1].p.length;
-                    const nbLinkCommands = args.args[1].p.filter((command) => {
-                        return command[0] === 4;
-                    }).length;
+                    const commands = args.args[1].p;
                     switch (saveCount) {
                         case 1:
-                            assert.strictEqual(
-                                nbCommands,
-                                46,
-                                "should send 46 commands (one for each record)"
-                            );
-                            assert.strictEqual(
-                                nbLinkCommands,
-                                45,
-                                "should send a LINK_TO command for each existing record"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[45],
-                                [
-                                    0,
-                                    args.args[1].p[45][1],
-                                    {
-                                        display_name: "new record",
-                                    },
-                                ],
-                                "should sent a CREATE command for the new record"
-                            );
+                            assert.deepEqual(commands, [
+                                [0, commands[0][1], { display_name: "new record" }],
+                            ]);
                             break;
                         case 2:
-                            assert.strictEqual(nbCommands, 46, "should send 46 commands");
-                            assert.strictEqual(
-                                nbLinkCommands,
-                                45,
-                                "should send a LINK_TO command for each existing record"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[45],
-                                [2, 10, false],
-                                "should sent a DELETE command for the deleted record"
-                            );
+                            assert.deepEqual(commands, [[2, 10]]);
                             break;
                         case 3:
-                            assert.strictEqual(nbCommands, 47, "should send 47 commands");
-                            assert.strictEqual(
-                                nbLinkCommands,
-                                43,
-                                "should send a LINK_TO command for each existing record"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[43],
-                                [0, args.args[1].p[43][1], { display_name: "new record page 1" }],
-                                "should sent correct CREATE command"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[44],
-                                [0, args.args[1].p[44][1], { display_name: "new record page 2" }],
-                                "should sent correct CREATE command"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[45],
-                                [2, 11, false],
-                                "should sent correct DELETE command"
-                            );
-                            assert.deepEqual(
-                                args.args[1].p[46],
-                                [2, 52, false],
-                                "should sent correct DELETE command"
-                            );
+                            assert.deepEqual(commands, [
+                                [0, commands[0][1], { display_name: "new record page 1" }],
+                                [2, 11],
+                                [2, 52],
+                                [0, commands[3][1], { display_name: "new record page 2" }],
+                            ]);
                             break;
                     }
                 }
@@ -2496,6 +2444,8 @@ QUnit.module("Fields", (hooks) => {
         );
         // save
         await clickSave(target);
+
+        assert.verifySteps(["write", "write", "write"]);
     });
 
     QUnit.test("open a record in a one2many kanban (mode 'readonly')", async function (assert) {
