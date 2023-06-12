@@ -12033,7 +12033,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Navigate from an invalid but not dirty row", async (assert) => {
+    QUnit.test("Navigate from an invalid but not dirty row", async (assert) => {
         serverData.models.partner.records[0].p = [2, 4];
         serverData.models.partner.records[1].display_name = ""; // invalid record
 

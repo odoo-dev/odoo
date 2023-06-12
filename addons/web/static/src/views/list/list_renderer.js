@@ -1469,7 +1469,11 @@ export class ListRenderer extends Component {
                 }
 
                 if (futureRecord) {
-                    list.enterEditMode(futureRecord);
+                    list.leaveEditMode({ validate: true }).then((canProceed) => {
+                        if (canProceed) {
+                            list.enterEditMode(futureRecord);
+                        }
+                    });
                 } else if (this.lastIsDirty || !record.canBeAbandoned || this.displayRowCreates) {
                     this.add({ group });
                 } else {

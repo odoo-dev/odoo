@@ -124,7 +124,8 @@ export class DynamicRecordList extends DynamicList {
                 isMonoRecord: true,
                 mode,
             },
-            data
+            data,
+            { manuallyAdded: !data.id },
         );
     }
 

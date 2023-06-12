@@ -107,6 +107,7 @@ export class StaticList extends DataPoint {
                 activeFields: params.activeFields,
                 context: params.context,
                 withoutParent: params.withoutParent,
+                manuallyAdded: true,
             });
             this._addRecord(record, { position: params.position });
             this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
@@ -144,26 +145,26 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
-    leaveEditMode({ discard, canAbandon } = {}) {
+    leaveEditMode({ discard, canAbandon, validate } = {}) {
         return this.model.mutex.exec(async () => {
             if (this.editedRecord) {
                 const isValid = await this.editedRecord.checkValidity();
+                if (!isValid && validate) {
+                    return false;
+                }
                 if (canAbandon !== false) {
                     this._abandonRecords([this.editedRecord], { force: discard || !isValid });
                 }
                 // if we still have an editedRecord, it means it hasn't been abandonned
                 if (this.editedRecord) {
+                    if (isValid && !this.editedRecord.isDirty && discard) {
+                        return false;
+                    }
                     if (
                         isValid ||
-                        (!isValid &&
-                            !this.editedRecord.isDirty &&
-                            this.editedRecord._canNeverBeAbandoned)
+                        (!this.editedRecord.isDirty && !this.editedRecord._manuallyAdded)
                     ) {
-                        this.model._updateConfig(
-                            this.editedRecord.config,
-                            { mode: "readonly" },
-                            { noReload: true }
-                        );
+                        this.editedRecord._switchMode("readonly");
                     }
                 }
             }
@@ -273,10 +274,7 @@ export class StaticList extends DataPoint {
             switch (command[0]) {
                 case CREATE: {
                     const virtualId = getId("virtual");
-                    const record = this._createRecordDatapoint(command[2], {
-                        virtualId,
-                        canNeverBeAbandoned: true,
-                    });
+                    const record = this._createRecordDatapoint(command[2], { virtualId });
                     this.records.push(record);
                     this._commands.push([CREATE, virtualId]);
                     this._currentIds.splice(this.offset + this.limit, 0, virtualId);
@@ -429,7 +427,7 @@ export class StaticList extends DataPoint {
                 this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
             },
             virtualId: params.virtualId,
-            canNeverBeAbandoned: params.canNeverBeAbandoned,
+            manuallyAdded: params.manuallyAdded,
         };
         const record = new this.model.constructor.Record(this.model, config, data, options);
         this._cache[id] = record;
@@ -461,6 +459,7 @@ export class StaticList extends DataPoint {
             mode: "edit",
             virtualId: getId("virtual"),
             activeFields: params.activeFields,
+            manuallyAdded: params.manuallyAdded,
         });
     }
 
@@ -598,28 +597,11 @@ export class StaticList extends DataPoint {
                 activeFields,
                 context: params.context,
                 withoutParent,
+                manuallyAdded: true,
             });
             record._hasBeenDuplicated = true;
             record._notAddedYet = true;
             return record;
-            // const virtualId = getId("virtual");
-            // const record = this._createRecordDatapoint()
-            // const config = {
-            //     ...params,
-            //     activeFields,
-            //     fields,
-            //     resModel: this.resModel,
-            //     resId: false,
-            //     resIds: [],
-            //     isMonoRecord: true,
-            // };
-            // const data = await this.model._loadData(config);
-            // return new this.model.constructor.Record(this.model, config, data, {
-            //     virtualId,
-            //     parentRecord: this._parent,
-            // });
-            // const record = this._createRecordDatapoint(data, { virtualId });
-            // return this.duplicateDatapoint(record, params);
         });
     }
     duplicateDatapoint(record, params) {
