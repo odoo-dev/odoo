@@ -58,7 +58,9 @@ export class DataPoint extends Reactive {
     }
 
     get fieldNames() {
-        return Object.keys(this.activeFields);
+        return Object.keys(this.activeFields).filter(
+            (fieldName) => !this.fields[fieldName].relatedPropertyField
+        );
     }
 
     get resModel() {
