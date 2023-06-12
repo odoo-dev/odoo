@@ -7292,7 +7292,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_data_row .o_data_cell").innerText, "new");
     });
 
-    QUnit.tttt("editable list: onchange that returns a warning", async function (assert) {
+    QUnit.test("editable list: onchange that returns a warning", async function (assert) {
         serverData.models.turtle.onchanges = {
             display_name: function () {},
         };
@@ -7315,13 +7315,13 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             resId: 1,
-            mockRPC(route, args) {
-                if (args.method === "onchange") {
+            async mockRPC(route, args) {
+                if (args.method === "onchange2") {
                     assert.step(args.method);
-                    return Promise.resolve({
+                    return {
                         value: {},
                         warning,
-                    });
+                    };
                 }
             },
         });
@@ -7340,10 +7340,10 @@ QUnit.module("Fields", (hooks) => {
         // and a warning again)
         await addRow(target);
 
-        assert.verifySteps(["onchange", "warning", "onchange", "warning"]);
+        assert.verifySteps(["onchange2", "warning", "onchange2", "warning"]);
     });
 
-    QUnit.tttt("editable list: contexts are correctly sent", async function (assert) {
+    QUnit.test("editable list: contexts are correctly sent", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.records[0].timmy = [12];
@@ -7364,7 +7364,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "read" && args.model === "partner") {
+                if (args.method === "web_read" && args.model === "partner") {
                     assert.deepEqual(
                         args.kwargs.context,
                         {
@@ -7375,18 +7375,7 @@ QUnit.module("Fields", (hooks) => {
                         },
                         "read partner context"
                     );
-                }
-                if (args.method === "read" && args.model === "partner_type") {
-                    assert.deepEqual(
-                        args.kwargs.context,
-                        {
-                            key2: "hello",
-                            active_field: 2,
-                            someKey: "some value",
-                            uid: 7,
-                        },
-                        "read partner_type context"
-                    );
+                    assert.deepEqual(args.kwargs.specification.timmy.context, { key2: "hello" });
                 }
                 if (args.method === "write") {
                     assert.deepEqual(
@@ -7408,8 +7397,8 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("contexts of nested x2manys are correctly sent (add line)", async function (assert) {
-        assert.expect(2);
+    QUnit.test("contexts of nested x2manys are correctly sent (add line)", async function (assert) {
+        assert.expect(4);
 
         serverData.models.partner.fields.timmy.default = [[4, 12]];
 
@@ -7430,7 +7419,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.deepEqual(
                         args.kwargs.context,
                         {
@@ -7440,19 +7429,25 @@ QUnit.module("Fields", (hooks) => {
                         },
                         "onchange context"
                     );
+                    assert.deepEqual(args.args[3].timmy.context, {
+                        key: "yop",
+                        key2: "hello",
+                    });
                 }
-                if (args.method === "read" && args.model === "partner_type") {
+                if (args.method === "web_read" && args.model === "partner") {
                     assert.deepEqual(
                         args.kwargs.context,
                         {
                             active_field: 2,
-                            key: "yop",
-                            key2: "hello",
+                            bin_size: true,
                             someKey: "some value",
                             uid: 7,
                         },
                         "read timmy context"
                     );
+                    assert.deepEqual(args.kwargs.specification.p.fields.timmy.context, {
+                        key2: "hello",
+                    });
                 }
             },
             resId: 1,
@@ -7462,7 +7457,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.tttt("resetting invisible one2manys", async function (assert) {
+    QUnit.test("resetting invisible one2manys", async function (assert) {
         serverData.models.partner.records[0].turtles = [];
         serverData.models.partner.onchanges.foo = function (obj) {
             obj.turtles = [[5], [4, 1]];
@@ -7483,7 +7478,7 @@ QUnit.module("Fields", (hooks) => {
             },
         });
         await editInput(target, '[name="foo"] input', "abcd");
-        assert.verifySteps(["get_views", "read", "onchange"]);
+        assert.verifySteps(["get_views", "web_read", "onchange2"]);
     });
 
     QUnit.tttt(
