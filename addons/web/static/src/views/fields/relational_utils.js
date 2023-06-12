@@ -764,17 +764,18 @@ export function useOpenX2ManyRecord({
 export function useX2ManyCrud(getList, isMany2Many) {
     let saveRecord; // FIXME: isn't this "createRecord" instead?
     if (isMany2Many) {
-        saveRecord = (object) => {
+        saveRecord = async (object) => {
             const list = getList();
             const currentIds = list.currentIds;
             let resIds;
             if (Array.isArray(object)) {
                 resIds = [...currentIds, ...object];
-            } else if (object.resId) {
-                resIds = [...currentIds, object.resId];
             } else {
-                // FIXME: this line would crash
-                return list.add(object, { isM2M: isMany2Many });
+                // object instanceof Record
+                if (!object.resId) {
+                    await object.save(); // new record
+                }
+                resIds = [...currentIds, object.resId];
             }
             return list.replaceWith(resIds);
         };
