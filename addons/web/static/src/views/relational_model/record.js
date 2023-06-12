@@ -220,20 +220,8 @@ export class Record extends DataPoint {
     }
 
     async setInvalidField(fieldName) {
-        const canProceed = this.model.hooks.onWillSetInvalidField(this, fieldName);
-        if (canProceed === false) {
-            return;
-        }
-        if (this.selected && this.model.multiEdit && !this._invalidFields.has(fieldName)) {
-            await this.model.dialog.add(AlertDialog, {
-                body: _t("No valid record to save"),
-                confirm: async () => {
-                    await this.discard();
-                    this.model._updateConfig(this.config, { mode: "readonly" }, { noReload: true });
-                },
-            });
-        }
-        this._invalidFields.add(fieldName);
+        this.isDirty = true;
+        return this._setInvalidField(fieldName);
     }
 
     toggleSelection(selected) {
@@ -437,7 +425,7 @@ export class Record extends DataPoint {
         this._unsetRequiredFields.clear();
         for (const fieldName of unsetRequiredFields) {
             this._unsetRequiredFields.add(fieldName);
-            this.setInvalidField(fieldName);
+            this._setInvalidField(fieldName);
         }
         return !this._invalidFields.size;
     }
@@ -823,6 +811,23 @@ export class Record extends DataPoint {
                 value._updateContext(getFieldContext(this, fieldName));
             }
         }
+    }
+
+    async _setInvalidField(fieldName) {
+        const canProceed = this.model.hooks.onWillSetInvalidField(this, fieldName);
+        if (canProceed === false) {
+            return;
+        }
+        if (this.selected && this.model.multiEdit && !this._invalidFields.has(fieldName)) {
+            await this.model.dialog.add(AlertDialog, {
+                body: _t("No valid record to save"),
+                confirm: async () => {
+                    await this.discard();
+                    this.model._updateConfig(this.config, { mode: "readonly" }, { noReload: true });
+                },
+            });
+        }
+        this._invalidFields.add(fieldName);
     }
 
     /**
