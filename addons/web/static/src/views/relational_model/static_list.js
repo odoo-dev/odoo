@@ -64,6 +64,7 @@ export class StaticList extends DataPoint {
 
     get evalContext() {
         return {
+            ...this.config.context,
             parent: this._parent.evalContext,
         };
     }
@@ -447,7 +448,7 @@ export class StaticList extends DataPoint {
                 fields: this.fields,
                 context: Object.assign({}, this.context, params.context),
             },
-            { changes }
+            { changes, evalContext: this.evalContext }
         );
         return this._createRecordDatapoint(values, {
             mode: "edit",
