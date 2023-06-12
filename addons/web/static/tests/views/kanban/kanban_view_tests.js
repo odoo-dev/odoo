@@ -9593,7 +9593,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("drag & drop records grouped by m2o with progressbar", async (assert) => {
+    QUnit.test("drag & drop records grouped by m2o with progressbar", async (assert) => {
         serverData.models.partner.records[0].product_id = false;
 
         await makeView({
@@ -9649,17 +9649,14 @@ QUnit.module("Views", (hooks) => {
             "unity_web_search_read",
             "write",
             "read_progress_bar",
-            "read",
             "/web/dataset/resequence",
             "read",
             "write",
             "read_progress_bar",
-            "read",
             "/web/dataset/resequence",
             "read",
             "write",
             "read_progress_bar",
-            "read",
             "/web/dataset/resequence",
             "read",
         ]);
@@ -9699,7 +9696,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "progress bar recompute after drag&drop to and from other column",
         async (assert) => {
             await makeView({
@@ -9739,7 +9736,6 @@ QUnit.module("Views", (hooks) => {
                 "unity_web_search_read",
                 "write",
                 "read_progress_bar",
-                "read",
                 "/web/dataset/resequence",
                 "read",
             ]);
@@ -10553,7 +10549,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["1", "2"], "should writes on both kanban records");
     });
 
-    QUnit.tttt("ungrouped kanban with handle field", async (assert) => {
+    QUnit.test("ungrouped kanban with handle field", async (assert) => {
         assert.expect(3);
 
         await makeView({
@@ -11005,7 +11001,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "filtered column keeps consistent counters when dropping in a non-matching record",
         async (assert) => {
             await makeView({
@@ -11086,14 +11082,13 @@ QUnit.module("Views", (hooks) => {
                 "unity_web_search_read",
                 "write",
                 "read_progress_bar",
-                "read",
                 "/web/dataset/resequence",
                 "read",
             ]);
         }
     );
 
-    QUnit.tttt("filtered column is reloaded when dragging out its last record", async (assert) => {
+    QUnit.test("filtered column is reloaded when dragging out its last record", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -11173,7 +11168,6 @@ QUnit.module("Views", (hooks) => {
             "write",
             "read_progress_bar",
             "unity_web_search_read",
-            "read", // read happens is delayed by the ORM batcher
             "/web/dataset/resequence",
             "read",
         ]);
@@ -11958,7 +11952,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("update field on which progress bars are computed", async (assert) => {
+    QUnit.test("update field on which progress bars are computed", async (assert) => {
         serverData.models.partner.records.push({ id: 5, state: "abc", bar: true });
 
         await makeView({
@@ -12037,7 +12031,7 @@ QUnit.module("Views", (hooks) => {
             "unity_web_search_read",
             "unity_web_search_read",
             "write",
-            "read",
+            "web_read",
             "read_progress_bar",
             "unity_web_search_read",
             "unity_web_search_read",
@@ -12100,7 +12094,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt("click on the progressBar of a new column", async (assert) => {
+    QUnit.test("click on the progressBar of a new column", async (assert) => {
         serverData.models.partner.records = [];
         await makeView({
             type: "kanban",
@@ -12309,7 +12303,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.tttt("no leak of TransactionInProgress (not grouped case)", async (assert) => {
+    QUnit.test("no leak of TransactionInProgress (not grouped case)", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
