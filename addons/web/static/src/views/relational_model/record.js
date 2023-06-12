@@ -414,7 +414,7 @@ export class Record extends DataPoint {
                     const list = this.data[fieldName];
                     if (
                         (this._isRequired(fieldName) && !list.count) ||
-                        !list.records.every((r) => r._checkValidity({ silent }))
+                        !list.records.every((r) => !r.isDirty || r._checkValidity({ silent }))
                     ) {
                         unsetRequiredFields.push(fieldName);
                     }
