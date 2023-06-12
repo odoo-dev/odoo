@@ -20,16 +20,18 @@ export class Record extends DataPoint {
         this._rawChanges = {};
 
         let savePoint;
+        const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in data));
+        const vals = this._parseServerValues({
+            ...this._getDefaultValues(missingFields),
+            ...data,
+        });
         if (this.resId) {
-            this._values = this._parseServerValues(data);
+            this._values = vals;
             this._changes = {};
             savePoint = {};
         } else {
             this._values = {};
-            this._changes = this._parseServerValues({
-                ...this._getDefaultValues(),
-                ...data,
-            });
+            this._changes = vals;
             savePoint = { ...this._changes };
         }
         this._savePoint = markRaw(savePoint);
