@@ -4866,7 +4866,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "value of invisible x2many fields is correctly evaluated in context",
         async function (assert) {
             assert.expect(2);
@@ -4974,7 +4974,7 @@ QUnit.module("Fields", (hooks) => {
         await addRow(target);
     });
 
-    QUnit.tttt("one2many field with context", async function (assert) {
+    QUnit.test("one2many field with context", async function (assert) {
         assert.expect(2);
 
         await makeView({

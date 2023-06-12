@@ -362,7 +362,13 @@ export class RelationalModel extends Model {
         if (config.countLimit !== Number.MAX_SAFE_INTEGER) {
             config.countLimit = Math.max(config.countLimit, config.offset + config.limit);
         }
-        return this._loadUngroupedList(config);
+        return this._loadUngroupedList({
+            ...config,
+            context: {
+                ...config.context,
+                current_company_id: this.company.currentCompany.id,
+            },
+        });
     }
 
     async _webReadGroup(config, firstGroupByName, orderBy) {
