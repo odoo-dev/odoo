@@ -1353,7 +1353,7 @@ QUnit.module("Fields", (hooks) => {
         assert.equal(items.length, 2);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "properties: kanban view with multiple sources of properties definitions",
         async function (assert) {
             const definition = {
