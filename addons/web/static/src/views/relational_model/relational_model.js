@@ -522,7 +522,10 @@ export class RelationalModel extends Model {
         ) {
             const currentGroups = config.currentGroups.groups;
             for (const group of currentGroups) {
-                if (!groups.some((g) => JSON.stringify(g.value) === JSON.stringify(group.value))) {
+                if (
+                    config.groups[group.value] &&
+                    !groups.some((g) => JSON.stringify(g.value) === JSON.stringify(group.value))
+                ) {
                     groups.push(Object.assign({}, group, { count: 0, length: 0, records: [] }));
                 }
             }
