@@ -5437,12 +5437,13 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("custom delete confirmation dialog", async (assert) => {
-
         const listView = registry.category("views").get("list");
         class CautiousController extends listView.Controller {
             get deleteConfirmationDialogProps() {
                 const props = super.deleteConfirmationDialogProps;
-                props.body = markup(`<span class="text-danger">These are the consequences</span><br/>${props.body}`);
+                props.body = markup(
+                    `<span class="text-danger">These are the consequences</span><br/>${props.body}`
+                );
                 return props;
             }
         }
@@ -5475,7 +5476,12 @@ QUnit.module("Views", (hooks) => {
         );
 
         await click(document, "body .modal footer button.btn-secondary");
-        assert.containsN(target, "tbody td.o_list_record_selector", 4, "nothing deleted, 4 records remain");
+        assert.containsN(
+            target,
+            "tbody td.o_list_record_selector",
+            4,
+            "nothing deleted, 4 records remain"
+        );
     });
 
     QUnit.test(
@@ -17454,19 +17460,22 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(td2.textContent, "61%");
     });
 
-    QUnit.test("Formatted group operator with digit precision on the field definition", async function (assert) {
-        serverData.models.foo.fields.qux.digits = [16, 3];
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree><field name="qux"/></tree>',
-            groupBy: ["bar"],
-        });
-        const [td1, td2] = target.querySelectorAll("td.o_list_number");
-        assert.strictEqual(td1.textContent, "9.000");
-        assert.strictEqual(td2.textContent, "10.400");
-    });
+    QUnit.test(
+        "Formatted group operator with digit precision on the field definition",
+        async function (assert) {
+            serverData.models.foo.fields.qux.digits = [16, 3];
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                arch: '<tree><field name="qux"/></tree>',
+                groupBy: ["bar"],
+            });
+            const [td1, td2] = target.querySelectorAll("td.o_list_number");
+            assert.strictEqual(td1.textContent, "9.000");
+            assert.strictEqual(td2.textContent, "10.400");
+        }
+    );
 
     QUnit.test("list view does not crash when clicked button cell", async function (assert) {
         await makeView({
@@ -18929,8 +18938,7 @@ QUnit.module("Views", (hooks) => {
         await doAction(wc, 1);
         assert.verifySteps([
             `foo: get_views: {"lang":"en","uid":7,"tz":"taht","tree_view_ref":"foo_view_ref","search_default_bar":true}`,
-            `foo: web_search_read: {"lang":"en","uid":7,"tz":"taht","bin_size":true}`,
-            `bar: read: {"lang":"en","uid":7,"tz":"taht","bin_size":true}`,
+            `foo: unity_web_search_read: {"lang":"en","uid":7,"tz":"taht","bin_size":true,"tree_view_ref":"foo_view_ref"}`,
         ]);
 
         await click(target.querySelectorAll(".o_data_row .o_data_cell")[1]);
@@ -18947,7 +18955,7 @@ QUnit.module("Views", (hooks) => {
         await click(items.find((el) => el.textContent.trim() === "Search More..."));
         assert.verifySteps([
             `bar: get_views: {"lang":"en","uid":7,"tz":"taht"}`,
-            `bar: web_search_read: {"lang":"en","uid":7,"tz":"taht","bin_size":true}`,
+            `bar: unity_web_search_read: {"lang":"en","uid":7,"tz":"taht","bin_size":true}`,
         ]);
         assert.containsOnce(target, ".modal");
         assert.strictEqual(
