@@ -6144,7 +6144,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read", "onchange2", "write", "web_read"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "form with domain widget: opening a many2many form and save should not crash",
         async function (assert) {
             assert.expect(0);
@@ -6692,7 +6692,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "args of onchanges in o2m fields are correct (dialog edition)",
         async function (assert) {
             serverData.models.partner.records[1].p = [4];
@@ -8133,7 +8133,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_control_panel");
     });
 
-    QUnit.tttt("check interactions between multiple FormViewDialogs", async function (assert) {
+    QUnit.test("check interactions between multiple FormViewDialogs", async function (assert) {
         assert.expect(9);
 
         serverData.models.product.fields.product_ids = {
@@ -12153,7 +12153,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         'field "length" with value 0: readonly fields are not sent when saving',
         async function (assert) {
             assert.expect(3);
