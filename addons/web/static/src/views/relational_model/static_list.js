@@ -96,7 +96,7 @@ export class StaticList extends DataPoint {
      * editable x2many list).
      *
      * @param {Object} params
-     * @param {"top"|"bottom"} [params.position="bottom"]
+     * @param {"top"|"bottom"} [params.position]
      * @param {Object} [params.activeFields=this.activeFields]
      * @param {boolean} [params.withoutParent=false]
      */
@@ -228,7 +228,7 @@ export class StaticList extends DataPoint {
             }
             this._currentIds.splice(this.offset, 0, record.virtualId);
             this._commands.unshift(command);
-        } else {
+        } else if (position === "bottom") {
             this.records.push(record);
             this._currentIds.splice(this.offset + this.limit, 0, record.virtualId);
             if (this.records.length > this.limit) {
@@ -236,6 +236,12 @@ export class StaticList extends DataPoint {
                 const nextLimit = this.limit + 1;
                 this.model._updateConfig(this.config, { limit: nextLimit }, { noReload: true });
             }
+            this._commands.push(command);
+        } else {
+            if (this.records.length < this.limit) {
+                this.records.push(record);
+            }
+            this._currentIds.push(record.virtualId);
             this._commands.push(command);
         }
         this.count++;
