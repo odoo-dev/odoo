@@ -1473,7 +1473,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("pager, update calls onUpdatedPager before the render", async (assert) => {
+    QUnit.test("pager, update calls onUpdatedPager", async (assert) => {
         assert.expect(8);
 
         class TestKanbanController extends KanbanController {
@@ -1514,7 +1514,7 @@ QUnit.module("Views", (hooks) => {
         assert.step("next page");
         await click(target.querySelector(".o_pager_next"));
         assert.deepEqual(getPagerValue(target), [4, 4]);
-        assert.verifySteps(["render", "next page", "onUpdatedPager", "render"]);
+        assert.verifySteps(["render", "next page", "render", "onUpdatedPager"]);
     });
 
     QUnit.test("click on a button type='delete' to delete a record in a column", async (assert) => {
@@ -5770,7 +5770,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("delete a column in grouped on m2o", async (assert) => {
+    QUnit.test("delete a column in grouped on m2o", async (assert) => {
         assert.expect(38);
 
         let resequencedIDs = [];
