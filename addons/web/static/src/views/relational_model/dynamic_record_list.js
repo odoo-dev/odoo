@@ -79,6 +79,10 @@ export class DynamicRecordList extends DynamicList {
         return record;
     }
 
+    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
+        return this.resequence(dataRecordId, refId);
+    }
+
     async resequence(movedRecordId, targetRecordId) {
         return this.model.mutex.exec(
             async () =>

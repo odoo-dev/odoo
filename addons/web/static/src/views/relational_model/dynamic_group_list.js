@@ -1,6 +1,7 @@
 /* @odoo-module */
 //@ts-check
 
+import { Domain } from "@web/core/domain";
 import { DynamicList } from "./dynamic_list";
 
 export class DynamicGroupList extends DynamicList {
@@ -129,15 +130,20 @@ export class DynamicGroupList extends DynamicList {
             [`default_${this.groupByField.name}`]: id,
         };
         const nextConfigGroups = { ...this.config.groups };
+        const domain = Domain.and([
+            this.config.domain,
+            [[this.groupByField.name, "=", id]],
+        ]).toList();
         nextConfigGroups[id] = {
             ...commonConfig,
             context,
             groupByFieldName: this.groupByField.name,
             isFolded,
+            initialDomain: domain,
             list: {
                 ...commonConfig,
                 context,
-                domain: [[this.groupByField.name, "=", id]],
+                domain: domain,
                 groupBy: [],
                 orderBy: this.orderBy,
             },
@@ -148,7 +154,7 @@ export class DynamicGroupList extends DynamicList {
             count: 0,
             length: 0,
             records: [],
-            __domain: [[this.groupByField.name, "=", id]],
+            __domain: domain,
             [this.groupByField.name]: [id, groupName],
             value: id,
             displayName: groupName,
