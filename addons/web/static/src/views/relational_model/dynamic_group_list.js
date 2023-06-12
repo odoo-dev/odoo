@@ -83,13 +83,23 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
 
     async _deleteGroups(groups) {
-        const proms = [];
-        for (const group of groups) {
-            proms.push(group._deleteRecords(group.records));
-        }
-        await Promise.all(proms);
-        for (const group of groups) {
-            this._removeGroup(group);
+        const shouldReload = groups.some((g) => g.count > 0);
+        const groupResIds = groups.map((g) => g.value);
+        await this.model.orm.unlink(this.groupByField.relation, groupResIds, {
+            context: this.context,
+        });
+        if (shouldReload) {
+            const configGroups = { ...this.config.groups };
+            for (const group of groups) {
+                delete configGroups[group.value];
+            }
+            const response = await this.model._updateConfig(this.config, { groups: configGroups });
+            this.groups = response.groups.map((group) => this._createGroupDatapoint(group));
+            this.count = response.length;
+        } else {
+            for (const group of groups) {
+                this._removeGroup(group);
+            }
         }
     }
 
