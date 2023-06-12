@@ -7940,7 +7940,7 @@ QUnit.module("Fields", (hooks) => {
         assert.notOk(target.querySelector(".o_field_widget[name=bar] input").checked);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with default value: edit line to make it invalid",
         async function (assert) {
             serverData.models.partner.fields.p.default = [
@@ -8756,7 +8756,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "new record, with one2many with more default values than limit",
         async function (assert) {
             await makeView({
@@ -8790,20 +8790,12 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "add a new line after limit is reached should behave nicely",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [1, 2, 3];
             serverData.models.partner.onchanges = {
-                turtles: function (obj) {
-                    obj.turtles = [
-                        [5],
-                        [1, 1, { turtle_foo: "yop" }],
-                        [1, 2, { turtle_foo: "blip" }],
-                        [1, 3, { turtle_foo: "kawa" }],
-                        [0, obj.turtles[3][2], { turtle_foo: "abc" }],
-                    ];
-                },
+                turtles: function () {},
             };
 
             await makeView({
@@ -8875,7 +8867,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange in a one2many with non inline view on a new record",
         async function (assert) {
             serverData.models.turtle.onchanges = {
@@ -8918,9 +8910,9 @@ QUnit.module("Fields", (hooks) => {
             assert.verifySteps([
                 "get_views", // load main form
                 "get_views", // load sub list
-                "onchange", // main record
-                "onchange", // sub record
-                "onchange", // edition of display_name of sub record
+                "onchange2", // main record
+                "onchange2", // sub record
+                "onchange2", // edition of display_name of sub record
             ]);
         }
     );
@@ -9571,7 +9563,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("o2m add a line custom control create editable with 'tab'", async function (assert) {
+    QUnit.test("o2m add a line custom control create editable with 'tab'", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -9592,7 +9584,7 @@ QUnit.module("Fields", (hooks) => {
             resId: 1,
             mockRPC(route, args) {
                 const { method, kwargs } = args;
-                if (method === "onchange") {
+                if (method === "onchange2") {
                     assert.step("onchange");
                     assert.strictEqual(kwargs.context.default_turtle_foo, "soft");
                 }
@@ -9608,7 +9600,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["onchange"]);
     });
 
-    QUnit.tttt("one2many with onchange, required field, shortcut enter", async function (assert) {
+    QUnit.test("one2many with onchange, required field, shortcut enter", async function (assert) {
         serverData.models.turtle.onchanges = {
             turtle_foo: function () {},
         };
@@ -9628,20 +9620,20 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
             async mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await Promise.resolve(def);
                 }
             },
         });
 
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
 
         const value = "hello";
 
         // add a new line
         await addRow(target);
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // we want to add a delay to simulate an onchange
         def = makeDeferred();
@@ -9657,7 +9649,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
         assert.containsOnce(target, ".o_data_row");
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // unlock onchange
         def.resolve();
@@ -9674,10 +9666,10 @@ QUnit.module("Fields", (hooks) => {
             ""
         );
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
     });
 
-    QUnit.tttt("edit a field with a slow onchange in one2many", async function (assert) {
+    QUnit.test("edit a field with a slow onchange in one2many", async function (assert) {
         serverData.models.turtle.onchanges = {
             turtle_foo: function () {},
         };
@@ -9697,20 +9689,20 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             async mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     await Promise.resolve(def);
                 }
             },
         });
 
-        assert.verifySteps(["get_views", "onchange"]);
+        assert.verifySteps(["get_views", "onchange2"]);
 
         const value = "hello";
 
         // add a new line
         await addRow(target);
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // we want to add a delay to simulate an onchange
         def = makeDeferred();
@@ -9724,7 +9716,7 @@ QUnit.module("Fields", (hooks) => {
         // check that nothing changed before the onchange finished
         assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
 
-        assert.verifySteps(["onchange"]);
+        assert.verifySteps(["onchange2"]);
 
         // unlock onchange
         def.resolve();
@@ -9734,7 +9726,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_data_row [name=turtle_foo]").innerText, value);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "no deadlock when leaving a one2many line with uncommitted changes",
         async function (assert) {
             // Before unselecting a o2m line, field widgets are asked to commit their changes (new values
@@ -9777,12 +9769,11 @@ QUnit.module("Fields", (hooks) => {
             );
             assert.verifySteps([
                 "get_views", // main form view
-                "onchange", // main record
-                "onchange", // line 1
-                "onchange", // line 2
+                "onchange2", // main record
+                "onchange2", // line 1
+                "onchange2", // line 2
                 "create",
-                "read", // main record
-                "read", // line 1
+                "web_read", // main record
             ]);
         }
     );
@@ -10077,7 +10068,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("one2many editable list: edit and click on add a line", async function (assert) {
+    QUnit.test("one2many editable list: edit and click on add a line", async function (assert) {
         serverData.models.turtle.onchanges = {
             turtle_int: function () {},
         };
@@ -10094,7 +10085,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step("onchange");
                 }
             },
@@ -10133,32 +10124,22 @@ QUnit.module("Fields", (hooks) => {
         assert.hasClass(target.querySelectorAll(".o_data_row")[1], "o_selected_row");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "many2manys inside a one2many are fetched in batch after onchange",
         async function (assert) {
-            assert.expect(7);
+            assert.expect(5);
 
             serverData.models.partner.onchanges = {
                 turtles: function (obj) {
                     obj.turtles = [
-                        [5],
+                        [4, 1],
+                        [4, 2],
                         [
                             1,
                             1,
                             {
                                 turtle_foo: "leonardo",
                                 partner_ids: [[4, 2]],
-                            },
-                        ],
-                        [
-                            1,
-                            2,
-                            {
-                                turtle_foo: "donatello",
-                                partner_ids: [
-                                    [4, 2],
-                                    [4, 4],
-                                ],
                             },
                         ],
                     ];
@@ -10180,13 +10161,6 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 mockRPC(route, args) {
                     assert.step(args.method || route);
-                    if (args.method === "read") {
-                        assert.deepEqual(
-                            args.args[0],
-                            [2, 4],
-                            "should read the partner_ids once, batched"
-                        );
-                    }
                 },
             });
 
@@ -10196,7 +10170,7 @@ QUnit.module("Fields", (hooks) => {
                 ["second record", "second recordaaa"]
             );
 
-            assert.verifySteps(["get_views", "onchange", "read"]);
+            assert.verifySteps(["get_views", "onchange2"]);
         }
     );
 
@@ -13020,7 +12994,7 @@ QUnit.module("Fields", (hooks) => {
                 res_model: "partner",
                 type: "ir.actions.act_window",
                 views: [[false, "list"]],
-            }
+            },
         };
         serverData.views = {
             "partner,false,list": `<tree><field name="int_field"/></tree>`,

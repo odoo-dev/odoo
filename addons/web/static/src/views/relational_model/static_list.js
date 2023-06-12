@@ -152,12 +152,19 @@ export class StaticList extends DataPoint {
                     this._abandonRecords([this.editedRecord], { force: discard || !isValid });
                 }
                 // if we still have an editedRecord, it means it hasn't been abandonned
-                if (this.editedRecord && (isValid || this.editedRecord._canNeverBeAbandoned)) {
-                    this.model._updateConfig(
-                        this.editedRecord.config,
-                        { mode: "readonly" },
-                        { noReload: true }
-                    );
+                if (this.editedRecord) {
+                    if (
+                        isValid ||
+                        (!isValid &&
+                            !this.editedRecord.isDirty &&
+                            this.editedRecord._canNeverBeAbandoned)
+                    ) {
+                        this.model._updateConfig(
+                            this.editedRecord.config,
+                            { mode: "readonly" },
+                            { noReload: true }
+                        );
+                    }
                 }
             }
             return !this.editedRecord;
