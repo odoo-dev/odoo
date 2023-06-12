@@ -48,7 +48,7 @@ export class Record extends DataPoint {
         }
         this._setDataContext();
 
-        this._canNeverBeAbandoned = options.canNeverBeAbandoned === true;
+        this._manuallyAdded = options.manuallyAdded === true;
         this.selected = false; // TODO: rename into isSelected?
         this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
@@ -61,7 +61,7 @@ export class Record extends DataPoint {
     // -------------------------------------------------------------------------
 
     get canBeAbandoned() {
-        return this.isNew && !this.isDirty && !this._canNeverBeAbandoned;
+        return this.isNew && !this.isDirty && this._manuallyAdded;
     }
 
     get evalContext() {
@@ -291,27 +291,6 @@ export class Record extends DataPoint {
         }
         this._rawChanges = {};
     }
-
-    // _applyNewConfig(config, data) {
-    //     this.model._updateConfig(record.config, config, { noReload: true });
-    //     record._applyValues(data);
-    //     record._applyRawChanges();
-    //     for (const fieldName in record.activeFields) {
-    //         if (["one2many", "many2many"].includes(record.fields[fieldName].type)) {
-    //             if (activeFields[fieldName].related) {
-    //                 const list = record.data[fieldName];
-    //                 const patch = {
-    //                     activeFields: activeFields[fieldName].related.activeFields,
-    //                     fields:activeFields[fieldName].related.fields,
-    //                 };
-    //                 for (const subRecord of Object.values(list._cache)) {
-    //                     this.model._updateConfig(subRecord.config, patch, { noReload: true });
-    //                 }
-    //                 this.model._updateConfig(list.config, patch, { noReload: true });
-    //             }
-    //         }
-    //     }
-    // }
 
     _applyValues(values) {
         Object.assign(this._values, this._parseServerValues(values));
@@ -825,11 +804,18 @@ export class Record extends DataPoint {
                 body: _t("No valid record to save"),
                 confirm: async () => {
                     await this.discard();
-                    this.model._updateConfig(this.config, { mode: "readonly" }, { noReload: true });
+                    this._switchMode("readonly");
                 },
             });
         }
         this._invalidFields.add(fieldName);
+    }
+
+    _switchMode(mode) {
+        this.model._updateConfig(this.config, { mode }, { noReload: true });
+        if (mode === "readonly") {
+            this._invalidFields.clear();
+        }
     }
 
     /**
