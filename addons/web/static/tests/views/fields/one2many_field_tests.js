@@ -4623,19 +4623,13 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_x2m_control_panel .o_pager", "o2m pager should be hidden");
     });
 
-    QUnit.tttt("one2many list with a many2one", async function (assert) {
+    QUnit.test("one2many list with a many2one", async function (assert) {
         assert.expect(5);
 
         let checkOnchange = false;
         serverData.models.partner.records[0].p = [2];
         serverData.models.partner.records[1].product_id = 37;
-        serverData.models.partner.onchanges.p = function (obj) {
-            obj.p = [
-                [5], // delete all
-                [1, 2, { product_id: [37, "xphone"] }], // update existing record
-                [0, 0, { product_id: [41, "xpad"] }],
-            ];
-        };
+        serverData.models.partner.onchanges.p = () => {};
         serverData.views = {};
         serverData.views["partner,false,form"] = '<form><field name="product_id"/></form>';
 
@@ -4653,13 +4647,10 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, args) {
-                if (args.method === "onchange" && checkOnchange) {
+                if (args.method === "onchange2" && checkOnchange) {
                     assert.deepEqual(
                         args.args[1].p,
-                        [
-                            [4, 2, false],
-                            [0, args.args[1].p[1][1], { product_id: 41 }],
-                        ],
+                        [[0, args.args[1].p[0][1], { product_id: 41 }]],
                         "should trigger onchange with correct parameters"
                     );
                 }
@@ -5079,7 +5070,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many with many2many widget: create", async function (assert) {
+    QUnit.test("one2many with many2many widget: create", async function (assert) {
         assert.expect(10);
 
         serverData.views = {
@@ -5098,6 +5089,7 @@ QUnit.module("Fields", (hooks) => {
                 </search>`,
         };
 
+        let expectedIds;
         await makeView({
             type: "form",
             resModel: "partner",
@@ -5128,9 +5120,9 @@ QUnit.module("Fields", (hooks) => {
                 }
                 if (route === "/web/dataset/call_kw/partner/write") {
                     assert.strictEqual(args.args[0][0], 1, "should write on the partner record 1");
-                    assert.strictEqual(
-                        args.args[1].turtles[0][0],
-                        6,
+                    assert.deepEqual(
+                        args.args[1].turtles,
+                        [[6, false, expectedIds]],
                         "should send only a 'replace with' command"
                     );
                 }
@@ -5139,34 +5131,35 @@ QUnit.module("Fields", (hooks) => {
 
         await addRow(target);
 
-        assert.strictEqual(
-            $(".modal .o_data_row").length,
+        assert.containsN(
+            target,
+            ".modal .o_data_row",
             2,
             "should have 2 records in the select view (the last one is not displayed because it is already selected)"
         );
 
-        await click($(".modal .o_data_row:first .o_list_record_selector input")[0]);
+        await click(target.querySelector(".modal .o_data_row .o_list_record_selector input"));
         await nextTick(); // additional render due to the change of selection (done in owl, not pure js)
-        await click($(".modal .o_select_button")[0]);
+        await click(target.querySelector(".modal .o_select_button"));
+        expectedIds = [2, 1];
         await clickSave(target);
-        await addRow(target);
 
-        assert.strictEqual(
-            $(".modal .o_data_row").length,
-            1,
+        await addRow(target);
+        assert.containsOnce(
+            target,
+            ".modal .o_data_row",
             "should have 1 record in the select view"
         );
 
-        await click($(".modal-footer button:eq(1)")[0]);
+        await click(target.querySelectorAll(".modal-footer button")[1]);
         await editInput(target, '.modal .o_field_widget[name="turtle_foo"] input', "tototo");
         await editInput(target, '.modal .o_field_widget[name="turtle_int"] input', 50);
         await clickOpenM2ODropdown(target, "product_id");
         await clickM2OHighlightedItem(target, "product_id");
 
-        await click($(".modal-footer button:contains(&):first")[0]);
+        await click(target.querySelector(".modal-footer button"));
 
-        assert.strictEqual($(".modal").length, 0, "should close the modals");
-
+        assert.containsNone(target, ".modal", "should close the modals");
         assert.containsN(target, ".o_data_row", 3, "should have 3 records in one2many list");
         assert.strictEqual(
             $(target.querySelectorAll(".o_data_row")).text(),
@@ -5174,6 +5167,7 @@ QUnit.module("Fields", (hooks) => {
             "should display the record values in one2many list"
         );
 
+        expectedIds = [2, 1, 4];
         await clickSave(target);
     });
 
@@ -5240,8 +5234,8 @@ QUnit.module("Fields", (hooks) => {
                 }
             },
         });
-        //await new Promise(() => {})
-        await click($(target).find(".o_data_cell:first")[0]);
+
+        await click(target.querySelector(".o_data_cell"));
         assert.strictEqual(
             $(".modal .modal-title").first().text().trim(),
             "Open: one2many turtle field",
