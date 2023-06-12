@@ -114,13 +114,13 @@ export class StaticList extends DataPoint {
         });
     }
 
-    delete(record) {
-        this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
+    async delete(record) {
+        await this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
         this._onChange();
     }
 
-    forget(record) {
-        this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
+    async forget(record) {
+        await this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
         this._onChange();
     }
 

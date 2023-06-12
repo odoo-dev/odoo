@@ -11074,14 +11074,10 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("delete a record while adding another one in a multipage", async function (assert) {
+    QUnit.test("delete a record while adding another one in a multipage", async function (assert) {
         // in a one2many with at least 2 pages, add a new line. Delete the line above it.
-        // (the onchange makes it so that the virtualID is inserted in the middle of the currentResIDs.)
         // it should load the next line to display it on the page.
         serverData.models.partner.records[0].turtles = [2, 3];
-        serverData.models.partner.onchanges.turtles = function (obj) {
-            obj.turtles = [[5]].concat(obj.turtles);
-        };
 
         await makeView({
             type: "form",
@@ -11117,7 +11113,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("one2many, onchange, edition and multipage...", async function (assert) {
+    QUnit.test("one2many, onchange, edition and multipage...", async function (assert) {
         serverData.models.partner.onchanges = {
             turtles: function (obj) {
                 obj.turtles = [[5]].concat(obj.turtles);
@@ -11149,13 +11145,12 @@ QUnit.module("Fields", (hooks) => {
 
         assert.verifySteps([
             "get_views partner",
-            "read partner",
-            "read turtle",
-            "onchange turtle",
-            "onchange partner",
-            "onchange partner",
-            "onchange turtle",
-            "onchange partner",
+            "web_read partner",
+            "onchange2 turtle",
+            "onchange2 partner",
+            "onchange2 partner",
+            "onchange2 turtle",
+            "onchange2 partner",
         ]);
     });
 
