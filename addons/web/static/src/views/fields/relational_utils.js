@@ -146,7 +146,7 @@ export function useSpecialData(loadFn) {
     const record = component.props.record;
     const key = `${record.resModel}-${component.props.name}`;
     const { specialDataCaches, orm } = record.model;
-    const ormWithCache = { ...orm };
+    const ormWithCache = Object.create(orm);
     if (!specialDataCaches[key]) {
         specialDataCaches[key] = new Cache(
             (...args) => orm.call(...args),
