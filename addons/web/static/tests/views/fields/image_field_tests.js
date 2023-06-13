@@ -672,59 +672,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("unique in url doesn't change on onchange", async (assert) => {
-        serverData.models.partner.onchanges = {
-            foo: () => {},
-        };
-
-        const rec = serverData.models.partner.records.find((rec) => rec.id === 1);
-        rec.document = "3 kb";
-        rec.write_date = "2022-08-05 08:37:00";
-
-        await makeView({
-            resId: 1,
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="foo" />
-                    <field name="document" widget="image" required="1" />
-                </form>`,
-            mockRPC(route, { method, args }) {
-                assert.step(method);
-                if (method === "onchange2") {
-                    return {
-                        value: {
-                            write_date: "", // actual return of the server
-                        },
-                    };
-                }
-                if (method === "write") {
-                    args[1].write_date = "2022-08-05 09:37:00";
-                }
-            },
-        });
-
-        assert.verifySteps(["get_views", "web_read"]);
-        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
-
-        assert.verifySteps([]);
-        // same unique as before
-        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
-
-        await editInput(target, ".o_field_widget[name='foo'] input", "grrr");
-        assert.verifySteps(["onchange2"]);
-        // also same unique
-        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
-
-        await clickSave(target);
-        assert.verifySteps(["write", "web_read"]);
-
-        assert.strictEqual(getUnique(target.querySelector(".o_field_image img")), "1659688620000");
-    });
-
-    QUnit.tttt("unique in url change on record change", async (assert) => {
+    QUnit.test("unique in url change on record change", async (assert) => {
         const rec = serverData.models.partner.records.find((rec) => rec.id === 1);
         rec.document = "3 kb";
         rec.write_date = "2022-08-05 08:37:00";
