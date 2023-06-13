@@ -504,7 +504,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "computed reference field changed by onchange to 'False,0' value",
         async function (assert) {
             assert.expect(1);
@@ -527,10 +527,12 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
                 mockRPC(route, { args, method }) {
                     if (method === "create") {
-                        assert.deepEqual(args[0], {
-                            bar: false,
-                            reference_char: "False,0",
-                        });
+                        assert.deepEqual(args[0], [
+                            {
+                                bar: false,
+                                reference_char: "False,0",
+                            },
+                        ]);
                     }
                 },
             });
@@ -543,7 +545,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("interact with reference field changed by onchange", async function (assert) {
+    QUnit.test("interact with reference field changed by onchange", async function (assert) {
         assert.expect(2);
 
         serverData.models.partner.onchanges = {
@@ -564,10 +566,12 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             mockRPC(route, { args, method }) {
                 if (method === "create") {
-                    assert.deepEqual(args[0], {
-                        bar: false,
-                        reference: "partner,4",
-                    });
+                    assert.deepEqual(args[0], [
+                        {
+                            bar: false,
+                            reference: "partner,4",
+                        },
+                    ]);
                 }
             },
         });
@@ -588,7 +592,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("default_get and onchange with a reference field", async function (assert) {
+    QUnit.test("default_get and onchange with a reference field", async function (assert) {
         serverData.models.partner.fields.reference.default = "product,37";
         serverData.models.partner.onchanges = {
             int_field(obj) {
@@ -611,14 +615,8 @@ QUnit.module("Fields", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { method, model }) {
-                if (method === "name_get") {
-                    assert.step(model);
-                }
-            },
         });
 
-        assert.verifySteps(["product"], "the first name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "product",
@@ -633,7 +631,6 @@ QUnit.module("Fields", (hooks) => {
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 12);
 
-        assert.verifySteps(["partner_type"], "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "partner_type",
@@ -646,7 +643,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("default_get a reference field in a x2m", async function (assert) {
+    QUnit.test("default_get a reference field in a x2m", async function (assert) {
         serverData.models.partner.fields.turtles.default = [
             [0, false, { turtle_ref: "product,37" }],
         ];
@@ -681,14 +678,13 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ReferenceField on char field, reset by onchange", async function (assert) {
+    QUnit.test("ReferenceField on char field, reset by onchange", async function (assert) {
         serverData.models.partner.records[0].foo = "product,37";
         serverData.models.partner.onchanges = {
             int_field(obj) {
                 obj.foo = "product," + obj.int_field;
             },
         };
-
         let nbNameGet = 0;
         await makeView({
             type: "form",
@@ -710,17 +706,14 @@ QUnit.module("Fields", (hooks) => {
                 }
             },
         });
-
         assert.strictEqual(nbNameGet, 1, "the first name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
             "xphone",
             "foo field should be correctly set"
         );
-
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 41);
-
         assert.strictEqual(nbNameGet, 2, "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
@@ -756,7 +749,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("ReferenceField with model_field option", async function (assert) {
+    QUnit.test("ReferenceField with model_field option", async function (assert) {
         serverData.models.partner.records[0].reference = false;
         serverData.models.partner.records[0].model_id = 20;
         serverData.models.partner.records[1].display_name = "John Smith";
@@ -773,7 +766,6 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference" options="{'model_field': 'model_id'}" />
                 </form>`,
         });
-
         assert.containsNone(
             target,
             "select",
@@ -810,7 +802,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ReferenceField with model_field option (model_field not synchronized with reference)",
         async function (assert) {
             // Checks that the data is not modified even though it is not synchronized.
@@ -849,7 +841,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("Reference field with default value in list view", async function (assert) {
+    QUnit.test("Reference field with default value in list view", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -862,9 +854,14 @@ QUnit.module("Fields", (hooks) => {
                     <field name="display_name"/>
                 </tree>`,
             mockRPC: (route, { method, args }) => {
-                if (method === "onchange") {
+                if (method === "onchange2") {
                     return {
-                        value: { reference: "partner,2" },
+                        value: {
+                            reference: {
+                                id: { id: 2, model: "partner" },
+                                display_name: "second record",
+                            },
+                        },
                     };
                 } else if (method === "create") {
                     assert.strictEqual(args.length, 1);
@@ -885,7 +882,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "ReferenceField with model_field option (tree list in form view)",
         async function (assert) {
             serverData.models.turtle.records[0].partner_ids = [1];
@@ -928,7 +925,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "edit a record containing a ReferenceField with model_field option (list in form view)",
         async function (assert) {
             serverData.models.turtle.records[0].partner_ids = [1];
@@ -974,7 +971,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("model selector is displayed only when it should be", async function (assert) {
+    QUnit.test("model selector is displayed only when it should be", async function (assert) {
         //The model selector should be only displayed if
         //there is no hide_model=True options AND no model_field specified
         await makeView({
