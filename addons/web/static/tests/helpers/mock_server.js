@@ -623,6 +623,18 @@ export class MockServer {
                             })[0];
                     }
                 });
+            } else if (field.type === "reference") {
+                if (val) {
+                    const [model, i] = val.split(",");
+                    const id = parseInt(i, 10);
+                    const result = this.mockWebRead(model, [[id]], {
+                        specification: specification[fname].fields || {},
+                    });
+                    values[fname] = {
+                        ...result[0],
+                        id: { id, model },
+                    };
+                }
             }
         });
         return values;
