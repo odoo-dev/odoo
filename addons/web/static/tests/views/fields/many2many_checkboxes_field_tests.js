@@ -306,7 +306,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["name_search", "write"]);
     });
 
-    QUnit.tttt("Many2ManyCheckBoxesField in a one2many", async function (assert) {
+    QUnit.test("Many2ManyCheckBoxesField in a one2many", async function (assert) {
         assert.expect(3);
 
         serverData.models.partner_type.records.push({ id: 15, display_name: "bronze" });
