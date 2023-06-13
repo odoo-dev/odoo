@@ -1758,6 +1758,7 @@ QUnit.module("Fields", (hooks) => {
                         };
                     } else {
                         assert.deepEqual(args.args[1], {
+                            display_name: false,
                             int_field: 2,
                             timmy: [[1, 12, { display_name: "gold" }]],
                         });
