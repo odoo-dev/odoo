@@ -1264,7 +1264,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
-    QUnit.tttt("settings can contain one2many fields", async function (assert) {
+    QUnit.test("settings can contain one2many fields", async function (assert) {
         await makeView({
             type: "form",
             resModel: "res.config.settings",
