@@ -768,7 +768,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "onchanges on many2ones trigger when editing record in form view",
         async function (assert) {
             assert.expect(10);

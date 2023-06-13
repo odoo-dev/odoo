@@ -6213,27 +6213,10 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("nested x2many (non inline form view) and onchanges", async function (assert) {
+    QUnit.test("nested x2many (non inline form view) and onchanges", async function (assert) {
         serverData.models.partner.onchanges.bar = function (obj) {
             if (!obj.bar) {
-                obj.p = [
-                    [5],
-                    [
-                        0,
-                        0,
-                        {
-                            turtles: [
-                                [
-                                    0,
-                                    0,
-                                    {
-                                        turtle_foo: "new turtle",
-                                    },
-                                ],
-                            ],
-                        },
-                    ],
-                ];
+                obj.p = [[0, 0, { turtles: [[0, 0, { turtle_foo: "new turtle" }]] }]];
             }
         };
 
