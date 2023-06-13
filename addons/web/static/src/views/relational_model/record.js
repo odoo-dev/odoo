@@ -494,7 +494,7 @@ export class Record extends DataPoint {
                 continue;
             }
             if (field.type === "one2many" || field.type === "many2many") {
-                const commands = value._getCommands();
+                const commands = value._getCommands({ withReadonly });
                 if (commands.length) {
                     result[fieldName] = commands;
                 }
@@ -852,7 +852,10 @@ export class Record extends DataPoint {
             (fieldName) => this.activeFields[fieldName] && this.activeFields[fieldName].onChange
         );
         if (onChangeFields.length && !this.model._urgentSave && !withoutOnchange) {
-            const localChanges = this._getChanges({ ...this._changes, ...changes });
+            const localChanges = this._getChanges(
+                { ...this._changes, ...changes },
+                { withReadonly: true }
+            );
             if (this.config.relationField) {
                 localChanges[this.config.relationField] = this._parentRecord._getChanges();
             }
