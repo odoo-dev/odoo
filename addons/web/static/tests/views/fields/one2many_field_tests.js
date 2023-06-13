@@ -10389,7 +10389,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector('th[data-name="date"]').offsetWidth, width);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many reset by onchange (of another field) while being edited",
         async function (assert) {
             // In this test, we have a many2one and a one2many. The many2one has an onchange that
@@ -10405,9 +10405,7 @@ QUnit.module("Fields", (hooks) => {
 
             const def = makeDeferred();
             serverData.models.partner.onchanges = {
-                trululu: (obj) => {
-                    obj.p = [[5]].concat(obj.p);
-                },
+                trululu: () => {},
             };
 
             await makeView({
@@ -10547,19 +10545,17 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with many2many_tags in list and list in form, and onchange (2)",
         async function (assert) {
             serverData.models.partner.onchanges = {
                 bar: function (obj) {
                     obj.p = [
-                        [5],
                         [
                             0,
                             0,
                             {
                                 turtles: [
-                                    [5],
                                     [
                                         0,
                                         0,
@@ -10677,7 +10673,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("nested one2many, onchange, no command value", async function (assert) {
+    QUnit.test("nested one2many, onchange, no command value", async function (assert) {
         // This test ensures that we always send all values to onchange rpcs for nested
         // one2manys, even if some field hasn't changed. In this particular test case,
         // a first onchange returns a value for the inner one2many, and a second onchange
@@ -10712,24 +10708,24 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             async mockRPC(route, args) {
-                if (step === 3 && args.method === "onchange" && args.model === "partner") {
+                if (step === 3 && args.method === "onchange2" && args.model === "partner") {
                     assert.deepEqual(args.args[1].turtles[0][2], {
                         turtle_bar: false,
-                        o2m: [], // we must send a value for this field
                     });
                 }
                 if (args.model === "turtle") {
                     if (step === 2) {
                         return {
                             value: {
-                                o2m: [[5], [0, false, { display_name: "default" }]],
+                                o2m: [[0, false, { display_name: "default" }]],
                                 turtle_bar: true,
                             },
                         };
                     }
                     if (step === 3) {
+                        const virtualId = args.args[1].o2m[0][1];
                         return {
-                            value: { o2m: [[5]] },
+                            value: { o2m: [[2, virtualId]] },
                         };
                     }
                 }
@@ -10844,7 +10840,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("combine contexts on o2m field and create tags", async function (assert) {
+    QUnit.test("combine contexts on o2m field and create tags", async function (assert) {
         assert.expect(1);
 
         await makeView({
@@ -10865,7 +10861,7 @@ QUnit.module("Fields", (hooks) => {
                     </sheet>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     if (args.model === "turtle") {
                         assert.deepEqual(
                             args.kwargs.context,
@@ -10887,7 +10883,7 @@ QUnit.module("Fields", (hooks) => {
         await addRow(target);
     });
 
-    QUnit.tttt("do not call name_get if display_name already known", async function (assert) {
+    QUnit.test("do not call name_get if display_name already known", async function (assert) {
         serverData.models.partner.fields.product_id.default = 37;
         serverData.models.partner.onchanges = {
             trululu: function (obj) {
@@ -10917,7 +10913,7 @@ QUnit.module("Fields", (hooks) => {
             target.querySelector(".o_field_widget[name=product_id] input").value,
             "xphone"
         );
-        assert.verifySteps(["get_views on partner", "onchange on partner"]);
+        assert.verifySteps(["get_views on partner", "onchange2 on partner"]);
     });
 
     QUnit.test("x2many default_order multiple fields", async function (assert) {
