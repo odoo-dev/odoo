@@ -89,6 +89,7 @@ const DEFAULT_HOOKS = {
     onWillSaveMulti: () => {},
     onSavedMulti: () => {},
     onWillSetInvalidField: () => {},
+    onRecordChanged: () => {},
 };
 const DEFAULT_HANDLE_FIELD = "sequence";
 
