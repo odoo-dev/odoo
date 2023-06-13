@@ -10174,7 +10174,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("two one2many fields with same relation and onchanges", async function (assert) {
+    QUnit.test("two one2many fields with same relation and onchanges", async function (assert) {
         // this test simulates the presence of two one2many fields with onchanges, such that
         // changes to the first o2m are repercuted on the second one
         serverData.models.partner.fields.turtles2 = {
@@ -10185,18 +10185,19 @@ QUnit.module("Fields", (hooks) => {
         };
         serverData.models.partner.onchanges = {
             turtles: function (obj) {
-                // when we add a line to turtles, add same line to turtles2
+                // replicate changes on turtles2
                 if (obj.turtles.length) {
-                    obj.turtles = [[5]].concat(obj.turtles);
-                    obj.turtles2 = obj.turtles;
+                    const command = obj.turtles2 && obj.turtles2[0];
+                    if (command) {
+                        // second onchange (with ABC): there's already a create command
+                        obj.turtles2 = [[1, command[1], obj.turtles[0][2]]];
+                    } else {
+                        // first onchange (when adding the row): replicate the create command
+                        obj.turtles2 = [[0, false, obj.turtles[0][2]]];
+                    }
                 }
             },
-            turtles2: function (obj) {
-                // simulate an onchange on turtles2 as well
-                if (obj.turtles2.length) {
-                    obj.turtles2 = [[5]].concat(obj.turtles2);
-                }
-            },
+            turtles2: () => {}, // simulate an onchange on turtles2 as well
         };
 
         await makeView({
