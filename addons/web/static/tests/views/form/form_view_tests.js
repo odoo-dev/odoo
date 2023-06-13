@@ -9624,7 +9624,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("readonly fields are not sent when saving", async function (assert) {
+    QUnit.test("readonly fields are not sent when saving", async function (assert) {
         assert.expect(6);
 
         // define an onchange on display_name to check that the value of readonly
@@ -9650,8 +9650,8 @@ QUnit.module("Views", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (checkOnchange && args.method === "onchange") {
-                    if (args.args[2] === "display_name") {
+                if (checkOnchange && args.method === "onchange2") {
+                    if (args.args[2][0] === "display_name") {
                         // onchange on field display_name
                         assert.strictEqual(
                             args.args[1].foo,
@@ -9675,9 +9675,9 @@ QUnit.module("Views", (hooks) => {
                 }
                 if (args.method === "create") {
                     assert.deepEqual(
-                        args.args[0],
+                        args.args[0][0],
                         {
-                            p: [[0, args.args[0].p[0][1], { display_name: "readonly" }]],
+                            p: [[0, args.args[0][0].p[0][1], { display_name: "readonly" }]],
                         },
                         "should not have sent the value of the readonly field"
                     );
