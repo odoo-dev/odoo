@@ -253,21 +253,29 @@ export class DynamicGroupList extends DynamicList {
             targetGroup.groupByField.type === "many2one"
                 ? [targetGroup.value, targetGroup.displayName]
                 : targetGroup.value;
+        const revert = () => {
+            targetGroup._removeRecords([record]);
+            sourceGroup.addRecord(record, oldIndex);
+        };
         try {
             // FIXME: add "save" option to update? And do not do onchange in this case? ask rco
             await record.update({ [targetGroup.groupByField.name]: value });
-            await record.save({ noReload: true });
+            const res = await record.save({ noReload: true });
+            if (!res) {
+                revert();
+            }
         } catch (e) {
             // revert changes
-            targetGroup._removeRecords([record]);
-            sourceGroup.addRecord(record, oldIndex);
+            revert();
             throw e;
         }
-        targetGroup.list.records = await targetGroup.list._resequence(
-            targetGroup.list.records,
-            this.resModel,
-            dataRecordId,
-            refId
-        );
+        if (!targetGroup.isFolded) {
+            targetGroup.list.records = await targetGroup.list._resequence(
+                targetGroup.list.records,
+                this.resModel,
+                dataRecordId,
+                refId
+            );
+        }
     }
 }
