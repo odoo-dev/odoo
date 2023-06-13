@@ -878,11 +878,7 @@ export class Record extends DataPoint {
         if (Object.keys(changes).length > 0) {
             this._applyChanges(changes);
             await this._onChange(changes);
-            // FIXME: should we remove this from model? Only for standalone case
-            this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
-                record: this,
-                changes: this._getChanges(),
-            });
+            return this.model.hooks.onRecordChanged(this, this._getChanges());
         }
     }
 }
