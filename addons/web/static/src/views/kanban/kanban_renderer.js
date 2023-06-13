@@ -222,7 +222,10 @@ export class KanbanRenderer extends Component {
             (fieldNode) => fieldNode.name === groupByField.name
         );
         let isReadonly;
-        if (fieldNodes.length) {
+        if (
+            fieldNodes.length &&
+            fieldNodes.some((fieldNode) => "readonly" in fieldNode.modifiers)
+        ) {
             isReadonly = fieldNodes.every((fieldNode) => fieldNode.modifiers.readonly === true);
         } else {
             isReadonly = this.props.list.fields[groupByField.name].readonly;
