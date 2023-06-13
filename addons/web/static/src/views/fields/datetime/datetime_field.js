@@ -272,7 +272,7 @@ export const dateField = {
         minDate: options.min_date,
         placeholder: attrs.placeholder,
         required: Boolean(modifiers.required),
-        rounding: parseInt(options.rounding),
+        rounding: options.rounding ? parseInt(options.rounding) : undefined,
         startDateField: options[START_DATE_FIELD_OPTION],
         warnFuture: archParseBoolean(options.warn_future),
     }),

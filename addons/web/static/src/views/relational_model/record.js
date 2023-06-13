@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { markRaw, markup } from "@odoo/owl";
+import { markRaw, markup, toRaw } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
@@ -17,7 +17,7 @@ export class Record extends DataPoint {
         this._onChange = options.onChange || (() => {});
         this.virtualId = options.virtualId || false;
 
-        this._rawChanges = {};
+        this._rawChanges = markRaw({});
 
         let savePoint;
         const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in data));
@@ -26,25 +26,25 @@ export class Record extends DataPoint {
             ...data,
         });
         if (this.resId) {
-            this._values = vals;
-            this._changes = {};
+            this._values = markRaw(vals);
+            this._changes = markRaw({});
             savePoint = {};
         } else {
-            this._values = {};
-            this._changes = vals;
+            this._values = markRaw({});
+            this._changes = markRaw(vals);
             savePoint = { ...this._changes };
         }
         this._savePoint = markRaw(savePoint);
         this.data = { ...this._values, ...this._changes };
         const parentRecord = this._parentRecord;
         if (parentRecord) {
-            this._dataContext = {
+            this.evalContext = {
                 get parent() {
                     return parentRecord.evalContext;
                 },
             };
         } else {
-            this._dataContext = {};
+            this.evalContext = {};
         }
         this._setDataContext();
 
@@ -62,20 +62,6 @@ export class Record extends DataPoint {
 
     get canBeAbandoned() {
         return this.isNew && !this.isDirty && this._manuallyAdded;
-    }
-
-    get evalContext() {
-        return Object.assign(
-            {},
-            this.context,
-            {
-                active_id: this.resId || false,
-                active_ids: this.resId ? [this.resId] : [],
-                active_model: this.resModel,
-                current_company_id: this.model.company.currentCompany.id,
-            },
-            this._dataContext
-        );
     }
 
     get hasData() {
@@ -260,8 +246,10 @@ export class Record extends DataPoint {
     }
 
     _applyChanges(changes) {
-        Object.assign(this._changes, changes);
-        Object.assign(this.data, changes);
+        for (const fieldName in changes) {
+            this._changes[fieldName] = changes[fieldName];
+            this.data[fieldName] = changes[fieldName];
+        }
         this._setDataContext();
         this._removeInvalidFields(Object.keys(changes));
     }
@@ -534,8 +522,9 @@ export class Record extends DataPoint {
 
     _computeDataContext() {
         const dataContext = {};
-        for (const fieldName in this.data) {
-            const value = this.data[fieldName];
+        const data = toRaw(this.data);
+        for (const fieldName in data) {
+            const value = data[fieldName];
             const field = this.fields[fieldName];
             if (["char", "text"].includes(field.type)) {
                 dataContext[fieldName] = value !== "" ? value : false;
@@ -782,9 +771,16 @@ export class Record extends DataPoint {
      * be uselessly re-rendered if we replace it by a brand new object.
      */
     _setDataContext() {
-        Object.assign(this._dataContext, this._computeDataContext());
+        Object.assign(this.evalContext, {
+            ...this.context,
+            active_id: this.resId || false,
+            active_ids: this.resId ? [this.resId] : [],
+            active_model: this.resModel,
+            current_company_id: this.model.company.currentCompany.id,
+            ...this._computeDataContext(),
+        });
 
-        for (const [fieldName, value] of Object.entries(this.data)) {
+        for (const [fieldName, value] of Object.entries(toRaw(this.data))) {
             if (
                 this.fields[fieldName].type === "one2many" ||
                 this.fields[fieldName].type === "many2many"

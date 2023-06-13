@@ -39,7 +39,10 @@ import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
+import { Field } from "@web/views/fields/field";
 import { CharField } from "@web/views/fields/char/char_field";
+import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
+import { IntegerField } from "@web/views/fields/integer/integer_field";
 import { FormController } from "@web/views/form/form_controller";
 import { companyService } from "@web/webclient/company_service";
 
@@ -6283,7 +6286,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".modal .o_field_widget[name=name] input", "new name");
     });
 
-    QUnit.test("onchanges on date(time) fields", async function (assert) {
+    QUnit.tttt("onchanges on date(time) fields", async function (assert) {
         patchTimeZone(120);
 
         serverData.models.partner.onchanges = {
@@ -13152,4 +13155,61 @@ QUnit.module("Views", (hooks) => {
             assert.verifySteps(["create", "web_read"]);
         }
     );
+
+    QUnit.test("only re-render necessary fields after change", async function (assert) {
+        function logLifeCycle(Component) {
+            patchWithCleanup(Component.prototype, {
+                setup() {
+                    this._super(...arguments);
+                    const prefix = `${this.constructor.name} ${this.props.name}`;
+                    owl.onWillRender(() => assert.step(`[${prefix}] onWillRender`));
+                    owl.onWillStart(() => assert.step(`[${prefix}] onWillStart`));
+                    owl.onWillUpdateProps(() => assert.step(`[${prefix}] onWillUpdateProps`));
+                },
+            });
+        }
+        logLifeCycle(Field);
+        logLifeCycle(CharField);
+        logLifeCycle(IntegerField);
+        logLifeCycle(DateTimeField);
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                    <field name="date"/>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.verifySteps([
+            "[Field foo] onWillStart",
+            "[Field int_field] onWillStart",
+            "[Field date] onWillStart",
+            "[Field foo] onWillRender",
+            "[CharField foo] onWillStart",
+            "[Field int_field] onWillRender",
+            "[IntegerField int_field] onWillStart",
+            "[Field date] onWillRender",
+            "[DateTimeField date] onWillStart",
+            "[CharField foo] onWillRender",
+            "[IntegerField int_field] onWillRender",
+            "[DateTimeField date] onWillRender",
+        ]);
+
+        await editInput(target, ".o_field_widget[name=foo] input", "new value");
+
+        assert.verifySteps(["[Field foo] onWillRender", "[CharField foo] onWillRender"]);
+
+        await editInput(target, ".o_field_widget[name=int_field] input", "5846");
+
+        assert.verifySteps([
+            "[Field int_field] onWillRender",
+            "[IntegerField int_field] onWillRender",
+        ]);
+    });
 });
