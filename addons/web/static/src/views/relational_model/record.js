@@ -863,12 +863,26 @@ export class Record extends DataPoint {
             });
             Object.assign(changes, this._parseServerValues(otherChanges, this.data));
         }
-        this._applyChanges(changes);
-        await this._onChange(changes);
-        // FIXME: should we remove this from model? Only for standalone case
-        this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
-            record: this,
-            changes: this._getChanges(),
-        });
+        // changes inside the record set as value for a many2one field must trigger the onchange,
+        // but can't be considered as changes on the parent record, so here we detect if many2one
+        // fields really changed, and if not, we delete them from changes
+        for (const fieldName in changes) {
+            if (this.fields[fieldName].type === "many2one") {
+                const curVal = toRaw(this.data[fieldName]);
+                const nextVal = changes[fieldName];
+                if (curVal && nextVal && curVal[0] === nextVal[0] && curVal[1] === nextVal[1]) {
+                    delete changes[fieldName];
+                }
+            }
+        }
+        if (Object.keys(changes).length > 0) {
+            this._applyChanges(changes);
+            await this._onChange(changes);
+            // FIXME: should we remove this from model? Only for standalone case
+            this.model.bus.trigger("RELATIONAL_MODEL:RECORD_UPDATED", {
+                record: this,
+                changes: this._getChanges(),
+            });
+        }
     }
 }
