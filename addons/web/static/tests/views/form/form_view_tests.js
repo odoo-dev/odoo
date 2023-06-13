@@ -9592,7 +9592,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "context is correctly passed after save & new in FormViewDialog",
         async function (assert) {
             assert.expect(3);

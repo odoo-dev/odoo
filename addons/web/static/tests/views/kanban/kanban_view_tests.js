@@ -4931,7 +4931,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.tttt("prevent drag and drop of record if grouped by readonly", async (assert) => {
+    QUnit.test("prevent drag and drop of record if grouped by readonly", async (assert) => {
         // Whether the kanban is grouped by state, foo, bar or product_id
         // the user must not be able to drag and drop from one group to another,
         // as state, foo bar, product_id are made readonly one way or another.
@@ -8454,19 +8454,21 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(getCard(0), "oe_kanban_color_9");
     });
 
-    QUnit.test("edit the kanban color with translated colors resulting in the same terms", async (assert) => {
-        serverData.models.category.records[0].color = 12;
+    QUnit.test(
+        "edit the kanban color with translated colors resulting in the same terms",
+        async (assert) => {
+            serverData.models.category.records[0].color = 12;
 
-        patchWithCleanup(translatedTerms, {
-            "Purple": "Violet",
-            "Violet": "Violet",
-        });
+            patchWithCleanup(translatedTerms, {
+                Purple: "Violet",
+                Violet: "Violet",
+            });
 
-        await makeView({
-            type: "kanban",
-            resModel: "category",
-            serverData,
-            arch: `
+            await makeView({
+                type: "kanban",
+                resModel: "category",
+                serverData,
+                arch: `
                 <kanban>
                     <field name="color"/>
                     <templates>
@@ -8480,12 +8482,13 @@ QUnit.module("Views", (hooks) => {
                         </t>
                     </templates>
                 </kanban>`,
-        });
+            });
 
-        await toggleRecordDropdown(0);
-        await click(target, ".oe_kanban_colorpicker a.oe_kanban_color_9");
-        assert.hasClass(getCard(0), "oe_kanban_color_9");
-    });
+            await toggleRecordDropdown(0);
+            await click(target, ".oe_kanban_colorpicker a.oe_kanban_color_9");
+            assert.hasClass(getCard(0), "oe_kanban_color_9");
+        }
+    );
 
     QUnit.test("colorpicker doesnt appear when missing access rights", async (assert) => {
         await makeView({
@@ -9505,7 +9508,7 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("RPCs when (de)activating kanban view progressbar filters", async (assert) => {
+    QUnit.test("RPCs when (de)activating kanban view progressbar filters", async (assert) => {
         await makeView({
             type: "kanban",
             resModel: "partner",
@@ -9540,12 +9543,12 @@ QUnit.module("Views", (hooks) => {
             "read_progress_bar",
             "unity_web_search_read",
             "unity_web_search_read",
+            "web_read_group", // recomputes aggregates
             "unity_web_search_read",
             // activate filter
             "web_read_group", // recomputes aggregates
             "unity_web_search_read",
             // activate another filter (switching)
-            "web_read_group", // recomputes aggregates
             "unity_web_search_read",
         ]);
     });
@@ -9795,7 +9798,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "column progressbars and active filter on quick create with quick_create_view are updated",
         async (assert) => {
             serverData.views["partner,some_view_ref,form"] = `
@@ -9857,19 +9860,18 @@ QUnit.module("Views", (hooks) => {
                 "read_progress_bar",
                 "unity_web_search_read",
                 "unity_web_search_read",
-                "unity_web_search_read",
                 "web_read_group",
+                "unity_web_search_read",
                 "get_views",
                 "onchange2",
                 "create",
-                "read",
+                "web_read",
                 "read_progress_bar",
                 "web_read_group",
                 "web_read_group",
                 "onchange2",
-                "onchange2",
                 "create",
-                "read",
+                "web_read",
                 "read_progress_bar",
                 "web_read_group",
                 "web_read_group",
@@ -11248,7 +11250,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCard(0).innerText, "123");
     });
 
-    QUnit.tttt("Quick created record is rendered after load", async (assert) => {
+    QUnit.test("Quick created record is rendered after load", async (assert) => {
         let def;
         await makeView({
             type: "kanban",
@@ -11278,13 +11280,14 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.deepEqual(getCardTexts(0), ["0", "1"]);
-        assert.verifySteps(["web_read"]);
+        assert.verifySteps([]);
 
         def = makeDeferred();
 
         await quickCreateRecord(0);
         await editQuickCreateInput("display_name", "Test");
         await validateRecord();
+        assert.deepEqual(getCardTexts(0), ["0", "1"]);
 
         def.resolve();
         await nextTick();
@@ -12334,7 +12337,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["resequence"]);
     });
 
-    QUnit.tttt("dragged record cannot be saved", async (assert) => {
+    QUnit.test("dragged record cannot be saved", async (assert) => {
         let def;
         serverData.models.partner.records = [
             { id: 1, bar: false, state: "abc" },
@@ -12622,7 +12625,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getColumn(1).innerText, "xmo\n3");
     });
 
-    QUnit.tttt("drag record to folded column, with progressbars", async (assert) => {
+    QUnit.test("drag record to folded column, with progressbars", async (assert) => {
         serverData.models.partner.records[0].bar = false;
         await makeView({
             type: "kanban",
@@ -13045,7 +13048,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "drag & drop records grouped by m2o with m2o displayed in records",
         async (assert) => {
             const prom = makeDeferred();
@@ -13070,7 +13073,7 @@ QUnit.module("Views", (hooks) => {
                 mockRPC: async (route, args) => {
                     assert.step(args.method || route);
                     if (args.method === "read") {
-                        assert.deepEqual(args.args[0], readIds.shift());
+                        assert.deepEqual(args.args[0], readIds[1]);
                         await prom;
                     }
                 },
@@ -13099,7 +13102,7 @@ QUnit.module("Views", (hooks) => {
             prom.resolve();
             await nextTick();
 
-            assert.verifySteps(["write", "read", "/web/dataset/resequence", "read"]);
+            assert.verifySteps(["write", "/web/dataset/resequence", "read"]);
             assert.deepEqual(
                 [...target.querySelectorAll(".o_kanban_record")].map((el) => el.innerText),
                 ["hello", "hello", "hello", "xmo"]
@@ -13129,7 +13132,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_kanban_record").innerHTML, "<div></div>");
     });
 
-    QUnit.tttt("rerenders only once after resequencing records", async (assert) => {
+    QUnit.test("rerenders only once after resequencing records", async (assert) => {
         // actually it's not once, but twice, because we must render directly after
         // the drag&drop s.t. the dropped record remains where it has been dropped,
         // and once again after the reload
@@ -13173,9 +13176,9 @@ QUnit.module("Views", (hooks) => {
         );
 
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
-            "gnap3",
-            "blip3",
-            "blip3",
+            "gnap1",
+            "blip1",
+            "blip1",
             "yop1", // new instance
         ]);
 
@@ -13185,9 +13188,9 @@ QUnit.module("Views", (hooks) => {
         );
 
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
-            "blip5",
-            "blip5",
-            "yop3",
+            "blip1",
+            "blip1",
+            "yop1",
             "gnap1", // new instance
         ]);
     });
