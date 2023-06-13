@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
 import { RelationalModel } from "@web/views/relational_model/relational_model";
 import { Component, xml, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
@@ -36,6 +36,7 @@ class _Record extends Component {
             hooks: {
                 onRecordSaved: this.props.info.onRecordSaved || (() => {}),
                 onWillSaveRecord: this.props.info.onWillSaveRecord || (() => {}),
+                onRecordChanged: this.props.info.onRecordChanged || (() => {}),
             },
         };
         const modelServices = Object.fromEntries(
@@ -66,12 +67,6 @@ class _Record extends Component {
                 return this.model.root.load(nextProps.info.resId);
             }
         });
-
-        if (this.props.info.onRecordChanged) {
-            useBus(this.model.bus, "RELATIONAL_MODEL:RECORD_UPDATED", ({ detail }) => {
-                this.props.info.onRecordChanged(detail.record, detail.changes);
-            });
-        }
     }
 
     getActiveFields() {
