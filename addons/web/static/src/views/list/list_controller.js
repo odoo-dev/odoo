@@ -151,7 +151,7 @@ export class ListController extends Component {
         onWillPatch(() => {
             this.firstLoad = false;
         });
-        useBus(this.env.searchModel, 'direct-export-data', this.onDirectExportData.bind(this));
+        useBus(this.env.searchModel, "direct-export-data", this.onDirectExportData.bind(this));
     }
 
     get modelParams() {
@@ -177,7 +177,6 @@ export class ListController extends Component {
         return {
             config: modelConfig,
             state: this.props.state?.modelState,
-            handleField: this.archInfo.handleField,
             groupByInfo,
             limit: this.archInfo.limit || this.props.limit,
             countLimit: this.archInfo.countLimit,

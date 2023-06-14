@@ -121,6 +121,7 @@ export class KanbanArchParser extends XMLParser {
                 }
                 if (fieldInfo.widget === "handle") {
                     handleField = name;
+                    fieldInfo.isHandle = true;
                 }
             }
             if (node.tagName === "widget") {
