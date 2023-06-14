@@ -31,8 +31,8 @@ export class DateTimeInput extends Component {
     setup() {
         useDateTimePicker({
             format: this.props.format,
-            pickerProps: (props) =>
-                omit(props, "format", "placeholder", "id", "onChange", "onApply"),
+            pickerProps: () =>
+                omit(this.props, "format", "placeholder", "id", "onChange", "onApply"),
             onApply: (...args) => this.props.onApply?.(...args),
             onChange: (...args) => this.props.onChange?.(...args),
         });

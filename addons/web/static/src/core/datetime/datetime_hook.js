@@ -1,19 +1,11 @@
 /** @odoo-module **/
 
-import {
-    onPatched,
-    onWillStart,
-    onWillUpdateProps,
-    reactive,
-    useComponent,
-    useEffect,
-    useEnv,
-    useRef,
-} from "@odoo/owl";
+import { onPatched, onWillRender, reactive, useEffect, useEnv, useRef } from "@odoo/owl";
 import { areDatesEqual } from "../l10n/dates";
 import { usePopover } from "../popover/popover_hook";
 import { registry } from "../registry";
 import { ensureArray, zip, zipWith } from "../utils/arrays";
+import { shallowEqual } from "../utils/objects";
 import { DateTimePicker } from "./datetime_picker";
 import { DateTimePickerPopover } from "./datetime_picker_popover";
 
@@ -38,6 +30,13 @@ import { DateTimePickerPopover } from "./datetime_picker_popover";
  * @template {HTMLElement} T
  * @typedef {{ el: T | null }} OwlRef
  */
+
+/**
+ * @param {DateTimePickerProps} [props1]
+ * @param {DateTimePickerProps} [props2]
+ */
+const arePropsEqual = (props1, props2) =>
+    shallowEqual(props1, props2, (a, b) => areDatesEqual(a, b) || shallowEqual(a, b));
 
 const FOCUS_CLASSNAME = "text-primary";
 
@@ -186,22 +185,6 @@ export const useDateTimePicker = (hookParams) => {
     };
 
     /**
-     * @param {DateTimePickerProps} nextProps
-     */
-    const onPropsUpdated = (nextProps) => {
-        const { pickerProps: getPickerProps } = hookParams;
-        const nextPickerProps =
-            typeof getPickerProps === "function"
-                ? getPickerProps(nextProps || comp.props)
-                : getPickerProps;
-
-        Object.assign(pickerProps, nextPickerProps);
-
-        lastChangedDate = lastAppliedDate = pickerProps.value;
-        inputsChanged = ensureArray(pickerProps.value).map(() => false);
-    };
-
-    /**
      * @template {"format" | "parse"} T
      * @param {T} operation
      * @param {T extends "format" ? DateTime : string} value
@@ -319,7 +302,6 @@ export const useDateTimePicker = (hookParams) => {
     const targetRef = typeof target === "string" ? useRef(target) : target;
     const inputRefs = [useRef("start-date"), useRef("end-date")];
     const env = useEnv();
-    const comp = useComponent();
     const popover = usePopover(DateTimePickerPopover, {
         onClose: () => {
             if (!allowOnClose) {
@@ -370,13 +352,26 @@ export const useDateTimePicker = (hookParams) => {
     let inputsChanged = [];
     let lastAppliedDate;
     let lastChangedDate;
+    let lastPickerProps;
     let lastIsRange = isRange(pickerProps.value);
     let shouldFocus = false;
 
     subscribeToPickerProps();
 
-    onWillStart(onPropsUpdated);
-    onWillUpdateProps(onPropsUpdated);
+    onWillRender(() => {
+        const { pickerProps: getProps } = hookParams;
+        const nextPickerProps = typeof getProps === "function" ? getProps() : getProps;
+
+        if (arePropsEqual(lastPickerProps, nextPickerProps)) {
+            return;
+        }
+        lastPickerProps = nextPickerProps;
+
+        Object.assign(pickerProps, nextPickerProps);
+
+        lastChangedDate = lastAppliedDate = pickerProps.value;
+        inputsChanged = ensureArray(pickerProps.value).map(() => false);
+    });
 
     onPatched(() => {
         if (!shouldFocus || !popover.isOpen) {
