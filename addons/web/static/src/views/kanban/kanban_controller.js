@@ -154,10 +154,10 @@ export class KanbanController extends Component {
             fields,
             openGroupsByDefault: true,
         };
+
         return {
             config: modelConfig,
             state: this.props.state?.modelState,
-            handleField: archInfo.handleField,
             limit: archInfo.limit || limit || 40,
             groupsLimit: Number.MAX_SAFE_INTEGER, // no limit
             countLimit: archInfo.countLimit,

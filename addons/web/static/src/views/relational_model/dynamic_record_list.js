@@ -28,8 +28,8 @@ export class DynamicRecordList extends DynamicList {
         return record.resId;
     }
 
-    getDPHandleField(record, handleField) {
-        return record.data[handleField];
+    getDPHandleField(record) {
+        return record.data[this.handleField];
     }
 
     /**
@@ -125,7 +125,7 @@ export class DynamicRecordList extends DynamicList {
                 mode,
             },
             data,
-            { manuallyAdded: !data.id },
+            { manuallyAdded: !data.id }
         );
     }
 

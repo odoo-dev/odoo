@@ -399,8 +399,7 @@ export class ListRenderer extends Component {
         if (!this.props.list.canResequence()) {
             return false;
         }
-        const orderBy = this.props.list.orderBy;
-        const handleField = this.props.archInfo.handleField;
+        const { handleField, orderBy } = this.props.list;
         return !orderBy.length || (orderBy.length && orderBy[0].name === handleField);
     }
 
@@ -1998,7 +1997,7 @@ export class ListRenderer extends Component {
         element.classList.remove("o_row_draggable");
         const refId = previous ? previous.dataset.id : null;
         this.resequencePromise = this.props.list.resequence(dataRowId, refId, {
-            handleField: this.props.archInfo.handleField,
+            handleField: this.props.list.handleField,
         });
         await this.resequencePromise;
         element.classList.add("o_row_draggable");

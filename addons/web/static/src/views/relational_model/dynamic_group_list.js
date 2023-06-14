@@ -216,8 +216,8 @@ export class DynamicGroupList extends DynamicList {
         return group.value;
     }
 
-    getDPHandleField(group, handleField) {
-        return group[handleField];
+    getDPHandleField(group) {
+        return group[this.handleField];
     }
 
     /**

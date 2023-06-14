@@ -1,11 +1,12 @@
 /* @odoo-module */
 
-import { DataPoint } from "./datapoint";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
+import { DataPoint } from "./datapoint";
 import { Record } from "./record";
+import { DEFAULT_HANDLE_FIELD } from "./utils";
 
 export class DynamicList extends DataPoint {
     /**
@@ -14,6 +15,12 @@ export class DynamicList extends DataPoint {
      */
     setup(config) {
         super.setup(...arguments);
+        this.handleField = Object.keys(this.activeFields).find(
+            (fieldName) => this.activeFields[fieldName].isHandle
+        );
+        if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
+            this.handleField = DEFAULT_HANDLE_FIELD;
+        }
         this.groupBy = [];
         this.isDomainSelected = false;
         this.evalContext = this.context;
@@ -51,7 +58,7 @@ export class DynamicList extends DataPoint {
     }
 
     canResequence() {
-        return !!this.model.handleField;
+        return !!this.handleField;
     }
 
     deleteRecords(records = []) {
@@ -280,7 +287,7 @@ export class DynamicList extends DataPoint {
         if (this.resModel === resModel && !this.canResequence()) {
             return originalList;
         }
-        const handleField = this.model.handleField;
+        const handleField = this.handleField;
         const dataPoints = [...originalList];
         const order = this.orderBy.find((o) => o.name === handleField);
         const asc = !order || order.asc;
