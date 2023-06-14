@@ -690,7 +690,7 @@ export class Record extends DataPoint {
                 };
                 proms.push(
                     this.model.orm.call(relation, "web_read", [[id]], kwargs).then((records) => {
-                        changes[fieldName] = [records[0].id, records[0].display_name];
+                        changes[fieldName] = [records[0].id, records[0].display_name || ""];
                     })
                 );
             } else {
