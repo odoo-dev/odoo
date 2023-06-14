@@ -242,7 +242,10 @@ QUnit.module("Fields", (hooks) => {
             // Needed to have two new records in a single stroke
             serverData.models.partner.onchanges = {
                 foo: function (obj) {
-                    obj.p = [[5], [0, 0, { trululu: false }], [0, 0, { trululu: false }]];
+                    obj.p = [
+                        [0, 0, { trululu: false }],
+                        [0, 0, { trululu: false }],
+                    ];
                 },
             };
 
@@ -279,7 +282,7 @@ QUnit.module("Fields", (hooks) => {
             // of the lines of "p"
             await dragAndDrop("tbody tr:nth-child(2) .o_handle_cell", "tbody tr", "top");
 
-            assert.verifySteps(["onchange partner"]);
+            assert.verifySteps(["onchange2 partner"]);
         }
     );
 
