@@ -13133,17 +13133,22 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("rerenders only once after resequencing records", async (assert) => {
-        // actually it's not once, but twice, because we must render directly after
-        // the drag&drop s.t. the dropped record remains where it has been dropped,
-        // and once again after the reload
+        let renderCount = 0;
+        let def;
         class MyField extends Component {
             setup() {
-                this.renderCount = 0;
-                owl.onWillRender(() => this.renderCount++);
+                owl.onWillRender(() => {
+                    renderCount++;
+                });
+            }
+            get renderCount() {
+                return renderCount;
             }
         }
         MyField.template = xml`<span t-esc="renderCount"/>`;
         registry.category("fields").add("my_field", { component: MyField });
+
+        serverData.models.partner.onchanges = { product_id: () => {} };
 
         await makeView({
             type: "kanban",
@@ -13152,6 +13157,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <kanban>
                     <templates>
+                        <field name="product_id"/>
                         <t t-name="kanban-box">
                             <div>
                                 <field name="foo"/>
@@ -13161,14 +13167,43 @@ QUnit.module("Views", (hooks) => {
                     </templates>
                 </kanban>`,
             groupBy: ["product_id"],
+            mockRPC: async (route, { method }) => {
+                if (method === "onchange2") {
+                    await def;
+                }
+            },
         });
 
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
             "yop1",
-            "gnap1",
-            "blip1",
-            "blip1",
+            "gnap2",
+            "blip3",
+            "blip4",
         ]);
+
+        def = makeDeferred();
+        await dragAndDrop(
+            ".o_kanban_group:first-child .o_kanban_record",
+            ".o_kanban_group:nth-child(2)"
+        );
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
+            "gnap2",
+            "blip3",
+            "blip4",
+            "yop5",
+        ]);
+
+        def.resolve();
+
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
+            "gnap2",
+            "blip3",
+            "blip4",
+            "yop5",
+        ]);
+
+        def = makeDeferred();
 
         await dragAndDrop(
             ".o_kanban_group:first-child .o_kanban_record",
@@ -13176,22 +13211,19 @@ QUnit.module("Views", (hooks) => {
         );
 
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
-            "gnap1",
-            "blip1",
-            "blip1",
-            "yop1", // new instance
+            "blip3",
+            "blip4",
+            "yop5",
+            "gnap6",
         ]);
 
-        await dragAndDrop(
-            ".o_kanban_group:first-child .o_kanban_record",
-            ".o_kanban_group:nth-child(2)"
-        );
+        def.resolve();
 
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_kanban_record")), [
-            "blip1",
-            "blip1",
-            "yop1",
-            "gnap1", // new instance
+            "blip3",
+            "blip4",
+            "yop5",
+            "gnap6",
         ]);
     });
 
