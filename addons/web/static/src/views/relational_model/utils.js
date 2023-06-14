@@ -7,7 +7,17 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { omit } from "@web/core/utils/objects";
 import { orderByToString } from "@web/views/utils";
 
-function makeActiveField({ context, invisible, readonly, required, onChange, forceSave } = {}) {
+export const DEFAULT_HANDLE_FIELD = "sequence";
+
+function makeActiveField({
+    context,
+    invisible,
+    readonly,
+    required,
+    onChange,
+    forceSave,
+    isHandle,
+} = {}) {
     return {
         context: context || "{}",
         invisible: invisible || false,
@@ -15,6 +25,7 @@ function makeActiveField({ context, invisible, readonly, required, onChange, for
         required: required || false,
         onChange: onChange || false,
         forceSave: forceSave || false,
+        isHandle: isHandle || false,
     };
 }
 
@@ -99,6 +110,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
             required: modifiers.required,
             onChange: fieldNode.onChange,
             forceSave: fieldNode.forceSave,
+            isHandle: fieldNode.isHandle,
         });
         if (["one2many", "many2many"].includes(fields[fieldName].type)) {
             if (fieldNode.views) {

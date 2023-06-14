@@ -112,6 +112,7 @@ export class ListArchParser extends XMLParser {
                 node.setAttribute("field_id", fieldId);
                 if (fieldInfo.widget === "handle") {
                     handleField = fieldInfo.name;
+                    fieldInfo.isHandle = true;
                 }
                 if (this.isColumnVisible(fieldInfo.modifiers.column_invisible)) {
                     const label = fieldInfo.field.label;
@@ -231,7 +232,6 @@ export class ListArchParser extends XMLParser {
 
         return {
             creates,
-            handleField,
             headerButtons,
             fieldNodes,
             widgetNodes,
