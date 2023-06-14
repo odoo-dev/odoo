@@ -52,7 +52,7 @@ export class Record extends DataPoint {
         this.selected = false; // TODO: rename into isSelected?
         this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
         this._invalidFields = new Set();
-        this._unsetRequiredFields = new Set();
+        this._unsetRequiredFields = markRaw(new Set());
         this._closeInvalidFieldsNotification = () => {};
     }
 
