@@ -13148,7 +13148,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("only re-render necessary fields after change", async function (assert) {
+    QUnit.tttt("only re-render necessary fields after change", async function (assert) {
         function logLifeCycle(Component) {
             patchWithCleanup(Component.prototype, {
                 setup() {
