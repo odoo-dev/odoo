@@ -4,7 +4,7 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { DataPoint } from "./datapoint";
-import { patchActiveFields, getId, fromUnityToServerValues } from "./utils";
+import { DEFAULT_HANDLE_FIELD, fromUnityToServerValues, getId, patchActiveFields } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
@@ -48,6 +48,13 @@ export class StaticList extends DataPoint {
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
         this.count = this.resIds.length;
+
+        this.handleField = Object.keys(this.activeFields).find(
+            (fieldName) => this.activeFields[fieldName].isHandle
+        );
+        if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
+            this.handleField = DEFAULT_HANDLE_FIELD;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -103,10 +110,12 @@ export class StaticList extends DataPoint {
      */
     addNew(params) {
         return this.model.mutex.exec(async () => {
+            const { activeFields, context, position, withoutParent } = params;
             const record = await this._createNewRecordDatapoint({
-                activeFields: params.activeFields,
-                context: params.context,
-                withoutParent: params.withoutParent,
+                activeFields,
+                context,
+                position,
+                withoutParent,
                 manuallyAdded: true,
             });
             this._addRecord(record, { position: params.position });
@@ -126,7 +135,7 @@ export class StaticList extends DataPoint {
     }
 
     canResequence() {
-        return false;
+        return this.handleField;
     }
 
     load({ limit, offset, orderBy }) {
@@ -196,6 +205,74 @@ export class StaticList extends DataPoint {
         this._commands = [x2ManyCommands.replaceWith(ids)];
         this._currentIds = [...ids];
         this.count = this._currentIds.length;
+        this._onChange();
+    }
+
+    async resequence(movedId, targetId) {
+        const records = [...this.records];
+        const order = this.orderBy.find((o) => o.name === this.handleField);
+        const asc = !order || order.asc;
+
+        // Find indices
+        const fromIndex = records.findIndex((r) => r.id === movedId);
+        let toIndex = 0;
+        if (targetId !== null) {
+            const targetIndex = records.findIndex((r) => r.id === targetId);
+            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+        }
+
+        const getSequence = (rec) => rec && rec.data[this.handleField];
+
+        // Determine what records need to be modified
+        const firstIndex = Math.min(fromIndex, toIndex);
+        const lastIndex = Math.max(fromIndex, toIndex) + 1;
+        let reorderAll = false;
+        let lastSequence = (asc ? -1 : 1) * Infinity;
+        for (let index = 0; index < records.length; index++) {
+            const sequence = getSequence(records[index]);
+            if (
+                ((index < firstIndex || index >= lastIndex) &&
+                    ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) ||
+                (index >= firstIndex && index < lastIndex && lastSequence === sequence)
+            ) {
+                reorderAll = true;
+            }
+            lastSequence = sequence;
+        }
+
+        // Perform the resequence in the list of records
+        const [record] = records.splice(fromIndex, 1);
+        records.splice(toIndex, 0, record);
+
+        // Creates the list of to modify
+        let toReorder = records;
+        if (!reorderAll) {
+            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
+            if (fromIndex < toIndex) {
+                toReorder.push(record);
+            } else {
+                toReorder.unshift(record);
+            }
+        }
+        if (!asc) {
+            toReorder.reverse();
+        }
+
+        const sequences = toReorder.map(getSequence);
+        const offset = sequences.length && Math.min(...sequences);
+
+        const proms = [];
+        for (const [i, record] of Object.entries(toReorder)) {
+            proms.push(
+                record._update(
+                    { [this.handleField]: offset + Number(i) },
+                    { withoutParentOnchange: true }
+                )
+            );
+        }
+        await Promise.all(proms);
+
+        this.records = records;
         this._onChange();
     }
 
@@ -414,7 +491,7 @@ export class StaticList extends DataPoint {
         const { CREATE, UPDATE } = x2ManyCommands;
         const options = {
             parentRecord: this._parent,
-            onChange: () => {
+            onChange: (changes, { withoutParentOnchange }) => {
                 if (record._notAddedYet) {
                     return;
                 }
@@ -424,7 +501,9 @@ export class StaticList extends DataPoint {
                 if (!hasCommand) {
                     this._commands.push([UPDATE, id]);
                 }
-                this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+                if (!withoutParentOnchange) {
+                    this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+                }
             },
             virtualId: params.virtualId,
             manuallyAdded: params.manuallyAdded,
@@ -455,6 +534,34 @@ export class StaticList extends DataPoint {
             },
             { changes, evalContext: this.evalContext }
         );
+        if (this.handleField && this.records.length) {
+            const position = params.position || "bottom";
+            const order = this.orderBy.find((order) => order.name === this.handleField);
+            const asc = !order || order.asc;
+            let value;
+            if (position === "top") {
+                const isOnFirstPage = this.offset === 0;
+                value = this.records[0].data[this.handleField];
+                if (isOnFirstPage) {
+                    if (asc) {
+                        value = value > 0 ? value - 1 : 0;
+                    } else {
+                        value = value + 1;
+                    }
+                }
+            } else if (position === "bottom") {
+                value = this.records[this.records.length - 1].data[this.handleField];
+                const isOnLastPage = this.limit + this.offset >= this.count;
+                if (isOnLastPage) {
+                    if (asc) {
+                        value = value + 1;
+                    } else {
+                        value = value > 0 ? value - 1 : 0;
+                    }
+                }
+            }
+            values[this.handleField] = value;
+        }
         return this._createRecordDatapoint(values, {
             mode: "edit",
             virtualId: getId("virtual"),
