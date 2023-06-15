@@ -271,7 +271,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("char field translatable", async function (assert) {
+    QUnit.test("char field translatable", async function (assert) {
         assert.expect(13);
 
         serverData.models.partner.fields.foo.translate = true;
@@ -465,7 +465,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("html field translatable", async function (assert) {
+    QUnit.test("html field translatable", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.fields.foo.translate = true;
