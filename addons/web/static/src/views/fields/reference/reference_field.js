@@ -198,13 +198,13 @@ export class ReferenceField extends Component {
         const resId = parseInt(_resId, 10);
         if (resModel && resId) {
             if (!this._nameGetCache[recordData]) {
-                const result = await this.orm.nameGet(resModel, [resId]);
-                this._nameGetCache[recordData] = result[0][1];
+                this._nameGetCache[recordData] = this.orm.nameGet(resModel, [resId]);
             }
+            const result = await this._nameGetCache[recordData];
             return {
                 resId,
                 resModel,
-                displayName: this._nameGetCache[recordData],
+                displayName: result[0][1],
             };
         }
         return false;
@@ -236,10 +236,10 @@ export class ReferenceField extends Component {
             return false;
         }
         if (!this._modelNameCache[modelId]) {
-            const result = await this.orm.read("ir.model", [modelId], ["model"]);
-            this._modelNameCache[modelId] = result[0].model;
+            this._modelNameCache[modelId] = this.orm.read("ir.model", [modelId], ["model"]);
         }
-        return this._modelNameCache[modelId];
+        const result = await this._modelNameCache[modelId];
+        return result[0].model;
     }
 }
 
