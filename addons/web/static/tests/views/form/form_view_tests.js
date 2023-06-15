@@ -8931,7 +8931,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
 
-    QUnit.tttt("save new record before opening translate dialog", async function (assert) {
+    QUnit.test("save new record before opening translate dialog", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
         patchWithCleanup(localization, {
@@ -8972,7 +8972,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "onchange2"]);
         assert.containsOnce(target, ".o_form_editable");
         await click(target, ".o_field_translate.btn-link");
-        assert.verifySteps(["create", "read", "get_installed", "get_field_translations"]);
+        assert.verifySteps(["create", "web_read", "get_installed", "get_field_translations"]);
         assert.containsOnce(target, ".modal");
         assert.strictEqual(target.querySelector(".modal-title").textContent, "Translate: foo");
     });
