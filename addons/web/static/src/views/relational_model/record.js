@@ -829,7 +829,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async _update(changes, { withoutOnchange } = {}) {
+    async _update(changes, { withoutOnchange, withoutParentOnchange } = {}) {
         this.isDirty = true;
         const prom = this._preprocessChanges(changes);
         if (prom && !this.model._urgentSave) {
@@ -880,7 +880,7 @@ export class Record extends DataPoint {
         }
         if (Object.keys(changes).length > 0) {
             this._applyChanges(changes);
-            await this._onChange(changes);
+            await this._onChange(changes, { withoutParentOnchange });
             return this.model.hooks.onRecordChanged(this, this._getChanges());
         }
     }

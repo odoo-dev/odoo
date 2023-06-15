@@ -236,7 +236,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("One2ManyField");
 
-    QUnit.tttt(
+    QUnit.test(
         "New record with a o2m also with 2 new records, ordered, and resequenced",
         async function (assert) {
             // Needed to have two new records in a single stroke
@@ -405,7 +405,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".o_field_many2one input");
     });
 
-    QUnit.tttt("resequence a x2m in a form view dialog from another x2m", async function (assert) {
+    QUnit.test("resequence a x2m in a form view dialog from another x2m", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -437,7 +437,6 @@ QUnit.module("Fields", (hooks) => {
                         2,
                         {
                             partner_ids: [
-                                [6, false, [2, 4]],
                                 [1, 2, { int_field: 0 }],
                                 [1, 4, { int_field: 1 }],
                             ],
@@ -446,7 +445,7 @@ QUnit.module("Fields", (hooks) => {
                 }
             },
         });
-        assert.verifySteps(["get_views", "read", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
         await click(target, ".o_data_cell");
         assert.containsOnce(target, ".modal");
@@ -456,7 +455,7 @@ QUnit.module("Fields", (hooks) => {
             ),
             ["aaa", "second record"]
         );
-        assert.verifySteps(["read", "read"]);
+        assert.verifySteps(["web_read"]);
 
         await dragAndDrop(".modal tr:nth-child(2) .o_handle_cell", "tbody tr", "top");
         assert.deepEqual(
@@ -469,7 +468,7 @@ QUnit.module("Fields", (hooks) => {
 
         await clickSave(target.querySelector(".modal"));
         await clickSave(target);
-        assert.verifySteps(["write", "read", "read"]);
+        assert.verifySteps(["write", "web_read"]);
     });
 
     QUnit.test("one2many list editable with cell readonly modifier", async function (assert) {
@@ -773,7 +772,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, "span.o_row_handle");
     });
 
-    QUnit.tttt("embedded one2many with handle widget", async function (assert) {
+    QUnit.test("embedded one2many with handle widget", async function (assert) {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
         serverData.models.partner.onchanges = {
             turtles: function () {},
@@ -794,7 +793,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             async mockRPC(route, args) {
-                if (args.method === "onchange") {
+                if (args.method === "onchange2") {
                     assert.step("onchange");
                 }
             },
@@ -1053,7 +1052,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("onchange for embedded one2many with handle widget", async function (assert) {
+    QUnit.test("onchange for embedded one2many with handle widget", async function (assert) {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
         let partnerOnchange = 0;
         serverData.models.partner.onchanges = {
@@ -1101,7 +1100,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(partnerOnchange, 1, "should trigger only one onchange on the parent");
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange for embedded one2many with handle widget using same sequence",
         async function (assert) {
             serverData.models.turtle.records[0].turtle_int = 1;
@@ -1162,32 +1161,28 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
-        "onchange (with command 5) for embedded one2many with handle widget",
-        async function (assert) {
-            const ids = [];
-            for (let i = 10; i < 50; i++) {
-                const id = 10 + i;
-                ids.push(id);
-                serverData.models.turtle.records.push({
-                    id: id,
-                    turtle_int: 0,
-                    turtle_foo: "#" + id,
-                });
-            }
-            ids.push(1, 2, 3);
-            serverData.models.partner.records[0].turtles = ids;
-            serverData.models.partner.onchanges = {
-                turtles: function (obj) {
-                    obj.turtles = [[5]].concat(obj.turtles);
-                },
-            };
+    QUnit.test("onchange for embedded one2many with handle widget", async function (assert) {
+        const ids = [];
+        for (let i = 10; i < 50; i++) {
+            const id = 10 + i;
+            ids.push(id);
+            serverData.models.turtle.records.push({
+                id: id,
+                turtle_int: 0,
+                turtle_foo: "#" + id,
+            });
+        }
+        ids.push(1, 2, 3);
+        serverData.models.partner.records[0].turtles = ids;
+        serverData.models.partner.onchanges = {
+            turtles: function (obj) {},
+        };
 
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
                     <form>
                         <field name="turtles">
                             <tree editable="bottom" default_order="turtle_int">
@@ -1196,37 +1191,39 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                     </form>`,
-                resId: 1,
-            });
+            resId: 1,
+        });
 
-            await click(target, "div[name=turtles] .o_pager_next");
+        await click(target, "div[name=turtles] .o_pager_next");
 
-            assert.deepEqual(
-                getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                ["yop", "blip", "kawa"]
-            );
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            "yop",
+            "blip",
+            "kawa",
+        ]);
 
-            await click(target.querySelector(".o_data_cell.o_list_char"));
-            await editInput(target, '.o_list_renderer div[name="turtle_foo"] input', "blurp");
+        await click(target.querySelector(".o_data_cell.o_list_char"));
+        await editInput(target, '.o_list_renderer div[name="turtle_foo"] input', "blurp");
 
-            // Drag and drop the third line in second position
-            await dragAndDrop("tbody tr:nth-child(3) .o_handle_cell", "tbody tr:nth-child(2)");
+        // Drag and drop the third line in second position
+        await dragAndDrop("tbody tr:nth-child(3) .o_handle_cell", "tbody tr:nth-child(2)");
 
-            // need to unselect row...
-            assert.deepEqual(
-                getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                ["blurp", "kawa", "blip"]
-            );
+        // need to unselect row...
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            "blurp",
+            "kawa",
+            "blip",
+        ]);
 
-            await clickSave(target);
-            await click(target, 'div[name="turtles"] .o_pager_next');
+        await clickSave(target);
+        await click(target, 'div[name="turtles"] .o_pager_next');
 
-            assert.deepEqual(
-                getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                ["blurp", "kawa", "blip"]
-            );
-        }
-    );
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            "blurp",
+            "kawa",
+            "blip",
+        ]);
+    });
 
     QUnit.tttt(
         "onchange with modifiers for embedded one2many on the second page",
@@ -2072,7 +2069,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("embedded one2many (editable list) with handle widget", async function (assert) {
+    QUnit.test("embedded one2many (editable list) with handle widget", async function (assert) {
         serverData.models.partner.records[0].p = [1, 2, 4];
         await makeView({
             type: "form",
@@ -2094,7 +2091,6 @@ QUnit.module("Fields", (hooks) => {
                     assert.deepEqual(args.args[1].p, [
                         [1, 2, { int_field: 0 }],
                         [1, 4, { int_field: 1 }],
-                        [4, 1, false],
                     ]);
                 }
             },
@@ -8373,7 +8369,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with sequence field, override default_get, bottom when inline",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
@@ -8415,7 +8411,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with sequence field, override default_get, top when inline",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
@@ -8458,7 +8454,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with sequence field, override default_get, bottom when popup",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
@@ -8517,7 +8513,7 @@ QUnit.module("Fields", (hooks) => {
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
 
-            serverData.models.turtle.fields.turtle_int.default = 10;
+            serverData.models.turtle.fields.turtle_int.default = 5;
 
             await makeView({
                 type: "form",
@@ -8539,14 +8535,11 @@ QUnit.module("Fields", (hooks) => {
             // click add a new line
             // check turtle_int for new is the current max of the page
             await addRow(target);
-            assert.strictEqual(
-                target.querySelector('.modal [name="turtle_int"] input').value,
-                "10"
-            );
+            assert.strictEqual(target.querySelector('.modal [name="turtle_int"] input').value, "9");
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many with sequence field, override default_get, last page",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [3, 2, 1];
@@ -8648,7 +8641,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("one2many with several pages, onchange and default order", async function (assert) {
+    QUnit.test("one2many with several pages, onchange and default order", async function (assert) {
         // This test reproduces a specific scenario where a one2many is displayed
         // over several pages, and has a default order such that a record that
         // would normally be on page 1 is actually on another page. Moreover,
@@ -8673,7 +8666,7 @@ QUnit.module("Fields", (hooks) => {
                     );
                     return [1, id, pick(record, "turtle_int", "turtle_foo", "partner_ids")];
                 });
-                obj.turtles = [[5]].concat(res);
+                obj.turtles = res;
             },
         };
 
@@ -8692,7 +8685,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                var ids = args.method === "read" ? " [" + args.args[0] + "]" : "";
+                var ids = args.method === "web_read" ? " [" + args.args[0] + "]" : "";
                 assert.step(args.method + ids);
             },
             resId: 1,
@@ -8718,12 +8711,8 @@ QUnit.module("Fields", (hooks) => {
 
         assert.verifySteps([
             "get_views",
-            "read [1]", // main record
-            "read [1,2,3]", // one2many (turtle_foo, all records)
-            "read [2,3]", // one2many (all fields in view, records of first page)
-            "read [2,4]", // many2many inside one2many (partner_ids), first page only
-            "onchange",
-            "read [1]", // AAB FIXME 4 (draft fixing taskid-2323491):
+            "web_read [1]", // main record
+            "onchange2",
             // this test's purpose is to assert that this rpc isn't
             // done, but yet it is. Actually, it wasn't before because mockOnChange
             // returned [1] as command list, instead of [[6, false, [1]]], so basically
@@ -8803,7 +8792,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange in a one2many with non inline view on an existing record",
         async function (assert) {
             serverData.models.partner.fields.sequence = { string: "Sequence", type: "integer" };
@@ -8841,7 +8830,7 @@ QUnit.module("Fields", (hooks) => {
             // swap 2 lines in the one2many
             await dragAndDrop("tbody tr:nth-child(2) .o_handle_cell", "tbody tr", "top");
 
-            assert.verifySteps(["get_views", "get_views", "read", "read", "onchange", "onchange"]);
+            assert.verifySteps(["get_views", "get_views", "web_read", "onchange2", "onchange2"]);
         }
     );
 
@@ -10752,7 +10741,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "reordering embedded one2many with handle widget starting with same sequence",
         async function (assert) {
             serverData.models.turtle = {
