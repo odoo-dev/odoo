@@ -3,7 +3,6 @@
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { many2OneField, Many2OneField } from "../many2one/many2one_field";
-import { useService } from "@web/core/utils/hooks";
 import { effect } from "@web/core/utils/reactive";
 
 import { Component, useState, onWillStart } from "@odoo/owl";
@@ -51,11 +50,6 @@ export class ReferenceField extends Component {
     };
 
     setup() {
-        this.orm = useService("orm");
-
-        this._nameGetCache = {};
-        this._modelNameCache = {};
-
         /** @type {{formattedCharValue?: ReferenceValue, modelName?: string}} */
         this.state = useState({
             formattedCharValue: undefined, // Value extracted from reference char field
@@ -197,10 +191,12 @@ export class ReferenceField extends Component {
         const [resModel, _resId] = recordData.split(",");
         const resId = parseInt(_resId, 10);
         if (resModel && resId) {
-            if (!this._nameGetCache[recordData]) {
-                this._nameGetCache[recordData] = this.orm.nameGet(resModel, [resId]);
+            const { specialDataCaches, orm } = props.record.model;
+            const key = `__reference__name_get-${recordData}`;
+            if (!specialDataCaches[key]) {
+                specialDataCaches[key] = orm.nameGet(resModel, [resId]);
             }
-            const result = await this._nameGetCache[recordData];
+            const result = await specialDataCaches[key];
             return {
                 resId,
                 resModel,
@@ -235,10 +231,12 @@ export class ReferenceField extends Component {
         if (!modelId) {
             return false;
         }
-        if (!this._modelNameCache[modelId]) {
-            this._modelNameCache[modelId] = this.orm.read("ir.model", [modelId], ["model"]);
+        const { specialDataCaches, orm } = props.record.model;
+        const key = `__reference__ir_model-${modelId}`;
+        if (!specialDataCaches[key]) {
+            specialDataCaches[key] = orm.read("ir.model", [modelId], ["model"]);
         }
-        const result = await this._modelNameCache[modelId];
+        const result = await specialDataCaches[key];
         return result[0].model;
     }
 }
