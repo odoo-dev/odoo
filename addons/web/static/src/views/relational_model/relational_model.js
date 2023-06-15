@@ -144,7 +144,7 @@ export class RelationalModel extends Model {
                 this.handleField = DEFAULT_HANDLE_FIELD;
             }
         }
-        this.specialDataCaches = params.state?.specialDataCaches || {};
+        this.specialDataCaches = markRaw(params.state?.specialDataCaches || {});
 
         this._urgentSave = false;
     }
