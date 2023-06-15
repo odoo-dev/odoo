@@ -6,7 +6,7 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { getNextTabableElement, getPreviousTabableElement } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { shallowEqual } from "@web/core/utils/arrays";
+import { shallowEqual } from "@web/core/utils/objects";
 import { sprintf } from "@web/core/utils/strings";
 import { _lt } from "@web/core/l10n/translation";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";

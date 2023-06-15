@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { shallowEqual } from "@web/core/utils/arrays";
+import { shallowEqual } from "@web/core/utils/objects";
 import { evaluate, formatAST, parseExpr } from "./py_js/py";
 import { toPyValue } from "./py_js/py_utils";
 
