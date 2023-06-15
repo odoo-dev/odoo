@@ -4,16 +4,9 @@ import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { many2OneField, Many2OneField } from "../many2one/many2one_field";
 import { useService } from "@web/core/utils/hooks";
+import { effect } from "@web/core/utils/reactive";
 
-import { Component, useState, reactive, onWillStart } from "@odoo/owl";
-
-//FIXME During rebase, use the one from web utils
-export function effect(cb, deps) {
-    const reactiveDeps = reactive(deps, () => {
-        cb(...reactiveDeps);
-    });
-    cb(...reactiveDeps);
-}
+import { Component, useState, onWillStart } from "@odoo/owl";
 
 /**
  * @typedef ReferenceValue
