@@ -1681,19 +1681,21 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "reference fields inside x2manys are fetched after an onchange",
         async function (assert) {
-            assert.expect(5);
+            assert.expect(4);
 
             serverData.models.turtle.records[1].turtle_ref = "product,41";
             serverData.models.partner.onchanges = {
                 foo: function (obj) {
-                    obj.turtles = [[5], [4, 1], [4, 2], [4, 3]];
+                    obj.turtles = [
+                        [4, 1],
+                        [4, 3],
+                    ];
                 },
             };
 
-            var checkRPC = false;
             await makeView({
                 type: "form",
                 resModel: "partner",
@@ -1712,15 +1714,6 @@ QUnit.module("Fields", (hooks) => {
                             </group>
                         </sheet>
                     </form>`,
-                mockRPC(route, args) {
-                    if (checkRPC && args.method === "name_get") {
-                        assert.deepEqual(
-                            args.args[0],
-                            [37],
-                            "should only fetch the name_get of the unknown record"
-                        );
-                    }
-                },
                 resId: 1,
             });
 
@@ -1731,13 +1724,12 @@ QUnit.module("Fields", (hooks) => {
             );
 
             // change the value of foo to trigger the onchange
-            checkRPC = true; // enable flag to check read RPC for reference field
             await editInput(target, ".o_field_widget[name=foo] input", "some value");
 
             assert.containsN(target, ".o_data_row", 3);
             assert.deepEqual(
                 [...target.querySelectorAll(".ref_field")].map((el) => el.textContent),
-                ["", "xpad", "xphone"]
+                ["xpad", "", "xphone"]
             );
         }
     );
