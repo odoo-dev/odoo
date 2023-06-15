@@ -702,7 +702,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("Datetime field - open datepicker and switch page", async (assert) => {
+    QUnit.test("Datetime field - open datepicker and switch page", async (assert) => {
         serverData.models.partner.records[0].datetime_end = "2017-03-13 00:00:00";
         serverData.models.partner.records.push({
             id: 2,
