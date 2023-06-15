@@ -8,7 +8,7 @@ import {
     useExternalListener,
     useState,
 } from "@odoo/owl";
-import { shallowEqual } from "@web/core/utils/arrays";
+import { shallowEqual } from "@web/core/utils/objects";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 
 /**
