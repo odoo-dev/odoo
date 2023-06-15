@@ -50,7 +50,7 @@ export class ReferenceField extends Component {
     };
     static props = {
         ...Many2OneField.props,
-        hideModelSelector: { type: Boolean, optional: true },
+        hideModel: { type: Boolean, optional: true },
         modelField: { type: String, optional: true },
     };
     static defaultProps = {
@@ -113,12 +113,12 @@ export class ReferenceField extends Component {
             value: value && [value.resId, value.displayName],
             update: this.updateM2O.bind(this),
         };
-        delete p.hideModelSelector;
+        delete p.hideModel;
         delete p.modelField;
         return p;
     }
     get selection() {
-        if (!this._isCharField(this.props) && !this.props.hideModelSelector) {
+        if (!this._isCharField(this.props) && !this.hideModelSelector) {
             return this.props.record.fields[this.props.name].selection;
         }
         return [];
@@ -126,6 +126,10 @@ export class ReferenceField extends Component {
 
     get relation() {
         return this.getRelation();
+    }
+
+    get hideModelSelector() {
+        return this.props.hideModel || this.props.modelField;
     }
 
     getRelation() {
@@ -157,7 +161,7 @@ export class ReferenceField extends Component {
      * @returns {string|undefined}
      */
     getModelName() {
-        return this.props.hideModelSelector && this.state.modelName;
+        return this.hideModelSelector && this.state.modelName;
     }
 
     updateModel(value) {
@@ -260,7 +264,7 @@ export const referenceField = {
         We want to display the model selector only in the 4th case.
         */
         const props = many2OneField.extractProps(...arguments);
-        props.hideModelSelector = !!options.hide_model || !!options.model_field;
+        props.hideModel = !!options.hide_model;
         props.modelField = options.model_field;
         return props;
     },
