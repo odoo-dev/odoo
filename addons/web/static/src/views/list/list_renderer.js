@@ -1323,7 +1323,7 @@ export class ListRenderer extends Component {
         const { editable } = this.props;
         const groupIndex = group.list.records.indexOf(record);
         const isLastOfGroup = groupIndex === group.list.records.length - 1;
-        const isDirty = record.isDirty || this.lastIsDirty;
+        const isDirty = record.dirty || this.lastIsDirty;
         const isEnterBehavior = hotkey === "enter" && (!record.canBeAbandoned || isDirty);
         const isTabBehavior = hotkey === "tab" && !record.canBeAbandoned && isDirty;
         if (
@@ -1396,7 +1396,7 @@ export class ListRenderer extends Component {
                 const lastIndex = topReCreate ? 0 : list.records.length - 1;
                 if (index === lastIndex) {
                     if (this.displayRowCreates) {
-                        if (record.isNew && !record.isDirty) {
+                        if (record.isNew && !record.dirty) {
                             list.leaveEditMode();
                             return false;
                         }
@@ -1406,7 +1406,7 @@ export class ListRenderer extends Component {
                     } else if (
                         this.canCreate &&
                         !record.canBeAbandoned &&
-                        (record.isDirty || this.lastIsDirty)
+                        (record.dirty || this.lastIsDirty)
                     ) {
                         this.add({ group });
                     } else if (cycleOnTab) {

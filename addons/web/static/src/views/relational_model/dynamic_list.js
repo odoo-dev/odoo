@@ -166,7 +166,7 @@ export class DynamicList extends DataPoint {
                         return true;
                     }
                 }
-                if (this.editedRecord.isNew && !this.editedRecord.isDirty) {
+                if (this.editedRecord.isNew && !this.editedRecord.dirty) {
                     this._removeRecords([this.editedRecord]);
                 } else {
                     canProceed = await this.editedRecord.save();

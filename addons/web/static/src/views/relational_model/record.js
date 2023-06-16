@@ -49,8 +49,10 @@ export class Record extends DataPoint {
         this._setDataContext();
 
         this._manuallyAdded = options.manuallyAdded === true;
-        this.selected = false; // TODO: rename into isSelected?
-        this.isDirty = false; // TODO: turn private? askChanges must be called beforehand to ensure the value is correct
+        this.selected = false;
+        // Be careful that pending changes might not have been notified yet, so the "dirty" flag may
+        // be false even though there are changes in a field. Consider calling "isDirty()" instead.
+        this.dirty = false;
         this._invalidFields = new Set();
         this._unsetRequiredFields = markRaw(new Set());
         this._closeInvalidFieldsNotification = () => {};
@@ -61,7 +63,7 @@ export class Record extends DataPoint {
     // -------------------------------------------------------------------------
 
     get canBeAbandoned() {
-        return this.isNew && !this.isDirty && this._manuallyAdded;
+        return this.isNew && !this.dirty && this._manuallyAdded;
     }
 
     get hasData() {
@@ -154,7 +156,7 @@ export class Record extends DataPoint {
                 await this._load({ resId, resIds });
             } else {
                 this.model._updateConfig(this.config, { resId: false }, { noReload: true });
-                this.isDirty = false;
+                this.dirty = false;
                 this._changes = this._parseServerValues(this._getDefaultValues());
                 this._values = {};
                 this.data = { ...this._changes };
@@ -176,6 +178,11 @@ export class Record extends DataPoint {
             resIds.splice(index + 1, 0, resId);
             await this._load({ resId, resIds, mode: "edit" });
         });
+    }
+
+    async isDirty() {
+        await this._askChanges();
+        return this.dirty;
     }
 
     load(resId = this.resId, context = this.context) {
@@ -208,7 +215,7 @@ export class Record extends DataPoint {
     }
 
     async setInvalidField(fieldName) {
-        this.isDirty = true;
+        this.dirty = true;
         return this._setInvalidField(fieldName);
     }
 
@@ -371,7 +378,7 @@ export class Record extends DataPoint {
                     const list = this.data[fieldName];
                     if (
                         (this._isRequired(fieldName) && !list.count) ||
-                        !list.records.every((r) => !r.isDirty || r._checkValidity({ silent }))
+                        !list.records.every((r) => !r.dirty || r._checkValidity({ silent }))
                     ) {
                         unsetRequiredFields.push(fieldName);
                     }
@@ -425,7 +432,7 @@ export class Record extends DataPoint {
     }
 
     _discard() {
-        this.isDirty = false;
+        this.dirty = false;
         for (const fieldName in this._changes) {
             if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
                 this._changes[fieldName]._discard();
@@ -577,7 +584,7 @@ export class Record extends DataPoint {
             this._values = {};
             this._changes = this._parseServerValues({ ...this._getDefaultValues(), ...values });
         }
-        this.isDirty = false;
+        this.dirty = false;
         this.data = { ...this._values, ...this._changes };
         this._setDataContext();
         this._invalidFields.clear();
@@ -706,10 +713,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async _save({ noReload, force, onError } = {}) {
-        if (!this.isDirty && !force) {
-            return true;
-        }
+    async _save({ noReload, onError } = {}) {
         // before saving, abandon new invalid, untouched records in x2manys
         for (const fieldName in this.activeFields) {
             if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
@@ -758,7 +762,7 @@ export class Record extends DataPoint {
             this._values = { ...this._values, ...this._changes, id: resId };
             this._changes = {};
             this.data = { ...this._values };
-            this.isDirty = false;
+            this.dirty = false;
         }
         await this.model.hooks.onRecordSaved(this);
         return true;
@@ -830,7 +834,7 @@ export class Record extends DataPoint {
     }
 
     async _update(changes, { withoutOnchange, withoutParentOnchange } = {}) {
-        this.isDirty = true;
+        this.dirty = true;
         const prom = this._preprocessChanges(changes);
         if (prom && !this.model._urgentSave) {
             await prom;
