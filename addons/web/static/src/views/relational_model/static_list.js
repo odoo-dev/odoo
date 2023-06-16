@@ -157,6 +157,10 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
+    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
+        return this.resequence(dataRecordId, refId);
+    }
+
     leaveEditMode({ discard, canAbandon, validate } = {}) {
         return this.model.mutex.exec(async () => {
             if (this.editedRecord) {
