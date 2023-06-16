@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
+import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import {
     addRow,
     click,
@@ -26,14 +27,13 @@ import {
 import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
+import { rpcService } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
+import { pick } from "@web/core/utils/objects";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
 import { RelationalModel } from "@web/views/relational_model";
-import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { rpcService } from "@web/core/network/rpc_service";
-import { pick } from "@web/core/utils/objects";
-import BasicModel from "web.BasicModel";
+import { Record } from "@web/views/relational_model/record";
 import { getPickerCell } from "../../core/datetime/datetime_test_helpers";
 
 let serverData;
@@ -1965,7 +1965,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
+    QUnit.test(
         "embedded one2many with handle widget with minimum setValue calls",
         async function (assert) {
             serverData.models.turtle.records[0].turtle_int = 6;
@@ -1993,15 +1993,11 @@ QUnit.module("Fields", (hooks) => {
             );
             serverData.models.partner.records[0].turtles = [1, 2, 3, 4, 5, 6, 7];
 
-            let model;
-            patchWithCleanup(BasicModel.prototype, {
-                init() {
-                    this._super(...arguments);
-                    model = this;
-                },
-                notifyChanges() {
-                    const changes = arguments[1];
-                    assert.step(String(this.get(changes.turtles.id).res_id));
+            patchWithCleanup(Record.prototype, {
+                _update() {
+                    if (this.resModel === "turtle") {
+                        assert.step(`${this.resId}`);
+                    }
                     return this._super(...arguments);
                 },
             });
@@ -2022,21 +2018,11 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
-            const formHandle = Object.keys(model.localData).find((k) => /partner/.test(k));
-
             assert.deepEqual(
-                Object.values(model.get(formHandle).data.turtles.data).map((r) => {
-                    return r.data;
-                }),
-                [
-                    { id: 6, turtle_foo: "a3", turtle_int: 2 },
-                    { id: 1, turtle_foo: "yop", turtle_int: 6 },
-                    { id: 2, turtle_foo: "blip", turtle_int: 9 },
-                    { id: 5, turtle_foo: "a2", turtle_int: 9 },
-                    { id: 7, turtle_foo: "a4", turtle_int: 11 },
-                    { id: 4, turtle_foo: "a1", turtle_int: 20 },
-                    { id: 3, turtle_foo: "kawa", turtle_int: 21 },
-                ]
+                [...target.querySelectorAll(".o_data_row [name='turtle_foo']")].map(
+                    (el) => el.textContent
+                ),
+                ["a3", "yop", "blip", "a2", "a4", "a1", "kawa"]
             );
 
             const positions = [
@@ -2053,18 +2039,10 @@ QUnit.module("Fields", (hooks) => {
             }
 
             assert.deepEqual(
-                Object.values(model.get(formHandle).data.turtles.data).map((r) => {
-                    return r.data;
-                }),
-                [
-                    { id: 3, turtle_foo: "kawa", turtle_int: 2 },
-                    { id: 7, turtle_foo: "a4", turtle_int: 3 },
-                    { id: 1, turtle_foo: "yop", turtle_int: 4 },
-                    { id: 2, turtle_foo: "blip", turtle_int: 5 },
-                    { id: 5, turtle_foo: "a2", turtle_int: 6 },
-                    { id: 6, turtle_foo: "a3", turtle_int: 7 },
-                    { id: 4, turtle_foo: "a1", turtle_int: 8 },
-                ]
+                [...target.querySelectorAll(".o_data_row [name='turtle_foo']")].map(
+                    (el) => el.textContent
+                ),
+                ["kawa", "a4", "yop", "blip", "a2", "a3", "a1"]
             );
         }
     );
