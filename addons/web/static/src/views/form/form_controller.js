@@ -326,21 +326,28 @@ export class FormController extends Component {
     }
 
     async onPagerUpdate({ offset, resIds }) {
-        const canProceed = await this.model.root.save({
-            stayInEdition: true,
-            onError: this.onSaveError.bind(this),
-        });
+        const dirty = await this.model.root.isDirty();
+        let canProceed = true;
+        if (dirty) {
+            canProceed = await this.model.root.save({
+                stayInEdition: true,
+                onError: this.onSaveError.bind(this),
+            });
+        }
         if (canProceed) {
             return this.model.root.load(resIds[offset]);
         }
     }
 
     async beforeLeave() {
-        return this.model.root.save({
-            noReload: true,
-            stayInEdition: true,
-            onError: this.onSaveError.bind(this),
-        });
+        const dirty = await this.model.root.isDirty();
+        if (dirty) {
+            return this.model.root.save({
+                noReload: true,
+                stayInEdition: true,
+                onError: this.onSaveError.bind(this),
+            });
+        }
     }
 
     async beforeUnload(ev) {
@@ -425,7 +432,8 @@ export class FormController extends Component {
     }
 
     async shouldExecuteAction(item) {
-        if ((this.model.root.isDirty || this.model.root.isNew) && !item.skipSave) {
+        const dirty = await this.model.root.isDirty();
+        if ((dirty || this.model.root.isNew) && !item.skipSave) {
             return this.model.root.save({
                 stayInEdition: true,
                 onError: this.onSaveError.bind(this),
@@ -500,7 +508,7 @@ export class FormController extends Component {
             stayInEdition: true,
             onError: this.onSaveError.bind(this),
         });
-        // FIXME: disable/enable not done in onPagerChange
+        // FIXME: disable/enable not done in onPagerUpdate
         if (canProceed) {
             this.disableButtons();
             await this.model.root.load(false);
@@ -516,7 +524,7 @@ export class FormController extends Component {
             if (this.props.saveRecord) {
                 saved = await this.props.saveRecord(record, params);
             } else {
-                saved = await record.save({ ...params, force: true });
+                saved = await record.save(params);
             }
         } finally {
             this.enableButtons();

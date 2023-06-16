@@ -260,7 +260,7 @@ export class ListController extends Component {
 
     async onClickSave() {
         this.disableButtons();
-        const saved = await this.model.root.editedRecord.save({ force: true });
+        const saved = await this.model.root.editedRecord.save();
         if (saved) {
             await this.model.root.leaveEditMode();
         }
@@ -527,7 +527,7 @@ export class ListController extends Component {
 
     async beforeExecuteActionButton(clickParams) {
         if (clickParams.special !== "cancel" && this.model.root.editedRecord) {
-            return this.model.root.editedRecord.save({ force: true });
+            return this.model.root.editedRecord.save();
         }
     }
 

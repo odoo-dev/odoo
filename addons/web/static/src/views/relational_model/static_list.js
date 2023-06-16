@@ -158,7 +158,8 @@ export class StaticList extends DataPoint {
     leaveEditMode({ discard, canAbandon, validate } = {}) {
         return this.model.mutex.exec(async () => {
             if (this.editedRecord) {
-                const isValid = await this.editedRecord.checkValidity();
+                await this.editedRecord._askChanges();
+                const isValid = this.editedRecord._checkValidity();
                 if (!isValid && validate) {
                     return false;
                 }
@@ -167,12 +168,12 @@ export class StaticList extends DataPoint {
                 }
                 // if we still have an editedRecord, it means it hasn't been abandonned
                 if (this.editedRecord) {
-                    if (isValid && !this.editedRecord.isDirty && discard) {
+                    if (isValid && !this.editedRecord.dirty && discard) {
                         return false;
                     }
                     if (
                         isValid ||
-                        (!this.editedRecord.isDirty && !this.editedRecord._manuallyAdded)
+                        (!this.editedRecord.dirty && !this.editedRecord._manuallyAdded)
                     ) {
                         this.editedRecord._switchMode("readonly");
                     }
