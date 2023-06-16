@@ -162,8 +162,8 @@ export class StaticList extends DataPoint {
                 if (!isValid && validate) {
                     return false;
                 }
-                if (canAbandon !== false) {
-                    this._abandonRecords([this.editedRecord], { force: discard || !isValid });
+                if (canAbandon !== false && !validate) {
+                    this._abandonRecords([this.editedRecord], { force: true });
                 }
                 // if we still have an editedRecord, it means it hasn't been abandonned
                 if (this.editedRecord) {
@@ -217,8 +217,8 @@ export class StaticList extends DataPoint {
     // Protected
     // -------------------------------------------------------------------------
 
-    _abandonRecords(records, { force } = {}) {
-        for (const record of this.records) {
+    _abandonRecords(records = this.records, { force } = {}) {
+        for (const record of records) {
             // FIXME: should canBeAbandoned check validity?
             if (record.canBeAbandoned && (force || !record._checkValidity())) {
                 const virtualId = record.virtualId;
