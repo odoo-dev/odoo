@@ -764,7 +764,6 @@ export class StaticList extends DataPoint {
                 }
             }
             record._applyValues(data);
-            record._applyRawChanges();
             record._addSavePoint();
             record._hasBeenDuplicated = true;
             this._lockedRecord = record;

@@ -17,8 +17,6 @@ export class Record extends DataPoint {
         this._onChange = options.onChange || (() => {});
         this.virtualId = options.virtualId || false;
 
-        this._rawChanges = markRaw({});
-
         let savePoint;
         const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in data));
         const vals = this._parseServerValues({
@@ -273,20 +271,6 @@ export class Record extends DataPoint {
         }
     }
 
-    _applyRawChanges() {
-        const changes = this._parseServerValues(this._rawChanges);
-        this._applyChanges(changes);
-        for (const fieldName in this.activeFields) {
-            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
-                const list = this.data[fieldName];
-                for (const subRecord of Object.values(list._cache)) {
-                    subRecord._applyRawChanges();
-                }
-            }
-        }
-        this._rawChanges = {};
-    }
-
     _applyValues(values) {
         Object.assign(this._values, this._parseServerValues(values));
         Object.assign(this.data, this._values, this._changes);
@@ -301,7 +285,6 @@ export class Record extends DataPoint {
         for (const fieldName in serverValues) {
             const value = serverValues[fieldName];
             if (!this.activeFields[fieldName]) {
-                this._rawChanges[fieldName] = value;
                 continue;
             }
             const field = this.fields[fieldName];

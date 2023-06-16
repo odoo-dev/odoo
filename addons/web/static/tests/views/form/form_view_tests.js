@@ -6219,6 +6219,7 @@ QUnit.module("Views", (hooks) => {
                             timmy: {
                                 fields: {
                                     name: {},
+                                    color: {},
                                 },
                                 limit: 40,
                                 order: "",
@@ -6251,6 +6252,7 @@ QUnit.module("Views", (hooks) => {
                         timmy: {
                             fields: {
                                 name: {},
+                                color: {},
                             },
                             limit: 40,
                             order: "",
