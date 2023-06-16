@@ -2317,7 +2317,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsOnce(target, ".o_list_view");
     });
 
-    QUnit.tttt("sample server: populate groups", async function (assert) {
+    QUnit.test("sample server: populate groups", async function (assert) {
         serverData.models.partner.records = [];
         serverData.views = {
             "partner,false,kanban": `
