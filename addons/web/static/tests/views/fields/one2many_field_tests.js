@@ -9972,7 +9972,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.tttt("one2many kanban with widget handle", async function (assert) {
+    QUnit.test("one2many kanban with widget handle", async function (assert) {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
         await makeView({
             type: "form",
