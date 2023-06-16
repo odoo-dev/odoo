@@ -118,7 +118,7 @@ export class StaticList extends DataPoint {
                 withoutParent,
                 manuallyAdded: true,
             });
-            this._addRecord(record, { position: params.position });
+            this._addRecord(record, { position });
             this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
             return record;
         });
@@ -135,7 +135,10 @@ export class StaticList extends DataPoint {
     }
 
     canResequence() {
-        return this.handleField;
+        const orderByHandleField = this.orderBy.length
+            ? this.orderBy[0].name === this.handleField
+            : this.handleField === DEFAULT_HANDLE_FIELD;
+        return this.handleField && orderByHandleField;
     }
 
     load({ limit, offset, orderBy }) {
@@ -209,71 +212,7 @@ export class StaticList extends DataPoint {
     }
 
     async resequence(movedId, targetId) {
-        const records = [...this.records];
-        const order = this.orderBy.find((o) => o.name === this.handleField);
-        const asc = !order || order.asc;
-
-        // Find indices
-        const fromIndex = records.findIndex((r) => r.id === movedId);
-        let toIndex = 0;
-        if (targetId !== null) {
-            const targetIndex = records.findIndex((r) => r.id === targetId);
-            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
-        }
-
-        const getSequence = (rec) => rec && rec.data[this.handleField];
-
-        // Determine what records need to be modified
-        const firstIndex = Math.min(fromIndex, toIndex);
-        const lastIndex = Math.max(fromIndex, toIndex) + 1;
-        let reorderAll = false;
-        let lastSequence = (asc ? -1 : 1) * Infinity;
-        for (let index = 0; index < records.length; index++) {
-            const sequence = getSequence(records[index]);
-            if (
-                ((index < firstIndex || index >= lastIndex) &&
-                    ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) ||
-                (index >= firstIndex && index < lastIndex && lastSequence === sequence)
-            ) {
-                reorderAll = true;
-            }
-            lastSequence = sequence;
-        }
-
-        // Perform the resequence in the list of records
-        const [record] = records.splice(fromIndex, 1);
-        records.splice(toIndex, 0, record);
-
-        // Creates the list of to modify
-        let toReorder = records;
-        if (!reorderAll) {
-            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
-            if (fromIndex < toIndex) {
-                toReorder.push(record);
-            } else {
-                toReorder.unshift(record);
-            }
-        }
-        if (!asc) {
-            toReorder.reverse();
-        }
-
-        const sequences = toReorder.map(getSequence);
-        const offset = sequences.length && Math.min(...sequences);
-
-        const proms = [];
-        for (const [i, record] of Object.entries(toReorder)) {
-            proms.push(
-                record._update(
-                    { [this.handleField]: offset + Number(i) },
-                    { withoutParentOnchange: true }
-                )
-            );
-        }
-        await Promise.all(proms);
-
-        this.records = records;
-        this._onChange();
+        return this.model.mutex.exec(() => this._resequence(movedId, targetId));
     }
 
     // -------------------------------------------------------------------------
@@ -534,9 +473,10 @@ export class StaticList extends DataPoint {
             },
             { changes, evalContext: this.evalContext }
         );
-        if (this.handleField && this.records.length) {
+
+        if (this.canResequence() && this.records.length) {
             const position = params.position || "bottom";
-            const order = this.orderBy.find((order) => order.name === this.handleField);
+            const order = this.orderBy[0];
             const asc = !order || order.asc;
             let value;
             if (position === "top") {
@@ -634,6 +574,74 @@ export class StaticList extends DataPoint {
         }
         this.records = currentIds.map((id) => this._cache[id]);
         await this.model._updateConfig(this.config, { limit, offset, orderBy }, { noReload: true });
+    }
+
+    async _resequence(movedId, targetId) {
+        const records = [...this.records];
+        const order = this.orderBy.find((o) => o.name === this.handleField);
+        const asc = !order || order.asc;
+
+        // Find indices
+        const fromIndex = records.findIndex((r) => r.id === movedId);
+        let toIndex = 0;
+        if (targetId !== null) {
+            const targetIndex = records.findIndex((r) => r.id === targetId);
+            toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
+        }
+
+        const getSequence = (rec) => rec && rec.data[this.handleField];
+
+        // Determine what records need to be modified
+        const firstIndex = Math.min(fromIndex, toIndex);
+        const lastIndex = Math.max(fromIndex, toIndex) + 1;
+        let reorderAll = false;
+        let lastSequence = (asc ? -1 : 1) * Infinity;
+        for (let index = 0; index < records.length; index++) {
+            const sequence = getSequence(records[index]);
+            if (
+                ((index < firstIndex || index >= lastIndex) &&
+                    ((asc && lastSequence >= sequence) || (!asc && lastSequence <= sequence))) ||
+                (index >= firstIndex && index < lastIndex && lastSequence === sequence)
+            ) {
+                reorderAll = true;
+            }
+            lastSequence = sequence;
+        }
+
+        // Perform the resequence in the list of records
+        const [record] = records.splice(fromIndex, 1);
+        records.splice(toIndex, 0, record);
+
+        // Creates the list of to modify
+        let toReorder = records;
+        if (!reorderAll) {
+            toReorder = toReorder.slice(firstIndex, lastIndex).filter((r) => r.id !== movedId);
+            if (fromIndex < toIndex) {
+                toReorder.push(record);
+            } else {
+                toReorder.unshift(record);
+            }
+        }
+        if (!asc) {
+            toReorder.reverse();
+        }
+
+        const sequences = toReorder.map(getSequence);
+        const offset = sequences.length && Math.min(...sequences);
+
+        const proms = [];
+        for (const [i, record] of Object.entries(toReorder)) {
+            proms.push(
+                record._update(
+                    { [this.handleField]: offset + Number(i) },
+                    { withoutParentOnchange: true }
+                )
+            );
+        }
+        await Promise.all(proms);
+
+        this.records = records;
+        this._onChange();
     }
 
     async _sortBy(fieldName) {
