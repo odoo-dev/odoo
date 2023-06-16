@@ -172,11 +172,11 @@ class KanbanQuickCreateController extends Component {
         this.state.disabled = false;
     }
 
-    cancel(force) {
+    async cancel(force) {
         if (this.state.disabled) {
             return;
         }
-        if (force || !this.model.root.isDirty) {
+        if (force || !(await this.model.root.isDirty())) {
             this.props.onCancel();
         }
     }

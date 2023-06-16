@@ -49,13 +49,13 @@ export class SettingsFormController extends formView.Controller {
             return true;
         }
         if (
-            this.model.root.isDirty &&
+            (await this.model.root.isDirty()) &&
             !["execute"].includes(clickParams.name) &&
             !clickParams.noSaveDialog
         ) {
             return this._confirmSave();
         } else {
-            return this.model.root.save({ force: true, stayInEdition: true });
+            return this.model.root.save({ stayInEdition: true });
         }
     }
 
@@ -63,8 +63,9 @@ export class SettingsFormController extends formView.Controller {
         return this.env._t("Settings");
     }
 
-    beforeLeave() {
-        if (this.model.root.isDirty) {
+    async beforeLeave() {
+        const dirty = await this.model.root.isDirty();
+        if (dirty) {
             return this._confirmSave();
         }
     }
@@ -116,7 +117,7 @@ export class SettingsFormController extends formView.Controller {
                 },
                 cancel: async () => {
                     await this.model.root.discard();
-                    await this.model.root.save({ force: true });
+                    await this.model.root.save();
                     _continue = true;
                     resolve();
                 },
