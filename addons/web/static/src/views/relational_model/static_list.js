@@ -4,7 +4,7 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { intersection } from "@web/core/utils/arrays";
 import { pick } from "@web/core/utils/objects";
 import { DataPoint } from "./datapoint";
-import { DEFAULT_HANDLE_FIELD, fromUnityToServerValues, getId, patchActiveFields } from "./utils";
+import { fromUnityToServerValues, getId, patchActiveFields } from "./utils";
 
 import { markRaw } from "@odoo/owl";
 
@@ -52,9 +52,6 @@ export class StaticList extends DataPoint {
         this.handleField = Object.keys(this.activeFields).find(
             (fieldName) => this.activeFields[fieldName].isHandle
         );
-        if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
-            this.handleField = DEFAULT_HANDLE_FIELD;
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -135,10 +132,7 @@ export class StaticList extends DataPoint {
     }
 
     canResequence() {
-        const orderByHandleField = this.orderBy.length
-            ? this.orderBy[0].name === this.handleField
-            : this.handleField === DEFAULT_HANDLE_FIELD;
-        return this.handleField && orderByHandleField;
+        return this.handleField && this.orderBy.length && this.orderBy[0].name === this.handleField;
     }
 
     load({ limit, offset, orderBy }) {
