@@ -299,6 +299,10 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         fieldInfo.modifiers.readonly = true;
     }
 
+    if (widget === "handle") {
+        fieldInfo.isHandle = true;
+    }
+
     if (X2M_TYPES.includes(fields[name].type)) {
         const views = {};
         let relatedFields = fieldInfo.field.relatedFields;
