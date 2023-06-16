@@ -10,6 +10,7 @@ import {
 import { ORM } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { cartesian, sortBy as arraySortBy } from "@web/core/utils/arrays";
+import { parseServerValue } from "@web/views/relational_model/utils";
 
 class UnimplementedRouteError extends Error {}
 
@@ -26,15 +27,15 @@ function getSampleFromId(id, sampleTexts) {
     return sampleTexts[(id - 1) % sampleTexts.length];
 }
 
-function serializeGroupValue(value, type) {
-    switch (type) {
-        case "date":
-            return serializeDate(value);
-        case "datetime":
-            return serializeDateTime(value);
-        default:
-            return value;
+function serializeGroupDateValue(range, field) {
+    if (!range) {
+        return false;
     }
+    let dateValue = parseServerValue(field, range.to);
+    dateValue = dateValue.minus({
+        [field.type === "date" ? "day" : "second"]: 1,
+    });
+    return field.type === "date" ? serializeDate(dateValue) : serializeDateTime(dateValue);
 }
 
 /**
@@ -720,7 +721,14 @@ export class SampleServer {
         }
         for (const r of this.data[params.model].records) {
             const group = getSampleFromId(r.id, groups);
-            r[groupBy] = serializeGroupValue(group[params.groupBy[0]], groupByField);
+            if (["date", "datetime"].includes(groupByField.type)) {
+                r[groupBy] = serializeGroupDateValue(
+                    group.__range[params.groupBy[0]],
+                    groupByField
+                );
+            } else {
+                r[groupBy] = group[params.groupBy[0]];
+            }
         }
     }
 
@@ -785,7 +793,12 @@ export class SampleServer {
         const records = this.data[params.model].records;
         for (const g of groups) {
             const recordsInGroup = records.filter((r) => {
-                return r[groupBy] === serializeGroupValue(g[fullGroupBy], groupByField);
+                if (["date", "datetime"].includes(groupByField.type)) {
+                    return (
+                        r[groupBy] === serializeGroupDateValue(g.__range[fullGroupBy], groupByField)
+                    );
+                }
+                return r[groupBy] === g[fullGroupBy];
             });
             for (const field of params.fields) {
                 const fieldType = this.data[params.model].fields[field].type;
