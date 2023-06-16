@@ -74,20 +74,25 @@ export function patchActiveFields(activeField, patch) {
     activeField.required = activeField.required || patch.required;
     activeField.onChange = activeField.onChange || patch.onChange;
     activeField.forceSave = activeField.forceSave || patch.forceSave;
+    activeField.isHandle = activeField.isHandle || patch.isHandle;
     // x2manys
-    const related = activeField.related;
-    if (related && patch.related) {
-        for (const fieldName in patch.related.activeFields) {
-            if (fieldName in related.activeFields) {
-                patchActiveFields(
-                    related.activeFields[fieldName],
-                    patch.related.activeFields[fieldName]
-                );
-            } else {
-                related.activeFields[fieldName] = { ...patch.related.activeFields[fieldName] };
+    if (patch.related) {
+        const related = activeField.related;
+        if (related) {
+            for (const fieldName in patch.related.activeFields) {
+                if (fieldName in related.activeFields) {
+                    patchActiveFields(
+                        related.activeFields[fieldName],
+                        patch.related.activeFields[fieldName]
+                    );
+                } else {
+                    related.activeFields[fieldName] = { ...patch.related.activeFields[fieldName] };
+                }
             }
+            Object.assign(related.fields, patch.related.fields);
+        } else {
+            activeField.related = patch.related;
         }
-        Object.assign(related.fields, patch.related.fields);
     }
     if ("limit" in patch) {
         activeField.limit = patch.limit;
@@ -118,6 +123,30 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
                 activeField.limit = viewDescr.limit;
                 activeField.defaultOrderBy = viewDescr.defaultOrder;
+                if (fieldNode.views.form) {
+                    // we already know the form view (it is inline), so add its fields (in invisble)
+                    // s.t. they will be sent in the spec for onchange, and create commands returned
+                    // by the onchange could return values for those fields (that would be displayed
+                    // later if the user opens the form view)
+                    const formArchInfo = extractFieldsFromArchInfo(
+                        fieldNode.views.form,
+                        fieldNode.views.form.fields
+                    );
+                    for (const fieldName in formArchInfo.activeFields) {
+                        const formActiveField = {
+                            ...formArchInfo.activeFields[fieldName],
+                            invisible: true,
+                        };
+                        if (fieldName in activeField.related.activeFields) {
+                            patchActiveFields(
+                                formActiveField,
+                                activeField.related.activeFields[fieldName]
+                            );
+                        }
+                        activeField.related.activeFields[fieldName] = formActiveField;
+                    }
+                    Object.assign(activeField.related.fields, formArchInfo.fields);
+                }
             }
             if (fieldNode.field?.useSubView) {
                 activeField.required = false;
