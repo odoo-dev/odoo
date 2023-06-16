@@ -119,9 +119,8 @@ export class KanbanArchParser extends XMLParser {
                 if (fieldInfo.options.group_by_tooltip) {
                     tooltipInfo[name] = fieldInfo.options.group_by_tooltip;
                 }
-                if (fieldInfo.widget === "handle") {
+                if (fieldInfo.isHandle) {
                     handleField = name;
-                    fieldInfo.isHandle = true;
                 }
             }
             if (node.tagName === "widget") {

@@ -110,9 +110,8 @@ export class ListArchParser extends XMLParser {
                 const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
                 fieldNodes[fieldId] = fieldInfo;
                 node.setAttribute("field_id", fieldId);
-                if (fieldInfo.widget === "handle") {
+                if (fieldInfo.isHandle) {
                     handleField = fieldInfo.name;
-                    fieldInfo.isHandle = true;
                 }
                 if (this.isColumnVisible(fieldInfo.modifiers.column_invisible)) {
                     const label = fieldInfo.field.label;
