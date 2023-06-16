@@ -8550,36 +8550,20 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt(
-        "one2many with sequence field, fetch name_get from empty list, field text",
-        async function (assert) {
-            // There was a bug where a RPC would fail because no route was set.
-            // The scenario is:
-            // - create a new parent model, which has a one2many
-            // - add at least 2 one2many lines which have:
-            //     - a handle field
-            //     - a many2one, which is not required, and we will leave it empty
-            // - reorder the lines with the handle
-            // -> This will call a resequence, which calls a name_get.
-            // -> With the bug that would fail, if it's ok the test will pass.
+    QUnit.test("one2many with sequence field and text field", async function (assert) {
+        serverData.models.turtle.fields.turtle_int.default = 10;
+        serverData.models.turtle.fields.product_id.default = 37;
+        serverData.models.turtle.fields.not_required_product_id = {
+            string: "Product",
+            type: "many2one",
+            relation: "product",
+        };
 
-            // This test will also make sure lists with
-            // FieldText (turtle_description) can be reordered with a handle.
-            // More specifically this will trigger a reset on a FieldText
-            // while the field is not in editable mode.
-            serverData.models.turtle.fields.turtle_int.default = 10;
-            serverData.models.turtle.fields.product_id.default = 37;
-            serverData.models.turtle.fields.not_required_product_id = {
-                string: "Product",
-                type: "many2one",
-                relation: "product",
-            };
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
                     <form>
                         <field name="turtles">
                             <tree editable="bottom">
@@ -8590,34 +8574,34 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                     </form>`,
-            });
+        });
 
-            // starting condition
-            assert.containsNone(target, ".o_data_cell");
+        // starting condition
+        assert.containsNone(target, ".o_data_cell");
 
-            const inputText1 = "relax";
-            const inputText2 = "max";
-            await addRow(target);
-            await editInput(target, 'div[name="turtle_foo"] input', inputText1);
-            await addRow(target);
-            await editInput(target, 'div[name="turtle_foo"] input', inputText2);
-            await addRow(target);
+        const inputText1 = "relax";
+        const inputText2 = "max";
+        await addRow(target);
+        await editInput(target, 'div[name="turtle_foo"] input', inputText1);
+        await addRow(target);
+        await editInput(target, 'div[name="turtle_foo"] input', inputText2);
+        await addRow(target);
 
-            assert.deepEqual(
-                getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                [inputText1, inputText2, ""]
-            );
+        assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")), [
+            inputText1,
+            inputText2,
+            "",
+        ]);
 
-            assert.containsN(target, ".ui-sortable-handle", 3);
+        assert.containsN(target, ".ui-sortable-handle", 3);
 
-            await dragAndDrop("tbody tr:nth-child(2) .o_handle_cell", "tbody tr:nth-child(1)");
+        await dragAndDrop("tbody tr:nth-child(2) .o_handle_cell", "tbody tr:nth-child(1)");
 
-            assert.deepEqual(
-                getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
-                [inputText2, inputText1] // empty line has been discarded on the drag and drop
-            );
-        }
-    );
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_data_cell.o_list_char")),
+            [inputText2, inputText1] // empty line has been discarded on the drag and drop
+        );
+    });
 
     QUnit.test("one2many with several pages, onchange and default order", async function (assert) {
         // This test reproduces a specific scenario where a one2many is displayed
