@@ -1848,6 +1848,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "onchange on one2many with x2many in list (no widget) and form view (list)",
         async function (assert) {
+            assert.expect(7);
             serverData.models.turtle.fields.turtle_foo.default = "a default value";
             serverData.models.partner.onchanges = {
                 foo: function (obj) {
@@ -1875,6 +1876,27 @@ QUnit.module("Fields", (hooks) => {
                             </form>
                         </field>
                     </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "onchange2" && args.model === "partner") {
+                        assert.deepEqual(args.args[3], {
+                            display_name: {},
+                            foo: {},
+                            p: {
+                                fields: {
+                                    turtles: {
+                                        fields: {
+                                            turtle_foo: {},
+                                        },
+                                        limit: 40,
+                                        order: "",
+                                    },
+                                },
+                                limit: 40,
+                                order: "",
+                            },
+                        });
+                    }
+                },
             });
 
             assert.containsOnce(
@@ -1908,6 +1930,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test(
         "onchange on one2many with x2many in list (many2many_tags) and form view (list)",
         async function (assert) {
+            assert.expect(7);
             serverData.models.turtle.fields.turtle_foo.default = "a default value";
             serverData.models.partner.onchanges = {
                 foo: function (obj) {
@@ -1935,6 +1958,26 @@ QUnit.module("Fields", (hooks) => {
                             </form>
                         </field>
                     </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "onchange2" && args.model === "partner") {
+                        assert.deepEqual(args.args[3], {
+                            display_name: {},
+                            foo: {},
+                            p: {
+                                fields: {
+                                    turtles: {
+                                        fields: {
+                                            display_name: {},
+                                            turtle_foo: {},
+                                        },
+                                    },
+                                },
+                                limit: 40,
+                                order: "",
+                            },
+                        });
+                    }
+                },
             });
 
             assert.containsOnce(
@@ -6123,10 +6166,10 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("nested x2many (inline form view) and onchanges", async function (assert) {
+        assert.expect(8);
         serverData.models.partner.onchanges.bar = function (obj) {
             if (!obj.bar) {
                 obj.p = [
-                    [5],
                     [
                         0,
                         0,
@@ -6166,6 +6209,27 @@ QUnit.module("Fields", (hooks) => {
                         </form>
                     </field>
                 </form>`,
+            mockRPC(route, args) {
+                if (args.method === "onchange2") {
+                    assert.deepEqual(args.args[3], {
+                        bar: {},
+                        display_name: {},
+                        p: {
+                            fields: {
+                                turtles: {
+                                    fields: {
+                                        turtle_foo: {},
+                                    },
+                                    limit: 40,
+                                    order: "",
+                                },
+                            },
+                            limit: 40,
+                            order: "",
+                        },
+                    });
+                }
+            },
         });
         assert.containsNone(target, ".o_data_row");
 
@@ -6178,55 +6242,6 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_form_view .o_data_row");
         assert.strictEqual(
             target.querySelector(".modal .o_form_view .o_data_row").textContent,
-            "new turtle"
-        );
-    });
-
-    QUnit.test("nested x2many (non inline form view) and onchanges", async function (assert) {
-        serverData.models.partner.onchanges.bar = function (obj) {
-            if (!obj.bar) {
-                obj.p = [[0, 0, { turtles: [[0, 0, { turtle_foo: "new turtle" }]] }]];
-            }
-        };
-
-        serverData.views = {
-            "partner,false,form": `
-                <form>
-                    <field name="turtles">
-                        <tree>
-                            <field name="turtle_foo"/>
-                        </tree>
-                    </field>
-                </form>`,
-        };
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="bar"/>
-                    <field name="p" widget="one2many">
-                        <tree>
-                            <field name="turtles"/>
-                        </tree>
-                    </field>
-                </form>`,
-        });
-
-        assert.containsNone(target, ".o_data_row");
-
-        await click(target, 'div[name="bar"] input');
-        assert.containsOnce(target, ".o_data_row");
-        assert.strictEqual(target.querySelector(".o_data_row").innerText.trim(), "1 record");
-
-        await click(target.querySelector(".o_data_row td"));
-
-        assert.containsOnce(target, ".modal .o_form_view");
-        assert.containsOnce(target, ".modal .o_form_view .o_data_row");
-        assert.strictEqual(
-            target.querySelector(".modal .o_form_view .o_data_row").innerText.trim(),
             "new turtle"
         );
     });
@@ -7433,11 +7448,14 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["get_views", "web_read", "onchange2"]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "one2many: onchange that returns unknown field in list, but not in form",
         async function (assert) {
+            assert.expect(6);
             serverData.models.partner.onchanges = {
-                name: function () {},
+                name: function (obj) {
+                    obj.p = [[0, 0, { display_name: "new", timmy: [[4, 12]] }]];
+                },
             };
 
             await makeView({
@@ -7458,10 +7476,21 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
                 mockRPC(route, args) {
-                    if (args.method === "onchange") {
-                        return Promise.resolve({
-                            value: {
-                                p: [[5], [0, 0, { display_name: "new", timmy: [[5], [4, 12]] }]],
+                    if (args.method === "onchange2") {
+                        assert.deepEqual(args.args[3], {
+                            display_name: {},
+                            name: {},
+                            p: {
+                                fields: {
+                                    display_name: {},
+                                    timmy: {
+                                        fields: {
+                                            display_name: {},
+                                        },
+                                    },
+                                },
+                                limit: 40,
+                                order: "",
                             },
                         });
                     }
@@ -7485,7 +7514,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test("multi level of nested x2manys, onchange and rawChanges", async function (assert) {
+    QUnit.test("multi level of nested x2manys, onchange", async function (assert) {
         assert.expect(7);
         serverData.models.partner.records[0].p = [1];
         serverData.models.partner.onchanges = {
@@ -7615,6 +7644,13 @@ QUnit.module("Fields", (hooks) => {
                         p: {
                             fields: {
                                 display_name: {},
+                                p: {
+                                    fields: {
+                                        display_name: {},
+                                    },
+                                    limit: 40,
+                                    order: "",
+                                },
                             },
                             limit: 40,
                             order: "",
@@ -8167,19 +8203,18 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("onchange on nested one2manys", async function (assert) {
-        assert.expect(6);
+    QUnit.test("onchange on nested one2manys", async function (assert) {
+        assert.expect(3);
 
         serverData.models.partner.onchanges.display_name = function (obj) {
             if (obj.display_name) {
                 obj.p = [
-                    [5],
                     [
                         0,
                         0,
                         {
                             display_name: "test",
-                            turtles: [[5], [0, 0, { display_name: "test nested" }]],
+                            turtles: [[0, 0, { display_name: "test nested" }]],
                         },
                     ],
                 ];
@@ -8210,26 +8245,23 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             mockRPC(route, args) {
                 if (args.method === "create") {
-                    assert.strictEqual(
-                        args.args[0].p[0][0],
-                        0,
-                        "should send a command 0 (CREATE) for p"
-                    );
-                    assert.strictEqual(
-                        args.args[0].p[0][2].display_name,
-                        "test",
-                        "should send the correct values"
-                    );
-                    assert.strictEqual(
-                        args.args[0].p[0][2].turtles[0][0],
-                        0,
-                        "should send a command 0 (CREATE) for turtles"
-                    );
-                    assert.deepEqual(
-                        args.args[0].p[0][2].turtles[0][2],
-                        { display_name: "test nested" },
-                        "should send the correct values"
-                    );
+                    const commands = args.args[0][0].p;
+                    assert.deepEqual(commands, [
+                        [
+                            0,
+                            commands[0][1],
+                            {
+                                display_name: "test",
+                                turtles: [
+                                    [
+                                        0,
+                                        commands[0][2].turtles[0][1],
+                                        { display_name: "test nested" },
+                                    ],
+                                ],
+                            },
+                        ],
+                    ]);
                 }
             },
         });
@@ -10551,57 +10583,6 @@ QUnit.module("Fields", (hooks) => {
             );
         }
     );
-
-    QUnit.tttt("one2many value returned by onchange with unknown fields", async function (assert) {
-        assert.expect(3);
-
-        serverData.models.partner.onchanges = {
-            bar: function (obj) {
-                obj.p = [
-                    [5],
-                    [
-                        0,
-                        0,
-                        {
-                            bar: true,
-                            display_name: "coucou",
-                            trululu: [2, "second record"],
-                            turtles: [[5], [0, 0, { turtle_int: 4 }]],
-                        },
-                    ],
-                ];
-            },
-        };
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="bar"/>
-                    <field name="p" widget="many2many_tags"/>
-                </form>`,
-            mockRPC(route, args) {
-                if (args.method === "create") {
-                    assert.deepEqual(args.args[0].p[0][2], {
-                        bar: true,
-                        display_name: "coucou",
-                        trululu: 2,
-                        turtles: [[5], [0, 0, { turtle_int: 4 }]],
-                    });
-                }
-            },
-        });
-
-        assert.containsOnce(target.querySelector(".o_field_many2many_tags"), ".badge");
-        assert.strictEqual(
-            target.querySelector(".o_field_many2many_tags .o_tag_badge_text").innerText,
-            "coucou"
-        );
-
-        await clickSave(target);
-    });
 
     QUnit.test("nested one2many, onchange, no command value", async function (assert) {
         // This test ensures that we always send all values to onchange rpcs for nested
