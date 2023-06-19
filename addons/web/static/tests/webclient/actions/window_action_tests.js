@@ -536,9 +536,34 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    QUnit.tttt("A new form view can be reloaded after a failed one", async function (assert) {
+    QUnit.test("A new form view can be reloaded after a failed one", async function (assert) {
         assert.expect(5);
+
+        /*
+         * By-pass QUnit's and test's error handling because the error service needs to be active
+         */
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+
+        patchWithCleanup(QUnit, {
+            onUnhandledRejection: () => {},
+        });
+
+        const originOnunhandledrejection = window.onunhandledrejection;
+        window.onunhandledrejection = () => {};
+        registerCleanup(() => {
+            window.onunhandledrejection = originOnunhandledrejection;
+        });
+        /*
+         * End By pass error handling
+         */
+
         const webClient = await createWebClient({ serverData });
+        serviceRegistry.add("error", errorService);
 
         await doAction(webClient, 3);
         await cpHelpers.switchView(target, "list");
