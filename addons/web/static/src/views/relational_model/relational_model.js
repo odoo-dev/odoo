@@ -1,6 +1,7 @@
 /* @odoo-module */
 // @ts-check
 
+import { registry } from "@web/core/registry";
 import { EventBus, markRaw } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
@@ -90,6 +91,21 @@ const DEFAULT_HOOKS = {
     onWillSetInvalidField: () => {},
     onRecordChanged: () => {},
 };
+
+export class FetchRecordError extends Error {
+    constructor(resIds) {
+        super(`Can't fetch record(s) ${resIds}. They might have been deleted.`);
+    }
+}
+
+export function fetchRecordErrorHandler(env, error, originalError) {
+    if (originalError instanceof FetchRecordError) {
+        env.services.notification.add(originalError.message, { sticky: true, type: "danger" });
+        return true;
+    }
+}
+const errorHandlerRegistry = registry.category("error_handlers");
+errorHandlerRegistry.add("fetchRecordErrorHandler", fetchRecordErrorHandler);
 
 export class RelationalModel extends Model {
     static services = ["action", "company", "dialog", "notification", "rpc", "user"];
@@ -600,8 +616,7 @@ export class RelationalModel extends Model {
         console.log("Unity field spec", kwargs.specification);
         const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
         if (!records.length) {
-            // see test "click on breadcrumb of a deleted record" (might missing a no error dialog assertion)
-            throw new Error(`Can't fetch record(s) ${resIds}. They might have been deleted.`);
+            throw new FetchRecordError(resIds);
         }
         console.log("Unity response", records);
 
