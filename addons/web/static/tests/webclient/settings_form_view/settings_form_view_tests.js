@@ -1430,7 +1430,7 @@ QUnit.module("SettingsFormView", (hooks) => {
         assert.verifySteps(["onchange2"]);
     });
 
-    QUnit.tttt("Settings Radio widget: show and search", async function (assert) {
+    QUnit.test("Settings Radio widget: show and search", async function (assert) {
         serverData.models["res.config.settings"].fields.product_id = {
             string: "Product",
             type: "many2one",
