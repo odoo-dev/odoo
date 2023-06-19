@@ -37,6 +37,11 @@
         <!-- [TODO] Note: after closing and reopening a post, the closed_reason_id remains on post  -->
         <!-- <t t-out="question.closed_reason_id.name"></t> -->
         <!-- [TODO] non active posts aren't listed -->
+        <span t-if="question.active" class="text-muted">
+                <t t-if="question.state=='pending'"> [Waiting Validation]</t>
+                <t t-if="question.state=='flagged' and user.karma > forum.karma_flag"> [Flagged]</t>
+                <t t-if="question.state=='close'"> [Closed]</t>
+        </span>
         <span t-if="not question.active" class="text-muted">
             <t t-if="question.state!='offensive'"> [Deleted]</t>
             <t t-if="question.state=='offensive'"> [Offensive]</t>
@@ -251,7 +256,7 @@
                 <h5 >You have a pending post</h5>
                 <span>Please wait for a moderator to validate your previous post to be allowed to reply to questions.</span>
             </div>
-            <div t-attf-class="alert alert-danger #{question.state != 'flagged' and 'd-none '}text-center" >
+            <div t-if="user.karma > forum.karma_flag" t-attf-class="alert alert-danger #{question.state != 'flagged' and 'd-none '}text-center" >
                 <h5>This question has been flagged</h5>
                 <span t-if="question.can_moderate">As a moderator, you can either validate or reject this answer.</span>
                 <t t-call="website_forum.link_button">

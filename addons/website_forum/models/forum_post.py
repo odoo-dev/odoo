@@ -322,7 +322,7 @@ class Post(models.Model):
 
         for post in posts:
             # deleted or closed questions
-            if post.parent_id and (post.parent_id.state == 'close' or post.parent_id.active is False):
+            if post.parent_id and (post.parent_id.state in ['close', 'offensive'] or post.parent_id.active is False):
                 raise UserError(_('Posting answer on a [Deleted] or [Closed] question is not possible.'))
             # karma-based access
             if not post.parent_id and not post.can_ask:
@@ -554,8 +554,6 @@ class Post(models.Model):
         for post in self:
             if not post.can_flag:
                 raise AccessError(_('%d karma required to flag a post.', post.forum_id.karma_flag))
-            if post.state == 'flagged':
-               res.append({'error': 'post_already_flagged'})
             elif post.state == 'active':
                 # TODO: potential performance bottleneck, can be batched
                 post.write({
@@ -808,10 +806,12 @@ class Post(models.Model):
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
         }
-
+        values = options.get('values') or False
         domain = website.website_domain()
-        domain += [('parent_id', '=', False), ('state', '=', 'active'), ('can_view', '=', True)]
+        domain += [('parent_id', '=', False), ('can_view', '=', True)]
         forum = options.get('forum')
+        if values == False or values.get('user').karma < values.get('forum').karma_moderate:
+            domain += [('state', '!=', 'close'), ('state', '!=', 'pending')]
         if forum:
             domain += [('forum_id', '=', unslug(forum)[1])]
         tags = options.get('tag')
