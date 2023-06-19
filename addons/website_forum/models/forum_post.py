@@ -35,7 +35,7 @@ class Post(models.Model):
         [
             ('active', 'Active'), ('pending', 'Waiting Validation'),
             ('close', 'Closed'), ('offensive', 'Offensive'),
-            ('flagged', 'Flagged'),
+            ('flagged', 'Flagged'), ('deleted', 'Deleted')
         ], string='Status', default='active')
     views = fields.Integer('Views', default=0, readonly=True, copy=False)
     active = fields.Boolean('Active', default=True)
@@ -88,6 +88,9 @@ class Post(models.Model):
     closed_reason_id = fields.Many2one('forum.post.reason', string='Reason', copy=False)
     closed_uid = fields.Many2one('res.users', string='Closed by', readonly=True, copy=False)
     closed_date = fields.Datetime('Closed on', readonly=True, copy=False)
+
+    #appeal
+    is_appeal = fields.Boolean('Appeal', help="shows which comment is used as appeal text")
 
     # karma calculation and access
     karma_accept = fields.Integer(
@@ -322,8 +325,8 @@ class Post(models.Model):
 
         for post in posts:
             # deleted or closed questions
-            if post.parent_id and (post.parent_id.state == 'close' or post.parent_id.active is False):
-                raise UserError(_('Posting answer on a [Deleted] or [Closed] question is not possible.'))
+            if post.parent_id and (post.parent_id.active is False):
+                raise UserError(_('Posting answer on a [Deleted] question is not possible.'))
             # karma-based access
             if not post.parent_id and not post.can_ask:
                 raise AccessError(_('%d karma required to create a new question.', post.forum_id.karma_ask))
@@ -490,7 +493,7 @@ class Post(models.Model):
                         karma *= 10
                 post.create_uid.sudo()._add_karma(karma * -1, post, _('Reopen a banned question'))
 
-        self.sudo().write({'state': 'active'})
+        self.sudo().write({'state': 'active', 'closed_reason_id': False})
 
     def close(self, reason_id):
         if any(post.parent_id for post in self):
@@ -554,8 +557,6 @@ class Post(models.Model):
         for post in self:
             if not post.can_flag:
                 raise AccessError(_('%d karma required to flag a post.', post.forum_id.karma_flag))
-            if post.state == 'flagged':
-               res.append({'error': 'post_already_flagged'})
             elif post.state == 'active':
                 # TODO: potential performance bottleneck, can be batched
                 post.write({
@@ -584,7 +585,6 @@ class Post(models.Model):
                 'moderator_id': self.env.user.id,
                 'closed_date': fields.Datetime.now(),
                 'closed_reason_id': reason_id,
-                'active': False,
             })
         return True
 
@@ -802,10 +802,12 @@ class Post(models.Model):
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
         }
-
+        values = options.get('values') or False
         domain = website.website_domain()
-        domain += [('parent_id', '=', False), ('state', '=', 'active'), ('can_view', '=', True)]
+        domain += [('parent_id', '=', False), ('can_view', '=', True)]
         forum = options.get('forum')
+        if values is False or values.get('user').karma < values.get('forum').karma_moderate:
+            domain += [('state', '!=', 'close'), ('state', '!=', 'pending')]
         if forum:
             domain += [('forum_id', '=', unslug(forum)[1])]
         tags = options.get('tag')
@@ -818,6 +820,10 @@ class Post(models.Model):
             domain += [('has_validated_answer', '=', True)]
         elif filters == 'unsolved':
             domain += [('has_validated_answer', '=', False)]
+        if filters == 'deleted':
+            domain += ['|', ('state', '=', 'deleted'), ('state', '=', 'offensive')]
+        else:
+            domain += [('state', '!=', 'deleted'), ('state', '!=', 'offensive')]
         user = self.env.user
         my = options.get('my')
         if my == 'mine':
@@ -828,6 +834,8 @@ class Post(models.Model):
             domain += [('tag_ids.message_partner_ids', '=', user.partner_id.id)]
         elif my == 'favourites':
             domain += [('favourite_ids', '=', user.id)]
+        if my == 'deleted':
+            domain += ['|', ('state', '=', 'deleted'), ('state', '=', 'offensive')]
 
         # 'sorting' from the form's "Order by" overrides order during auto-completion
         order = options.get('sorting', order)

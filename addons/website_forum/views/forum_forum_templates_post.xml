@@ -139,16 +139,27 @@
         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
         <input type="hidden" name="karma" t-att-value="user.karma" id="karma"/>
         <textarea name="content" t-attf-id="content-#{str(question.id)}" class="form-control o_wysiwyg_loader" required="required" minlength="50" t-att-data-karma="forum.karma_editor"/>
+        <t t-if="user==question.create_uid and question.state in ['close','offensive','deleted']">
+        <input type="hidden" name="is_appeal" t-att-value="True" id="appeal"/>
+        <p class="mt-2 mb-1 small">
+            <b>If you believe your post to be hidden for incorrect reasons, you can write an appeal to moderators here</b>
+        </p>
+        </t>
+        <t t-else="">
+        <input type="hidden" name="is_appeal" t-att-value="False" id="appeal"/>
         <p class="mt-2 mb-1 small">
             <b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just
             <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>
             - no need to answer the same question twice. Also, please <b>don't forget to vote</b>
             - it really helps to select the best questions and answers!
         </p>
+        </t>
         <div>
             <button type="submit" t-attf-class="o_wforum_submit_post #{forum.allow_share and 'oe_social_share_call '}btn btn-primary my-3 #{not question.can_answer and 'karma_required'}"
                     t-att-data-karma="question.forum_id.karma_answer"
-                    data-social-target-type="answer" data-hashtags="#answer">Post Answer</button>
+                    data-social-target-type="answer" data-hashtags="#answer">
+                    <t t-if="user==question.create_uid and question.state in ['close','offensive','deleted']">Appeal</t>
+                    <t t-else="">Post Answer</t></button>
             <a href="#"
                class="o_wforum_discard_btn btn btn-link"
                data-bs-toggle="collapse"
@@ -157,6 +168,7 @@
         </div>
     </form>
 </template>
+
 
 <template id="post_stats">
     <div class="d-flex">
@@ -212,7 +224,7 @@
                 <h5 >You have a pending post</h5>
                 <span>Please wait for a moderator to validate your previous post to be allowed to reply to questions.</span>
             </div>
-            <div t-attf-class="alert alert-danger #{question.state != 'flagged' and 'd-none '}text-center" >
+            <div t-if="user.karma > forum.karma_flag" t-attf-class="alert alert-danger #{question.state != 'flagged' and 'd-none '}text-center" >
                 <h5>This question has been flagged</h5>
                 <span t-if="question.can_moderate">As a moderator, you can either validate or reject this answer.</span>
                 <t t-call="website_forum.link_button">
@@ -239,6 +251,13 @@
                         <t t-set="icon" t-value="'fa-folder-open'"/>
                         <t t-set="karma" t-value="not question.can_close and question.karma_close or 0"/>
                         <t t-set="classes" t-value="'btn-info'"/>
+                    </t>
+                    <t t-if="user.karma > question.karma_unlink" t-call="website_forum.link_button">
+                        <t t-set="url" t-value="'/forum/' + slug(forum) + '/question/' + slug(question) + '/delete'"/>
+                        <t t-set="label">Delete</t>
+                        <t t-set="icon" t-value="'fa-trash'"/>
+                        <t t-set="karma" t-value="not question.can_close and question.karma_close or 0"/>
+                        <t t-set="classes" t-value="'btn-danger'"/>
                     </t>
                 </div>
             </div>
@@ -270,7 +289,16 @@
                         <i class="fa fa-reply me-1"/>Answer
                     </a>
                 </div>
-                <t t-if="question.state != 'close' and question.active != False and question.can_answer and forum">
+                <div t-if="uid and question.can_answer and question.state in ['close','offensive','deleted'] and question.active != False" class="d-flex mt-3">
+                    <a t-attf-class="btn btn-link collapsed #{not question.can_answer and 'karma_required text-muted'}#{forum.has_pending_post and ' disabled'} text-decoration-none"
+                        t-att-data-karma="question.forum_id.karma_answer"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".answer_collapse"
+                        href="#">
+                        <i class="fa fa-reply me-1"/>Appeal
+                    </a>
+                </div>
+                <t t-if="question.active != False and question.can_answer and forum">
                     <div id="post_reply" class="answer_collapse position-fixed d-flex flex-column start-0 end-0 bottom-0 w-100 w-lg-50 shadow mx-auto px-3 bg-body"
                          t-if="forum and not forum.has_pending_post and (not question.uid_has_answered or question.forum_id.mode == 'discussions')">
                         <div t-call="website_forum.post_answer" class="container my-3"/>
@@ -298,6 +326,7 @@
 
     <div t-attf-class="o_wforum_#{post_type} row g-0 mb-2 rounded
                        #{ 'o_wforum_answer_correct my-2 mx-n3 mx-lg-n2 mx-xl-n3 py-3 px-3 px-lg-2 px-xl-3' if post_id == answer and post_id.is_correct else '' }"
+        t-if="not post_id.is_appeal or post_id.is_appeal and (_question_creator != _answer_creator or request.env.user.karma > post_id.karma_close)"
         t-att-data-type="post_type"
         t-att-data-last-activity="post_id.create_date"
         t-att-data-last-update="post_id.write_date"
@@ -326,6 +355,9 @@
                         </span>
                         <span t-if="question.forum_id.mode == 'questions'" t-attf-class="o_wforum_answer_correct_badge badge #{answer.is_correct and 'd-inline' or 'd-none'} ms-auto border border-success rounded-pill px-2 py-1 text-success">
                             Best Answer
+                        </span>
+                        <span t-if="post_id.is_appeal" class="badge ms-2 border border-dark rounded-pill px-2 py-1 text-reset">
+                            Appeal
                         </span>
                     </t>
                 </header>
@@ -463,7 +495,7 @@
             <t t-set="karma" t-value="not post_id.can_edit and post_id.karma_edit or 0"/>
         </t>
         <t t-if="post_id == question">
-            <t t-if="post_id.state != 'close'" t-call="website_forum.link_button">
+            <t t-if="post_id.state != 'close' and request.env.user.karma > post_id.karma_close" t-call="website_forum.link_button">
                 <t t-set="url" t-value="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/ask_for_close'"/>
                 <t t-set="label">Close</t>
                 <t t-set="inDropdown" t-value="True"/>
@@ -485,7 +517,7 @@
                 <t t-set="karma" t-value="not post_id.can_moderate and post_id.forum_id.karma_moderate or 0"/>
             </t>
         </t>
-        <t t-if="post_id.active" t-call="website_forum.link_button">
+        <t t-if="post_id.active and post_id.state == 'close' and request.env.user.karma > post_id.karma_unlink" t-call="website_forum.link_button">
             <t t-set="url" t-value="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/delete'"/>
             <t t-set="label">Delete</t>
             <t t-set="inDropdown" t-value="True"/>
@@ -540,6 +572,9 @@
                         <span class="ms-2 mb-2 small text-muted"><small class="o_wforum_relative_datetime"/></span>
                         <span t-if="_question_creator == _comment_author" class="badge ms-2 border border-dark rounded-pill px-2 py-1 text-reset">
                             Author
+                        </span>
+                        <span t-if="post_id.is_appeal" class="badge ms-2 border border-dark rounded-pill px-2 py-1 text-reset">
+                            Appeal
                         </span>
                     </header>
                     <div t-field="message.body" class="o_wforum_readable oe_no_empty small text-break"/>

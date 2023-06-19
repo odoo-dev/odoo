@@ -68,6 +68,7 @@
                     <input type="text" name="post_name" required="required" pattern=".*\S.*" t-att-value="post_name"
                         class="form-control" placeholder="Write a clear, explicit and concise title" title="Title must not be empty"/>
                     <input type="hidden" name="karma" t-att-value="user.karma" id="karma"/>
+                    <input type="hidden" name="is_appeal" t-att-value="False" id="appeal"/>
                     <div class="form-text small text-muted">
                         <a data-bs-toggle="collapse" href="#newQuestionExample" role="button" aria-expanded="false" aria-controls="newQuestionExample">
                             Example
@@ -160,6 +161,7 @@
                 </div>
             </div>
             <input type="hidden" name="karma" t-att-value="user.karma" id="karma"/>
+            <input type="hidden" name="is_appeal" t-att-value="False" id="appeal"/>
             <div t-if="not is_answer" class="row mb-2">
                 <label class="form-label col-lg-2" for="post_tags">Tags</label>
                 <div class="col">

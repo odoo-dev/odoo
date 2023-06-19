@@ -15,7 +15,7 @@
 </template>
 
 <template id="link_button">
-    <form t-attf-method="#{form_method or 'POST'}" t-att-action="url" t-attf-class="#{form_classes} #{not inDropdown and ''}">
+    <form t-attf-method="#{form_method or 'POST'}" t-att-action="url" t-attf-class="#{form_classes} #{not inDropdown and ''} d-inline">
         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
         <button t-if="label" t-attf-class="#{icon and not label and ('fa ' + icon)} #{inDropdown and 'dropdown-item ps-3' or 'btn'} #{classes}#{karma > 0 and ' karma_required text-muted'}" t-attf-data-karma="#{karma}" t-att-title="title">
             <i t-if="icon and label" t-attf-class="fa fa-fw #{icon} #{inDropdown and 'me-1'}"/>
