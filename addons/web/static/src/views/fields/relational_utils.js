@@ -728,6 +728,12 @@ export function useOpenX2ManyRecord({
             record = await list.addNewRecord(params, isMany2Many);
         }
 
+        const _onClose = () => {
+            list.editedRecord?._switchMode("readonly");
+            list._lockedRecord = null;
+            onClose?.();
+        };
+
         addDialog(
             X2ManyFieldDialog,
             {
@@ -755,7 +761,7 @@ export function useOpenX2ManyRecord({
                 title,
                 delete: deleteRecord,
             },
-            { onClose }
+            { onClose: _onClose }
         );
     }
     return openRecord;
@@ -782,7 +788,8 @@ export function useX2ManyCrud(getList, isMany2Many) {
     } else {
         saveRecord = async (record) => {
             const list = getList();
-            record.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
+            record._switchMode("readonly");
+            list._lockedRecord = null;
             await list._addRecord(record);
             await list._onChange();
         };
@@ -790,16 +797,14 @@ export function useX2ManyCrud(getList, isMany2Many) {
 
     const updateRecord = async (record) => {
         if (isMany2Many) {
-            return record.save();
-            // Maybe add a _sort ???
-            // operation = { operation: "TRIGGER_ONCHANGE" };
-            // FIXME: incomplete, check updateRecord in BasicRelationalModel
-        } else {
-            const list = getList();
-            await list._onChange();
-            if (list.orderBy.length) {
-                await list._sort();
-            }
+            await record.save();
+        }
+        // FIXME: incomplete, check updateRecord in BasicRelationalModel
+        const list = getList();
+        list._lockedRecord = null;
+        await list._onChange();
+        if (list.orderBy.length) {
+            await list._sort();
         }
     };
 

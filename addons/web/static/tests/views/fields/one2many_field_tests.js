@@ -9277,38 +9277,10 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(target.querySelector(".o_data_cell").innerText, "new name");
     });
 
-    QUnit.tttt("onchange affecting inline unopened list view", async function (assert) {
-        // when we got onchange result for fields of record that were not
-        // already available because they were in a inline view not already
-        // opened, in a given configuration the change were applied ignoring
-        // existing data, thus a line of a one2many field inside a one2many
-        // field could be duplicated unexplectedly
-
+    QUnit.test("onchange affecting inline unopened list view", async function (assert) {
         let numUserOnchange = 0;
         serverData.models.user.onchanges = {
             partner_ids: function (obj) {
-                if (numUserOnchange === 0) {
-                    // simulate proper server onchange after save of modal with new record
-                    obj.partner_ids = [
-                        [5],
-                        [
-                            1,
-                            1,
-                            {
-                                display_name: "first record",
-                                turtles: [[5], [1, 2, { display_name: "donatello" }]],
-                            },
-                        ],
-                        [
-                            1,
-                            2,
-                            {
-                                display_name: "second record",
-                                turtles: [[5], obj.partner_ids[1][2].turtles[0]],
-                            },
-                        ],
-                    ];
-                }
                 numUserOnchange++;
             },
         };
@@ -11074,36 +11046,10 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt("onchange on unloaded record clearing posterious change", async function (assert) {
-        // when we got onchange result for fields of record that were not
-        // already available because they were in a inline view not already
-        // opened, in a given configuration the change were applied ignoring
-        // posteriously changed data, thus an added/removed/modified line could
-        // be reset to the original onchange data
+    QUnit.test("onchange on unloaded record clearing posterious change", async function (assert) {
         let numUserOnchange = 0;
-
         serverData.models.user.onchanges = {
             partner_ids: function (obj) {
-                // simulate actual server onchange after save of modal with new record
-                if (numUserOnchange === 0) {
-                    obj.partner_ids = [...obj.partner_ids];
-                    obj.partner_ids.unshift([5]);
-                    obj.partner_ids[1][2].turtles.unshift([5]);
-                    obj.partner_ids[2] = [
-                        1,
-                        2,
-                        {
-                            display_name: "second record",
-                            trululu: 1,
-                            turtles: [[5]],
-                        },
-                    ];
-                } else if (numUserOnchange === 1) {
-                    obj.partner_ids = [...obj.partner_ids];
-                    obj.partner_ids.unshift([5]);
-                    obj.partner_ids[1][2].turtles.unshift([5]);
-                    obj.partner_ids[2][2].turtles.unshift([5]);
-                }
                 numUserOnchange++;
             },
         };

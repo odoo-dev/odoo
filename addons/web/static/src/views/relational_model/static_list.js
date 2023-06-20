@@ -444,6 +444,9 @@ export class StaticList extends DataPoint {
                 if (!hasCommand) {
                     this._commands.push([UPDATE, id]);
                 }
+                if (record === this._lockedRecord) {
+                    return;
+                }
                 if (!withoutParentOnchange) {
                     this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
                 }
@@ -732,6 +735,9 @@ export class StaticList extends DataPoint {
     duplicateDatapoint(record, params) {
         return this.model.mutex.exec(async () => {
             if (record._hasBeenDuplicated) {
+                if (this._lockedRecord) {
+                    throw new Error("LOCKED RECORD");
+                }
                 this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
                 record._addSavePoint();
                 this._lockedRecord = record;
@@ -777,6 +783,9 @@ export class StaticList extends DataPoint {
             record._applyValues(data);
             record._addSavePoint();
             record._hasBeenDuplicated = true;
+            if (this._lockedRecord) {
+                throw new Error("LOCKED RECORD");
+            }
             this._lockedRecord = record;
             return record;
         });
