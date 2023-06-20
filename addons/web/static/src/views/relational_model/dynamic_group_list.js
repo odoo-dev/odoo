@@ -189,10 +189,10 @@ export class DynamicGroupList extends DynamicList {
         this.count = response.length;
     }
 
-    _removeRecords(records) {
+    _removeRecords(recordIds) {
         const proms = [];
         for (const group of this.groups) {
-            proms.push(group._removeRecords(records));
+            proms.push(group._removeRecords(recordIds));
         }
         return Promise.all(proms);
     }
@@ -246,7 +246,7 @@ export class DynamicGroupList extends DynamicList {
         // step 1: move record to correct position
         const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
         const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
-        sourceGroup._removeRecords([record]);
+        sourceGroup._removeRecords([record.id]);
         targetGroup.addRecord(record, refIndex + 1);
         // step 2: update record value
         const value =
@@ -254,7 +254,7 @@ export class DynamicGroupList extends DynamicList {
                 ? [targetGroup.value, targetGroup.displayName]
                 : targetGroup.value;
         const revert = () => {
-            targetGroup._removeRecords([record]);
+            targetGroup._removeRecords([record.id]);
             sourceGroup.addRecord(record, oldIndex);
         };
         try {

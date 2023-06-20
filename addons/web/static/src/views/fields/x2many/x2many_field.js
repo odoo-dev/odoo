@@ -197,6 +197,13 @@ export class X2ManyField extends Component {
             const recordsDraggable = !this.props.readonly && archInfo.recordsDraggable;
             props.archInfo = { ...archInfo, recordsDraggable };
             props.readonly = this.props.readonly;
+            // TODO: apply same logic in the list case
+            props.deleteRecord = (record) => {
+                if (this.isMany2Many) {
+                    return this.list.forget(record);
+                }
+                return this.list.delete(record);
+            };
             return props;
         }
 

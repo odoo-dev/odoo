@@ -134,8 +134,8 @@ export class DynamicRecordList extends DynamicList {
         this.count++;
     }
 
-    _removeRecords(records) {
-        const _records = this.records.filter((r) => !records.includes(r));
+    _removeRecords(recordIds) {
+        const _records = this.records.filter((r) => !recordIds.includes(r.id));
         if (this.offset && !_records.length) {
             // we weren't on the first page, and we removed all records of the current page
             const offset = Math.max(this.offset - this.limit, 0);
