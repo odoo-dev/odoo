@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { Layout } from "@web/search/layout";
@@ -24,6 +26,7 @@ const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "m
 export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
+        this.dialog = useService("dialog");
         const { Model, archInfo } = this.props;
 
         class KanbanSampleModel extends Model {
@@ -186,6 +189,15 @@ export class KanbanController extends Component {
             return classList.join(" ");
         }
         return this.props.className;
+    }
+
+    async deleteRecord(record) {
+        this.dialog.add(ConfirmationDialog, {
+            body: _t("Are you sure you want to delete this record?"),
+            confirm: () => this.model.root.deleteRecords([record]),
+            confirmLabel: _t("Delete"),
+            cancel: () => {},
+        });
     }
 
     async openRecord(record, mode) {

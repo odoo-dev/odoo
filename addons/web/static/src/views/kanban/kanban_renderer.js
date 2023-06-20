@@ -49,6 +49,7 @@ export class KanbanRenderer extends Component {
         "archInfo",
         "Compiler?", // optional in stable for backward compatibility
         "list",
+        "deleteRecord",
         "openRecord",
         "readonly",
         "forceGlobalClick?",

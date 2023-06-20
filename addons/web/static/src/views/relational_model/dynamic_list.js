@@ -66,36 +66,6 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._deleteRecords(records));
     }
 
-    async _deleteRecords(records) {
-        let resIds;
-        if (records.length) {
-            resIds = records.map((r) => r.resId);
-        } else {
-            resIds = await this.getResIds(true);
-            records = this.records.filter((r) => resIds.includes(r.resId));
-        }
-        const unliked = await this.model.orm.unlink(this.resModel, resIds, {
-            context: this.context,
-        });
-        if (!unliked) {
-            return false;
-        }
-        if (
-            this.isDomainSelected &&
-            resIds.length === session.active_ids_limit &&
-            resIds.length < this.count
-        ) {
-            const msg = sprintf(
-                _t(`Only the first %s records have been deleted (out of %s selected)`),
-                resIds.length,
-                this.count
-            );
-            this.model.notification.add(msg, { title: _t("Warning") });
-        }
-        await this._removeRecords(records);
-        return unliked;
-    }
-
     /**
      * @param {boolean} [isSelected]
      * @returns {Promise<number[]>}
@@ -158,7 +128,7 @@ export class DynamicList extends DataPoint {
             if (discard) {
                 await this.editedRecord.discard();
                 if (this.editedRecord && this.editedRecord.isNew) {
-                    this._removeRecords([this.editedRecord]);
+                    this._removeRecords([this.editedRecord.id]);
                 }
             } else {
                 if (!this.model._urgentSave) {
@@ -168,7 +138,7 @@ export class DynamicList extends DataPoint {
                     }
                 }
                 if (this.editedRecord.isNew && !this.editedRecord.dirty) {
-                    this._removeRecords([this.editedRecord]);
+                    this._removeRecords([this.editedRecord.id]);
                 } else {
                     canProceed = await this.editedRecord.save();
                 }
@@ -375,5 +345,35 @@ export class DynamicList extends DataPoint {
         }
 
         return dataPoints;
+    }
+
+    async _deleteRecords(records) {
+        let resIds;
+        if (records.length) {
+            resIds = records.map((r) => r.resId);
+        } else {
+            resIds = await this.getResIds(true);
+            records = this.records.filter((r) => resIds.includes(r.resId));
+        }
+        const unlinked = await this.model.orm.unlink(this.resModel, resIds, {
+            context: this.context,
+        });
+        if (!unlinked) {
+            return false;
+        }
+        if (
+            this.isDomainSelected &&
+            resIds.length === session.active_ids_limit &&
+            resIds.length < this.count
+        ) {
+            const msg = sprintf(
+                _t(`Only the first %s records have been deleted (out of %s selected)`),
+                resIds.length,
+                this.count
+            );
+            this.model.notification.add(msg, { title: _t("Warning") });
+        }
+        await this._removeRecords(records.map((r) => r.id));
+        return unlinked;
     }
 }
