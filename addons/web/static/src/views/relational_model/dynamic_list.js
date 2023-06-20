@@ -6,7 +6,8 @@ import { sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
 import { DataPoint } from "./datapoint";
 import { Record } from "./record";
-import { DEFAULT_HANDLE_FIELD } from "./utils";
+
+const DEFAULT_HANDLE_FIELD = "sequence";
 
 export class DynamicList extends DataPoint {
     /**
