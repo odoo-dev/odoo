@@ -115,8 +115,8 @@ export class StaticList extends DataPoint {
                 withoutParent,
                 manuallyAdded: true,
             });
-            this._addRecord(record, { position });
-            this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+            await this._addRecord(record, { position });
+            await this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
             return record;
         });
     }
@@ -243,7 +243,7 @@ export class StaticList extends DataPoint {
         }
     }
 
-    _addRecord(record, { position } = {}) {
+    async _addRecord(record, { position } = {}) {
         const command = [x2ManyCommands.CREATE, record.virtualId];
         if (position === "top") {
             this.records.unshift(record);
@@ -262,10 +262,15 @@ export class StaticList extends DataPoint {
             }
             this._commands.push(command);
         } else {
-            if (this.records.length < this.limit) {
-                this.records.push(record);
+            const currentIds = [...this._currentIds, record.virtualId];
+            if (this.orderBy.length) {
+                await this._sort(currentIds);
+            } else {
+                if (this.records.length < this.limit) {
+                    this.records.push(record);
+                }
             }
-            this._currentIds.push(record.virtualId);
+            this._currentIds = currentIds;
             this._commands.push(command);
         }
         this.count++;
@@ -643,21 +648,9 @@ export class StaticList extends DataPoint {
         this._onChange();
     }
 
-    async _sortBy(fieldName) {
-        let orderBy = [...this.config.orderBy];
-        if (orderBy.length && orderBy[0].name === fieldName) {
-            if (!this._needsReordering) {
-                orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
-            }
-        } else {
-            orderBy = orderBy.filter((o) => o.name !== fieldName);
-            orderBy.unshift({
-                name: fieldName,
-                asc: true,
-            });
-        }
+    async _sort(currentIds = this.currentIds, orderBy = this.orderBy) {
         const fieldNames = orderBy.map((o) => o.name);
-        const resIds = this._currentIds.filter((id) => {
+        const resIds = currentIds.filter((id) => {
             if (typeof id === "string") {
                 // this is a virtual id, we don't want to read it
                 return false;
@@ -680,7 +673,7 @@ export class StaticList extends DataPoint {
                 this._createRecordDatapoint(record, { activeFields });
             }
         }
-        const allRecords = this._currentIds.map((id) => this._cache[id]);
+        const allRecords = currentIds.map((id) => this._cache[id]);
         const sortedRecords = allRecords.sort((r1, r2) => {
             return compareRecords(r1, r2, orderBy, this.fields) || (orderBy[0].asc ? -1 : 1);
         });
@@ -689,6 +682,24 @@ export class StaticList extends DataPoint {
         this.model._updateConfig(this.config, { orderBy }, { noReload: true });
         this.records = currentPageRecords;
         this._needsReordering = false;
+    }
+
+    async _sortBy(fieldName) {
+        let orderBy = [...this.orderBy];
+        if (fieldName) {
+            if (orderBy.length && orderBy[0].name === fieldName) {
+                if (!this._needsReordering) {
+                    orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+                }
+            } else {
+                orderBy = orderBy.filter((o) => o.name !== fieldName);
+                orderBy.unshift({
+                    name: fieldName,
+                    asc: true,
+                });
+            }
+        }
+        return this._sort(this._currentIds, orderBy);
     }
 
     _updateContext(context) {

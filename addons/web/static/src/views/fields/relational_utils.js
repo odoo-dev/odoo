@@ -783,19 +783,23 @@ export function useX2ManyCrud(getList, isMany2Many) {
         saveRecord = async (record) => {
             const list = getList();
             record.model._updateConfig(record.config, { mode: "readonly" }, { noReload: true });
-            list._addRecord(record);
-            list._onChange();
+            await list._addRecord(record);
+            await list._onChange();
         };
     }
 
-    const updateRecord = (record) => {
+    const updateRecord = async (record) => {
         if (isMany2Many) {
             return record.save();
+            // Maybe add a _sort ???
             // operation = { operation: "TRIGGER_ONCHANGE" };
             // FIXME: incomplete, check updateRecord in BasicRelationalModel
         } else {
             const list = getList();
-            list._onChange();
+            await list._onChange();
+            if (list.orderBy.length) {
+                await list._sort();
+            }
         }
     };
 

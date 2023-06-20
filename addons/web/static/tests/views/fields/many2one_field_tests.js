@@ -2574,7 +2574,7 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["object"]);
     });
 
-    QUnit.tttt("X2Many sequence list in modal", async function (assert) {
+    QUnit.test("X2Many sequence list in modal", async function (assert) {
         serverData.models.partner.fields.sequence = { string: "Sequence", type: "integer" };
         serverData.models.partner.records[0].sequence = 1;
         serverData.models.partner.records[1].sequence = 2;
@@ -2593,6 +2593,8 @@ QUnit.module("Fields", (hooks) => {
             relation: "turtle",
         };
         serverData.models.product.records[0].turtle_ids = [1];
+        serverData.models.product.records[0].display_name = "leonardo";
+        serverData.models.product.records[0].name = "xphone";
 
         serverData.models.turtle.fields.partner_types_ids = {
             string: "Partner",
@@ -2604,6 +2606,7 @@ QUnit.module("Fields", (hooks) => {
             type: "many2one",
             relation: "partner_type",
         };
+        serverData.models.turtle.records[0].type_id = 12;
 
         serverData.models.partner_type.fields.partner_ids = {
             string: "Partner",
@@ -2638,20 +2641,9 @@ QUnit.module("Fields", (hooks) => {
                         </tree>
                     </field>
                 </form>`,
-            mockRPC(route) {
-                if (route === "/web/dataset/call_kw/product/web_read") {
-                    return Promise.resolve([
-                        { id: 37, name: "xphone", display_name: "leonardo", turtle_ids: [1] },
-                    ]);
-                }
-                if (route === "/web/dataset/call_kw/turtle/web_read") {
-                    return Promise.resolve([{ id: 1, type_id: [12, "gold"] }]);
-                }
+            async mockRPC(route) {
                 if (route === "/web/dataset/call_kw/partner_type/get_formview_id") {
-                    return Promise.resolve(false);
-                }
-                if (route === "/web/dataset/call_kw/partner_type/web_read") {
-                    return Promise.resolve([{ id: 12, partner_ids: [1, 2], display_name: "gold" }]);
+                    return false;
                 }
                 if (route === "/web/dataset/call_kw/partner_type/write") {
                     assert.step("partner_type write");
