@@ -1497,7 +1497,7 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual($(".modal .o_data_row").length, 0, "should contain no row");
     });
 
-    QUnit.tttt("many2many list with onchange and edition of a record", async function (assert) {
+    QUnit.test("many2many list with onchange and edition of a record", async function (assert) {
         serverData.models.partner.fields.turtles.type = "many2many";
         serverData.models.partner.onchanges.turtles = function () {};
 
@@ -1524,12 +1524,12 @@ QUnit.module("Fields", (hooks) => {
         });
         assert.verifySteps(["get_views", "web_read"]);
 
-        await click($(target).find("td.o_data_cell:first")[0]);
+        await click(target.querySelector("td.o_data_cell"));
         assert.verifySteps(["get_views", "web_read"]);
 
-        await click($('.modal-body input[type="checkbox"]')[0]);
-        await click($(".modal .modal-footer .btn-primary").first()[0]);
-        assert.verifySteps(["write", "onchange2", "web_read"]);
+        await click(target.querySelector(".modal-body input[type=checkbox]"));
+        await click(target.querySelector(".modal .modal-footer .btn-primary"));
+        assert.verifySteps(["write", "web_read", "onchange2"]);
 
         // there is nothing left to save -> should not do a 'write' RPC
         await clickSave(target);
