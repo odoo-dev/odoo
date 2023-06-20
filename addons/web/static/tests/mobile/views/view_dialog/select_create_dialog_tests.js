@@ -77,7 +77,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 </form>`,
             async mockRPC(route, args) {
                 if (args.method === "create" && args.model === "sale_order_line") {
-                    const { product_id: selectedId } = args.args[0];
+                    const { product_id: selectedId } = args.args[0][0];
                     assert.strictEqual(selectedId, false, `there should be no product selected`);
                 }
             },
