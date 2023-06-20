@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { ColorList } from "@web/core/colorlist/colorlist";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -30,7 +29,9 @@ const { COLORS } = ColorList;
 const formatters = registry.category("formatters");
 
 // These classes determine whether a click on a record should open it.
-export const CANCEL_GLOBAL_CLICK = ["a", ".dropdown", ".oe_kanban_action", "[data-bs-toggle]"].join(",");
+export const CANCEL_GLOBAL_CLICK = ["a", ".dropdown", ".oe_kanban_action", "[data-bs-toggle]"].join(
+    ","
+);
 const ALLOW_GLOBAL_CLICK = [".oe_kanban_global_click", ".oe_kanban_global_click_edit"].join(",");
 
 /**
@@ -295,7 +296,7 @@ export class KanbanRecord extends Component {
      */
     triggerAction(params) {
         const env = this.env;
-        const { archInfo, group, list, openRecord, record } = this.props;
+        const { archInfo, openRecord, deleteRecord, record } = this.props;
         const { type } = params;
         switch (type) {
             case "edit": {
@@ -305,20 +306,7 @@ export class KanbanRecord extends Component {
                 return openRecord(record);
             }
             case "delete": {
-                const listOrGroup = group || list;
-                if (listOrGroup.deleteRecords) {
-                    this.dialog.add(ConfirmationDialog, {
-                        body: env._t("Are you sure you want to delete this record?"),
-                        confirm: () => listOrGroup.deleteRecords([record]),
-                        confirmLabel: env._t("Delete"),
-                        cancel: () => {},
-                    });
-                } else {
-                    // FIXME: uniformize APIs...
-                    // static list case
-                    listOrGroup.delete(record);
-                }
-                return;
+                return deleteRecord(record);
             }
             case "set_cover": {
                 const { autoOpen, fieldName } = params;
@@ -388,6 +376,7 @@ KanbanRecord.components = {
 };
 KanbanRecord.defaultProps = {
     colors: COLORS,
+    deleteRecord: () => {},
     openRecord: () => {},
 };
 KanbanRecord.props = [
@@ -398,6 +387,7 @@ KanbanRecord.props = [
     "forceGlobalClick?",
     "group?",
     "list",
+    "deleteRecord?",
     "openRecord?",
     "readonly?",
     "record",

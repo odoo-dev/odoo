@@ -289,7 +289,7 @@ export class StaticList extends DataPoint {
 
     _applyCommands(commands) {
         const isOnLastPage = this.limit + this.offset >= this.count;
-        const { CREATE, UPDATE, DELETE, FORGET, LINK_TO } = x2ManyCommands;
+        const { CREATE, UPDATE, DELETE, FORGET, LINK_TO, REPLACE_WITH } = x2ManyCommands;
         for (const command of commands) {
             switch (command[0]) {
                 case CREATE: {
@@ -348,13 +348,21 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case FORGET: {
-                    const index = this._commands.findIndex(
-                        (c) => c[0] === LINK_TO && c[1] === command[1]
+                    const replaceWithIndex = this._commands.findIndex(
+                        (c) => c[0] === REPLACE_WITH && c[2].includes(command[1])
                     );
-                    if (index === -1) {
-                        this._commands.push([FORGET, command[1]]);
+                    if (replaceWithIndex >= 0) {
+                        const ids = this._commands[replaceWithIndex][2];
+                        this._commands[replaceWithIndex][2] = ids.filter((id) => id !== command[1]);
                     } else {
-                        this._commands.splice(index, 1);
+                        const linkToIndex = this._commands.findIndex(
+                            (c) => c[0] === LINK_TO && c[1] === command[1]
+                        );
+                        if (linkToIndex >= 0) {
+                            this._commands.splice(linkToIndex, 1);
+                        } else {
+                            this._commands.push([FORGET, command[1]]);
+                        }
                     }
                     const record = this._cache[command[1]];
                     this.records.splice(

@@ -219,8 +219,8 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Many2ManyField");
 
-    QUnit.tttt("many2many kanban: edition", async function (assert) {
-        assert.expect(31);
+    QUnit.test("many2many kanban: edition", async function (assert) {
+        assert.expect(29);
 
         serverData.views = {
             "partner_type,false,form": '<form><field name="display_name"/></form>',
@@ -267,28 +267,18 @@ QUnit.module("Fields", (hooks) => {
                 }
                 if (route === "/web/dataset/call_kw/partner_type/create") {
                     assert.strictEqual(
-                        args.args[0].display_name,
+                        args.args[0][0].display_name,
                         "A new type",
                         "should create 'A new type'"
                     );
                 }
                 if (route === "/web/dataset/call_kw/partner/write") {
-                    var commands = args.args[1].timmy;
-                    assert.strictEqual(commands.length, 1, "should have generated one command");
-                    assert.strictEqual(
-                        commands[0][0],
-                        6,
-                        "generated command should be REPLACE WITH"
-                    );
+                    const commands = args.args[1].timmy;
                     // get the created type's id
-                    var createdType = serverData.models.partner_type.records.find((record) => {
+                    const createdType = serverData.models.partner_type.records.find((record) => {
                         return record.display_name === "A new type";
                     });
-                    var ids = [12, 15, 18].concat(createdType.id).sort();
-                    assert.ok(
-                        JSON.stringify(commands[0][2].sort()) === JSON.stringify(ids),
-                        "new value should be " + ids
-                    );
+                    assert.deepEqual(commands, [[6, false, [12, 15, 18, createdType.id]]]);
                 }
             },
         });
