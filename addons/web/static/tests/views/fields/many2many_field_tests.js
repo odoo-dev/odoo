@@ -792,9 +792,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.tttt("many2many list (editable): edition", async function (assert) {
-        assert.expect(29);
-
+    QUnit.test("many2many list (editable): edition", async function (assert) {
         serverData.models.partner.records[0].timmy = [12, 14];
         serverData.models.partner_type.records.push({ id: 15, display_name: "bronze", color: 6 });
         serverData.models.partner_type.fields.float_field = { string: "Float", type: "float" };
@@ -817,9 +815,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method !== "get_views") {
-                    assert.step(route.split("/").at(-1));
-                }
+                assert.step(args.method);
                 if (args.method === "write") {
                     assert.deepEqual(args.args[1].timmy, [
                         [6, false, [12, 15]],
@@ -892,7 +888,7 @@ QUnit.module("Fields", (hooks) => {
             "new name",
             "value of subrecord should have been updated"
         );
-        assert.verifySteps(["web_read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
         // add new subrecords
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
@@ -940,6 +936,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         assert.verifySteps([
+            "get_views", // list view in dialog
             "unity_web_search_read", // list view in dialog
             "web_read", // relational field (updated)
             "write", // save main record

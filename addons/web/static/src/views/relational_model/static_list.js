@@ -204,7 +204,10 @@ export class StaticList extends DataPoint {
             }
         }
         this.records = ids.map((id) => this._cache[id]);
-        this._commands = [x2ManyCommands.replaceWith(ids)];
+        const updateCommandsToKeep = this._commands.filter(
+            (c) => c[0] === x2ManyCommands.UPDATE && ids.includes(c[1])
+        );
+        this._commands = [x2ManyCommands.replaceWith(ids)].concat(updateCommandsToKeep);
         this._currentIds = [...ids];
         this.count = this._currentIds.length;
         this._onChange();
@@ -569,7 +572,9 @@ export class StaticList extends DataPoint {
             } else if (command[0] === CREATE || command[0] === UPDATE) {
                 const record = this._cache[command[1]];
                 const values = record._getChanges(record._changes, { withReadonly });
-                commands.push([command[0], command[1], values]);
+                if (command[0] === CREATE || Object.keys(values).length) {
+                    commands.push([command[0], command[1], values]);
+                }
             } else {
                 commands.push(command);
             }
