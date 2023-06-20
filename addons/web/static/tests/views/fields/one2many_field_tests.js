@@ -5206,7 +5206,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
     });
 
-    QUnit.tttt("one2many with many2many widget: edition", async function (assert) {
+    QUnit.test("one2many with many2many widget: edition", async function (assert) {
         assert.expect(7);
 
         serverData.views = {
