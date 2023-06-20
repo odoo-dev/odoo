@@ -681,7 +681,7 @@ export class StaticList extends DataPoint {
         }
         await Promise.all(proms);
 
-        this.records = records;
+        await this._sort();
         this._onChange();
     }
 
@@ -700,7 +700,7 @@ export class StaticList extends DataPoint {
         }
         const allRecords = currentIds.map((id) => this._cache[id]);
         const sortedRecords = allRecords.sort((r1, r2) => {
-            return compareRecords(r1, r2, orderBy, this.fields) || (orderBy[0].asc ? -1 : 1);
+            return compareRecords(r1, r2, orderBy, this.fields);
         });
         await this._load({
             orderBy,
