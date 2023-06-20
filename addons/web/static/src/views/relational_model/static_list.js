@@ -380,7 +380,7 @@ export class StaticList extends DataPoint {
                     break;
                 }
                 case LINK_TO: {
-                    const record = this._createRecordDatapoint(command[2]);
+                    const record = this._createRecordDatapoint({ ...command[2], id: command[1] });
                     if (!this.limit || this.records.length < this.limit) {
                         this.records.push(record);
                     }
