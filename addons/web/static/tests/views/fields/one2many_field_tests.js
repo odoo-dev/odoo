@@ -1225,7 +1225,7 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.tttt(
+    QUnit.test(
         "onchange with modifiers for embedded one2many on the second page",
         async function (assert) {
             const ids = [];
