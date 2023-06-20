@@ -7,8 +7,6 @@ import { x2ManyCommands } from "@web/core/orm_service";
 import { omit } from "@web/core/utils/objects";
 import { orderByToString } from "@web/views/utils";
 
-export const DEFAULT_HANDLE_FIELD = "sequence";
-
 function makeActiveField({
     context,
     invisible,

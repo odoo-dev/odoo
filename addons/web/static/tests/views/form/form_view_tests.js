@@ -6288,7 +6288,7 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".modal .o_field_widget[name=name] input", "new name");
     });
 
-    QUnit.tttt("onchanges on date(time) fields", async function (assert) {
+    QUnit.test("onchanges on date(time) fields", async function (assert) {
         patchTimeZone(120);
 
         serverData.models.partner.onchanges = {
@@ -8350,7 +8350,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["get_views", "web_read"]);
     });
 
-    QUnit.tttt("default_order on x2many embedded view", async function (assert) {
+    QUnit.test("default_order on x2many embedded view", async function (assert) {
         serverData.models.partner.fields.display_name.sortable = true;
         serverData.models.partner.records[0].p = [1, 4];
 
@@ -10978,7 +10978,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.tttt("resequence list lines when discardable lines are present", async function (assert) {
+    QUnit.test("resequence list lines when discardable lines are present", async function (assert) {
         var onchangeNum = 0;
         serverData.models.partner.onchanges = {
             p: function (obj) {
