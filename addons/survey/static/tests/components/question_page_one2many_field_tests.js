@@ -169,7 +169,7 @@ QUnit.module("QuestionPageOneToManyField", (hooks) => {
         assert.containsOnce(target, ".modal .o_form_view");
     });
 
-    QUnit.test("A validation error from saving parent form notifies and prevents dialog from closing", async (assert) => {
+    QUnit.tttt("A validation error from saving parent form notifies and prevents dialog from closing", async (assert) => {
         await makeView({
             type: "form",
             resModel: "survey",

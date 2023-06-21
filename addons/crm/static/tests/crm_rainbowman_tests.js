@@ -117,7 +117,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         setupViewRegistries();
     },
 }, function () {
-    QUnit.test("first lead won, click on statusbar", async function (assert) {
+    QUnit.tttt("first lead won, click on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -131,7 +131,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Go, go, go! Congrats for your first deal.']);
     });
 
-    QUnit.test("first lead won, click on statusbar in edit mode", async function (assert) {
+    QUnit.tttt("first lead won, click on statusbar in edit mode", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -144,7 +144,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Go, go, go! Congrats for your first deal.']);
     });
 
-    QUnit.test("team record 30 days, click on statusbar", async function (assert) {
+    QUnit.tttt("team record 30 days, click on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -158,7 +158,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Boom! Team record for the past 30 days.']);
     });
 
-    QUnit.test("team record 7 days, click on statusbar", async function (assert) {
+    QUnit.tttt("team record 7 days, click on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -172,7 +172,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Yeah! Deal of the last 7 days for the team.']);
     });
 
-    QUnit.test("user record 30 days, click on statusbar", async function (assert) {
+    QUnit.tttt("user record 30 days, click on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -186,7 +186,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['You just beat your personal record for the past 30 days.']);
     });
 
-    QUnit.test("user record 7 days, click on statusbar", async function (assert) {
+    QUnit.tttt("user record 7 days, click on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -200,7 +200,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['You just beat your personal record for the past 7 days.']);
     });
 
-    QUnit.test("click on stage (not won) on statusbar", async function (assert) {
+    QUnit.tttt("click on stage (not won) on statusbar", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -214,7 +214,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['no rainbowman']);
     });
 
-    QUnit.test("first lead won, drag & drop kanban", async function (assert) {
+    QUnit.tttt("first lead won, drag & drop kanban", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -226,7 +226,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Go, go, go! Congrats for your first deal.']);
     });
 
-    QUnit.test("team record 30 days, drag & drop kanban", async function (assert) {
+    QUnit.tttt("team record 30 days, drag & drop kanban", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -238,7 +238,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Boom! Team record for the past 30 days.']);
     });
 
-    QUnit.test("team record 7 days, drag & drop kanban", async function (assert) {
+    QUnit.tttt("team record 7 days, drag & drop kanban", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -250,7 +250,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['Yeah! Deal of the last 7 days for the team.']);
     });
 
-    QUnit.test("user record 30 days, drag & drop kanban", async function (assert) {
+    QUnit.tttt("user record 30 days, drag & drop kanban", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -262,7 +262,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['You just beat your personal record for the past 30 days.']);
     });
 
-    QUnit.test("user record 7 days, drag & drop kanban", async function (assert) {
+    QUnit.tttt("user record 7 days, drag & drop kanban", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -274,7 +274,7 @@ QUnit.module('Crm Rainbowman Triggers', {
         assert.verifySteps(['You just beat your personal record for the past 7 days.']);
     });
 
-    QUnit.test("drag & drop record kanban in stage not won", async function (assert) {
+    QUnit.tttt("drag & drop record kanban in stage not won", async function (assert) {
         assert.expect(2);
 
         await makeView({

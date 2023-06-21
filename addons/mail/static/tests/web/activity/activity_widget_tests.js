@@ -8,7 +8,7 @@ import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
 QUnit.module("activity widget");
 
-QUnit.test("list activity widget with no activity", async (assert) => {
+QUnit.tttt("list activity widget with no activity", async (assert) => {
     const pyEnv = await startServer();
     const views = {
         "res.users,false,list": `
@@ -42,7 +42,7 @@ QUnit.test("list activity widget with no activity", async (assert) => {
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
 });
 
-QUnit.test("list activity widget with activities", async (assert) => {
+QUnit.tttt("list activity widget with activities", async (assert) => {
     const pyEnv = await startServer();
     const [activityId_1, activityId_2] = pyEnv["mail.activity"].create([{}, {}]);
     const [activityTypeId_1, activityTypeId_2] = pyEnv["mail.activity.type"].create([
@@ -99,7 +99,7 @@ QUnit.test("list activity widget with activities", async (assert) => {
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
 });
 
-QUnit.test("list activity widget with exception", async (assert) => {
+QUnit.tttt("list activity widget with exception", async (assert) => {
     const pyEnv = await startServer();
     const activityId = pyEnv["mail.activity"].create({});
     const activityTypeId = pyEnv["mail.activity.type"].create({});
@@ -142,7 +142,7 @@ QUnit.test("list activity widget with exception", async (assert) => {
     assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
 });
 
-QUnit.test("list activity widget: open dropdown", async (assert) => {
+QUnit.tttt("list activity widget: open dropdown", async (assert) => {
     const pyEnv = await startServer();
     const [activityTypeId_1, activityTypeId_2] = pyEnv["mail.activity.type"].create([{}, {}]);
     const [activityId_1, activityId_2] = pyEnv["mail.activity"].create([

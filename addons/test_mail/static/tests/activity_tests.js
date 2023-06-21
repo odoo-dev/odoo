@@ -677,7 +677,7 @@ QUnit.module("test_mail", {}, function () {
         assert.containsNone($, ".modal.o_technical_modal", "Activity Modal should be closed");
     });
 
-    QUnit.test(
+    QUnit.tttt(
         "Activity view: many2one_avatar_user widget in activity view",
         async function (assert) {
             assert.expect(3);

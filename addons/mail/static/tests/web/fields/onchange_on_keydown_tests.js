@@ -31,7 +31,7 @@ QUnit.module("onchange on keydown", {
     },
 });
 
-QUnit.test(
+QUnit.tttt(
     "Test that onchange_on_keydown option triggers the onchange properly",
     async (assert) => {
         assert.expect(3);

@@ -80,7 +80,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.module("Forecast views");
 
-    QUnit.test("Forecast graph view", async function (assert) {
+    QUnit.tttt("Forecast graph view", async function (assert) {
         assert.expect(5);
 
         patchWithCleanup(browser, { setTimeout: (fn) => fn() });

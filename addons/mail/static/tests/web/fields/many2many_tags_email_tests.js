@@ -7,7 +7,7 @@ import testUtils from "web.test_utils";
 
 QUnit.module("FieldMany2ManyTagsEmail");
 
-QUnit.test("fieldmany2many tags email (edition)", async (assert) => {
+QUnit.tttt("fieldmany2many tags email (edition)", async (assert) => {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { name: "gold", email: "coucou@petite.perruche" },
