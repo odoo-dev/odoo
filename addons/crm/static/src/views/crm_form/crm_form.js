@@ -5,23 +5,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formView } from "@web/views/form/form_view";
 
-/**
- * This Form Controller makes sure we display a rainbowman message
- * when the stage is won, even when we click on the statusbar.
- * When the stage of a lead is changed and data are saved, we check
- * if the lead is won and if a message should be displayed to the user
- * with a rainbowman like when the user click on the button "Mark Won".
- */
-
-class CrmFormController extends formView.Controller {
-    setup() {
-        super.setup();
-        this.orm = useService("orm");
-        this.effect = useService("effect");
-        this.changedStage = false;
-    }
-
-    /**
+class CrmFormRecord extends formView.Model.Record {
+     /**
      * Main method used when saving the record hitting the "Save" button.
      * We check if the stage_id field was altered and if we need to display a rainbowman
      * message.
@@ -38,48 +23,62 @@ class CrmFormController extends formView.Controller {
      *
      * @override
      */
-    async onWillSaveRecord(record) {
-        const recordID = record.__bm_handle__;
-        const localData = record.model.__bm__.localData[recordID];
-        const changes = localData._changes || {};
+    async _save() {
+        const localData = this._values;
+        const changes = { ...this._changes };
 
-        const needsSynchronizationEmail =
-            changes.partner_email_update === undefined
-                ? localData.data.partner_email_update // original value
-                : changes.partner_email_update; // new value
+        // OWL JPP Todo: the force_save part ... check the tours
 
-        const needsSynchronizationPhone =
-            changes.partner_phone_update === undefined
-                ? localData.data.partner_phone_update // original value
-                : changes.partner_phone_update; // new value
+        // const needsSynchronizationEmail =
+        //     changes.partner_email_update === undefined
+        //         ? localData.partner_email_update // original value
+        //         : changes.partner_email_update; // new value
 
-        if (
-            needsSynchronizationEmail &&
-            changes.email_from === undefined &&
-            localData.data.email_from
-        ) {
-            changes.email_from = localData.data.email_from;
-        }
-        if (needsSynchronizationPhone && changes.phone === undefined && localData.data.phone) {
-            changes.phone = localData.data.phone;
-        }
-        if (!localData._changes && Object.keys(changes).length) {
-            localData._changes = changes;
-        }
+        // const needsSynchronizationPhone =
+        //     changes.partner_phone_update === undefined
+        //         ? localData.partner_phone_update // original value
+        //         : changes.partner_phone_update; // new value
+
+        // if (needsSynchronizationEmail && changes.email_from === undefined && localData.email_from) {
+        //     changes.email_from = localData.email_from;
+        // }
+        // if (needsSynchronizationPhone && changes.phone === undefined && localData.phone) {
+        //     changes.phone = localData.phone;
+        // }
+        // if (!localData._changes && Object.keys(changes).length) {
+        //     localData._changes = changes;
+        // }
 
         if ("stage_id" in changes) {
-            const bm = record.model.__bm__;
-            let oldStageId = false;
-            if (bm.localData[recordID].data.stage_id) {
-                oldStageId = bm.get(bm.localData[recordID].data.stage_id).data.id;
-            }
-            const newStageId = bm.get(bm.localData[recordID]._changes.stage_id).data.id;
-            this.changedStage = oldStageId !== newStageId;
+            this.model.changedStage = localData.stage_id !== this.data.stage_id;
         }
+
+        return super._save(arguments);
+    }
+}
+
+class CrmFormModel extends formView.Model {
+    static Record = CrmFormRecord;
+}
+
+/**
+ * This Form Controller makes sure we display a rainbowman message
+ * when the stage is won, even when we click on the statusbar.
+ * When the stage of a lead is changed and data are saved, we check
+ * if the lead is won and if a message should be displayed to the user
+ * with a rainbowman like when the user click on the button "Mark Won".
+ */
+
+class CrmFormController extends formView.Controller {
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+        this.effect = useService("effect");
+        this.changedStage = false;
     }
 
     async onRecordSaved(record) {
-        if (this.changedStage) {
+        if (this.model.changedStage) {
             await checkRainbowmanMessage(this.orm, this.effect, record.resId);
         }
     }
@@ -88,4 +87,5 @@ class CrmFormController extends formView.Controller {
 registry.category("views").add("crm_form", {
     ...formView,
     Controller: CrmFormController,
+    Model: CrmFormModel,
 });

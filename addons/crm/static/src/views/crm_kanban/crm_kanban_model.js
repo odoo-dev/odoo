@@ -2,15 +2,16 @@
 
 import { KanbanModel } from "@web/views/kanban/kanban_model";
 import { checkRainbowmanMessage } from "@crm/views/check_rainbowman_message";
+import { RelationalModel } from "@web/views/relational_model/relational_model";
 
-export class CrmKanbanModel extends KanbanModel {
+export class CrmKanbanModel extends RelationalModel {
     setup(params, { effect }) {
         super.setup(...arguments);
         this.effect = effect;
     }
 }
 
-export class CrmKanbanDynamicGroupList extends CrmKanbanModel.DynamicGroupList {
+export class CrmKanbanDynamicGroupList extends RelationalModel.DynamicGroupList {
     /**
      * @override
      *
@@ -18,10 +19,7 @@ export class CrmKanbanDynamicGroupList extends CrmKanbanModel.DynamicGroupList {
      * a rainbowman message if that's the case.
      */
     async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
-        const succeeded = await super.moveRecord(...arguments);
-        if (!succeeded) {
-            return;
-        }
+        await super.moveRecord(...arguments);
         const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
         const targetGroup = this.groups.find((g) => g.id === targetGroupId);
         if (
