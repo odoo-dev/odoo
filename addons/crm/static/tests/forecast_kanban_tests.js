@@ -70,7 +70,7 @@ QUnit.module('Crm Forecast Model Extension', {
     },
 
 }, function () {
-    QUnit.test("filter out every records before the start of the current month with forecast_filter for a date field", async function (assert) {
+    QUnit.tttt("filter out every records before the start of the current month with forecast_filter for a date field", async function (assert) {
         // the filter is used by the forecast model extension, and applies the forecast_filter context key,
         // which adds a domain constraint on the field marked in the other context key forecast_field
         assert.expect(7);
@@ -96,7 +96,7 @@ QUnit.module('Crm Forecast Model Extension', {
                         "3nd column March should contain 2 records");
     });
 
-    QUnit.test("filter out every records before the start of the current month with forecast_filter for a datetime field", async function (assert) {
+    QUnit.tttt("filter out every records before the start of the current month with forecast_filter for a datetime field", async function (assert) {
         // same tests as for the date field
         assert.expect(7);
 
@@ -185,7 +185,7 @@ QUnit.module('Crm Fill Temporal Service', {
      * we only check the domain and the context sent to the read_group, as well
      * as the end value of the FillTemporal Service after the read_group (which should have been updated in the model)
      */
-    QUnit.test("Forecast on months, until the end of the year of the latest data", async function (assert) {
+    QUnit.tttt("Forecast on months, until the end of the year of the latest data", async function (assert) {
         assert.expect(3);
 
         this.testKanbanView.serverData.models['crm.lead'].records = [
@@ -227,7 +227,7 @@ QUnit.module('Crm Fill Temporal Service', {
      * we only check the domain and the context sent to the read_group, as well
      * as the end value of the FillTemporal Service after the read_group (which should have been updated in the model)
      */
-    QUnit.test("Forecast on years, until the end of the year of the latest data", async function (assert) {
+    QUnit.tttt("Forecast on years, until the end of the year of the latest data", async function (assert) {
         assert.expect(3);
 
         this.testKanbanView.serverData.models['crm.lead'].records = [

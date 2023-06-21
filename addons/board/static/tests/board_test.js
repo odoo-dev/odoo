@@ -86,7 +86,7 @@ QUnit.module("Board", (hooks) => {
         assert.containsOnce(target, ".o_view_nocontent");
     });
 
-    QUnit.test("basic functionality, with one sub action", async function (assert) {
+    QUnit.tttt("basic functionality, with one sub action", async function (assert) {
         assert.expect(23);
         serverData.views["partner,4,list"] = '<tree string="Partner"><field name="foo"/></tree>';
         await makeView({

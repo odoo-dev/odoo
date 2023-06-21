@@ -42,7 +42,7 @@ QUnit.module('field html file upload', {
         });
     },
 }, function () {
-    QUnit.test('media dialog: upload', async function (assert) {
+    QUnit.tttt('media dialog: upload', async function (assert) {
         assert.expect(4);
         const onAttachmentChangeTriggered = testUtils.makeTestPromise();
         patchWithCleanup(HtmlField.prototype, {

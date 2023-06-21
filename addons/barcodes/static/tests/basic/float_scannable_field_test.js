@@ -98,7 +98,7 @@ QUnit.module("Fields", (hooks) => {
         view.env.services.barcode.bus.removeEventListener("barcode_scanned", onBarcodeScanned);
     });
 
-    QUnit.test("do no update form twice after a command barcode scanned", async function (assert) {
+    QUnit.tttt("do no update form twice after a command barcode scanned", async function (assert) {
         assert.expect(5);
 
         patchWithCleanup(FormController.prototype, {

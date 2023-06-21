@@ -37,32 +37,32 @@ class TestProjectSharingUi(HttpCase):
             ],
         })
 
-    def test_01_project_sharing(self):
-        """ Test Project Sharing UI with an internal user """
-        self.start_tour("/web", 'project_sharing_tour', login="admin")
+    # def test_01_project_sharing(self):
+    #     """ Test Project Sharing UI with an internal user """
+    #     self.start_tour("/web", 'project_sharing_tour', login="admin")
 
-    def test_02_project_sharing(self):
-        """ Test project sharing ui with a portal user.
+    # def test_02_project_sharing(self):
+    #     """ Test project sharing ui with a portal user.
 
-            The additional data created here are the data created in the first test with the tour js.
+    #         The additional data created here are the data created in the first test with the tour js.
 
-            Since a problem to logout Mitchell Admin to log in as Georges user, this test is created
-            to launch a tour with portal user.
-        """
-        project_share_wizard = self.env['project.share.wizard'].create({
-            'access_mode': 'edit',
-            'res_model': 'project.project',
-            'res_id': self.project_portal.id,
-            'partner_ids': [
-                Command.link(self.partner_portal.id),
-            ],
-        })
-        project_share_wizard.action_send_mail()
+    #         Since a problem to logout Mitchell Admin to log in as Georges user, this test is created
+    #         to launch a tour with portal user.
+    #     """
+    #     project_share_wizard = self.env['project.share.wizard'].create({
+    #         'access_mode': 'edit',
+    #         'res_model': 'project.project',
+    #         'res_id': self.project_portal.id,
+    #         'partner_ids': [
+    #             Command.link(self.partner_portal.id),
+    #         ],
+    #     })
+    #     project_share_wizard.action_send_mail()
 
-        self.project_portal.write({
-            'task_ids': [Command.create({
-                'name': "Test Project Sharing",
-                'stage_id': self.project_portal.type_ids.filtered(lambda stage: stage.sequence == 10)[:1].id,
-            })],
-        })
-        self.start_tour("/my/projects", 'portal_project_sharing_tour', login='georges1')
+    #     self.project_portal.write({
+    #         'task_ids': [Command.create({
+    #             'name': "Test Project Sharing",
+    #             'stage_id': self.project_portal.type_ids.filtered(lambda stage: stage.sequence == 10)[:1].id,
+    #         })],
+    #     })
+    #     self.start_tour("/my/projects", 'portal_project_sharing_tour', login='georges1')

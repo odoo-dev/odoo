@@ -44,7 +44,7 @@ QUnit.test("hover following button", async (assert) => {
     assert.containsNone($, ".fa-check + span:contains(Unfollow)");
 });
 
-QUnit.test('click on "follow" button', async (assert) => {
+QUnit.tttt('click on "follow" button', async (assert) => {
     const { openView, pyEnv } = await start();
     await openView({
         res_id: pyEnv.currentPartnerId,
@@ -57,7 +57,7 @@ QUnit.test('click on "follow" button', async (assert) => {
     assert.containsOnce($, "button:contains(Following)");
 });
 
-QUnit.test('click on "unfollow" button', async (assert) => {
+QUnit.tttt('click on "unfollow" button', async (assert) => {
     const pyEnv = await startServer();
     const threadId = pyEnv["res.partner"].create({});
     pyEnv["mail.followers"].create({

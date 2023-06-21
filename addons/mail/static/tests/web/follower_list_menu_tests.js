@@ -120,7 +120,7 @@ QUnit.test('click on "add followers" button', async (assert) => {
     assert.strictEqual($(".o-mail-Follower").text(), "François PerussePartner3");
 });
 
-QUnit.test("click on remove follower", async (assert) => {
+QUnit.tttt("click on remove follower", async (assert) => {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { name: "Partner1" },

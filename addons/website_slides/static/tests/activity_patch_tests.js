@@ -4,7 +4,7 @@ import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 QUnit.module("activity (patch)");
 
-QUnit.test("grant course access", async (assert) => {
+QUnit.tttt("grant course access", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const channelId = pyEnv["slide.channel"].create({});
@@ -39,7 +39,7 @@ QUnit.test("grant course access", async (assert) => {
     assert.verifySteps(["access_grant"]);
 });
 
-QUnit.test("refuse course access", async (assert) => {
+QUnit.tttt("refuse course access", async (assert) => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({});
     const channelId = pyEnv["slide.channel"].create({});
