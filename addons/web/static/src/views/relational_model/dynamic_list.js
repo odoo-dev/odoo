@@ -22,7 +22,6 @@ export class DynamicList extends DataPoint {
         if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
             this.handleField = DEFAULT_HANDLE_FIELD;
         }
-        this.groupBy = [];
         this.isDomainSelected = false;
         this.evalContext = this.context;
     }
@@ -30,6 +29,10 @@ export class DynamicList extends DataPoint {
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
+
+    get groupBy() {
+        return [];
+    }
 
     get orderBy() {
         return this.config.orderBy;

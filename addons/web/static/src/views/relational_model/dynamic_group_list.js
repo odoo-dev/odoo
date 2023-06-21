@@ -14,8 +14,6 @@ export class DynamicGroupList extends DynamicList {
     setup(config, data) {
         super.setup(...arguments);
         this.isGrouped = true;
-        this.groupBy = config.groupBy;
-        this.groupByField = this.fields[this.groupBy[0].split(":")[0]];
         /** @type {import("./group").Group[]} */
         this.groups = data.groups.map((g) => this._createGroupDatapoint(g));
         this.count = data.length;
@@ -24,6 +22,14 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
+
+    get groupBy() {
+        return this.config.groupBy;
+    }
+
+    get groupByField() {
+        return this.fields[this.groupBy[0].split(":")[0]];
+    }
 
     get hasData() {
         if (this.count === 0) {
