@@ -445,7 +445,7 @@ export class StaticList extends DataPoint {
         const { CREATE, UPDATE } = x2ManyCommands;
         const options = {
             parentRecord: this._parent,
-            onChange: (changes, { withoutParentOnchange }) => {
+            onChange: async (changes, { withoutParentOnchange }) => {
                 if (record._notAddedYet) {
                     return;
                 }
@@ -459,7 +459,9 @@ export class StaticList extends DataPoint {
                     return;
                 }
                 if (!withoutParentOnchange) {
-                    this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+                    await this._onChange({
+                        withoutOnchange: !record._checkValidity({ silent: true }),
+                    });
                 }
             },
             virtualId: params.virtualId,

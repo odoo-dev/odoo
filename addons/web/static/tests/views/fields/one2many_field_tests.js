@@ -35,6 +35,10 @@ import { session } from "@web/session";
 import { RelationalModel } from "@web/views/relational_model";
 import { Record } from "@web/views/relational_model/record";
 import { getPickerCell } from "../../core/datetime/datetime_test_helpers";
+import { makeServerError } from "@web/../tests/helpers/mock_server";
+import { errorService } from "../../../src/core/errors/error_service";
+
+const serviceRegistry = registry.category("services");
 
 let serverData;
 let target;
@@ -8152,8 +8156,40 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.tttt("display correct value after validation error", async function (assert) {
+    QUnit.test("display correct value after validation error", async function (assert) {
         assert.expect(4);
+
+        /*
+         * By-pass QUnit's and test's error handling because the error service needs to be active
+         */
+        const handler = (ev) => {
+            // need to preventDefault to remove error from console (so python test pass)
+            ev.preventDefault();
+        };
+        window.addEventListener("unhandledrejection", handler);
+        registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+
+        patchWithCleanup(QUnit, {
+            onUnhandledRejection: () => {},
+        });
+
+        const originOnunhandledrejection = window.onunhandledrejection;
+        window.onunhandledrejection = () => {};
+        registerCleanup(() => {
+            window.onunhandledrejection = originOnunhandledrejection;
+        });
+        /*
+         * End By pass error handling
+         */
+
+        serviceRegistry.add("error", errorService);
+        function validationHandler(env, error, originalError) {
+            if (originalError.data.name === "ValidationError") {
+                return true;
+            }
+        }
+        const errorHandlerRegistry = registry.category("error_handlers");
+        errorHandlerRegistry.add("validationHandler", validationHandler);
 
         serverData.models.partner.onchanges.turtles = function () {};
 
@@ -8174,11 +8210,7 @@ QUnit.module("Fields", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "onchange2") {
                     if (args.args[1].turtles[0][2].turtle_foo === "pinky") {
-                        // we simulate a validation error.  In the 'real' web client,
-                        // the server error will be used by the session to display
-                        // an error dialog.  From the point of view of the basic
-                        // model, the promise is just rejected.
-                        return Promise.reject();
+                        throw makeServerError({ type: "ValidationError" });
                     }
                 }
                 if (args.method === "write") {
