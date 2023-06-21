@@ -9,6 +9,7 @@ import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
 import { getFieldContext, parseServerValue } from "./utils";
+import { pick } from "@web/core/utils/objects";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -867,9 +868,15 @@ export class Record extends DataPoint {
             }
         }
         if (Object.keys(changes).length > 0) {
+            const initialChanges = pick(this._changes, ...Object.keys(changes));
             this._applyChanges(changes);
-            await this._onChange(changes, { withoutParentOnchange });
-            return this.model.hooks.onRecordChanged(this, this._getChanges());
+            try {
+                await this._onChange(changes, { withoutParentOnchange });
+            } catch (e) {
+                this._applyChanges(initialChanges);
+                throw e;
+            }
+            await this.model.hooks.onRecordChanged(this, this._getChanges());
         }
     }
 }
