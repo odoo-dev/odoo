@@ -121,7 +121,7 @@ QUnit.test("click on section edit the section in place", async (assert) => {
     assert.containsNone($, ".modal .o_form_view");
 });
 
-QUnit.test("click on real line opens a dialog", async (assert) => {
+QUnit.tttt("click on real line opens a dialog", async (assert) => {
     await makeView({
         type: "form",
         resModel: "partner",

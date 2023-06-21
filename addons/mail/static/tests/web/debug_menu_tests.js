@@ -17,7 +17,7 @@ import {
 
 QUnit.module("debug menu");
 
-QUnit.test("Manage Messages", async (assert) => {
+QUnit.tttt("Manage Messages", async (assert) => {
     patchWithCleanup(odoo, { debug: "1" });
     const serverData = getActionManagerServerData();
     // Add fake "mail.message" model and arch

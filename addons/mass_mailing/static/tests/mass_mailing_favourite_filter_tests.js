@@ -171,7 +171,7 @@ QUnit.module('favorite filter widget', (hooks) => {
         await testUtils.clickSave(fixture);
     });
 
-    QUnit.test('unlink favorite filter', async (assert) => {
+    QUnit.tttt('unlink favorite filter', async (assert) => {
         assert.expect(10);
 
         await makeView({

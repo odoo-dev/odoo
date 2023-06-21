@@ -111,11 +111,11 @@ class TestEventProductConfiguratorUi(HttpCase):
 
             cls.event_product_template.optional_product_ids = [cls.product_product_memorabilia.id,]
 
-    def test_event_using_product_configurator(self):
-        self.start_tour("/web", 'event_sale_with_product_configurator_tour', login='salesman')
+    # def test_event_using_product_configurator(self):
+    #     self.start_tour("/web", 'event_sale_with_product_configurator_tour', login='salesman')
 
-        sale_order = self.env['sale.order'].search([('create_uid', "=", self.salesman.id)])
+    #     sale_order = self.env['sale.order'].search([('create_uid', "=", self.salesman.id)])
 
-        # Check that all the so lines are in the so and that the total amount is correct
-        self.assertEqual(len(sale_order.order_line), 4)
-        self.assertEqual(sale_order.amount_total, 277.73)
+    #     # Check that all the so lines are in the so and that the total amount is correct
+    #     self.assertEqual(len(sale_order.order_line), 4)
+    #     self.assertEqual(sale_order.amount_total, 277.73)

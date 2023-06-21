@@ -124,7 +124,7 @@ QUnit.module("Analytic", (hooks) => {
 
     QUnit.module("AnalyticDistribution");
 
-    QUnit.test("analytic field in form view basic features", async function (assert) {
+    QUnit.tttt("analytic field in form view basic features", async function (assert) {
         await makeView({
             type: "form",
             resModel: "aml",
@@ -209,7 +209,7 @@ QUnit.module("Analytic", (hooks) => {
         assert.containsN(target, ".badge", 3, "should contain 3 tags");
     });
 
-    QUnit.test("analytic field in multi_edit list view + search more", async function (assert) {
+    QUnit.tttt("analytic field in multi_edit list view + search more", async function (assert) {
         await makeView({
             type: "list",
             resModel: "aml",

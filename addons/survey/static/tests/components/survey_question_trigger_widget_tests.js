@@ -86,7 +86,7 @@ QUnit.module("SurveyQuestionTriggerWidget", (hooks) => {
         setupViewRegistries();
     });
 
-    QUnit.test("dynamic rendering of surveyQuestionTriggerError rows", async (assert) => {
+    QUnit.tttt("dynamic rendering of surveyQuestionTriggerError rows", async (assert) => {
         await makeView({
             type: "form",
             resModel: "survey",

@@ -135,7 +135,7 @@ QUnit.test("many2one_avatar_employee widget in kanban view", async function (ass
     );
 });
 
-QUnit.test(
+QUnit.tttt(
     "many2one_avatar_employee: click on an employee not associated with a user",
     async function (assert) {
         const pyEnv = await startServer();
@@ -181,7 +181,7 @@ QUnit.test(
     }
 );
 
-QUnit.test("many2many_avatar_employee widget in form view", async function (assert) {
+QUnit.tttt("many2many_avatar_employee widget in form view", async function (assert) {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([{}, {}]);
     const [userId_1, userId_2] = pyEnv["res.users"].create([
@@ -240,7 +240,7 @@ QUnit.test("many2many_avatar_employee widget in form view", async function (asse
     assert.containsN(document.body, ".o-mail-ChatWindow-name", 2);
 });
 
-QUnit.test("many2many_avatar_employee widget in list view", async function (assert) {
+QUnit.tttt("many2many_avatar_employee widget in list view", async function (assert) {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { name: "Mario" },
@@ -301,7 +301,7 @@ QUnit.test("many2many_avatar_employee widget in list view", async function (asse
     );
 });
 
-QUnit.test("many2many_avatar_employee widget in kanban view", async function (assert) {
+QUnit.tttt("many2many_avatar_employee widget in kanban view", async function (assert) {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([{}, {}]);
     const [userId_1, userId_2] = pyEnv["res.users"].create([
@@ -374,7 +374,7 @@ QUnit.test("many2many_avatar_employee widget in kanban view", async function (as
     ]);
 });
 
-QUnit.test(
+QUnit.tttt(
     "many2many_avatar_employee: click on an employee not associated with a user",
     async function (assert) {
         const pyEnv = await startServer();

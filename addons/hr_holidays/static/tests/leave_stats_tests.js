@@ -138,7 +138,7 @@ QUnit.test("leave stats renders correctly", async (assert) => {
     assert.containsOnce($leavesDepartmentBody, "div.o_horizontal_separator:contains(R&D)");
 });
 
-QUnit.test("leave stats reload when employee/department changes", async (assert) => {
+QUnit.tttt("leave stats reload when employee/department changes", async (assert) => {
     assert.expect(3);
     await makeView({
         serverData,

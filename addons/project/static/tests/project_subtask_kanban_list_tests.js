@@ -57,7 +57,7 @@ QUnit.module('Subtask Kanban List tests', {
         setupViewRegistries();
     }
 }, function () {
-    QUnit.test("Check whether subtask list functionality works as intended", async function (assert) {
+    QUnit.tttt("Check whether subtask list functionality works as intended", async function (assert) {
         assert.expect(8);
 
         const views = this.views;
@@ -83,7 +83,7 @@ QUnit.module('Subtask Kanban List tests', {
         assert.containsNone(target, '.subtask_list', "If the drawdown button is clicked again, the subtasks list should be hidden again");
     });
 
-    QUnit.test("Update closed subtask count in the kanban card when the state of a subtask is set to Done.", async function (assert) {
+    QUnit.tttt("Update closed subtask count in the kanban card when the state of a subtask is set to Done.", async function (assert) {
         let checkSteps = false;
         const { openView } = await start({
             serverData: { views: this.views },

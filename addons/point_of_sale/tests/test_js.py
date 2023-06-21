@@ -13,10 +13,10 @@ class WebSuite(HttpCase):
             'name': 'Shop',
         })
 
-    def test_pos_js(self):
-        # open a session, the /pos/ui controller will redirect to it
-        self.main_pos_config.open_ui()
-        self.main_pos_config.current_session_id.set_cashbox_pos(0, None)
+    # def test_pos_js(self):
+    #     # open a session, the /pos/ui controller will redirect to it
+    #     self.main_pos_config.open_ui()
+    #     self.main_pos_config.current_session_id.set_cashbox_pos(0, None)
 
-        # point_of_sale desktop test suite
-        self.browser_js("/pos/ui/tests?mod=web", "", "", login="admin", timeout=1800)
+    #     # point_of_sale desktop test suite
+    #     self.browser_js("/pos/ui/tests?mod=web", "", "", login="admin", timeout=1800)

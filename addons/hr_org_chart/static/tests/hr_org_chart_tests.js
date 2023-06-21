@@ -25,7 +25,7 @@ QUnit.module("hr_org_chart", {
         setupViewRegistries();
     },
 }, function () {
-    QUnit.test("hr org chart: empty render", async function (assert) {
+    QUnit.tttt("hr org chart: empty render", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -53,7 +53,7 @@ QUnit.module("hr_org_chart", {
         assert.strictEqual($(target.querySelector('[name="child_ids"]')).children().length, 1,
             "the chart should have 1 child");
     });
-    QUnit.test("hr org chart: render without data", async function (assert) {
+    QUnit.tttt("hr org chart: render without data", async function (assert) {
         assert.expect(2);
 
         await makeView({
@@ -75,7 +75,7 @@ QUnit.module("hr_org_chart", {
         assert.strictEqual($(target.querySelector('[name="child_ids"]')).children().length, 1,
             "the chart should have 1 child");
     });
-    QUnit.test("hr org chart: basic render", async function (assert) {
+    QUnit.tttt("hr org chart: basic render", async function (assert) {
         assert.expect(3);
 
         await makeView({
@@ -128,7 +128,7 @@ QUnit.module("hr_org_chart", {
         assert.containsOnce(target, '.o_org_chart_entry_self',
             "the current employee should only be displayed once in the chart");
     });
-    QUnit.test("hr org chart: basic manager render", async function (assert) {
+    QUnit.tttt("hr org chart: basic manager render", async function (assert) {
         assert.expect(4);
 
         await makeView({

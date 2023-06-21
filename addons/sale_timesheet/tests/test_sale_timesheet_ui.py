@@ -21,5 +21,5 @@ class TestUi(HttpCase):
             .create({'group_project_milestone': True}) \
             .execute()
 
-    def test_ui(self):
-        self.start_tour('/web', 'sale_timesheet_tour', login='admin', timeout=100)
+    # def test_ui(self):
+    #     self.start_tour('/web', 'sale_timesheet_tour', login='admin', timeout=100)

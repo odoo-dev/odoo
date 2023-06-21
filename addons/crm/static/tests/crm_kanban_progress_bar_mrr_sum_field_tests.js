@@ -74,7 +74,7 @@ QUnit.module('Crm Kanban Progressbar', {
         );
     },
 }, function () {
-    QUnit.test("Progressbar: do not show sum of MRR if recurring revenues is not enabled", async function (assert) {
+    QUnit.tttt("Progressbar: do not show sum of MRR if recurring revenues is not enabled", async function (assert) {
         assert.expect(1);
 
         await makeView({

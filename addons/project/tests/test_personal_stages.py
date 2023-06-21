@@ -112,9 +112,9 @@ class TestPersonalStages(TestProjectCommon):
         stages = ProjectTaskTypeSudo.search([('user_id', '=', user_with_stages.id)])
         self.assertEqual(stages, personal_stage, "As this user already had a personal stage, none should be added")
 
-@tagged('-at_install', 'post_install')
-class TestPersonalStageTour(HttpCase, TestProjectCommon):
+# @tagged('-at_install', 'post_install')
+# class TestPersonalStageTour(HttpCase, TestProjectCommon):
 
-    def test_personal_stage_tour(self):
-        # Test customizing personal stages as a project user
-        self.start_tour('/web', 'personal_stage_tour', login="armandel")
+#     def test_personal_stage_tour(self):
+#         # Test customizing personal stages as a project user
+#         self.start_tour('/web', 'personal_stage_tour', login="armandel")

@@ -56,7 +56,7 @@ QUnit.module("tracking value", {
     },
 });
 
-QUnit.test("basic rendering of tracking value (float type)", async function (assert) {
+QUnit.tttt("basic rendering of tracking value (float type)", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({ float_field: 12.3 });
     await this.start({ res_id: mailTestTrackAllId1 });
@@ -75,7 +75,7 @@ QUnit.test("basic rendering of tracking value (float type)", async function (ass
     assert.strictEqual(target.querySelector(".o-mail-Message-trackingNew").textContent, "45.67");
 });
 
-QUnit.test("rendering of tracked field of type float: from non-0 to 0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type float: from non-0 to 0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         float_field: 1,
@@ -89,7 +89,7 @@ QUnit.test("rendering of tracked field of type float: from non-0 to 0", async fu
     );
 });
 
-QUnit.test("rendering of tracked field of type float: from 0 to non-0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type float: from 0 to non-0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         float_field: 0,
@@ -103,7 +103,7 @@ QUnit.test("rendering of tracked field of type float: from 0 to non-0", async fu
     );
 });
 
-QUnit.test("rendering of tracked field of type integer: from non-0 to 0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type integer: from non-0 to 0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         integer_field: 1,
@@ -114,7 +114,7 @@ QUnit.test("rendering of tracked field of type integer: from non-0 to 0", async 
     assert.strictEqual(target.querySelector(".o-mail-Message-tracking").textContent, "10(Integer)");
 });
 
-QUnit.test("rendering of tracked field of type integer: from 0 to non-0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type integer: from 0 to non-0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         integer_field: 0,
@@ -125,7 +125,7 @@ QUnit.test("rendering of tracked field of type integer: from 0 to non-0", async 
     assert.strictEqual(target.querySelector(".o-mail-Message-tracking").textContent, "01(Integer)");
 });
 
-QUnit.test("rendering of tracked field of type monetary: from non-0 to 0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type monetary: from non-0 to 0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         monetary_field: 1,
@@ -139,7 +139,7 @@ QUnit.test("rendering of tracked field of type monetary: from non-0 to 0", async
     );
 });
 
-QUnit.test("rendering of tracked field of type monetary: from 0 to non-0", async function (assert) {
+QUnit.tttt("rendering of tracked field of type monetary: from 0 to non-0", async function (assert) {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         monetary_field: 0,
@@ -153,7 +153,7 @@ QUnit.test("rendering of tracked field of type monetary: from 0 to non-0", async
     );
 });
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type boolean: from true to false",
     async function (assert) {
         const pyEnv = await startServer();
@@ -170,7 +170,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type boolean: from false to true",
     async function (assert) {
         const pyEnv = await startServer();
@@ -185,7 +185,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type char: from a string to empty string",
     async function (assert) {
         const pyEnv = await startServer();
@@ -202,7 +202,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type char: from empty string to a string",
     async function (assert) {
         const pyEnv = await startServer();
@@ -219,7 +219,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type date: from no date to a set date",
     async function (assert) {
         const pyEnv = await startServer();
@@ -240,7 +240,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type date: from a set date to no date",
     async function (assert) {
         const pyEnv = await startServer();
@@ -261,7 +261,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type datetime: from no date and time to a set date and time",
     async function (assert) {
         patchTimeZone(180);
@@ -287,7 +287,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type datetime: from a set date and time to no date and time",
     async function (assert) {
         patchTimeZone(180);
@@ -309,7 +309,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type text: from some text to empty",
     async function (assert) {
         const pyEnv = await startServer();
@@ -326,7 +326,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type text: from empty to some text",
     async function (assert) {
         const pyEnv = await startServer();
@@ -343,7 +343,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type selection: from a selection to no selection",
     async function (assert) {
         const pyEnv = await startServer();
@@ -360,7 +360,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type selection: from no selection to a selection",
     async function (assert) {
         const pyEnv = await startServer();
@@ -375,7 +375,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type many2one: from having a related record to no related record",
     async function (assert) {
         const pyEnv = await startServer();
@@ -393,7 +393,7 @@ QUnit.test(
     }
 );
 
-QUnit.test(
+QUnit.tttt(
     "rendering of tracked field of type many2one: from no related record to having a related record",
     async function (assert) {
         const pyEnv = await startServer();

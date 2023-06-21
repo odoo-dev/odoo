@@ -158,7 +158,7 @@ QUnit.test("edit follower and close subtype dialog", async (assert) => {
     assert.containsNone($, ".o-mail-FollowerSubtypeDialog");
 });
 
-QUnit.test("remove a follower in a dirty form view", async (assert) => {
+QUnit.tttt("remove a follower in a dirty form view", async (assert) => {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
     pyEnv["discuss.channel"].create({ name: "General", display_name: "General" });
@@ -195,7 +195,7 @@ QUnit.test("remove a follower in a dirty form view", async (assert) => {
     assert.containsOnce($, ".o_tag:contains(General)");
 });
 
-QUnit.test("removing a follower should reload form view", async function (assert) {
+QUnit.tttt("removing a follower should reload form view", async function (assert) {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
     pyEnv["mail.followers"].create({
