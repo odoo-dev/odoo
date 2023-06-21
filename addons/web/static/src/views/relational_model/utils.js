@@ -53,11 +53,11 @@ export function createPropertyActiveField(property) {
     if (type === "many2many") {
         activeField.related = {
             fields: {
-                id: { name: "id", type: "integer", readonly: true },
+                id: { name: "id", type: "integer" },
                 display_name: { name: "display_name", type: "char" },
             },
             activeFields: {
-                id: makeActiveField(),
+                id: makeActiveField({ readonly: true }),
                 display_name: makeActiveField(),
             },
         };
@@ -122,7 +122,7 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
                 activeField.limit = viewDescr.limit;
                 activeField.defaultOrderBy = viewDescr.defaultOrder;
                 if (fieldNode.views.form) {
-                    // we already know the form view (it is inline), so add its fields (in invisble)
+                    // we already know the form view (it is inline), so add its fields (in invisible)
                     // s.t. they will be sent in the spec for onchange, and create commands returned
                     // by the onchange could return values for those fields (that would be displayed
                     // later if the user opens the form view)
