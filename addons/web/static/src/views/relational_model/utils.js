@@ -101,10 +101,7 @@ export function patchActiveFields(activeField, patch) {
 }
 
 export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
-    const activeFields = {
-        id: makeActiveField({ readonly: true, invisible: true }),
-    };
-    fields = { ...fields, id: { name: "id", type: "integer" } };
+    const activeFields = {};
     for (const fieldNode of Object.values(fieldNodes)) {
         const fieldName = fieldNode.name;
         const modifiers = fieldNode.modifiers || {};
