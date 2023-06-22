@@ -39,7 +39,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
 
     QUnit.module('Sandboxed Preview');
 
-    QUnit.tttt("complex html is automatically in sandboxed preview mode", async (assert) => {
+    QUnit.test("complex html is automatically in sandboxed preview mode", async (assert) => {
         serverData.models.partner.records = [{
             id: 1,
             txt: `
