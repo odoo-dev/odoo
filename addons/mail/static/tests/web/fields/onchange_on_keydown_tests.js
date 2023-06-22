@@ -31,7 +31,7 @@ QUnit.module("onchange on keydown", {
     },
 });
 
-QUnit.tttt(
+QUnit.test(
     "Test that onchange_on_keydown option triggers the onchange properly",
     async (assert) => {
         assert.expect(3);
@@ -44,7 +44,7 @@ QUnit.tttt(
                     <field name="description" onchange_on_keydown="True" keydown_debounce_delay="0"/>
                 </form>`,
             mockRPC(route, params) {
-                if (params.method === "onchange") {
+                if (params.method === "onchange2") {
                     // the onchange will be called twice: at record creation & when keydown is detected
                     // the second call should have our description value completed.
                     assert.ok(true);
@@ -54,7 +54,9 @@ QUnit.tttt(
                     ) {
                         assert.ok(true);
                     }
-                    return {};
+                    return {
+                        value: {},
+                    };
                 }
             },
         });
