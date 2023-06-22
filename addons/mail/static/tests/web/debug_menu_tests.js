@@ -17,7 +17,7 @@ import {
 
 QUnit.module("debug menu");
 
-QUnit.tttt("Manage Messages", async (assert) => {
+QUnit.test("Manage Messages", async (assert) => {
     patchWithCleanup(odoo, { debug: "1" });
     const serverData = getActionManagerServerData();
     // Add fake "mail.message" model and arch
@@ -35,7 +35,7 @@ QUnit.tttt("Manage Messages", async (assert) => {
         if (method === "check_access_rights") {
             return true;
         }
-        if (method === "web_search_read" && model === "mail.message") {
+        if (method === "unity_web_search_read" && model === "mail.message") {
             assert.step("message_read");
             const { context, domain } = kwargs;
             assert.strictEqual(context.default_res_id, 5);
