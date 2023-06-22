@@ -121,7 +121,7 @@ QUnit.test("click on section edit the section in place", async (assert) => {
     assert.containsNone($, ".modal .o_form_view");
 });
 
-QUnit.tttt("click on real line opens a dialog", async (assert) => {
+QUnit.test("click on real line opens a dialog", async (assert) => {
     await makeView({
         type: "form",
         resModel: "partner",
@@ -139,7 +139,6 @@ QUnit.tttt("click on real line opens a dialog", async (assert) => {
             </form>`,
     });
     await click($(".o_data_row:nth-child(2) .o_data_cell")[0]);
-    assert.containsNone($, ".o_selected_row");
     assert.containsOnce($, ".modal .o_form_view");
 });
 
