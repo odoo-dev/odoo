@@ -155,7 +155,7 @@ QUnit.test(
     }
 );
 
-QUnit.tttt(
+QUnit.test(
     'many2many_avatar_user widget edited by the smart action "Assign to..."',
     async (assert) => {
         const pyEnv = await startServer();
@@ -206,7 +206,7 @@ QUnit.tttt(
     }
 );
 
-QUnit.tttt(
+QUnit.test(
     'many2many_avatar_user widget edited by the smart action "Assign to me"',
     async (assert) => {
         const pyEnv = await startServer();
