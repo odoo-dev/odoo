@@ -10,7 +10,15 @@ import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { useDebounced } from "@web/core/utils/timing";
+import { FormController } from "@web/views/form/form_controller";
 import { FormRenderer } from "@web/views/form/form_renderer";
+
+patch(FormController.prototype, "mail/views/web", {
+    async onRecordSaved(record) {
+        await this._super(record);
+        this.env.bus.trigger("UPDATE-CHATTER");
+    },
+});
 
 patch(FormRenderer.prototype, "mail/views/web", {
     setup() {
