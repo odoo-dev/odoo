@@ -2464,19 +2464,21 @@ QUnit.module("Fields", (hooks) => {
         assert.verifySteps(["write", "write", "write"]);
     });
 
-    QUnit.test("When viewing one2many records in an embedded kanban, the delete button should say 'Delete' and not 'Remove'", async function (assert) {
-        assert.expect(1);
-        serverData.views = {
-            "turtle,false,form": `
+    QUnit.test(
+        "When viewing one2many records in an embedded kanban, the delete button should say 'Delete' and not 'Remove'",
+        async function (assert) {
+            assert.expect(1);
+            serverData.views = {
+                "turtle,false,form": `
                 <form>
                     <h3>Data</h3>
                 </form>`,
-        };
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
+            };
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
                 <form>
                     <field name="turtles">
                         <kanban>
@@ -2491,14 +2493,15 @@ QUnit.module("Fields", (hooks) => {
                         </kanban>
                     </field>
                 </form>`,
-            resId: 1,
-        });
+                resId: 1,
+            });
 
-        // Opening the record to see the footer buttons
-        await click(target.querySelector(".o_kanban_record"));
+            // Opening the record to see the footer buttons
+            await click(target.querySelector(".o_kanban_record"));
 
-        assert.strictEqual(target.querySelector('.o_btn_remove').textContent, 'Delete');
-    });
+            assert.strictEqual(target.querySelector(".o_btn_remove").textContent, "Delete");
+        }
+    );
 
     QUnit.test("open a record in a one2many kanban (mode 'readonly')", async function (assert) {
         serverData.views = {
@@ -8123,12 +8126,12 @@ QUnit.module("Fields", (hooks) => {
 
         serviceRegistry.add("error", errorService);
         function validationHandler(env, error, originalError) {
-            if (originalError.data.name === "ValidationError") {
+            if (originalError.data.name === "odoo.exceptions.ValidationError") {
                 return true;
             }
         }
         const errorHandlerRegistry = registry.category("error_handlers");
-        errorHandlerRegistry.add("validationHandler", validationHandler);
+        errorHandlerRegistry.add("validationHandler", validationHandler, { sequence: 1 });
 
         serverData.models.partner.onchanges.turtles = function () {};
 
