@@ -146,7 +146,7 @@ QUnit.test("toggle follower subtype checkbox", async (assert) => {
     );
 });
 
-QUnit.tttt("follower subtype apply", async (assert) => {
+QUnit.test("follower subtype apply", async (assert) => {
     const pyEnv = await startServer();
     const subtypeId = pyEnv["mail.message.subtype"].create({
         default: true,
