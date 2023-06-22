@@ -49,7 +49,7 @@ QUnit.module(
         },
     },
     function () {
-        QUnit.tttt("Many2ManyAttendee: basic rendering", async function (assert) {
+        QUnit.test("Many2ManyAttendee: basic rendering", async function (assert) {
             await makeView({
                 type: "form",
                 resModel: "event",

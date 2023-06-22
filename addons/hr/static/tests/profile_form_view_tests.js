@@ -32,7 +32,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.module("EmployeeProfileController");
 
-    QUnit.tttt(
+    QUnit.test(
         "editing the 'lang' field and saving it triggers a 'reload_context'",
         async function (assert) {
             const form = await makeView({

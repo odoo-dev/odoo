@@ -715,7 +715,7 @@ export class Record extends DataPoint {
         if (!creation && !Object.keys(changes).length) {
             return true;
         }
-        const canProceed = await this.model.hooks.onWillSaveRecord(this);
+        const canProceed = await this.model.hooks.onWillSaveRecord(this, changes);
         if (canProceed === false) {
             return false;
         }
