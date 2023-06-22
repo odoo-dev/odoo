@@ -2,7 +2,6 @@
 
 import { checkRainbowmanMessage } from "@crm/views/check_rainbowman_message";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { formView } from "@web/views/form/form_view";
 
 class CrmFormRecord extends formView.Model.Record {
