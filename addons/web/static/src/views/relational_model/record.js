@@ -24,7 +24,7 @@ export class Record extends DataPoint {
             ...data,
         });
         if (this.resId) {
-            this._values = markRaw({ ...vals, id: this.resId });
+            this._values = markRaw(vals);
             this._changes = markRaw({});
         } else {
             this._values = markRaw({});
@@ -563,7 +563,7 @@ export class Record extends DataPoint {
         const values = await this.model._updateConfig(this.config, nextConfig);
         if (this.resId) {
             this.model._updateSimilarRecords(this, values);
-            this._values = { ...this._parseServerValues(values), id: this.resId };
+            this._values = this._parseServerValues(values);
             this._changes = {};
         } else {
             this._values = {};
