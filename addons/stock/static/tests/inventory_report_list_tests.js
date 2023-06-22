@@ -69,7 +69,7 @@ QUnit.module(
 
     QUnit.module("InventoryReportListView");
 
-    QUnit.tttt('Create new record correctly', async function (assert) {
+    QUnit.test('Create new record correctly', async function (assert) {
 
         assert.expect(2);
 
@@ -97,7 +97,7 @@ QUnit.module(
         assert.containsN(target, '.o_data_row', 4, "should now have 4 records");
     });
 
-    QUnit.tttt('Don\'t duplicate record', async function (assert) {
+    QUnit.test('Don\'t duplicate record', async function (assert) {
 
         assert.expect(3);
 
@@ -130,7 +130,7 @@ QUnit.module(
         assert.strictEqual(ageField.text(), age, "The age field must be updated");
     });
 
-    QUnit.tttt('Work in grouped list', async function (assert) {
+    QUnit.test('Work in grouped list', async function (assert) {
 
         assert.expect(6);
 
