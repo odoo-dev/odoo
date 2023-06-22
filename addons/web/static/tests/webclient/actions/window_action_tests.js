@@ -2172,7 +2172,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
     });
 
-    QUnit.tttt("window action in target new fails (onchange)", async (assert) => {
+    QUnit.test("window action in target new fails (onchange)", async (assert) => {
         /*
          * By-pass QUnit's and test's error handling because the error service needs to be active
          */

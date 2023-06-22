@@ -8184,12 +8184,12 @@ QUnit.module("Fields", (hooks) => {
 
         serviceRegistry.add("error", errorService);
         function validationHandler(env, error, originalError) {
-            if (originalError.data.name === "ValidationError") {
+            if (originalError.data.name === "odoo.exceptions.ValidationError") {
                 return true;
             }
         }
         const errorHandlerRegistry = registry.category("error_handlers");
-        errorHandlerRegistry.add("validationHandler", validationHandler);
+        errorHandlerRegistry.add("validationHandler", validationHandler, { sequence: 1 });
 
         serverData.models.partner.onchanges.turtles = function () {};
 

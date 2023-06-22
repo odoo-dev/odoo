@@ -655,11 +655,16 @@ function makeActionManager(env) {
                 onError(this.onError);
             }
             onError(error) {
-                reject(error);
+                if (!this.isMounted) {
+                    reject(error);
+                }
                 cleanDomFromBootstrap();
                 if (action.target === "new") {
-                    // get the dialog service to close the dialog.
-                    throw error;
+                    if (this.isMounted) {
+                        reject(error);
+                    } else {
+                        removeDialog?.();
+                    }
                 } else {
                     const lastCt = controllerStack[controllerStack.length - 1];
                     let info = {};
@@ -753,7 +758,7 @@ function makeActionManager(env) {
         ControllerComponent.props = {
             "*": true,
         };
-
+        let removeDialog;
         let nextDialog = null;
         if (action.target === "new") {
             cleanDomFromBootstrap();
@@ -768,7 +773,7 @@ function makeActionManager(env) {
             }
 
             const onClose = _removeDialog();
-            const removeDialog = env.services.dialog.add(ActionDialog, actionDialogProps, {
+            removeDialog = env.services.dialog.add(ActionDialog, actionDialogProps, {
                 onClose: () => {
                     const onClose = _removeDialog();
                     if (onClose) {
