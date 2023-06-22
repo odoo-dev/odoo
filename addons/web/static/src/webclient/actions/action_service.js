@@ -656,6 +656,9 @@ function makeActionManager(env) {
                 onError(this.onError);
             }
             onError(error) {
+                if (!this.isMounted) {
+                    reject(error);
+                }
                 cleanDomFromBootstrap();
                 if (this.isMounted) {
                     // the error occurred on the controller which is
@@ -751,7 +754,6 @@ function makeActionManager(env) {
         ControllerComponent.props = {
             "*": true,
         };
-
         let nextDialog = null;
         if (action.target === "new") {
             cleanDomFromBootstrap();
