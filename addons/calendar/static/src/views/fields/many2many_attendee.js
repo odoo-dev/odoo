@@ -50,11 +50,6 @@ export const many2ManyAttendee = {
     ...many2ManyTagsAvatarField,
     component: Many2ManyAttendee,
     additionalClasses: ["o_field_many2many_tags_avatar", "w-100"],
-    legacySpecialData: "_fetchSpecialAttendeeStatus",
 };
 
 registry.category("fields").add("many2manyattendee", many2ManyAttendee);
-
-registry.category("preloadedData").add("many2manyattendee", {
-    loadOnTypes: ["many2many"],
-});
