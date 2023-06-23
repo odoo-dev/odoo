@@ -55,18 +55,6 @@ export const many2ManyAttendee = {
 
 registry.category("fields").add("many2manyattendee", many2ManyAttendee);
 
-export function preloadMany2ManyAttendee(orm, record, fieldName, { context }) {
-    return orm.call(
-        "res.partner",
-        "get_attendee_detail",
-        [record.data[fieldName].records.map((rec) => rec.resId), [record.resId || false]],
-        {
-            context,
-        }
-    );
-}
-
 registry.category("preloadedData").add("many2manyattendee", {
     loadOnTypes: ["many2many"],
-    preload: preloadMany2ManyAttendee,
 });
