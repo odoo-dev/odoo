@@ -12,6 +12,7 @@ import {
     clickSave,
     triggerHotkey,
     nextTick,
+    makeDeferred,
 } from "@web/../tests/helpers/utils";
 import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 
@@ -1018,5 +1019,34 @@ QUnit.module("Fields", (hooks) => {
             "select",
             "the selection list of the reference field should exist when hide_model=False and no model_field specified."
         );
+    });
+
+    QUnit.test("reference field should await fetch model before render", async function (assert) {
+        serverData.models.partner.records[0].model_id = 20;
+
+        const def = makeDeferred();
+        makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="model_id" invisible="1"/>
+                    <field name="reference" options="{'model_field': 'model_id'}" />
+                </form>`,
+            async mockRPC(route, args) {
+                if (args.method === "read" && args.model === "ir.model") {
+                    await def;
+                }
+            },
+        });
+        await nextTick();
+        await nextTick();
+        assert.containsNone(target, ".o_form_view");
+        def.resolve();
+
+        await nextTick();
+        assert.containsOnce(target, ".o_form_view");
     });
 });

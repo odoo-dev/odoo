@@ -74,6 +74,7 @@ QUnit.module("Analytic", (hooks) => {
                         amount: { string: "Amount", type: "float" },
                         analytic_distribution: { string: "Analytic", type: "json" },
                         move_id: { string: "Account Move", type: "many2one", relation: "move" },
+                        analytic_precision: { string: "Analytic Precision", type: "integer" },
                     },
                     records: [
                         { id: 1, label: "Developer Time", amount: 100.00, analytic_distribution: {"1": 30.3, "3": 69.7}},
@@ -124,7 +125,7 @@ QUnit.module("Analytic", (hooks) => {
 
     QUnit.module("AnalyticDistribution");
 
-    QUnit.tttt("analytic field in form view basic features", async function (assert) {
+    QUnit.test("analytic field in form view basic features", async function (assert) {
         await makeView({
             type: "form",
             resModel: "aml",
@@ -140,7 +141,7 @@ QUnit.module("Analytic", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { kwargs, method, model }) {
+            mockRPC(route, { method, model }) {
                 if (method === "get_relevant_plans" && model === "account.analytic.plan") {
                     return Promise.resolve(
                         serverData.models['plan'].records.filter((r) => !r.parent_id && r.applicability !== "unavailable")
@@ -209,7 +210,7 @@ QUnit.module("Analytic", (hooks) => {
         assert.containsN(target, ".badge", 3, "should contain 3 tags");
     });
 
-    QUnit.tttt("analytic field in multi_edit list view + search more", async function (assert) {
+    QUnit.test("analytic field in multi_edit list view + search more", async function (assert) {
         await makeView({
             type: "list",
             resModel: "aml",

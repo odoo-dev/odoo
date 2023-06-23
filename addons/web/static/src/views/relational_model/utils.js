@@ -1,11 +1,13 @@
 /* @odoo-module */
 
-import { markup } from "@odoo/owl";
+import { useComponent, markup, onWillStart } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { omit } from "@web/core/utils/objects";
+import { batched, effect } from "@web/core/utils/reactive";
 import { orderByToString } from "@web/views/utils";
+import { Deferred } from "@web/core/utils/concurrency";
 
 function makeActiveField({
     context,
@@ -469,4 +471,24 @@ export function fromUnityToServerValues(values, fields, activeFields) {
         serverValues[fieldName] = value;
     }
     return serverValues;
+}
+
+/**
+ * This hook should only be used in a component field because it
+ * depends on the record props.
+ * The callback will be executed once during setup and each time
+ * a record value read in the callback changes.
+ * @param {(record) => void} callback
+ */
+export function onWillUpdateRecord(callback) {
+    const component = useComponent();
+    const def = new Deferred();
+    effect(
+        batched(async (record) => {
+            await callback(record);
+            def.resolve();
+        }),
+        [component.props.record]
+    );
+    onWillStart(() => def);
 }
