@@ -27,7 +27,7 @@ QUnit.module('widgets', ()=> {
 
         });
 
-        QUnit.tttt('Test creation/usage form popover widget', async assert => {
+        QUnit.test('Test creation/usage form popover widget', async assert => {
             assert.expect(5);
             await makeView({
                 type: "form",
