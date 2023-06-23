@@ -150,8 +150,11 @@ export class Thread extends Component {
             this.lastJumpPresent = this.props.jumpPresent;
             this.threadService.fetchNewMessages(this.props.thread);
         });
-        useBus(this.env.bus, "UPDATE-CHATTER", () => {
-            this.threadService.fetchNewMessages(this.props.thread);
+        useBus(this.env.bus, "FORM-VIEW:RECORD-SAVED", ({ detail }) => {
+            const { model, id } = this.props.thread;
+            if (detail.resModel === model && detail.resId === id) {
+                this.threadService.fetchNewMessages(this.props.thread);
+            }
         });
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread !== this.props.thread) {
