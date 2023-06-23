@@ -297,7 +297,12 @@ export class FormController extends Component {
      * is invalid or if a server error is thrown.
      * @param {Record} record
      */
-    async onRecordSaved(record) {}
+    async onRecordSaved(record) {
+        this.env.bus.trigger("FORM-VIEW:RECORD-SAVED", {
+            resModel: record.resModel,
+            resId: record.resId,
+        });
+    }
 
     /**
      * onWillSaveRecord is a callBack that will be executed before the
