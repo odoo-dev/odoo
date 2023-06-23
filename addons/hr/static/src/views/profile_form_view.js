@@ -15,7 +15,8 @@ export class EmployeeProfileController extends formView.Controller {
         this.mustReload = "lang" in changes;
     }
 
-    onRecordSaved(record) {
+    async onRecordSaved(record) {
+        await super.onRecordSaved(...arguments);
         if (this.mustReload) {
             this.mustReload = false;
             return this.action.doAction("reload_context");
