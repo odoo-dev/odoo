@@ -2523,7 +2523,7 @@ QUnit.module("ActionManager", (hooks) => {
             .add("odoo.exceptions.ValidationError", WarningDialogWait);
 
         const mockRPC = (route, args) => {
-            if (args.method === "web_search_read" && args.model === "partner") {
+            if (args.method === "unity_web_search_read" && args.model === "partner") {
                 throw makeServerError({ type: "ValidationError" });
             }
         };
