@@ -2,10 +2,10 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { onWillUpdateRecord } from "@web/views/relational_model/utils";
 import { many2OneField, Many2OneField } from "../many2one/many2one_field";
-import { effect } from "@web/core/utils/reactive";
 
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 /**
  * @typedef ReferenceValue
@@ -57,39 +57,28 @@ export class ReferenceField extends Component {
         });
         this.currentValue = undefined;
         this.currentRelation = this.getRelation();
-
-        onWillStart(async () => {
-            if (this._isCharField(this.props)) {
-                /** Fetch the display name of the record referenced by the field */
-                effect(
-                    async (props) => {
-                        if (this.currentValue !== props.record.data[props.name]) {
-                            this.state.formattedCharValue = await this._fetchReferenceCharData(
-                                props
-                            );
-                            this.currentValue = props.record.data[props.name];
-                        }
-                    },
-                    [this.props]
-                );
-            } else if (this.props.modelField) {
-                /** Fetch the technical name of the co model */
-                effect(
-                    async (props) => {
-                        if (this.currentModelId !== props.record.data[props.modelField]?.[0]) {
-                            this.state.modelName = await this._fetchModelTechnicalName(props);
-                            if (this.currentModelId !== undefined) {
-                                props.record.update({ [props.name]: false });
-                            }
-                            this.currentModelId = props.record.data[props.modelField]?.[0];
-                        }
-                    },
-                    [this.props]
-                );
-            } else {
-                this.currentValue = this.props.record.data[this.props.name];
-            }
-        });
+        if (this._isCharField(this.props)) {
+            /** Fetch the display name of the record referenced by the field */
+            onWillUpdateRecord(async (record) => {
+                if (this.currentValue !== record.data[this.props.name]) {
+                    this.state.formattedCharValue = await this._fetchReferenceCharData(this.props);
+                    this.currentValue = record.data[this.props.name];
+                }
+            });
+        } else if (this.props.modelField) {
+            /** Fetch the technical name of the co model */
+            onWillUpdateRecord(async (record) => {
+                if (this.currentModelId !== record.data[this.props.modelField]?.[0]) {
+                    this.state.modelName = await this._fetchModelTechnicalName(this.props);
+                    if (this.currentModelId !== undefined) {
+                        record.update({ [this.props.name]: false });
+                    }
+                    this.currentModelId = record.data[this.props.modelField]?.[0];
+                }
+            });
+        } else {
+            this.currentValue = this.props.record.data[this.props.name];
+        }
     }
 
     get m2oProps() {
