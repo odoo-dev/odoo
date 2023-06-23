@@ -589,7 +589,13 @@ export class X2ManyFieldDialog extends Component {
 
     async save({ saveAndNew }) {
         if (await this.record.checkValidity()) {
-            this.record = (await this.props.save(this.record, { saveAndNew })) || this.record;
+            const isSaved = await this.props.save(this.record);
+            if (isSaved === false) {
+                return false;
+            }
+            if (saveAndNew) {
+                this.record = await this.props.addNew();
+            }
         } else {
             this.record.openInvalidFieldsNotification();
             return false;
@@ -622,6 +628,7 @@ X2ManyFieldDialog.props = {
     archInfo: Object,
     close: Function,
     record: Object,
+    addNew: Function,
     save: Function,
     title: String,
     delete: { optional: true },
@@ -739,14 +746,14 @@ export function useOpenX2ManyRecord({
                 config: env.config,
                 archInfo,
                 record,
-                save: async (rec, { saveAndNew }) => {
+                addNew: () => {
+                    return list.extendRecord(params);
+                },
+                save: (rec) => {
                     if (isDuplicate && rec.id === record.id) {
-                        await updateRecord(rec);
+                        return updateRecord(rec);
                     } else {
-                        await saveRecord(rec);
-                    }
-                    if (saveAndNew) {
-                        return list.extendRecord(params);
+                        return saveRecord(rec);
                     }
                 },
                 title,
