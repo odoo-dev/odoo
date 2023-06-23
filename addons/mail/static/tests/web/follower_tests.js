@@ -158,7 +158,7 @@ QUnit.test("edit follower and close subtype dialog", async (assert) => {
     assert.containsNone($, ".o-mail-FollowerSubtypeDialog");
 });
 
-QUnit.tttt("remove a follower in a dirty form view", async (assert) => {
+QUnit.test("remove a follower in a dirty form view", async (assert) => {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
     pyEnv["discuss.channel"].create({ name: "General", display_name: "General" });
@@ -172,7 +172,7 @@ QUnit.tttt("remove a follower in a dirty form view", async (assert) => {
         "res.partner,false,form": `
             <form>
                 <field name="name"/>
-                <field name="channel_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="channel_ids" widget="many2many_tags"/>
                 <div class="oe_chatter">
                     <field name="message_ids"/>
                     <field name="message_follower_ids"/>
@@ -195,7 +195,7 @@ QUnit.tttt("remove a follower in a dirty form view", async (assert) => {
     assert.containsOnce($, ".o_tag:contains(General)");
 });
 
-QUnit.tttt("removing a follower should reload form view", async function (assert) {
+QUnit.test("removing a follower should reload form view", async function (assert) {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
     pyEnv["mail.followers"].create({
@@ -206,7 +206,7 @@ QUnit.tttt("removing a follower should reload form view", async function (assert
     });
     const { openFormView } = await start({
         async mockRPC(route, args) {
-            if (args.method === "read") {
+            if (args.method === "web_read") {
                 assert.step(`read ${args.args[0][0]}`);
             }
         },
