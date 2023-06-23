@@ -429,15 +429,30 @@ export class ListRenderer extends Component {
     }
 
     canUseFormatter(column, record) {
-        return !record.isInEdition && !column.widget && !this.isLocked(record);
+        if (column.widget) {
+            return false;
+        }
+        if (record.isInEdition && (record.model.multiEdit || this.isInlineEditable(record))) {
+            // in a x2many non editable list, a record is in edition when it is opened in a dialog,
+            // but in the list we want it to still be displayed in readonly.
+            return false;
+        }
+        return true;
     }
 
     isRecordReadonly(record) {
-        return (this.props.activeActions?.edit === false && !record.isNew) || this.isLocked(record);
-    }
-
-    isLocked(record) {
-        return this.props.list._lockedRecord?.id === record.id;
+        if (record.isNew) {
+            return false;
+        }
+        if (this.props.activeActions?.edit === false) {
+            return true;
+        }
+        if (record.isInEdition && !this.isInlineEditable(record) && !record.model.multiEdit) {
+            // in a x2many non editable list, a record is in edition when it is opened in a dialog,
+            // but in the list we want it to still be displayed in readonly.
+            return true;
+        }
+        return false;
     }
 
     focusCell(column, forward = true) {

@@ -15,7 +15,7 @@ export class Record extends DataPoint {
     static type = "Record";
     setup(config, data, options = {}) {
         this._parentRecord = options.parentRecord;
-        this._onChange = options.onChange || (() => {});
+        this._onUpdate = options.onUpdate || (() => {});
         this.virtualId = options.virtualId || false;
 
         const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in data));
@@ -218,6 +218,13 @@ export class Record extends DataPoint {
         return this._setInvalidField(fieldName);
     }
 
+    switchMode(mode) {
+        this.model._updateConfig(this.config, { mode }, { noReload: true });
+        if (mode === "readonly") {
+            this._invalidFields.clear();
+        }
+    }
+
     toggleSelection(selected) {
         if (typeof selected === "boolean") {
             this.selected = selected;
@@ -408,7 +415,7 @@ export class Record extends DataPoint {
         };
         let staticList;
         const options = {
-            onChange: ({ withoutOnchange } = {}) =>
+            onUpdate: ({ withoutOnchange } = {}) =>
                 this._update({ [fieldName]: staticList }, { withoutOnchange }),
             parent: this,
         };
@@ -789,18 +796,11 @@ export class Record extends DataPoint {
                 body: _t("No valid record to save"),
                 confirm: async () => {
                     await this.discard();
-                    this._switchMode("readonly");
+                    this.switchMode("readonly");
                 },
             });
         }
         this._invalidFields.add(fieldName);
-    }
-
-    _switchMode(mode) {
-        this.model._updateConfig(this.config, { mode }, { noReload: true });
-        if (mode === "readonly") {
-            this._invalidFields.clear();
-        }
     }
 
     /**
@@ -818,7 +818,7 @@ export class Record extends DataPoint {
         }
     }
 
-    async _update(changes, { withoutOnchange, withoutParentOnchange } = {}) {
+    async _update(changes, { withoutOnchange, withoutParentUpdate } = {}) {
         this.dirty = true;
         const prom = this._preprocessChanges(changes);
         if (prom && !this.model._urgentSave) {
@@ -871,7 +871,7 @@ export class Record extends DataPoint {
             const initialChanges = pick(this._changes, ...Object.keys(changes));
             this._applyChanges(changes);
             try {
-                await this._onChange(changes, { withoutParentOnchange });
+                await this._onUpdate(changes, { withoutParentUpdate });
             } catch (e) {
                 this._applyChanges(initialChanges);
                 throw e;
