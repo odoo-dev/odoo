@@ -19,6 +19,7 @@ export class SurveyQuestionTriggerWidget extends Component {
             if (this.button && this.button.el) {
                 const triggeringQuestionTitle = this.props.record.data.triggering_question_id[1];
                 const triggerError = this.surveyQuestionTriggerError;
+                debugger
                 if (triggerError === "MISPLACED_TRIGGER_WARNING") {
                     this.state.surveyIconWarning = true;
                     this.state.triggerTooltip = sprintf(
@@ -71,7 +72,7 @@ export class SurveyQuestionTriggerWidget extends Component {
             return "";
         }
         const triggerId = record.data.triggering_question_id[0];
-        let triggerRecord = record.model.root.data.question_and_page_ids.records.find(rec => rec.data.id === triggerId);
+        let triggerRecord = record.model.root.data.question_and_page_ids.records.find(rec => rec.resId === triggerId);
 
         if (!triggerRecord) {
             return "MISSING_TRIGGER_ERROR";
@@ -80,7 +81,7 @@ export class SurveyQuestionTriggerWidget extends Component {
             return "WRONG_QUESTIONS_SELECTION_WARNING";
         }
         if (record.data.sequence < triggerRecord.data.sequence ||
-            (record.data.sequence === triggerRecord.data.sequence && record.data.id < triggerId)) {
+            (record.data.sequence === triggerRecord.data.sequence && record.resId < triggerId)) {
             return "MISPLACED_TRIGGER_WARNING";
         }
         return "";
@@ -95,5 +96,9 @@ SurveyQuestionTriggerWidget.props = {
 export const surveyQuestionTriggerWidget = {
     component: SurveyQuestionTriggerWidget,
     displayName: "Trigger",
+    fieldDependencies: [
+        { name: "triggering_question_id", type: "many2one" },
+        { name: "triggering_answer_id", type: "many2one" },
+    ],
 };
 registry.category("view_widgets").add("survey_question_trigger", surveyQuestionTriggerWidget);
