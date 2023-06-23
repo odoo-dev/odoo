@@ -1,9 +1,8 @@
 /** @odoo-module */
 
+import { makeServerError } from "@web/../tests/helpers/mock_server";
 import { click, editInput, getFixture, nextTick, triggerHotkey } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-
-import { makeServerError } from "@web/../tests/helpers/mock_server";
 
 QUnit.module("QuestionPageOneToManyField", (hooks) => {
     let serverData;
@@ -169,7 +168,7 @@ QUnit.module("QuestionPageOneToManyField", (hooks) => {
         assert.containsOnce(target, ".modal .o_form_view");
     });
 
-    QUnit.tttt("A validation error from saving parent form notifies and prevents dialog from closing", async (assert) => {
+    QUnit.test("A validation error from saving parent form notifies and prevents dialog from closing", async (assert) => {
         await makeView({
             type: "form",
             resModel: "survey",

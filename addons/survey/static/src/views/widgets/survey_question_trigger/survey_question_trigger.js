@@ -19,7 +19,6 @@ export class SurveyQuestionTriggerWidget extends Component {
             if (this.button && this.button.el) {
                 const triggeringQuestionTitle = this.props.record.data.triggering_question_id[1];
                 const triggerError = this.surveyQuestionTriggerError;
-                debugger
                 if (triggerError === "MISPLACED_TRIGGER_WARNING") {
                     this.state.surveyIconWarning = true;
                     this.state.triggerTooltip = sprintf(

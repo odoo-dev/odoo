@@ -46,23 +46,30 @@ class QuestionPageOneToManyField extends X2ManyField {
 
         const self = this;
         const saveRecord = async (record) => {
-            const saveResponse = await superSaveRecord(record);
+            let isSaved = await superSaveRecord(record);
             try {
-                await self.props.record.save({stayInEdition: true, throwOnError: true});
+                const isSucceed = await self.props.record.save({
+                    stayInEdition: true,
+                    throwOnError: true,
+                });
+                isSaved = isSaved === false ? false : isSucceed;
             } catch (error) {
-                return self.handleSurveySaveError(error, record);
+                self.handleSurveySaveError(error, record);
+                return false;
             }
-            return saveResponse;
+            return isSaved;
         };
 
         const updateRecord = async (record) => {
-            const updateResponse = await superUpdateRecord(record);
+            let isUpdated = await superUpdateRecord(record);
             try {
-                await self.props.record.save({stayInEdition: true, throwOnError: true});
+                const isSaved = await self.props.record.save({ stayInEdition: true, throwOnError: true });
+                isUpdated = isUpdated === false ? false : isSaved;
             } catch (error) {
-                return self.handleSurveySaveError(error);
+                self.handleSurveySaveError(error);
+                return false;
             }
-            return updateResponse;
+            return isUpdated;
         };
 
         const openRecord = useOpenX2ManyRecord({
@@ -103,19 +110,13 @@ class QuestionPageOneToManyField extends X2ManyField {
      *   list.
      */
     async handleSurveySaveError(error, recordToDelete) {
-        error.event.preventDefault();
         if (recordToDelete) {
-            const listRecord = this.list.records.find(r => r.__bm_handle__ === recordToDelete.__bm_handle__);
-            await this.list.delete(listRecord.id);
+            await this.list.delete(recordToDelete);
         }
-        this.notificationService.add(
-            error.message.data.message, {
-                title: this.env._t("Validation Error"),
-                type: "danger"
-            }
-        );
-        // Prevent closing the question form view
-        throw error;
+        this.notificationService.add(error.data.message, {
+            title: this.env._t("Validation Error"),
+            type: "danger",
+        });
     }
 }
 QuestionPageOneToManyField.components = {
