@@ -33,7 +33,9 @@ const AGGREGATABLE_FIELD_TYPES = ["float", "integer", "monetary"]; // types that
 
 export function addFieldDependencies(activeFields, fields, fieldDependencies = []) {
     for (const field of fieldDependencies) {
-        if (!activeFields[field.name]) {
+        if (field.name in activeFields) {
+            patchActiveFields(activeFields[field.name], field);
+        } else {
             activeFields[field.name] = makeActiveField(field);
         }
         if (!fields[field.name]) {
