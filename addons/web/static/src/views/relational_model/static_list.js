@@ -36,7 +36,7 @@ export class StaticList extends DataPoint {
 
     setup(config, data, options = {}) {
         this._parent = options.parent;
-        this._onChange = options.onChange;
+        this._onUpdate = options.onUpdate;
         this._cache = markRaw({});
         this._commands = [];
         this._savePoint = markRaw({});
@@ -48,6 +48,12 @@ export class StaticList extends DataPoint {
             .slice(this.offset, this.limit)
             .map((r) => this._createRecordDatapoint(r));
         this.count = this.resIds.length;
+
+        // In kanban and non editable list views, x2many records can be opened in a form view in
+        // dialog, which may contain other fields than the kanban or list view. The next set keeps
+        // tracks of records we already opened in dialog and thus for which we already modified the
+        // config to add the form view's fields in activeFields.
+        this._extendedRecords = new Set();
 
         this.handleField = Object.keys(this.activeFields).find(
             (fieldName) => this.activeFields[fieldName].isHandle
@@ -116,19 +122,19 @@ export class StaticList extends DataPoint {
                 manuallyAdded: true,
             });
             await this._addRecord(record, { position });
-            await this._onChange({ withoutOnchange: !record._checkValidity({ silent: true }) });
+            await this._onUpdate({ withoutOnchange: !record._checkValidity({ silent: true }) });
             return record;
         });
     }
 
     async delete(record) {
         await this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
-        this._onChange();
+        this._onUpdate();
     }
 
     async forget(record) {
         await this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
-        this._onChange();
+        this._onUpdate();
     }
 
     canResequence() {
@@ -175,7 +181,7 @@ export class StaticList extends DataPoint {
                         isValid ||
                         (!this.editedRecord.dirty && !this.editedRecord._manuallyAdded)
                     ) {
-                        this.editedRecord._switchMode("readonly");
+                        this.editedRecord.switchMode("readonly");
                     }
                 }
             }
@@ -186,7 +192,7 @@ export class StaticList extends DataPoint {
     async enterEditMode(record) {
         const canProceed = await this.leaveEditMode();
         if (canProceed) {
-            this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
+            record.switchMode("edit");
         }
         return canProceed;
     }
@@ -210,11 +216,130 @@ export class StaticList extends DataPoint {
         this._commands = [x2ManyCommands.replaceWith(ids)].concat(updateCommandsToKeep);
         this._currentIds = [...ids];
         this.count = this._currentIds.length;
-        this._onChange();
+        this._onUpdate();
     }
 
     async resequence(movedId, targetId) {
         return this.model.mutex.exec(() => this._resequence(movedId, targetId));
+    }
+
+    /**
+     * This method is meant to be used in a very specific usecase: when an x2many record is viewed
+     * or edited through a form view dialog (e.g. x2many kanban or non editable list). In this case,
+     * the form typically contains different fields than the kanban or list, so we need to "extend"
+     * the fields and activeFields. If the record opened in a form view dialog already exists, we
+     * modify it's config to add the new fields. If it is a new record, we create it with the
+     * extended config.
+     *
+     * @param {Object} params
+     * @param {Object} params.activeFields
+     * @param {Object} params.fields
+     * @param {Object} [params.context]
+     * @param {boolean} [params.withoutParent]
+     * @param {Record} [record]
+     * @returns {Record}
+     */
+    extendRecord(params, record) {
+        return this.model.mutex.exec(async () => {
+            // extend fields and activeFields of the list with those given in params
+            Object.assign(this.fields, params.fields);
+            const activeFields = { ...params.activeFields };
+            for (const fieldName in this.activeFields) {
+                if (fieldName in activeFields) {
+                    patchActiveFields(activeFields[fieldName], this.activeFields[fieldName]);
+                } else {
+                    activeFields[fieldName] = this.activeFields[fieldName];
+                }
+            }
+
+            if (record) {
+                // case 1: the record already exists
+                if (this._extendedRecords.has(record.id)) {
+                    // case 1.1: the record has already been extended
+                    // -> simply switch it to edit and store a savepoint
+                    record.switchMode("edit");
+                    record._addSavePoint();
+                    return record;
+                }
+                // case 1.2: the record is extended for the first time, and it now potentially has
+                // more fields than before (or x2many fields displayed differently)
+                // -> if it isn't a new record, load it to retrieve the values of new fields
+                // -> generate default values for new fields
+                // -> recursively update the config of the record and it's sub datapoints
+                // -> apply the loaded values in the case of a not new record
+                // -> store a savepoint
+                // These operations must be done in that specific order to ensure that the model is
+                // mutated only once (in a tick), and that datapoints have the correct config to
+                // handle field values they receive.
+                const config = {
+                    ...record.config,
+                    ...params,
+                    activeFields,
+                };
+                let data = {};
+                if (!record.isNew) {
+                    const evalContext = Object.assign({}, record.evalContext, config.context);
+                    const resIds = [record.resId];
+                    [data] = await this.model._loadRecords({ ...config, resIds }, evalContext);
+                }
+                this.model._updateConfig(record.config, config, { noReload: true });
+                record._applyDefaultValues();
+                for (const fieldName in record.activeFields) {
+                    if (["one2many", "many2many"].includes(record.fields[fieldName].type)) {
+                        if (activeFields[fieldName].related) {
+                            const list = record.data[fieldName];
+                            const patch = {
+                                activeFields: activeFields[fieldName].related.activeFields,
+                                fields: activeFields[fieldName].related.fields,
+                            };
+                            for (const subRecord of Object.values(list._cache)) {
+                                this.model._updateConfig(subRecord.config, patch, {
+                                    noReload: true,
+                                });
+                            }
+                            this.model._updateConfig(list.config, patch, { noReload: true });
+                        }
+                    }
+                }
+                record._applyValues(data);
+                record._addSavePoint();
+            } else {
+                // case 2: the record is a new record
+                // -> simply create one with the extended config
+                record = await this._createNewRecordDatapoint({
+                    activeFields,
+                    context: params.context,
+                    withoutParent: params.withoutParent,
+                    manuallyAdded: true,
+                });
+            }
+
+            // mark the record as being extended, to go through case 1.1 next time
+            this._extendedRecords.add(record.id);
+
+            return record;
+        });
+    }
+
+    /**
+     * This method is meant to be called when a record, which has previously been extended to be
+     * displayed in a form view dialog (see @extendRecord) is saved. In this case, we may need to
+     * add this record to the list (if it is a new one), and to notify the parent record of the
+     * update. We may also want to sort the list.
+     *
+     * @param {Record} record
+     */
+    validateExtendedRecord(record) {
+        return this.model.mutex.exec(async () => {
+            if (!this._currentIds.includes(record.isNew ? record.virtualId : record.resId)) {
+                // new record created, not yet in the list
+                await this._addRecord(record);
+            }
+            await this._onUpdate();
+            if (this.orderBy.length) {
+                await this._sort();
+            }
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -278,7 +403,6 @@ export class StaticList extends DataPoint {
         }
         this.count++;
         this._needsReordering = true;
-        delete record._notAddedYet;
     }
 
     _addSavePoint() {
@@ -445,8 +569,10 @@ export class StaticList extends DataPoint {
         const { CREATE, UPDATE } = x2ManyCommands;
         const options = {
             parentRecord: this._parent,
-            onChange: async (changes, { withoutParentOnchange }) => {
-                if (record._notAddedYet) {
+            onUpdate: async (changes, { withoutParentUpdate }) => {
+                if (!this.currentIds.includes(record.isNew ? record.virtualId : record.resId)) {
+                    // the record hasn't been added to the list yet (we're currently creating it
+                    // from a dialog)
                     return;
                 }
                 const hasCommand = this._commands.some(
@@ -455,11 +581,14 @@ export class StaticList extends DataPoint {
                 if (!hasCommand) {
                     this._commands.push([UPDATE, id]);
                 }
-                if (record === this._lockedRecord) {
+                if (this._extendedRecords.has(record.id)) {
+                    // the record is edited from a dialog, so we don't want to notify the parent
+                    // record to be notified at each change inside the dialog (it will be notified
+                    // at the end when the dialog is saved)
                     return;
                 }
-                if (!withoutParentOnchange) {
-                    await this._onChange({
+                if (!withoutParentUpdate) {
+                    await this._onUpdate({
                         withoutOnchange: !record._checkValidity({ silent: true }),
                     });
                 }
@@ -680,14 +809,14 @@ export class StaticList extends DataPoint {
             proms.push(
                 record._update(
                     { [this.handleField]: offset + Number(i) },
-                    { withoutParentOnchange: true }
+                    { withoutParentUpdate: true }
                 )
             );
         }
         await Promise.all(proms);
 
         await this._sort();
-        this._onChange();
+        this._onUpdate();
     }
 
     async _sort(currentIds = this.currentIds, orderBy = this.orderBy) {
@@ -734,87 +863,5 @@ export class StaticList extends DataPoint {
 
     _updateContext(context) {
         Object.assign(this.context, context);
-    }
-
-    // x2many dialog
-    addNewRecord(params, withoutParent) {
-        return this.model.mutex.exec(async () => {
-            Object.assign(this.fields, params.fields);
-            const activeFields = { ...params.activeFields };
-            for (const fieldName in this.activeFields) {
-                if (fieldName in activeFields) {
-                    patchActiveFields(activeFields[fieldName], this.activeFields[fieldName]);
-                } else {
-                    activeFields[fieldName] = this.activeFields[fieldName];
-                }
-            }
-            const record = await this._createNewRecordDatapoint({
-                activeFields,
-                context: params.context,
-                withoutParent,
-                manuallyAdded: true,
-            });
-            record._hasBeenDuplicated = true;
-            record._notAddedYet = true;
-            return record;
-        });
-    }
-    duplicateDatapoint(record, params) {
-        return this.model.mutex.exec(async () => {
-            if (record._hasBeenDuplicated) {
-                if (this._lockedRecord) {
-                    throw new Error("LOCKED RECORD");
-                }
-                this.model._updateConfig(record.config, { mode: "edit" }, { noReload: true });
-                record._addSavePoint();
-                this._lockedRecord = record;
-                return record;
-            }
-            Object.assign(this.fields, params.fields);
-            const activeFields = { ...params.activeFields };
-            for (const fieldName in record.activeFields) {
-                if (fieldName in activeFields) {
-                    patchActiveFields(activeFields[fieldName], record.activeFields[fieldName]);
-                } else {
-                    activeFields[fieldName] = record.activeFields[fieldName];
-                }
-            }
-            const config = {
-                ...record.config,
-                ...params,
-                activeFields,
-            };
-            let data = {};
-            if (!record.isNew) {
-                const evalContext = Object.assign({}, record.evalContext, config.context);
-                const resIds = [record.resId];
-                [data] = await this.model._loadRecords({ ...config, resIds }, evalContext);
-            }
-            this.model._updateConfig(record.config, config, { noReload: true });
-            record._applyDefaultValues();
-            for (const fieldName in record.activeFields) {
-                if (["one2many", "many2many"].includes(record.fields[fieldName].type)) {
-                    if (activeFields[fieldName].related) {
-                        const list = record.data[fieldName];
-                        const patch = {
-                            activeFields: activeFields[fieldName].related.activeFields,
-                            fields: activeFields[fieldName].related.fields,
-                        };
-                        for (const subRecord of Object.values(list._cache)) {
-                            this.model._updateConfig(subRecord.config, patch, { noReload: true });
-                        }
-                        this.model._updateConfig(list.config, patch, { noReload: true });
-                    }
-                }
-            }
-            record._applyValues(data);
-            record._addSavePoint();
-            record._hasBeenDuplicated = true;
-            if (this._lockedRecord) {
-                throw new Error("LOCKED RECORD");
-            }
-            this._lockedRecord = record;
-            return record;
-        });
     }
 }

@@ -625,7 +625,7 @@ X2ManyFieldDialog.props = {
     save: Function,
     title: String,
     delete: { optional: true },
-    deleteButtonLabel: {optional: true},
+    deleteButtonLabel: { optional: true },
     config: Object,
 };
 X2ManyFieldDialog.template = "web.X2ManyFieldDialog";
@@ -716,25 +716,20 @@ export function useOpenX2ManyRecord({
         let deleteButtonLabel = undefined;
         const isDuplicate = !!record;
 
+        const params = { activeFields, fields, mode };
         if (record) {
-            const _record = record;
-            record = await list.duplicateDatapoint(record, { mode, fields, activeFields });
             const { delete: canDelete, onDelete } = activeActions;
-            deleteRecord = viewMode === "kanban" && canDelete ? () => onDelete(_record) : null;            
-            deleteButtonLabel = activeActions.type === 'one2many' ? env._t('Delete') : env._t('Remove');
+            deleteRecord = viewMode === "kanban" && canDelete ? () => onDelete(record) : null;
+            deleteButtonLabel =
+                activeActions.type === "one2many" ? env._t("Delete") : env._t("Remove");
         } else {
-            const params = {
-                context: makeContext([list.context, context]),
-                activeFields,
-                fields,
-                mode: "edit",
-            };
-            record = await list.addNewRecord(params, isMany2Many);
+            params.context = makeContext([list.context, context]);
+            params.withoutParent = isMany2Many;
         }
+        record = await list.extendRecord(params, record);
 
         const _onClose = () => {
-            list.editedRecord?._switchMode("readonly");
-            list._lockedRecord = null;
+            list.editedRecord?.switchMode("readonly");
             onClose?.();
         };
 
@@ -751,15 +746,7 @@ export function useOpenX2ManyRecord({
                         await saveRecord(rec);
                     }
                     if (saveAndNew) {
-                        return list.addNewRecord(
-                            {
-                                context: makeContext([list.context, context]),
-                                activeFields,
-                                fields,
-                                mode: "edit",
-                            },
-                            isMany2Many
-                        );
+                        return list.extendRecord(params);
                     }
                 },
                 title,
@@ -792,11 +779,7 @@ export function useX2ManyCrud(getList, isMany2Many) {
         };
     } else {
         saveRecord = async (record) => {
-            const list = getList();
-            record._switchMode("readonly");
-            list._lockedRecord = null;
-            await list._addRecord(record);
-            await list._onChange();
+            return getList().validateExtendedRecord(record);
         };
     }
 
@@ -804,13 +787,7 @@ export function useX2ManyCrud(getList, isMany2Many) {
         if (isMany2Many) {
             await record.save();
         }
-        // FIXME: incomplete, check updateRecord in BasicRelationalModel
-        const list = getList();
-        list._lockedRecord = null;
-        await list._onChange();
-        if (list.orderBy.length) {
-            await list._sort();
-        }
+        return getList().validateExtendedRecord(record);
     };
 
     const removeRecord = (record) => {

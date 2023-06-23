@@ -585,7 +585,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(
             target
                 .querySelectorAll(".o_field_one2many")[1]
-                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+                .querySelector(".o_data_row .o_data_cell[name=foo]").innerText,
             "yop"
         );
         await editInput(
@@ -596,7 +596,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(
             target
                 .querySelectorAll(".o_field_one2many")[1]
-                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+                .querySelector(".o_data_row .o_data_cell[name=foo]").innerText,
             "hello"
         );
         await click(target.querySelector(".o_field_one2many .o_field_x2many_list_row_add a"));
@@ -609,7 +609,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(
             target
                 .querySelectorAll(".o_field_one2many")[1]
-                .querySelector(".o_data_row .o_field_widget[name=foo] input").value, // FIXME: ideally, this row should not be in edition
+                .querySelectorAll(".o_data_row .o_data_cell[name=foo]")[1].innerText,
             "My little Foo Value"
         );
     });
