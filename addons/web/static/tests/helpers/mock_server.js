@@ -792,7 +792,8 @@ export class MockServer {
             const key = "default_" + fieldName;
             if (kwargs.context && key in kwargs.context) {
                 if (field.type === "one2many" || field.type === "many2many") {
-                    result[fieldName] = kwargs.context[key].map((id) => [4, id]);
+                    const ids = kwargs.context[key] || [];
+                    result[fieldName] = ids.map((id) => [4, id]);
                 } else {
                     result[fieldName] = kwargs.context[key];
                 }
