@@ -13133,4 +13133,71 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".o_list_view");
         assert.verifySteps([]);
     });
+
+    QUnit.tttt("abcde", async function (assert) {
+        assert.expect(1);
+
+        serverData.models.partner.records[0].p = [1, 2];
+        serverData.models.partner.records[1].turtles = [2];
+        serverData.models.partner.onchanges = {
+            int_field: function (obj) {
+                obj.p = [
+                    [
+                        1,
+                        2,
+                        {
+                            foo: "new foo value",
+                            turtles: [
+                                [
+                                    1,
+                                    2,
+                                    {
+                                        turtle_foo: "new turtle foo value",
+                                        partner_ids: [[3, 2]],
+                                    },
+                                ],
+                            ],
+                        },
+                    ],
+                ];
+            },
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <group>
+                        <field name="int_field"/>
+                        <field name="p">
+                            <tree>
+                                <field name="foo"/>
+                            </tree>
+                            <form>
+                                <field name="turtles">
+                                    <tree editable="bottom">
+                                        <field name="turtle_foo"/>
+                                        <field name="partner_ids" widget="many2many_tags"/>
+                                    </tree>
+                                </field>
+                            </form>
+                        </field>
+                    </group>
+                </form>`,
+            resId: 1,
+        });
+
+        // await click(target.querySelector(".o_data_row td")); // edit first record
+
+        // await click(target.querySelector('div[name="partner_ids"] input'));
+        // await click(target.querySelector('div[name="partner_ids"] .o_input_dropdown li'));
+
+        // // add a many2many tag and save
+        // await editInput(target, ".modal .o_field_many2many_tags input", "test");
+
+        // await click(target, ".modal .modal-footer .btn-primary"); // save
+
+        // await clickSave(target);
+    });
 });
