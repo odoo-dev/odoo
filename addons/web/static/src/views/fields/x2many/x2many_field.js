@@ -78,7 +78,7 @@ export class X2ManyField extends Component {
         });
 
         this.addInLine = useAddInlineRecord({
-            addNew: (...args) => this.list.addNew(...args),
+            addNew: (...args) => this.list.addNewRecord(...args),
         });
 
         const openRecord = useOpenX2ManyRecord({
