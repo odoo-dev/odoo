@@ -111,7 +111,7 @@ export class StaticList extends DataPoint {
      * @param {Object} [params.activeFields=this.activeFields]
      * @param {boolean} [params.withoutParent=false]
      */
-    addNew(params) {
+    addNewRecord(params) {
         return this.model.mutex.exec(async () => {
             const { activeFields, context, position, withoutParent } = params;
             const record = await this._createNewRecordDatapoint({

@@ -101,7 +101,7 @@ patch(SaleOrderLineProductField.prototype, 'sale_product_configurator', {
                 await this.props.record.update(mainProduct);
                 this._onProductUpdate();
                 for (const optionalProduct of optionalProducts) {
-                    const line = await saleOrderRecord.data.order_line.addNew({
+                    const line = await saleOrderRecord.data.order_line.addNewRecord({
                         position: 'bottom',
                     });
                     line.update(optionalProduct);
