@@ -36,6 +36,8 @@ class MyOption (optparse.Option, object):
     def __init__(self, *opts, **attrs):
         self.my_default = attrs.pop('my_default', None)
         super(MyOption, self).__init__(*opts, **attrs)
+        if self.dest and self.dest not in config.options_index:
+            config.options_index[self.dest] = self
 
 DEFAULT_LOG_HANDLER = ':INFO'
 def _get_default_datadir():
@@ -86,7 +88,8 @@ class configmanager:
         ])
 
         # dictionary mapping option destination (keys in self.options) to MyOptions.
-        self.casts = {}
+        self.options_index = {}
+        self.casts = self.options_index  # deprecated
 
         self.misc = {}  # deprecated since 17.0
 
@@ -94,7 +97,10 @@ class configmanager:
             (getattr(loglevels, 'LOG_%s' % x), getattr(logging, x))
             for x in ('CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET')
         ])
+        self.parser = None
 
+
+    def _build_cli(self):
         version = "%s %s" % (release.description, release.version)
         self.parser = parser = optparse.OptionParser(version=version, option_class=MyOption)
 
@@ -344,15 +350,11 @@ class configmanager:
                              type="int")
             parser.add_option_group(group)
 
-        # Copy all optparse options (i.e. MyOption) into self.options.
-        for group in parser.option_groups:
-            for option in group.option_list:
-                if option.dest not in self.options:
-                    self.options[option.dest] = option.my_default
-                    self.casts[option.dest] = option
-
-        # generate default config
-        self._parse_config()
+    def _load_default_options(self):
+        self.options.update({
+            option_name: option.my_default
+            for option_name, option in self.options_index.items()
+        })
 
     _log_entries = []   # helpers for log() and warn(), accumulate messages
     _warn_entries = []  # until logging is configured and the entries flushed
@@ -776,3 +778,6 @@ class configmanager:
 
 
 config = configmanager()
+config._build_cli()
+config._load_default_options()
+config._parse_config()
