@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import collections
 import configparser as ConfigParser
 import errno
 import logging
@@ -82,7 +83,16 @@ def _deduplicate_loggers(loggers):
 
 class configmanager:
     def __init__(self):
-        self.options = {}
+        self._default_options = {}
+        self._file_options = {}
+        self._cli_options = {}
+        self._runtime_options = {}
+        self.options = collections.ChainMap(
+            self._runtime_options,
+            self._cli_options,
+            self._file_options,
+            self._default_options,
+        )
 
         # dictionary mapping option destination (keys in self.options) to MyOptions.
         self.options_index = {}
@@ -115,7 +125,7 @@ class configmanager:
         group = optparse.OptionGroup(parser, "Common options")
         group.add_option("-c", "--config", dest="config", file_loadable=False,
                          help="specify alternate config file")
-        group.add_option("-s", "--save", action="store_true", dest="save", default=False, file_loadable=False,
+        group.add_option("-s", "--save", action="store_true", dest="save", my_default=False, file_loadable=False,
                          help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)")
         group.add_option("-i", "--init", dest="init", file_loadable=False,
                          help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
@@ -126,7 +136,7 @@ class configmanager:
                          my_default=False)
         group.add_option("-P", "--import-partial", dest="import_partial", my_default='',
                          help="Use this for big data importation, if it crashes you will be able to continue at the current state. Provide a filename to store intermediate importation states.")
-        group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
+        group.add_option("--pidfile", dest="pidfile", my_default='', help="file where the server pid will be stored")
         group.add_option("--addons-path", dest="addons_path",
                          help="specify additional addons paths (separated by commas).",
                          action="callback", callback=self._check_addons_path, nargs=1, type="string")
@@ -174,7 +184,7 @@ class configmanager:
 
         # Testing Group
         group = optparse.OptionGroup(parser, "Testing Configuration")
-        group.add_option("--test-file", dest="test_file", my_default=False,
+        group.add_option("--test-file", dest="test_file", my_default='',
                          help="Launch a python test file.")
         group.add_option("--test-enable", action="callback", callback=self._test_enable_callback,
                          dest='test_enable',
@@ -198,7 +208,7 @@ class configmanager:
                          "by --test-tags specs and additionally by dynamic specs "
                          "'at_install' and 'post_install' correspondingly. Implies --stop-after-init")
 
-        group.add_option("--screencasts", dest="screencasts", action="store", my_default=None,
+        group.add_option("--screencasts", dest="screencasts", action="store", my_default='',
                          metavar='DIR',
                          help="Screencasts will go in DIR/{db_name}/screencasts.")
         temp_tests_dir = os.path.join(tempfile.gettempdir(), 'odoo_tests')
@@ -209,7 +219,7 @@ class configmanager:
 
         # Logging Group
         group = optparse.OptionGroup(parser, "Logging Configuration")
-        group.add_option("--logfile", dest="logfile", help="file where the server log will be stored")
+        group.add_option("--logfile", dest="logfile", my_default='', help="file where the server log will be stored")
         group.add_option("--syslog", action="store_true", dest="syslog", my_default=False, help="Send the log to the syslog server")
         group.add_option('--log-handler', action="append", default=[], my_default=DEFAULT_LOG_HANDLER, metavar="PREFIX:LEVEL", help='setup a handler at LEVEL for a given PREFIX. An empty PREFIX indicates the root logger. This option can be repeated. Example: "odoo.api:DEBUG" or "werkzeug:CRITICAL" (default: ":INFO")')
         group.add_option('--log-web', action="append_const", dest="log_handler", const="odoo.http:DEBUG", help='shortcut for --log-handler=odoo.http:DEBUG')
@@ -258,7 +268,7 @@ class configmanager:
                          help="specify the database user name")
         group.add_option("-w", "--db_password", dest="db_password", my_default=False,
                          help="specify the database password")
-        group.add_option("--pg_path", dest="pg_path", help="specify the pg executable path")
+        group.add_option("--pg_path", dest="pg_path", my_default='', help="specify the pg executable path")
         group.add_option("--db_host", dest="db_host", my_default=False,
                          help="specify the database host")
         group.add_option("--db_replica_host", dest="db_replica_host", my_default=False,
@@ -375,7 +385,8 @@ class configmanager:
         return parser
 
     def _load_default_options(self):
-        self.options.update({
+        self._default_options.clear()
+        self._default_options.update({
             option_name: option.my_default
             for option_name, option in self.options_index.items()
         })
@@ -482,38 +493,26 @@ class configmanager:
             opt.config or os.environ.get('ODOO_RC') or os.environ.get('OPENERP_SERVER') or rcfilepath)
         self.load()
 
-        # Verify that we want to log or not, if not the output will go to stdout
-        if self.options['logfile'] in ('None', 'False'):
-            self.options['logfile'] = False
-        # the same for the pidfile
-        if self.options['pidfile'] in ('None', 'False'):
-            self.options['pidfile'] = False
-        # the same for the test_tags
-        if self.options['test_tags'] == 'None':
-            self.options['test_tags'] = None
-        # and the server_wide_modules
-        if self.options['server_wide_modules'] in ('', 'None', 'False'):
-            self.options['server_wide_modules'] = 'base,web'
+        addons_path = self._cli_options.pop('addons_path', None)
+        self._cli_options.clear()
+        if addons_path is not None:
+            self._cli_options['addons_path'] = addons_path
 
         keys = [
             option_name for option_name, option
             in self.options_index.items()
-            if option.cli_loadable and option.file_loadable
+            if option.cli_loadable
             if option.action != 'append'
         ]
 
         for arg in keys:
-            # Copy the command-line argument (except the special case for log_handler, due to
-            # action=append requiring a real default, so we cannot use the my_default workaround)
             if getattr(opt, arg, None) is not None:
-                self.options[arg] = getattr(opt, arg)
-            # ... or keep, but cast, the config file value.
-            elif isinstance(self.options[arg], str) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
-                self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
+                self._cli_options[arg] = getattr(opt, arg)
 
-        if isinstance(self.options['log_handler'], str):
-            self.options['log_handler'] = self.options['log_handler'].split(',')
-        self.options['log_handler'].extend(opt.log_handler)
+        if opt.log_handler:
+            self._cli_options['log_handler'] = opt.log_handler
+
+        self._runtime_options.clear()
 
         die(bool(self.options['syslog']) and bool(self.options['logfile']),
             "the syslog and logfile options are exclusive")
@@ -521,7 +520,7 @@ class configmanager:
         die(self.options['translate_in'] and (not self.options['language'] or not self.options['db_name']),
             "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
 
-        die(self.options['overwrite_existing_translations'] and not (self.options['translate_in'] or self.options['update']),
+        die(self.options['overwrite_existing_translations'] and not (self.options['translate_in'] or opt.update),
             "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
 
         die(self.options['translate_out'] and (not self.options['db_name']),
@@ -530,7 +529,15 @@ class configmanager:
         die(',' in (self.options.get('db_name') or '') and (opt.init or opt.update),
             "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
 
-        if not self.options['addons_path'] or self.options['addons_path']=='None':
+
+        # Load the various coma-separated options and the special ones
+        if not self['server_wide_modules']:
+            self._runtime_options['server_wide_modules'] = 'base,web'
+
+        if isinstance(self['log_handler'], str):
+            self._runtime_options['log_handler'] = self['log_handler'].split(',')
+
+        if not self['addons_path']:
             default_addons = []
             base_addons = os.path.join(self.root_path, 'addons')
             if os.path.exists(base_addons):
@@ -538,44 +545,44 @@ class configmanager:
             main_addons = os.path.abspath(os.path.join(self.root_path, '../addons'))
             if os.path.exists(main_addons):
                 default_addons.append(main_addons)
-            self.options['addons_path'] = ','.join(default_addons)
+            self._runtime_options['addons_path'] = ','.join(default_addons)
         else:
-            self.options['addons_path'] = ",".join(
+            self._runtime_options['addons_path'] = ",".join(
                 self._normalize(x)
-                for x in self.options['addons_path'].split(','))
+                for x in self['addons_path'].split(','))
 
-        self.options["upgrade_path"] = (
+        self._runtime_options["upgrade_path"] = (
             ",".join(self._normalize(x)
-                for x in self.options['upgrade_path'].split(','))
-            if self.options['upgrade_path']
+                for x in self['upgrade_path'].split(','))
+            if self['upgrade_path']
             else ""
         )
 
-        self.options['init'] = opt.init and dict.fromkeys(opt.init.split(','), 1) or {}
-        self.options['demo'] = (dict(self.options['init'])
-                                if not self.options['without_demo'] else {})
-        self.options['update'] = opt.update and dict.fromkeys(opt.update.split(','), 1) or {}
-        self.options['translate_modules'] = [m.strip() for m in opt.translate_modules.split(',')]
-        self.options['translate_modules'].sort()
+        self._runtime_options['init'] = opt.init and dict.fromkeys(opt.init.split(','), 1) or {}
+        self._runtime_options['demo'] = (dict(self['init'])
+                                if not self['without_demo'] else {})
+        self._runtime_options['update'] = opt.update and dict.fromkeys(opt.update.split(','), 1) or {}
+        self._runtime_options['translate_modules'] = [m.strip() for m in opt.translate_modules.split(',')]
+        self._runtime_options['translate_modules'].sort()
 
         dev_split = [s.strip() for s in opt.dev_mode.split(',')] if opt.dev_mode else []
-        self.options['dev_mode'] = dev_split + (['reload', 'qweb', 'xml'] if 'all' in dev_split else [])
+        self._runtime_options['dev_mode'] = dev_split + (['reload', 'qweb', 'xml'] if 'all' in dev_split else [])
 
-        self.options['test_enable'] = bool(self.options['test_tags'])
-        if self.options['test_enable'] or self.options['test_file']:
-            self.options['stop_after_init'] = True
+        self._runtime_options['test_enable'] = bool(self['test_tags'])
+        if self['test_enable'] or self['test_file']:
+            self._runtime_options['stop_after_init'] = True
 
         if opt.save:
             self.save()
 
         # normalize path options
         for key in ['data_dir', 'logfile', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_city_db', 'geoip_country_db']:
-            self.options[key] = self._normalize(self.options[key])
+            self._runtime_options[key] = self._normalize(self[key])
 
-        conf.addons_paths = self.options['addons_path'].split(',')
+        conf.addons_paths = self['addons_path'].split(',')
 
         conf.server_wide_modules = [
-            m.strip() for m in self.options['server_wide_modules'].split(',') if m.strip()
+            m.strip() for m in self['server_wide_modules'].split(',') if m.strip()
         ]
         return opt
 
@@ -663,6 +670,7 @@ class configmanager:
             parser.values.test_tags = "+standard"
 
     def load(self):
+        self._file_options.clear()
         outdated_options_map = {
             'xmlrpc_port': 'http_port',
             'xmlrpc_interface': 'http_interface',
@@ -674,15 +682,17 @@ class configmanager:
             for (name,value) in p.items('options'):
                 name = outdated_options_map.get(name, name)
                 option = self.options_index.get(name)
-                if option and not option.file_loadable:
+                if not option or not option.file_loadable:
                     continue
-                if name == 'root_path':
-                    continue
-                if value=='True' or value=='true':
+                elif value == 'True' or value == 'true':
                     value = True
-                if value=='False' or value=='false':
+                elif value == 'False' or value == 'false':
                     value = False
-                self.options[name] = value
+                elif value == 'None':
+                    value = None
+                elif option and option.type in optparse.Option.TYPE_CHECKER and isinstance(value, str):
+                    value = optparse.Option.TYPE_CHECKER[option.type](option, name, value)
+                self._file_options[name] = value
         except IOError:
             pass
         except ConfigParser.NoSectionError:

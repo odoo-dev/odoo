@@ -1,3 +1,4 @@
+import textwrap
 import unittest
 from unittest.mock import call, patch
 
@@ -12,6 +13,12 @@ EMPTY_CONFIG_PATH = file_path('base/tests/config/empty.conf')
 PROJECT_PATH = odoo.tools.config.root_path.removesuffix('/odoo')
 
 
+class _Sentinel:
+    def __repr__(self):
+        return ''
+SENTINEL = _Sentinel()
+
+
 class TestConfigManager(TransactionCase):
     maxDiff = None
 
@@ -23,15 +30,46 @@ class TestConfigManager(TransactionCase):
         self.config = configmanager()
 
     def parse_reset(self, args=None):
-        with patch.dict(self.config.options, {}):
+        with (
+            patch.dict(self.config._runtime_options, {}),
+            patch.dict(self.config._cli_options, {}),
+            patch.dict(self.config._file_options, {}),
+            patch.dict(self.config._default_options, {}),
+        ):
             cli = self.config._parse_config(args)
             return cli, dict(self.config.options)
+
+    def assertConfigEqual(self, truth):
+        try:
+            self.assertEqual(dict(self.config.options), truth)
+        except AssertionError as exc1:
+            for k in set(self.config.options).intersection(truth):
+                try:
+                    self.assertEqual(self.config.options[k], truth[k], f"{k!r} doesn't match")
+                except AssertionError as exc2:
+                    err = textwrap.dedent(f"""\
+                        - Runtime: {self.config._runtime_options.get(k, SENTINEL)!r}
+                        - CLI: {self.config._cli_options.get(k, SENTINEL)!r}
+                        - File: {self.config._file_options.get(k, SENTINEL)!r}
+                        - Default: {self.config._default_options.get(k, SENTINEL)!r}
+                    """)
+                    if hasattr(Exception, 'add_note'):
+                        exc2.add_note(err)
+                        raise exc2 from exc1
+                    raise AssertionError(f"{exc2.args[0]}\n{err}") from exc1
+            if missing := set(self.config.options).difference(truth):
+                e = "missing from the test dict: " + ', '.join(missing)
+                raise AssertionError(e) from exc1
+            if missing := set(truth).difference(self.config.options):
+                e = "missing from the configuration: " + ', '.join(missing)
+                raise AssertionError(e) from exc1
+            raise
 
     def test_00_setUp(self):
         self.assertEqual(self.config.rcfile, EMPTY_CONFIG_PATH)
 
     def test_01_default_config(self):
-        default_values = {
+        self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'admin',
             'csv_internal_sep': ',',
@@ -43,7 +81,7 @@ class TestConfigManager(TransactionCase):
 
             # common
             'config': None,
-            'save': None,
+            'save': False,
             'init': {},
             'update': {},
             'without_demo': False,
@@ -127,40 +165,40 @@ class TestConfigManager(TransactionCase):
             'unaccent': False,
             'geoip_city_db': '/usr/share/GeoIP/GeoLite2-City.mmdb',
             'geoip_country_db': '/usr/share/GeoIP/GeoLite2-Country.mmdb',
-        }
 
-        if IS_POSIX:
             # multiprocessing
-            default_values.update(
-                {
-                    'workers': 0,
-                    'limit_memory_soft': 2048 * 1024 * 1024,
-                    'limit_memory_soft_gevent': False,
-                    'limit_memory_hard': 2560 * 1024 * 1024,
-                    'limit_memory_hard_gevent': False,
-                    'limit_time_cpu': 60,
-                    'limit_time_real': 120,
-                    'limit_time_real_cron': -1,
-                    'limit_request': 2**16,
-                }
-            )
+            **({
+                'workers': 0,
+                'limit_memory_soft': 2048 * 1024 * 1024,
+                'limit_memory_soft_gevent': False,
+                'limit_memory_hard': 2560 * 1024 * 1024,
+                'limit_memory_hard_gevent': False,
+                'limit_time_cpu': 60,
+                'limit_time_real': 120,
+                'limit_time_real_cron': -1,
+                'limit_request': 2**16,
+            } if IS_POSIX else {}),
+        })
 
-        self.assertEqual(self.config.options, default_values, "Options don't match")
 
     def test_02_default_config_file(self):
-        values = {
+        config_path = file_path('base/tests/config/non_default.conf')
+        self.config._parse_config(['-c', config_path])
+        self.assertEqual(self.config.rcfile, config_path)
+        self.assertEqual(self.config.rcfile, self.config['config'])
+        self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'Tigrou007',
             'csv_internal_sep': '@',
             'publisher_warranty_url': 'http://example.com',  # blacklist for save, read from the config file
             'reportgz': True,
-            'websocket_rate_limit_burst': '1',
-            'websocket_rate_limit_delay': '2',
-            'websocket_keep_alive_timeout': '600',
+            'websocket_rate_limit_burst': 1,
+            'websocket_rate_limit_delay': 2.0,
+            'websocket_keep_alive_timeout': 600,
 
             # common
-            'config': None,
-            'save': None,
+            'config': config_path,
+            'save': False,
             'init': {},  # blacklist for save, ignored from the config file
             'update': {},  # blacklist for save, ignored from the config file
             'without_demo': True,
@@ -244,29 +282,20 @@ class TestConfigManager(TransactionCase):
             'unaccent': True,
             'geoip_city_db': '/foo/bar/city.db',
             'geoip_country_db': '/foo/bar/country.db',
-        }
 
-        if IS_POSIX:
             # multiprocessing
-            values.update(
-                {
-                    'workers': 92,
-                    'limit_memory_soft': 1234,
-                    'limit_memory_soft_gevent': 1234,
-                    'limit_memory_hard': 5678,
-                    'limit_memory_hard_gevent': 5678,
-                    'limit_time_cpu': 3,
-                    'limit_time_real': 4,
-                    'limit_time_real_cron': -3,
-                    'limit_request': 1,
-                }
-            )
-
-        config_path = file_path('base/tests/config/non_default.conf')
-        self.config._parse_config(['-c', config_path])
-        self.assertEqual(self.config.options, values, "Options don't match")
-        self.assertEqual(self.config.rcfile, config_path)
-        self.assertNotEqual(self.config.rcfile, self.config['config'])  # funny
+            **({
+                'workers': 92,
+                'limit_memory_soft': 1234,
+                'limit_memory_soft_gevent': 1234,
+                'limit_memory_hard': 5678,
+                'limit_memory_hard_gevent': 5678,
+                'limit_time_cpu': 3,
+                'limit_time_real': 4,
+                'limit_time_real_cron': -3,
+                'limit_request': 1,
+            } if IS_POSIX else {}),
+        })
 
     @unittest.skipIf(not IS_POSIX, 'this test is POSIX only')
     def test_03_save_default_options(self):
@@ -286,9 +315,14 @@ class TestConfigManager(TransactionCase):
     def test_04_odoo16_config_file(self):
         # test that loading the Odoo 16.0 generated default config works
         # with a modern version
-        assert_options = {
+        config_path = file_path('base/tests/config/16.0.conf')
+        self.config._parse_config(['--config', config_path])
+        with self.assertNoLogs('py.warnings'):
+            self.config._warn_deprecated_options()
+        self.assertConfigEqual({
             # options taken from the configuration file
             'admin_passwd': 'admin',
+            'config': config_path,
             'csv_internal_sep': ',',
             'db_host': False,
             'db_maxconn': 64,
@@ -341,17 +375,29 @@ class TestConfigManager(TransactionCase):
 
             # options that are not taken from the file (also in 14.0)
             'addons_path': f'{PROJECT_PATH}/odoo/addons,{PROJECT_PATH}/addons',
-            'config': None,
             'data_dir': _get_default_datadir(),
             'dev_mode': [],
             'init': {},
             'language': None,
             'publisher_warranty_url': 'http://services.odoo.com/publisher-warranty/',
-            'save': None,
+            'save': False,
             'shell_interface': None,
             'stop_after_init': False,
             'translate_in': '',
             'translate_out': '',
+
+            # multiprocessing
+            **({
+                'workers': 0,
+                'limit_memory_soft': 2048 * 1024 * 1024,
+                'limit_memory_soft_gevent': False,
+                'limit_memory_hard': 2560 * 1024 * 1024,
+                'limit_memory_hard_gevent': False,
+                'limit_time_cpu': 60,
+                'limit_time_real': 120,
+                'limit_time_real_cron': -1,
+                'limit_request': 1 << 16,
+            } if IS_POSIX else {}),
 
             # new options since 14.0
             'db_maxconn_gevent': False,
@@ -362,32 +408,11 @@ class TestConfigManager(TransactionCase):
             'gevent_port': 8072,
             'smtp_ssl_certificate_filename': False,
             'smtp_ssl_private_key_filename': False,
-            'websocket_keep_alive_timeout': '3600',
-            'websocket_rate_limit_burst': '10',
-            'websocket_rate_limit_delay': '0.2',
+            'websocket_keep_alive_timeout': 3600,
+            'websocket_rate_limit_burst': 10,
+            'websocket_rate_limit_delay': 0.2,
             'x_sendfile': False,
-        }
-        if IS_POSIX:
-            # multiprocessing
-            assert_options.update(
-                {
-                    'workers': 0,
-                    'limit_memory_soft': 2048 * 1024 * 1024,
-                    'limit_memory_soft_gevent': False,
-                    'limit_memory_hard': 2560 * 1024 * 1024,
-                    'limit_memory_hard_gevent': False,
-                    'limit_time_cpu': 60,
-                    'limit_time_real': 120,
-                    'limit_time_real_cron': -1,
-                    'limit_request': 1 << 16,
-                }
-            )
-
-        config_path = file_path('base/tests/config/16.0.conf')
-        self.config._parse_config(['--config', config_path])
-        with self.assertNoLogs('py.warnings'):
-            self.config._warn_deprecated_options()
-        self.assertEqual(self.config.options, assert_options, "Options don't match")
+        })
 
     def test_05_repeat_parse_config(self):
         """Emulate multiple calls to parse_config()"""
@@ -412,9 +437,11 @@ class TestConfigManager(TransactionCase):
 
     @patch('optparse.OptionParser.error')
     def test_08_overwrite_existing_translations_incompatible_with_translate_in_or_update(self, error):
-        self.parse_reset(['--i18n-overwrite', '-l', 'fr_FR'])
+        self.parse_reset(['--i18n-overwrite'])
+        error.assert_has_calls(1 * [call("the i18n-overwrite option cannot be used without the i18n-import option or without the update option")])
+        error.reset_mock()
         self.parse_reset(['--i18n-overwrite', '-u', 'base'])
-        error.assert_has_calls(2 * [call("the i18n-overwrite option cannot be used without the i18n-import option or without the update option")])
+        error.assert_not_called()
 
     @patch('optparse.OptionParser.error')
     def test_09_translate_out_requires_db_name(self, error):
