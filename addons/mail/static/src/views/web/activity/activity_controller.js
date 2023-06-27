@@ -24,14 +24,16 @@ export class ActivityController extends Component {
     static template = "mail.ActivityController";
 
     setup() {
-        const { rootState } = this.props.state || {};
-        this.model = useModel(this.props.Model, {
+        const modelConfig = {
             activeFields: this.props.archInfo.activeFields,
             resModel: this.props.resModel,
             fields: this.props.fields,
-            viewMode: "activity",
-            rootState,
-        });
+        };
+        this.model = useState(
+            useModel(this.props.Model, {
+                config: modelConfig,
+            })
+        );
 
         this.dialog = useService("dialog");
         this.action = useService("action");
