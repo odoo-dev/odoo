@@ -55,6 +55,15 @@ class configmanager:
 
         self.parser = None
 
+    @property
+    def rcfile(self):
+        self._warn("Since 17.0, use odoo.tools.config['config'] instead", DeprecationWarning, stacklevel=2)
+        return self['config']
+
+    @rcfile.setter
+    def rcfile(self, rcfile):
+        self._warn(f"Since 17.0, use odoo.tools.config['config'] = {rcfile!r} instead", DeprecationWarning, stacklevel=2)
+        self._runtime_options['config'] = rcfile
 
     def _build_cli(self):
         version = "%s %s" % (release.description, release.version)
@@ -346,6 +355,20 @@ class configmanager:
             else:
                 self._log(missing_level, "%s addons dir at %r seems missing/empty", name, addons_dir)
 
+        if rcfilepath := os.getenv('ODOO_RC'):
+            pass
+        elif rcfilepath := os.getenv('OPENERP_SERVER'):
+            self._warn("Since ages ago, the OPENERP_SERVER environment variable has been replaced by ODOO_RC", DeprecationWarning)
+        elif os.name == 'nt':
+            rcfilepath = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'odoo.conf')
+        elif os.path.isfile(rcfilepath := os.path.expanduser('~/.odoorc')):
+            pass
+        elif os.path.isfile(rcfilepath := os.path.expanduser('~/.openerp_serverrc')):
+            self._warn("Since ages ago, the ~/.openerp_serverrc file has been replaced by ~/.odoorc", DeprecationWarning)
+        else:
+            rcfilepath = '~/.odoorc'
+        self._default_options['config'] = self._normalize(rcfilepath)
+
     _log_entries = []   # helpers for log() and warn(), accumulate messages
     _warn_entries = []  # until logging is configured and the entries flushed
 
@@ -426,28 +449,7 @@ class configmanager:
             "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
             "use -s/--save if you want to generate it"% opt.config)
 
-        # place/search the config file on Win32 near the server installation
-        # (../etc from the server)
-        # if the server is run by an unprivileged user, he has to specify location of a config file where he has the rights to write,
-        # else he won't be able to save the configurations, or even to start the server...
-        # TODO use appdirs
-        if os.name == 'nt':
-            rcfilepath = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'odoo.conf')
-        else:
-            rcfilepath = os.path.expanduser('~/.odoorc')
-            old_rcfilepath = os.path.expanduser('~/.openerp_serverrc')
-
-            die(os.path.isfile(rcfilepath) and os.path.isfile(old_rcfilepath),
-                "Found '.odoorc' and '.openerp_serverrc' in your path. Please keep only one of "\
-                "them, preferably '.odoorc'.")
-
-            if not os.path.isfile(rcfilepath) and os.path.isfile(old_rcfilepath):
-                rcfilepath = old_rcfilepath
-
-        self.rcfile = os.path.abspath(
-            opt.config or os.environ.get('ODOO_RC') or os.environ.get('OPENERP_SERVER') or rcfilepath)
-        self.load()
-
+        # Load CLI options
         addons_path = self._cli_options.pop('addons_path', None)
         self._cli_options.clear()
         if addons_path is not None:
@@ -466,6 +468,9 @@ class configmanager:
 
         if opt.log_handler:
             self._cli_options['log_handler'] = opt.log_handler
+
+        # Load config file options
+        self.load()
 
         ismultidb = ',' in (self.options.get('db_name') or '')
         die(ismultidb and (opt.init or opt.update), "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
@@ -620,7 +625,7 @@ class configmanager:
         }
         p = ConfigParser.RawConfigParser()
         try:
-            p.read([self.rcfile])
+            p.read([self['config']])
             for (name,value) in p.items('options'):
                 name = outdated_options_map.get(name, name)
                 if option := self.options_index.get(name):
@@ -650,9 +655,9 @@ class configmanager:
 
     def save(self, keys=None):
         p = ConfigParser.RawConfigParser()
-        rc_exists = os.path.exists(self.rcfile)
+        rc_exists = os.path.exists(self['config'])
         if rc_exists and keys:
-            p.read([self.rcfile])
+            p.read([self['config']])
         if not p.has_section('options'):
             p.add_section('options')
         for opt in sorted(self.options):
@@ -673,12 +678,12 @@ class configmanager:
 
         # try to create the directories and write the file
         try:
-            if not rc_exists and not os.path.exists(os.path.dirname(self.rcfile)):
-                os.makedirs(os.path.dirname(self.rcfile))
+            if not rc_exists and not os.path.exists(os.path.dirname(self['config'])):
+                os.makedirs(os.path.dirname(self['config']))
             try:
-                p.write(open(self.rcfile, 'w'))
+                p.write(open(self['config'], 'w'))
                 if not rc_exists:
-                    os.chmod(self.rcfile, 0o600)
+                    os.chmod(self['config'], 0o600)
             except IOError:
                 sys.stderr.write("ERROR: couldn't write the config file\n")
 
