@@ -258,7 +258,7 @@ export class KanbanRecordQuickCreate extends Component {
             props.resModel
         );
         const context = props.context || {};
-        context[`default_${props.group.groupByField.name}`] = props.group.getServerValue();
+        context[`default_${props.group.groupByField.name}`] = props.group.serverValue;
         this.quickCreateProps = {
             Model: formView.Model,
             Renderer: formView.Renderer,

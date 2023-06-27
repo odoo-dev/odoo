@@ -8,8 +8,8 @@ export class DynamicGroupList extends DynamicList {
     static type = "DynamicGroupList";
 
     /**
-     *
      * @param {import("./relational_model").Config} config
+     * @param {Object} data
      */
     setup(config, data) {
         super.setup(...arguments);
@@ -56,6 +56,22 @@ export class DynamicGroupList extends DynamicList {
         return this.groups.reduce((acc, group) => acc + group.count, 0);
     }
 
+    // -------------------------------------------------------------------------
+    // Public
+    // -------------------------------------------------------------------------
+
+    async createGroup(groupName, groupData, isFolded) {
+        if (!this.groupByField || this.groupByField.type !== "many2one") {
+            throw new Error("Cannot create a group on a non many2one group field");
+        }
+
+        await this.model.mutex.exec(() => this._createGroup(groupName, groupData, isFolded));
+    }
+
+    async deleteGroups(groups) {
+        await this.model.mutex.exec(() => this._deleteGroups(groups));
+    }
+
     async sortBy(fieldName) {
         if (!this.groups.length) {
             return;
@@ -71,18 +87,6 @@ export class DynamicGroupList extends DynamicList {
             }
         }
         return super.sortBy(fieldName);
-    }
-
-    async createGroup(groupName, groupData, isFolded) {
-        if (!this.groupByField || this.groupByField.type !== "many2one") {
-            throw new Error("Cannot create a group on a non many2one group field");
-        }
-
-        await this.model.mutex.exec(() => this._createGroup(groupName, groupData, isFolded));
-    }
-
-    async deleteGroups(groups) {
-        await this.model.mutex.exec(() => this._deleteGroups(groups));
     }
 
     // -------------------------------------------------------------------------
@@ -195,6 +199,14 @@ export class DynamicGroupList extends DynamicList {
         this.count = response.length;
     }
 
+    _getDPresId(group) {
+        return group.value;
+    }
+
+    _getDPHandleField(group) {
+        return group[this.handleField];
+    }
+
     _removeRecords(recordIds) {
         const proms = [];
         for (const group of this.groups) {
@@ -216,14 +228,6 @@ export class DynamicGroupList extends DynamicList {
                 targetGroupId
             );
         });
-    }
-
-    getDPresId(group) {
-        return group.value;
-    }
-
-    getDPHandleField(group) {
-        return group[this.handleField];
     }
 
     /**

@@ -4,10 +4,14 @@ import { DynamicList } from "./dynamic_list";
 
 export class DynamicRecordList extends DynamicList {
     static type = "DynamicRecordList";
+
+    /**
+     * @param {import("./relational_model").Config} config
+     * @param {Object} data
+     */
     setup(config, data) {
         super.setup(config);
         /** @type {import("./record").Record[]} */
-        console.log(data);
         this.records = data.records.map((r) => this._createRecordDatapoint(r));
         this._updateCount(data);
     }
@@ -23,14 +27,6 @@ export class DynamicRecordList extends DynamicList {
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
-
-    getDPresId(record) {
-        return record.resId;
-    }
-
-    getDPHandleField(record) {
-        return record.data[this.handleField];
-    }
 
     /**
      * @param {number} resId
@@ -113,6 +109,11 @@ export class DynamicRecordList extends DynamicList {
         return record;
     }
 
+    _addRecord(record, index) {
+        this.records.splice(Number.isInteger(index) ? index : this.records.length, 0, record);
+        this.count++;
+    }
+
     _createRecordDatapoint(data, mode = "readonly") {
         return new this.model.constructor.Record(
             this.model,
@@ -131,9 +132,23 @@ export class DynamicRecordList extends DynamicList {
         );
     }
 
-    _addRecord(record, index) {
-        this.records.splice(Number.isInteger(index) ? index : this.records.length, 0, record);
-        this.count++;
+    _getDPresId(record) {
+        return record.resId;
+    }
+
+    _getDPHandleField(record) {
+        return record.data[this.handleField];
+    }
+
+    async _load(offset, limit, orderBy, domain) {
+        const response = await this.model._updateConfig(this.config, {
+            offset,
+            limit,
+            orderBy,
+            domain,
+        });
+        this.records = response.records.map((r) => this._createRecordDatapoint(r));
+        this._updateCount(response);
     }
 
     _removeRecords(recordIds) {
@@ -165,16 +180,5 @@ export class DynamicRecordList extends DynamicList {
             this.hasLimitedCount = false;
             this.count = length;
         }
-    }
-
-    async _load(offset, limit, orderBy, domain) {
-        const response = await this.model._updateConfig(this.config, {
-            offset,
-            limit,
-            orderBy,
-            domain,
-        });
-        this.records = response.records.map((r) => this._createRecordDatapoint(r));
-        this._updateCount(response);
     }
 }

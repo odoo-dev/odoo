@@ -5,18 +5,38 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
+import { pick } from "@web/core/utils/objects";
 import { escape } from "@web/core/utils/strings";
 import { evalDomain, isNumeric, isX2Many } from "@web/views/utils";
 import { DataPoint } from "./datapoint";
 import { getFieldContext, parseServerValue } from "./utils";
-import { pick } from "@web/core/utils/objects";
 
 export class Record extends DataPoint {
     static type = "Record";
+
+    /**
+     * @param {import("./relational_model").Config} config
+     * @param {Object} data
+     * @param {Object} [options={}]
+     * @param {boolean} [options.manuallyAdded]
+     * @param {Function} [options.onUpdate]
+     * @param {Record} [options.parentRecord]
+     * @param {string} [options.virtualId]
+     */
     setup(config, data, options = {}) {
-        this._parentRecord = options.parentRecord;
+        this._manuallyAdded = options.manuallyAdded === true;
         this._onUpdate = options.onUpdate || (() => {});
-        this.virtualId = options.virtualId || false;
+        this._parentRecord = options.parentRecord;
+        this._virtualId = options.virtualId || false;
+
+        // Be careful that pending changes might not have been notified yet, so the "dirty" flag may
+        // be false even though there are changes in a field. Consider calling "isDirty()" instead.
+        this.dirty = false;
+        this.selected = false;
+
+        this._invalidFields = new Set();
+        this._unsetRequiredFields = markRaw(new Set());
+        this._closeInvalidFieldsNotification = () => {};
 
         const missingFields = this.fieldNames.filter((fieldName) => !(fieldName in data));
         const vals = this._parseServerValues({
@@ -35,6 +55,7 @@ export class Record extends DataPoint {
             changes: { ...this._changes },
         });
         this.data = { ...this._values, ...this._changes };
+
         const parentRecord = this._parentRecord;
         if (parentRecord) {
             this.evalContext = {
@@ -46,15 +67,6 @@ export class Record extends DataPoint {
             this.evalContext = {};
         }
         this._setDataContext();
-
-        this._manuallyAdded = options.manuallyAdded === true;
-        this.selected = false;
-        // Be careful that pending changes might not have been notified yet, so the "dirty" flag may
-        // be false even though there are changes in a field. Consider calling "isDirty()" instead.
-        this.dirty = false;
-        this._invalidFields = new Set();
-        this._unsetRequiredFields = markRaw(new Set());
-        this._closeInvalidFieldsNotification = () => {};
     }
 
     // -------------------------------------------------------------------------
@@ -78,6 +90,14 @@ export class Record extends DataPoint {
         return true;
     }
 
+    get isInEdition() {
+        if (this.config.mode === "readonly") {
+            return false;
+        } else {
+            return this.config.mode === "edit" || !this.resId;
+        }
+    }
+
     get isNew() {
         return !this.resId;
     }
@@ -94,42 +114,12 @@ export class Record extends DataPoint {
         return this.config.resIds;
     }
 
-    get isInEdition() {
-        if (this.config.mode === "readonly") {
-            return false;
-        } else {
-            return this.config.mode === "edit" || !this.resId;
-        }
-    }
-
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
 
     archive() {
         return this.model.mutex.exec(() => this._toggleArchive(true));
-    }
-
-    /**
-     * @param {string} fieldName
-     */
-    getFieldDomain(fieldName) {
-        const { domain } = this.fields[fieldName];
-        return domain ? new Domain(domain).toList(this.evalContext) : [];
-    }
-
-    /**
-     * @param {string} fieldName
-     */
-    isFieldInvalid(fieldName) {
-        return this._invalidFields.has(fieldName);
-    }
-
-    update(changes) {
-        if (this.model._urgentSave) {
-            return this._update(changes);
-        }
-        return this.model.mutex.exec(() => this._update(changes));
     }
 
     async checkValidity() {
@@ -179,9 +169,24 @@ export class Record extends DataPoint {
         });
     }
 
+    /**
+     * @param {string} fieldName
+     */
+    getFieldDomain(fieldName) {
+        const { domain } = this.fields[fieldName];
+        return domain ? new Domain(domain).toList(this.evalContext) : [];
+    }
+
     async isDirty() {
         await this._askChanges();
         return this.dirty;
+    }
+
+    /**
+     * @param {string} fieldName
+     */
+    isFieldInvalid(fieldName) {
+        return this._invalidFields.has(fieldName);
     }
 
     load(resId = this.resId, context = this.context) {
@@ -237,6 +242,13 @@ export class Record extends DataPoint {
         return this.model.mutex.exec(() => this._toggleArchive(false));
     }
 
+    update(changes) {
+        if (this.model._urgentSave) {
+            return this._update(changes);
+        }
+        return this.model.mutex.exec(() => this._update(changes));
+    }
+
     // FIXME: should this be save({ urgent: true }) ?
     urgentSave() {
         this.model._urgentSave = true;
@@ -284,65 +296,6 @@ export class Record extends DataPoint {
         Object.assign(this._values, this._parseServerValues(values));
         Object.assign(this.data, this._values, this._changes);
         this._setDataContext();
-    }
-
-    _parseServerValues(serverValues, currentValues = {}) {
-        const parsedValues = {};
-        if (!serverValues) {
-            return parsedValues;
-        }
-        for (const fieldName in serverValues) {
-            const value = serverValues[fieldName];
-            if (!this.activeFields[fieldName]) {
-                continue;
-            }
-            const field = this.fields[fieldName];
-            if (field.type === "one2many" || field.type === "many2many") {
-                let staticList = currentValues[fieldName];
-                let valueIsCommandList = true;
-                // value can be a list of records or a list of commands (new record)
-                valueIsCommandList = value.length > 0 && Array.isArray(value[0]);
-                if (!staticList) {
-                    let data = valueIsCommandList ? [] : value;
-                    // FIXME: tocheck: what does unity return when no related field? In the mockServer, we return the list of ids
-                    if (data.length > 0 && typeof data[0] === "number") {
-                        data = data.map((resId) => {
-                            return { id: resId };
-                        });
-                    }
-                    staticList = this._createStaticListDatapoint(data, fieldName);
-                }
-                if (valueIsCommandList) {
-                    staticList._applyCommands(value);
-                }
-                parsedValues[fieldName] = staticList;
-            } else {
-                parsedValues[fieldName] = parseServerValue(field, value);
-                if (field.type === "properties") {
-                    for (const property of parsedValues[fieldName]) {
-                        const fieldPropertyName = `${fieldName}.${property.name}`;
-                        if (property.type === "one2many" || property.type === "many2many") {
-                            const staticList = this._createStaticListDatapoint(
-                                property.value.map((record) => ({
-                                    id: record[0],
-                                    display_name: record[1],
-                                })),
-                                fieldPropertyName
-                            );
-                            parsedValues[fieldPropertyName] = staticList;
-                        } else if (property.type === "many2one") {
-                            parsedValues[fieldPropertyName] =
-                                property.value.length && property.value[1] === null
-                                    ? [property.value[0], this.model.env._t("No Access")]
-                                    : property.value;
-                        } else {
-                            parsedValues[fieldPropertyName] = property.value ?? false;
-                        }
-                    }
-                }
-            }
-        }
-        return parsedValues;
     }
 
     // FIXME: move to model?
@@ -396,6 +349,36 @@ export class Record extends DataPoint {
             this._setInvalidField(fieldName);
         }
         return !this._invalidFields.size;
+    }
+
+    _computeDataContext() {
+        const dataContext = {};
+        const data = toRaw(this.data);
+        for (const fieldName in data) {
+            const value = data[fieldName];
+            const field = this.fields[fieldName];
+            if (["char", "text"].includes(field.type)) {
+                dataContext[fieldName] = value !== "" ? value : false;
+            } else if (["one2many", "many2many"].includes(field.type)) {
+                dataContext[fieldName] = value.resIds;
+            } else if (value && field.type === "date") {
+                dataContext[fieldName] = serializeDate(value);
+            } else if (value && field.type === "datetime") {
+                dataContext[fieldName] = serializeDateTime(value);
+            } else if (value && field.type === "many2one") {
+                dataContext[fieldName] = value[0];
+            } else if (value && field.type === "reference") {
+                dataContext[fieldName] = `${value.resModel},${value.resId}`;
+            } else if (field.type === "properties") {
+                dataContext[fieldName] = value.filter(
+                    (property) => !property.definition_deleted !== false
+                );
+            } else {
+                dataContext[fieldName] = value;
+            }
+        }
+        dataContext.id = this.resId || false;
+        return dataContext;
     }
 
     _createStaticListDatapoint(data, fieldName) {
@@ -519,36 +502,6 @@ export class Record extends DataPoint {
         return defaultValues;
     }
 
-    _computeDataContext() {
-        const dataContext = {};
-        const data = toRaw(this.data);
-        for (const fieldName in data) {
-            const value = data[fieldName];
-            const field = this.fields[fieldName];
-            if (["char", "text"].includes(field.type)) {
-                dataContext[fieldName] = value !== "" ? value : false;
-            } else if (["one2many", "many2many"].includes(field.type)) {
-                dataContext[fieldName] = value.resIds;
-            } else if (value && field.type === "date") {
-                dataContext[fieldName] = serializeDate(value);
-            } else if (value && field.type === "datetime") {
-                dataContext[fieldName] = serializeDateTime(value);
-            } else if (value && field.type === "many2one") {
-                dataContext[fieldName] = value[0];
-            } else if (value && field.type === "reference") {
-                dataContext[fieldName] = `${value.resModel},${value.resId}`;
-            } else if (field.type === "properties") {
-                dataContext[fieldName] = value.filter(
-                    (property) => !property.definition_deleted !== false
-                );
-            } else {
-                dataContext[fieldName] = value;
-            }
-        }
-        dataContext.id = this.resId || false;
-        return dataContext;
-    }
-
     _isInvisible(fieldName) {
         const invisible = this.activeFields[fieldName].invisible;
         return invisible ? evalDomain(invisible, this.evalContext) : false;
@@ -580,6 +533,65 @@ export class Record extends DataPoint {
         this.data = { ...this._values, ...this._changes };
         this._setDataContext();
         this._invalidFields.clear();
+    }
+
+    _parseServerValues(serverValues, currentValues = {}) {
+        const parsedValues = {};
+        if (!serverValues) {
+            return parsedValues;
+        }
+        for (const fieldName in serverValues) {
+            const value = serverValues[fieldName];
+            if (!this.activeFields[fieldName]) {
+                continue;
+            }
+            const field = this.fields[fieldName];
+            if (field.type === "one2many" || field.type === "many2many") {
+                let staticList = currentValues[fieldName];
+                let valueIsCommandList = true;
+                // value can be a list of records or a list of commands (new record)
+                valueIsCommandList = value.length > 0 && Array.isArray(value[0]);
+                if (!staticList) {
+                    let data = valueIsCommandList ? [] : value;
+                    // FIXME: tocheck: what does unity return when no related field? In the mockServer, we return the list of ids
+                    if (data.length > 0 && typeof data[0] === "number") {
+                        data = data.map((resId) => {
+                            return { id: resId };
+                        });
+                    }
+                    staticList = this._createStaticListDatapoint(data, fieldName);
+                }
+                if (valueIsCommandList) {
+                    staticList._applyCommands(value);
+                }
+                parsedValues[fieldName] = staticList;
+            } else {
+                parsedValues[fieldName] = parseServerValue(field, value);
+                if (field.type === "properties") {
+                    for (const property of parsedValues[fieldName]) {
+                        const fieldPropertyName = `${fieldName}.${property.name}`;
+                        if (property.type === "one2many" || property.type === "many2many") {
+                            const staticList = this._createStaticListDatapoint(
+                                property.value.map((record) => ({
+                                    id: record[0],
+                                    display_name: record[1],
+                                })),
+                                fieldPropertyName
+                            );
+                            parsedValues[fieldPropertyName] = staticList;
+                        } else if (property.type === "many2one") {
+                            parsedValues[fieldPropertyName] =
+                                property.value.length && property.value[1] === null
+                                    ? [property.value[0], this.model.env._t("No Access")]
+                                    : property.value;
+                        } else {
+                            parsedValues[fieldPropertyName] = property.value ?? false;
+                        }
+                    }
+                }
+            }
+        }
+        return parsedValues;
     }
 
     async _preprocessChanges(changes) {

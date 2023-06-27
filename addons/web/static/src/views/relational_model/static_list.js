@@ -15,6 +15,7 @@ function compareFieldValues(v1, v2, fieldType) {
     }
     return v1 < v2;
 }
+
 function compareRecords(r1, r2, orderBy, fields) {
     const { name, asc } = orderBy[0];
     const v1 = asc ? r1.data[name] : r2.data[name];
@@ -34,9 +35,17 @@ function compareRecords(r1, r2, orderBy, fields) {
 export class StaticList extends DataPoint {
     static type = "StaticList";
 
+    /**
+     * @param {import("./relational_model").Config} config
+     * @param {Object} data
+     * @param {Object} [options={}]
+     * @param {Function} [options.onUpdate]
+     * @param {Record} [options.parent]
+     */
     setup(config, data, options = {}) {
         this._parent = options.parent;
         this._onUpdate = options.onUpdate;
+
         this._cache = markRaw({});
         this._commands = [];
         this._savePoint = markRaw({});
@@ -44,17 +53,16 @@ export class StaticList extends DataPoint {
         this._currentIds = [...this.resIds];
         this._needsReordering = false;
         this._tmpIncreaseLimit = 0;
-        this.records = data
-            .slice(this.offset, this.limit)
-            .map((r) => this._createRecordDatapoint(r));
-        this.count = this.resIds.length;
-
         // In kanban and non editable list views, x2many records can be opened in a form view in
         // dialog, which may contain other fields than the kanban or list view. The next set keeps
         // tracks of records we already opened in dialog and thus for which we already modified the
         // config to add the form view's fields in activeFields.
         this._extendedRecords = new Set();
 
+        this.records = data
+            .slice(this.offset, this.limit)
+            .map((r) => this._createRecordDatapoint(r));
+        this.count = this.resIds.length;
         this.handleField = Object.keys(this.activeFields).find(
             (fieldName) => this.activeFields[fieldName].isHandle
         );
@@ -87,12 +95,12 @@ export class StaticList extends DataPoint {
         return this.config.offset;
     }
 
-    get resIds() {
-        return this.config.resIds;
-    }
-
     get orderBy() {
         return this.config.orderBy;
+    }
+
+    get resIds() {
+        return this.config.resIds;
     }
 
     // -------------------------------------------------------------------------
@@ -127,66 +135,13 @@ export class StaticList extends DataPoint {
         });
     }
 
-    async delete(record) {
-        await this._applyCommands([[x2ManyCommands.DELETE, record.resId || record.virtualId]]);
-        this._onUpdate();
-    }
-
-    async forget(record) {
-        await this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
-        this._onUpdate();
-    }
-
     canResequence() {
         return this.handleField && this.orderBy.length && this.orderBy[0].name === this.handleField;
     }
 
-    load({ limit, offset, orderBy } = {}) {
-        return this.model.mutex.exec(async () => {
-            if (this.editedRecord && !(await this.editedRecord.checkValidity())) {
-                return;
-            }
-            limit = limit !== undefined ? limit : this.limit;
-            offset = offset !== undefined ? offset : this.offset;
-            orderBy = orderBy !== undefined ? orderBy : this.orderBy;
-            return this._load({ limit, offset, orderBy });
-        });
-    }
-
-    sortBy(fieldName) {
-        return this.model.mutex.exec(() => this._sortBy(fieldName));
-    }
-
-    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
-        return this.resequence(dataRecordId, refId);
-    }
-
-    leaveEditMode({ discard, canAbandon, validate } = {}) {
-        return this.model.mutex.exec(async () => {
-            if (this.editedRecord) {
-                await this.editedRecord._askChanges();
-                const isValid = this.editedRecord._checkValidity();
-                if (!isValid && validate) {
-                    return false;
-                }
-                if (canAbandon !== false && !validate) {
-                    this._abandonRecords([this.editedRecord], { force: true });
-                }
-                // if we still have an editedRecord, it means it hasn't been abandonned
-                if (this.editedRecord) {
-                    if (isValid && !this.editedRecord.dirty && discard) {
-                        return false;
-                    }
-                    if (
-                        isValid ||
-                        (!this.editedRecord.dirty && !this.editedRecord._manuallyAdded)
-                    ) {
-                        this.editedRecord.switchMode("readonly");
-                    }
-                }
-            }
-            return !this.editedRecord;
-        });
+    async delete(record) {
+        await this._applyCommands([[x2ManyCommands.DELETE, record.resId || record._virtualId]]);
+        this._onUpdate();
     }
 
     async enterEditMode(record) {
@@ -195,32 +150,6 @@ export class StaticList extends DataPoint {
             record.switchMode("edit");
         }
         return canProceed;
-    }
-
-    async replaceWith(ids) {
-        const resIds = ids.filter((id) => !this._cache[id]);
-        if (resIds.length) {
-            const records = await this.model._loadRecords({
-                ...this.config,
-                resIds: ids.filter((id) => !this._cache[id]),
-                context: this.context,
-            });
-            for (const record of records) {
-                this._createRecordDatapoint(record);
-            }
-        }
-        this.records = ids.map((id) => this._cache[id]);
-        const updateCommandsToKeep = this._commands.filter(
-            (c) => c[0] === x2ManyCommands.UPDATE && ids.includes(c[1])
-        );
-        this._commands = [x2ManyCommands.replaceWith(ids)].concat(updateCommandsToKeep);
-        this._currentIds = [...ids];
-        this.count = this._currentIds.length;
-        this._onUpdate();
-    }
-
-    async resequence(movedId, targetId) {
-        return this.model.mutex.exec(() => this._resequence(movedId, targetId));
     }
 
     /**
@@ -321,6 +250,85 @@ export class StaticList extends DataPoint {
         });
     }
 
+    async forget(record) {
+        await this._applyCommands([[x2ManyCommands.FORGET, record.resId]]);
+        this._onUpdate();
+    }
+
+    leaveEditMode({ discard, canAbandon, validate } = {}) {
+        return this.model.mutex.exec(async () => {
+            if (this.editedRecord) {
+                await this.editedRecord._askChanges();
+                const isValid = this.editedRecord._checkValidity();
+                if (!isValid && validate) {
+                    return false;
+                }
+                if (canAbandon !== false && !validate) {
+                    this._abandonRecords([this.editedRecord], { force: true });
+                }
+                // if we still have an editedRecord, it means it hasn't been abandonned
+                if (this.editedRecord) {
+                    if (isValid && !this.editedRecord.dirty && discard) {
+                        return false;
+                    }
+                    if (
+                        isValid ||
+                        (!this.editedRecord.dirty && !this.editedRecord._manuallyAdded)
+                    ) {
+                        this.editedRecord.switchMode("readonly");
+                    }
+                }
+            }
+            return !this.editedRecord;
+        });
+    }
+
+    load({ limit, offset, orderBy } = {}) {
+        return this.model.mutex.exec(async () => {
+            if (this.editedRecord && !(await this.editedRecord.checkValidity())) {
+                return;
+            }
+            limit = limit !== undefined ? limit : this.limit;
+            offset = offset !== undefined ? offset : this.offset;
+            orderBy = orderBy !== undefined ? orderBy : this.orderBy;
+            return this._load({ limit, offset, orderBy });
+        });
+    }
+
+    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
+        return this.resequence(dataRecordId, refId);
+    }
+
+    sortBy(fieldName) {
+        return this.model.mutex.exec(() => this._sortBy(fieldName));
+    }
+
+    async replaceWith(ids) {
+        const resIds = ids.filter((id) => !this._cache[id]);
+        if (resIds.length) {
+            const records = await this.model._loadRecords({
+                ...this.config,
+                resIds: ids.filter((id) => !this._cache[id]),
+                context: this.context,
+            });
+            for (const record of records) {
+                this._createRecordDatapoint(record);
+            }
+        }
+        this.records = ids.map((id) => this._cache[id]);
+        const updateCommandsToKeep = this._commands.filter(
+            (c) => c[0] === x2ManyCommands.UPDATE && ids.includes(c[1])
+        );
+        this._commands = [x2ManyCommands.replaceWith(ids)].concat(updateCommandsToKeep);
+        this._currentIds = [...ids];
+        this.count = this._currentIds.length;
+        this._onUpdate();
+    }
+
+    async resequence(movedId, targetId) {
+        return this.model.mutex.exec(() => this._resequence(movedId, targetId));
+    }
+
     /**
      * This method is meant to be called when a record, which has previously been extended to be
      * displayed in a form view dialog (see @extendRecord) is saved. In this case, we may need to
@@ -331,7 +339,7 @@ export class StaticList extends DataPoint {
      */
     validateExtendedRecord(record) {
         return this.model.mutex.exec(async () => {
-            if (!this._currentIds.includes(record.isNew ? record.virtualId : record.resId)) {
+            if (!this._currentIds.includes(record.isNew ? record._virtualId : record.resId)) {
                 // new record created, not yet in the list
                 await this._addRecord(record);
             }
@@ -350,7 +358,7 @@ export class StaticList extends DataPoint {
         for (const record of records) {
             // FIXME: should canBeAbandoned check validity?
             if (record.canBeAbandoned && (force || !record._checkValidity())) {
-                const virtualId = record.virtualId;
+                const virtualId = record._virtualId;
                 const index = this._currentIds.findIndex((id) => id === virtualId);
                 this._currentIds.splice(index, 1);
                 this.records.splice(
@@ -372,17 +380,17 @@ export class StaticList extends DataPoint {
     }
 
     async _addRecord(record, { position } = {}) {
-        const command = [x2ManyCommands.CREATE, record.virtualId];
+        const command = [x2ManyCommands.CREATE, record._virtualId];
         if (position === "top") {
             this.records.unshift(record);
             if (this.records.length > this.limit) {
                 this.records.pop();
             }
-            this._currentIds.splice(this.offset, 0, record.virtualId);
+            this._currentIds.splice(this.offset, 0, record._virtualId);
             this._commands.unshift(command);
         } else if (position === "bottom") {
             this.records.push(record);
-            this._currentIds.splice(this.offset + this.limit, 0, record.virtualId);
+            this._currentIds.splice(this.offset + this.limit, 0, record._virtualId);
             if (this.records.length > this.limit) {
                 this._tmpIncreaseLimit++;
                 const nextLimit = this.limit + 1;
@@ -390,7 +398,7 @@ export class StaticList extends DataPoint {
             }
             this._commands.push(command);
         } else {
-            const currentIds = [...this._currentIds, record.virtualId];
+            const currentIds = [...this._currentIds, record._virtualId];
             if (this.orderBy.length) {
                 await this._sort(currentIds);
             } else {
@@ -549,65 +557,6 @@ export class StaticList extends DataPoint {
         }
     }
 
-    _createRecordDatapoint(data, params = {}) {
-        const resId = data.id || false;
-        if (!resId && !params.virtualId) {
-            throw new Error("You must provide a virtualId if the record has no id");
-        }
-        const id = resId || params.virtualId;
-        const config = {
-            context: this.context,
-            activeFields: params.activeFields || this.activeFields,
-            resModel: this.resModel,
-            fields: params.fields || this.fields,
-            relationField: this.config.relationField,
-            resId,
-            resIds: resId ? [resId] : [],
-            mode: params.mode || "readonly",
-            isMonoRecord: true,
-        };
-        const { CREATE, UPDATE } = x2ManyCommands;
-        const options = {
-            parentRecord: this._parent,
-            onUpdate: async (changes, { withoutParentUpdate }) => {
-                if (!this.currentIds.includes(record.isNew ? record.virtualId : record.resId)) {
-                    // the record hasn't been added to the list yet (we're currently creating it
-                    // from a dialog)
-                    return;
-                }
-                const hasCommand = this._commands.some(
-                    (c) => (c[0] === CREATE || c[0] === UPDATE) && c[1] === id
-                );
-                if (!hasCommand) {
-                    this._commands.push([UPDATE, id]);
-                }
-                if (this._extendedRecords.has(record.id)) {
-                    // the record is edited from a dialog, so we don't want to notify the parent
-                    // record to be notified at each change inside the dialog (it will be notified
-                    // at the end when the dialog is saved)
-                    return;
-                }
-                if (!withoutParentUpdate) {
-                    await this._onUpdate({
-                        withoutOnchange: !record._checkValidity({ silent: true }),
-                    });
-                }
-            },
-            virtualId: params.virtualId,
-            manuallyAdded: params.manuallyAdded,
-        };
-        const record = new this.model.constructor.Record(this.model, config, data, options);
-        this._cache[id] = record;
-        if (!params.dontApplyCommands) {
-            const commands = this._unknownRecordCommands[id];
-            if (commands) {
-                delete this._unknownRecordCommands[id];
-                this._applyCommands(commands);
-            }
-        }
-        return record;
-    }
-
     async _createNewRecordDatapoint(params = {}) {
         const changes = {};
         if (!params.withoutParent) {
@@ -657,6 +606,65 @@ export class StaticList extends DataPoint {
             activeFields: params.activeFields,
             manuallyAdded: params.manuallyAdded,
         });
+    }
+
+    _createRecordDatapoint(data, params = {}) {
+        const resId = data.id || false;
+        if (!resId && !params.virtualId) {
+            throw new Error("You must provide a virtualId if the record has no id");
+        }
+        const id = resId || params.virtualId;
+        const config = {
+            context: this.context,
+            activeFields: params.activeFields || this.activeFields,
+            resModel: this.resModel,
+            fields: params.fields || this.fields,
+            relationField: this.config.relationField,
+            resId,
+            resIds: resId ? [resId] : [],
+            mode: params.mode || "readonly",
+            isMonoRecord: true,
+        };
+        const { CREATE, UPDATE } = x2ManyCommands;
+        const options = {
+            parentRecord: this._parent,
+            onUpdate: async (changes, { withoutParentUpdate }) => {
+                if (!this.currentIds.includes(record.isNew ? record._virtualId : record.resId)) {
+                    // the record hasn't been added to the list yet (we're currently creating it
+                    // from a dialog)
+                    return;
+                }
+                const hasCommand = this._commands.some(
+                    (c) => (c[0] === CREATE || c[0] === UPDATE) && c[1] === id
+                );
+                if (!hasCommand) {
+                    this._commands.push([UPDATE, id]);
+                }
+                if (this._extendedRecords.has(record.id)) {
+                    // the record is edited from a dialog, so we don't want to notify the parent
+                    // record to be notified at each change inside the dialog (it will be notified
+                    // at the end when the dialog is saved)
+                    return;
+                }
+                if (!withoutParentUpdate) {
+                    await this._onUpdate({
+                        withoutOnchange: !record._checkValidity({ silent: true }),
+                    });
+                }
+            },
+            virtualId: params.virtualId,
+            manuallyAdded: params.manuallyAdded,
+        };
+        const record = new this.model.constructor.Record(this.model, config, data, options);
+        this._cache[id] = record;
+        if (!params.dontApplyCommands) {
+            const commands = this._unknownRecordCommands[id];
+            if (commands) {
+                delete this._unknownRecordCommands[id];
+                this._applyCommands(commands);
+            }
+        }
+        return record;
     }
 
     _discard() {
@@ -838,7 +846,7 @@ export class StaticList extends DataPoint {
         });
         await this._load({
             orderBy,
-            nextCurrentIds: sortedRecords.map((r) => r.resId || r.virtualId),
+            nextCurrentIds: sortedRecords.map((r) => r.resId || r._virtualId),
         });
         this._needsReordering = false;
     }

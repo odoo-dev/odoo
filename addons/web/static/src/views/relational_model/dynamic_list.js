@@ -11,7 +11,6 @@ const DEFAULT_HANDLE_FIELD = "sequence";
 
 export class DynamicList extends DataPoint {
     /**
-     *
      * @param {import("./relational_model").Config} config
      */
     setup(config) {
@@ -33,7 +32,6 @@ export class DynamicList extends DataPoint {
     get groupBy() {
         return [];
     }
-
     get orderBy() {
         return this.config.orderBy;
     }
@@ -102,23 +100,24 @@ export class DynamicList extends DataPoint {
         return this.model.mutex.exec(() => this._multiSave(record));
     }
 
-    // TODO: keep this??
     selectDomain(value) {
         this.isDomainSelected = value;
     }
 
     sortBy(fieldName) {
-        let orderBy = [...this.orderBy];
-        if (orderBy.length && orderBy[0].name === fieldName) {
-            orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
-        } else {
-            orderBy = orderBy.filter((o) => o.name !== fieldName);
-            orderBy.unshift({
-                name: fieldName,
-                asc: true,
-            });
-        }
-        return this.load({ orderBy });
+        return this.model.mutex.exec(() => {
+            let orderBy = [...this.orderBy];
+            if (orderBy.length && orderBy[0].name === fieldName) {
+                orderBy[0] = { name: orderBy[0].name, asc: !orderBy[0].asc };
+            } else {
+                orderBy = orderBy.filter((o) => o.name !== fieldName);
+                orderBy.unshift({
+                    name: fieldName,
+                    asc: true,
+                });
+            }
+            return this._load(this.offset, this.limit, orderBy, this.domain);
+        });
     }
 
     unarchive(isSelected) {
@@ -274,13 +273,13 @@ export class DynamicList extends DataPoint {
             toIndex = fromIndex > targetIndex ? targetIndex + 1 : targetIndex;
         }
 
-        const getSequence = (dp) => dp && this.getDPHandleField(dp, handleField);
+        const getSequence = (dp) => dp && this._getDPHandleField(dp, handleField);
 
         // Determine which records/groups need to be modified
         const firstIndex = Math.min(fromIndex, toIndex);
         const lastIndex = Math.max(fromIndex, toIndex) + 1;
         let reorderAll = dataPoints.some(
-            (dp) => this.getDPHandleField(dp, handleField) === undefined
+            (dp) => this._getDPHandleField(dp, handleField) === undefined
         );
         if (!reorderAll) {
             let lastSequence = (asc ? -1 : 1) * Infinity;
@@ -316,7 +315,7 @@ export class DynamicList extends DataPoint {
             toReorder.reverse();
         }
 
-        const resIds = toReorder.map((d) => this.getDPresId(d)).filter((id) => id && !isNaN(id));
+        const resIds = toReorder.map((d) => this._getDPresId(d)).filter((id) => id && !isNaN(id));
         const sequences = toReorder.map(getSequence);
         const offset = sequences.length && Math.min(...sequences);
 
@@ -339,7 +338,7 @@ export class DynamicList extends DataPoint {
         const kwargs = { context: this.context };
         const result = await this.model.orm.read(resModel, resIds, [handleField], kwargs);
         for (const dpData of result) {
-            const dp = dataPoints.find((d) => this.getDPresId(d) === dpData.id);
+            const dp = dataPoints.find((d) => this._getDPresId(d) === dpData.id);
             if (dp instanceof Record) {
                 dp._applyValues(dpData);
             } else {

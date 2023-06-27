@@ -32,7 +32,8 @@ import { Domain } from "@web/core/domain";
 
 /**
  * @typedef Params
- * @property {State} state
+ * @property {Config} config
+ * @property {State} [state]
  * @property {Hooks} [hooks]
  * @property {number} [limit]
  * @property {number} [countLimit]
@@ -41,6 +42,7 @@ import { Domain } from "@web/core/domain";
  * @property {Array<string>} [defaultGroupBy]
  * @property {number} [maxGroupByDepth]
  * @property {boolean} [multiEdit]
+ * @property {Object} [groupByInfo]
  */
 
 /**
@@ -228,40 +230,21 @@ export class RelationalModel extends Model {
             }
         }
     }
-    /**
-     *
-     * @param {Config} config
-     */
-    _toggleGroup(config) {
-        config.isFolded = !config.isFolded;
-    }
 
     /**
      *
      * @param {Config} config
-     * @param {Partial<Config>} patch
-     * @param {Object} [options]
-     * @param {boolean} [options.noReload=false]
+     * @param {*} data
+     * @returns {DataPoint}
      */
-    async _updateConfig(config, patch, options = {}) {
-        const tmpConfig = { ...config, ...patch }; //FIXME I wonder if we should not use deepCopy here
-        let response;
-        if (!options.noReload) {
-            response = await this._loadData(tmpConfig);
+    _createRoot(config, data) {
+        if (config.isMonoRecord) {
+            return new this.constructor.Record(this, config, data);
         }
-        Object.assign(config, tmpConfig);
-        return response;
-    }
-
-    /**
-     *
-     * @param {Config} config
-     * @returns {Promise<number>}
-     */
-    async _updateCount(config) {
-        const count = await this.keepLast.add(this.orm.searchCount(config.resModel, config.domain));
-        config.countLimit = Number.MAX_SAFE_INTEGER;
-        return count;
+        if (config.groupBy.length) {
+            return new this.constructor.DynamicGroupList(this, config, data);
+        }
+        return new this.constructor.DynamicRecordList(this, config, data);
     }
 
     /**
@@ -316,22 +299,6 @@ export class RelationalModel extends Model {
     /**
      *
      * @param {Config} config
-     * @param {*} data
-     * @returns {DataPoint}
-     */
-    _createRoot(config, data) {
-        if (config.isMonoRecord) {
-            return new this.constructor.Record(this, config, data);
-        }
-        if (config.groupBy.length) {
-            return new this.constructor.DynamicGroupList(this, config, data);
-        }
-        return new this.constructor.DynamicRecordList(this, config, data);
-    }
-
-    /**
-     *
-     * @param {Config} config
      */
     async _loadData(config) {
         if (config.isMonoRecord) {
@@ -378,22 +345,6 @@ export class RelationalModel extends Model {
                 current_company_id: this.company.currentCompany.id,
             },
         });
-    }
-
-    async _webReadGroup(config, firstGroupByName, orderBy) {
-        return this.orm.webReadGroup(
-            config.resModel,
-            config.domain,
-            unique([...Object.keys(config.activeFields), firstGroupByName]),
-            [config.groupBy[0]],
-            {
-                orderby: orderByToString(orderBy),
-                lazy: true, // maybe useless
-                offset: config.offset,
-                limit: config.limit,
-                context: config.context,
-            }
-        );
     }
 
     /**
@@ -563,42 +514,6 @@ export class RelationalModel extends Model {
     }
 
     /**
-     * @param {Config} config
-     * @param {Object} param
-     * @param {Object} [param.changes={}]
-     * @param {string[]} [param.fieldNames=[]]
-     * @param {Object} [param.evalContext=config.context]
-     * @returns Promise<Object>
-     */
-    async _onchange(config, { changes = {}, fieldNames = [], evalContext = config.context }) {
-        const { fields, activeFields, resModel, resId } = config;
-        let context = config.context;
-        if (fieldNames.length === 1) {
-            const fieldContext = config.activeFields[fieldNames[0]].context;
-            context = makeContext([context, fieldContext], evalContext);
-        }
-        const spec = getFieldsSpec(activeFields, fields, evalContext, { withInvisible: true });
-        console.log("Onchange spec", spec);
-        const args = [resId ? [resId] : [], changes, fieldNames, spec];
-        const response = await this.orm.call(resModel, "onchange2", args, { context });
-        console.log("Onchange response", response);
-        if (response.warning) {
-            const { type, title, message, className, sticky } = response.warning;
-            if (type === "dialog") {
-                this.dialog.add(WarningDialog, { title, message });
-            } else {
-                this.notification.add(message, {
-                    className,
-                    sticky,
-                    title,
-                    type: "warning",
-                });
-            }
-        }
-        return response.value;
-    }
-
-    /**
      *
      * @param {Config} config
      * @param {object} evalContext
@@ -651,6 +566,70 @@ export class RelationalModel extends Model {
     }
 
     /**
+     * @param {Config} config
+     * @param {Object} param
+     * @param {Object} [param.changes={}]
+     * @param {string[]} [param.fieldNames=[]]
+     * @param {Object} [param.evalContext=config.context]
+     * @returns Promise<Object>
+     */
+    async _onchange(config, { changes = {}, fieldNames = [], evalContext = config.context }) {
+        const { fields, activeFields, resModel, resId } = config;
+        let context = config.context;
+        if (fieldNames.length === 1) {
+            const fieldContext = config.activeFields[fieldNames[0]].context;
+            context = makeContext([context, fieldContext], evalContext);
+        }
+        const spec = getFieldsSpec(activeFields, fields, evalContext, { withInvisible: true });
+        console.log("Onchange spec", spec);
+        const args = [resId ? [resId] : [], changes, fieldNames, spec];
+        const response = await this.orm.call(resModel, "onchange2", args, { context });
+        console.log("Onchange response", response);
+        if (response.warning) {
+            const { type, title, message, className, sticky } = response.warning;
+            if (type === "dialog") {
+                this.dialog.add(WarningDialog, { title, message });
+            } else {
+                this.notification.add(message, {
+                    className,
+                    sticky,
+                    title,
+                    type: "warning",
+                });
+            }
+        }
+        return response.value;
+    }
+
+    /**
+     *
+     * @param {Config} config
+     * @param {Partial<Config>} patch
+     * @param {Object} [options]
+     * @param {boolean} [options.noReload=false]
+     */
+    async _updateConfig(config, patch, options = {}) {
+        const tmpConfig = { ...config, ...patch }; //FIXME I wonder if we should not use deepCopy here
+        let response;
+        if (!options.noReload) {
+            response = await this._loadData(tmpConfig);
+        }
+        Object.assign(config, tmpConfig);
+        return response;
+    }
+
+    /**
+     *
+     * @param {Config} config
+     * @returns {Promise<number>}
+     */
+    async _updateCount(config) {
+        const count = await this.keepLast.add(this.orm.searchCount(config.resModel, config.domain));
+        config.countLimit = Number.MAX_SAFE_INTEGER;
+        return count;
+    }
+
+    /**
      * When grouped by a many2many field, the same record may be displayed in
      * several groups. When one of these records is edited, we want all other
      * occurrences to be updated. The purpose of this function is to find and
@@ -669,5 +648,21 @@ export class RelationalModel extends Model {
                 record._applyValues(serverValues);
             }
         }
+    }
+
+    async _webReadGroup(config, firstGroupByName, orderBy) {
+        return this.orm.webReadGroup(
+            config.resModel,
+            config.domain,
+            unique([...Object.keys(config.activeFields), firstGroupByName]),
+            [config.groupBy[0]],
+            {
+                orderby: orderByToString(orderBy),
+                lazy: true, // maybe useless
+                offset: config.offset,
+                limit: config.limit,
+                context: config.context,
+            }
+        );
     }
 }

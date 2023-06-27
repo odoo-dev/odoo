@@ -10,6 +10,7 @@ import { DataPoint } from "./datapoint";
 
 export class Group extends DataPoint {
     static type = "Group";
+
     /**
      * @param {import("./relational_model").Config} config
      */
@@ -49,6 +50,21 @@ export class Group extends DataPoint {
     get records() {
         return this.list.records;
     }
+    get serverValue() {
+        const { type } = this.groupByField;
+
+        // TODO: handle other types (selection, date, datetime)
+        switch (type) {
+            case "many2one":
+                return this.value || false;
+            case "many2many": {
+                return this.value ? [this.value] : false;
+            }
+            default: {
+                return this._rawValue || false;
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Public
@@ -85,27 +101,11 @@ export class Group extends DataPoint {
         return this.model.mutex.exec(() => this._deleteRecords(records));
     }
 
-    getServerValue() {
-        const { type } = this.groupByField;
-
-        // TODO: handle other types (selection, date, datetime)
-        switch (type) {
-            case "many2one":
-                return this.value || false;
-            case "many2many": {
-                return this.value ? [this.value] : false;
-            }
-            default: {
-                return this._rawValue || false;
-            }
-        }
-    }
-
     async toggle() {
         if (this.config.isFolded) {
             await this.list.load();
         }
-        this.model._toggleGroup(this.config);
+        this.config.isFolded = !this.config.isFolded;
     }
 
     // -------------------------------------------------------------------------
