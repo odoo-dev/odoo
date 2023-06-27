@@ -12,7 +12,7 @@ import tempfile
 import warnings
 import odoo
 from os.path import expandvars, expanduser, abspath, realpath, normcase
-from .. import release, conf
+from .. import release
 from . import appdirs
 
 from passlib.context import CryptContext
@@ -458,9 +458,6 @@ class configmanager:
 
         if opt.save:
             self.save()
-
-        conf.addons_paths = self['addons_path']
-        conf.server_wide_modules = self['server_wide_modules']
 
         return opt
 
