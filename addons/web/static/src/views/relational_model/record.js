@@ -771,7 +771,7 @@ export class Record extends DataPoint {
             this.data = { ...this._values };
             this.dirty = false;
         }
-        await this.model.hooks.onRecordSaved(this);
+        await this.model.hooks.onRecordSaved(this, changes);
         return true;
     }
 
