@@ -5,12 +5,13 @@ from unittest.mock import call, patch
 import odoo
 from odoo.tests import TransactionCase
 from odoo.tools import file_path, file_open, file_open_temporary_directory
-from odoo.tools.config import configmanager, _get_default_datadir
+from odoo.tools.config import configmanager
 
 
 IS_POSIX = 'workers' in odoo.tools.config.options
 EMPTY_CONFIG_PATH = file_path('base/tests/config/empty.conf')
 PROJECT_PATH = odoo.tools.config.root_path.removesuffix('/odoo')
+DEFAULT_DATADIR = odoo.tools.config._default_options['data_dir']
 
 
 class _Sentinel:
@@ -84,14 +85,14 @@ class TestConfigManager(TransactionCase):
             'save': False,
             'init': {},
             'update': {},
-            'without_demo': '',
+            'without_demo': [],
             'demo': {},
             'import_partial': '',
             'pidfile': '',
-            'addons_path': f'{PROJECT_PATH}/odoo/addons,{PROJECT_PATH}/addons',
-            'upgrade_path': '',
-            'server_wide_modules': 'base,web',
-            'data_dir': _get_default_datadir(),
+            'addons_path': [f'{PROJECT_PATH}/odoo/addons', f'{PROJECT_PATH}/addons'],
+            'upgrade_path': [],
+            'server_wide_modules': ['base', 'web'],
+            'data_dir': DEFAULT_DATADIR,
 
             # HTTP
             'http_interface': '',
@@ -157,7 +158,7 @@ class TestConfigManager(TransactionCase):
 
             # advanced
             'dev_mode': [],
-            'shell_interface': None,
+            'shell_interface': [],
             'stop_after_init': False,
             'osv_memory_count_limit': 0,
             'transient_age_limit': 1.0,
@@ -183,7 +184,8 @@ class TestConfigManager(TransactionCase):
 
     def test_02_default_config_file(self):
         config_path = file_path('base/tests/config/non_default.conf')
-        self.config._parse_config(['-c', config_path])
+        with self.assertLogs('odoo.tools.config', 'WARNING') as capture:
+            self.config._parse_config(['-c', config_path])
         self.assertEqual(self.config.rcfile, config_path)
         self.assertEqual(self.config.rcfile, self.config['config'])
         self.assertConfigEqual({
@@ -203,11 +205,11 @@ class TestConfigManager(TransactionCase):
             'update': {},  # blacklist for save, ignored from the config file
             'without_demo': True,
             'demo': {},  # blacklist for save, ignored from the config file
-            'import_partial': 'bob',
+            'import_partial': '/home/julien/Odoo/bob',
             'pidfile': '/binary/pg_pid',
-            'addons_path': '/foo/bar/odoo',
-            'upgrade_path': '/foo/bar/upgrade',
-            'server_wide_modules': 'base,web,mail',
+            'addons_path': [f'{PROJECT_PATH}/odoo/addons', f'{PROJECT_PATH}/addons'],  # the path found in the config file is invalid
+            'upgrade_path': [],  # the path found in the config file is invalid
+            'server_wide_modules': ['base', 'web', 'mail'],
             'data_dir': '/home/navy/.local/share/Odoo',
 
             # HTTP
@@ -273,8 +275,8 @@ class TestConfigManager(TransactionCase):
             'list_db': False,
 
             # advanced
-            'dev_mode': [],  # blacklist for save, ignored from the config file
-            'shell_interface': 'ipython',  # blacklist for save, read from the config file
+            'dev_mode': ['xml'],  # blacklist for save, read from the config file
+            'shell_interface': ['ipython'],  # blacklist for save, read from the config file
             'stop_after_init': True,  # blacklist for save, read from the config file
             'osv_memory_count_limit': 71,
             'transient_age_limit': 4.0,
@@ -296,6 +298,10 @@ class TestConfigManager(TransactionCase):
                 'limit_request': 1,
             } if IS_POSIX else {}),
         })
+        self.assertEqual(capture.output, [
+            "WARNING:odoo.tools.config:option addons_path, no such directory '/foo/bar/odoo', skipped",
+            "WARNING:odoo.tools.config:option upgrade_path, no such directory '/foo/bar/upgrade', skipped",
+        ])
 
     @unittest.skipIf(not IS_POSIX, 'this test is POSIX only')
     def test_03_save_default_options(self):
@@ -357,7 +363,7 @@ class TestConfigManager(TransactionCase):
             'reportgz': False,
             'screencasts': '',
             'screenshots': '/tmp/odoo_tests',
-            'server_wide_modules': 'base,web',
+            'server_wide_modules': ['base', 'web'],
             'smtp_password': '',
             'smtp_port': 25,
             'smtp_server': 'localhost',
@@ -371,18 +377,18 @@ class TestConfigManager(TransactionCase):
             'translate_modules': ['all'],
             'unaccent': False,
             'update': {},
-            'upgrade_path': '',
-            'without_demo': '',
+            'upgrade_path': [],
+            'without_demo': [],
 
             # options that are not taken from the file (also in 14.0)
-            'addons_path': f'{PROJECT_PATH}/odoo/addons,{PROJECT_PATH}/addons',
-            'data_dir': _get_default_datadir(),
+            'addons_path': [f'{PROJECT_PATH}/odoo/addons', f'{PROJECT_PATH}/addons'],
+            'data_dir': DEFAULT_DATADIR,
             'dev_mode': [],
             'init': {},
             'language': None,
             'publisher_warranty_url': 'http://services.odoo.com/publisher-warranty/',
             'save': False,
-            'shell_interface': None,
+            'shell_interface': [],
             'stop_after_init': False,
             'translate_in': '',
             'translate_out': '',
@@ -423,7 +429,7 @@ class TestConfigManager(TransactionCase):
                 'db_host', 'db_name', 'db_password', 'db_user', 'email_from',
                 'from_filter', 'log_db', 'smtp_password',
                 'smtp_ssl_certificate_filename',
-                'smtp_ssl_private_key_filename', 'smtp_user', 'without_demo',
+                'smtp_ssl_private_key_filename', 'smtp_user', 'without_demo'
             )
         ]
         output.insert(
