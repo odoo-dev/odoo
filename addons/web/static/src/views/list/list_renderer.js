@@ -1169,13 +1169,8 @@ export class ListRenderer extends Component {
 
     /**
      * @param {KeyboardEvent} ev
-     * @param { import('@web/views/relational_model').Group
-     *  | null
-     * } group
-     * @param { import('@web/views/relational_model').Record
-     *  | import('@web/views/basic_relational_model').Record
-     *  | null
-     * } record
+     * @param { import('@web/views/relational_model').Group | null } group
+     * @param { import('@web/views/relational_model').Record | null } record
      */
     onCellKeydown(ev, group = null, record = null) {
         if (this.props.list.model.useSampleModel) {
@@ -1379,12 +1374,8 @@ export class ListRenderer extends Component {
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
-     * @param { import('@web/views/relational_model').Group
-     *  | null
-     * } group
-     * @param { import('@web/views/relational_model').Record
-     *  | import('@web/views/basic_relational_model').Record
-     * } record
+     * @param { import('@web/views/relational_model').Group | null } group
+     * @param { import('@web/views/relational_model').Record } record
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownEditMode(hotkey, cell, group, record) {
@@ -1544,10 +1535,7 @@ export class ListRenderer extends Component {
      * @param { import('@web/views/relational_model').Group
      *  | null
      * } group
-     * @param { import('@web/views/relational_model').Record
-     *  | import('@web/views/basic_relational_model').Record
-     *  | null
-     * } record
+     * @param { import('@web/views/relational_model').Record | null } record
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownReadOnlyMode(hotkey, cell, group, record) {
