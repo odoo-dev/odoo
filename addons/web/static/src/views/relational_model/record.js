@@ -751,7 +751,10 @@ export class Record extends DataPoint {
             await this._load(nextConfig);
         } else {
             this.model._updateConfig(this.config, { resId }, { noReload: true });
-            this._values = { ...this._values, ...this._changes, id: resId };
+            this._values = { ...this._values, ...this._changes };
+            if ("id" in this.activeFields) {
+                this._values.id = resId;
+            }
             this._changes = {};
             this.data = { ...this._values };
             this.dirty = false;
