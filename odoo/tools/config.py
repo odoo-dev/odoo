@@ -416,16 +416,14 @@ class configmanager:
         return opt
 
     def _parse_config(self, args=None):
-        if args is None:
-            args = []
-        opt, args = self.parser.parse_args(args)
+        opt, unkown_args = self.parser.parse_args(args or [])
 
         def die(cond, msg):
             if cond:
                 self.parser.error(msg)
 
         # Ensures no illegitimate argument is silently discarded (avoids insidious "hyphen to dash" problem)
-        die(args, "unrecognized parameters: '%s'" % " ".join(args))
+        die(unkown_args, "unrecognized parameters: '%s'" % " ".join(unkown_args))
 
         # Even if they are not exposed on the CLI, cli un-loadable variables still show up in the opt, remove them
         for option_name in list(vars(opt).keys()):
@@ -449,7 +447,26 @@ class configmanager:
             "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
             "use -s/--save if you want to generate it"% opt.config)
 
-        # Load CLI options
+        self._load_cli_options(opt)
+        self._load_file_options(self['config'])
+
+        ismultidb = ',' in (self.options.get('db_name') or '')
+        die(ismultidb and (self['init'] or self['update']),
+            "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
+
+        self._postprocess_options()
+
+        if opt.save:
+            self.save()
+
+        conf.addons_paths = self['addons_path']
+        conf.server_wide_modules = self['server_wide_modules']
+
+        return opt
+
+    def _load_cli_options(self, opt):
+        # odoo.cli.command.main parses the config twice, the second time
+        # without --addons-path but expect the value to be persisted
         addons_path = self._cli_options.pop('addons_path', None)
         self._cli_options.clear()
         if addons_path is not None:
@@ -469,13 +486,7 @@ class configmanager:
         if opt.log_handler:
             self._cli_options['log_handler'] = opt.log_handler
 
-        # Load config file options
-        self.load()
-
-        ismultidb = ',' in (self.options.get('db_name') or '')
-        die(ismultidb and (opt.init or opt.update), "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
-
-        # Load the various comma-separated options and the special ones
+    def _postprocess_options(self):
         self._runtime_options.clear()
 
         # ensure default server wide modules are present
@@ -518,14 +529,6 @@ class configmanager:
                 self._runtime_options['gevent_port'] = self['longpolling_port']
             for map_ in self.options.maps:
                 map_.pop('lonqgpolling_port', None)
-
-        if opt.save:
-            self.save()
-
-        conf.addons_paths = self['addons_path']
-
-        conf.server_wide_modules = self['server_wide_modules']
-        return opt
 
     @classmethod
     def _is_addons_path(cls, path):
@@ -617,6 +620,10 @@ class configmanager:
         return format_func(value)
 
     def load(self):
+        self._warn("Since 17.0, use config._load_file_options instead", DeprecationWarning, stacklevel=2)
+        self._load_default_options(self['config'])
+
+    def _load_file_options(self, rcfile):
         self._file_options.clear()
         outdated_options_map = {
             'xmlrpc_port': 'http_port',
@@ -625,7 +632,7 @@ class configmanager:
         }
         p = ConfigParser.RawConfigParser()
         try:
-            p.read([self['config']])
+            p.read([rcfile])
             for (name,value) in p.items('options'):
                 name = outdated_options_map.get(name, name)
                 if option := self.options_index.get(name):
