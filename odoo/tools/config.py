@@ -521,17 +521,16 @@ class configmanager:
         odoo.modules.module.initialize_sys_path()
         return opt
 
-    def _parse_config(self, args=None):
-        if args is None:
-            args = []
-        opt, args = self.parser.parse_args(args)
+    def _die(self, cond, msg):
+        if cond:
+            self.parser.error(msg)
 
-        def die(cond, msg):
-            if cond:
-                self.parser.error(msg)
+    def _parse_config(self, args=None):
+        opt, unkown_args = self.parser.parse_args(args or [])
+
 
         # Ensures no illegitimate argument is silently discarded (avoids insidious "hyphen to dash" problem)
-        die(args, "unrecognized parameters: '%s'" % " ".join(args))
+        self._die(unkown_args, "unrecognized parameters: '%s'" % " ".join(unkown_args))
 
         # Even if they are not exposed on the CLI, cli un-loadable variables still show up in the opt, remove them
         for option_name in list(vars(opt).keys()):
@@ -539,11 +538,25 @@ class configmanager:
                 delattr(opt, option_name)  # hence list(...) above
 
         # Check if the config file exists (-c used, but not -s)
-        die(not opt.save and opt.config and not os.access(opt.config, os.R_OK),
+        self._die(not opt.save and opt.config and not os.access(opt.config, os.R_OK),
             "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
             "use -s/--save if you want to generate it"% opt.config)
 
-        # Load CLI options
+        self._load_cli_options(opt)
+        self._load_file_options(self['config'])
+        self._postprocess_options()
+
+        if opt.save:
+            self.save()
+
+        conf.addons_paths = self['addons_path']
+        conf.server_wide_modules = self['server_wide_modules']
+
+        return opt
+
+    def _load_cli_options(self, opt):
+        # odoo.cli.command.main parses the config twice, the second time
+        # without --addons-path but expect the value to be persisted
         addons_path = self._cli_options.pop('addons_path', None)
         self._cli_options.clear()
         if addons_path is not None:
@@ -563,21 +576,17 @@ class configmanager:
         if opt.log_handler:
             self._cli_options['log_handler'] = opt.log_handler
 
-        # Load config file options
-        self.load()
-
-        # Run some validation against the file/cli config, then
-        # Load the various comma-separated options and the special ones
+    def _postprocess_options(self):
         self._runtime_options.clear()
-        die(bool(self.options['syslog']) and bool(self.options['logfile']),
+        self._die(bool(self.options['syslog']) and bool(self.options['logfile']),
             "the syslog and logfile options are exclusive")
-        die(self.options['translate_in'] and (not self.options['language'] or not self.options['db_name']),
+        self._die(self.options['translate_in'] and (not self.options['language'] or not self.options['db_name']),
             "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
-        die(self.options['overwrite_existing_translations'] and not (self.options['translate_in'] or opt.update),
+        self._die(self.options['overwrite_existing_translations'] and not (self.options['translate_in'] or self['update']),
             "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
-        die(self.options['translate_out'] and (not self.options['db_name']),
+        self._die(self.options['translate_out'] and (not self.options['db_name']),
             "the i18n-export option cannot be used without the database (-d) option")
-        die(',' in (self.options.get('db_name') or '') and (opt.init or opt.update),
+        self._die(',' in (self.options.get('db_name') or '') and (self['init'] or self['update']),
             "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
 
         # ensure default server wide modules are present
@@ -612,14 +621,6 @@ class configmanager:
         self._runtime_options['test_enable'] = bool(self['test_tags'])
         if self['test_enable'] or self['test_file']:
             self._runtime_options['stop_after_init'] = True
-
-        if opt.save:
-            self.save()
-
-        conf.addons_paths = self['addons_path']
-
-        conf.server_wide_modules = self['server_wide_modules']
-        return opt
 
     def _warn_deprecated_options(self):
         for old_option_name, new_option_name in [
@@ -748,6 +749,10 @@ class configmanager:
         return format_func(value)
 
     def load(self):
+        self._warn("Since 17.0, use config._load_file_options instead", DeprecationWarning, stacklevel=2)
+        self._load_default_options(self['config'])
+
+    def _load_file_options(self, rcfile):
         self._file_options.clear()
         outdated_options_map = {
             'xmlrpc_port': 'http_port',
@@ -756,7 +761,7 @@ class configmanager:
         }
         p = ConfigParser.RawConfigParser()
         try:
-            p.read([self['config']])
+            p.read([rcfile])
             for (name,value) in p.items('options'):
                 name = outdated_options_map.get(name, name)
                 option = self.options_index.get(name)
