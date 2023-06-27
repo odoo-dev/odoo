@@ -218,7 +218,7 @@ export class ListController extends Component {
             }
             await list.leaveEditMode();
             if (!list.editedRecord) {
-                await (group || list).createRecord(this.editable === "top");
+                await (group || list).addNewRecord(this.editable === "top");
             }
             this.render();
         } else {

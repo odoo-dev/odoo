@@ -253,7 +253,7 @@ export class DynamicGroupList extends DynamicList {
         const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
         const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
         sourceGroup._removeRecords([record.id]);
-        targetGroup.addRecord(record, refIndex + 1);
+        targetGroup._addRecord(record, refIndex + 1);
         // step 2: update record value
         const value =
             targetGroup.groupByField.type === "many2one"
@@ -261,7 +261,7 @@ export class DynamicGroupList extends DynamicList {
                 : targetGroup.value;
         const revert = () => {
             targetGroup._removeRecords([record.id]);
-            sourceGroup.addRecord(record, oldIndex);
+            sourceGroup._addRecord(record, oldIndex);
         };
         try {
             // FIXME: add "save" option to update? And do not do onchange in this case? ask rco

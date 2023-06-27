@@ -37,11 +37,13 @@ export class DynamicRecordList extends DynamicList {
      * @param {boolean} [atFirstPosition]
      * @returns {Promise<Record>} the newly created record
      */
-    async addExistingRecord(resId, atFirstPosition) {
-        const record = this._createRecordDatapoint({});
-        await this.model.mutex.exec(() => record._load({ resId }));
-        this._addRecord(record, atFirstPosition ? 0 : this.records.length);
-        return record;
+    addExistingRecord(resId, atFirstPosition) {
+        return this.model.mutex.exec(async () => {
+            const record = this._createRecordDatapoint({});
+            await record._load({ resId });
+            this._addRecord(record, atFirstPosition ? 0 : this.records.length);
+            return record;
+        });
     }
 
     /**
@@ -49,7 +51,7 @@ export class DynamicRecordList extends DynamicList {
      * @param {boolean} [atFirstPosition=false]
      * @returns {Promise<Record>}
      */
-    createRecord(atFirstPosition = false) {
+    addNewRecord(atFirstPosition = false) {
         return this.model.mutex.exec(async () => {
             await this._leaveSampleMode();
             return this._addNewRecord(atFirstPosition);

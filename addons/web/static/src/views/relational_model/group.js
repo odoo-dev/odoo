@@ -54,6 +54,22 @@ export class Group extends DataPoint {
     // Public
     // -------------------------------------------------------------------------
 
+    async addExistingRecord(resId, atFirstPosition = false) {
+        const record = await this.list.addExistingRecord(resId, atFirstPosition);
+        this.count++;
+        return record;
+    }
+
+    async addNewRecord(_unused, atFirstPosition = false) {
+        const canProceed = await this.model.root.leaveEditMode({ discard: true });
+        if (canProceed) {
+            const record = await this.list.addNewRecord(atFirstPosition);
+            if (record) {
+                this.count++;
+            }
+        }
+    }
+
     async applyFilter(filter) {
         if (filter) {
             await this.list.load({
@@ -65,31 +81,8 @@ export class Group extends DataPoint {
         this.model._updateConfig(this.config, { extraDomain: filter }, { noReload: true });
     }
 
-    addRecord(record, index) {
-        this.list._addRecord(record, index);
-        this.count++;
-    }
-
-    addExistingRecord(resId, atFirstPosition = false) {
-        this.count++;
-        return this.list.addExistingRecord(resId, atFirstPosition);
-    }
-
-    async createRecord(_unused, atFirstPosition = false) {
-        const canProceed = await this.model.root.leaveEditMode({ discard: true });
-        if (canProceed) {
-            await this.list.createRecord(atFirstPosition);
-            this.count++;
-        }
-    }
-
     deleteRecords(records) {
         return this.model.mutex.exec(() => this._deleteRecords(records));
-    }
-
-    async _deleteRecords(records) {
-        await this.list._deleteRecords(records);
-        this.count -= records.length;
     }
 
     getServerValue() {
@@ -118,6 +111,16 @@ export class Group extends DataPoint {
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
+
+    _addRecord(record, index) {
+        this.list._addRecord(record, index);
+        this.count++;
+    }
+
+    async _deleteRecords(records) {
+        await this.list._deleteRecords(records);
+        this.count -= records.length;
+    }
 
     async _removeRecords(recordIds) {
         const idsToRemove = recordIds.filter((id) => this.list.records.some((r) => r.id === id));

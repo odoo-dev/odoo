@@ -59,8 +59,8 @@ export class InventoryReportListDynamicRecordList extends DynamicRecordList {
     /**
      * Override
      */
-    async createRecord() {
-        const record = await super.createRecord(...arguments);
+    async addNewRecord() {
+        const record = await super.addNewRecord(...arguments);
         // keep created record id on model
         record.model._lastCreatedRecordId = record.id;
         return record;
