@@ -283,6 +283,11 @@ export class StaticList extends DataPoint {
         });
     }
 
+    async linkTo(resId, serverData) {
+        await this._applyCommands([[x2ManyCommands.LINK_TO, resId, serverData]]);
+        this._onUpdate();
+    }
+
     load({ limit, offset, orderBy } = {}) {
         return this.model.mutex.exec(async () => {
             if (this.editedRecord && !(await this.editedRecord.checkValidity())) {
