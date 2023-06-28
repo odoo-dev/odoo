@@ -9,7 +9,7 @@ import { batched, effect } from "@web/core/utils/reactive";
 import { orderByToString } from "@web/views/utils";
 import { Deferred } from "@web/core/utils/concurrency";
 
-function makeActiveField({
+export function makeActiveField({
     context,
     invisible,
     readonly,
