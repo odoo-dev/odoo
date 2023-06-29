@@ -172,8 +172,6 @@
             'web/static/src/legacy/js/fields/field_registry.js',
             'web/static/src/legacy/js/fields/field_registration.js',
             'web/static/src/legacy/js/fields/field_utils.js',
-            'web/static/src/legacy/js/views/abstract_model.js',
-            'web/static/src/legacy/js/views/basic/basic_model.js',
             'web/static/src/legacy/js/views/view_utils.js',
             'web/static/src/legacy/js/services/data_manager.js',
             'web/static/src/legacy/js/services/session.js',
