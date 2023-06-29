@@ -60,16 +60,24 @@ export class SubtaskKanbanList extends Component {
         return {
             display_name: {},
             state: {
+                name: "state",
                 viewType: "kanban",
                 field: getFieldFromRegistry(this.fields.state.type, "project_task_state_selection", "kanban"),
             },
             user_ids: {
+                name: "user_ids",
                 field: getFieldFromRegistry(this.fields.user_ids.type, "many2many_avatar_user", "kanban"),
             },
         };
     }
 
     async onSubTaskSaved(subTask) {
+        const ids = this.subTasksRead.map((t) => t.id);
+        this.subTasksRead = await this.orm.searchRead(
+            this.props.record.resModel,
+            [["id", "in", ids]],
+            this.fieldNames
+        );
         const isKnownAsClosed = this.subTaskClosed.has(subTask.resId);
         const isClosed = subTask.data.state.startsWith("1_");
         if (isKnownAsClosed && !isClosed) {
@@ -80,7 +88,6 @@ export class SubtaskKanbanList extends Component {
             return;
         }
         await this.props.record.load();
-        this.props.record.model.notify();
     }
 }
 
