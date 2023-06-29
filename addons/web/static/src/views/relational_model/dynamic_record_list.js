@@ -53,6 +53,7 @@ export class DynamicRecordList extends DynamicList {
             return this._addNewRecord(atFirstPosition);
         });
     }
+
     /**
      * Performs a search_count with the current domain to set the count. This is
      * useful as web_search_read limits the count for performance reasons, so it

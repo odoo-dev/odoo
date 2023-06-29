@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { KanbanModel } from "@web/views/kanban/kanban_model";
 import { checkRainbowmanMessage } from "@crm/views/check_rainbowman_message";
 import { RelationalModel } from "@web/views/relational_model/relational_model";
 
@@ -35,4 +34,4 @@ export class CrmKanbanDynamicGroupList extends RelationalModel.DynamicGroupList 
 }
 
 CrmKanbanModel.DynamicGroupList = CrmKanbanDynamicGroupList;
-CrmKanbanModel.services = [...KanbanModel.services, "effect"];
+CrmKanbanModel.services = [...RelationalModel.services, "effect"];

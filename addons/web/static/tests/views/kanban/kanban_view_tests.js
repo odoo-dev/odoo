@@ -45,7 +45,6 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { AnimatedNumber } from "@web/views/view_components/animated_number";
 
 import { Component, onWillRender, xml } from "@odoo/owl";
-import { KanbanDynamicGroupList } from "@web/views/kanban/kanban_model";
 import { SampleServer } from "@web/views/sample_server";
 
 const serviceRegistry = registry.category("services");
@@ -1171,7 +1170,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("there should be no limit on the number of fetched groups", async (assert) => {
-        patchWithCleanup(KanbanDynamicGroupList, { DEFAULT_LIMIT: 1 });
+        patchWithCleanup(RelationalModel, { DEFAULT_GROUP_LIMIT: 1 });
 
         await makeView({
             type: "kanban",
