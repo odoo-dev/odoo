@@ -32,7 +32,7 @@ import { _t } from "@web/core/l10n/translation";
 const { DateTime } = luxon;
 
 /** @typedef {import("@web/core/domain").DomainRepr} DomainRepr */
-/** @typedef {import("../views/relational_model").OrderTerm} OrderTerm */
+/** @typedef {import("../views/utils").OrderTerm} OrderTerm */
 
 /**
  * @typedef {Object} ComparisonDomain

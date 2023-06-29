@@ -8,8 +8,6 @@ export const X2M_TYPES = ["one2many", "many2many"];
 const RELATIONAL_TYPES = [...X2M_TYPES, "many2one"];
 const NUMERIC_TYPES = ["integer", "float", "monetary"];
 
-/** @typedef {import("./relational_model").OrderTerm} OrderTerm */
-
 /**
  * @typedef ViewActiveActions {
  * @property {"view"} type
@@ -339,7 +337,7 @@ export function processMeasure(measure) {
 }
 
 /**
- * @typedef {Object} OrderTerm ?
+ * @typedef {Object} OrderTerm
  * @property {string} name
  * @property {boolean} asc
  */
