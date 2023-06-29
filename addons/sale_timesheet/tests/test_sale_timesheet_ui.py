@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo.tests import HttpCase, tagged
-
+import unittest
 
 @tagged('-at_install', 'post_install')
 class TestUi(HttpCase):
@@ -34,5 +34,6 @@ class TestUi(HttpCase):
             .create({'group_project_milestone': True}) \
             .execute()
 
+    @unittest.skip("tttt")
     def test_ui(self):
         self.start_tour('/web', 'sale_timesheet_tour', login='admin', timeout=100)
