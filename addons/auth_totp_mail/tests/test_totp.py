@@ -1,5 +1,5 @@
-# # -*- coding: utf-8 -*-
-# # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import tagged
 from odoo.addons.auth_totp.tests.test_totp import TestTOTP
