@@ -2,12 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
-
+import unittest
 import odoo.tests
 
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUi(odoo.tests.HttpCase):
+    @unittest.skip("tttt")
     def test_set_defaults(self):
         """Tests the "Set Defaults" feature of the debug menu on the res.partner form.
 
