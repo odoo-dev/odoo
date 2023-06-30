@@ -121,32 +121,34 @@ export function extractFieldsFromArchInfo({ fieldNodes, widgetNodes }, fields) {
         if (["one2many", "many2many"].includes(fields[fieldName].type)) {
             if (fieldNode.views) {
                 const viewDescr = fieldNode.views[fieldNode.viewMode];
-                activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
-                activeField.limit = viewDescr.limit;
-                activeField.defaultOrderBy = viewDescr.defaultOrder;
-                if (fieldNode.views.form) {
-                    // we already know the form view (it is inline), so add its fields (in invisible)
-                    // s.t. they will be sent in the spec for onchange, and create commands returned
-                    // by the onchange could return values for those fields (that would be displayed
-                    // later if the user opens the form view)
-                    const formArchInfo = extractFieldsFromArchInfo(
-                        fieldNode.views.form,
-                        fieldNode.views.form.fields
-                    );
-                    for (const fieldName in formArchInfo.activeFields) {
-                        const formActiveField = {
-                            ...formArchInfo.activeFields[fieldName],
-                            invisible: true,
-                        };
-                        if (fieldName in activeField.related.activeFields) {
-                            patchActiveFields(
-                                formActiveField,
-                                activeField.related.activeFields[fieldName]
-                            );
+                if (viewDescr) {
+                    activeField.related = extractFieldsFromArchInfo(viewDescr, viewDescr.fields);
+                    activeField.limit = viewDescr.limit;
+                    activeField.defaultOrderBy = viewDescr.defaultOrder;
+                    if (fieldNode.views.form) {
+                        // we already know the form view (it is inline), so add its fields (in invisible)
+                        // s.t. they will be sent in the spec for onchange, and create commands returned
+                        // by the onchange could return values for those fields (that would be displayed
+                        // later if the user opens the form view)
+                        const formArchInfo = extractFieldsFromArchInfo(
+                            fieldNode.views.form,
+                            fieldNode.views.form.fields
+                        );
+                        for (const fieldName in formArchInfo.activeFields) {
+                            const formActiveField = {
+                                ...formArchInfo.activeFields[fieldName],
+                                invisible: true,
+                            };
+                            if (fieldName in activeField.related.activeFields) {
+                                patchActiveFields(
+                                    formActiveField,
+                                    activeField.related.activeFields[fieldName]
+                                );
+                            }
+                            activeField.related.activeFields[fieldName] = formActiveField;
                         }
-                        activeField.related.activeFields[fieldName] = formActiveField;
+                        Object.assign(activeField.related.fields, formArchInfo.fields);
                     }
-                    Object.assign(activeField.related.fields, formArchInfo.fields);
                 }
             }
             if (fieldNode.field?.useSubView) {
