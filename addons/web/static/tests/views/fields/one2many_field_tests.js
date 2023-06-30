@@ -679,6 +679,39 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
+    QUnit.test("nested x2manys with inline form, but not list", async function (assert) {
+        serverData.views = {
+            "turtle,false,list": `<tree><field name="turtle_foo"/></tree>`,
+            "partner,false,list": `<tree><field name="foo"/></tree>`,
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <form>
+                            <field name="turtle_foo"/>
+                            <field name="partner_ids">
+                                <form>
+                                    <field name="foo"/>
+                                </form>
+                            </field>
+                        </form>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+
+        assert.containsOnce(target, ".o_form_view");
+        assert.containsOnce(target, ".o_data_row");
+
+        await click(target, ".o_data_row .o_data_cell");
+        assert.containsOnce(target, ".o_dialog");
+        assert.containsN(target.querySelector(".o_dialog"), ".o_data_row", 2);
+    });
+
     QUnit.test(
         "use the limit attribute in arch (in field o2m non inline tree view)",
         async function (assert) {
