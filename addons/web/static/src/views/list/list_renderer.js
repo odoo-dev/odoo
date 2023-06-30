@@ -243,28 +243,32 @@ export class ListRenderer extends Component {
     processAllColumn(allColumns, list) {
         return allColumns.flatMap((column) => {
             if (column.type === "field" && list.fields[column.name].type === "properties") {
-                return Object.values(list.fields)
-                    .filter(
-                        (field) =>
-                            field.relatedPropertyField &&
-                            field.relatedPropertyField.fieldName === column.name
-                    )
-                    .map((propertyField) => {
-                        return {
-                            ...getPropertyFieldInfo(propertyField),
-                            id: `${column.id}_${propertyField.name}`,
-                            classNames: column.classNames,
-                            optional: "hide",
-                            type: "field",
-                            hasLabel: true,
-                            label: propertyField.string,
-                            sortable: false,
-                        };
-                    });
+                return this.getPropertyFieldColumns(column, list);
             } else {
                 return [column];
             }
         });
+    }
+
+    getPropertyFieldColumns(column, list) {
+        return Object.values(list.fields)
+            .filter(
+                (field) =>
+                    field.relatedPropertyField &&
+                    field.relatedPropertyField.fieldName === column.name
+            )
+            .map((propertyField) => {
+                return {
+                    ...getPropertyFieldInfo(propertyField),
+                    id: `${column.id}_${propertyField.name}`,
+                    classNames: column.classNames,
+                    optional: "hide",
+                    type: "field",
+                    hasLabel: true,
+                    label: propertyField.string,
+                    sortable: false,
+                };
+            });
     }
 
     getFieldProps(record, column) {
