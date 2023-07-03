@@ -121,13 +121,14 @@ export class StaticList extends DataPoint {
      */
     addNewRecord(params) {
         return this.model.mutex.exec(async () => {
-            const { activeFields, context, position, withoutParent } = params;
+            const { activeFields, context, mode, position, withoutParent } = params;
             const record = await this._createNewRecordDatapoint({
                 activeFields,
                 context,
                 position,
                 withoutParent,
                 manuallyAdded: true,
+                mode,
             });
             await this._addRecord(record, { position });
             await this._onUpdate({ withoutOnchange: !record._checkValidity({ silent: true }) });
@@ -137,6 +138,34 @@ export class StaticList extends DataPoint {
 
     canResequence() {
         return this.handleField && this.orderBy.length && this.orderBy[0].name === this.handleField;
+    }
+
+    /**
+     * TODO: We should probably delete this function.
+     * It is only used for the product configurator.
+     * It will take a list of contexts containing default
+     * values used to create the new records in the static list.
+     * It will then delete the old records from the static list
+     * and replace them with the new ones we have just created.
+     */
+    createAndReplace(contextRecords) {
+        return this.model.mutex.exec(async () => {
+            const proms = [];
+            for (const context of contextRecords) {
+                proms.push(
+                    this._createNewRecordDatapoint({
+                        context,
+                        manuallyAdded: true,
+                    })
+                );
+            }
+            this.records = await Promise.all(proms);
+            this._commands = this.records.map((record) => [
+                x2ManyCommands.CREATE,
+                record._virtualId,
+            ]);
+            this._currentIds = this.records.map((record) => record._virtualId);
+        });
     }
 
     async delete(record) {
@@ -308,7 +337,7 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
-    async replaceWith(ids) {
+    async replaceWith(ids, { silent = false } = {}) {
         const resIds = ids.filter((id) => !this._cache[id]);
         if (resIds.length) {
             const records = await this.model._loadRecords({
@@ -327,7 +356,9 @@ export class StaticList extends DataPoint {
         this._commands = [x2ManyCommands.replaceWith(ids)].concat(updateCommandsToKeep);
         this._currentIds = [...ids];
         this.count = this._currentIds.length;
-        this._onUpdate();
+        if (!silent) {
+            this._onUpdate();
+        }
     }
 
     async resequence(movedId, targetId) {
@@ -606,7 +637,7 @@ export class StaticList extends DataPoint {
             values[this.handleField] = value;
         }
         return this._createRecordDatapoint(values, {
-            mode: "edit",
+            mode: params.mode || "edit",
             virtualId: getId("virtual"),
             activeFields: params.activeFields,
             manuallyAdded: params.manuallyAdded,
