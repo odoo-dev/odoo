@@ -95,10 +95,7 @@ export class DynamicGroupList extends DynamicList {
 
     async _deleteGroups(groups) {
         const shouldReload = groups.some((g) => g.count > 0);
-        const groupResIds = groups.map((g) => g.value);
-        await this.model.orm.unlink(this.groupByField.relation, groupResIds, {
-            context: this.context,
-        });
+        await this._unlinkGroups(groups);
         if (shouldReload) {
             const configGroups = { ...this.config.groups };
             for (const group of groups) {
@@ -136,14 +133,11 @@ export class DynamicGroupList extends DynamicList {
             activeFields: this.config.activeFields,
         };
         const context = {
-            ...this.config.context,
+            ...this.context,
             [`default_${this.groupByField.name}`]: id,
         };
         const nextConfigGroups = { ...this.config.groups };
-        const domain = Domain.and([
-            this.config.domain,
-            [[this.groupByField.name, "=", id]],
-        ]).toList();
+        const domain = Domain.and([this.domain, [[this.groupByField.name, "=", id]]]).toList();
         nextConfigGroups[id] = {
             ...commonConfig,
             context,
@@ -287,5 +281,12 @@ export class DynamicGroupList extends DynamicList {
                 refId
             );
         }
+    }
+
+    _unlinkGroups(groups) {
+        const groupResIds = groups.map((g) => g.value);
+        return this.model.orm.unlink(this.groupByField.relation, groupResIds, {
+            context: this.context,
+        });
     }
 }

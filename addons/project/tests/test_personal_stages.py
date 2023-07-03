@@ -115,7 +115,6 @@ class TestPersonalStages(TestProjectCommon):
 @tagged('-at_install', 'post_install')
 class TestPersonalStageTour(HttpCase, TestProjectCommon):
 
-    @unittest.skip("tttt")
     def test_personal_stage_tour(self):
         # Test customizing personal stages as a project user
         self.start_tour('/web', 'personal_stage_tour', login="armandel")
