@@ -65,6 +65,10 @@ export class DynamicRecordList extends DynamicList {
         return this.count;
     }
 
+    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
+        return this.resequence(dataRecordId, refId);
+    }
+
     removeRecord(record) {
         if (!record.isNew) {
             throw new Error("removeRecord can't be called on an existing record");
@@ -76,10 +80,6 @@ export class DynamicRecordList extends DynamicList {
         this.records.splice(index, 1);
         this.count--;
         return record;
-    }
-
-    moveRecord(dataRecordId, _dataGroupId, refId, _targetGroupId) {
-        return this.resequence(dataRecordId, refId);
     }
 
     async resequence(movedRecordId, targetRecordId) {

@@ -72,6 +72,80 @@ export class DynamicGroupList extends DynamicList {
         await this.model.mutex.exec(() => this._deleteGroups(groups));
     }
 
+    /**
+     * @param {string} dataRecordId
+     * @param {string} dataGroupId
+     * @param {string} refId
+     * @param {string} targetGroupId
+     */
+    async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
+        const targetGroup = this.groups.find((g) => g.id === targetGroupId);
+        if (dataGroupId === targetGroupId) {
+            // move a record inside the same group
+            targetGroup.list.records = await targetGroup.list._resequence(
+                targetGroup.list.records,
+                this.resModel,
+                dataRecordId,
+                refId
+            );
+            return;
+        }
+
+        // move record from a group to another group
+        const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
+        const recordIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
+        const record = sourceGroup.list.records[recordIndex];
+        // step 1: move record to correct position
+        const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+        const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
+        sourceGroup._removeRecords([record.id]);
+        targetGroup._addRecord(record, refIndex + 1);
+        // step 2: update record value
+        const value =
+            targetGroup.groupByField.type === "many2one"
+                ? [targetGroup.value, targetGroup.displayName]
+                : targetGroup.value;
+        const revert = () => {
+            targetGroup._removeRecords([record.id]);
+            sourceGroup._addRecord(record, oldIndex);
+        };
+        try {
+            // FIXME: add "save" option to update? And do not do onchange in this case? ask rco
+            await record.update({ [targetGroup.groupByField.name]: value });
+            const res = await record.save({ noReload: true });
+            if (!res) {
+                revert();
+            }
+        } catch (e) {
+            // revert changes
+            revert();
+            throw e;
+        }
+        if (!targetGroup.isFolded) {
+            targetGroup.list.records = await targetGroup.list._resequence(
+                targetGroup.list.records,
+                this.resModel,
+                dataRecordId,
+                refId
+            );
+        }
+    }
+
+    async resequence(movedGroupId, targetGroupId) {
+        if (!this.groupByField || this.groupByField.type !== "many2one") {
+            throw new Error("Cannot resequence a group on a non many2one group field");
+        }
+
+        return this.model.mutex.exec(async () => {
+            this.groups = await this._resequence(
+                this.groups,
+                this.groupByField.relation,
+                movedGroupId,
+                targetGroupId
+            );
+        });
+    }
+
     async sortBy(fieldName) {
         if (!this.groups.length) {
             return;
@@ -92,30 +166,6 @@ export class DynamicGroupList extends DynamicList {
     // -------------------------------------------------------------------------
     // Protected
     // -------------------------------------------------------------------------
-
-    async _deleteGroups(groups) {
-        const shouldReload = groups.some((g) => g.count > 0);
-        await this._unlinkGroups(groups);
-        if (shouldReload) {
-            const configGroups = { ...this.config.groups };
-            for (const group of groups) {
-                delete configGroups[group.value];
-            }
-            const response = await this.model._updateConfig(this.config, { groups: configGroups });
-            this.groups = response.groups.map((group) => this._createGroupDatapoint(group));
-            this.count = response.length;
-        } else {
-            for (const group of groups) {
-                this._removeGroup(group);
-            }
-        }
-    }
-
-    _removeGroup(group) {
-        const index = this.groups.findIndex((g) => g.id === group.id);
-        this.groups.splice(index, 1);
-        this.count--;
-    }
 
     async _createGroup(groupName, groupData = {}, isFolded = false) {
         groupData = { ...groupData, name: groupName };
@@ -182,6 +232,32 @@ export class DynamicGroupList extends DynamicList {
         return new this.model.constructor.Group(this.model, this.config.groups[data.value], data);
     }
 
+    async _deleteGroups(groups) {
+        const shouldReload = groups.some((g) => g.count > 0);
+        await this._unlinkGroups(groups);
+        if (shouldReload) {
+            const configGroups = { ...this.config.groups };
+            for (const group of groups) {
+                delete configGroups[group.value];
+            }
+            const response = await this.model._updateConfig(this.config, { groups: configGroups });
+            this.groups = response.groups.map((group) => this._createGroupDatapoint(group));
+            this.count = response.length;
+        } else {
+            for (const group of groups) {
+                this._removeGroup(group);
+            }
+        }
+    }
+
+    _getDPresId(group) {
+        return group.value;
+    }
+
+    _getDPHandleField(group) {
+        return group[this.handleField];
+    }
+
     async _load(offset, limit, orderBy, domain) {
         const response = await this.model._updateConfig(this.config, {
             offset,
@@ -193,12 +269,10 @@ export class DynamicGroupList extends DynamicList {
         this.count = response.length;
     }
 
-    _getDPresId(group) {
-        return group.value;
-    }
-
-    _getDPHandleField(group) {
-        return group[this.handleField];
+    _removeGroup(group) {
+        const index = this.groups.findIndex((g) => g.id === group.id);
+        this.groups.splice(index, 1);
+        this.count--;
     }
 
     _removeRecords(recordIds) {
@@ -207,80 +281,6 @@ export class DynamicGroupList extends DynamicList {
             proms.push(group._removeRecords(recordIds));
         }
         return Promise.all(proms);
-    }
-
-    async resequence(movedGroupId, targetGroupId) {
-        if (!this.groupByField || this.groupByField.type !== "many2one") {
-            throw new Error("Cannot resequence a group on a non many2one group field");
-        }
-
-        return this.model.mutex.exec(async () => {
-            this.groups = await this._resequence(
-                this.groups,
-                this.groupByField.relation,
-                movedGroupId,
-                targetGroupId
-            );
-        });
-    }
-
-    /**
-     * @param {string} dataRecordId
-     * @param {string} dataGroupId
-     * @param {string} refId
-     * @param {string} targetGroupId
-     */
-    async moveRecord(dataRecordId, dataGroupId, refId, targetGroupId) {
-        const targetGroup = this.groups.find((g) => g.id === targetGroupId);
-        if (dataGroupId === targetGroupId) {
-            // move a record inside the same group
-            targetGroup.list.records = await targetGroup.list._resequence(
-                targetGroup.list.records,
-                this.resModel,
-                dataRecordId,
-                refId
-            );
-            return;
-        }
-
-        // move record from a group to another group
-        const sourceGroup = this.groups.find((g) => g.id === dataGroupId);
-        const recordIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
-        const record = sourceGroup.list.records[recordIndex];
-        // step 1: move record to correct position
-        const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
-        const oldIndex = sourceGroup.list.records.findIndex((r) => r.id === dataRecordId);
-        sourceGroup._removeRecords([record.id]);
-        targetGroup._addRecord(record, refIndex + 1);
-        // step 2: update record value
-        const value =
-            targetGroup.groupByField.type === "many2one"
-                ? [targetGroup.value, targetGroup.displayName]
-                : targetGroup.value;
-        const revert = () => {
-            targetGroup._removeRecords([record.id]);
-            sourceGroup._addRecord(record, oldIndex);
-        };
-        try {
-            // FIXME: add "save" option to update? And do not do onchange in this case? ask rco
-            await record.update({ [targetGroup.groupByField.name]: value });
-            const res = await record.save({ noReload: true });
-            if (!res) {
-                revert();
-            }
-        } catch (e) {
-            // revert changes
-            revert();
-            throw e;
-        }
-        if (!targetGroup.isFolded) {
-            targetGroup.list.records = await targetGroup.list._resequence(
-                targetGroup.list.records,
-                this.resModel,
-                dataRecordId,
-                refId
-            );
-        }
     }
 
     _unlinkGroups(groups) {
