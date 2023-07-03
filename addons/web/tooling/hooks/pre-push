@@ -1,0 +1,12 @@
+#!/bin/bash
+
+push_command=$(ps -ocommand= -p $PPID)
+
+for arg in $push_command; do
+    if [[ "$arg" == '-f' || "$arg" == '--force' ]]; then
+        echo "[Policy] Never force push ! Use this instead so you don't cause race conflicts in the repo: git push --force-with-lease"
+        exit 1
+    fi
+done
+
+exit 0
