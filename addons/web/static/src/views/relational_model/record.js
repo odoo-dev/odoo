@@ -66,7 +66,7 @@ export class Record extends DataPoint {
         // expose string values (false fallbacks on the empty string) in this.data.
         this._textValues = markRaw({});
         this._setTextValues(data);
-        this._setDataContext();
+        this._setEvalContext();
         this._savePoint = markRaw({
             dirty: false,
             changes: { ...this._changes },
@@ -155,7 +155,7 @@ export class Record extends DataPoint {
                 this._values = markRaw({});
                 this._textValues = markRaw({});
                 this.data = { ...this._changes };
-                this._setDataContext();
+                this._setEvalContext();
             }
         });
     }
@@ -284,7 +284,7 @@ export class Record extends DataPoint {
             this.data[fieldName] = changes[fieldName];
         }
         this._setTextValues(changes);
-        this._setDataContext();
+        this._setEvalContext();
         this._removeInvalidFields(Object.keys(changes));
     }
 
@@ -304,7 +304,7 @@ export class Record extends DataPoint {
         Object.assign(this._values, this._parseServerValues(values));
         Object.assign(this.data, this._values, this._changes);
         this._setTextValues(Object.assign({}, values, this._changes));
-        this._setDataContext();
+        this._setEvalContext();
     }
 
     // FIXME: move to model?
@@ -425,7 +425,7 @@ export class Record extends DataPoint {
         this._changes = markRaw({ ...this._savePoint.changes });
         this.data = { ...this._values, ...this._changes };
         this._textValues = markRaw({ ...this._savePoint.textValues });
-        this._setDataContext();
+        this._setEvalContext();
         this._invalidFields.clear();
         this._closeInvalidFieldsNotification();
         this._closeInvalidFieldsNotification = () => {};
@@ -544,7 +544,7 @@ export class Record extends DataPoint {
         }
         this.dirty = false;
         this.data = { ...this._values, ...this._changes };
-        this._setDataContext();
+        this._setEvalContext();
         this._savePoint = markRaw({
             dirty: false,
             changes: { ...this._changes },
@@ -799,7 +799,7 @@ export class Record extends DataPoint {
      * registered to the evalContext (but not necessarily keys inside it), and would
      * be uselessly re-rendered if we replace it by a brand new object.
      */
-    _setDataContext() {
+    _setEvalContext() {
         Object.assign(this.evalContext, {
             ...this.context,
             active_id: this.resId || false,
