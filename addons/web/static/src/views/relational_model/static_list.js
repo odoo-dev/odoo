@@ -343,13 +343,13 @@ export class StaticList extends DataPoint {
         return this.model.mutex.exec(() => this._sortBy(fieldName));
     }
 
-    replaceWith(ids, { silent = false } = {}) {
+    replaceWith(ids, { reload = false, silent = false } = {}) {
         return this.model.mutex.exec(async () => {
-            const resIds = ids.filter((id) => !this._cache[id]);
+            const resIds = reload ? ids : ids.filter((id) => !this._cache[id]);
             if (resIds.length) {
                 const records = await this.model._loadRecords({
                     ...this.config,
-                    resIds: ids.filter((id) => !this._cache[id]),
+                    resIds,
                     context: this.context,
                 });
                 for (const record of records) {
