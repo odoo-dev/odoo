@@ -1905,7 +1905,7 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </sheet>
                 </form>`,
-            mockRPC(route, { method, args}) {
+            mockRPC(route, { method, args }) {
                 if (method === "read" && args[1].length === 1 && args[1][0] === "display_name") {
                     throw new Error("read(['display_name']) should not be called");
                 }
@@ -1945,7 +1945,11 @@ QUnit.module("Fields", (hooks) => {
                         </sheet>
                     </form>`,
                 mockRPC(route, { method, args }) {
-                    if (method === "read" && args[1].length === 1 && args[1][0] === "display_name") {
+                    if (
+                        method === "read" &&
+                        args[1].length === 1 &&
+                        args[1][0] === "display_name"
+                    ) {
                         throw new Error("read(['display_name']) should not be called");
                     }
                 },

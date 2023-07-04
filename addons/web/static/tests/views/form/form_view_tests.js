@@ -3888,7 +3888,11 @@ QUnit.module("Views", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === 'read' && args.args[1].length === 1 && args.args[1][0] === 'display_name') {
+                if (
+                    args.method === "read" &&
+                    args.args[1].length === 1 &&
+                    args.args[1][0] === "display_name"
+                ) {
                     nameGetCount++;
                 }
             },
@@ -3919,7 +3923,11 @@ QUnit.module("Views", (hooks) => {
             serverData,
             arch: '<form><field name="trululu"/></form>',
             mockRPC(route, args) {
-                if (args.method === 'read' && args.args[1].length === 1 && args.args[1][0] === 'display_name') {
+                if (
+                    args.method === "read" &&
+                    args.args[1].length === 1 &&
+                    args.args[1][0] === "display_name"
+                ) {
                     throw new Error("Should not call display_name read");
                 }
             },
@@ -13204,78 +13212,78 @@ QUnit.module("Views", (hooks) => {
 
         await editInput(target, ".o_field_widget[name=int_field] input", "5846");
 
-        assert.verifySteps([
-            "[Field int_field] onPatched",
-            "[IntegerField int_field] onPatched",
-        ]);
+        assert.verifySteps(["[Field int_field] onPatched", "[IntegerField int_field] onPatched"]);
     });
 
-    QUnit.test("only re-render necessary fields after change (with onchange)", async function (assert) {
-        function logLifeCycle(Component) {
-            patchWithCleanup(Component.prototype, {
-                setup() {
-                    this._super(...arguments);
-                    const prefix = `${this.constructor.name} ${this.props.name}`;
-                    owl.onMounted(() => assert.step(`[${prefix}] onMounted`));
-                    owl.onPatched(() => assert.step(`[${prefix}] onPatched`));
-                    owl.onWillStart(() => assert.step(`[${prefix}] onWillStart`));
-                    owl.onWillUpdateProps(() => assert.step(`[${prefix}] onWillUpdateProps`));
+    QUnit.test(
+        "only re-render necessary fields after change (with onchange)",
+        async function (assert) {
+            function logLifeCycle(Component) {
+                patchWithCleanup(Component.prototype, {
+                    setup() {
+                        this._super(...arguments);
+                        const prefix = `${this.constructor.name} ${this.props.name}`;
+                        owl.onMounted(() => assert.step(`[${prefix}] onMounted`));
+                        owl.onPatched(() => assert.step(`[${prefix}] onPatched`));
+                        owl.onWillStart(() => assert.step(`[${prefix}] onWillStart`));
+                        owl.onWillUpdateProps(() => assert.step(`[${prefix}] onWillUpdateProps`));
+                    },
+                });
+            }
+            logLifeCycle(Field);
+            logLifeCycle(CharField);
+            logLifeCycle(IntegerField);
+            logLifeCycle(DateTimeField);
+
+            serverData.models.partner.onchanges = {
+                foo(obj) {
+                    obj.int_field = 23;
                 },
-            });
-        }
-        logLifeCycle(Field);
-        logLifeCycle(CharField);
-        logLifeCycle(IntegerField);
-        logLifeCycle(DateTimeField);
+            };
 
-        serverData.models.partner.onchanges = {
-            foo(obj) {
-                obj.int_field = 23;
-            },
-        };
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
                 <form>
                     <field name="foo"/>
                     <field name="int_field"/>
                     <field name="date"/>
                 </form>`,
-            resId: 2,
-        });
+                resId: 2,
+            });
 
-        assert.verifySteps([
-            "[Field foo] onWillStart",
-            "[Field int_field] onWillStart",
-            "[Field date] onWillStart",
-            "[CharField foo] onWillStart",
-            "[IntegerField int_field] onWillStart",
-            "[DateTimeField date] onWillStart",
-            "[DateTimeField date] onMounted",
-            "[IntegerField int_field] onMounted",
-            "[CharField foo] onMounted",
-            "[Field date] onMounted",
-            "[Field int_field] onMounted",
-            "[Field foo] onMounted",
-        ]);
+            assert.verifySteps([
+                "[Field foo] onWillStart",
+                "[Field int_field] onWillStart",
+                "[Field date] onWillStart",
+                "[CharField foo] onWillStart",
+                "[IntegerField int_field] onWillStart",
+                "[DateTimeField date] onWillStart",
+                "[DateTimeField date] onMounted",
+                "[IntegerField int_field] onMounted",
+                "[CharField foo] onMounted",
+                "[Field date] onMounted",
+                "[Field int_field] onMounted",
+                "[Field foo] onMounted",
+            ]);
 
-        await editInput(target, ".o_field_widget[name=foo] input", "new value");
+            await editInput(target, ".o_field_widget[name=foo] input", "new value");
 
-        assert.verifySteps([
-            "[Field foo] onPatched",
-            "[CharField foo] onPatched",
-            "[Field int_field] onPatched",
-            "[IntegerField int_field] onPatched",
-        ]);
+            assert.verifySteps([
+                "[Field foo] onPatched",
+                "[CharField foo] onPatched",
+                "[Field int_field] onPatched",
+                "[IntegerField int_field] onPatched",
+            ]);
 
-        await editInput(target, ".o_field_widget[name=int_field] input", "5846");
+            await editInput(target, ".o_field_widget[name=int_field] input", "5846");
 
-        assert.verifySteps([
-            "[Field int_field] onPatched",
-            "[IntegerField int_field] onPatched",
-        ]);
-    });
+            assert.verifySteps([
+                "[Field int_field] onPatched",
+                "[IntegerField int_field] onPatched",
+            ]);
+        }
+    );
 });
