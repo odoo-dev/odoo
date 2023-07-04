@@ -18,7 +18,6 @@ class TestMailingUi(MassMailCommon, HttpCase):
             ],
         })
 
-    @unittest.skip("tttt")
     def test_mailing_campaign_tour(self):
         self.user_marketing.write({
             'groups_id': [
@@ -44,7 +43,6 @@ class TestMailingUi(MassMailCommon, HttpCase):
         self.assertIn('data-snippet="s_title"', mailing.body_html)
         self.assertTrue(mailing.body_html.startswith('<table'))
 
-    @unittest.skip("tttt")
     def test_mailing_editor_theme_tour(self):
         self.start_tour('/web', 'mailing_editor_theme', login="demo")
 
