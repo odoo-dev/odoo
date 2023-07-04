@@ -107,7 +107,7 @@
             'web/static/src/core/**/*',
             'web/static/src/search/**/*',
             'web/static/src/webclient/icons.scss', # variables required in list_controller.scss
-            'web/static/src/views/*.js',
+            'web/static/src/views/**/*.js',
             'web/static/src/views/*.xml',
             'web/static/src/views/*.scss',
             'web/static/src/views/fields/**/*',
@@ -172,7 +172,6 @@
             'web/static/src/legacy/js/fields/field_registry.js',
             'web/static/src/legacy/js/fields/field_registration.js',
             'web/static/src/legacy/js/fields/field_utils.js',
-            'web/static/src/legacy/js/views/view_utils.js',
             'web/static/src/legacy/js/services/data_manager.js',
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/js/tools/tools.js',

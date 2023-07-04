@@ -2,7 +2,6 @@
 
 from odoo import Command
 from odoo.tests import HttpCase, tagged
-import unittest
 
 @tagged('post_install', '-at_install')
 class TestProjectSharingUi(HttpCase):
@@ -37,12 +36,10 @@ class TestProjectSharingUi(HttpCase):
             ],
         })
 
-    @unittest.skip("tttt")
     def test_01_project_sharing(self):
         """ Test Project Sharing UI with an internal user """
         self.start_tour("/web", 'project_sharing_tour', login="admin")
 
-    @unittest.skip("tttt")
     def test_02_project_sharing(self):
         """ Test project sharing ui with a portal user.
 
