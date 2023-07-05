@@ -253,7 +253,6 @@ export function getFieldsSpec(
     evalContext,
     { parentActiveFields, withInvisible } = {}
 ) {
-    console.log("getFieldsSpec");
     const fieldsSpec = {};
     const properties = [];
     for (const fieldName in activeFields) {
