@@ -57,6 +57,7 @@
             'web/static/src/views/form/**/*',
             'web/static/src/views/kanban/**/*',
             'web/static/src/views/list/**/*',
+            'web/static/src/views/relational_model/**/*',
             'web/static/src/views/view_button/**/*',
             'web/static/src/views/view_components/**/*',
             'web/static/src/views/view_dialogs/**/*',
