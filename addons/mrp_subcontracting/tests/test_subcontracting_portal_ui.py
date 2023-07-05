@@ -47,7 +47,6 @@ class TestSubcontractingPortalUi(HttpCase):
             bom_line.product_qty = 1
         cls.bom_tracked = bom_form.save()
 
-    @unittest.skip("tttt")
     def test_subcontrating_portal(self):
         # Create a receipt picking from the subcontractor
         picking_form = Form(self.env['stock.picking'])
