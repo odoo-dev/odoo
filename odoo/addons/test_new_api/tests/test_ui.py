@@ -4,12 +4,10 @@
 import odoo.tests
 from odoo.tools import mute_logger
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
-import unittest
 
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(HttpCaseWithUserDemo):
 
-    @unittest.skip("tttt")
     def test_01_admin_widget_x2many(self):
         # FIXME: breaks if too many children of base.menu_tests
 
