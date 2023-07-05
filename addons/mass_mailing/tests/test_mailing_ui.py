@@ -46,11 +46,9 @@ class TestMailingUi(MassMailCommon, HttpCase):
     def test_mailing_editor_theme_tour(self):
         self.start_tour('/web', 'mailing_editor_theme', login="demo")
 
-    @unittest.skip("tttt")
     def test_snippets_mailing_menu_tabs_tour(self):
         self.start_tour("/web", 'snippets_mailing_menu_tabs', login="demo")
 
-    @unittest.skip("tttt")
     def test_snippets_mailing_menu_toolbar_tour(self):
         self.start_tour("/web", 'snippets_mailing_menu_toolbar', login="demo")
 
