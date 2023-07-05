@@ -22,10 +22,10 @@
                   area-label="Your favourite"
                   data-bs-toggle="tooltip"
                   class="fa fa-lock"/>
-            <a t-attf-href="/forum/#{slug(question.forum_id)}/#{slug(question)}#{answer and ('/#answer-%s' % answer.id)}"
+            <a t-attf-href="/forum/#{slug(question.forum_id)}/#{slug(question)}#{answer and ('/#answer-%s' % answer.id if answer else '')}"
                 t-attf-title="Read: #{question.name}"
                 t-attf-class="stretched-link text-body #{_link_classes}">
-                <span t-out="question.name"/>
+                <span t-out="question.name" t-if="question.name"/>
             </a>
             <span t-if="question.has_validated_answer and question.forum_id.mode == 'questions'"
                   title="Solved"
@@ -51,9 +51,9 @@
 
             <!-- Toggle Tags on click -->
             <t t-if="tag and tag.name == question_tag.name" t-set="click_action"
-                t-value="'/forum/' + slug(question_tag.forum_id) + '?' + keep_query( 'search', 'sorting', 'my')"/>
+                t-value="'/forum/' + slug(question_tag.forum_id) + '?' + keep_query( 'search', 'sorting', 'my', 'author',)"/>
             <t t-else="" t-set="click_action"
-                t-value="'/forum/' + slug(question_tag.forum_id) + '/tag/' + slug(question_tag) + '/questions?' + keep_query( 'search', 'sorting', 'my', filters='tag')"/>
+                t-value="'/forum/' + slug(question_tag.forum_id) + '/tag/' + slug(question_tag) + '/questions?' + keep_query( 'search', 'sorting', 'my', 'author', filters='tag')"/>
 
             <a t-att-href="click_action"
                 t-attf-class="badge position-relative z-index-1 #{tag and tag.name == question_tag.name and 'text-bg-secondary' or 'text-bg-light'} fw-normal"
