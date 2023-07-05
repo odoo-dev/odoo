@@ -531,12 +531,10 @@ export class RelationalModel extends Model {
             context: { bin_size: true, ...context },
             specification: getFieldsSpec(activeFields, fields, evalContext),
         };
-        console.log("Unity field spec", kwargs.specification);
         const records = await this.orm.call(resModel, "web_read", [resIds], kwargs);
         if (!records.length) {
             throw new FetchRecordError(resIds);
         }
-        console.log("Unity response", records);
 
         this._applyProperties(records, config);
         return records;
@@ -560,9 +558,7 @@ export class RelationalModel extends Model {
             count_limit:
                 config.countLimit !== Number.MAX_SAFE_INTEGER ? config.countLimit + 1 : undefined,
         };
-        console.log("Unity field spec", kwargs.specification);
         const response = await this.orm.call(config.resModel, "unity_web_search_read", [], kwargs);
-        console.log("Unity response", response);
 
         this._applyProperties(response.records, config);
         return response;
@@ -584,10 +580,8 @@ export class RelationalModel extends Model {
             context = makeContext([context, fieldContext], evalContext);
         }
         const spec = getFieldsSpec(activeFields, fields, evalContext, { withInvisible: true });
-        console.log("Onchange spec", spec);
         const args = [resId ? [resId] : [], changes, fieldNames, spec];
         const response = await this.orm.call(resModel, "onchange2", args, { context });
-        console.log("Onchange response", response);
         if (response.warning) {
             const { type, title, message, className, sticky } = response.warning;
             if (type === "dialog") {
