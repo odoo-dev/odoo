@@ -13,7 +13,6 @@ class WebSuite(HttpCase):
             'name': 'Shop',
         })
 
-    @unittest.skip("tttt")
     def test_pos_js(self):
         # open a session, the /pos/ui controller will redirect to it
         self.main_pos_config.open_ui()
