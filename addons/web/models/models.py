@@ -110,10 +110,11 @@ class Base(models.AbstractModel):
                 extra_fields = dict(field_spec['fields'])
                 extra_fields.pop('display_name', None)
 
-                many2one_data = {
-                    vals['id']: vals
-                    for vals in co_records.web_read(extra_fields)
-                }
+                many2one_data = {}
+                for vals in co_records.web_read(extra_fields):
+                    many2one_data[vals['id']] = vals
+                    if not isinstance(vals['id'], int):
+                        many2one_data[vals['id'].origin] = vals
 
                 if 'display_name' in field_spec['fields']:
                     for rec in co_records.sudo():
