@@ -91,7 +91,7 @@ export class PurchaseOrderLineProductField extends Many2OneField {
 
         if (!edit) {
             // remove new line used to open the matrix
-            PurchaseOrderRecord.data.order_line.delete(this.props.record);
+            PurchaseOrderRecord.data.order_line.removeRecord(this.props.record);
         }
     }
 
