@@ -8,7 +8,6 @@ import unittest
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPurchaseMatrixUi(TestMatrixCommon):
 
-    @unittest.skip("tttt")
     def test_purchase_matrix_ui(self):
         self.start_tour("/web", 'purchase_matrix_tour', login="admin")
 
