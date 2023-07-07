@@ -111,7 +111,6 @@ class TestEventProductConfiguratorUi(HttpCase):
 
             cls.event_product_template.optional_product_ids = [cls.product_product_memorabilia.id,]
 
-    @unittest.skip("tttt")
     def test_event_using_product_configurator(self):
         self.start_tour("/web", 'event_sale_with_product_configurator_tour', login='salesman')
 
