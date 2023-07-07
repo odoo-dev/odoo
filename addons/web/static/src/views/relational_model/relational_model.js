@@ -86,6 +86,7 @@ import { Domain } from "@web/core/domain";
  */
 
 const DEFAULT_HOOKS = {
+    onWillLoadRoot: () => {},
     onWillSaveRecord: () => {},
     onRecordSaved: () => {},
     onWillSaveMulti: () => {},
@@ -141,6 +142,7 @@ export class RelationalModel extends Model {
         this.config = {
             isMonoRecord: false,
             ...params.config,
+            isRoot: true,
         };
 
         /** @type {Hooks} */
@@ -301,6 +303,9 @@ export class RelationalModel extends Model {
      * @param {Config} config
      */
     async _loadData(config) {
+        if (config.isRoot) {
+            this.hooks.onWillLoadRoot();
+        }
         if (config.isMonoRecord) {
             const evalContext = {
                 ...config.context,
