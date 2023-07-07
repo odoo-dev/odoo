@@ -337,6 +337,7 @@ export class FormController extends Component {
         let canProceed = true;
         if (dirty) {
             canProceed = await this.model.root.save({
+                noReload: true,
                 stayInEdition: true,
                 onError: this.onSaveError.bind(this),
             });
