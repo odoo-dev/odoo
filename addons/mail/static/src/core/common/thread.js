@@ -150,7 +150,7 @@ export class Thread extends Component {
             this.lastJumpPresent = this.props.jumpPresent;
             this.threadService.fetchNewMessages(this.props.thread);
         });
-        useBus(this.env.bus, "FORM-VIEW:RECORD-SAVED", ({ detail }) => {
+        useBus(this.env.bus, "MAIL:RELOAD-THREAD", ({ detail }) => {
             const { model, id } = this.props.thread;
             if (detail.resModel === model && detail.resId === id) {
                 this.threadService.fetchNewMessages(this.props.thread);

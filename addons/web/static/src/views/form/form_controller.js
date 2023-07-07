@@ -285,11 +285,19 @@ export class FormController extends Component {
             },
             state: this.props.state?.modelState,
             hooks: {
-                onRecordSaved: this.onRecordSaved.bind(this),
+                onWillLoadRoot: this.onWillLoadRoot.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
+                onRecordSaved: this.onRecordSaved.bind(this),
             },
         };
     }
+
+    /**
+     * onWillLoadRoot is a callback that will be executed before (re)loading the
+     * data necessary for the root record datapoint. Note that this.model.root
+     * may not exist yet at this point, if this is the first load.
+     */
+    onWillLoadRoot() {}
 
     /**
      * onRecordSaved is a callBack that will be executed after the save
@@ -297,12 +305,7 @@ export class FormController extends Component {
      * is invalid or if a server error is thrown.
      * @param {Record} record
      */
-    async onRecordSaved(record) {
-        this.env.bus.trigger("FORM-VIEW:RECORD-SAVED", {
-            resModel: record.resModel,
-            resId: record.resId,
-        });
-    }
+    async onRecordSaved(record) {}
 
     /**
      * onWillSaveRecord is a callBack that will be executed before the
