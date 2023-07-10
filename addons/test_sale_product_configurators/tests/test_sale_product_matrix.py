@@ -30,7 +30,6 @@ class TestSaleMatrixUi(TestMatrixCommon):
         cls.currency = cls.env['res.currency'].search([('name', '=', 'USD')])
         cls.currency.action_unarchive()
 
-    @unittest.skip("tttt")
     def test_sale_matrix_ui(self):
         # Set the template as configurable by matrix.
         self.matrix_template.product_add_mode = "matrix"
