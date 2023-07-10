@@ -20,7 +20,6 @@ export class Model {
         this.env = env;
         this.orm = services.orm;
         this.bus = new EventBus();
-        this.useSampleModel = false; // will be set to true by the "useModel" hook if necessary
         this.setup(params, services);
     }
 
@@ -81,10 +80,34 @@ function getSearchParams(props) {
  * @param {T} ModelClass
  * @param {Object} params
  * @param {Object} [options]
- * @param {Function} [options.onUpdate]
+ * @param {Function} [options.beforeFirstLoad]
  * @returns {InstanceType<T>}
  */
 export function useModel(ModelClass, params, options = {}) {
+    const component = useComponent();
+    const services = {};
+    for (const key of ModelClass.services) {
+        services[key] = useService(key);
+    }
+    services.orm = services.orm || useService("orm");
+    const model = new ModelClass(component.env, params, services);
+    onWillStart(async () => {
+        await options.beforeFirstLoad?.();
+        return model.load(component.props);
+    });
+    onWillUpdateProps((nextProps) => model.load(nextProps));
+    return model;
+}
+
+/**
+ * @template {typeof Model} T
+ * @param {T} ModelClass
+ * @param {Object} params
+ * @param {Object} [options]
+ * @param {Function} [options.onUpdate]
+ * @returns {InstanceType<T>}
+ */
+export function useModelWithSampleData(ModelClass, params, options = {}) {
     const component = useComponent();
     if (!(ModelClass.prototype instanceof Model)) {
         throw new Error(`the model class should extend Model`);
@@ -96,6 +119,7 @@ export function useModel(ModelClass, params, options = {}) {
     services.orm = services.orm || useService("orm");
 
     const model = new ModelClass(component.env, params, services);
+
     useBus(
         model.bus,
         "update",
