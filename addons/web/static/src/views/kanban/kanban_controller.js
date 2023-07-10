@@ -9,7 +9,7 @@ import { usePager } from "@web/search/pager_hook";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { useSetupView } from "@web/views/view_hook";
-import { useModel } from "@web/views/model";
+import { useModelWithSampleData } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiRecordViewButton } from "@web/views/view_button/multi_record_view_button";
 import { useViewButtons } from "@web/views/view_button/view_button_hook";
@@ -80,7 +80,9 @@ export class KanbanController extends Component {
             }
         }
 
-        this.model = useState(useModel(KanbanSampleModel, this.modelParams, this.modelOptions));
+        this.model = useState(
+            useModelWithSampleData(KanbanSampleModel, this.modelParams, this.modelOptions)
+        );
         if (archInfo.progressAttributes) {
             const { activeBars } = this.props.state || {};
             this.progressBarState = useProgressBar(
