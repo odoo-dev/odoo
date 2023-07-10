@@ -143,9 +143,7 @@ export function useModel(ModelClass, params, options = {}) {
         started = true;
     });
     onWillUpdateProps((nextProps) => {
-        if (!options.ignoreUseSampleModel) {
-            useSampleModel = false;
-        }
+        useSampleModel = false;
         load(nextProps);
     });
 

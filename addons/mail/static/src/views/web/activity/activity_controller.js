@@ -2,14 +2,13 @@
 
 import { useMessaging } from "@mail/core/common/messaging_hook";
 
-import { Component, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { Layout } from "@web/search/layout";
 import { SearchBar } from "@web/search/search_bar/search_bar";
-import { useModel } from "@web/views/model";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
@@ -24,16 +23,21 @@ export class ActivityController extends Component {
     static template = "mail.ActivityController";
 
     setup() {
-        const modelConfig = {
-            activeFields: this.props.archInfo.activeFields,
-            resModel: this.props.resModel,
-            fields: this.props.fields,
+        const modelParams = {
+            config: {
+                activeFields: this.props.archInfo.activeFields,
+                resModel: this.props.resModel,
+                fields: this.props.fields,
+            },
         };
-        this.model = useState(
-            useModel(this.props.Model, {
-                config: modelConfig,
+        const modelServices = Object.fromEntries(
+            this.props.Model.services.map((servName) => {
+                return [servName, useService(servName)];
             })
         );
+        this.model = useState(new this.props.Model(this.env, modelParams, modelServices));
+        onWillStart(() => this.model.load(this.props));
+        onWillUpdateProps((nextProps) => this.model.root.load(nextProps));
 
         this.dialog = useService("dialog");
         this.action = useService("action");

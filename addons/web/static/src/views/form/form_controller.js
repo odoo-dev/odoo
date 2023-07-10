@@ -133,7 +133,6 @@ export class FormController extends Component {
                 return [servName, useService(servName)];
             })
         );
-        modelServices.orm = useService("orm");
         this.model = useState(new this.props.Model(this.env, this.modelParams, modelServices));
 
         this.display = { ...this.props.display };
