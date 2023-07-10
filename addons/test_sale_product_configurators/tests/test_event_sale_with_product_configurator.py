@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, timedelta
-import unittest
+
 from odoo import fields
 from odoo.tests import HttpCase, tagged
 
