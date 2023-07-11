@@ -27,15 +27,7 @@ class EventBoothConfiguratorController extends formView.Controller {
                 eventBoothConfiguration: {
                     event_id,
                     event_booth_category_id,
-                    event_booth_pending_ids: {
-                        operation: "MULTI",
-                        commands: [
-                            {
-                                operation: "REPLACE_WITH",
-                                ids: event_booth_ids.currentIds,
-                            },
-                        ],
-                    },
+                    event_booth_pending_ids: event_booth_ids.currentIds,
                 },
             },
         });
