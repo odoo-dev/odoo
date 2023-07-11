@@ -590,9 +590,11 @@ export class X2ManyFieldDialog extends Component {
     async save({ saveAndNew }) {
         const disabledButtons = this.disableButtons();
         if (await this.record.checkValidity()) {
-            const isSaved = await this.props.save(this.record);
-            if (isSaved === false) {
-                return false;
+            try {
+                await this.props.save(this.record);
+            } catch (error) {
+                this.enableButtons(disabledButtons);
+                throw error;
             }
             if (saveAndNew) {
                 this.record = await this.props.addNew();
@@ -748,7 +750,7 @@ export function useOpenX2ManyRecord({
                 archInfo,
                 record,
                 addNew: () => {
-                    return list.extendRecord(params);
+                    return getList().extendRecord(params);
                 },
                 save: (rec) => {
                     if (isDuplicate && rec.id === record.id) {
