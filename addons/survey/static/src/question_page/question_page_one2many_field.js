@@ -27,6 +27,28 @@ patch(X2ManyFieldDialog.prototype, 'survey_question_chaining_with_validation', {
     }
 });
 
+
+/**
+ * For convenience, we'll prevent closing the question form dialog and
+ * stay in edit mode to make sure only valid records are saved. Therefore,
+ * in case of error occurring when saving we will replace default error
+ * modal with a notification.
+ */
+
+class SurveySaveError extends Error {}
+function SurveySaveErrorHandler(env, error, originalError) {
+    if (originalError instanceof SurveySaveError) {
+        env.services.notification.add(originalError.message, {
+            title: env._t("Validation Error"),
+            type: "danger",
+        });
+        return true;
+    }
+}
+registry
+    .category("error_handlers")
+    .add("surveySaveErrorHandler", SurveySaveErrorHandler, { sequence: 10 });
+
 class QuestionPageOneToManyField extends X2ManyField {
     setup() {
         super.setup();
@@ -46,30 +68,24 @@ class QuestionPageOneToManyField extends X2ManyField {
 
         const self = this;
         const saveRecord = async (record) => {
-            let isSaved = await superSaveRecord(record);
+            await superSaveRecord(record);
             try {
-                const isSucceed = await self.props.record.save({
-                    stayInEdition: true,
-                    throwOnError: true,
-                });
-                isSaved = isSaved === false ? false : isSucceed;
+                await self.props.record.save();
             } catch (error) {
-                self.handleSurveySaveError(error, record);
-                return false;
+                // In case of error occurring when saving.
+                // Remove erroneous question row added to the embedded list
+                await this.list.delete(record);
+                throw new SurveySaveError(error.data.message);
             }
-            return isSaved;
         };
 
         const updateRecord = async (record) => {
-            let isUpdated = await superUpdateRecord(record);
+            await superUpdateRecord(record);
             try {
-                const isSaved = await self.props.record.save({ stayInEdition: true, throwOnError: true });
-                isUpdated = isUpdated === false ? false : isSaved;
+                await self.props.record.save();
             } catch (error) {
-                self.handleSurveySaveError(error);
-                return false;
+                throw new SurveySaveError(error.data.message);
             }
-            return isUpdated;
         };
 
         const openRecord = useOpenX2ManyRecord({
@@ -81,7 +97,7 @@ class QuestionPageOneToManyField extends X2ManyField {
             updateRecord,
         });
         this._openRecord = async (params) => {
-            if (!await self.props.record.save({ stayInEdition: true })) {
+            if (!await self.props.record.save()) {
                 // do not open question form as it won't be savable either.
                 return;
             }
@@ -94,29 +110,6 @@ class QuestionPageOneToManyField extends X2ManyField {
             openRecord(params);
         };
         this.canOpenRecord = true;
-    }
-
-    /**
-     * For convenience, we'll prevent closing the question form dialog and
-     * stay in edit mode to make sure only valid records are saved. Therefore,
-     * two things should be cared for in case of error occurring when saving
-     * the question:
-     *   * Remove erroneous question row added to the embedded list
-     *   * Replace default error modal with a notification
-     *
-     *   @param {Error} error Error thrown when saving survey/question.
-     *   @param {Record?} recordToDelete (optional) In case the error is
-     *   thrown when saving a new question, it should be deleted from the
-     *   list.
-     */
-    async handleSurveySaveError(error, recordToDelete) {
-        if (recordToDelete) {
-            await this.list.delete(recordToDelete);
-        }
-        this.notificationService.add(error.data.message, {
-            title: this.env._t("Validation Error"),
-            type: "danger",
-        });
     }
 }
 QuestionPageOneToManyField.components = {
