@@ -511,40 +511,34 @@ export class StaticList extends DataPoint {
                     }
                     break;
                 }
-                case DELETE: {
-                    if (!this._commands.find((c) => c[0] === CREATE && c[1] === command[1])) {
-                        this._commands.push([DELETE, command[1]]);
-                    }
-                    this._commands = this._commands.filter((c) => {
-                        return !(c[0] === CREATE || c[0] === UPDATE) || c[1] !== command[1];
-                    });
-                    const record = this._cache[command[1]];
-                    this.records.splice(
-                        this.records.findIndex((r) => r.id === record.id),
-                        1
-                    );
-                    if (record.resId) {
-                        const index = this._currentIds.findIndex((id) => id === record.resId);
-                        this._currentIds.splice(index, 1);
-                    }
-                    this.count--;
-                    break;
-                }
+                case DELETE:
                 case FORGET: {
-                    const replaceWithIndex = this._commands.findIndex(
-                        (c) => c[0] === REPLACE_WITH && c[2].includes(command[1])
-                    );
-                    if (replaceWithIndex >= 0) {
-                        const ids = this._commands[replaceWithIndex][2];
-                        this._commands[replaceWithIndex][2] = ids.filter((id) => id !== command[1]);
+                    if (command[0] === DELETE) {
+                        if (!this._commands.find((c) => c[0] === CREATE && c[1] === command[1])) {
+                            this._commands.push([DELETE, command[1]]);
+                        }
+                        this._commands = this._commands.filter((c) => {
+                            return !(c[0] === CREATE || c[0] === UPDATE) || c[1] !== command[1];
+                        });
                     } else {
-                        const linkToIndex = this._commands.findIndex(
-                            (c) => c[0] === LINK_TO && c[1] === command[1]
+                        // FORGET
+                        const replaceWithIndex = this._commands.findIndex(
+                            (c) => c[0] === REPLACE_WITH && c[2].includes(command[1])
                         );
-                        if (linkToIndex >= 0) {
-                            this._commands.splice(linkToIndex, 1);
+                        if (replaceWithIndex >= 0) {
+                            const ids = this._commands[replaceWithIndex][2];
+                            this._commands[replaceWithIndex][2] = ids.filter(
+                                (id) => id !== command[1]
+                            );
                         } else {
-                            this._commands.push([FORGET, command[1]]);
+                            const linkToIndex = this._commands.findIndex(
+                                (c) => c[0] === LINK_TO && c[1] === command[1]
+                            );
+                            if (linkToIndex >= 0) {
+                                this._commands.splice(linkToIndex, 1);
+                            } else {
+                                this._commands.push([FORGET, command[1]]);
+                            }
                         }
                     }
                     const record = this._cache[command[1]];
