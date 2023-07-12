@@ -2,7 +2,6 @@ import json
 import time
 from xmlrpc.client import Fault
 
-import unittest
 from passlib.totp import TOTP
 
 from odoo import http
@@ -44,7 +43,6 @@ class TestTOTP(HttpCase):
             del Home.totp_hook
             self.env['ir.http']._clear_routing_map()
 
-    @unittest.skip("tttt")
     def test_totp(self):
         # 1. Enable 2FA
         self.start_tour('/web', 'totp_tour_setup', login='demo')
@@ -84,14 +82,12 @@ class TestTOTP(HttpCase):
         self.assertEqual(r['login'], 'demo')
 
 
-    @unittest.skip("tttt")
     def test_totp_administration(self):
         self.start_tour('/web', 'totp_tour_setup', login='demo')
         self.start_tour('/web', 'totp_admin_disables', login='admin')
         self.start_tour('/', 'totp_login_disabled', login=None)
 
     @mute_logger('odoo.http')
-    @unittest.skip("tttt")
     def test_totp_authenticate(self):
         """
         Ensure we don't leak the session info from an half-logged-in
