@@ -3,7 +3,7 @@
 // TODO sort
 import publicWidget from '@web/legacy/js/public/public_widget';
 import Dialog from '@web/legacy/js/core/dialog';
-import { escape, sprintf } from '@web/core/utils/strings';
+import { escape } from '@web/core/utils/strings';
 import core from '@web/legacy/js/services/core';
 const _t = core._t;  // TODO see if better way to import now
 
@@ -185,11 +185,14 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         this._setPaymentFlow(); // Reset the payment flow to let providers overwrite it.
 
         // Prepare the inline form of the selected payment option.
+        const providerId = this._getProviderId(radio);
         const providerCode = this._getProviderCode(radio);
         const paymentOptionId = this._getPaymentOptionId(radio);
         const paymentMethodCode = this._getPaymentMethodCode(radio);
         const flow = this._getPaymentFlow(radio);
-        await this._prepareInlineForm(providerCode, paymentOptionId, paymentMethodCode, flow);
+        await this._prepareInlineForm(
+            providerId, providerCode, paymentOptionId, paymentMethodCode, flow
+        );
 
         // Display the prepared inline form if it is not empty.
         const inlineForm = this._getInlineForm(radio);
@@ -205,13 +208,14 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * of the form.
      *
      * @private
+     * @param {number} providerId - The id of the selected payment option's provider.
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @param {string} flow - The payment flow of the selected payment option.
      * @return {void}
      */
-    async _prepareInlineForm(providerCode, paymentOptionId, paymentMethodCode, flow) {},
+    async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {},
 
     /**
      * Collapse all inline forms of the current widget.
@@ -235,9 +239,8 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @return {Dialog} The error dialog.
      */
     _displayErrorDialog(title, description = '', error = '') {
-        const checkedRadios = this.$('input[name="o_payment_radio"]:checked');
         return new Dialog(null, {
-            title: sprintf(_t("Error: %s"), title),
+            title: title,
             size: 'medium',
             $content: `<p>${escape(description) || ''}</p><p>${escape(error) || ''}</p>`, // TODO format
             buttons: [{ text: _t("Ok"), close: true }]
@@ -490,6 +493,17 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     },
 
     /**
+     * Determine and return the id of the provider of the selected payment option.
+     *
+     * @private
+     * @param {HTMLElement} radio - The radio button linked to the payment option.
+     * @return {number} The id of the provider of the selected payment option.
+     */
+    _getProviderId(radio) {
+        return Number(radio.dataset['providerId']);
+    },
+
+    /**
      * Determine and return the code of the provider of the selected payment option.
      *
      * @private
@@ -501,14 +515,14 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     },
 
     /**
-     * Determine and return the id of the provider of the selected payment option.
+     * Determine and return the state of the provider of the selected payment option.
      *
      * @private
      * @param {HTMLElement} radio - The radio button linked to the payment option.
-     * @return {number} The id of the provider of the selected payment option.
+     * @return {string} The state of the provider of the selected payment option.
      */
-    _getProviderId(radio) {
-        return Number(radio.dataset['providerId']);
+    _getProviderState(radio) {
+        return radio.dataset['providerState'];
     },
 
     //

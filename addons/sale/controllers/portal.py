@@ -8,14 +8,14 @@ from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.fields import Command
 from odoo.http import request
 
-from odoo.addons.payment.controllers import portal as payment_portal
 from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment.controllers import portal as payment_portal
 from odoo.addons.portal.controllers.mail import _message_post_helper
 from odoo.addons.portal.controllers import portal
 from odoo.addons.portal.controllers.portal import pager as portal_pager
 
 
-class CustomerPortal(portal.CustomerPortal):
+class CustomerPortal(portal.CustomerPortal, payment_portal.PaymentPortal):
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
@@ -210,7 +210,11 @@ class CustomerPortal(portal.CustomerPortal):
         )  # Make sure that the partner's company matches the order's company.
         portal_page_values = {'company_mismatch': company_mismatch, 'expected_company': company}
 
-        return {**portal_page_values, **payment_form_values}
+        return {
+            **portal_page_values,
+            **payment_form_values,
+            **self._get_extra_payment_form_values(**kwargs),
+        }
 
     @http.route(['/my/orders/<int:order_id>/accept'], type='json', auth="public", website=True)
     def portal_quote_accept(self, order_id, access_token=None, name=None, signature=None):
@@ -352,22 +356,22 @@ class PaymentPortal(payment_portal.PaymentPortal):
             })
         return super().payment_pay(*args, amount=amount, access_token=access_token, **kwargs)
 
-    def _get_custom_rendering_context_values(self, sale_order_id=None, **kwargs):
-        """ Override of payment to add the sale order id in the custom rendering context values.
+    def _get_extra_payment_form_values(self, sale_order_id=None, **kwargs):
+        """ Override of `payment` to add the sale order id to the payment form values.
 
         :param int sale_order_id: The sale order for which a payment id made, as a `sale.order` id
         :return: The extended rendering context values
         :rtype: dict
         """
-        rendering_context_values = super()._get_custom_rendering_context_values(**kwargs)
+        form_values = super()._get_extra_payment_form_values(sale_order_id=sale_order_id, **kwargs)
         if sale_order_id:
-            rendering_context_values['sale_order_id'] = sale_order_id
+            form_values['sale_order_id'] = sale_order_id
 
             # Interrupt the payment flow if the sales order has been canceled.
             order_sudo = request.env['sale.order'].sudo().browse(sale_order_id)
             if order_sudo.state == 'cancel':
-                rendering_context_values['amount'] = 0.0
-        return rendering_context_values
+                form_values['amount'] = 0.0
+        return form_values
 
     def _create_transaction(self, *args, sale_order_id=None, custom_create_values=None, **kwargs):
         """ Override of payment to add the sale order id in the custom create values.
