@@ -808,10 +808,7 @@ export class Record extends DataPoint {
         });
 
         for (const [fieldName, value] of Object.entries(toRaw(this.data))) {
-            if (
-                this.fields[fieldName].type === "one2many" ||
-                this.fields[fieldName].type === "many2many"
-            ) {
+            if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
                 value._updateContext(getFieldContext(this, fieldName));
             }
         }
