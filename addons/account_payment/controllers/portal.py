@@ -8,7 +8,7 @@ from odoo.addons.payment.controllers.portal import PaymentPortal
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 
 
-class PortalAccount(portal.PortalAccount):
+class PortalAccount(portal.PortalAccount, PaymentPortal):
 
     def _invoice_get_page_view_values(self, invoice, access_token, **kwargs):
         values = super()._invoice_get_page_view_values(invoice, access_token, **kwargs)
@@ -63,5 +63,9 @@ class PortalAccount(portal.PortalAccount):
             'transaction_route': f'/invoice/transaction/{invoice.id}/',
             'landing_route': _build_url_w_params(invoice.access_url, {'access_token': access_token})
         }
-        values.update(**portal_page_values, **payment_form_values)
+        values.update(
+            **portal_page_values,
+            **payment_form_values,
+            **self._get_extra_payment_form_values(**kwargs),
+        )
         return values

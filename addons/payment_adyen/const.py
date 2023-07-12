@@ -1,16 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 # Endpoints of the API.
-# See https://docs.adyen.com/api-explorer/#/CheckoutService/v67/overview for Checkout API
-# See https://docs.adyen.com/api-explorer/#/Recurring/v49/overview for Recurring API
+# See https://docs.adyen.com/api-explorer/#/CheckoutService/v70/overview for Checkout API
+# See https://docs.adyen.com/api-explorer/#/Recurring/v68/overview for Recurring API
 API_ENDPOINT_VERSIONS = {
-    '/disable': 49,                 # Recurring API
-    '/paymentMethods': 67,          # Checkout API
-    '/payments': 67,                # Checkout API
-    '/payments/details': 67,        # Checkout API
-    '/payments/{}/cancels': 67,     # Checkout API
-    '/payments/{}/captures': 67,    # Checkout API
-    '/payments/{}/refunds': 67,     # Checkout API
+    '/disable': 68,                 # Recurring API
+    '/paymentMethods': 70,          # Checkout API
+    '/payments': 70,                # Checkout API
+    '/payments/details': 70,        # Checkout API
+    '/payments/{}/cancels': 70,     # Checkout API
+    '/payments/{}/captures': 70,    # Checkout API
+    '/payments/{}/refunds': 70,     # Checkout API
 }
 
 # Adyen-specific mapping of currency codes in ISO 4217 format to the number of decimals.
@@ -21,6 +21,15 @@ CURRENCY_DECIMALS = {
     'CVE': 0,
     'IDR': 0,
     'ISK': 2,
+}
+
+# Mapping of payment method codes to Adyen codes.
+PAYMENT_METHODS_MAPPING = {  # TODO update after we have the full PM list
+    'mastercard': 'mc',
+    'apple_pay': 'applepay',
+    'unionpay': 'cup',
+    'bancontact': 'bcmc',
+    'sepa_debit': 'sepadirectdebit',
 }
 
 # Mapping of transaction states to Adyen result codes.

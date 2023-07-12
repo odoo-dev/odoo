@@ -166,7 +166,7 @@ class PaymentPortal(portal.CustomerPortal):
                 providers_sudo, **kwargs
             ),
         }
-        tx_context = {  # TODO ANV
+        tx_context = {
             'reference_prefix': reference,
             'amount': amount,
             'currency': currency,
@@ -176,9 +176,13 @@ class PaymentPortal(portal.CustomerPortal):
             'transaction_route': '/payment/transaction',
             'landing_route': '/payment/confirmation',
             'access_token': access_token,
-            # **self._get_custom_rendering_context_values(**kwargs),
         }
-        rendering_context = {**portal_page_values, **payment_form_values, **tx_context}
+        rendering_context = {
+            **portal_page_values,
+            **payment_form_values,
+            **tx_context,
+            **self._get_extra_payment_form_values(**kwargs),
+        }
         return request.render(self._get_payment_page_template_xmlid(**kwargs), rendering_context)
 
     @staticmethod
@@ -229,15 +233,15 @@ class PaymentPortal(portal.CustomerPortal):
             'access_token': access_token,
             'transaction_route': '/payment/transaction',
             'landing_route': '/my/payment_method',
-            **self._get_custom_rendering_context_values(**kwargs),
+            **self._get_extra_payment_form_values(**kwargs),
         }
         return request.render('payment.payment_methods', rendering_context)
 
-    def _get_custom_rendering_context_values(self, **kwargs):
-        """ Return a dict of additional rendering context values.
+    def _get_extra_payment_form_values(self, **kwargs):
+        """ Return a dict of extra payment form values to include in the rendering context.
 
-        :param dict kwargs: Optional data. This parameter is not used here
-        :return: The dict of additional rendering context values
+        :param dict kwargs: Optional data. This parameter is not used here.
+        :return: The dict of extra payment form values.
         :rtype: dict
         """
         return {}
