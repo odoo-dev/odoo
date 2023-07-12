@@ -58,7 +58,7 @@ LANGUAGE_CODES_MAPPING = {
 }
 
 # Mapping of payment method codes to AsiaPay codes.
-PAYMENT_METHODS_MAPPING = {
+PAYMENT_METHODS_MAPPING = {  # TODO update after we have the full PM list
     'card': 'CC',
     'visa': 'VISA',
     'mastercard': 'Master',
