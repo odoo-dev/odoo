@@ -334,6 +334,7 @@ QUnit.module("Analytic", (hooks) => {
         // apply the changes to both move lines
         triggerHotkey("Escape");
         await nextTick();
+        await nextTick();
         await click(target.querySelector(".modal-dialog .btn-primary"));
         assert.containsN(target, ".badge", 10, "should contain 2 rows of 5 tags each");
 
