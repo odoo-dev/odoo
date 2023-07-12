@@ -702,7 +702,12 @@ QUnit.module("Fields", (hooks) => {
                     </sheet>
                 </form>`,
             mockRPC(route, { model, method, args }) {
-                if (model === "product" && method === "read" && args[1].length === 1 && args[1][0] === "display_name") {
+                if (
+                    model === "product" &&
+                    method === "read" &&
+                    args[1].length === 1 &&
+                    args[1][0] === "display_name"
+                ) {
                     nbNameGet++;
                 }
             },
@@ -715,6 +720,7 @@ QUnit.module("Fields", (hooks) => {
         );
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 41);
+        await nextTick();
         assert.strictEqual(nbNameGet, 2, "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
@@ -911,6 +917,8 @@ QUnit.module("Fields", (hooks) => {
 
             // Select the second product without changing the model
             await click(target, ".o_list_table .reference_field");
+            await nextTick();
+
             await click(target, ".o_list_table .reference_field input");
 
             // Enter to select it
@@ -959,6 +967,7 @@ QUnit.module("Fields", (hooks) => {
             );
 
             await click(target.querySelector(".o_list_table .o_data_cell"));
+            await nextTick();
             await editInput(target, ".o_list_table [name='name'] input", "plop");
             await click(target, ".o_form_view");
             assert.strictEqual(

@@ -1,13 +1,14 @@
 /* @odoo-module */
 
-import { useComponent, markup, onWillStart, onWillDestroy } from "@odoo/owl";
+import { markup, onWillDestroy, onWillStart, onWillUpdateProps, useComponent } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { x2ManyCommands } from "@web/core/orm_service";
-import { omit } from "@web/core/utils/objects";
-import { batched, effect } from "@web/core/utils/reactive";
-import { orderByToString } from "@web/views/utils";
 import { Deferred } from "@web/core/utils/concurrency";
+import { omit } from "@web/core/utils/objects";
+import { effect } from "@web/core/utils/reactive";
+import { batched } from "@web/core/utils/timing";
+import { orderByToString } from "@web/views/utils";
 
 export function makeActiveField({
     context,
@@ -485,22 +486,33 @@ export function fromUnityToServerValues(values, fields, activeFields) {
  */
 export function onWillUpdateRecord(callback) {
     const component = useComponent();
-    const def = new Deferred();
     let alive = true;
-    effect(
-        batched(async (record) => {
-            if (!alive) {
-                // effect doesn't clean up when the component is unmounted.
-                // We must do it manually.
-                return;
-            }
-            await callback(record);
-            def.resolve();
-        }),
-        [component.props.record]
-    );
+    const fct = (props) => {
+        const def = new Deferred();
+        effect(
+            batched(
+                async (record) => {
+                    if (!alive) {
+                        // effect doesn't clean up when the component is unmounted.
+                        // We must do it manually.
+                        return;
+                    }
+                    await callback(record);
+                    def.resolve();
+                },
+                () => new Promise((resolve) => window.requestAnimationFrame(resolve))
+            ),
+            [props.record]
+        );
+        return def;
+    };
     onWillDestroy(() => {
         alive = false;
     });
-    onWillStart(() => def);
+    onWillStart(() => fct(component.props));
+    onWillUpdateProps((props) => {
+        if (props.record.id !== component.props.record.id) {
+            return fct(props);
+        }
+    });
 }
