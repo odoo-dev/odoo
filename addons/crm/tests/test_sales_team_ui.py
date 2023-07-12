@@ -5,10 +5,9 @@ from odoo import tests
 from odoo.tests import HttpCase
 from odoo.tests.common import users
 from odoo.addons.sales_team.tests.common import SalesTeamCommon
-import unittest
 
 
-@tests.tagged('post_install', '-at_install', 'plop')
+@tests.tagged('post_install', '-at_install')
 class TestUi(HttpCase, SalesTeamCommon):
 
     @users('salesmanager')

@@ -2,6 +2,7 @@
 
 import logging
 import odoo.tests
+
 _logger = logging.getLogger(__name__)
 
 
