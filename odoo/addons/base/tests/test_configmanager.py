@@ -132,7 +132,7 @@ class TestConfigManager(TransactionCase):
             'smtp_ssl_private_key_filename': '',
 
             # database
-            'db_name': '',
+            'db_name': [],
             'db_user': '',
             'db_password': '',
             'pg_path': '',
@@ -248,7 +248,7 @@ class TestConfigManager(TransactionCase):
             'smtp_ssl_private_key_filename': '/var/www/key',
 
             # database
-            'db_name': 'horizon',
+            'db_name': ['horizon'],
             'db_user': 'kiwi',
             'db_password': 'Tigrou007',
             'pg_path': '/binary/pg_path',
@@ -331,7 +331,7 @@ class TestConfigManager(TransactionCase):
             'csv_internal_sep': ',',
             'db_host': '',
             'db_maxconn': 64,
-            'db_name': '',
+            'db_name': [],
             'db_password': '',
             'db_port': None,
             'db_sslmode': 'prefer',

@@ -135,7 +135,11 @@ def get_db_name():
     # database from XML-RPC).
     if not db and hasattr(threading.current_thread(), 'dbname'):
         return threading.current_thread().dbname
-    return db
+    if len(db) > 1:
+        _logger.warning(
+            "Multiple databases provided with %s, use %r with %s",
+            odoo.tools.config.options_index['db_name'], db[0], get_db_name)
+    return db[0]
 
 
 standalone_tests = defaultdict(list)
@@ -159,20 +163,6 @@ def standalone(*tags):
         return func
 
     return register
-
-
-def test_xsd(url=None, path=None, skip=False):
-    def decorator(func):
-        def wrapped_f(self, *args, **kwargs):
-            if not skip:
-                xmls = func(self, *args, **kwargs)
-                _validate_xml(self.env, url, path, xmls)
-        return wrapped_f
-    return decorator
-
-
-# For backwards-compatibility - get_db_name() should be used instead
-DB = get_db_name()
 
 
 def new_test_user(env, login='', groups='base.group_user', context=None, **kwargs):
