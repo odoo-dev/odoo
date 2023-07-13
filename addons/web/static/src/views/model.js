@@ -130,6 +130,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
     );
 
     const globalState = component.props.globalState || {};
+    const localState = component.props.state || {};
     let useSampleModel = Boolean(
         "useSampleModel" in globalState
             ? globalState.useSampleModel
@@ -137,7 +138,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
     );
     model.useSampleModel = useSampleModel;
     const orm = model.orm;
-    let sampleORM = globalState.sampleORM;
+    let sampleORM = localState.sampleORM;
     const user = useService("user");
     let started = false;
 
@@ -173,7 +174,10 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
 
     useSetupView({
         getGlobalState() {
-            return { sampleORM, useSampleModel };
+            return { useSampleModel };
+        },
+        getLocalState: () => {
+            return { sampleORM };
         },
     });
 
