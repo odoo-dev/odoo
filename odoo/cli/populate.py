@@ -37,7 +37,17 @@ class Populate(Command):
         parser.add_option_group(group)
         opt = odoo.tools.config.parse_config(cmdargs)
         populate_models = opt.populate_models and set(opt.populate_models.split(','))
-        dbname = odoo.tools.config['db_name']
+
+        dbnames = odoo.tools.config['db_name']
+        if not dbnames:
+            _logger.error('Populate command needs a database name. Use "-d" argument')
+            sys.exit(1)
+        if len(dbnames) > 1:
+            _logger.warning(
+                "Multiple databases provided with %s, only the first one %r will be populated",
+                odoo.tools.config.options_index['db_name'], dbnames[0])
+        dbname = dbnames[0]
+
         registry = odoo.registry(dbname)
         with registry.cursor() as cr:
             env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})

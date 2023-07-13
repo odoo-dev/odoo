@@ -41,7 +41,7 @@ In the latter mode, only the custom code is accounted for.
         c = cloc.Cloc()
         if opt.database:
             config.parse_config(['-d', opt.database] + unknown)
-            c.count_database(opt.database)
+            c.count_database()
         if opt.path:
             for i in opt.path:
                 c.count_path(i)

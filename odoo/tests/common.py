@@ -111,7 +111,11 @@ def get_db_name():
     # database from XML-RPC).
     if not db and hasattr(threading.current_thread(), 'dbname'):
         return threading.current_thread().dbname
-    return db
+    if len(db) > 1:
+        _logger.warning(
+            "Multiple databases provided with %s, the first one %r is returned by %s",
+            odoo.tools.config.options_index['db_name'], db[0], get_db_name)
+    return db[0]
 
 
 standalone_tests = defaultdict(list)
@@ -135,10 +139,6 @@ def standalone(*tags):
         return func
 
     return register
-
-
-# For backwards-compatibility - get_db_name() should be used instead
-DB = get_db_name()
 
 
 def new_test_user(env, login='', groups='base.group_user', context=None, **kwargs):

@@ -23,10 +23,15 @@ class Neutralize(Command):
         parser.add_option_group(group)
         opt = odoo.tools.config.parse_config(args)
 
-        dbname = odoo.tools.config['db_name']
-        if not dbname:
+        dbnames = odoo.tools.config['db_name']
+        if not dbnames:
             _logger.error('Neutralize command needs a database name. Use "-d" argument')
             sys.exit(1)
+        if len(dbnames) > 1:
+            _logger.warning(
+                "Multiple databases provided with %s, only the first one %r will be neutralised",
+                odoo.tools.config.options_index['db_name'], dbnames[0])
+        dbname = dbnames[0]
 
         if not opt.to_stdout:
             _logger.info("Starting %s database neutralization", dbname)

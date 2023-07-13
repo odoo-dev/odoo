@@ -120,5 +120,14 @@ class Shell(Command):
 
     def run(self, args):
         self.init(args)
-        self.shell(config['db_name'])
+
+        dbnames = config['db_name']
+        if len(dbnames) > 1:
+            _logger.warning(
+                "Multiple databases provided with %s, the shell will open on the first one %r",
+                odoo.tools.config.options_index['db_name'], dbnames[0])
+        if not dbnames:
+            self.shell(None)
+        else:
+            self.shell(dbnames[0])
         return 0

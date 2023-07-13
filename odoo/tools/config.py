@@ -220,8 +220,8 @@ class configmanager:
 
         # Database Group
         group = optparse.OptionGroup(parser, "Database related options")
-        group.add_option("-d", "--database", dest="db_name",
-                         help="specify the database name")
+        group.add_option("-d", "--database", dest="db_name", type='comma',  my_default=[],
+                         help="database(s) used when installing or updating modules. Providing a comma-separated list restrict access to databases provided in list.")
         group.add_option("-r", "--db_user", dest="db_user",
                          help="specify the database user name")
         group.add_option("-w", "--db_password", dest="db_password",
@@ -450,8 +450,7 @@ class configmanager:
         self._load_cli_options(opt)
         self._load_file_options(self['config'])
 
-        ismultidb = ',' in (self.options.get('db_name') or '')
-        die(ismultidb and (self['init'] or self['update']),
+        die(len(self['db_name']) > 1 and (self['init'] or self['update']),
             "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
 
         self._postprocess_options()
