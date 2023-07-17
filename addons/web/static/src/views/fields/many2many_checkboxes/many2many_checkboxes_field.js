@@ -52,7 +52,6 @@ export const many2ManyCheckboxesField = {
     displayName: _lt("Checkboxes"),
     supportedTypes: ["many2many"],
     isEmpty: () => false,
-    legacySpecialData: "_fetchSpecialRelation",
     extractProps(fieldInfo, dynamicInfo) {
         return {
             domain: dynamicInfo.domain(),

@@ -91,7 +91,6 @@ export const radioField = {
         label: string,
         domain: dynamicInfo.domain(),
     }),
-    legacySpecialData: "_fetchSpecialMany2ones",
 };
 
 registry.category("fields").add("radio", radioField);
