@@ -86,7 +86,6 @@ export const selectionField = {
     component: SelectionField,
     displayName: _lt("Selection"),
     supportedTypes: ["many2one", "selection"],
-    legacySpecialData: "_fetchSpecialRelation",
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
     extractProps({ attrs }, dynamicInfo) {
         return {

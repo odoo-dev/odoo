@@ -83,7 +83,6 @@ export const badgeSelectionField = {
     displayName: _lt("Badges"),
     supportedTypes: ["many2one", "selection"],
     isEmpty: (record, fieldName) => record.data[fieldName] === false,
-    legacySpecialData: "_fetchSpecialMany2ones",
     extractProps: (fieldInfo, dynamicInfo) => ({
         domain: dynamicInfo.domain(),
     }),
