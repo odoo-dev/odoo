@@ -105,6 +105,7 @@ export function useModel(ModelClass, params, options = {}) {
  * @param {Object} params
  * @param {Object} [options]
  * @param {Function} [options.onUpdate]
+ * @param {Function} [options.onWillStart]
  * @returns {InstanceType<T>}
  */
 export function useModelWithSampleData(ModelClass, params, options = {}) {
@@ -161,6 +162,9 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
         }
     }
     onWillStart(async () => {
+        if (options.onWillStart) {
+            await options.onWillStart();
+        }
         await load(component.props);
         if (options.onWillStartAfterLoad) {
             await options.onWillStartAfterLoad();
