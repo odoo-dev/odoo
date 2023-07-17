@@ -167,12 +167,9 @@ export class RelationalModel extends Model {
     // Public
     // -------------------------------------------------------------------------
 
-    exportConfig() {
-        return this.config;
-    }
-
     exportState() {
         return {
+            config: this.config,
             specialDataCaches: this.specialDataCaches,
         };
     }

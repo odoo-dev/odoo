@@ -124,7 +124,6 @@ export class KanbanController extends Component {
             getLocalState: () => {
                 return {
                     activeBars: this.progressBarState?.activeBars,
-                    modelConfig: this.model.exportConfig(),
                     modelState: this.model.exportState(),
                 };
             },
@@ -153,7 +152,7 @@ export class KanbanController extends Component {
         const { resModel, archInfo, limit, defaultGroupBy } = this.props;
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
         addFieldDependencies(activeFields, fields, this.progressBarAggregateFields);
-        const modelConfig = this.props.state?.modelConfig || {
+        const modelConfig = this.props.state?.modelState?.config || {
             resModel,
             activeFields,
             fields,

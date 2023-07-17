@@ -102,7 +102,6 @@ export class ListController extends Component {
             getLocalState: () => {
                 const renderer = this.rootRef.el.querySelector(".o_list_renderer");
                 return {
-                    modelConfig: this.model.exportConfig(),
                     modelState: this.model.exportState(),
                     rendererScrollPositions: {
                         left: renderer.scrollLeft,
@@ -167,7 +166,7 @@ export class ListController extends Component {
             groupByInfo[fieldName] = extractFieldsFromArchInfo({ fieldNodes }, fields);
         }
 
-        const modelConfig = this.props.state?.modelConfig || {
+        const modelConfig = this.props.state?.modelState?.config || {
             resModel: this.props.resModel,
             fields,
             activeFields,
