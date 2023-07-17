@@ -49,6 +49,13 @@ export class DataPoint extends Reactive {
         this.setup(config, data, options);
     }
 
+    /**
+     * @abstract
+     * @param {Object} params
+     * @param {Object} state
+     */
+    setup() {}
+
     get activeFields() {
         return this.config.activeFields;
     }
@@ -78,13 +85,6 @@ export class DataPoint extends Reactive {
     // -------------------------------------------------------------------------
     // Public
     // -------------------------------------------------------------------------
-
-    /**
-     * @abstract
-     * @param {Object} params
-     * @param {Object} state
-     */
-    setup() {}
 
     /**
      * @param {string} fieldName
