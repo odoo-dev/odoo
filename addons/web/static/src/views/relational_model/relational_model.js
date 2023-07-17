@@ -72,11 +72,13 @@ import { Domain } from "@web/core/domain";
 
 /**
  * @typedef Hooks
+ * @property {Function} [onWillLoadRoot]
  * @property {Function} [onWillSaveRecord]
  * @property {Function} [onRecordSaved]
  * @property {Function} [onWillSaveMulti]
  * @property {Function} [onSavedMulti]
  * @property {Function} [onWillSetInvalidField]
+ * @property {Function} [onRecordChanged]
  */
 
 /**
