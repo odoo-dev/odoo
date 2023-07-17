@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { reactive } from "@odoo/owl";
+import { Reactive } from "@web/core/utils/reactive";
 import { evalDomain } from "@web/views/utils";
 import { getId } from "./utils";
 
@@ -27,12 +27,6 @@ import { getId } from "./utils";
  * @property {boolean} required
  * @property {boolean} onChange
  */
-
-class Reactive {
-    constructor() {
-        return reactive(this);
-    }
-}
 
 export class DataPoint extends Reactive {
     /**
