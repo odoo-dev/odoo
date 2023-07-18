@@ -936,6 +936,14 @@ export class MockServer {
 
         let serverValues = {};
         const onchangeValues = {};
+        for (const change in changes) {
+            if (!(change in this.models[modelName].fields)) {
+                throw makeServerError({
+                    type: "ValidationError",
+                    message: `Field ${change} does not exist`,
+                });
+            }
+        }
         if (resId) {
             serverValues = this.mockRead(modelName, [args[0], fieldsFromView], kwargs)[0];
         } else if (firstOnChange) {
@@ -963,6 +971,7 @@ export class MockServer {
         }
         fields.forEach((field) => {
             if (field in onchanges) {
+                // debugger;
                 const target = Object.assign({}, serverValues, onchangeValues, changes);
                 const handler = {
                     set(_, key, val) {
