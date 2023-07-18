@@ -105,7 +105,11 @@ export class Group extends DataPoint {
         if (this.config.isFolded) {
             await this.list.load();
         }
-        this.config.isFolded = !this.config.isFolded;
+        this.model._updateConfig(
+            this.config,
+            { isFolded: !this.config.isFolded },
+            { noReload: true }
+        );
     }
 
     // -------------------------------------------------------------------------

@@ -69,7 +69,7 @@ export class DataPoint extends Reactive {
     }
 
     get config() {
-        return this._config; //FIXME Remove this, it's only for dev purpose to see if the config is updated somewhere
+        return this._config;
     }
 
     get context() {
