@@ -270,7 +270,7 @@ export class DynamicList extends DataPoint {
         if (this.resModel === resModel && !this.canResequence()) {
             return originalList;
         }
-        const handleField = this.handleField;
+        const handleField = this.resModel === resModel ? this.handleField : DEFAULT_HANDLE_FIELD;
         const dataPoints = [...originalList];
         const order = this.orderBy.find((o) => o.name === handleField);
         const asc = !order || order.asc;
