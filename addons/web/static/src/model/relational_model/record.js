@@ -9,6 +9,7 @@ import { pick } from "@web/core/utils/objects";
 import { escape } from "@web/core/utils/strings";
 import { DataPoint } from "./datapoint";
 import { getFieldContext, parseServerValue } from "./utils";
+import { x2ManyCommands } from "@web/core/orm_service";
 
 export class Record extends DataPoint {
     static type = "Record";
@@ -406,14 +407,12 @@ export class Record extends DataPoint {
             limit: limit || Number.MAX_SAFE_INTEGER,
             context: {}, // will be set afterwards, see "_updateContext" in "_setEvalContext"
         };
-        let staticList;
         const options = {
             onUpdate: ({ withoutOnchange } = {}) =>
-                this._update({ [fieldName]: staticList }, { withoutOnchange }),
+                this._update({ [fieldName]: [] }, { withoutOnchange }),
             parent: this,
         };
-        staticList = new this.model.constructor.StaticList(this.model, config, data, options);
-        return staticList;
+        return this.model.constructor.StaticList(this.model, config, data, options);
     }
 
     _discard() {
@@ -607,6 +606,7 @@ export class Record extends DataPoint {
         await Promise.all([
             this._preprocessMany2oneChanges(changes),
             this._preprocessReferenceChanges(changes),
+            this._preprocessX2manyChanges(changes),
         ]);
     }
 
@@ -718,6 +718,29 @@ export class Record extends DataPoint {
             }
         }
         return Promise.all(proms);
+    }
+
+    async _preprocessX2manyChanges(changes) {
+        for (const [fieldName, value] of Object.entries(changes)) {
+            if (
+                this.fields[fieldName].type !== "one2many" &&
+                this.fields[fieldName].type !== "many2many"
+            ) {
+                continue;
+            }
+            const list = this.data[fieldName];
+
+            for (const command of value) {
+                switch (command[0]) {
+                    case x2ManyCommands.REPLACE_WITH:
+                        await list._replaceWith(command[1]); // Move it to _applyCommands ??
+                        break;
+                    default:
+                        await list._applyCommands([command]);
+                }
+            }
+            changes[fieldName] = list;
+        }
     }
 
     _removeInvalidFields(fieldNames) {
