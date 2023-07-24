@@ -354,25 +354,25 @@ function patchAssets() {
 
 export async function setupTests() {
     // uncomment to debug memory leaks in qunit suite
-    // let memoryBeforeModule;
-    // QUnit.moduleStart(({ tests }) => {
-    //     if (tests.length) {
-    //         window.gc();
-    //         memoryBeforeModule = window.performance.memory.usedJSHeapSize;
-    //     }
-    // });
-    // QUnit.moduleDone(({ name }) => {
-    //     if (memoryBeforeModule) {
-    //         window.gc();
-    //         const afterGc = window.performance.memory.usedJSHeapSize;
-    //         console.log(
-    //             `MEMINFO - After suite "${name}" - after gc: ${afterGc} delta: ${
-    //                 afterGc - memoryBeforeModule
-    //             }`
-    //         );
-    //         memoryBeforeModule = null;
-    //     }
-    // });
+    let memoryBeforeModule;
+    QUnit.moduleStart(({ tests }) => {
+        if (tests.length) {
+            window.gc();
+            memoryBeforeModule = window.performance.memory.usedJSHeapSize;
+        }
+    });
+    QUnit.moduleDone(({ name }) => {
+        if (memoryBeforeModule) {
+            window.gc();
+            const afterGc = window.performance.memory.usedJSHeapSize;
+            console.log(
+                `MEMINFO - After suite "${name}" - after gc: ${afterGc} delta: ${
+                    afterGc - memoryBeforeModule
+                }`
+            );
+            memoryBeforeModule = null;
+        }
+    });
 
     QUnit.testStart(() => {
         checkGlobalObjectsIntegrity();
