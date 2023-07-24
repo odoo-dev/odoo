@@ -300,7 +300,7 @@ export class Chatter extends Component {
     async reloadParentView() {
         await this.props.saveRecord?.();
         if (this.props.webRecord) {
-            await this.props.webRecord.model.root.load(this.props.threadId);
+            await this.props.webRecord.load();
             this.props.webRecord.model.notify();
         }
     }
