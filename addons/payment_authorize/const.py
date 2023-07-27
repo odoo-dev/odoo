@@ -8,3 +8,13 @@ TRANSACTION_STATUS_MAPPING = {
     'voided': ['voided'],
     'refunded': ['refundPendingSettlement', 'refundSettledSuccessfully'],
 }
+
+PAYMENT_METHODS_MAPPING = {
+    'amex': 'AmericanExpress',
+    'diners': 'DinersClub',
+    'discover': 'Discover',
+    'jcb': 'JCB',
+    'mastercard': 'Mastercard',
+    'visa': 'Visa',
+    'card': 'creditCard'
+}

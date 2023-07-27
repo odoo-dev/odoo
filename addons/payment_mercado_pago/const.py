@@ -34,3 +34,14 @@ TRANSACTION_STATUS_MAPPING = {
     'done': ('approved', 'refunded'),
     'canceled': ('cancelled', 'null'),
 }
+
+PAYMENT_METHODS_MAPPING = {
+    'santander': 'serfin',
+    'card': 'credit_card',
+    'bbva_bancomer': 'bancomer',
+    'citibanamex': 'banamex',
+    'klarna_pay_over_time': 'larnasliceit',
+    'bank_transfer': 'banktransfer',
+    'p24': 'przelewy24',
+    'sepa_debit': 'directdebit',
+}

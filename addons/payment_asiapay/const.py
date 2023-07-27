@@ -121,3 +121,32 @@ SUCCESS_CODE_MAPPING = {
     'done': ('0',),
     'error': ('1',),
 }
+
+PAYMENT_METHODS_MAPPING = {
+    'card': 'CC',
+    'mastercard': 'Master',
+    'diners': 'Diners',
+    'unionpay': 'CHINAPAY',
+    'alipay_hk': 'ALIPAYHKONL',
+    'krungthai_bank': 'KTB',
+    'boa': 'KRUNGSRIONLINE',
+    'ttb': 'TMB',
+    'bangkok_bank': 'IBANKING',
+    'maybank': 'M2U',
+    'cimb': 'CIMBCLICK',
+    'wechat_pay': 'WECHATONL',
+    'momo': 'MOMOPAY',
+    'maya': 'PayMaya',
+    'gcash': 'GCash',
+    'duitnow': 'DuitNow',
+    'touchngo': 'TouchnGo',
+    'humm': 'humm',
+    'zip': 'ZIPPAY',
+    'pace': 'Pace',
+    'tendopay': 'TendoPay',
+    'masterpass': 'MP',
+    'samsung_pay': 'SAMSUNG',
+    'googlepay': 'GOOGLE',
+    'apple_pay': 'APPLEPAY',
+
+}
