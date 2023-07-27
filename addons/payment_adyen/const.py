@@ -44,3 +44,33 @@ RESULT_CODES_MAPPING = {
     'error': ('Error',),
     'refused': ('Refused',),
 }
+
+PAYMENT_METHODS_MAPPING = {
+    'apple_pay': 'applepay',
+    'bacs_direct_debit': 'directdebit_GB',
+    'bancontact': 'bcmc',
+    'bancontact_mobile': 'bcmc_mobile',
+    'boleto_bancario': 'boletobancario',
+    'gopay': 'gopay_wallet',
+    'becs_direct_debit': 'au_becs_debit',
+    'afterpay' : 'afterpaytouch',
+    'klarna_pot' : 'klarna_account',
+    'momo': 'momo_wallet',
+    'napas_card': 'momo_atm',
+    'paytrail': 'ebanking_FI',
+    'online_banking_czech_republic': 'onlineBanking_CZ',
+    'online_banking_india': 'onlinebanking_IN',
+    'fpx': 'molpay_ebanking_fpx_MY',
+    'p24': 'onlineBanking_PL',
+    'online_banking_slovakia': 'onlineBanking_SK',
+    'online_banking_thailand': 'molpay_ebanking_TH',
+    'open_banking': 'paybybank',
+    'samsung_pay': 'samsungpay',
+    'sepa_debit': 'sepadirectdebit',
+    'sofort': 'directEbanking',
+    'wallets': 'wallet_IN',
+    'wechat_pay': 'wechatpayQR',
+    
+
+
+}
