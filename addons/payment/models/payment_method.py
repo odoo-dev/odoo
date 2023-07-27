@@ -43,7 +43,28 @@ class PaymentMethod(models.Model):
         max_width=45,
         max_height=30,
     )  # TODO see if still necessary; if ratio is still correct
-
+    supported_country_ids = fields.Many2many(
+        string="Supported counstries", comodel_name='res.country'
+    )
+    supported_currency_ids = fields.Many2many(
+        string="Supported counstries", comodel_name='res.currency'
+    )
+    support_tokenization = fields.Boolean(
+        string="Tokenization Supported", compute='_compute_feature_support_fields'
+    )
+    support_manual_capture = fields.Selection(
+        string="Manual Capture Supported",
+        selection=[('full_only', "Full Only"), ('partial', "Partial")],
+        compute='_compute_feature_support_fields',
+    )
+    support_express_checkout = fields.Boolean(
+        string="Express Checkout Supported", compute='_compute_feature_support_fields'
+    )
+    support_refund = fields.Selection(
+        string="Type of Refund Supported",
+        selection=[('full_only', "Full Only"), ('partial', "Partial")],
+        compute='_compute_feature_support_fields',
+    )
     # === BUSINESS METHODS === #
 
     def _get_compatible_payment_methods(self, provider_ids):

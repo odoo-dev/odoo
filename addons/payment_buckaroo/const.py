@@ -24,3 +24,23 @@ SUPPORTED_CURRENCIES = [
     'CHF',
     'USD',
 ]
+
+PAYMENT_METHODS_MAPPING = {
+    'alipay': 'Alipay',
+    'apple_pay': 'applepay',
+    'bancontact': 'bancontactmrcash',
+    'billink': 'Billink',
+    'in3': 'Capayable',
+    'kbc': 'KBCPaymentButton',
+    'bank_reference': 'PayByBank',
+    'p24': 'Przelewy24',
+    'sepa_debit': 'SepaDirectDebit',
+    'sofort': 'sofortueberweisung',
+    'tinka': 'Tinka',
+    'sepa_transfer': 'transfer',
+    'trustly': 'Trustly',
+    'wechat_pay': 'WeChatPay',
+    'klarna': 'klarnakp',
+    'afterpay_riverty': 'afterpay',
+}
+
