@@ -331,7 +331,6 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         }).guardedCatch(error => {
             error.event.preventDefault();
             this._displayErrorDialog(
-                _t("Server Error"),
                 _t("We are not able to process your payment."),
                 error.message.data.message,
             );

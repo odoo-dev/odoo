@@ -106,13 +106,13 @@ class PaymentPortal(portal.CustomerPortal):
         if not currency or not currency.active:
             raise werkzeug.exceptions.NotFound()  # The currency must exist and be active.
 
-        # Select all the payment methods and tokens that match the constraints.
+        # Select all the payment methods and tokens that match the payment context.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company_id, partner_sudo.id, amount, currency_id=currency.id, **kwargs
         )  # In sudo mode to read the fields of providers and partner (if logged out).
-        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
+        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
             providers_sudo.ids
-        )
+        )  # TODO check if need to add back sudo() or remove sudo_ from the name
         # if provider_id in providers_sudo.ids:  # Only keep the desired provider if it's suitable TODO ANV drop feature
         #     providers_sudo = providers_sudo.browse(provider_id)
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
@@ -146,7 +146,7 @@ class PaymentPortal(portal.CustomerPortal):
         # fees_by_provider = {
         #     provider_sudo: provider_sudo._compute_fees(amount, currency, partner_sudo.country_id)
         #     for provider_sudo in providers_sudo.filtered('fees_active')
-        # } TODO ANV re-implement
+        # } TODO drop feature
 
         # Generate a new access token in case the partner id or the currency id was updated
         access_token = payment_utils.generate_access_token(partner_sudo.id, amount, currency.id)
@@ -162,7 +162,7 @@ class PaymentPortal(portal.CustomerPortal):
             # 'mode': 'validation',  # TODO remove me
             # 'allow_token_selection': False,  # TODO remove me
             # 'default_token_id': token_1.id,  # TODO remove me
-            'show_tokenize_input_mapping': self._compute_show_tokenize_input_mapping(
+            'show_tokenize_input_mapping': PaymentPortal._compute_show_tokenize_input_mapping(
                 providers_sudo, **kwargs
             ),
         }
