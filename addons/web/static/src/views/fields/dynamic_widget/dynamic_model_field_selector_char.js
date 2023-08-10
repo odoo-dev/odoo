@@ -16,6 +16,7 @@ export class DynamicModelFieldSelectorChar extends CharField {
         ...CharField.props,
         resModel : { type: String, optional: true },
         onlySearchable: { type: Boolean, optional: true },
+        followRelations: { type: Boolean, optional: true },
     }
 
     /**
@@ -39,6 +40,7 @@ export class DynamicModelFieldSelectorChar extends CharField {
             update: this._onRecordUpdate.bind(this),
             isDebugMode: !!this.env.debug,
             filter: this.filter.bind(this),
+            followRelations: this.props.followRelations,
         };
     }
 
@@ -62,6 +64,7 @@ export const dynamicModelFieldSelectorChar = {
     component: DynamicModelFieldSelectorChar,
     extractProps({ options }, dynamicInfo) {
         return {
+            followRelations: options.follow_relations ?? true,
             onlySearchable: archParseBoolean(options.only_searchable),
             resModel: options.model,
         };
