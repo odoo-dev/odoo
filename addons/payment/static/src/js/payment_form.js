@@ -524,44 +524,6 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         return radio.dataset['providerState'];
     },
 
-    //
-    // /**
-    //  * TODO.
-    //
-    // /**
-    //  * Determine and return the id of the selected payment method.
-    //  *
-    //  * @private
-    //  * @param {HTMLElement} radio - The radio button linked to the payment option.
-    //  * @return {number} The id of the selected payment method.
-    //  */
-    // _getPaymentMethodIdFromRadio(radio) {
-    //     return Number(radio.dataset['paymentMethodId']);
-    // },
-    //
-    //
-    //
-    // /**
-    //  * Redirect the customer by submitting the redirect form included in the processing values.
-    //  *
-    //  * For a provider to redefine the processing of the payment with redirection flow, it must
-    //  * override this method.
-    //  *
-    //  * @private
-    //  * @param {string} code - The code of the provider.
-    //  * @param {number} providerId - The id of the provider handling the transaction.
-    //  * @param {object} processingValues - The processing values of the transaction.
-    //  * @return {void}
-    //  */
-    // _processRedirectPayment(code, providerId, processingValues) {
-    //     const template = document.createElement('template');
-    //     template.innerHTML = processingValues['redirect_form_html'].trim();
-    //     const redirectForm = template.content.firstChild;
-    //     redirectForm.setAttribute('target', '_top'); // Ensure ext. redirections when in an iframe.
-    //     this.el.appendChild(redirectForm);  // Insert the redirect form in the DOM.
-    //     redirectForm.submit();  // Submit the form.
-    // },
-
 });
 
 export default publicWidget.registry.PaymentForm;
