@@ -2039,7 +2039,7 @@
 
     <template id="payment" name="Payment">
         <t t-call="website.layout">
-            <t t-set="additional_title">Shop - Select Payment Provider</t>
+            <t t-set="additional_title">Shop - Select Payment Method</t>
             <t t-set="no_footer" t-value="1"/>
 
             <div id="wrap">
@@ -2074,10 +2074,11 @@
                                 <div class="mt-3">
                                     <h3 class="mb24">Pay with </h3>
                                 </div>
-                                <div t-if="providers or tokens" id="payment_method">
-                                    <t t-call="payment.checkout">
-                                        <t t-set="footer_template_id" t-value="'website_sale.payment_footer'"/>
-                                        <t t-set="submit_button_label">Pay Now</t>
+                                <div t-if="payment_methods_sudo or tokens_sudo" id="payment_method">
+                                    <t t-call="payment.form">
+                                        <!-- TODO -->
+<!--                                        <t t-set="footer_template_id" t-value="'website_sale.payment_footer'"/>-->
+<!--                                        <t t-set="submit_button_label">Pay Now</t>-->
                                     </t>
                                 </div>
                                 <div t-else="" class="alert alert-warning">
@@ -2123,6 +2124,7 @@
         </t>
     </template>
 
+    <!-- TODO payment.form doesn't accept a custom footer anymore -->
     <template id="payment_footer" name="Payment">
         <div name="o_checkbox_container"
              class="form-check mt-2 o_accept_tc_button"/>

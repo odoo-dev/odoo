@@ -551,10 +551,10 @@ class PaymentProvider(models.Model):
     def _is_tokenization_required(self, **kwargs):
         """ Return whether tokenizing the transaction is required given its context.
 
-        For a module to make the tokenization required based on the transaction context, it must
+        For a module to make the tokenization required based on the payment context, it must
         override this method and return whether it is required.
 
-        :param dict kwargs: The transaction context. This parameter is not used here.
+        :param dict kwargs: The payment context. This parameter is not used here.
         :return: Whether tokenizing the transaction is required.
         :rtype: bool
         """

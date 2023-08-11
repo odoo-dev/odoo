@@ -21,7 +21,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     async start() {
         // Synchronously initialize txContext before any await.
-        this.txContext = {};
+        this.txContext = {}; // TODO rename to paymentContext
         Object.assign(this.txContext, this.el.dataset);
 
         await this._super(...arguments);
@@ -441,8 +441,8 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      *
      * As some providers implement both direct payments and the payment with redirection flow, we
      * cannot infer it from the radio button only. The radio button indicates only whether the
-     * payment option is a token. If not, the transaction context is looked up to determine whether
-     * the flow is 'direct' or 'redirect'.
+     * payment option is a token. If not, the payment context is looked up to determine whether the
+     * flow is 'direct' or 'redirect'.
      *
      * @private
      * @param {HTMLInputElement} radio - The radio button linked to the payment option.

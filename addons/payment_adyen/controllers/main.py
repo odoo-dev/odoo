@@ -27,7 +27,7 @@ class AdyenController(http.Controller):
 
     @http.route('/payment/adyen/payment_methods', type='json', auth='public')
     def adyen_payment_methods(self, provider_id, amount=None, currency_id=None, partner_id=None):
-        """ Query the available payment methods based on the transaction context.
+        """ Query the available payment methods based on the payment context.
 
         :param int provider_id: The provider handling the transaction, as a `payment.provider` id
         :param float amount: The transaction amount

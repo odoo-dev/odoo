@@ -3,7 +3,7 @@
 
 import binascii
 
-from odoo import fields, http, SUPERUSER_ID, _
+from odoo import fields, http, _
 from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.fields import Command
 from odoo.http import request
@@ -11,11 +11,10 @@ from odoo.http import request
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers import portal as payment_portal
 from odoo.addons.portal.controllers.mail import _message_post_helper
-from odoo.addons.portal.controllers import portal
 from odoo.addons.portal.controllers.portal import pager as portal_pager
 
 
-class CustomerPortal(portal.CustomerPortal, payment_portal.PaymentPortal):
+class CustomerPortal(payment_portal.PaymentPortal):
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
@@ -181,6 +180,8 @@ class CustomerPortal(portal.CustomerPortal, payment_portal.PaymentPortal):
         company = order_sudo.company_id
         amount = order_sudo.amount_total
         currency = order_sudo.currency_id
+
+        # Select all the payment methods and tokens that match the payment context.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company.id,
             partner.id,
@@ -188,37 +189,38 @@ class CustomerPortal(portal.CustomerPortal, payment_portal.PaymentPortal):
             currency_id=currency.id,
             sale_order_id=order_sudo.id,
             **kwargs,
-        )  # In sudo mode to read the fields of providers and partner (if not logged in).
-        fees_by_provider = {
-            provider: provider._compute_fees(
-                amount, currency, partner.country_id
-            ) for provider in providers_sudo.filtered('fees_active')
-        }
+        )  # In sudo mode to read the fields of providers and partner (if logged out).
+        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+            providers_sudo.ids
+        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+
+        # Make sure that the partner's company matches the invoice's company.
+        company_mismatch = not payment_portal.PaymentPortal._can_partner_pay_in_company(
+            partner, company
+        )
+
+        portal_page_values = {'company_mismatch': company_mismatch, 'expected_company': company}
         payment_form_values = {
-            'providers': providers_sudo,
-            'tokens': request.env['payment.token']._get_available_tokens(
-                providers_sudo.ids, partner.id, **kwargs
-            ),
-            'fees_by_provider': fees_by_provider,
-            'show_tokenize_input': PaymentPortal._compute_show_tokenize_input_mapping(
+            'show_tokenize_input_mapping': PaymentPortal._compute_show_tokenize_input_mapping(
                 providers_sudo, sale_order_id=order_sudo.id
             ),
+        }
+        payment_context = {
             'amount': amount,
             'currency': currency,
             'partner_id': partner.id,
-            'access_token': order_sudo._portal_ensure_token(),
+            'payment_methods_sudo': payment_methods_sudo,
+            'tokens_sudo': request.env['payment.token']._get_available_tokens(
+                providers_sudo.ids, partner.id, **kwargs
+            ),
             'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
             'landing_route': order_sudo.get_portal_url(),
+            'access_token': order_sudo._portal_ensure_token(),
         }
-
-        company_mismatch = not payment_portal.PaymentPortal._can_partner_pay_in_company(
-            partner, company
-        )  # Make sure that the partner's company matches the order's company.
-        portal_page_values = {'company_mismatch': company_mismatch, 'expected_company': company}
-
         return {
             **portal_page_values,
             **payment_form_values,
+            **payment_context,
             **self._get_extra_payment_form_values(**kwargs),
         }
 
@@ -391,7 +393,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             if custom_create_values is None:
                 custom_create_values = {}
             # As this override is also called if the flow is initiated from sale or website_sale, we
-            # need not to override whatever value these modules could have already set
+            # must avoid overriding whatever value these modules could have already set.
             if 'sale_order_ids' not in custom_create_values:  # We are in the payment module's flow
                 custom_create_values['sale_order_ids'] = [Command.set([int(sale_order_id)])]
 

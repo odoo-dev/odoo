@@ -42,12 +42,6 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             partner_sudo, invoice_company
         )
 
-        # fees_by_provider = {
-        #     pro_sudo: pro_sudo._compute_fees(
-        #         invoice.amount_total, invoice.currency_id, invoice.partner_id.country_id
-        #     ) for pro_sudo in providers_sudo.filtered('fees_active')
-        # }  # TODO drop feature
-
         portal_page_values = {
             'company_mismatch': company_mismatch,
             'expected_company': invoice_company,
@@ -57,7 +51,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
                 providers_sudo
             ),
         }
-        tx_context = { # TODO partner_id does not need to be passed here, but something goes wrong when trying to pay from invoicing portal; test /payment/pay too
+        payment_context = {
             'amount': invoice.amount_residual,
             'currency': invoice.currency_id,
             'partner_id': partner_sudo.id,
@@ -72,7 +66,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
         values.update(
             **portal_page_values,
             **payment_form_values,
-            **tx_context,
+            **payment_context,
             **self._get_extra_payment_form_values(**kwargs),
         )
         return values
