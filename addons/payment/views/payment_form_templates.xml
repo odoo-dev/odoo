@@ -11,7 +11,7 @@
                                            shown.
             - display_submit_button: Whether the submit button is displayed; default: `True`.
         -->
-        <!-- Transaction context:
+        <!-- Payment context:
             - reference_prefix: The custom prefix to compute the full transaction reference.
             - amount: The amount to pay.
             - currency: The currency of the transaction, as a `res.currency` record.

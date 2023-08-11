@@ -51,7 +51,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
                 providers_sudo
             ),
         }
-        tx_context = { # TODO partner_id does not need to be passed here, but something goes wrong when trying to pay from invoicing portal; test /payment/pay too
+        payment_context = {
             'amount': invoice.amount_residual,
             'currency': invoice.currency_id,
             'partner_id': partner_sudo.id,
@@ -66,7 +66,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
         values.update(
             **portal_page_values,
             **payment_form_values,
-            **tx_context,
+            **payment_context,
             **self._get_extra_payment_form_values(**kwargs),
         )
         return values

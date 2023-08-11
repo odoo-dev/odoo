@@ -156,7 +156,8 @@ class Website(main.Website):
             'position': request.website.currency_id.position,
         }
 
-class WebsiteSale(http.Controller):
+# TODO split controllers -> payment needed here to call _get_extra_payment_form_values
+class WebsiteSale(payment_portal.PaymentPortal):
     _express_checkout_route = '/shop/express_checkout'
     _express_checkout_shipping_route = '/shop/express/shipping_address_change'
 
@@ -1585,8 +1586,8 @@ class WebsiteSale(http.Controller):
         render_values['only_services'] = order and order.only_services or False
 
         if render_values['errors']:
-            render_values.pop('providers', '')
-            render_values.pop('tokens', '')
+            render_values.pop('payment_methods_sudo', '')
+            render_values.pop('tokens_sudo', '')
 
         return request.render("website_sale.payment", render_values)
 

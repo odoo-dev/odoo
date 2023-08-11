@@ -152,7 +152,6 @@ class PaymentPortal(portal.CustomerPortal):
             'partner_is_different': partner_is_different,
         }
         payment_form_values = {
-            'mode': 'payment',
             # 'mode': 'validation',  # TODO remove me
             # 'allow_token_selection': False,  # TODO remove me
             # 'default_token_id': token_1.id,  # TODO remove me
@@ -160,13 +159,13 @@ class PaymentPortal(portal.CustomerPortal):
                 providers_sudo, **kwargs
             ),
         }
-        tx_context = {
+        payment_context = {
             'reference_prefix': reference,
             'amount': amount,
             'currency': currency,
             'partner_id': partner_sudo.id,
             'payment_methods_sudo': payment_methods_sudo,
-            'tokens_sudo': tokens_sudo,
+            'tokens_sudo': tokens_sudo,  # TODO rename without _sudo for other modules' controllers?
             'transaction_route': '/payment/transaction',
             'landing_route': '/payment/confirmation',
             'access_token': access_token,
@@ -174,7 +173,7 @@ class PaymentPortal(portal.CustomerPortal):
         rendering_context = {
             **portal_page_values,
             **payment_form_values,
-            **tx_context,
+            **payment_context,
             **self._get_extra_payment_form_values(**kwargs),
         }
         return request.render(self._get_payment_page_template_xmlid(**kwargs), rendering_context)
