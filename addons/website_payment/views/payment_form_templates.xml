@@ -2,6 +2,10 @@
 <odoo>
 
     <template id="payment_form" inherit_id="payment.form">
+        <!-- Make available anchor to inject donation form content -->
+        <xpath expr="//div[@id='o_payment_form_accordion']" position="before">
+            <t t-if="is_donation" t-call="website_payment.donation_information"/>
+        </xpath>
         <!-- Allow to find the provider id from the radio of tokens TODO reimplement? -->
 <!--        <xpath expr="//t[@t-foreach='tokens']//input[@name='o_payment_radio']" position="attributes">-->
 <!--            <attribute name="t-att-data-payment-provider-id">provider.id</attribute>-->
@@ -40,10 +44,7 @@
                                 <strong>No suitable payment option could be found.</strong><br/>
                                 If you believe that it is an error, please contact the website administrator.
                             </div>
-                            <t t-else="">
-                                <t t-call="website_payment.donation_information"/>
-                                <t t-call="payment.form"/>
-                            </t>
+                            <t t-else="" t-call="payment.form"/>
                         </div>
                     </div>
                 </div>

@@ -73,7 +73,7 @@ paymentForm.include({
                 return;
             }
         }
-        this._super(...arguments);
+        await this._super(...arguments);
     },
 
     /**
