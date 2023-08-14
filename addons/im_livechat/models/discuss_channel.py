@@ -28,13 +28,6 @@ class DiscussChannel(models.Model):
     _sql_constraints = [('livechat_operator_id', "CHECK((channel_type = 'livechat' and livechat_operator_id is not null) or (channel_type != 'livechat'))",
                          'Livechat Operator ID is required for a channel of type livechat.')]
 
-    @api.depends('message_ids')
-    def _compute_duration(self):
-        for record in self:
-            start = record.message_ids[-1].date if record.message_ids else record.create_date
-            end = record.message_ids[0].date if record.message_ids else fields.Datetime.now()
-            record.duration = (end - start).total_seconds() / 3600
-
     def _get_chat_channel_types(self):
         return super()._get_chat_channel_types() + ['livechat']
 
