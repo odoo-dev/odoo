@@ -12,7 +12,7 @@ from odoo.addons.payment.controllers.post_processing import PaymentPostProcessin
 from odoo.addons.portal.controllers import portal
 
 
-class PaymentPortal(portal.CustomerPortal):
+class PaymentPortal(portal.CustomerPortal):  # TODO split in two
 
     """ This controller contains the foundations for online payments through the portal.
 
@@ -118,26 +118,6 @@ class PaymentPortal(portal.CustomerPortal):
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             providers_sudo.ids, partner_sudo.id
         )  # In sudo mode to be able to read tokens of other partners.
-        # TODO remove me
-        # request.env['payment.token'].sudo().search([]).unlink()
-        # demo_provider = request.env['payment.provider'].search([('code', '=', 'demo')], limit=1)
-        # stripe_provider = request.env['payment.provider'].search([('code', '=', 'stripe')], limit=1)
-        # token_1 = request.env['payment.token'].sudo().create({
-        #     'provider_id': demo_provider.id,
-        #     'payment_method_id': demo_provider.payment_method_ids[0].id,
-        #     'payment_details': 'some bullshit test data',
-        #     'partner_id': partner_sudo.id,
-        #     'provider_ref': 'nope',
-        # })
-        # token_2 = request.env['payment.token'].sudo().create({
-        #     'provider_id': stripe_provider.id,
-        #     'payment_method_id': stripe_provider.payment_method_ids[0].id,
-        #     'payment_details': '1234',
-        #     'partner_id': partner_sudo.id,
-        #     'provider_ref': 'nope',
-        # })
-        # tokens_sudo = request.env['payment.token'].sudo().search([])
-        # # TODO remove me
 
         # Make sure that the partner's company matches the company passed as parameter.
         company_mismatch = not PaymentPortal._can_partner_pay_in_company(partner_sudo, company)
@@ -158,8 +138,6 @@ class PaymentPortal(portal.CustomerPortal):
             'partner_is_different': partner_is_different,
         }
         payment_form_values = {
-            # 'mode': 'validation',  # TODO remove me
-            # 'allow_token_selection': False,  # TODO remove me
             # 'default_token_id': token_1.id,  # TODO remove me
             'show_tokenize_input_mapping': PaymentPortal._compute_show_tokenize_input_mapping(
                 providers_sudo, **kwargs
@@ -214,24 +192,52 @@ class PaymentPortal(portal.CustomerPortal):
         :rtype: str
         """
         partner_sudo = request.env.user.partner_id  # env.user is always sudoed
+
+        # Select all the payment methods and tokens that match the payment context.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             request.env.company.id,
             partner_sudo.id,
             0.,  # There is no amount to pay with validation transactions.
             force_tokenization=True,
             is_validation=True,
-        )
+            **kwargs,
+        )  # In sudo mode to read the fields of providers and partner (if logged out).
+        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+            providers_sudo.ids
+        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+        tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
+            None, partner_sudo.id, is_validation=True
+        )  # In sudo mode to read the commercial partner's fields.
+
         access_token = payment_utils.generate_access_token(partner_sudo.id, None, None)
-        rendering_context = {
-            'providers': providers_sudo,
-            'tokens': request.env['payment.token'].sudo()._get_available_tokens(
-                None, partner_sudo.id, is_validation=True
-            ),  # In sudo mode to read the commercial partner's fields.
+
+        # TODO remove me
+        adyen_provider = request.env['payment.provider'].search([('code', '=', 'adyen')], limit=1)
+        request.env['payment.token'].sudo().search([]).active = False
+        tokens_sudo = request.env['payment.token'].sudo().create({
+            'provider_id': adyen_provider.id,
+            'payment_method_id': request.env.ref('payment.payment_method_card').id,
+            'payment_details': '1234',
+            'partner_id': partner_sudo.id,
+            'provider_ref': 'nope',
+        })
+        # # TODO remove me
+        payment_form_values = {
+            'mode': 'validation',
+            'allow_token_selection': False,
+        }
+        payment_context = {
             'reference_prefix': payment_utils.singularize_reference_prefix(prefix='V'),
             'partner_id': partner_sudo.id,
-            'access_token': access_token,
+            'payment_methods_sudo': payment_methods_sudo,
+            'tokens_sudo': tokens_sudo,
             'transaction_route': '/payment/transaction',
             'landing_route': '/my/payment_method',
+            'access_token': access_token,
+        }
+        rendering_context = {
+            **payment_form_values,
+            **payment_context,
             **self._get_extra_payment_form_values(**kwargs),
         }
         return request.render('payment.payment_methods', rendering_context)
