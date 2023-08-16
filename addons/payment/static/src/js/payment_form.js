@@ -75,13 +75,12 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
 
         const checkedRadio = this.el.querySelector('input[name="o_payment_radio"]:checked');
 
-        // TODO comment
-        // this._hideError(); // Don't keep the error displayed if the user is going through 3DS2 TODO problably useless now that we use a dialog
-        this._disableButton(true); // Block the entire UI to prevent fiddling with other widgets.
+        // Block the entire UI to prevent fiddling with other widgets.
+        this._disableButton(true);
 
         // Process the payment flow of the selected payment option.
         const flow = this.txContext.flow = this._getPaymentFlow(checkedRadio);
-        if (flow === 'token' && this.txContext['assignTokenRoute']) { // Token assignation flow. TODO consider implementing this flow only in subscriptions
+        if (flow === 'token' && this.txContext['assignTokenRoute']) { // Token assignation flow.
             await this._assignToken(paymentOptionId); // TODO implement
         } else { // Both tokens and payment methods must process a payment operation.
             const providerCode = this.txContext.providerCode = this._getProviderCode(checkedRadio);
@@ -99,7 +98,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             }
             this.txContext.tokenizationRequested = this._getInlineForm(checkedRadio)?.querySelector(
                 '[name="o_payment_tokenize_checkbox"]'
-            )?.checked ?? false;
+            )?.checked ?? this.txContext['mode'] === 'validation';
             await this._initiatePaymentFlow(providerCode, paymentOptionId, paymentMethodCode, flow);
         }
     },
@@ -130,7 +129,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     _disableButton(blockUI = false) {
         this._getSubmitButton().setAttribute('disabled', true);
-        if (blockUI) { // TODO not sure it can be done here; see https://github.com/odoo/odoo/pull/81661
+        if (blockUI) {
             $('body').block({
                 message: false,
                 overlayCSS: { backgroundColor: "#000", opacity: 0, zIndex: 1050 },
@@ -147,7 +146,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     _showInputs() {
         // Show the tokenization checkbox and its label.
         const tokenizeContainer = this.el.querySelector('[name="o_payment_tokenize_container"]');
-        tokenizeContainer.classList.remove('d-none');
+        tokenizeContainer?.classList.remove('d-none');
 
         // Show the submit button.
         this._getSubmitButton().classList.remove('d-none');
@@ -166,7 +165,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     _hideInputs() {
         // Hide the tokenization checkbox and its label.
         const tokenizeContainer = this.el.querySelector('[name="o_payment_tokenize_container"]');
-        tokenizeContainer.classList.add('d-none');
+        tokenizeContainer?.classList.add('d-none');
 
         // Hide the submit button.
         this._getSubmitButton().classList.add('d-none');
@@ -358,7 +357,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             'flow': this.txContext['flow'],
             'tokenization_requested': this.txContext['tokenizationRequested'],
             'landing_route': this.txContext['landingRoute'],
-            'is_validation': this.txContext['isValidation'],
+            'is_validation': this.txContext['mode'] === 'validation',
             'access_token': this.txContext['accessToken'],
             'csrf_token': core.csrf_token,
         };

@@ -84,14 +84,17 @@
                 <div class="container">
                     <!-- Portal breadcrumb -->
                     <t t-call="payment.portal_breadcrumb"/>
-                    <!-- Manage page -->
+                    <!-- Payment methods page -->
                     <div class="row">
                         <div class="col-lg-7">
-                            <t t-if="providers or tokens" t-call="payment.manage"/>
-                            <div t-else="" class="alert alert-warning">
-                                <p><strong>No suitable payment provider could be found.</strong></p>
-                                <p>If you believe that it is an error, please contact the website administrator.</p>
+                            <div t-if="not payment_methods_sudo and not tokens_sudo"
+                                 class="alert alert-warning"
+                            >
+                                <strong>No suitable payment method could be found.</strong><br/>
+                                If you believe that it is an error, please contact the website
+                                administrator.
                             </div>
+                            <t t-else="" t-call="payment.form"/>
                         </div>
                     </div>
                 </div>

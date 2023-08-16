@@ -8,7 +8,7 @@
                                      (through the `assign_token_route` parameter); default: `True`.
             - default_token_id: The id of the token that should be pre-selected; default: `None`.
             - show_tokenize_input_mapping: For each provider, whether the tokenization checkbox is
-                                           shown.
+                                           shown; used only in `payment` mode.
             - display_submit_button: Whether the submit button is displayed; default: `True`.
         -->
         <!-- Payment context:
@@ -32,13 +32,16 @@
            t-value="allow_token_selection and (default_token_id or tokens_sudo[:1].id)"
         />
         <t t-set="selected_method_id"
-           t-value="not selected_token_id and len(payment_methods_sudo) == 1 and payment_methods_sudo[:1].id"
+           t-value="not selected_token_id
+                    and len(payment_methods_sudo) == 1
+                    and payment_methods_sudo[:1].id"
         />
         <t t-set="display_submit_button"
            t-value="True if display_submit_button is None else display_submit_button"
         />
         <form id="o_payment_form"
               class="o_payment_form"
+              t-att-data-mode="mode"
               t-att-data-reference-prefix="reference_prefix"
               t-att-data-amount="amount"
               t-att-data-currency-id="currency and currency.id"
@@ -91,7 +94,8 @@
                     <!-- === Accordion header === -->
                     <h4 id="o_payment_methods_heading" class="mb-0">
                         <button type="button"
-                                t-att-class="'accordion-button bg-light' + (' collapsed' if tokens_sudo else '')"
+                                t-att-class="'accordion-button bg-light'
+                                             + (' collapsed' if tokens_sudo else '')"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#o_payment_methods_list"
                                 aria-expanded="true"
@@ -104,7 +108,8 @@
                     </h4>
                     <!-- === Accordion body === -->
                     <div id="o_payment_methods_list"
-                         t-att-class="'accordion-collapse collapse' + (' show' if not tokens_sudo else '')"
+                         t-att-class="'accordion-collapse collapse'
+                                      + (' show' if not tokens_sudo else '')"
                          aria-labelledby="o_payment_methods_heading"
                          data-bs-parent="#o_payment_form_accordion"
                     >
@@ -112,10 +117,12 @@
                             <ul class="list-group list-group-flush">
                                 <t t-foreach="payment_methods_sudo" t-as="pm_sudo">
                                     <t t-set="extra_classes"
-                                       t-value="' rounded-bottom o_last_payment_method' if pm_sudo_last else ''"
+                                       t-value="' rounded-bottom o_last_payment_method'
+                                                if pm_sudo_last else ''"
                                     />
                                     <li name="o_payment_option"
-                                        t-attf-class="list-group-item d-flex flex-column gap-2 py-3 {{extra_classes}}"
+                                        t-attf-class="list-group-item d-flex flex-column gap-2 py-3
+                                                      {{extra_classes}}"
                                     >
                                         <t t-call="payment.method_form">
                                             <t t-set="is_selected"
@@ -152,13 +159,15 @@
         <div class="d-flex gap-3">
             <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3">
                 <div class="col col-lg-5">
-                    <div t-att-class="'form-check mb-0' + (' ps-0' if not allow_token_selection else '')">
+                    <div t-att-class="'form-check mb-0'
+                                      + (' ps-0' if not allow_token_selection else '')">
                         <!-- === Radio button === -->
                         <input t-attf-id="o_payment_token_{{token_sudo.id}}"
                                name="o_payment_radio"
                                type="radio"
                                t-att-checked="is_selected"
-                               t-att-class="'form-check-input' + (' d-none' if not allow_token_selection else '')"
+                               t-att-class="'form-check-input'
+                                            + (' d-none' if not allow_token_selection else '')"
                                data-payment-option-type="token"
                                t-att-data-payment-option-id="token_sudo.id"
                                t-att-data-provider-code="token_sudo.provider_code"
@@ -196,7 +205,9 @@
                 <div class="col mt-1">
                     <p class="mb-0 ms-4 ms-lg-0 small text-muted">
                         <span>Managed by</span>
-                        <span t-out="dict(provider_sudo._fields['code']._description_selection(provider_sudo.env))[provider_sudo.code]"
+                        <span t-out="dict(provider_sudo._fields['code']._description_selection(
+                                         provider_sudo.env
+                                     ))[provider_sudo.code]"
                               class="text-break"
                         />
                     </p>
@@ -209,7 +220,8 @@
             </div>
             <!-- === Delete button === -->
             <button name="o_payment_delete_token"
-                    t-att-class="'btn btn-link align-self-start py-0 px-2 z-index-1' + (' d-none' if mode != 'validation' else '')"
+                    t-att-class="'btn btn-link align-self-start py-0 px-2 z-index-1'
+                                 + (' d-none' if mode != 'validation' else '')"
             >
                 <i class="fa fa-trash"
                    title="Delete payment method"
@@ -256,7 +268,8 @@
                            t-att-data-provider-code="provider_sudo.code"
                            t-att-data-provider-state="provider_sudo.state"
                     />
-                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 flex-grow-1">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2
+                                flex-grow-1">
                         <!-- === Method label === -->
                         <label t-out="pm_sudo.name"
                                class="o_payment_option_label mb-0 text-break"
@@ -297,13 +310,18 @@
         </div>
         <!-- === Inline form === -->
         <div name="o_payment_inline_form" class="position-relative d-none">
-            <t t-if="inline_form_xml_id and provider_sudo._should_build_inline_form(is_validation=mode == 'validation')"
+            <t t-if="inline_form_xml_id and provider_sudo._should_build_inline_form(
+                         is_validation=mode == 'validation'
+                     )"
                t-call="{{inline_form_xml_id}}"
             >
                 <t t-set="provider_id" t-value="provider_sudo.id"/>
             </t>
             <!-- === Tokenization checkbox === -->
-            <div name="o_payment_tokenize_container" class="o-checkbox form-check mt-2">
+            <div t-if="mode == 'payment'"
+                 name="o_payment_tokenize_container"
+                 class="o-checkbox form-check mt-2"
+            >
                 <label t-if="show_tokenize_input_mapping[provider_sudo.id]">
                     <input name="o_payment_tokenize_checkbox"
                            class="form-check-input"
