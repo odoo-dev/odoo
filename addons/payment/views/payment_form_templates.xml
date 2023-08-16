@@ -166,6 +166,7 @@
                                name="o_payment_radio"
                                type="radio"
                                t-att-checked="is_selected"
+                               t-att-disabled="not allow_token_selection"
                                t-att-class="'form-check-input'
                                             + (' d-none' if not allow_token_selection else '')"
                                data-payment-option-type="token"
