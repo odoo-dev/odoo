@@ -8,12 +8,12 @@
         <field name="image" type="base64" file="payment/static/img/maestro.png"/>
     </record>
 
-    <record id="payment_method_alipay_plus" model="payment.method"> <!-- depriciated provider-->
+    <record id="payment_method_alipay_plus" model="payment.method">
         <field name="sequence">10</field>
         <field name="name">Alipay+</field>
         <field name="code">alipay_plus</field>
         <field name="image" type="base64" file="payment/static/img/maestro.png"/>
-    </record> <!--Maybe some of methods will be child of this one but not sure-->
+    </record> <!-- TODO Maybe some methods will be child of this one but not sure-->
 
     <record id="payment_method_unknown" model="payment.method">
         <field name="sequence">10</field>
@@ -328,14 +328,14 @@
         <field name="image" type="base64" file="payment/static/img/airtel-money.png"/>
     </record>
 
-    <record id="payment_method_barter_by_flutterwave" model="payment.method"> <!-- needs currency -->
+    <record id="payment_method_barter_by_flutterwave" model="payment.method"> <!-- TODO needs currency -->
         <field name="sequence">260</field>
         <field name="name">Barter by Flutterwave</field>
         <field name="code">barter</field>
         <field name="image" type="base64" file="payment/static/img/barter-by-flutterwave.png"/>
     </record>
 
-    <record id="payment_method_sadad" model="payment.method"> <!-- possible that it's no longer supported-->
+    <record id="payment_method_sadad" model="payment.method"> <!-- TODO possible that it's no longer supported-->
         <field name="sequence">270</field>
         <field name="name">Sadad</field>
         <field name="code">sadad</field>
@@ -523,7 +523,7 @@
         <field name="image" type="base64" file="payment/static/img/wechatpay.png"/>
     </record>
     
-    <record id="payment_method_alipay" model="payment.method"> <!--Alipay+ method in Alipay-->
+    <record id="payment_method_alipay" model="payment.method"> <!-- TODO Alipay+ method in Alipay -->
         <field name="sequence">330</field>
         <field name="name">Alipay+</field>
         <field name="code">alipay</field>
@@ -585,7 +585,7 @@
         <field name="image" type="base64" file="payment/static/img/bacs.png"/>
     </record>
 
-    <record id="payment_method_becs_direct_debit" model="payment.method"> <!--I couldn't dinf an icon-->
+    <record id="payment_method_becs_direct_debit" model="payment.method"> <!-- TODO I couldn't dinf an icon -->
         <field name="sequence">370</field>
         <field name="name">BECS Direct Debit</field>
         <field name="code">becs_direct_debit</field>
@@ -706,7 +706,7 @@
         <field name="image" type="base64" file="payment/static/img/pix.png"/>
     </record>
 
-    <record id="payment_method_promptpay" model="payment.method"> <!-- invite needed-->
+    <record id="payment_method_promptpay" model="payment.method"> <!-- TODO invite needed -->
         <field name="sequence">450</field>
         <field name="name">Prompt Pay</field>
         <field name="code">promptpay</field>
@@ -721,7 +721,7 @@
         <field name="image" type="base64" file="payment/static/img/promptpay.png"/>
     </record>
 
-    <record id="payment_method_sepa_transfer" model="payment.method"> <!-- ANKO -->
+    <record id="payment_method_sepa_transfer" model="payment.method"> <!-- TODO ANKO -->
         <field name="sequence">460</field>
         <field name="name">SEPA Transfer</field>
         <field name="code">sepa_transfer</field>
@@ -780,7 +780,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_afterpay_riverty" model="payment.method"> <!--CHECK IT AGAIN ANKO--> 
+    <record id="payment_method_afterpay_riverty" model="payment.method"> <!--TODO CHECK IT AGAIN ANKO-->
         <field name="sequence">510</field>
         <field name="name">AfterPay</field>
         <field name="code">afterpay_riverty</field>
@@ -802,7 +802,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_afterpay" model="payment.method"> <!--CHECK IT AGAIN ANKO--> 
+    <record id="payment_method_afterpay" model="payment.method"> <!--TODO CHECK IT AGAIN ANKO-->
         <field name="sequence">510</field>
         <field name="name">Afterpay</field>
         <field name="code">afterpay</field>
@@ -1274,7 +1274,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_gcash" model="payment.method"> <!-- ALipay+ in Alipay, but it says its a wallet but on use case it shows in alipay+-->
+    <record id="payment_method_gcash" model="payment.method"> <!-- TODO ALipay+ in Alipay, but it says its a wallet but on use case it shows in alipay+-->
         <field name="sequence">600</field>
         <field name="name">GCash</field>
         <field name="code">gcash</field>
@@ -1304,7 +1304,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_kakao_pay" model="payment.method"> <!--Alipay+ method in ALipay but same thing as others-->
+    <record id="payment_method_kakao_pay" model="payment.method"> <!--TODO Alipay+ method in ALipay but same thing as others-->
         <field name="sequence">600</field>
         <field name="name">KakaoPay</field>
         <field name="code">kakaopay</field>
@@ -1511,7 +1511,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_touch_n_go" model="payment.method"> <!-- ALipay+ in Alipay-->
+    <record id="payment_method_touch_n_go" model="payment.method"> <!-- TODO ALipay+ in Alipay-->
         <field name="sequence">600</field>
         <field name="name">Touch'n Go</field>
         <field name="code">touchngo</field>
@@ -1562,7 +1562,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_rabbit_line_pay" model="payment.method"> <!-- ALipay+ but it shows both in alipay+ and as seprate method?-->
+    <record id="payment_method_rabbit_line_pay" model="payment.method"> <!-- TODO ALipay+ but it shows both in alipay+ and as seprate method?-->
         <field name="sequence">600</field>
         <field name="name">Rabbit LINE Pay</field>
         <field name="code">twint</field>
@@ -1577,7 +1577,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_true_money" model="payment.method"> <!-- ALipay+ but it shows both in alipay+ and as seprate method?-->
+    <record id="payment_method_true_money" model="payment.method"> <!-- TODO ALipay+ but it shows both in alipay+ and as seprate method?-->
         <field name="sequence">600</field>
         <field name="name">TrueMoney</field>
         <field name="code">truemoney</field>
@@ -1592,7 +1592,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_boost" model="payment.method"> <!-- ALipay+ -->
+    <record id="payment_method_boost" model="payment.method"> <!-- TODO ALipay+ -->
         <field name="sequence">600</field>
         <field name="name">Boost</field>
         <field name="code">boost</field>
@@ -1607,7 +1607,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_billease" model="payment.method"> <!-- ALipay+ -->
+    <record id="payment_method_billease" model="payment.method"> <!-- TODO ALipay+ -->
         <field name="sequence">600</field>
         <field name="name">BillEase</field>
         <field name="code">billease</field>
@@ -1622,7 +1622,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_bpi" model="payment.method"> <!-- ALipay+-->
+    <record id="payment_method_bpi" model="payment.method"> <!-- TODO ALipay+-->
         <field name="sequence">600</field>
         <field name="name">Bank of the Philippine Islands</field>
         <field name="code">bpi</field>
@@ -1637,7 +1637,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_maya" model="payment.method"> <!-- ALipay+ but at the same time it is shown in different tab also-->
+    <record id="payment_method_maya" model="payment.method"> <!-- TODO ALipay+ but at the same time it is shown in different tab also-->
         <field name="sequence">600</field>
         <field name="name">Maya</field>
         <field name="code">maya</field>
@@ -1652,7 +1652,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_akulaku" model="payment.method"> <!-- Alipay+-->
+    <record id="payment_method_akulaku" model="payment.method"> <!-- TODO Alipay+-->
         <field name="sequence">600</field>
         <field name="name">Akulaku PayLater</field>
         <field name="code">akulaku</field>
@@ -1682,7 +1682,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_naver" model="payment.method"> <!--Alipay+ same thing as others-->
+    <record id="payment_method_naver" model="payment.method"> <!-- TODO Alipay+ same thing as others-->
         <field name="sequence">600</field>
         <field name="name">Naver Pay</field>
         <field name="code">naverpay</field>
@@ -1697,7 +1697,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_toss" model="payment.method"> <!--Alipay+ same thing as others-->
+    <record id="payment_method_toss" model="payment.method"> <!-- TODO Alipay+ same thing as others-->
         <field name="sequence">600</field>
         <field name="name">Toss Pay</field>
         <field name="code">tosspay</field>
@@ -1787,7 +1787,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_bangkok_bank" model="payment.method"> <!-- Online banking/Bank transfer/-->
+    <record id="payment_method_bangkok_bank" model="payment.method"> <!-- TODO Online banking/Bank transfer/-->
         <field name="sequence">600</field>
         <field name="name">Bangkok Bank</field>
         <field name="code">bangkok_bank</field>
@@ -2592,7 +2592,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_mercado_pago_card" model="payment.method"> <!-- "id": "mercadopagocard",
+    <record id="payment_method_mercado_pago_card" model="payment.method"> <!-- TODO "id": "mercadopagocard",
     "name": "Tarjeta MercadoPago",
     "payment_type_id": "prepaid_card", -->
         <field name="sequence">600</field>

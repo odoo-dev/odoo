@@ -5,7 +5,17 @@ API_VERSION = '2019-05-16'  # The API version of Stripe implemented in this modu
 # Stripe proxy URL
 PROXY_URL = 'https://stripe.api.odoo.com/api/stripe/'
 
-# The payment methods for which Stripe supports tokenization.
+# Mapping of payment method codes to Stripe codes.
+PAYMENT_METHODS_MAPPING = {
+    'ach_direct_debit': 'us_bank_account',
+    'bacs_direct_debit': 'bacs_debit',
+    'becs_direct_debit': 'au_becs_debit',
+    'boleto_bancario': 'boleto',
+    'afterpay': 'afterpay_clearpay',
+    'clearpay': 'afterpay_clearpay',
+}
+
+# The payment methods for which Stripe supports tokenization. TODO VCHU drop this
 # See https://stripe.com/docs/payments/payment-methods/integration-options.
 PAYMENT_METHODS_TOKENIZATION_SUPPORT = {
     'acss_debit': True,
@@ -116,13 +126,4 @@ SUPPORTED_COUNTRIES = {
     'SK',
     'TH',  # Beta
     'US',
-}
-
-PAYMENT_METHODS_MAPPING = {
-    'ach_direct_debit': 'us_bank_account',
-    'bacs_direct_debit': 'bacs_debit',
-    'becs_direct_debit': 'au_becs_debit',
-    'boleto_bancario': 'boleto',
-    'afterpay' : 'afterpay_clearpay',
-    'clearpay': 'afterpay_clearpay',
 }

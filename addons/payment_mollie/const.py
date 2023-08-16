@@ -47,6 +47,7 @@ SUPPORTED_CURRENCIES = [
     'ZAR'
 ]
 
+# Mapping of payment method codes to Mollie codes.
 PAYMENT_METHODS_MAPPING = {
     'apple_pay': 'applepay',
     'card': 'creditcard',
