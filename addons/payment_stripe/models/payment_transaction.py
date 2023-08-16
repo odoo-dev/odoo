@@ -126,7 +126,6 @@ class PaymentTransaction(models.Model):
         return {
             'customer': customer['id'],
             'description': self.reference,
-            'automatic_payment_methods[enabled]': True,
             **self._stripe_prepare_mandate_options(),
         }
 
@@ -138,12 +137,14 @@ class PaymentTransaction(models.Model):
         :return: The Stripe-formatted payload for the PaymentIntent request.
         :rtype: dict
         """
+        payment_method_type = self.payment_method_id.parent_id.code or self.payment_method_code
         payment_intent_payload = {
             'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
             'currency': self.currency_id.name.lower(),
             'description': self.reference,
             'capture_method': 'manual' if self.provider_id.capture_manually else 'automatic',
-            'automatic_payment_methods[enabled]': True,
+            'expand[]': 'payment_method',
+            'payment_method_types[0]': payment_method_type,
         }
         if self.operation in ['online_token', 'offline']:
             if not self.token_id.stripe_payment_method:  # Pre-SCA token, migrate it.
@@ -155,6 +156,8 @@ class PaymentTransaction(models.Model):
                 'off_session': True,
                 'payment_method': self.token_id.stripe_payment_method,
                 'mandate': self.token_id.stripe_mandate or None,
+                # For support token payment of payment methods that use sepa debit
+                'payment_method_types[1]': 'sepa_debit',
             })
         else:
             if self.tokenize:
