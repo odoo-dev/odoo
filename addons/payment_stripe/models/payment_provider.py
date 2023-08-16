@@ -499,7 +499,6 @@ class PaymentProvider(models.Model):
                     'postal_code': partner.zip or '',
                 },
             },
-            'payment_methods_tokenization_support': const.PAYMENT_METHODS_TOKENIZATION_SUPPORT,
             'is_tokenization_required': self._is_tokenization_required(**kwargs),
         }
         return json.dumps(inline_form_values)
