@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">https://www.w3schools.com/
+<odoo noupdate="1">
 
     <record id="payment_provider_adyen" model="payment.provider">
         <field name="name">Adyen</field>
@@ -80,12 +80,12 @@
                ])]"/>
     </record>
 
-    <record id="payment_provider_aps" model="payment.provider"> <!-- cards: visa, mastercard, amex-->
+    <record id="payment_provider_aps" model="payment.provider">
         <field name="name">Amazon Payment Services</field>
         <field name="display_as">Amazon Payment Services</field>
         <field name="image_128" type="base64" file="payment_aps/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_aps"/>
-        <!-- https://paymentservices.amazon.com/docs/EN/24.html --> 
+        <!-- https://paymentservices.amazon.com/docs/EN/24.html -->
         <field name="payment_method_ids"
                eval="[(6, 0, [
                         ref('payment.payment_method_card'), 
@@ -226,7 +226,7 @@
         <field name="module_id" ref="base.module_payment_demo"/>
     </record>
 
-    <record id="payment_provider_flutterwave" model="payment.provider"> <!--rewrite that-->
+    <record id="payment_provider_flutterwave" model="payment.provider"> <!-- TODO ANKO rewrite that-->
         <field name="name">Flutterwave</field>
         <field name="image_128"
                type="base64"
@@ -250,7 +250,7 @@
             ])]"/>
     </record>
 
-    <record id="payment_provider_mercado_pago" model="payment.provider"> <!-- check that-->
+    <record id="payment_provider_mercado_pago" model="payment.provider"> <!-- TODO ANKO check that-->
         <field name="name">Mercado Pago</field>
         <field name="display_as">Credit Card (powered by Mercado Pago)</field>
         <field name="image_128"
@@ -272,7 +272,7 @@
                ])]"/>
     </record>
 
-    <record id="payment_provider_mollie" model="payment.provider"> <!-- check mollie-->
+    <record id="payment_provider_mollie" model="payment.provider"> <!-- TODO ANKO check mollie-->
         <field name="name">Mollie</field>
         <field name="image_128" type="base64" file="payment_mollie/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_mollie"/>
@@ -328,7 +328,7 @@
         <field name="image_128" type="base64" file="payment_razorpay/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_razorpay"/>
         <!-- https://razorpay.com/docs/payments/payment-methods/#supported-payment-methods -->
-        <!-- possible that only card,netbanking, wallet, emi and upi are possible-->
+        <!-- TODO ANKO possible that only card,netbanking, wallet, emi and upi are possible-->
         <field name="payment_method_ids"
                eval="[(6, 0, [
                    ref('payment.payment_method_card'),
@@ -383,7 +383,7 @@
         <!--
             See https://stripe.com/payments/payment-methods-guide
             See https://support.goteamup.com/hc/en-us/articles/115002089349-Which-cards-and-payment-types-can-I-accept-with-Stripe-
-            Check if we care for boleto, multibanco
+            TODO ANKO Check if we care for boleto, multibanco
         -->
         <field name="payment_method_ids"
                eval="[(6, 0, [

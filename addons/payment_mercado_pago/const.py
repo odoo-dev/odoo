@@ -27,14 +27,7 @@ SUPPORTED_CURRENCIES = [
     'VES',  # Sovereign Bolivar
 ]
 
-# Mapping of transaction states to Mercado Pago payment statuses.
-# See https://www.mercadopago.com.mx/developers/en/reference/payments/_payments_id/get.
-TRANSACTION_STATUS_MAPPING = {
-    'pending': ('pending', 'in_process', 'in_mediation'),
-    'done': ('approved', 'refunded'),
-    'canceled': ('cancelled', 'null'),
-}
-
+# Mapping of payment method codes to Flutterwave codes.
 PAYMENT_METHODS_MAPPING = {
     'santander': 'serfin',
     'card': 'credit_card',
@@ -44,4 +37,12 @@ PAYMENT_METHODS_MAPPING = {
     'bank_transfer': 'banktransfer',
     'p24': 'przelewy24',
     'sepa_debit': 'directdebit',
+}
+
+# Mapping of transaction states to Mercado Pago payment statuses.
+# See https://www.mercadopago.com.mx/developers/en/reference/payments/_payments_id/get.
+TRANSACTION_STATUS_MAPPING = {
+    'pending': ('pending', 'in_process', 'in_mediation'),
+    'done': ('approved', 'refunded'),
+    'canceled': ('cancelled', 'null'),
 }
