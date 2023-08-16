@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="checkout" inherit_id="payment.checkout">
-        <xpath expr="." position="inside">
-            <t t-call="payment_stripe.sdk_assets"/>
-        </xpath>
-    </template>
-
-    <template id="manage" inherit_id="payment.manage">
-        <xpath expr="." position="inside">
-            <t t-call="payment_stripe.sdk_assets"/>
-        </xpath>
-    </template>
-
     <template id="payment_form" inherit_id="payment.form">
         <xpath expr="." position="inside">
             <t t-call="payment_stripe.sdk_assets"/>
@@ -31,4 +19,13 @@
         <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
     </template>
 
+    <template id="payment_stripe.method_form" inherit_id="payment.method_form">
+        <xpath expr="//input[@name='o_payment_radio']" position="attributes">
+            <attribute name="t-att-data-inline-form-values">
+                provider_sudo._stripe_get_inline_form_values(
+                    amount, currency, partner_id, mode == 'validation', sale_order_id=sale_order_id
+                )
+            </attribute>
+        </xpath>
+    </template>
 </odoo>
