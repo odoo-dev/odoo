@@ -3,7 +3,7 @@
 
     <template id="payment_form" inherit_id="payment.form">
         <!-- Make available anchor to inject donation form content -->
-        <xpath expr="//div[@id='o_payment_form']" position="before">
+        <xpath expr="//div[@id='o_payment_form_options']" position="before">
             <t t-if="is_donation" t-call="website_payment.donation_information"/>
         </xpath>
         <!-- Make fee badges recognizable so that they can be updated upon amount changes -->
