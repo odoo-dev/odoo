@@ -500,5 +500,6 @@ class PaymentProvider(models.Model):
                 },
             },
             'is_tokenization_required': self._is_tokenization_required(**kwargs),
+            'payment_methods_mapping': const.PAYMENT_METHODS_MAPPING,
         }
         return json.dumps(inline_form_values)

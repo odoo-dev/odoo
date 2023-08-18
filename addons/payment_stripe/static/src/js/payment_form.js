@@ -10,13 +10,13 @@ paymentForm.include( {
     /**
      * Prepare the inline form of Stripe for direct payment.
      *
-     * @override method from payment.payment_form
+     * @override method from @payment/js/payment_form
      * @private
      * @param {number} providerId - The id of the selected payment option's provider.
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-     * @param {string} flow - The online payment flow of the selected payment option
+     * @param {string} flow - The online payment flow of the selected payment option.
      * @return {void}
      */
     async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
@@ -26,11 +26,11 @@ paymentForm.include( {
         }
 
         // Check if instantiation of the element is needed.
-        this.stripePaymentElements ??= {}; // Store the element of each instantiated payment method.
+        this.stripeElements ??= {}; // Store the element of each instantiated payment method.
         // Check if instantiation of the element is needed.
         if (flow === 'token') {
             return; // No elements for tokens.
-        } else if (this.stripePaymentElements[paymentOptionId]) {
+        } else if (this.stripeElements[paymentOptionId]) {
             this._setPaymentFlow('direct'); // Overwrite the flow even if no re-instantiation.
             return; // Don't re-instantiate if already done for this provider.
         }
@@ -38,39 +38,58 @@ paymentForm.include( {
         // Overwrite the flow of the select payment option.
         this._setPaymentFlow('direct');
 
+        // Extract and deserialize the inline form values.
         const radio = document.querySelector('input[name="o_payment_radio"]:checked');
         const inlineForm = this._getInlineForm(radio);
         const stripeInlineForm = inlineForm.querySelector('[name="o_stripe_element_container"]');
-        this.isValidation = Boolean(this.txContext['mode'] === 'validation');
-        this.stripeInlineFormValues = JSON.parse(radio.dataset['inlineFormValues']);
-        this.stripeInlineFormValues.paymentMethodTypes = [paymentMethodCode];
+        this.stripeInlineFormValues = JSON.parse(stripeInlineForm.dataset['inlineFormValues']);
 
-        // Instantiate the payment element.
+        // Instantiate the elements.
+        let elementsOptions =  {
+            appearance: { theme: 'stripe' },
+            currency: this.stripeInlineFormValues['currency_name'],
+            captureMethod: this.stripeInlineFormValues['capture_method'],
+            paymentMethodTypes: [
+                this.stripeInlineFormValues['payment_methods_mapping'][paymentMethodCode]
+                ?? paymentMethodCode
+            ],
+        };
+        if (this.txContext['mode'] === 'payment') {
+            elementsOptions.mode = 'payment';
+            elementsOptions.amount = parseInt(this.stripeInlineFormValues['minor_amount']);
+            if (this.stripeInlineFormValues['is_tokenization_required']) {
+                elementsOptions.setupFutureUsage = 'off_session';
+            }
+        }
+        else {
+            elementsOptions.mode = 'setup';
+            elementsOptions.setupFutureUsage = 'off_session';
+        }
         this.stripeJS = Stripe(
             this.stripeInlineFormValues['publishable_key'],
             // The values required by Stripe Connect are inserted into the dataset.
             new StripeOptions()._prepareStripeOptions(stripeInlineForm.dataset),
         );
-        this.stripePaymentElements[paymentOptionId] = this.stripeJS.elements(
-            this._getElementsOptions()
-        );
+        this.stripeElements[paymentOptionId] = this.stripeJS.elements(elementsOptions);
+
+        // Instantiate the payment element.
         const paymentElementOptions = {
             defaultValues: {
                 billingDetails: this.stripeInlineFormValues['billing_details'],
             },
         };
-        const paymentElement = this.stripePaymentElements[paymentOptionId].create(
+        const paymentElement = this.stripeElements[paymentOptionId].create(
             'payment', paymentElementOptions
         );
         paymentElement.mount(stripeInlineForm);
 
         const tokenizationCheckbox = inlineForm.querySelector(
-            "input[name='o_payment_tokenize_checkbox']"
+            'input[name="o_payment_tokenize_checkbox"]'
         );
         if (tokenizationCheckbox) {
             // Display tokenization-specific inputs when the tokenization checkbox is checked.
             tokenizationCheckbox.addEventListener('input', () => {
-                this.stripePaymentElements[paymentOptionId].update({
+                this.stripeElements[paymentOptionId].update({
                     setupFutureUsage: tokenizationCheckbox.checked ? 'off_session' : null,
                 });
             });
@@ -78,33 +97,10 @@ paymentForm.include( {
     },
 
     /**
-     * Prepare the required options for the configuration of the Elements object.
+     * Trigger the payment processing by submitting the elements.
      *
+     * @override method from @payment/js/payment_form
      * @private
-     * @return {Object}
-     */
-    _getElementsOptions() {
-        let options =  {
-            appearance: { theme: 'stripe' },
-            currency: this.stripeInlineFormValues['currency_name'],
-            captureMethod: this.stripeInlineFormValues['capture_method'],
-            paymentMethodTypes: this.stripeInlineFormValues['paymentMethodTypes'],
-        };
-        if (this.isValidation){
-            options.mode = 'setup';
-            options.setupFutureUsage = 'off_session';
-        }
-        else {
-            options.mode = 'payment';
-            options.amount = parseInt(this.stripeInlineFormValues['minor_amount']);
-            if (this.stripeInlineFormValues['is_tokenization_required']) {
-                options.setupFutureUsage = 'off_session';
-            }
-        }
-        return options;
-    },
-
-    /* @private
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
@@ -116,24 +112,18 @@ paymentForm.include( {
             await this._super(...arguments); // Tokens are handled by the generic flow.
             return;
         }
-        if (this.stripePaymentElements[paymentOptionId] === undefined) { // Elements has not been properly instantiated.
+
+        // Trigger form validation and wallet collection.
+        const _super = this._super.bind(this);
+        const { error: submitError } = await this.stripeElements[paymentOptionId].submit();
+        if (submitError) {
             this._displayErrorDialog(
-                _t("Server Error"), _t("We are not able to process your payment.")
+                _t("Incorrect Payment Details"),
+                _t("Please verify your payment details."),
             );
             this._enableButton();
-        } else {
-            // Trigger form validation and wallet collection.
-            const _super = this._super.bind(this);
-            const { error: submitError } = await this.stripePaymentElements[paymentOptionId].submit();
-            if (submitError) {
-                this._displayErrorDialog(
-                    _t("Incorrect Payment Details"),
-                    _t("Please verify your payment details."),
-                );
-                this._enableButton();
-            } else { // There is no invalid input, resume the generic flow.
-                return await _super(...arguments);
-            }
+        } else { // There is no invalid input, resume the generic flow.
+            return await _super(...arguments);
         }
     },
 
@@ -174,18 +164,18 @@ paymentForm.include( {
      * @return {object} The processing error, if any.
      */
     async _stripeConfirmIntent(processingValues, paymentOptionId) {
-        const elementOptions = {
-            elements: this.stripePaymentElements[paymentOptionId],
+        const confirmOptions = {
+            elements: this.stripeElements[paymentOptionId],
             clientSecret: processingValues['client_secret'],
             confirmParams: {
                 return_url: processingValues['return_url'],
             },
-        }
-        if (this.isValidation){
-             return await this.stripeJS.confirmSetup(elementOptions);
+        };
+        if (this.txContext['mode'] === 'payment'){
+             return await this.stripeJS.confirmPayment(confirmOptions);
         }
         else {
-            return await this.stripeJS.confirmPayment(elementOptions);
+            return await this.stripeJS.confirmSetup(confirmOptions);
         }
     },
 
