@@ -11,6 +11,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     selector: '#o_payment_form',
     events: Object.assign({}, publicWidget.Widget.prototype.events, {
         'click [name="o_payment_radio"]': '_selectPaymentOption',
+        'click [name="o_payment_expand_button"]': '_hideExpandButton',
         'click [name="o_payment_submit_button"]': '_submitForm',
     }),
 
@@ -60,6 +61,17 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
 
         // Re-enable the submit button after the inline form has been prepared.
         this._enableButton();
+    },
+
+    /**
+     * Hide the button to expand the payment methods section once it has been clicked.
+     *
+     * @private
+     * @param {Event} ev
+     * @return {void}
+     */
+    async _hideExpandButton(ev) {
+        ev.target.classList.add('d-none');
     },
 
     /**
