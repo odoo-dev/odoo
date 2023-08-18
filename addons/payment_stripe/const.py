@@ -15,44 +15,6 @@ PAYMENT_METHODS_MAPPING = {
     'clearpay': 'afterpay_clearpay',
 }
 
-# The payment methods for which Stripe supports tokenization. TODO VCHU drop this
-# See https://stripe.com/docs/payments/payment-methods/integration-options.
-PAYMENT_METHODS_TOKENIZATION_SUPPORT = {
-    'acss_debit': True,
-    'affirm': False,
-    'afterpay_clearpay': False,
-    'alipay': False,
-    'apple_pay': True,
-    'au_becs_debit': True,
-    'bacs_debit': False,  # Stripe doesn't support saving BACS with setupIntent.
-    'bancontact': True,
-    'blik': False,
-    'boleto': True,
-    'card': True,
-    'cashapp': True,
-    'customer_balance': False,
-    'eps': False,
-    'fpx': False,
-    'giropay': False,
-    'google_pay': True,
-    'grabpay': False,
-    'ideal': True,
-    'klarna': False,
-    'konbini': False,
-    'link': True,
-    'mobilepay': False,
-    'oxxo': False,
-    'p24': False,
-    'paynow': False,
-    'paypal': True,
-    'promptpay': False,
-    'sepa_debit': True,
-    'sofort': True,
-    'us_bank_account': True,
-    'wechat_pay': False,
-    'zip': False,
-}
-
 # Mapping of transaction states to Stripe objects ({Payment,Setup}Intent, Refund) statuses.
 # For each object's exhaustive status list, see:
 # https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status
