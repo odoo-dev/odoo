@@ -2,45 +2,45 @@
 <odoo>
 
     <template id="inline_form">
-        <div t-if="provider.authorize_payment_method_type == 'credit_card'" t-attf-id="o_authorize_form_{{provider_id}}" class="o_authorize_form">
+        <div t-if="pm_sudo.code == 'card'" t-attf-id="o_authorize_form_{{pm_sudo.id}}" class="o_authorize_form">
             <div class="mb-3">
-                <label t-attf-for="o_authorize_card_{{provider_id}}" class="col-form-label">Card Number</label>
-                <input type="text" t-attf-id="o_authorize_card_{{provider_id}}" required="" maxlength="19" class="form-control"/>
+                <label t-attf-for="o_authorize_card_{{pm_sudo.id}}" class="col-form-label">Card Number</label>
+                <input type="text" t-attf-id="o_authorize_card_{{pm_sudo.id}}" required="" maxlength="19" class="form-control"/>
             </div>
             <div class="row">
                 <div class="col-sm-8 mb-3">
-                    <label t-attf-for="o_authorize_month_{{provider_id}}">Expiration</label>
+                    <label t-attf-for="o_authorize_month_{{pm_sudo.id}}">Expiration</label>
                     <div class="input-group">
-                        <input type="number" t-attf-id="o_authorize_month_{{provider_id}}" placeholder="MM" min="1" max="12" required="" class="form-control"/>
-                        <input type="number" t-attf-id="o_authorize_year_{{provider_id}}" placeholder="YY" min="00" max="99" required="" class="form-control"/>
+                        <input type="number" t-attf-id="o_authorize_month_{{pm_sudo.id}}" placeholder="MM" min="1" max="12" required="" class="form-control"/>
+                        <input type="number" t-attf-id="o_authorize_year_{{pm_sudo.id}}" placeholder="YY" min="00" max="99" required="" class="form-control"/>
                     </div>
                 </div>
                 <div class="col-sm-4 mb-3">
-                    <label t-attf-for="o_authorize_code_{{provider_id}}">Card Code</label>
-                    <input type="number" t-attf-id="o_authorize_code_{{provider_id}}" max="9999" class="form-control"/>
+                    <label t-attf-for="o_authorize_code_{{pm_sudo.id}}">Card Code</label>
+                    <input type="number" t-attf-id="o_authorize_code_{{pm_sudo.id}}" max="9999" class="form-control"/>
                 </div>
             </div>
         </div>
-        <div t-else="" t-attf-id="o_authorize_form_{{provider_id}}" class="o_authorize_form">
+        <div t-else="" t-attf-id="o_authorize_form_{{pm_sudo.id}}" class="o_authorize_form">
             <div class="mb-3">
-                <label t-attf-for="o_authorize_bank_name_{{provider_id}}" class="col-form-label">Bank Name</label>
-                <input type="text" t-attf-id="o_authorize_bank_name_{{provider_id}}" required="" class="form-control"/>
+                <label t-attf-for="o_authorize_bank_name_{{pm_sudo.id}}" class="col-form-label">Bank Name</label>
+                <input type="text" t-attf-id="o_authorize_bank_name_{{pm_sudo.id}}" required="" class="form-control"/>
             </div>
             <div class="mb-3">
-                <label t-attf-for="o_authorize_account_name_{{provider_id}}" class="col-form-label">Name On Account</label>
-                <input type="text" t-attf-id="o_authorize_account_name_{{provider_id}}" required="" class="form-control"/>
+                <label t-attf-for="o_authorize_account_name_{{pm_sudo.id}}" class="col-form-label">Name On Account</label>
+                <input type="text" t-attf-id="o_authorize_account_name_{{pm_sudo.id}}" required="" class="form-control"/>
             </div>
             <div class="mb-3">
-                <label t-attf-for="o_authorize_account_number_{{provider_id}}" class="col-form-label">Account Number</label>
-                <input type="text" t-attf-id="o_authorize_account_number_{{provider_id}}" required="" class="form-control"/>
+                <label t-attf-for="o_authorize_account_number_{{pm_sudo.id}}" class="col-form-label">Account Number</label>
+                <input type="text" t-attf-id="o_authorize_account_number_{{pm_sudo.id}}" required="" class="form-control"/>
             </div>
             <div class="mb-3">
-                <label t-attf-for="o_authorize_aba_number_{{provider_id}}" class="col-form-label">ABA Routing Number</label>
-                <input type="text" t-attf-id="o_authorize_aba_number_{{provider_id}}" required="" class="form-control"/>
+                <label t-attf-for="o_authorize_aba_number_{{pm_sudo.id}}" class="col-form-label">ABA Routing Number</label>
+                <input type="text" t-attf-id="o_authorize_aba_number_{{pm_sudo.id}}" required="" class="form-control"/>
             </div>
             <div class="mb-3">
-                <label t-attf-for="o_authorize_account_type_{{provider_id}}" class="col-form-label">Bank Account Type</label>
-                <select t-attf-id="o_authorize_account_type_{{provider_id}}" required="" class="form-select">
+                <label t-attf-for="o_authorize_account_type_{{pm_sudo.id}}" class="col-form-label">Bank Account Type</label>
+                <select t-attf-id="o_authorize_account_type_{{pm_sudo.id}}" required="" class="form-select">
                     <option value="checking">Personal Checking</option>
                     <option value="savings">Personal Savings</option>
                     <option value="businessChecking">Business Checking</option>

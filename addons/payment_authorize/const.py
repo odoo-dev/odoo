@@ -2,13 +2,9 @@
 
 # Mapping of payment method codes to Authorize codes.
 PAYMENT_METHODS_MAPPING = {
-    'amex': 'AmericanExpress',
-    'diners': 'DinersClub',
-    'discover': 'Discover',
-    'jcb': 'JCB',
-    'mastercard': 'Mastercard',
-    'visa': 'Visa',
-    'card': 'creditCard'
+    'amex': 'americanexpress',
+    'diners': 'dinersclub',
+    'card': 'creditcard'
 }
 
 # Mapping of payment status on Authorize side to transaction statuses.

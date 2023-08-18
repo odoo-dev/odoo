@@ -99,7 +99,14 @@ paymentForm.include({
         }
         else if (paymentMethodCode === 'paypal') {
             // PayPal requires the form to be submitted with its own button.
-            componentConfiguration['showPayButton'] = true;
+            Object.assign(componentConfiguration, {
+                style: {
+                    disableMaxWidth: true
+                },
+                showPayButton: true,
+                blockPayPalCreditButton: true,
+                blockPayPalPayLaterButton: true
+            })
             this._hideInputs();
             // Define necessary fields as the step _submitForm is missed.
             Object.assign(this.txContext, {

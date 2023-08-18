@@ -26,7 +26,6 @@ class AuthorizeController(http.Controller):
         provider_sudo = request.env['payment.provider'].sudo().browse(provider_id).exists()
         return {
             'state': provider_sudo.state,
-            'payment_method_type': provider_sudo.authorize_payment_method_type,
             # The public API key solely used to identify the seller account with Authorize.Net
             'login_id': provider_sudo.authorize_login,
             # The public client key solely used to identify requests from the Accept.js suite

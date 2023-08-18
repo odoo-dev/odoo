@@ -8,7 +8,7 @@ from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_authorize.models.authorize_request import AuthorizeAPI
-from odoo.addons.payment_authorize.const import TRANSACTION_STATUS_MAPPING
+from odoo.addons.payment_authorize.const import TRANSACTION_STATUS_MAPPING, PAYMENT_METHODS_MAPPING
 
 
 _logger = logging.getLogger(__name__)
@@ -211,6 +211,11 @@ class PaymentTransaction(models.Model):
 
         response_content = notification_data.get('response')
 
+        payment_method_code = response_content.get('payment_method_code', '').lower()
+        payment_method = self.env['payment.method']._get_from_code(
+            payment_method_code, PAYMENT_METHODS_MAPPING
+        )
+        self.payment_method_id = payment_method or self.payment_method_id
         self.provider_reference = response_content.get('x_trans_id')
         status_code = response_content.get('x_response_code', '3')
         if status_code == '1':  # Approved
@@ -281,7 +286,7 @@ class PaymentTransaction(models.Model):
                 'partner_id': self.partner_id.id,
                 'provider_ref': cust_profile.get('payment_profile_id'),
                 'authorize_profile': cust_profile.get('profile_id'),
-                'authorize_payment_method_type': self.provider_id.authorize_payment_method_type,
+                'payment_method_id': self.payment_method_id.id,
                 'verified': True,
             })
             self.write({
