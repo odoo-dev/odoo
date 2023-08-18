@@ -112,6 +112,7 @@ paymentForm.include({
             this._super(...arguments); // Tokens are handled by the generic flow
             return;
         }
+
         // The `onError` event handler is not used to validate inputs anymore since v5.0.0.
         if (!this.adyenComponents[paymentOptionId].isValid) {
             this._displayErrorDialog(

@@ -9,7 +9,7 @@ from odoo import _, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
-from odoo.addons.payment_stripe.const import STATUS_MAPPING
+from odoo.addons.payment_stripe import const
 from odoo.addons.payment_stripe.controllers.main import StripeController
 
 
@@ -126,6 +126,9 @@ class PaymentTransaction(models.Model):
         return {
             'customer': customer['id'],
             'description': self.reference,
+            'payment_method_types[]': const.PAYMENT_METHODS_MAPPING.get(
+                self.payment_method_code, self.payment_method_code
+            ),
             **self._stripe_prepare_mandate_options(),
         }
 
@@ -143,8 +146,10 @@ class PaymentTransaction(models.Model):
             'currency': self.currency_id.name.lower(),
             'description': self.reference,
             'capture_method': 'manual' if self.provider_id.capture_manually else 'automatic',
+            'payment_method_types[]': const.PAYMENT_METHODS_MAPPING.get(
+                payment_method_type, payment_method_type
+            ),
             'expand[]': 'payment_method',
-            'payment_method_types[0]': payment_method_type,
         }
         if self.operation in ['online_token', 'offline']:
             if not self.token_id.stripe_payment_method:  # Pre-SCA token, migrate it.
@@ -156,8 +161,6 @@ class PaymentTransaction(models.Model):
                 'off_session': True,
                 'payment_method': self.token_id.stripe_payment_method,
                 'mandate': self.token_id.stripe_mandate or None,
-                # For support token payment of payment methods that use sepa debit
-                'payment_method_types[1]': 'sepa_debit',
             })
         else:
             if self.tokenize:
@@ -380,15 +383,15 @@ class PaymentTransaction(models.Model):
             raise ValidationError(
                 "Stripe: " + _("Received data with missing intent status.")
             )
-        if status in STATUS_MAPPING['draft']:
+        if status in const.STATUS_MAPPING['draft']:
             pass
-        elif status in STATUS_MAPPING['pending']:
+        elif status in const.STATUS_MAPPING['pending']:
             self._set_pending()
-        elif status in STATUS_MAPPING['authorized']:
+        elif status in const.STATUS_MAPPING['authorized']:
             if self.tokenize:
                 self._stripe_tokenize_from_notification_data(notification_data)
             self._set_authorized()
-        elif status in STATUS_MAPPING['done']:
+        elif status in const.STATUS_MAPPING['done']:
             if self.tokenize:
                 self._stripe_tokenize_from_notification_data(notification_data)
 
@@ -398,9 +401,9 @@ class PaymentTransaction(models.Model):
             # will not be triggered by a customer browsing the transaction from the portal.
             if self.operation == 'refund':
                 self.env.ref('payment.cron_post_process_payment_tx')._trigger()
-        elif status in STATUS_MAPPING['cancel']:
+        elif status in const.STATUS_MAPPING['cancel']:
             self._set_canceled()
-        elif status in STATUS_MAPPING['error']:
+        elif status in const.STATUS_MAPPING['error']:
             if self.operation != 'refund':
                 last_payment_error = notification_data.get('payment_intent', {}).get(
                     'last_payment_error'

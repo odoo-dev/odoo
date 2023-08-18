@@ -18,14 +18,4 @@
              placed in __manifest__.py. The following declaration fix this problem -->
         <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
     </template>
-
-    <template id="payment_stripe.method_form" inherit_id="payment.method_form">
-        <xpath expr="//input[@name='o_payment_radio']" position="attributes">
-            <attribute name="t-att-data-inline-form-values">
-                provider_sudo._stripe_get_inline_form_values(
-                    amount, currency, partner_id, mode == 'validation', sale_order_id=sale_order_id
-                )
-            </attribute>
-        </xpath>
-    </template>
 </odoo>
