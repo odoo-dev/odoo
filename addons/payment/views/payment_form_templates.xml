@@ -36,6 +36,7 @@
                     and len(payment_methods_sudo) == 1
                     and payment_methods_sudo[:1].id"
         />
+        <t t-set="collapse_payment_methods" t-value="tokens_sudo and allow_token_selection"/>
         <t t-set="display_submit_button"
            t-value="True if display_submit_button is None else display_submit_button"
         />
@@ -79,12 +80,14 @@
                     </ul>
                 </div>
                 <!-- === Payment methods === -->
-                <div id="o_payment_methods" class="collapse">
+                <div id="o_payment_methods"
+                     t-att-class="'collapse' if collapse_payment_methods else ''"
+                >
                     <!-- === Header === -->
                     <h4 class="d-flex gap-3 align-items-center mt-4 mb-3 fs-6 small text-uppercase
                                fw-bolder"
                     >
-                        <t t-if="not tokens_sudo">Choose a payment method</t>
+                        <t t-if="not collapse_payment_methods">Choose a payment method</t>
                         <t t-else="">Other payment methods</t>
                         <hr class="flex-grow-1 m-0"/>
                     </h4>
@@ -106,7 +109,8 @@
             </div>
             <div class="d-flex justify-content-end flex-column flex-md-row gap-2 my-2">
                 <!-- === Expand payment methods button === -->
-                <button name="o_payment_expand_button"
+                <button t-if="collapse_payment_methods"
+                        name="o_payment_expand_button"
                         type="button"
                         href="#o_payment_methods"
                         class="btn btn-link"
