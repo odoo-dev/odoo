@@ -66,16 +66,8 @@ patch(KanbanHeader.prototype, {
             search_default_model_id: modelId[0],
             ...enrichContext(this.group),
         };
-        this.action.doAction({
-            name: _t("Automation Rules"),
-            res_model: "base.automation",
-            views: [
-                [false, "kanban"],
-                [false, "form"],
-            ],
-            type: "ir.actions.act_window",
-            target: "current",
-            context: context,
+        this.action.doAction("base_automation.base_automation_act", {
+            additionalContext: context,
         });
     },
 });
