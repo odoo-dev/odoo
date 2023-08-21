@@ -12,9 +12,15 @@
                     invisible="state != 'sms'"
                     required="state == 'sms'"/>
                 <field name="sms_method"
+                       groups="base.group_no_one"
                        string="Send as"
                        invisible="state != 'sms'"
                        required="state == 'sms'"/>
+                <span colspan="2" class="text-muted o_row ps-1"
+                        invisible="state != 'sms'"
+                        groups="base.group_no_one">
+                    <i class="fa fa-lightbulb-o"/>&amp;nbsp; <field name="sms_method_helper"/>
+                </span>
             </xpath>
         </field>
     </record>

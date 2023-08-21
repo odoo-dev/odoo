@@ -26,6 +26,15 @@ class ServerActions(models.Model):
         compute='_compute_sms_method',
         readonly=False, store=True,
         help='Choose method for SMS sending:\nSMS: mass SMS\nPost as Message: log on document\nPost as Note: mass SMS with archives')
+    sms_method_helper = fields.Char('Send As (SMS) helper message', compute='_compute_sms_method_helper')
+
+    @api.depends('state', 'sms_template_id')
+    def _compute_name(self):
+        for action in self:
+            if action.state == 'sms':
+                action.name = 'Send SMS: %s' % action.sms_template_id.name
+            else:
+                super(ServerActions, action)._compute_name()
 
     @api.depends('model_id', 'state')
     def _compute_sms_template_id(self):
@@ -44,6 +53,18 @@ class ServerActions(models.Model):
         other = self - to_reset
         if other:
             other.sms_method = 'sms'
+
+    @api.depends('sms_method')
+    def _compute_sms_method_helper(self):
+        for action in self:
+            if action.sms_method == 'sms':
+                action.sms_method_helper = _('The message will be sent as an SMS to the recipients of the template and will not appear in the messaging history.')
+            elif action.sms_method == 'note':
+                action.sms_method_helper = _('The SMS will be sent as an SMS to the recipients of the template. A copy will appear in the messaging history.')
+            elif action.sms_method == 'comment':
+                action.sms_method_helper = _('The SMS will be sent as an SMS to the recipients of the template. A copy will be sent to all followers of the document and will appear in the messaging history.')
+            else:
+                action.sms_method_helper = ''
 
     def _check_model_coherency(self):
         super()._check_model_coherency()
