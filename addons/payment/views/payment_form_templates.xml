@@ -6,6 +6,7 @@
             - mode: The operation mode of the form: `payment` or `validation`; default: `payment`.
             - allow_token_selection: Whether tokens can be selected for payment or assignation
                                      (through the `assign_token_route` parameter); default: `True`.
+            - allow_token_deletion: Whether tokens can be deleted (archived); default: `False`.
             - default_token_id: The id of the token that should be pre-selected; default: `None`.
             - show_tokenize_input_mapping: For each provider, whether the tokenization checkbox is
                                            shown; used only in `payment` mode.
@@ -28,6 +29,7 @@
         <t t-set="allow_token_selection"
            t-value="True if allow_token_selection is None else allow_token_selection"
         />
+        <t t-set="allow_token_deletion" t-value="allow_token_deletion or False"/>
         <t t-set="selected_token_id"
            t-value="allow_token_selection and (default_token_id or tokens_sudo[:1].id)"
         />
@@ -139,7 +141,8 @@
         <t t-set="inline_form_xml_id" t-value="provider_sudo.token_inline_form_view_id.xml_id"/>
         <div class="d-flex gap-3">
             <!-- === Delete button === -->
-            <button name="o_payment_delete_token"
+            <button t-if="allow_token_deletion"
+                    name="o_payment_delete_token"
                     t-att-class="'btn btn-link align-self-start px-2 lh-lg z-index-1'
                                  + (' d-none' if mode != 'validation' else '')"
             >

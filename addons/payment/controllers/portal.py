@@ -220,6 +220,7 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
         payment_form_values = {
             'mode': 'validation',
             'allow_token_selection': False,
+            'allow_token_deletion': True,
         }
         payment_context = {
             'reference_prefix': payment_utils.singularize_reference_prefix(prefix='V'),
