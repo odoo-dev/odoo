@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- Integration of a conditional "Manage payment methods" link in /my -->
-    <template id="pay_meth_link" inherit_id="portal.portal_layout">
+    <template id="payment.pay_meth_link" inherit_id="portal.portal_layout">
         <xpath expr="//div[hasclass('o_portal_my_details')]" position="inside">
             <t t-set="partner" t-value="request.env.user.partner_id"/>
             <t t-set="providers_allowing_tokenization"
@@ -17,9 +17,16 @@
     </template>
 
     <!-- Display of /payment/pay -->
-    <template id="pay">
+    <template id="payment.pay">
         <!-- Parameters description:
-            - res_company: The company in which the payment if made.
+            - reference_prefix: The custom prefix to compute the full transaction reference.
+            - amount: The amount to pay.
+            - currency: The currency of the payment, as a `res.currency` record.
+            - partner_id: The id of the partner on behalf of whom the payment should be made.
+            - payment_methods_sudo: The compatible payment methods, as a sudoed `payment.method`
+                                    recordset.
+            - tokens_sudo: The available payment tokens, as a sudoed `payment.token` recordset.
+            - res_company: The company in which the payment if made (for the company logo).
             - company_mismatch: Whether the user should make the payment in another company.
             - expected_company: The record of the company that the user should switch to.
             - partner_is_different: Whether the partner logged in is the one making the payment.
@@ -58,14 +65,7 @@
                                     <strong>Warning</strong> Make sure your are logged in as the
                                     correct partner before making this payment.
                                 </div>
-                                <t t-if="reference_prefix">
-                                    <b>Reference:</b>
-                                    <t t-esc="reference_prefix"/><br/>
-                                </t>
-                                <b>Amount:</b>
-                                <t t-esc="amount"
-                                   t-options="{'widget': 'monetary', 'display_currency': currency}"
-                                />
+                                <t t-call="payment.pay_summary"/>
                                 <t t-call="payment.form"/>
                             </t>
                         </div>
@@ -75,8 +75,31 @@
         </t>
     </template>
 
+    <template id="payment.pay_summary">
+        <div class="o_payment_details o_cc2 row row-cols-1 row-cols-md-2 mx-0 py-2 rounded">
+            <!-- TODO review with mano
+                    what does the scss do?
+            -->
+            <div class="col my-3">
+                <label for="form_reference" class="d-block small text-muted">
+                    Reference
+                </label>
+                <span name="form_reference"
+                      t-out="reference_prefix"/>
+            </div>
+            <div class="col my-3">
+                <label for="form_amount" class="d-block small text-muted">
+                    Amount
+                </label>
+                <span name="form_amount"
+                      t-out="amount"
+                      t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+            </div>
+        </div>
+    </template>
+
     <!-- Display of /my/payment_methods -->
-    <template id="payment_methods" name="Payment Methods">
+    <template id="payment.payment_methods" name="Payment Methods">
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Methods'"/>
             <t t-set="additional_title"><t t-esc="page_title"/></t>
@@ -103,7 +126,7 @@
     </template>
 
     <!-- Display of /payment/status -->
-    <template id="payment_status" name="Payment Status">
+    <template id="payment.payment_status" name="Payment Status">
         <t t-call="portal.frontend_layout">
             <t t-set="page_title" t-value="'Payment Status'"/>
             <t t-set="additional_title"><t t-esc="page_title"/></t>
@@ -124,7 +147,7 @@
     </template>
 
     <!-- Display of /payment/confirmation -->
-    <template id="confirm">
+    <template id="payment.confirm">
         <!-- Parameters description:
             - tx: The transaction to display.
         -->
@@ -199,7 +222,7 @@
     </template>
 
     <!-- Breadcrumb for the portal -->
-    <template id="portal_breadcrumb">
+    <template id="payment.portal_breadcrumb">
         <!-- Parameters description:
             - page_title: The title of the breadcrumb item.
         -->
