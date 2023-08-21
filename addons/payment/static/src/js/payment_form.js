@@ -6,6 +6,8 @@ import Dialog from '@web/legacy/js/core/dialog';
 import { escape } from '@web/core/utils/strings';
 import core from '@web/legacy/js/services/core';
 const _t = core._t;  // TODO see if better way to import now
+import { _t } from '@web/core/l10n/translation';
+import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
 
 publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     selector: '#o_payment_form',
@@ -244,18 +246,12 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * Display an error dialog.
      *
      * @private
-     * @param {string} title - The title of the error.
-     * @param {string} description - The description of the error.
-     * @param {string} error - The raw error message.
-     * @return {Dialog} The error dialog.
+     * @param {string} title - The title of the dialog.
+     * @param {string} errorMessage - The error message.
+     * @return {void}
      */
-    _displayErrorDialog(title, description = '', error = '') {
-        return new Dialog(null, {
-            title: title,
-            size: 'medium',
-            $content: `<p>${escape(description) || ''}</p><p>${escape(error) || ''}</p>`, // TODO format
-            buttons: [{ text: _t("Ok"), close: true }]
-        }).open();
+    _displayErrorDialog(title, errorMessage = '') {
+        this.call('dialog', 'add', ConfirmationDialog, { title: title, body: errorMessage || "" });
     },
 
     /**
@@ -341,10 +337,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             }
         }).guardedCatch(error => {
             error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("We are not able to process your payment."),
-                error.message.data.message,
-            );
+            this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
             this._enableButton(); // The button has been disabled before initiating the flow.
         });
     },
@@ -371,7 +364,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             'landing_route': this.txContext['landingRoute'],
             'is_validation': this.txContext['mode'] === 'validation',
             'access_token': this.txContext['accessToken'],
-            'csrf_token': core.csrf_token,
+            'csrf_token': odoo.csrf_token,
         };
     },
 

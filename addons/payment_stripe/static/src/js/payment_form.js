@@ -117,10 +117,7 @@ paymentForm.include( {
         const _super = this._super.bind(this);
         const { error: submitError } = await this.stripeElements[paymentOptionId].submit();
         if (submitError) {
-            this._displayErrorDialog(
-                _t("Incorrect Payment Details"),
-                _t("Please verify your payment details."),
-            );
+            this._displayErrorDialog(_t("Incorrect payment details"));
             this._enableButton();
         } else { // There is no invalid input, resume the generic flow.
             return await _super(...arguments);
@@ -146,11 +143,7 @@ paymentForm.include( {
 
         const { error } = await this._stripeConfirmIntent(processingValues, paymentOptionId);
         if (error) {
-            this._displayErrorDialog(
-                _t("Server Error"),
-                _t("We are not able to process your payment."),
-                error.message,
-            );
+            this._displayErrorDialog(_t("Payment processing failed"), error.message);
             this._enableButton();
         }
     },

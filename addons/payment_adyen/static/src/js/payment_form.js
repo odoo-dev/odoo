@@ -88,9 +88,7 @@ paymentForm.include({
         }).guardedCatch((error) => {
             error.event.preventDefault();
             this._displayErrorDialog(
-                _t("Server Error"),
-                _t("An error occurred when displayed this payment form."),
-                error.message.data.message,
+                _t("Cannot display the payment form"), error.message.data.message
             );
             this._enableButton();
         });
@@ -115,10 +113,7 @@ paymentForm.include({
 
         // The `onError` event handler is not used to validate inputs anymore since v5.0.0.
         if (!this.adyenComponents[paymentOptionId].isValid) {
-            this._displayErrorDialog(
-                _t("Incorrect Payment Details"),
-                _t("Please verify your payment details."),
-            );
+            this._displayErrorDialog(_t("Incorrect payment details"));
             this._enableButton();
             return;
         }
@@ -164,10 +159,7 @@ paymentForm.include({
             }
         }).guardedCatch((error) => {
             error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("We are not able to process your payment."),
-                error.message.data.message,
-            );
+            this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
             this._enableButton();
         });
     },
@@ -196,10 +188,7 @@ paymentForm.include({
             }
         }).guardedCatch((error) => {
             error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("We are not able to process your payment."),
-                error.message.data.message,
-            );
+            this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
             this._enableButton();
         });
     },
@@ -214,11 +203,8 @@ paymentForm.include({
      * @param {object} error - The error in the component.
      * @return {void}
      */
-    _adyenOnError(error) { // TODO use error
-        this._displayErrorDialog(
-            _t("We are not able to process your payment."),
-            _t(error.message),
-        );
+    _adyenOnError(error) {
+        this._displayErrorDialog(_t("Payment processing failed"), error.message);
         this._enableButton();
     },
 
