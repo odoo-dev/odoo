@@ -15,7 +15,7 @@
         <!-- Payment context:
             - reference_prefix: The custom prefix to compute the full transaction reference.
             - amount: The amount to pay.
-            - currency: The currency of the transaction, as a `res.currency` record.
+            - currency: The currency of the payment, as a `res.currency` record.
             - partner_id: The id of the partner on behalf of whom the payment should be made.
             - payment_methods_sudo: The compatible payment methods, as a sudoed `payment.method`
                                     recordset.

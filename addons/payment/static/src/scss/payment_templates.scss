@@ -1,3 +1,17 @@
 div#o_payment_status_alert > p {
     margin-bottom: 0;
 }
+
+.o_payment_details {
+    @include media-breakpoint-up(lg) {
+        > div.col:not(:nth-child(4n + 4)):not(:last-child) {
+            border-right: $border-width solid $border-color;
+        }
+    }
+
+    @include media-breakpoint-up(md) {
+        > div.col:nth-child(odd):not(:last-child) {
+            border-right: $border-width solid $border-color;
+        }
+    }
+}

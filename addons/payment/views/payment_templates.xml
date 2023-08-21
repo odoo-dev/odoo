@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- Company mismatch warning -->
-    <template id="company_mismatch_warning" name="Company Mismatch Warning">
+    <template id="payment.company_mismatch_warning" name="Company Mismatch Warning">
         <!-- Parameters description:
             - expected_company: The record of the company that the user should switch to.
         -->
@@ -329,7 +329,7 @@
     </template>
 
     <!-- Express Checkout form -->
-    <template id="express_checkout" name="Payment Express Checkout">
+    <template id="payment.express_checkout" name="Payment Express Checkout">
         <!-- Variables description:
             - providers: The payment providers compatible with the current transaction.
             - reference_prefix: The custom prefix to compute the full transaction reference.
@@ -451,7 +451,7 @@
     </template>
 
     <!-- Transaction status in portal -->
-    <template id="transaction_status">
+    <template id="payment.transaction_status">
         <!-- Parameters description:
             - tx: The transaction whose status must be displayed.
         -->
