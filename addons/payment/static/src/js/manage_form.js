@@ -78,7 +78,7 @@ publicWidget.registry.PaymentManageForm = publicWidget.Widget.extend(paymentForm
      * @return {void}
      */
     _openConfirmationDialog: function (linkedRecordsInfo, confirmCallback) {
-        const body = renderToMarkup('payment.ManageFormConfirmationDialog', { linkedRecordsInfo });
+        const body = renderToMarkup('payment.deleteTokenDialog', { linkedRecordsInfo });
         this.call('dialog', 'add', ConfirmationDialog, {
             title: _t("Warning!"),
             body,

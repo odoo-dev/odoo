@@ -30,12 +30,9 @@
         'wizards/payment_onboarding_views.xml',
     ],
     'assets': {
-        'web.assets_frontend': [  # TODO ANV use glob
-            'payment/static/src/scss/payment_templates.scss',
-            'payment/static/src/scss/payment_form.scss',
+        'web.assets_frontend': [
             'payment/static/lib/jquery.payment/jquery.payment.js',
-            'payment/static/src/js/*',
-            'payment/static/src/xml/*.xml',
+            'payment/static/src/**/*',
         ],
         'web.assets_backend': [
             'payment/static/src/scss/payment_provider.scss',
