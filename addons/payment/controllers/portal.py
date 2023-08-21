@@ -110,14 +110,14 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company_id, partner_sudo.id, amount, currency_id=currency.id, **kwargs
         )  # In sudo mode to read the fields of providers and partner (if logged out).
-        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids
-        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+        )  # In sudo mode to read the fields of providers.
         # if provider_id in providers_sudo.ids:  # Only keep the desired provider if it's suitable TODO ANV drop feature
         #     providers_sudo = providers_sudo.browse(provider_id)
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             providers_sudo.ids, partner_sudo.id
-        )  # In sudo mode to be able to read tokens of other partners.
+        )  # In sudo mode to be able to read tokens of other partners. TODO check if should also be sudo in other modules to read token.provider_id.*
 
         # Make sure that the partner's company matches the company passed as parameter.
         company_mismatch = not PaymentPortal._can_partner_pay_in_company(partner_sudo, company)
@@ -155,7 +155,7 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
             'currency': currency,
             'partner_id': partner_sudo.id,
             'payment_methods_sudo': payment_methods_sudo,
-            'tokens_sudo': tokens_sudo,  # TODO rename without _sudo for other modules' controllers?
+            'tokens_sudo': tokens_sudo,
             'transaction_route': '/payment/transaction',
             'landing_route': '/payment/confirmation',
             'access_token': access_token,
@@ -208,9 +208,9 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
             is_validation=True,
             **kwargs,
         )  # In sudo mode to read the fields of providers and partner (if logged out).
-        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids
-        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+        )  # In sudo mode to read the fields of providers.
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             None, partner_sudo.id, is_validation=True
         )  # In sudo mode to read the commercial partner's fields.
