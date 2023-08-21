@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.KanbanHeader" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-if='canEditGroup()']" position="after">
+            <DropdownItem t-if="user.isAdmin" class="'o_column_automations'" onSelected="() => this.openAutomations()">
+                Automations
+            </DropdownItem>
+        </xpath>
+    </t>
+</templates>

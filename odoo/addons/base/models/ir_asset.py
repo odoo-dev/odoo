@@ -280,7 +280,7 @@ class IrAsset(models.Model):
         manifs = map(mapper, addons_tuple)
 
         def sort_key(manif):
-            return (not manif['application'], int(manif['sequence']), manif['name'])
+            return (int(manif['sequence']), manif['name'])
 
         manifs = sorted(manifs, key=sort_key)
 

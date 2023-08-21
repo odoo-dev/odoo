@@ -8,5 +8,5 @@ class ServerAction(models.Model):
     _inherit = "ir.actions.server"
 
     usage = fields.Selection(selection_add=[
-        ('base_automation', 'Automated Action')
+        ('base_automation', 'Automation Rule')
     ], ondelete={'base_automation': 'cascade'})
