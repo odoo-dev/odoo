@@ -2,17 +2,15 @@
 
 // TODO sort
 import publicWidget from '@web/legacy/js/public/public_widget';
-import Dialog from '@web/legacy/js/core/dialog';
-import { escape } from '@web/core/utils/strings';
-import core from '@web/legacy/js/services/core';
-const _t = core._t;  // TODO see if better way to import now
 import { _t } from '@web/core/l10n/translation';
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
+import { renderToMarkup } from '@web/core/utils/render';
 
 publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     selector: '#o_payment_form',
     events: Object.assign({}, publicWidget.Widget.prototype.events, {
         'click [name="o_payment_radio"]': '_selectPaymentOption',
+        'click [name="o_payment_delete_token"]': '_showTokenDeletionDialog',
         'click [name="o_payment_expand_button"]': '_hideExpandButton',
         'click [name="o_payment_submit_button"]': '_submitForm',
     }),
@@ -66,13 +64,73 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     },
 
     /**
+     * Show the token deletion dialog.
+     *
+     * @private
+     * @param {Event} ev
+     * @return {void}
+     */
+    // TODO split to allow overriding in Subs -> _fetchTokenData (handlers) + _challengeTokenDeletion (flow) + _archiveToken (flow)
+    _showTokenDeletionDialog(ev) {
+        ev.preventDefault();
+
+        const execute = () => {
+            this._rpc({
+                route: '/payment/archive_token',
+                params: {
+                    'token_id': tokenId,
+                },
+            }).then(() => { // TODO simply reload page
+                const $tokenCard = this.$(
+                    `input[name="o_payment_radio"][data-payment-option-id="${tokenId}"]` +
+                    `[data-payment-option-type="token"]`
+                ).closest('div[name="o_payment_option_card"]');
+                $tokenCard.siblings(`#o_payment_token_inline_manage_form_${tokenId}`).remove();
+                $tokenCard.remove();
+                this._disableButton(false);
+            }).guardedCatch(error => {
+                error.event.preventDefault();
+                this._displayError(
+                    _t("Server Error"),
+                    _t("We are not able to delete your payment method."),
+                    error.message.data.message,
+                );
+            });
+        };
+
+        // Fetch the documents linked to the token.
+        const linkedRadio = document.getElementById(ev.currentTarget.dataset['linkedRadio']);
+        const tokenId = this._getPaymentOptionId(linkedRadio);
+        this._rpc({
+            model: 'payment.token',
+            method: 'get_linked_records_info',
+            args: [tokenId],
+        }).then(linkedRecordsInfo => {
+            const body = renderToMarkup('payment.deleteTokenDialog', { linkedRecordsInfo });
+            this.call('dialog', 'add', ConfirmationDialog, {
+                title: _t("Warning!"),
+                body,
+                confirmLabel: _t("Confirm Deletion"),
+                confirm: () => execute,
+                cancel: () => {},
+            });
+        }).guardedCatch(error => {
+            error.event.preventDefault(); // TODO still needed?
+            this._displayErrorDialog(
+                _t("Cannot delete payment method"), error.message.data.message
+            );
+        });
+
+    },
+
+    /**
      * Hide the button to expand the payment methods section once it has been clicked.
      *
      * @private
      * @param {Event} ev
      * @return {void}
      */
-    async _hideExpandButton(ev) {
+    _hideExpandButton(ev) {
         ev.target.classList.add('d-none');
     },
 
@@ -336,7 +394,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
                 );
             }
         }).guardedCatch(error => {
-            error.event.preventDefault();
+            error.event.preventDefault(); // TODO still needed?
             this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
             this._enableButton(); // The button has been disabled before initiating the flow.
         });
