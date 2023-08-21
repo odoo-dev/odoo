@@ -34,6 +34,9 @@ paymentForm.include({
             return; // No component for tokens.
         } else if (this.adyenComponents[paymentOptionId]) {
             this._setPaymentFlow('direct'); // Overwrite the flow even if no re-instantiation.
+            if (paymentMethodCode === 'paypal') { // PayPal uses native button to make payments.
+                this._hideInputs();
+            }
             return; // Don't re-instantiate if already done for this payment method.
         }
 
@@ -57,11 +60,10 @@ paymentForm.include({
             // Create the Adyen Checkout SDK.
             const radio = document.querySelector('input[name="o_payment_radio"]:checked');
             const providerState = this._getProviderState(radio);
-            const clientKey = radio.dataset['adyenClientKey'];
-            const adyenPaymentMethodCode = radio.dataset['adyenPaymentMethodCode'];
+            const adyenInlineFormValues = JSON.parse(radio.dataset['inlineFormValues']);
             const configuration = {
                 paymentMethodsResponse: response,
-                clientKey: clientKey,
+                clientKey: adyenInlineFormValues['client_key'],
                 locale: (this._getContext().lang || 'en-US').replace('_', '-'),
                 environment: providerState === 'enabled' ? 'live' : 'test',
                 onAdditionalDetails: this._adyenOnSubmitAdditionalDetails.bind(this),
@@ -74,17 +76,31 @@ paymentForm.include({
             const componentConfiguration = {
                 showBrandsUnderCardNumber: false,
                 showPayButton: false,
+                billingAddressRequired: false, // billing address is included in the back-end
+                amount: {
+                    value: adyenInlineFormValues['amount'],
+                    currency: adyenInlineFormValues['currency_name'],
+                },
+                countryCode: adyenInlineFormValues['country_code'],
             };
             if (paymentMethodCode === 'card') {
                 // Forbid Bancontact cards in the card component.
                 componentConfiguration['brands'] = ['mc', 'visa', 'amex', 'discover'];
             }
+            else if (paymentMethodCode === 'paypal') {
+                // PayPal works only with native button.
+                componentConfiguration['showPayButton'] = true;
+                this._hideInputs();
+                // Define necessary fields as the step _submitForm is missed.
+                this.txContext.tokenizationRequested = false;
+                this.txContext.providerId = providerId;
+                this.txContext.paymentMethodId = paymentOptionId;
+            }
             const inlineForm = this._getInlineForm(radio);
             const adyenContainer = inlineForm.querySelector('[name="o_adyen_component_container"]');
             this.adyenComponents[paymentOptionId] = checkout.create(
-                adyenPaymentMethodCode, componentConfiguration
+                adyenInlineFormValues['adyen_pm_code'], componentConfiguration
             ).mount(adyenContainer);
-            this.adyenComponents[paymentOptionId].providerId = providerId;
         }).guardedCatch((error) => {
             error.event.preventDefault();
             this._displayErrorDialog(
@@ -132,14 +148,14 @@ paymentForm.include({
         // Create the transaction and retrieve the processing values.
         this._rpc({
             route: this.txContext['transactionRoute'],
-            params: this._prepareTransactionRouteParams('adyen', component.providerId, 'direct'),
+            params: this._prepareTransactionRouteParams(),
         }).then(processingValues => {
             component.reference = processingValues.reference; // Store final reference.
             // Initiate the payment.
             return this._rpc({
                 route: '/payment/adyen/payments',
                 params: {
-                    'provider_id': component.providerId,
+                    'provider_id': processingValues.provider_id,
                     'reference': processingValues.reference,
                     'converted_amount': processingValues.converted_amount,
                     'currency_id': processingValues.currency_id,
@@ -176,7 +192,7 @@ paymentForm.include({
         this._rpc({
             route: '/payment/adyen/payments/details',
             params: {
-                'provider_id': component.providerId,
+                'provider_id': this.txContext.providerId,
                 'reference': component.reference,
                 'payment_details': state.data,
             },

@@ -25,6 +25,7 @@ CURRENCY_DECIMALS = {
 
 # Mapping of payment method codes to Adyen codes.
 PAYMENT_METHODS_MAPPING = {
+    'ach_direct_debit': 'ach',
     'apple_pay': 'applepay',
     'bacs_direct_debit': 'directdebit_GB',
     'bancontact': 'bcmc',
