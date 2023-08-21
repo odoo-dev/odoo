@@ -101,7 +101,7 @@
                             >
                                 <t t-call="payment.method_form">
                                     <t t-set="is_selected"
-                                        t-value="pm_sudo.id == selected_method_id"
+                                       t-value="pm_sudo.id == selected_method_id"
                                     />
                                 </t>
                             </li>
@@ -145,6 +145,7 @@
                     name="o_payment_delete_token"
                     t-att-class="'btn btn-link align-self-start px-2 lh-lg z-index-1'
                                  + (' d-none' if mode != 'validation' else '')"
+                    t-attf-data-linked-radio="o_payment_token_{{token_sudo.id}}"
             >
                 <i class="fa fa-trash"
                    title="Delete payment method"
