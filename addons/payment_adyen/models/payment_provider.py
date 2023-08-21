@@ -2,13 +2,14 @@
 
 import logging
 import re
-
+import json
 import requests
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.payment_adyen.const import API_ENDPOINT_VERSIONS
+from odoo.addons.payment_adyen import const
+from odoo.addons.payment import utils as payment_utils
 
 _logger = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class PaymentProvider(models.Model):
         self.ensure_one()
 
         base_url = self[url_field_name]  # Restrict request URL to the stored API URL fields
-        version = API_ENDPOINT_VERSIONS[endpoint]
+        version = const.API_ENDPOINT_VERSIONS[endpoint]
         endpoint = endpoint if not endpoint_param else endpoint.format(endpoint_param)
         url = _build_url(base_url, version, endpoint)
         headers = {'X-API-Key': self.adyen_api_key}
@@ -143,3 +144,29 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         return f'ODOO_PARTNER_{partner_id}'
+
+    def _adyen_get_inline_form_values(self, amount, currency, partner_id, pm_code):
+        """ Return a serialized JSON of the required values to render the inline form.
+
+        Note: `self.ensure_one()`
+
+        :param float amount: The amount in major units, to convert in minor units.
+        :param res.currency currency: The currency of the transaction.
+        :param int partner_id: The partner of the transaction, as a `res.partner` id.
+        :param str pm_code: Payment method code id.
+        :return: The JSON serial of the required values to render the inline form.
+        :rtype: str
+        """
+        self.ensure_one()
+
+        partner = self.env['res.partner'].browse(partner_id).exists()
+        inline_form_values = {
+            'client_key': self.adyen_client_key,
+            'currency_name': currency.name,
+            'amount': amount and payment_utils.to_minor_currency_units(
+                amount, currency, const.CURRENCY_DECIMALS.get(currency.name)
+            ),
+            'country_code': partner.country_id.code or '',
+            'adyen_pm_code': const.PAYMENT_METHODS_MAPPING.get(pm_code, pm_code),
+        }
+        return json.dumps(inline_form_values)

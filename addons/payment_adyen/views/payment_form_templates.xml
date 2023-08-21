@@ -18,9 +18,10 @@
 
     <template id="payment_adyen.method_form" inherit_id="payment.method_form">
         <xpath expr="//input[@name='o_payment_radio']" position="attributes">
-            <attribute name="t-att-data-adyen-client-key">provider_sudo.adyen_client_key</attribute>
-            <attribute name="t-att-data-adyen-payment-method-code">
-                adyen_payment_methods_mapping.get(pm_sudo.code, pm_sudo.code)
+            <attribute name="t-att-data-inline-form-values">
+                provider_sudo._adyen_get_inline_form_values(
+                    amount, currency, partner_id, pm_sudo.code
+                )
             </attribute>
         </xpath>
     </template>
