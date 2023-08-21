@@ -190,9 +190,12 @@ class CustomerPortal(payment_portal.PaymentPortal):
             sale_order_id=order_sudo.id,
             **kwargs,
         )  # In sudo mode to read the fields of providers and partner (if logged out).
-        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids
-        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+        )  # In sudo mode to read the fields of providers.
+        tokens = request.env['payment.token']._get_available_tokens(
+            providers_sudo.ids, partner.id, **kwargs
+        )
 
         # Make sure that the partner's company matches the invoice's company.
         company_mismatch = not payment_portal.PaymentPortal._can_partner_pay_in_company(
@@ -210,9 +213,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
             'currency': currency,
             'partner_id': partner.id,
             'payment_methods_sudo': payment_methods_sudo,
-            'tokens_sudo': request.env['payment.token']._get_available_tokens(
-                providers_sudo.ids, partner.id, **kwargs
-            ),
+            'tokens_sudo': tokens,
             'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
             'landing_route': order_sudo.get_portal_url(),
             'access_token': order_sudo._portal_ensure_token(),

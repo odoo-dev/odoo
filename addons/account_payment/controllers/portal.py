@@ -30,9 +30,9 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
             invoice.amount_total,
             currency_id=invoice.currency_id.id
         )  # In sudo mode to read the fields of providers and partner (if logged out).
-        payment_methods_sudo = request.env['payment.method']._get_compatible_payment_methods(
+        payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids
-        )  # TODO check if need to add back sudo() or remove sudo_ from the name
+        )  # In sudo mode to read the fields of providers.
         tokens = request.env['payment.token']._get_available_tokens(
             providers_sudo.ids, partner_sudo.id
         )
