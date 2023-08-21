@@ -12,9 +12,7 @@
                         <h1><field name="name" placeholder="Name"/></h1>
                     </div>
                     <group>
-                        <field name="parent_id"
-                               attrs="{'invisible': [('id', '!=', False), ('parent_id', '=', False)]}"
-                        />
+                        <field name="parent_id"/>
                     </group>
                     <notebook>
                         <page string="Providers list" name="providers">
@@ -47,7 +45,10 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name" string="Name"/>
-                <filter string="Parent only (to rename)" name="filter_parent" domain="[('parent_id', '=', False)]"/>
+                <filter string="Parent only (to rename)"
+                        name="filter_parent"
+                        domain="[('parent_id', '=', False)]"
+                />
             </search>
         </field>
     </record>
