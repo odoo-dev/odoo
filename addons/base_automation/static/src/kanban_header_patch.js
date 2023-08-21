@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { KanbanHeader } from "@web/views/kanban/kanban_header";
 import { TRIGGER_FILTERS } from "./utils";
+import { Markup } from "@odoo/owl";
 
 const SUPPORTED_TRIGGERS = [
     "on_stage_set",
@@ -50,8 +51,14 @@ patch(KanbanHeader.prototype, {
         super.setup();
         this.action = useService("action");
         this.user = useService("user");
+        this.hasBaseAutomation = true; // used in web_enterprise to avoid displaying btn twice
     },
+
     async openAutomations() {
+        return this._openAutomations();
+    },
+
+    async _openAutomations() {
         const domain = [["model", "=", this.props.list.resModel]];
         const modelId = await this.orm.search("ir.model", domain, { limit: 1 });
         const context = {

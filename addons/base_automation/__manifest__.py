@@ -4,7 +4,7 @@
 {
     'name': 'Automation Rules',
     'version': '1.0',
-    'sequence': 14,
+    'sequence': 12,
     'category': 'Sales/Sales',
     'description': """
 This module allows to implement automation rules for any object.
