@@ -154,7 +154,9 @@
                    data-bs-delay="0"
                 />
             </button>
-            <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3 align-items-start align-items-md-center">
+            <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3 align-items-start
+                        align-items-md-center"
+            >
                 <div class="col col-lg-5">
                     <div t-att-class="'form-check mb-0'
                                       + (' ps-0' if not allow_token_selection else '')">
