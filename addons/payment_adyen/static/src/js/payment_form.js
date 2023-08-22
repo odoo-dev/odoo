@@ -10,6 +10,10 @@ paymentForm.include({
     // Private
     //--------------------------------------------------------------------------
 
+    adyenCheckout: undefined,
+    adyenComponents: undefined,
+
+
     /**
      * Prepare the inline form of Adyen for direct payment.
      *
@@ -43,68 +47,72 @@ paymentForm.include({
         // Overwrite the flow of the selected payment method.
         this._setPaymentFlow('direct');
 
-        // Get the available payment methods.
-        this._rpc({
-            route: '/payment/adyen/payment_methods',
-            params: {
-                'provider_id': providerId,
-                'partner_id': parseInt(this.txContext.partnerId),
-                'amount': this.txContext.amount
-                    ? parseFloat(this.txContext.amount)
-                    : undefined,
-                'currency_id': this.txContext.currencyId
-                    ? parseInt(this.txContext.currencyId)
-                    : undefined,
-            },
-        }).then(async response => { // TODO save in memory
-            // Create the Adyen Checkout SDK.
-            const radio = document.querySelector('input[name="o_payment_radio"]:checked');
-            const providerState = this._getProviderState(radio);
-            const adyenInlineFormValues = JSON.parse(radio.dataset['inlineFormValues']);
-            const configuration = {
-                paymentMethodsResponse: response,
-                clientKey: adyenInlineFormValues['client_key'],
-                locale: (this._getContext().lang || 'en-US').replace('_', '-'),
-                environment: providerState === 'enabled' ? 'live' : 'test',
-                onAdditionalDetails: this._adyenOnSubmitAdditionalDetails.bind(this),
-                onError: this._adyenOnError.bind(this),
-                onSubmit: this._adyenOnSubmit.bind(this),
-            };
-            const checkout = await AdyenCheckout(configuration);
+        // Extract and deserialize the inline form values.
+        const radio = document.querySelector('input[name="o_payment_radio"]:checked');
+        const adyenInlineFormValues = JSON.parse(radio.dataset['inlineFormValues']);
 
-            // Instantiate and mount the component.
-            const componentConfiguration = {
-                showBrandsUnderCardNumber: false,
-                showPayButton: false,
-                billingAddressRequired: false, // The billing address is included in the request.
-            };
-            if (paymentMethodCode === 'card') {
-                // Forbid Bancontact cards in the card component.
-                componentConfiguration['brands'] = ['mc', 'visa', 'amex', 'discover'];
-            }
-            else if (paymentMethodCode === 'paypal') {
-                // PayPal requires the form to be submitted with its own button.
-                componentConfiguration['showPayButton'] = true;
-                this._hideInputs();
-                // Define necessary fields as the step _submitForm is missed.
-                Object.assign(this.txContext, {
-                    tokenizationRequested: false,
-                    providerId: providerId,
-                    paymentMethodId: paymentOptionId,
-                });
-            }
-            const inlineForm = this._getInlineForm(radio);
-            const adyenContainer = inlineForm.querySelector('[name="o_adyen_component_container"]');
-            this.adyenComponents[paymentOptionId] = checkout.create(
-                adyenInlineFormValues['adyen_pm_code'], componentConfiguration
-            ).mount(adyenContainer);
-        }).guardedCatch((error) => {
-            error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("Cannot display the payment form"), error.message.data.message
-            );
-            this._enableButton();
-        });
+        // Create the checkout object if not already done for another payment method.
+        if (!this.adyenCheckout) {
+            await this._rpc({ // Await the RPC to let it create AdyenCheckout before using it.
+                route: '/payment/adyen/payment_methods',
+                params: {
+                    'provider_id': providerId,
+                    'partner_id': parseInt(this.txContext.partnerId),
+                    'amount': this.txContext.amount
+                        ? parseFloat(this.txContext.amount)
+                        : undefined,
+                    'currency_id': this.txContext.currencyId
+                        ? parseInt(this.txContext.currencyId)
+                        : undefined,
+                },
+            }).then(async response => {
+                // Create the Adyen Checkout SDK.
+                const providerState = this._getProviderState(radio);
+                const configuration = {
+                    paymentMethodsResponse: response,
+                    clientKey: adyenInlineFormValues['client_key'],
+                    locale: (this._getContext().lang || 'en-US').replace('_', '-'),
+                    environment: providerState === 'enabled' ? 'live' : 'test',
+                    onAdditionalDetails: this._adyenOnSubmitAdditionalDetails.bind(this),
+                    onError: this._adyenOnError.bind(this),
+                    onSubmit: this._adyenOnSubmit.bind(this),
+                };
+                this.adyenCheckout = await AdyenCheckout(configuration);
+            }).guardedCatch((error) => {
+                error.event.preventDefault();
+                this._displayErrorDialog(
+                    _t("Cannot display the payment form"), error.message.data.message
+                );
+                this._enableButton();
+            });
+        }
+
+        // Instantiate and mount the component.
+        const componentConfiguration = {
+            showBrandsUnderCardNumber: false,
+            showPayButton: false,
+            billingAddressRequired: false, // The billing address is included in the request.
+        };
+        if (paymentMethodCode === 'card') {
+            // Forbid Bancontact cards in the card component.
+            componentConfiguration['brands'] = ['mc', 'visa', 'amex', 'discover'];
+        }
+        else if (paymentMethodCode === 'paypal') {
+            // PayPal requires the form to be submitted with its own button.
+            componentConfiguration['showPayButton'] = true;
+            this._hideInputs();
+            // Define necessary fields as the step _submitForm is missed.
+            Object.assign(this.txContext, {
+                tokenizationRequested: false,
+                providerId: providerId,
+                paymentMethodId: paymentOptionId,
+            });
+        }
+        const inlineForm = this._getInlineForm(radio);
+        const adyenContainer = inlineForm.querySelector('[name="o_adyen_component_container"]');
+        this.adyenComponents[paymentOptionId] = this.adyenCheckout.create(
+            adyenInlineFormValues['adyen_pm_code'], componentConfiguration
+        ).mount(adyenContainer);
     },
 
     /**
