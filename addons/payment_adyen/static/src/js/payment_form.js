@@ -34,7 +34,7 @@ paymentForm.include({
             return; // No component for tokens.
         } else if (this.adyenComponents[paymentOptionId]) {
             this._setPaymentFlow('direct'); // Overwrite the flow even if no re-instantiation.
-            if (paymentMethodCode === 'paypal') { // PayPal uses native button to make payments.
+            if (paymentMethodCode === 'paypal') { // PayPal uses its own button to submit.
                 this._hideInputs();
             }
             return; // Don't re-instantiate if already done for this payment method.
@@ -56,7 +56,7 @@ paymentForm.include({
                     ? parseInt(this.txContext.currencyId)
                     : undefined,
             },
-        }).then(async response => {
+        }).then(async response => { // TODO save in memory
             // Create the Adyen Checkout SDK.
             const radio = document.querySelector('input[name="o_payment_radio"]:checked');
             const providerState = this._getProviderState(radio);
@@ -76,25 +76,22 @@ paymentForm.include({
             const componentConfiguration = {
                 showBrandsUnderCardNumber: false,
                 showPayButton: false,
-                billingAddressRequired: false, // billing address is included in the back-end
-                amount: {
-                    value: adyenInlineFormValues['amount'],
-                    currency: adyenInlineFormValues['currency_name'],
-                },
-                countryCode: adyenInlineFormValues['country_code'],
+                billingAddressRequired: false, // The billing address is included in the request.
             };
             if (paymentMethodCode === 'card') {
                 // Forbid Bancontact cards in the card component.
                 componentConfiguration['brands'] = ['mc', 'visa', 'amex', 'discover'];
             }
             else if (paymentMethodCode === 'paypal') {
-                // PayPal works only with native button.
+                // PayPal requires the form to be submitted with its own button.
                 componentConfiguration['showPayButton'] = true;
                 this._hideInputs();
                 // Define necessary fields as the step _submitForm is missed.
-                this.txContext.tokenizationRequested = false;
-                this.txContext.providerId = providerId;
-                this.txContext.paymentMethodId = paymentOptionId;
+                Object.assign(this.txContext, {
+                    tokenizationRequested: false,
+                    providerId: providerId,
+                    paymentMethodId: paymentOptionId,
+                });
             }
             const inlineForm = this._getInlineForm(radio);
             const adyenContainer = inlineForm.querySelector('[name="o_adyen_component_container"]');

@@ -8,8 +8,8 @@ import requests
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.payment_adyen import const
 from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment_adyen import const
 
 _logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class PaymentProvider(models.Model):
             'support_tokenization': True,
         })
 
-    #=== BUSINESS METHODS ===#
+    #=== BUSINESS METHODS - PAYMENT FLOW ===#
 
     def _adyen_make_request(
         self, url_field_name, endpoint, endpoint_param=None, payload=None, method='POST'
@@ -145,28 +145,21 @@ class PaymentProvider(models.Model):
         """
         return f'ODOO_PARTNER_{partner_id}'
 
-    def _adyen_get_inline_form_values(self, amount, currency, partner_id, pm_code):
+    #=== BUSINESS METHODS - GETTERS ===#
+
+    def _adyen_get_inline_form_values(self, pm_code):
         """ Return a serialized JSON of the required values to render the inline form.
 
         Note: `self.ensure_one()`
 
-        :param float amount: The amount in major units, to convert in minor units.
-        :param res.currency currency: The currency of the transaction.
-        :param int partner_id: The partner of the transaction, as a `res.partner` id.
-        :param str pm_code: Payment method code id.
+        :param str pm_code: The code of the payment method whose inline form to render.
         :return: The JSON serial of the required values to render the inline form.
         :rtype: str
         """
         self.ensure_one()
 
-        partner = self.env['res.partner'].browse(partner_id).exists()
         inline_form_values = {
             'client_key': self.adyen_client_key,
-            'currency_name': currency.name,
-            'amount': amount and payment_utils.to_minor_currency_units(
-                amount, currency, const.CURRENCY_DECIMALS.get(currency.name)
-            ),
-            'country_code': partner.country_id.code or '',
             'adyen_pm_code': const.PAYMENT_METHODS_MAPPING.get(pm_code, pm_code),
         }
         return json.dumps(inline_form_values)

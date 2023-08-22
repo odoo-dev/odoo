@@ -262,7 +262,6 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     async _expandInlineForm(radio) {
         this._collapseInlineForms(); // Collapse previously opened inline forms.
-        this._hideErrorDialog(); // The error is no longer relevant if hidden with its inline form.
         this._setPaymentFlow(); // Reset the payment flow to let providers overwrite it.
 
         // Prepare the inline form of the selected payment option.
@@ -320,16 +319,6 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      */
     _displayErrorDialog(title, errorMessage = '') {
         this.call('dialog', 'add', ConfirmationDialog, { title: title, body: errorMessage || "" });
-    },
-
-    /**
-     * Hide the error dialog. TODO check if still needed if we also show the error as a dialog
-     *
-     * @private
-     * @return {void}
-     */
-    _hideErrorDialog() {
-        this.el.querySelector('[name="o_payment_error_dialog"]')?.remove();
     },
 
     // #=== PAYMENT FLOW ===#
@@ -404,7 +393,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
                 );
             }
         }).guardedCatch(error => {
-            error.event.preventDefault(); // TODO still needed?
+            error.event.preventDefault();
             this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
             this._enableButton(); // The button has been disabled before initiating the flow.
         });

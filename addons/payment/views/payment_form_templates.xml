@@ -319,9 +319,8 @@
             >
                 <t t-set="provider_id" t-value="provider_sudo.id"/>
             </t>
-            <div t-att-class="'d-flex flex-column flex-md-row align-md-items-center'
-                              'justify-content-between gap-2 mt-2'
-                              + (' TODO' if mode == 'payment' else ' TODO')"
+            <div class="d-flex flex-column flex-md-row align-md-items-center justify-content-between
+                        gap-2 mt-2"
             >
                 <!-- === Tokenization checkbox === -->
                 <div t-if="mode == 'payment'"
