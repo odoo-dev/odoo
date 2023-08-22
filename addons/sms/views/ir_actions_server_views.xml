@@ -11,16 +11,13 @@
                     context="{'default_model': model_name}"
                     invisible="state != 'sms'"
                     required="state == 'sms'"/>
-                <field name="sms_method"
-                       groups="base.group_no_one"
-                       string="Send as"
-                       invisible="state != 'sms'"
-                       required="state == 'sms'"/>
-                <span colspan="2" class="text-muted o_row ps-1"
-                        invisible="state != 'sms'"
-                        groups="base.group_no_one">
-                    <i class="fa fa-lightbulb-o"/>&amp;nbsp; <field name="sms_method_helper"/>
-                </span>
+                <label for="sms_method" invisible="state != 'sms'"/>
+                    <div class="d-flex flex-column" invisible="state != 'sms'">
+                        <field name="sms_method" required="state == 'sms'"/>
+                        <span class="text-muted">
+                            <field name="sms_method_helper"/>
+                        </span>
+                    </div>
             </xpath>
         </field>
     </record>

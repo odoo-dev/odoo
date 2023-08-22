@@ -21,16 +21,18 @@ class ServerActions(models.Model):
         domain="[('model_id', '=', model_id)]",
     )
     sms_method = fields.Selection(
-        selection=[('sms', 'SMS'), ('comment', 'Post as Message'), ('note', 'Post as Note')],
-        string='Send as (SMS)',
+        selection=[('sms', 'SMS (without note)'), ('comment', 'SMS (with note)'), ('note', 'Note only')],
+        string='Send SMS As',
         compute='_compute_sms_method',
-        readonly=False, store=True,
-        help='Choose method for SMS sending:\nSMS: mass SMS\nPost as Message: log on document\nPost as Note: mass SMS with archives')
+        readonly=False, store=True)
     sms_method_helper = fields.Char('Send As (SMS) helper message', compute='_compute_sms_method_helper')
 
     @api.depends('state', 'sms_template_id')
     def _compute_name(self):
         for action in self:
+            if not action.state or not self.env.context.get('automatic_action_name'):
+                action.name = action.name
+                continue
             if action.state == 'sms':
                 action.name = 'Send SMS: %s' % action.sms_template_id.name
             else:
@@ -58,11 +60,18 @@ class ServerActions(models.Model):
     def _compute_sms_method_helper(self):
         for action in self:
             if action.sms_method == 'sms':
-                action.sms_method_helper = _('The message will be sent as an SMS to the recipients of the template and will not appear in the messaging history.')
+                action.sms_method_helper = _(
+                    'The message will be sent as an SMS to the recipients of the'
+                    ' template and will not appear in the messaging history.')
             elif action.sms_method == 'note':
-                action.sms_method_helper = _('The SMS will be sent as an SMS to the recipients of the template. A copy will appear in the messaging history.')
+                action.sms_method_helper = _(
+                    'The SMS will not be sent, it will only be posted as an '
+                    'internal note in the messaging history.')
             elif action.sms_method == 'comment':
-                action.sms_method_helper = _('The SMS will be sent as an SMS to the recipients of the template. A copy will be sent to all followers of the document and will appear in the messaging history.')
+                action.sms_method_helper = _(
+                    'The SMS will be sent as an SMS to the recipients of the '
+                    'template and it will also be posted as an internal note '
+                    'in the messaging history.')
             else:
                 action.sms_method_helper = ''
 

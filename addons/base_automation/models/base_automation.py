@@ -191,14 +191,15 @@ class BaseAutomation(models.Model):
             no_code_actions = record.action_server_ids.filtered(lambda a: a.state != 'code')
             if record.trigger == ON_CHANGE and len(no_code_actions) > 0:
                 raise exceptions.ValidationError(
-                    _('Form Modification based automation rules can only be used with code action type.')
+                    _('"On live update" automation rules can only be used with "Execute Python Code" action type.')
                 )
             mail_actions = record.action_server_ids.filtered(
                 lambda a: a.state in ['mail_post', 'followers', 'next_activity']
             )
             if record.trigger == ON_UNLINK and len(mail_actions) > 0:
                 raise exceptions.ValidationError(
-                    _('Email, followers or activities action types cannot be used when deleting records.')
+                    _('Email, followers or activities action types cannot be used when deleting records, '
+                      'as there is no more records on which to apppply these changes!')
                 )
 
     @api.depends('model_id', 'trigger')

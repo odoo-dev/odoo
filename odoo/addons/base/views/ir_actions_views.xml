@@ -325,14 +325,17 @@
                                 help="Run this action manually."/>
                     </header>
                     <sheet>
+                        <h1 class="oe_title">
+                            <field name="name" placeholder="e.g. Mass archive contacts"/>
+                        </h1>
                         <group name="action_wrapper">
                             <group name="action_content">
                                 <field name="model_name" invisible="1"/>
                                 <field name="model_id" invisible="1"/>
                                 <field name="model_id" options="{'no_create': True}" groups="base.group_no_one"/>
                                 <field name="model_id" options="{'no_create': True}" groups="!base.group_no_one" invisible="context.get('default_model_id')"/>
-                                <field name="state"/>
-                                <field name="name" invisible="state in ['object_create', 'object_write']"/>
+                                <field name="groups_id" widget="many2many_tags" groups="base.group_no_one" />
+                                <field name="state" string="Action Type"/>
                                 <field name="update_field_id" invisible="state != 'object_write'"
                                     options="{'no_create': True}"
                                     domain="['|', ('model_id', '=', crud_model_id), ('model_id', '=', model_id)]"/>
@@ -350,13 +353,13 @@
                                     invisible="state != 'object_create'"
                                     required="state == 'object_create'"/>
                                 <field name="crud_model_name" invisible="1"/>
+                                <field name="value" widget="char" string="Name" invisible="state != 'object_create'"/>
                                 <field name="link_field_id"
                                     domain="[('model_id', '=', model_id), ('relation', '=', crud_model_name),
                                     ('ttype', 'in', ['many2one', 'one2many', 'many2many'])]"
                                     options="{'no_create': True}"
                                     invisible="state != 'object_create'"
                                     context="{'default_model_id': model_id, 'default_relation': crud_model_name}"/>
-                                <field name="value" widget="char" string="Name" invisible="state != 'object_create'"/>
                             </group>
                             <group invisible="evaluation_type != 'equation' or state != 'object_write'">
                                     <span colspan="2" class="text-muted"> Available variables: </span>
@@ -374,10 +377,6 @@
                             <page string="Python Code" name='code'
                                     invisible="state != 'code'">
                                 <field name="code" widget="code" options="{'mode': 'python'}" placeholder="Enter Python code here. Help about Python expression is available in the help tab of this document."/>
-                            </page>
-
-                            <page name="security" string="Access Rights" groups="base.group_no_one">
-                                <field name="groups_id"/>
                             </page>
 
                             <page string="Actions" name="actions"
@@ -409,10 +408,10 @@
                                     </ul>
                                     <div invisible="state != 'code'">
                                         <p>Example of Python code</p>
-<code style='white-space: pre-wrap'>
-partner_name = record.name + '_code' \n
+<pre style='white-space: pre-wrap'>
+partner_name = record.name + '_code'
 env['res.partner'].create({'name': partner_name})
-</code>
+</pre>
                                     </div>
                                 </div>
                             </page>

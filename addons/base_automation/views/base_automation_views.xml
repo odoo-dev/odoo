@@ -27,35 +27,38 @@
                         <group invisible="not model_id">
                             <group>
                                 <label for="trigger"/>
-                                <div class="d-flex">
-                                    <field name="trigger" widget="base_automation_trigger_selection" class="oe_inline me-3"/>
-                                    <field name="trg_selection_field_id" placeholder="Select a value..." class="oe_inline"
-                                        options="{'no_open': True, 'no_create': True}"
-                                        invisible="trigger not in ['on_state_set', 'on_priority_set']"
-                                        required="trigger in ['on_state_set', 'on_priority_set']"
-                                    />
-                                    <field name="trg_field_ref" placeholder="Select a value..." class="oe_inline"
-                                        widget="base_automation_trigger_reference"
-                                        invisible="trigger not in ['on_stage_set', 'on_tag_set']"
-                                        required="trigger in ['on_stage_set', 'on_tag_set']"
-                                    />
-                                    <field name="trg_field_ref_model_name" invisible="1" />
-                                    <field name="trg_field_ref_display_name" invisible="1" />
-                                    <field name="trigger_field_ids" invisible="1" />
-                                    <field name="trigger_field_ids" placeholder="Select fields..." class="oe_inline" groups="base.group_no_one"
-                                        options="{'no_open': True, 'no_create': True}"
-                                        domain="[('model_id', '=', model_id)]"
-                                        invisible="trigger != 'on_create_or_write'" widget="many2many_tags" />
-                                    <field name="on_change_field_ids" class="oe_inline" string="Trigger Fields" placeholder="Select fields..."
-                                        options="{'no_open': True, 'no_create': True}"
-                                        domain="[('model_id', '=', model_id)]"
-                                        invisible="trigger != 'on_change'" required="trigger == 'on_change'"
-                                        widget="many2many_tags"/>
-                                    <field name="trg_date_id" class="oe_inline" string="Date Field"
-                                        options="{'no_open': True, 'no_create': True}"
-                                            invisible="trigger != 'on_time'"
-                                            required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"
-                                    />
+                                <div>
+                                    <div class="d-flex flex-row">
+                                        <field name="trigger" widget="base_automation_trigger_selection" class="oe_inline me-3"/>
+                                        <field name="trg_selection_field_id" placeholder="Select a value..." class="oe_inline"
+                                            options="{'no_open': True, 'no_create': True}"
+                                            invisible="trigger not in ['on_state_set', 'on_priority_set']"
+                                            required="trigger in ['on_state_set', 'on_priority_set']"
+                                        />
+                                        <field name="trg_field_ref" placeholder="Select a value..." class="oe_inline"
+                                            widget="base_automation_trigger_reference"
+                                            invisible="trigger not in ['on_stage_set', 'on_tag_set']"
+                                            required="trigger in ['on_stage_set', 'on_tag_set']"
+                                        />
+                                        <field name="trg_field_ref_model_name" invisible="1" />
+                                        <field name="trg_field_ref_display_name" invisible="1" />
+                                        <field name="trigger_field_ids" invisible="1" />
+                                        <field name="trigger_field_ids" placeholder="Select fields..." class="oe_inline" groups="base.group_no_one"
+                                            options="{'no_open': True, 'no_create': True}"
+                                            domain="[('model_id', '=', model_id)]"
+                                            invisible="trigger != 'on_create_or_write'" widget="many2many_tags" />
+                                        <field name="on_change_field_ids" class="oe_inline" string="Trigger Fields" placeholder="Trigger fields..."
+                                            options="{'no_open': True, 'no_create': True}"
+                                            domain="[('model_id', '=', model_id)]"
+                                            invisible="trigger != 'on_change'" required="trigger == 'on_change'"
+                                            widget="many2many_tags"/>
+                                        <field name="trg_date_id" class="oe_inline" string="Date Field"
+                                            options="{'no_open': True, 'no_create': True}"
+                                                invisible="trigger != 'on_time'"
+                                                required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"
+                                        />
+                                    </div>
+                                    <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-lightbulb-o"/> Automation rules that run on live updates will be executed every time the trigger fields change, <em>whether you save or not</em>.</div>
                                 </div>
                                 <label for="trg_date_range" class="oe_inline" string="Delay"
                                     invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
@@ -85,7 +88,7 @@
                                     name="action_server_ids"
                                     widget="one2many"
                                     class="o_base_automation_actions_field"
-                                    context="{'default_model_id': model_id}"
+                                    context="{'default_model_id': model_id, 'default_state': False, 'automatic_action_name': True}"
                                 >
                                     <kanban>
                                         <control>
@@ -136,6 +139,12 @@
             <field name="mode">primary</field>
             <field name="inherit_id" ref="base.view_server_action_form"/>
             <field name="arch" type="xml">
+                <xpath expr='//field[@name="name"]' position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr='//field[@name="state"]' position="attributes">
+                    <attribute name="string">Type</attribute>
+                </xpath>
                 <xpath expr="//header" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
@@ -179,9 +188,9 @@
                                 <field name="active" invisible="1" />
                                 <field name="model_name" invisible="1" />
                                 <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active" />
-                                <div class="row flex-column flex-md-row gap-2 gap-md-0">
-                                    <div class="col-md-7 col-lg-6 col-xl-4 d-flex align-items-center">
-                                        <div class="ms-md-3 flex-fill d-flex flex-column">
+                                <div class="d-flex flex-column flex-md-row gap-3 flex-grow-1">
+                                    <div class="d-flex align-items-center o_automation_base_info">
+                                        <div class="d-flex flex-column">
                                             <field name="name" class="fs-2 fw-bold"/>
                                             <field name="model_id" invisible="context.get('default_model_id')"/>
                                             <div class="d-flex align-items-center gap-1" invisible="trigger in ['on_time', 'on_time_created', 'on_time_updated']">
@@ -207,8 +216,8 @@
                                             <field name="trg_date_calendar_id" invisible="not trg_date_id or trg_date_range_type != 'day'" />
                                         </div>
                                     </div>
-                                    <div class="col-md-5 col-lg-6 col-xl-8 flex-fill d-flex gap-4" data-name="more-info">
-                                        <i class="fa fa-2x fa-arrow-right text-primary align-self-center" title="Actions" />
+                                    <div class="d-none flex-grow-1 align-items-center gap-3 o_automation_actions" data-name="more-info">
+                                        <i class="fa fa-2x fa-arrow-right text-primary" title="Actions" />
                                         <field name="action_server_ids" widget="base_automation_actions_one2many" class="align-self-center w-100 me-md-3" />
                                     </div>
                                 </div>
@@ -243,10 +252,11 @@
               <p class="o_view_nocontent_smiling_face">
                 Automate <em>everything</em> with Automation Rules
               </p><p>
-                Send an email when an object change state, archive records
+                Send an email when an object changes state, archive records
                 after a month of inactivity or remind yourself to follow-up on
-                tasks when a specific tag is added. With Automation Rules, you can automate
-                any workflow.
+                tasks when a specific tag is added.
+              </p><p>With Automation Rules, you can automate
+                <em>any</em> workflow.
               </p>
             </field>
         </record>

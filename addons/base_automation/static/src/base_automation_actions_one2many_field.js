@@ -89,7 +89,7 @@ class ActionsOne2ManyField extends Component {
     }
     get moreText() {
         const isPlural = this.hiddenActionsCount > 1;
-        return isPlural ? _t("%s more actions", this.hiddenActionsCount) : _t("1 more action");
+        return isPlural ? _t("%s actions", this.hiddenActionsCount) : _t("1 action");
     }
 }
 

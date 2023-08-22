@@ -16,12 +16,12 @@
                     <group invisible="state != 'next_activity'">
                         <label for="activity_date_deadline_range"/>
                         <div class="o_row">
-                            <field name="activity_date_deadline_range"/>
-                            <field name="activity_date_deadline_range_type" required="state == 'next_activity' and activity_date_deadline_range &gt; 0"/>
+                            <field name="activity_date_deadline_range" class="oe_inline"/>
+                            <field name="activity_date_deadline_range_type" class="oe_inline" required="state == 'next_activity' and activity_date_deadline_range &gt; 0"/>
                         </div>
                         <field name="activity_user_type" required="state == 'next_activity'"/>
                         <field name="activity_user_field_name" placeholder="e.g. user_id" invisible="activity_user_type == 'specific'" required="state == 'next_activity' and activity_user_type == 'generic'"/>
-                        <field name="activity_user_id" placeholder="Select a user" invisible="activity_user_type == 'generic'" required="state == 'next_activity' and activity_user_type == 'specific'"/>
+                        <field name="activity_user_id" placeholder="Select a user..." invisible="activity_user_type == 'generic'" required="state == 'next_activity' and activity_user_type == 'specific'"/>
                     </group>
                     <field name="activity_note" class="oe-bordered-editor" placeholder="Add a description to your activity..." invisible="state != 'next_activity'"/>
                 </xpath>
@@ -37,15 +37,13 @@
                            required="state == 'mail_post'"
                            context="{'default_model': model_name,
                                      'default_use_default_to': True}"/>
-                    <field name="mail_post_method"
-                           groups="base.group_no_one"
-                           invisible="state != 'mail_post'"
-                           required="state == 'mail_post'"/>
-                    <span colspan="2" class="text-muted o_row ps-1"
-                            invisible="state != 'mail_post'"
-                            groups="base.group_no_one">
-                        <i class="fa fa-lightbulb-o"/>&amp;nbsp; <field name="mail_post_method_helper"/>
-                    </span>
+                    <label for="mail_post_method" invisible="state != 'mail_post'"/>
+                    <div class="d-flex flex-column" invisible="state != 'mail_post'">
+                        <field name="mail_post_method" required="state == 'mail_post'"/>
+                        <span class="text-muted">
+                            <field name="mail_post_method_helper"/>
+                        </span>
+                    </div>
                     <field name="mail_post_autofollow" invisible="1"/>
                 </xpath>
             </field>

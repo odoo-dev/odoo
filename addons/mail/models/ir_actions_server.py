@@ -39,11 +39,10 @@ class ServerActions(models.Model):
         'Subscribe Recipients', compute='_compute_mail_post_autofollow',
         readonly=False, store=True)
     mail_post_method = fields.Selection(
-        selection=[('email', 'Email'), ('comment', 'Post as Message'), ('note', 'Post as Note')],
-        string='Send as',
+        selection=[('email', 'Email'), ('comment', 'Email and Message'), ('note', 'Email and Note')],
+        string='Send Email As',
         compute='_compute_mail_post_method',
-        readonly=False, store=True,
-        help='Choose method for email sending:\nEMail: send directly emails\nPost as Message: post on document and notify followers\nPost as Note: log a note on document')
+        readonly=False, store=True)
     mail_post_method_helper = fields.Char('Send As helper message', compute='_compute_mail_post_method_helper')
 
     # Next Activity
@@ -69,20 +68,24 @@ class ServerActions(models.Model):
         compute='_compute_activity_info', readonly=False, store=True)
     activity_user_type = fields.Selection(
         [('specific', 'Specific User'),
-         ('generic', 'Generic User From Record')],
+         ('generic', 'Dynamic User (based on record)')],
+         string='User Type',
         compute='_compute_activity_info', readonly=False, store=True,
-        help="Use 'Specific User' to always assign the same user on the next activity. Use 'Generic User From Record' to specify the field name of the user to choose on the record.")
+        help="Use 'Specific User' to always assign the same user on the next activity. Use 'Dynamic User' to specify the field name of the user to choose on the record.")
     activity_user_id = fields.Many2one(
         'res.users', string='Responsible',
         compute='_compute_activity_info', readonly=False, store=True)
     activity_user_field_name = fields.Char(
-        'User field name',
+        'User Field',
         compute='_compute_activity_info', readonly=False, store=True)
 
 
     @api.depends('state', 'template_id', 'partner_ids', 'activity_summary')
     def _compute_name(self):
         for action in self:
+            if not action.state or not self.env.context.get('automatic_action_name'):
+                action.name = action.name
+                continue
             if action.state == 'mail_post':
                 action.name = 'Send email: %s' % action.template_id.name
             elif action.state == 'followers':
@@ -125,11 +128,19 @@ class ServerActions(models.Model):
     def _compute_mail_post_method_helper(self):
         for action in self:
             if action.mail_post_method == 'email':
-                action.mail_post_method_helper = _('The message will be sent as an email to the recipients of the template and will not appear in the messaging history.')
+                action.mail_post_method_helper = _(
+                    'The message will be sent as an email to the recipients of '
+                    'the template and will not appear in the messaging history.')
             elif action.mail_post_method == 'note':
-                action.mail_post_method_helper = _('The message will not be sent, but will be visible to internal users in the messaging history.')
+                action.mail_post_method_helper = _(
+                    'The message will be sent as an email to the recipients of '
+                    'the template and will be posted as an internal note '
+                    'visible to internal users in the messaging history.')
             elif action.mail_post_method == 'comment':
-                action.mail_post_method_helper = _('The message will be sent to all followers of the document and will appear in the message history.')
+                action.mail_post_method_helper = _(
+                    'The message will be sent as an email to the recipients of '
+                    'the template and to all followers of the document and '
+                    'will appear in the message history.')
             else:
                 action.mail_post_method_helper = False
 

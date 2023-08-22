@@ -469,7 +469,7 @@ class IrActionsServer(models.Model):
         ('object_create', 'Create a new Record'),
         ('object_write', 'Update the Record'),
         ('multi', 'Execute several actions')], string='Type',
-        default='object_write', required=True, copy=True,
+        default='code', required=True, copy=True,
         help="Type of server action. The following values are available:\n"
              "- 'Execute Python Code': a block of python code that will be executed\n"
              "- 'Create a new Record': create a new record with new values\n"
@@ -496,28 +496,30 @@ class IrActionsServer(models.Model):
                                  string='Child Actions', help='Child server actions that will be executed. Note that the last return returned action value will be used as global return value.')
     # Create
     crud_model_id = fields.Many2one(
-        'ir.model', string='Target Model',
+        'ir.model', string='Record to Create',
         compute='_compute_crud_model_id', readonly=False, store=True,
-        help="Model for record creation. Set this field only to specify a different model than the base model.")
+        help="Specify which kind of record should be created. Set this field only to specify a different model than the base model.")
     crud_model_name = fields.Char(related='crud_model_id.model', string='Target Model Name', readonly=True)
     link_field_id = fields.Many2one(
         'ir.model.fields', string='Link Field',
         compute='_compute_link_field_id', readonly=False, store=True,
-        help="Provide the field used to link the newly created record on the record used by the server action.")
+        help="Specify a field used to link the newly created record on the record used by the server action.")
     groups_id = fields.Many2many('res.groups', 'ir_act_server_group_rel',
-                                 'act_id', 'gid', string='Groups')
+                                 'act_id', 'gid', string='Allowed Groups', help='Groups that can execute the server action. Leave empty to allow everybody.')
 
     update_field_id = fields.Many2one('ir.model.fields', string='Field to update', default=_default_value, ondelete='cascade')
     update_related_model_id = fields.Many2one('ir.model', compute='_compute_update_related_model_id')
 
-    value = fields.Text(help="Expression containing a value specification. \n"
-                                            "When Formula type is selected, this field may be a Python expression "
-                                            " that can use the same values as for the code field on the server action.\n"
-                                            "If Value type is selected, the value will be used directly without evaluation.")
+    value = fields.Text(help="For Python expressions, this field may hold a Python expression "
+                             "that can use the same values as for the code field on the server action,"
+                             "e.g. `env.user.name` to set the current user's name as the value "
+                             "or `record.id` to set the ID of the record on which the action is run.\n\n"
+                             "For Static values, the value will be used directly without evaluation, e.g."
+                             "`42` or `My custom name` or the selected record.")
     evaluation_type = fields.Selection([
-        ('value', 'Value'),
+        ('value', 'Static value'),
         ('equation', 'Python expression')
-    ], 'Evaluation Type', default='value', change_default=True)
+    ], 'Value Type', default='value', change_default=True)
     resource_ref = fields.Reference(
         string='Record', selection='_selection_target_model', inverse='_set_resource_ref')
     selection_value = fields.Many2one('ir.model.fields.selection', string="Selection value", ondelete='cascade',
@@ -532,10 +534,13 @@ class IrActionsServer(models.Model):
     @api.depends('state', 'update_field_id', 'crud_model_id', 'value')
     def _compute_name(self):
         for action in self:
+            if not action.state or not self.env.context.get('automatic_action_name'):
+                action.name = action.name
+                continue
             if action.state == 'object_write':
-                action.name = "Update %s" % action.update_field_id.field_description
+                action.name = _("Update %s", action.update_field_id.field_description)
             elif action.state == 'object_create':
-                action.name = "Create %s with name %s" % (action.crud_model_id.name, action.value)
+                action.name = _("Create %s with name %s", action.crud_model_id.name, action.value)
             else:
                 state_name = dict(action._fields['state'].selection)[action.state]
                 action.name = state_name
