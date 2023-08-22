@@ -139,11 +139,11 @@
         <t t-set="is_test" t-value="provider_sudo.state == 'test'"/>
         <t t-set="is_unpublished" t-value="not provider_sudo.is_published"/>
         <t t-set="inline_form_xml_id" t-value="provider_sudo.token_inline_form_view_id.xml_id"/>
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 align-items-start align-items-md-center">
             <!-- === Delete button === -->
             <button t-if="allow_token_deletion"
                     name="o_payment_delete_token"
-                    t-att-class="'btn btn-link align-self-start px-2 lh-lg z-index-1'
+                    t-att-class="'btn btn-link px-2 py-0 lh-lg z-index-1'
                                  + (' d-none' if mode != 'validation' else '')"
                     t-attf-data-linked-radio="o_payment_token_{{token_sudo.id}}"
             >
@@ -154,7 +154,7 @@
                    data-bs-delay="0"
                 />
             </button>
-            <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3">
+            <div class="row flex-column flex-md-row flex-grow-1 gap-lg-3 align-items-start align-items-md-center">
                 <div class="col col-lg-5">
                     <div t-att-class="'form-check mb-0'
                                       + (' ps-0' if not allow_token_selection else '')">
@@ -171,7 +171,7 @@
                                t-att-data-provider-code="token_sudo.provider_code"
                                t-att-data-provider-id="token_sudo.provider_id.id"
                         />
-                        <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
                             <!-- === Token label === -->
                             <label t-out="token_sudo.payment_method_id.name"
                                    class="o_payment_option_label text-break"
@@ -195,14 +195,14 @@
                     </div>
                 </div>
                 <!-- === Token name (payment details) === -->
-                <div class="col mt-1">
+                <div class="col">
                     <p t-out="token_sudo.display_name"
                        t-att-class="'mb-0 small fw-bold text-break'
                                     + (' ms-4 ms-md-0' if allow_token_selection else '')"
                     />
                 </div>
                 <!-- === Provider name (only for desktop and tablet) === -->
-                <div class="col d-none d-md-block mt-1">
+                <div class="col d-none d-md-block">
                     <p t-att-class="'mb-0 small text-600'
                                     + (' ms-4 ms-md-0' if allow_token_selection else '')"
                     >
@@ -335,7 +335,7 @@
                     </label>
                 </div>
                 <!-- === Provider name === -->
-                <p class="align-self-end mb-0 small text-600">
+                <p class="align-self-end mb-0 ms-auto small text-600">
                     <span><i class="fa fa-lock"/> Secured by</span>
                     <span t-out="dict(provider_sudo._fields['code']._description_selection(
                                      provider_sudo.env
