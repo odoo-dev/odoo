@@ -128,15 +128,20 @@ class PaymentPortal(portal.CustomerPortal):  # TODO split in two
         # TODO remove me
         # adyen_provider = request.env['payment.provider'].search([('code', '=', 'adyen')], limit=1)
         # request.env['payment.token'].sudo().search([]).active = False
-        # tokens_sudo = request.env['payment.token'].sudo().create({
+        # tokens_sudo = request.env['payment.token'].sudo().create([{
         #     'provider_id': adyen_provider.id,
         #     'payment_method_id': request.env.ref('payment.payment_method_card').id,
         #     'payment_details': '1234',
         #     'partner_id': partner_sudo.id,
         #     'provider_ref': 'nope',
-        # })
+        # }, {
+        #     'provider_id': adyen_provider.id,
+        #     'payment_method_id': request.env.ref('payment.payment_method_card').id,
+        #     'payment_details': '5678',
+        #     'partner_id': partner_sudo.id,
+        #     'provider_ref': 'nope',
+        # }])
         # # TODO remove me
-
         portal_page_values = {
             'res_company': company,  # Display the correct logo in a multi-company environment.
             'company_mismatch': company_mismatch,

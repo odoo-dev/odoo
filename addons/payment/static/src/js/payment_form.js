@@ -5,12 +5,13 @@ import publicWidget from '@web/legacy/js/public/public_widget';
 import { _t } from '@web/core/l10n/translation';
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { renderToMarkup } from '@web/core/utils/render';
+import {browser} from "../../../../web/static/src/core/browser/browser";
 
 publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     selector: '#o_payment_form',
     events: Object.assign({}, publicWidget.Widget.prototype.events, {
         'click [name="o_payment_radio"]': '_selectPaymentOption',
-        'click [name="o_payment_delete_token"]': '_showTokenDeletionDialog',
+        'click [name="o_payment_delete_token"]': '_fetchTokenData',
         'click [name="o_payment_expand_button"]': '_hideExpandButton',
         'click [name="o_payment_submit_button"]': '_submitForm',
     }),
@@ -64,41 +65,16 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     },
 
     /**
-     * Show the token deletion dialog.
+     * Fetch data relative to the documents linked to the token and delegate them to the token
+     * deletion confirmation dialog.
      *
      * @private
      * @param {Event} ev
      * @return {void}
      */
-    // TODO split to allow overriding in Subs -> _fetchTokenData (handlers) + _challengeTokenDeletion (flow) + _archiveToken (flow)
-    _showTokenDeletionDialog(ev) {
+    _fetchTokenData(ev) {
         ev.preventDefault();
 
-        const execute = () => {
-            this._rpc({
-                route: '/payment/archive_token',
-                params: {
-                    'token_id': tokenId,
-                },
-            }).then(() => { // TODO simply reload page
-                const $tokenCard = this.$(
-                    `input[name="o_payment_radio"][data-payment-option-id="${tokenId}"]` +
-                    `[data-payment-option-type="token"]`
-                ).closest('div[name="o_payment_option_card"]');
-                $tokenCard.siblings(`#o_payment_token_inline_manage_form_${tokenId}`).remove();
-                $tokenCard.remove();
-                this._disableButton(false);
-            }).guardedCatch(error => {
-                error.event.preventDefault();
-                this._displayError(
-                    _t("Server Error"),
-                    _t("We are not able to delete your payment method."),
-                    error.message.data.message,
-                );
-            });
-        };
-
-        // Fetch the documents linked to the token.
         const linkedRadio = document.getElementById(ev.currentTarget.dataset['linkedRadio']);
         const tokenId = this._getPaymentOptionId(linkedRadio);
         this._rpc({
@@ -106,21 +82,55 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
             method: 'get_linked_records_info',
             args: [tokenId],
         }).then(linkedRecordsInfo => {
-            const body = renderToMarkup('payment.deleteTokenDialog', { linkedRecordsInfo });
-            this.call('dialog', 'add', ConfirmationDialog, {
-                title: _t("Warning!"),
-                body,
-                confirmLabel: _t("Confirm Deletion"),
-                confirm: () => execute,
-                cancel: () => {},
-            });
+            this._challengeTokenDeletion(tokenId, linkedRecordsInfo);
         }).guardedCatch(error => {
-            error.event.preventDefault(); // TODO still needed?
+            error.event.preventDefault();
             this._displayErrorDialog(
                 _t("Cannot delete payment method"), error.message.data.message
             );
         });
+    },
 
+    /**
+     * Display the token deletion confirmation dialog.
+     *
+     * @private
+     * @param {number} tokenId - The id of the token whose deletion was requested.
+     * @param {object} linkedRecordsInfo - The data relative to the documents linked to the token.
+     * @return {void}
+     */
+    _challengeTokenDeletion(tokenId, linkedRecordsInfo) {
+        const body = renderToMarkup('payment.deleteTokenDialog', { linkedRecordsInfo });
+        this.call('dialog', 'add', ConfirmationDialog, {
+            title: _t("Warning!"),
+            body,
+            confirmLabel: _t("Confirm Deletion"),
+            confirm: () => this._archiveToken(tokenId),
+            cancel: () => {},
+        });
+    },
+
+    /**
+     * Archive the provided token.
+     *
+     * @private
+     * @param {number} tokenId - The id of the token whose deletion was requested.
+     * @return {void}
+     */
+    _archiveToken(tokenId) {
+        this._rpc({
+            route: '/payment/archive_token',
+            params: {
+                'token_id': tokenId,
+            },
+        }).then(() => {
+            browser.location.reload();
+        }).guardedCatch(error => {
+            error.event.preventDefault();
+            this._displayErrorDialog(
+                _t("Cannot delete payment method"), error.message.data.message
+            );
+        });
     },
 
     /**
