@@ -77,23 +77,23 @@
 
     <template id="payment.pay_summary">
         <div class="o_payment_details o_cc2 row row-cols-1 row-cols-md-2 mx-0 py-2 rounded">
-            <!-- TODO review with mano
-                    what does the scss do?
-            -->
-            <div class="col my-3">
-                <label for="form_reference" class="d-block small text-muted">
-                    Reference
-                </label>
-                <span name="form_reference"
-                      t-out="reference_prefix"/>
-            </div>
             <div class="col my-3">
                 <label for="form_amount" class="d-block small text-muted">
                     Amount
                 </label>
                 <span name="form_amount"
                       t-out="amount"
-                      t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                      t-options="{'widget': 'monetary', 'display_currency': currency}"
+                      class="fs-4 fw-bold"/>
+            </div>
+            <hr class="d-md-none m-0 text-300 opacity-100"/>
+            <div class="form_reference_col col my-3">
+                <label for="form_reference" class="d-block small text-muted">
+                    Reference
+                </label>
+                <span name="form_reference"
+                      t-out="reference_prefix"
+                      class="fs-4 fw-bold"/>
             </div>
         </div>
     </template>
