@@ -19,11 +19,6 @@ class ActionsOne2ManyField extends Component {
         next_activity: _lt("Create next activity"),
         sms: _lt("Send SMS Text Message"),
     };
-    static actionTemplates = {
-        object_create: "base_automation.ActionsOne2ManyField.Action.ObjectCreateOrWrite",
-        object_write: "base_automation.ActionsOne2ManyField.Action.ObjectCreateOrWrite",
-        mail_post: "base_automation.ActionsOne2ManyField.Action.MailPost",
-    };
     setup() {
         this.root = useRef("root");
 
@@ -88,9 +83,6 @@ class ActionsOne2ManyField extends Component {
             // Render only if hidden actions count has changed.
             return this.render();
         }
-    }
-    getActionTemplate(action) {
-        return this.constructor.actionTemplates[action.data.state];
     }
     getActionType(action) {
         return this.constructor.actionStates[action.data.state] || action.data.state;

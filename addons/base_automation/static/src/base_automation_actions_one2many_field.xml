@@ -25,11 +25,8 @@
                                 'sms': 'fa-comments-o',
                             }[action.data.state]"
                         />
-                        <div class="fs-3 ps-2" t-esc="action.data.name" />
+                        <div class="ps-2" t-esc="action.data.name" />
                     </div>
-
-                    <t t-set="actionTemplate" t-value="getActionTemplate(action)"/>
-                    <t t-if="actionTemplate" t-call="{{ actionTemplate }}" t-call-context="action.data" />
                 </div>
                 <div t-if="!action_last" class="px-3 align-self-center" t-att-data-action-id="action.id">
                     <i class="fa fa-lg fa-plus text-primary"></i>
@@ -40,19 +37,6 @@
                     <i class="fa fa-lg fa-fw fa-ellipsis-h text-secondary" t-att-data-tooltip="moreText"></i>
                 </div>
             </t>
-        </div>
-    </t>
-
-    <t t-name="base_automation.ActionsOne2ManyField.Action.ObjectCreateOrWrite" owl="1">
-        <div t-if="crud_model_id" t-esc="crud_model_id[1]"/>
-    </t>
-
-    <t t-name="base_automation.ActionsOne2ManyField.Action.MailPost" owl="1">
-        <div>
-            Template: <t t-esc="template_id[1]"/>
-        </div>
-        <div>
-            Send as: <t t-esc="mail_post_method"/>
         </div>
     </t>
 </templates>
