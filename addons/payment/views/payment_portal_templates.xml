@@ -88,7 +88,7 @@
                 />
             </div>
             <hr class="d-md-none m-0 text-300 opacity-100"/>
-            <div class="o_payment_summary_reference_col col my-3">
+            <div class="o_payment_summary_left_separator col my-3">
                 <label for="o_payment_summary_reference" class="d-block small text-muted">
                     Reference
                 </label>
