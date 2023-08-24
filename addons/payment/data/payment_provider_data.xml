@@ -224,6 +224,10 @@
         <field name="sequence">0</field>
         <field name="image_128" type="base64" file="payment_demo/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_demo"/>
+        <field name="payment_method_ids"
+               eval="[(6, 0, [
+                   ref('payment.payment_method_demo'),
+               ])]"/>
     </record>
 
     <record id="payment_provider_flutterwave" model="payment.provider"> <!-- TODO ANKO rewrite that-->

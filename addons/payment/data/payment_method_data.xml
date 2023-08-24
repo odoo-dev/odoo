@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="payment_method_demo" model="payment.method">
+        <field name="sequence">10</field>
+        <field name="name">Demo</field>
+        <field name="code">demo</field>
+        <field name="image" type="base64" file="payment/static/img/maestro.png"/>
+    </record>
+
     <record id="payment_method_card" model="payment.method">
         <field name="sequence">10</field>
         <field name="name">Card</field>

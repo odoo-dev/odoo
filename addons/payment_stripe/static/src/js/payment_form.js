@@ -127,7 +127,7 @@ paymentForm.include( {
     /**
      * Process Stripe implementation of the direct payment flow.
      *
-     * @override method from payment.payment_form_mixin
+     * @override method from payment.payment_form
      * @private
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option.
