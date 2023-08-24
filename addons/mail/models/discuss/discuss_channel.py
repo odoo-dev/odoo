@@ -97,25 +97,18 @@ class Channel(models.Model):
             if len(ch.channel_member_ids) > 2 or len(ch.channel_partner_ids) > 2:
                 raise ValidationError(_("A channel of type 'chat' cannot have more than two users."))
 
-    def _get_allowed_group_based_authorization_channel_types(self):
-        return ['channel']
-
     @api.constrains('group_public_id', 'group_ids')
     def _constraint_group_id_channel(self):
-        failing_channels = self.sudo().filtered(lambda channel: channel.channel_type not in self._get_allowed_group_based_authorization_channel_types() \
-            and (channel.group_public_id or channel.group_ids))
+        failing_channels = self.sudo().filtered(lambda channel: channel.channel_type != 'channel' and (channel.group_public_id or channel.group_ids))
         if failing_channels:
             raise ValidationError(_("For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription.", channels=', '.join([ch.name for ch in failing_channels])))
 
     # COMPUTE / INVERSE
 
-    def _get_chat_channel_types(self):
-        return ['chat']
-
     @api.depends('channel_type')
     def _compute_is_chat(self):
         for record in self:
-            record.is_chat = record.channel_type in self._get_chat_channel_types()
+            record.is_chat = record.channel_type == 'chat'
 
     @api.depends('channel_type', 'is_member')
     def _compute_is_editable(self):
@@ -215,7 +208,7 @@ class Channel(models.Model):
 
     @api.depends('channel_type')
     def _compute_group_public_id(self):
-        channels = self.filtered(lambda channel: channel.channel_type in self._get_allowed_group_based_authorization_channel_types())
+        channels = self.filtered(lambda channel: channel.channel_type == "channel")
         channels.filtered(lambda channel: not channel.group_public_id).group_public_id = self.env.ref('base.group_user')
         (self - channels).group_public_id = None
 
@@ -1018,16 +1011,14 @@ class Channel(models.Model):
             'last_seen_dt': fields.Datetime.now(),
         })
 
-    def _get_allowed_channel_types_to_mark_as_fetched(self):
-        return ['chat']
-
     def channel_fetched(self):
         """ Broadcast the channel_fetched notification to channel members
         """
         for channel in self:
             if not channel.message_ids.ids:
                 return
-            if channel.channel_type not in self._get_allowed_channel_types_to_mark_as_fetched():
+            # a bit not-modular but helps understanding code
+            if channel.channel_type not in {'chat', 'whatsapp'}:
                 return
             last_message_id = channel.message_ids.ids[0] # zero is the index of the last message
             member = self.env['discuss.channel.member'].search([('channel_id', '=', channel.id), ('partner_id', '=', self.env.user.partner_id.id)], limit=1)
