@@ -28,11 +28,8 @@ class DiscussChannel(models.Model):
     _sql_constraints = [('livechat_operator_id', "CHECK((channel_type = 'livechat' and livechat_operator_id is not null) or (channel_type != 'livechat'))",
                          'Livechat Operator ID is required for a channel of type livechat.')]
 
-    def _compute_is_chat(self):
-        super()._compute_is_chat()
-        for record in self:
-            if record.channel_type == 'livechat':
-                record.is_chat = True
+    def _get_chat_channel_types(self):
+        return super()._get_chat_channel_types() + ['livechat']
 
     def _channel_message_notifications(self, message, message_format=False):
         """ When a anonymous user create a discuss.channel, the operator is not notify (to avoid massive polling when
