@@ -199,7 +199,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
         if (this._canSubmit()) {
             this._getSubmitButton().removeAttribute('disabled');
         }
-        $('body').unblock();
+        this.call('ui', 'unblock');
     },
 
     /**
@@ -212,10 +212,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     _disableButton(blockUI = false) {
         this._getSubmitButton().setAttribute('disabled', true);
         if (blockUI) {
-            $('body').block({
-                message: false,
-                overlayCSS: { backgroundColor: "#000", opacity: 0, zIndex: 1050 },
-            });
+            this.call('ui', 'block');
         }
     },
 
