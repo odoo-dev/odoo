@@ -8,6 +8,8 @@ import paymentForm from '@payment/js/payment_form';
 
 paymentForm.include({
 
+    // #=== DOM MANIPULATION ===#
+
     /**
      * Prepare the inline form of Authorize.net for direct payment.
      *
@@ -31,7 +33,7 @@ paymentForm.include({
 
         this._setPaymentFlow('direct');
 
-        if (!this.authorizeInfo){
+        if (!this.authorizeInfo) { // TODO VCHU store per paymentOption
             let acceptJSUrl = 'https://js.authorize.net/v1/Accept.js';
             const radio = document.querySelector('input[name="o_payment_radio"]:checked');
             const inlineForm = this._getInlineForm(radio);
@@ -40,16 +42,11 @@ paymentForm.include({
             if (this.authorizeInfo.state !== 'enabled') {
                 acceptJSUrl = 'https://jstest.authorize.net/v1/Accept.js';
             }
-            loadJS(acceptJSUrl).guardedCatch((error) => {
-                error.event.preventDefault();
-                this._displayErrorDialog(
-                    _t("Cannot display the payment form"), error.message.data.message
-                );
-                this._enableButton();
-            });
+            loadJS(acceptJSUrl);
         }
-
     },
+
+    // #=== PAYMENT FLOW ===#
 
     /**
      * Trigger the payment processing by submitting the data.
@@ -68,13 +65,13 @@ paymentForm.include({
             return;
         }
 
-        if (!this._validateFormInputs(paymentMethodCode)) {
+        const inputs = Object.values(this._authorizeGetInlineFormInputs(paymentMethodCode));
+        if (!inputs.every(element => element.reportValidity())) {
             this._enableButton(); // The submit button is disabled at this point, enable it
             return;
         }
-        else{
-            return await this._super(...arguments);
-        }
+
+        await this._super(...arguments);
     },
 
     /**
@@ -100,26 +97,51 @@ paymentForm.include({
                 apiLoginID: this.authorizeInfo.login_id,
                 clientKey: this.authorizeInfo.client_key,
             },
-            ...this._getPaymentDetails(paymentMethodCode),
+            ...this._authorizeGetPaymentDetails(paymentMethodCode),
         };
 
         // Dispatch secure data to Authorize.Net to get a payment nonce in return
         Accept.dispatchData(
-            secureData, response => this._responseHandler(response, processingValues)
+            secureData, response => this._authorizeHandleResponse(response, processingValues)
         );
     },
 
     /**
-     * Checks that all payment inputs adhere to the DOM validation constraints.
+     * Handle the response from Authorize.Net and initiate the payment.
      *
      * @private
-     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-     * @return {boolean} - Whether all elements pass the validation constraints
+     * @param {object} response - The payment nonce returned by Authorized.Net
+     * @param {object} processingValues - The processing values of the transaction.
+     * @return {void}
      */
-    _validateFormInputs(paymentMethodCode) {
-        const inputs = Object.values(this._getInlineFormInputs(paymentMethodCode));
-        return inputs.every(element => element.reportValidity());
+    _authorizeHandleResponse(response, processingValues) {
+        if (response.messages.resultCode === 'Error') {
+            let error = '';
+            response.messages.message.forEach(msg => error += `${msg.code}: ${msg.text}\n`);
+            this._displayErrorDialog(_t("Payment processing failed"), error);
+            this._enableButton();
+            return;
+        }
+
+        // Initiate the payment
+        this._rpc({
+            route: '/payment/authorize/payment',
+            params: {
+                'reference': processingValues.reference,
+                'partner_id': processingValues.partner_id,
+                'opaque_data': response.opaqueData,
+                'access_token': processingValues.access_token,
+            }
+        }).then(() => {
+            window.location = '/payment/status';
+        }).guardedCatch((error) => {
+            error.event.preventDefault();
+            this._displayErrorDialog(_t("Payment processing failed"), error.message.data.message);
+            this._enableButton();
+        });
     },
+
+    // #=== GETTERS ===#
 
     /**
      * Return all relevant inline form inputs based on the payment method type of the provider.
@@ -128,20 +150,20 @@ paymentForm.include({
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @return {Object} - An object mapping the name of inline form inputs to their DOM element
      */
-    _getInlineFormInputs(paymentMethodCode) {
+    _authorizeGetInlineFormInputs(paymentMethodCode) {
         if (paymentMethodCode === 'card') {
             return {
-                card: this.authorizeForm.querySelector(`#o_authorize_card`),
-                month: this.authorizeForm.querySelector(`#o_authorize_month`),
-                year: this.authorizeForm.querySelector(`#o_authorize_year`),
-                code: this.authorizeForm.querySelector(`#o_authorize_code`),
+                card: this.authorizeForm.querySelector('#o_authorize_card'),
+                month: this.authorizeForm.querySelector('#o_authorize_month'),
+                year: this.authorizeForm.querySelector('#o_authorize_year'),
+                code: this.authorizeForm.querySelector('#o_authorize_code'),
             };
         } else {
             return {
-                accountName: this.authorizeForm.querySelector(`#o_authorize_account_name`),
-                accountNumber: this.authorizeForm.querySelector(`#o_authorize_account_number`),
-                abaNumber: this.authorizeForm.querySelector(`#o_authorize_aba_number`),
-                accountType: this.authorizeForm.querySelector(`#o_authorize_account_type`),
+                accountName: this.authorizeForm.querySelector('#o_authorize_account_name'),
+                accountNumber: this.authorizeForm.querySelector('#o_authorize_account_number'),
+                abaNumber: this.authorizeForm.querySelector('#o_authorize_aba_number'),
+                accountType: this.authorizeForm.querySelector('#o_authorize_account_type'),
             };
         }
     },
@@ -153,8 +175,8 @@ paymentForm.include({
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @return {Object} - Data to pass to the Accept.dispatch request
      */
-    _getPaymentDetails(paymentMethodCode) {
-        const inputs = this._getInlineFormInputs(paymentMethodCode);
+    _authorizeGetPaymentDetails(paymentMethodCode) {
+        const inputs = this._authorizeGetInlineFormInputs(paymentMethodCode);
         if (paymentMethodCode === 'card') {
             return {
                 cardData: {
@@ -174,47 +196,6 @@ paymentForm.include({
                 },
             };
         }
-    },
-
-    /**
-     * Handle the response from Authorize.Net and initiate the payment.
-     *
-     * @private
-     * @param {object} response - The payment nonce returned by Authorized.Net
-     * @param {object} processingValues - The processing values of the transaction.
-     * @return {void}
-     */
-    _responseHandler(response, processingValues) {
-        if (response.messages.resultCode === 'Error') {
-            let error = '';
-            response.messages.message.forEach(msg => error += `${msg.code}: ${msg.text}\n`);
-            this._displayErrorDialog(
-                _t("We are not able to process your payment."),
-                error
-            );
-            this._enableButton();
-            return;
-        }
-
-        // Initiate the payment
-        this._rpc({
-            route: '/payment/authorize/payment',
-            params: {
-                'reference': processingValues.reference,
-                'partner_id': processingValues.partner_id,
-                'opaque_data': response.opaqueData,
-                'access_token': processingValues.access_token,
-            }
-        }).then(() => {
-            window.location = '/payment/status';
-        }).guardedCatch((error) => {
-            error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("We are not able to process your payment."),
-                error.message.data.message,
-            );
-            this._enableButton();
-        });
     },
 
 });

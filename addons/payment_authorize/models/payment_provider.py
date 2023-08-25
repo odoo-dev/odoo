@@ -1,14 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import pprint
-import json
 
 from odoo import _, api, fields, models
-from odoo.fields import Command
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Command
 
-from .authorize_request import AuthorizeAPI
+from odoo.addons.payment_authorize.models.authorize_request import AuthorizeAPI
 
 _logger = logging.getLogger(__name__)
 
@@ -117,9 +117,7 @@ class PaymentProvider(models.Model):
 
         inline_form_values = {
             'state': self.state,
-            # The public API key solely used to identify the seller account with Authorize.Net
             'login_id': self.authorize_login,
-            # The public client key solely used to identify requests from the Accept.js suite
             'client_key': self.authorize_client_key,
         }
         return json.dumps(inline_form_values)

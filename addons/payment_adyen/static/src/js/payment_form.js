@@ -148,7 +148,7 @@ paymentForm.include({
             this._enableButton();
             return;
         }
-        this.adyenComponents[paymentOptionId].submit();
+        this.adyenComponents[paymentOptionId].submit(); // TODO VCHU split like in authorize
     },
 
     /**
