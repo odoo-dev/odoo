@@ -31,26 +31,24 @@ paymentForm.include({
 
         this._setPaymentFlow('direct');
 
-        let acceptJSUrl = 'https://js.authorize.net/v1/Accept.js';
-        this._rpc({
-            route: '/payment/authorize/get_provider_info',
-            params: {
-                'provider_id': providerId,
-            },
-        }).then(providerInfo => {
-            if (providerInfo.state !== 'enabled') {
+        if (!this.authorizeInfo){
+            let acceptJSUrl = 'https://js.authorize.net/v1/Accept.js';
+            const radio = document.querySelector('input[name="o_payment_radio"]:checked');
+            const inlineForm = this._getInlineForm(radio);
+            this.authorizeForm = inlineForm.querySelector('[name="o_authorize_form"]');
+            this.authorizeInfo = JSON.parse(this.authorizeForm.dataset['inlineFormValues']);
+            if (this.authorizeInfo.state !== 'enabled') {
                 acceptJSUrl = 'https://jstest.authorize.net/v1/Accept.js';
             }
-            this.authorizeInfo = providerInfo;
-        }).then(() => {
-            loadJS(acceptJSUrl);
-        }).guardedCatch((error) => {
-            error.event.preventDefault();
-            this._displayErrorDialog(
-                _t("Cannot display the payment form"), error.message.data.message
-            );
-            this._enableButton();
-        });
+            loadJS(acceptJSUrl).guardedCatch((error) => {
+                error.event.preventDefault();
+                this._displayErrorDialog(
+                    _t("Cannot display the payment form"), error.message.data.message
+                );
+                this._enableButton();
+            });
+        }
+
     },
 
     /**
@@ -70,8 +68,29 @@ paymentForm.include({
             return;
         }
 
-        if (!this._validateFormInputs(paymentOptionId, paymentMethodCode)) {
+        if (!this._validateFormInputs(paymentMethodCode)) {
             this._enableButton(); // The submit button is disabled at this point, enable it
+            return;
+        }
+        else{
+            return await this._super(...arguments);
+        }
+    },
+
+    /**
+     * Process the direct payment flow.
+     *
+     * @override method from payment.payment_form
+     * @private
+     * @param {string} providerCode - The code of the selected payment option's provider.
+     * @param {number} paymentOptionId - The id of the selected payment option.
+     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
+     * @param {object} processingValues - The processing values of the transaction.
+     * @return {void}
+     */
+    async _processDirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
+        if (providerCode !== 'authorize') {
+            this._super(...arguments);
             return;
         }
 
@@ -81,12 +100,12 @@ paymentForm.include({
                 apiLoginID: this.authorizeInfo.login_id,
                 clientKey: this.authorizeInfo.client_key,
             },
-            ...this._getPaymentDetails(paymentOptionId, paymentMethodCode),
+            ...this._getPaymentDetails(paymentMethodCode),
         };
 
         // Dispatch secure data to Authorize.Net to get a payment nonce in return
         Accept.dispatchData(
-            secureData, response => this._responseHandler(response)
+            secureData, response => this._responseHandler(response, processingValues)
         );
     },
 
@@ -94,11 +113,11 @@ paymentForm.include({
      * Checks that all payment inputs adhere to the DOM validation constraints.
      *
      * @private
-     * @param {number} paymentOptionId - The id of the selected payment option.
+     * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @return {boolean} - Whether all elements pass the validation constraints
      */
-    _validateFormInputs(paymentOptionId, paymentMethodCode) {
-        const inputs = Object.values(this._getInlineFormInputs(paymentOptionId, paymentMethodCode));
+    _validateFormInputs(paymentMethodCode) {
+        const inputs = Object.values(this._getInlineFormInputs(paymentMethodCode));
         return inputs.every(element => element.reportValidity());
     },
 
@@ -106,32 +125,23 @@ paymentForm.include({
      * Return all relevant inline form inputs based on the payment method type of the provider.
      *
      * @private
-     * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @return {Object} - An object mapping the name of inline form inputs to their DOM element
      */
-    _getInlineFormInputs(paymentOptionId, paymentMethodCode) {
-        const radio = this.el.querySelector('input[name="o_payment_radio"]:checked');
-        const inlineForm = this._getInlineForm(radio);
+    _getInlineFormInputs(paymentMethodCode) {
         if (paymentMethodCode === 'card') {
             return {
-                card: inlineForm.querySelector(`#o_authorize_card_${paymentOptionId}`),
-                month: inlineForm.querySelector(`#o_authorize_month_${paymentOptionId}`),
-                year: inlineForm.querySelector(`#o_authorize_year_${paymentOptionId}`),
-                code: inlineForm.querySelector(`#o_authorize_code_${paymentOptionId}`),
+                card: this.authorizeForm.querySelector(`#o_authorize_card`),
+                month: this.authorizeForm.querySelector(`#o_authorize_month`),
+                year: this.authorizeForm.querySelector(`#o_authorize_year`),
+                code: this.authorizeForm.querySelector(`#o_authorize_code`),
             };
         } else {
             return {
-                accountName: inlineForm.querySelector(
-                    `#o_authorize_account_name_${paymentOptionId}`
-                ),
-                accountNumber: inlineForm.querySelector(
-                    `#o_authorize_account_number_${paymentOptionId}`
-                ),
-                abaNumber: inlineForm.querySelector(`#o_authorize_aba_number_${paymentOptionId}`),
-                accountType: inlineForm.querySelector(
-                    `#o_authorize_account_type_${paymentOptionId}`
-                ),
+                accountName: this.authorizeForm.querySelector(`#o_authorize_account_name`),
+                accountNumber: this.authorizeForm.querySelector(`#o_authorize_account_number`),
+                abaNumber: this.authorizeForm.querySelector(`#o_authorize_aba_number`),
+                accountType: this.authorizeForm.querySelector(`#o_authorize_account_type`),
             };
         }
     },
@@ -140,12 +150,11 @@ paymentForm.include({
      * Return the credit card or bank data to pass to the Accept.dispatch request.
      *
      * @private
-     * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
      * @return {Object} - Data to pass to the Accept.dispatch request
      */
-    _getPaymentDetails(paymentOptionId, paymentMethodCode) {
-        const inputs = this._getInlineFormInputs(paymentOptionId, paymentMethodCode);
+    _getPaymentDetails(paymentMethodCode) {
+        const inputs = this._getInlineFormInputs(paymentMethodCode);
         if (paymentMethodCode === 'card') {
             return {
                 cardData: {
@@ -172,9 +181,10 @@ paymentForm.include({
      *
      * @private
      * @param {object} response - The payment nonce returned by Authorized.Net
+     * @param {object} processingValues - The processing values of the transaction.
      * @return {void}
      */
-    _responseHandler(response) {
+    _responseHandler(response, processingValues) {
         if (response.messages.resultCode === 'Error') {
             let error = '';
             response.messages.message.forEach(msg => error += `${msg.code}: ${msg.text}\n`);
@@ -186,21 +196,15 @@ paymentForm.include({
             return;
         }
 
-        // Create the transaction and retrieve the processing values
+        // Initiate the payment
         this._rpc({
-            route: this.txContext.transactionRoute,
-            params: this._prepareTransactionRouteParams(),
-        }).then(processingValues => {
-            // Initiate the payment
-            return this._rpc({
-                route: '/payment/authorize/payment',
-                params: {
-                    'reference': processingValues.reference,
-                    'partner_id': processingValues.partner_id,
-                    'opaque_data': response.opaqueData,
-                    'access_token': processingValues.access_token,
-                }
-            });
+            route: '/payment/authorize/payment',
+            params: {
+                'reference': processingValues.reference,
+                'partner_id': processingValues.partner_id,
+                'opaque_data': response.opaqueData,
+                'access_token': processingValues.access_token,
+            }
         }).then(() => {
             window.location = '/payment/status';
         }).guardedCatch((error) => {

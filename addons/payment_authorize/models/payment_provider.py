@@ -2,6 +2,7 @@
 
 import logging
 import pprint
+import json
 
 from odoo import _, api, fields, models
 from odoo.fields import Command
@@ -103,3 +104,22 @@ class PaymentProvider(models.Model):
             return res
 
         return self.available_currency_ids[0]
+
+    def _authorize_get_inline_form_values(self):
+        """ Return a serialized JSON of the required values to render the inline form.
+
+        Note: `self.ensure_one()`
+
+        :return: The JSON serial of the required values to render the inline form.
+        :rtype: str
+        """
+        self.ensure_one()
+
+        inline_form_values = {
+            'state': self.state,
+            # The public API key solely used to identify the seller account with Authorize.Net
+            'login_id': self.authorize_login,
+            # The public client key solely used to identify requests from the Accept.js suite
+            'client_key': self.authorize_client_key,
+        }
+        return json.dumps(inline_form_values)
