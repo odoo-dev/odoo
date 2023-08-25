@@ -9,17 +9,14 @@ import paymentForm from '@payment/js/payment_form';
 paymentForm.include({
 
     /**
-     * Prepare the Authorize.net inline form of the selected payment option.
-     *
-     * For a provider to manage an inline form, it must override this method and render the content
-     * of the form.
+     * Prepare the inline form of Authorize.net for direct payment.
      *
      * @private
      * @param {number} providerId - The id of the selected payment option's provider.
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-     * @param {string} flow - The payment flow of the selected payment option.
+     * @param {string} flow - The online payment flow of the selected payment option.
      * @return {void}
      */
     async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
@@ -29,7 +26,7 @@ paymentForm.include({
         }
 
         if (flow === 'token') {
-            return; // Don't show the form for tokens
+            return; // Don't show the form for tokens.
         }
 
         this._setPaymentFlow('direct');
@@ -50,8 +47,7 @@ paymentForm.include({
         }).guardedCatch((error) => {
             error.event.preventDefault();
             this._displayErrorDialog(
-                _t("An error occurred when displayed this payment form."),
-                error.message.data.message,
+                _t("Cannot display the payment form"), error.message.data.message
             );
             this._enableButton();
         });
@@ -116,7 +112,7 @@ paymentForm.include({
      */
     _getInlineFormInputs(paymentOptionId, paymentMethodCode) {
         const radio = this.el.querySelector('input[name="o_payment_radio"]:checked');
-        const inlineForm = this._getInlineForm(radio)
+        const inlineForm = this._getInlineForm(radio);
         if (paymentMethodCode === 'card') {
             return {
                 card: inlineForm.querySelector(`#o_authorize_card_${paymentOptionId}`),

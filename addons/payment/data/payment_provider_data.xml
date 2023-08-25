@@ -172,9 +172,8 @@
         <!-- https://www.authorize.net/solutions/merchantsolutions/onlinemerchantaccount/ -->
         <field name="payment_method_ids"
                eval="[(6, 0, [
+                   ref('payment.payment_method_ach_direct_debit'),
                    ref('payment.payment_method_card'),
-                   ref('payment.payment_method_paypal'),
-                   ref('payment.payment_method_apple_pay'),
                ])]"/>
     </record>
 

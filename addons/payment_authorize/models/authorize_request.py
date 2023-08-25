@@ -138,7 +138,7 @@ class AuthorizeAPI:
         })
 
         payment = response.get('paymentProfile', {}).get('payment', {})
-        if payment.get('creditCard'):
+        if 'creditCard' in payment:
             # Authorize.net pads the card and account numbers with X's.
             res['payment_details'] = payment.get('creditCard', {}).get('cardNumber')[-4:]
         else:

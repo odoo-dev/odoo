@@ -5,7 +5,9 @@ import { _t } from '@web/core/l10n/translation';
 import { StripeOptions } from '@payment_stripe/js/stripe_options';
 import paymentForm from '@payment/js/payment_form';
 
-paymentForm.include( {
+paymentForm.include({
+
+    // #=== DOM MANIPULATION ===#
 
     /**
      * Prepare the inline form of Stripe for direct payment.
@@ -95,6 +97,8 @@ paymentForm.include( {
             });
         }
     },
+
+    // #=== PAYMENT FLOW ===#
 
     /**
      * Trigger the payment processing by submitting the elements.

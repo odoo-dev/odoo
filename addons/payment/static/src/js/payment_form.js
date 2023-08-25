@@ -289,7 +289,7 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
      * @param {string} providerCode - The code of the selected payment option's provider.
      * @param {number} paymentOptionId - The id of the selected payment option.
      * @param {string} paymentMethodCode - The code of the selected payment method, if any.
-     * @param {string} flow - The payment flow of the selected payment option.
+     * @param {string} flow - The online payment flow of the selected payment option.
      * @return {void}
      */
     async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {},

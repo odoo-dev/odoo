@@ -13,6 +13,7 @@ paymentForm.include({
     adyenCheckout: undefined,
     adyenComponents: undefined,
 
+    // #=== DOM MANIPULATION ===#
 
     /**
      * Prepare the inline form of Adyen for direct payment.
@@ -106,7 +107,7 @@ paymentForm.include({
                 showPayButton: true,
                 blockPayPalCreditButton: true,
                 blockPayPalPayLaterButton: true
-            })
+            });
             this._hideInputs();
             // Define necessary fields as the step _submitForm is missed.
             Object.assign(this.txContext, {
@@ -121,6 +122,8 @@ paymentForm.include({
             adyenInlineFormValues['adyen_pm_code'], componentConfiguration
         ).mount(adyenContainer);
     },
+
+    // #=== PAYMENT FLOW ===#
 
     /**
      * Trigger the payment processing by submitting the component.
