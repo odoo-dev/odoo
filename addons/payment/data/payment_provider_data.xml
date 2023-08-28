@@ -22,7 +22,6 @@
                    ref('payment.payment_method_benefit'),
                    ref('payment.payment_method_bizum'),
                    ref('payment.payment_method_blik'),
-                   ref('payment.payment_method_boleto_bancario'),
                    ref('payment.payment_method_card'),
                    ref('payment.payment_method_cashapp'),
                    ref('payment.payment_method_clearpay'),
@@ -52,7 +51,6 @@
                    ref('payment.payment_method_online_banking_slovakia'),
                    ref('payment.payment_method_online_banking_thailand'),
                    ref('payment.payment_method_open_banking'),
-                   ref('payment.payment_method_oxxo'),
                    ref('payment.payment_method_p24'),
                    ref('payment.payment_method_pay_bright'),
                    ref('payment.payment_method_pay_safe_card'),
@@ -237,8 +235,6 @@
         <field name="payment_method_ids" eval="[(6, 0, [
                 ref('payment.payment_method_card'),
                 ref('payment.payment_method_mpesa'),
-                ref('payment.payment_method_airtel_money'),
-                ref('payment.payment_method_barter_by_flutterwave'),
                 ref('payment.payment_method_mmg'),
                 ref('payment.payment_method_mmfa'),
                 ref('payment.payment_method_mmu'),
@@ -248,7 +244,8 @@
                 ref('payment.payment_method_bank_account'),
                 ref('payment.payment_method_credit'),
                 ref('payment.payment_method_paypal'),
-                ref('payment.payment_method_ach_direct_debit'),
+                ref('payment.payment_method_ussd'),
+                ref('payment.payment_method_nqr_by_flutterwave'),
             ])]"/>
     </record>
 
@@ -265,12 +262,8 @@
         <field name="payment_method_ids"
                eval="[(6, 0, [
                     ref('payment.payment_method_card'),
-                    ref('payment.payment_method_bbva_bancomer'),
-                    ref('payment.payment_method_citibanamex'),
-                    ref('payment.payment_method_pix'),
-                    ref('payment.payment_method_pse'),
-                    ref('payment.payment_method_santander'),
-                    ref('payment.payment_method_oxxo'),
+                    ref('payment.payment_method_bank_transfer'),
+                    ref('payment.payment_method_paypal'),
                ])]"/>
     </record>
 
@@ -280,23 +273,19 @@
         <field name="module_id" ref="base.module_payment_mollie"/>
         <!-- https://www.mollie.com/en/payments -->
         <field name="payment_method_ids" eval="[(6, 0, [
-                ref('payment.payment_method_card'),
+                ref('payment.payment_method_apple_pay'),
                 ref('payment.payment_method_bancontact'),
+                ref('payment.payment_method_bank_transfer'),
+                ref('payment.payment_method_belfius'),
+                ref('payment.payment_method_card'),
+                ref('payment.payment_method_sepa'),
                 ref('payment.payment_method_eps'),
                 ref('payment.payment_method_giropay'),
-                ref('payment.payment_method_p24'),
                 ref('payment.payment_method_ideal'),
                 ref('payment.payment_method_paypal'),
-                ref('payment.payment_method_apple_pay'),
-                ref('payment.payment_method_sepa'),
-                ref('payment.payment_method_sepa_transfer'),
-                ref('payment.payment_method_klarna'),
-                ref('payment.payment_method_kbc_cbc'),
-                ref('payment.payment_method_belfius'),
-                ref('payment.payment_method_sofort'),
                 ref('payment.payment_method_pay_safe_card'),
-                ref('payment.payment_method_in3'),
-                ref('payment.payment_method_poste_pay'),
+                ref('payment.payment_method_p24'),
+                ref('payment.payment_method_sofort'),
             ])]"/>
 
     </record>
@@ -308,19 +297,7 @@
         <!-- https://www.paypal.com/us/selfhelp/article/Which-credit-cards-can-I-accept-with-PayPal-Merchant-Services-FAQ1525#business -->
         <field name="payment_method_ids"
                eval="[(6, 0, [
-                   ref('payment.payment_method_card'),
                    ref('payment.payment_method_paypal'),
-                   ref('payment.payment_method_pay_later_paypal'),
-                   ref('payment.payment_method_venmo'),
-                   ref('payment.payment_method_bancontact'),
-                   ref('payment.payment_method_blik'),
-                   ref('payment.payment_method_eps'),
-                   ref('payment.payment_method_giropay'),
-                   ref('payment.payment_method_ideal'),
-                   ref('payment.payment_method_mybank'),
-                   ref('payment.payment_method_ratepay'),
-                   ref('payment.payment_method_p24'),
-                   ref('payment.payment_method_sofort'),
                ])]"/>
     </record>
 
@@ -332,13 +309,9 @@
         <field name="payment_method_ids"
                eval="[(6, 0, [
                    ref('payment.payment_method_card'),
-                   ref('payment.payment_method_rupay'),
                    ref('payment.payment_method_netbanking'),
-                   ref('payment.payment_method_emi'),
                    ref('payment.payment_method_upi'),
                    ref('payment.payment_method_wallets_india'),
-                   ref('payment.payment_method_google_pay'),
-                   ref('payment.payment_method_bank_transfer'),
                    ref('payment.payment_method_pay_later'),
 
                ])]"/>
@@ -398,7 +371,6 @@
                    ref('payment.payment_method_bancontact'),
                    ref('payment.payment_method_becs_direct_debit'),
                    ref('payment.payment_method_blik'),
-                   ref('payment.payment_method_boleto_bancario'),
                    ref('payment.payment_method_card'),
                    ref('payment.payment_method_cashapp'),
                    ref('payment.payment_method_clearpay'),

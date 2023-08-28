@@ -51,9 +51,6 @@ SUPPORTED_CURRENCIES = [
 PAYMENT_METHODS_MAPPING = {
     'apple_pay': 'applepay',
     'card': 'creditcard',
-    'klarna': 'klarnapaylater',
-    'klarna_paynow': 'klarnapaynow',
-    'klarna_pay_over_time': 'klarnasliceit',
     'bank_transfer': 'banktransfer',
     'p24': 'przelewy24',
     'sepa_debit': 'directdebit',

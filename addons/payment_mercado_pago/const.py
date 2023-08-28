@@ -29,10 +29,8 @@ SUPPORTED_CURRENCIES = [
 
 # Mapping of payment method codes to Mercado Pago codes.
 PAYMENT_METHODS_MAPPING = {
-    'santander': 'serfin',
-    'card': 'credit_card',
-    'bbva_bancomer': 'bancomer',
-    'citibanamex': 'banamex',
+    'card': 'debit_card,credit_card,prepaid_card',
+    'paypal': 'digital_wallet',
 }
 
 # Mapping of transaction states to Mercado Pago payment statuses.

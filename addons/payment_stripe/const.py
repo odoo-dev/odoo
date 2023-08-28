@@ -10,7 +10,6 @@ PAYMENT_METHODS_MAPPING = {
     'ach_direct_debit': 'us_bank_account',
     'bacs_direct_debit': 'bacs_debit',
     'becs_direct_debit': 'au_becs_debit',
-    'boleto_bancario': 'boleto',
     'afterpay': 'afterpay_clearpay',
     'clearpay': 'afterpay_clearpay',
 }

@@ -82,7 +82,7 @@
 
     <record id="payment_method_rupay" model="payment.method">
         <field name="sequence">80</field>
-        <field name="name">Rupay</field>
+        <field name="name">RuPay</field>
         <field name="code">rupay</field>
         <field name="parent_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/rupay.png"/>
@@ -339,42 +339,24 @@
         <field name="image" type="base64" file="payment/static/img/m-pesa.png"/>
     </record>
 
-    <record id="payment_method_airtel_money" model="payment.method">
-        <field name="sequence">250</field>
-        <field name="name">Airtel Money</field>
-        <field name="code">airtel_money</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.ug'),
-                    ref('base.tz'),
-                    ref('base.zm'),
-                    ref('base.mw'),
-                    ref('base.ke'),
-                    ref('base.rw'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.UGX'),
-                    ref('base.TZS'),
-                    ref('base.ZMW'),
-                    ref('base.MWK'),
-                    ref('base.KES'),
-                    ref('base.RWF'),
-                ])]"/>
+    <record id="payment_method_ussd" model="payment.method">
+        <field name="sequence">260</field>
+        <field name="name">USSD by Flutterwave</field>
+        <field name="code">ussd</field>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">full_only</field>
-        <field name="image" type="base64" file="payment/static/img/airtel-money.png"/>
+        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_barter_by_flutterwave" model="payment.method"> <!-- TODO needs currency -->
+    <record id="payment_method_nqr_by_flutterwave" model="payment.method">
         <field name="sequence">260</field>
-        <field name="name">Barter by Flutterwave</field>
-        <field name="code">barter</field>
+        <field name="name">QR payment by Flutterwave</field>
+        <field name="code">nqr</field>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">full_only</field>
-        <field name="image" type="base64" file="payment/static/img/barter-by-flutterwave.png"/>
+        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
     <record id="payment_method_mada" model="payment.method">
@@ -393,40 +375,6 @@
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="image" type="base64" file="payment/static/img/mada.png"/>
-    </record>
-
-    <record id="payment_method_bbva_bancomer" model="payment.method">
-        <field name="sequence">280</field>
-        <field name="name">BBVA Bancomer</field>
-        <field name="code">bbva_bancomer</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.mx'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.MXN'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/bbva-bancomer.png"/>
-    </record>
-
-   <record id="payment_method_citibanamex" model="payment.method">
-        <field name="sequence">280</field>
-        <field name="name">CitiBanamex</field>
-        <field name="code">citibanamex</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.mx'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.MXN'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/citibanamex.png"/>
     </record>
 
     <record id="payment_method_cartes_bancaires" model="payment.method">
@@ -706,23 +654,6 @@
         <field name="image" type="base64" file="payment/static/img/blik.png"/>
     </record>
 
-    <record id="payment_method_boleto_bancario" model="payment.method">
-        <field name="sequence">390</field>
-        <field name="name">Boleto Bancário</field>
-        <field name="code">boleto_bancario</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.br'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.BRL'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/boleto-bancario.png"/>
-    </record>
-
     <record id="payment_method_cashapp" model="payment.method">
         <field name="sequence">400</field>
         <field name="name">Cash App Pay</field>
@@ -757,23 +688,6 @@
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
-        <field name="image" type="base64" file="payment/static/img/fpx.png"/>
-    </record>
-
-    <record id="payment_method_oxxo" model="payment.method">
-        <field name="sequence">410</field>
-        <field name="name">Oxxo</field>
-        <field name="code">oxxo</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.mx'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.MXN'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
         <field name="image" type="base64" file="payment/static/img/fpx.png"/>
     </record>
 
@@ -1827,22 +1741,6 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_wallets" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">Wallets India</field>
-        <field name="code">wallets</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.in'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.INR'),
-                ])]"/>
-        <field name="support_refund">full_only</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
     <record id="payment_method_walley" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Walley</field>
@@ -1868,7 +1766,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_rabbit_line_pay" model="payment.method"> <!-- TODO ALipay+ but it shows both in alipay+ and as seprate method?-->
+    <record id="payment_method_rabbit_line_pay" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Rabbit LINE Pay</field>
         <field name="code">twint</field>
@@ -1885,7 +1783,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_true_money" model="payment.method"> <!-- TODO ALipay+ but it shows both in alipay+ and as seprate method?-->
+    <record id="payment_method_true_money" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">TrueMoney</field>
         <field name="code">truemoney</field>
@@ -1902,7 +1800,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_boost" model="payment.method"> <!-- TODO ALipay+ -->
+    <record id="payment_method_boost" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Boost</field>
         <field name="code">boost</field>
@@ -1919,7 +1817,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_billease" model="payment.method"> <!-- TODO ALipay+ -->
+    <record id="payment_method_billease" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">BillEase</field>
         <field name="code">billease</field>
@@ -1936,7 +1834,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_bpi" model="payment.method"> <!-- TODO ALipay+-->
+    <record id="payment_method_bpi" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Bank of the Philippine Islands</field>
         <field name="code">bpi</field>
@@ -1953,7 +1851,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_maya" model="payment.method"> <!-- TODO ALipay+ but at the same time it is shown in different tab also-->
+    <record id="payment_method_maya" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Maya</field>
         <field name="code">maya</field>
@@ -1970,7 +1868,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_akulaku" model="payment.method"> <!-- TODO Alipay+-->
+    <record id="payment_method_akulaku" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Akulaku PayLater</field>
         <field name="code">akulaku</field>
@@ -2004,7 +1902,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_naver" model="payment.method"> <!-- TODO Alipay+ same thing as others-->
+    <record id="payment_method_naver" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Naver Pay</field>
         <field name="code">naverpay</field>
@@ -2021,7 +1919,7 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_toss" model="payment.method"> <!-- TODO Alipay+ same thing as others-->
+    <record id="payment_method_toss" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Toss Pay</field>
         <field name="code">tosspay</field>
@@ -2450,23 +2348,6 @@
         <field name="supported_currency_ids"
                eval="[(6,0,[
                     ref('base.EUR'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_pagofacil" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">PAGOFACIL</field>
-        <field name="code">pagofacil</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.ar'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.ARS'),
                 ])]"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
@@ -3204,28 +3085,6 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_santander" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">Santander</field>
-        <field name="code">santander</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.ar'),
-                    ref('base.br'),
-                    ref('base.cl'),
-                    ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.ARS'),
-                    ref('base.BRL'),
-                    ref('base.CLP'),
-                    ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-
     <record id="payment_method_argencard" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Argencard</field>
@@ -3352,14 +3211,6 @@
         <field name="sequence">600</field>
         <field name="name">Presto</field>
         <field name="code">presto</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_red_compra" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">RedCompra</field>
-        <field name="code">red_compra</field>
         <field name="parent_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
@@ -3570,48 +3421,6 @@
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
-    <record id="payment_method_bbva_bancomer_br" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">BBVA Bancomer</field>
-        <field name="code">bbva_reference</field>
-        <field name="parent_id" eval="ref('payment.payment_method_bank_reference')"/>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_efecty" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">Efecty</field>
-        <field name="code">efecty</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.co'),
-                    ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.COP'),
-                    ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_su_red" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">Su Red</field>
-        <field name="code">su_red</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.co'),
-                    ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.COP'),
-                    ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
     <record id="payment_method_floa_bank" model="payment.method">
         <field name="sequence">600</field>
         <field name="name">Floa Bank</field>
@@ -3661,74 +3470,6 @@
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_klap" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">Klap</field>
-        <field name="code">klap</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.cl'),
-                    ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.CLP'),
-                    ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_pagoefectivo" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">PAGOEFECTIVO</field>
-        <field name="code">pagoefectivo</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.pe'),
-                    ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.PEN'),
-                    ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_rapipago" model="payment.method">
-        <field name="sequence">600</field>
-        <field name="name">RAPIPAGO</field>
-        <field name="code">rapipago</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.ar'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.ARS'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
-    </record>
-
-    <record id="payment_method_spei" model="payment.method">
-        <field name="sequence">280</field>
-        <field name="name">SPEI</field>
-        <field name="code">spei</field>
-        <field name="supported_country_ids"
-               eval="[(6,0,[
-                    ref('base.mx'),
-                ])]"/>
-        <field name="supported_currency_ids"
-               eval="[(6,0,[
-                    ref('base.MXN'),
-                ])]"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="image" type="base64" file="payment/static/img/bbva-bancomer.png"/>
     </record>
 
 </odoo>

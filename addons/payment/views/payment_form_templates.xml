@@ -39,7 +39,9 @@
                     and len(payment_methods_sudo) == 1
                     and payment_methods_sudo[:1].id"
         />
-        <t t-set="collapse_payment_methods" t-value="tokens_sudo and allow_token_selection"/>
+        <t t-set="collapse_payment_methods"
+           t-value="tokens_sudo and allow_token_selection and payment_methods_sudo"
+        />
         <t t-set="display_submit_button"
            t-value="True if display_submit_button is None else display_submit_button"
         />
@@ -86,7 +88,8 @@
                     </ul>
                 </div>
                 <!-- === Payment methods === -->
-                <div id="o_payment_methods"
+                <div t-if="payment_methods_sudo"
+                     id="o_payment_methods"
                      t-att-class="'collapse' if collapse_payment_methods else ''"
                 >
                     <!-- === Header === -->
