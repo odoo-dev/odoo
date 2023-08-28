@@ -13,8 +13,8 @@
                    ref('payment.payment_method_bancontact'),
                    ref('payment.payment_method_belfius'),
                    ref('payment.payment_method_bizum'),
-                   ref('payment.payment_method_kbc_cbc'),
-                   ref('payment.payment_method_klarna'),
+                   ref('payment.payment_method_klarna_paynow'),
+                   ref('payment.payment_method_klarna_pay_over_time'),
                    ref('payment.payment_method_masterpass'),
                    ref('payment.payment_method_paypal'),
                    ref('payment.payment_method_sofort'),
@@ -22,9 +22,9 @@
                    ref('payment.payment_method_axis'),
                    ref('payment.payment_method_eps'),
                    ref('payment.payment_method_paypal'),
-                   ref('payment.payment_method_pay_safe_card'),
                    ref('payment.payment_method_sofort'),
                    ref('payment.payment_method_paylib'),
+                   ref('payment.payment_method_p24'),
                ])]"/>
         <field name="code">ogone</field>
         <field name="redirect_form_view_id" ref="redirect_form"/>

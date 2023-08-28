@@ -15,7 +15,6 @@
                    ref('payment.payment_method_netbanking'),
                    ref('payment.payment_method_emi'),
                    ref('payment.payment_method_upi'),
-                   ref('payment.payment_method_wallets'),
                ])]"/>
         <field name="code">payumoney</field>
         <field name="redirect_form_view_id" ref="redirect_form"/>

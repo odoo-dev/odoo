@@ -15,6 +15,7 @@
             <input type="hidden" name="furl" t-att-value="return_url"/>
             <input type="hidden" name="service_provider" value="payu_paisa"/>
             <input type="hidden" name="hash" t-att-value="hash"/>
+            <input type="hidden" name="enforce_paymethod" t-att-value="enforce_paymethod"/>
         </form>
     </template>
 

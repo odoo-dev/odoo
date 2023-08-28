@@ -36,3 +36,7 @@ PAYMENT_STATUS_MAPPING = {
     'cancel': ['cancelled'],
     'error': ['failed'],
 }
+
+PAYMENT_METHODS_MAPPING = {
+    'bank_transfer': 'banktransfer',
+}

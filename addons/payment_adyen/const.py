@@ -30,7 +30,6 @@ PAYMENT_METHODS_MAPPING = {
     'bacs_direct_debit': 'directdebit_GB',
     'bancontact_card': 'bcmc',
     'bancontact': 'bcmc_mobile',
-    'boleto_bancario': 'boletobancario',
     'gopay': 'gopay_wallet',
     'becs_direct_debit': 'au_becs_debit',
     'afterpay': 'afterpaytouch',

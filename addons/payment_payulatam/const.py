@@ -13,19 +13,10 @@ SUPPORTED_CURRENCIES = [
     'USD'
 ]
 
-# Mapping of payment method codes to Ogone codes.
+# Mapping of payment method codes to PayU Latam codes.
 PAYMENT_METHODS_MAPPING = {
-    'pagofacil': 'PAGOFACIL',
     'bank_reference': 'BANK_REFERENCED',
-    'boleto_bancario': 'BOLETO_BANCARIO',
     'pix': 'PIX',
-    'red_compra': 'TRANSBANK_DEBIT',
-    'pse': 'PSE',
-    'efecty': 'EFECTY',
-    'su_red': 'OTHERS_CASH',
-    'oxxo': 'OXXO',
-    'klap': 'MULTICAJA',
-    'pagoefectivo': 'PAGOEFECTIVO',
-    'rapipago': 'RAPIPAGO',
-    'spei': 'SPEI'
+    'card': 'VISA,VISA_DEBIT,MASTERCARD,MASTERCARD_DEBIT,AMEX,ARGENCARD,CABAL,CENCOSUD,DINERS,ELO,NARANJA,SHOPPING,HIPERCARD,TRANSBANK_DEBIT,CODENSA',
+    'bank_transfer': 'ITAU,PSE,SPEI',
 }
