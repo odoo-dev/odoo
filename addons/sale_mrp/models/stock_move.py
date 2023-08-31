@@ -21,7 +21,12 @@ class StockMoveLine(models.Model):
     def _compute_sale_price(self):
         kit_lines = self.filtered(lambda move_line: move_line.move_id.bom_line_id.bom_id.type == 'phantom')
         for move_line in kit_lines:
-            unit_price = move_line.product_id.list_price
+            bom_id = move_line.move_id.bom_line_id.bom_id
+            product_id = bom_id.product_id or bom_id.product_tmpl_id.product_variant_id
+            bom_product_price = product_id._compute_bom_price(bom_id)
+            global_discount = move_line.move_id.sale_line_id.get_global_discount()
+            sale_unit_price = move_line.move_id.sale_line_id.price_reduce_taxinc - global_discount
+            unit_price = sale_unit_price * (move_line.product_id.standard_price / bom_product_price)
             qty = move_line.product_uom_id._compute_quantity(move_line.quantity, move_line.product_id.uom_id)
             move_line.sale_price = unit_price * qty
         super(StockMoveLine, self - kit_lines)._compute_sale_price()
