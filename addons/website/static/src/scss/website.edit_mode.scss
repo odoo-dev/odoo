@@ -211,6 +211,11 @@ table.editorbar-panel {
     }
 }
 
+// Prevent Instagram block to open Instagram in edit mode.
+.editor_enable .s_instagram_page iframe {
+    pointer-events: none;
+}
+
 // s_countdown preview classes
 body.editor_enable {
     .s_countdown {
