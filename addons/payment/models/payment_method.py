@@ -15,10 +15,10 @@ class PaymentMethod(models.Model):
     )
     parent_id = fields.Many2one(
         string="Parent", help="The parent payment method", comodel_name='payment.method'
-    )  # TODO ANV rename field
-    child_payment_method_ids = fields.One2many(
-        string="Child Payment Methods",
-        help="TODO",
+    )
+    brand_ids = fields.One2many(
+        string="Brands",
+        help="The brands of the payment methods that will be displayed on the payment form.",
         comodel_name='payment.method',
         inverse_name='parent_id',
     )
@@ -40,7 +40,7 @@ class PaymentMethod(models.Model):
         store=True,
         max_width=45,
         max_height=30,
-    )  # TODO see if still necessary; if ratio is still correct
+    )
 
     # TODO
     supported_country_ids = fields.Many2many(
