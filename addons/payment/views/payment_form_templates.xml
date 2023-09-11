@@ -175,7 +175,7 @@
                                             + (' d-none' if not allow_token_selection else '')"
                                data-payment-option-type="token"
                                t-att-data-payment-option-id="token_sudo.id"
-                               t-att-data-provider-code="token_sudo.provider_code"
+                               t-att-data-provider-code="token_sudo.provider_id._get_code()"
                                t-att-data-provider-id="token_sudo.provider_id.id"
                         />
                         <div class="d-flex align-items-center flex-wrap gap-2">
@@ -271,7 +271,7 @@
                            t-att-data-payment-option-id="pm_sudo.id"
                            t-att-data-payment-method-code="pm_sudo.code"
                            t-att-data-provider-id="provider_sudo.id"
-                           t-att-data-provider-code="provider_sudo.code"
+                           t-att-data-provider-code="provider_sudo._get_code()"
                            t-att-data-provider-state="provider_sudo.state"
                     />
                     <div class="d-flex gap-2 flex-grow-1 me-auto">
