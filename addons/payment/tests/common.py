@@ -90,6 +90,7 @@ class PaymentCommon(BaseCommon):
         cls.provider = cls.dummy_provider
         cls.payment_methods = cls.provider.payment_method_ids
         cls.payment_method_id = cls.provider.payment_method_ids[:1].id
+        cls.payment_method_code = cls.provider.payment_method_ids[:1].code
         cls.amount = 1111.11
         cls.company = cls.env.company
         cls.company_id = cls.company.id
