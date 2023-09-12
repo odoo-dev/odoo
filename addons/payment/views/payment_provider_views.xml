@@ -105,9 +105,8 @@
                             <field name="payment_method_ids"
                                    domain="[('is_primary', '=', True)]"
                                    context="{'active_test': False}"
-                                   options="{'no_create': True, 'no_edit': True}"
-                            >
-                                <tree>
+                            > <!-- TODO overwrite write to active if install key not in context -->
+                                <tree create="False" edit="False">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                 </tree>
