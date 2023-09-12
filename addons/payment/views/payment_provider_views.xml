@@ -108,7 +108,7 @@
                                    options="{'no_create': True, 'no_edit': True}"
                             >
                                 <tree>
-                                    <field name="sequence" widget="handle"/>y
+                                    <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                 </tree>
                             </field>
