@@ -103,7 +103,7 @@
                         </page>
                         <page string="Payment Methods">
                             <field name="payment_method_ids"
-                                   domain="[('parent_id', '=', False)]"
+                                   domain="[('is_primary', '=', True)]"
                                    options="{'no_create': True, 'no_edit': True}"
                             >
                                 <tree>

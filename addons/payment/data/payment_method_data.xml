@@ -4,7 +4,7 @@
     <!-- TODO same sequence for almost all PMs -->
     <!-- TODO same xmlid as the code -->
 
-    <!-- === MAIN PAYMENT METHODS === -->
+    <!-- === PRIMARY PAYMENT METHODS === -->
 
     <record id="payment_method_demo" model="payment.method">
         <field name="sequence">10</field>
@@ -3715,7 +3715,7 @@
         <field name="sequence">20</field>
         <field name="name">VISA</field>
         <field name="code">visa</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/visa.png"/>
     </record>
 
@@ -3723,7 +3723,7 @@
         <field name="sequence">30</field>
         <field name="name">MasterCard</field>
         <field name="code">mastercard</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
     </record>
 
@@ -3731,7 +3731,7 @@
         <field name="sequence">40</field>
         <field name="name">American Express</field>
         <field name="code">amex</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/american_express.png"/>
     </record>
 
@@ -3739,7 +3739,7 @@
         <field name="sequence">50</field>
         <field name="name">Discover</field>
         <field name="code">discover</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/discover.png"/>
     </record>
 
@@ -3747,7 +3747,7 @@
         <field name="sequence">60</field>
         <field name="name">Diners Club International</field>
         <field name="code">diners</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/diners_club_intl.png"/>
     </record>
 
@@ -3755,7 +3755,7 @@
         <field name="sequence">80</field>
         <field name="name">RuPay</field>
         <field name="code">rupay</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/rupay.png"/>
     </record>
 
@@ -3763,7 +3763,7 @@
         <field name="sequence">100</field>
         <field name="name">JCB</field>
         <field name="code">jcb</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/jcb.png"/>
     </record>
 
@@ -3771,7 +3771,7 @@
         <field name="sequence">110</field>
         <field name="name">Maestro</field>
         <field name="code">maestro</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/maestro.png"/>
     </record>
 
@@ -3779,7 +3779,7 @@
         <field name="sequence">120</field>
         <field name="name">Cirrus</field>
         <field name="code">cirrus</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/cirrus.png"/>
     </record>
 
@@ -3787,7 +3787,7 @@
         <field name="sequence">130</field>
         <field name="name">UnionPay</field>
         <field name="code">unionpay</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/unionpay.png"/>
     </record>
 
@@ -3795,7 +3795,7 @@
         <field name="sequence">50</field>
         <field name="name">Carnet</field>
         <field name="code">carnet</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/discover.png"/>
     </record>
 
@@ -3803,7 +3803,7 @@
         <field name="sequence">300</field>
         <field name="name">Cartes Bancaires</field>
         <field name="code">cartes_bancaires</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/paypal.png"/>
     </record>
 
@@ -3811,7 +3811,7 @@
         <field name="sequence">620</field>
         <field name="name">Elo</field>
         <field name="code">elo</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
     </record>
 
@@ -3819,7 +3819,7 @@
         <field name="sequence">630</field>
         <field name="name">Hipercard</field>
         <field name="code">hipercard</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
     </record>
 
@@ -3827,7 +3827,7 @@
         <field name="sequence">640</field>
         <field name="name">Dankort</field>
         <field name="code">dankort</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
     </record>
 
@@ -3835,7 +3835,7 @@
         <field name="sequence">600</field>
         <field name="name">Meeza</field>
         <field name="code">meeza</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3843,7 +3843,7 @@
         <field name="sequence">600</field>
         <field name="name">NAPS</field>
         <field name="code">naps</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3851,7 +3851,7 @@
         <field name="sequence">600</field>
         <field name="name">OmanNet</field>
         <field name="code">omannet</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3859,7 +3859,7 @@
         <field name="sequence">600</field>
         <field name="name">Argencard</field>
         <field name="code">argencard</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3867,7 +3867,7 @@
         <field name="sequence">600</field>
         <field name="name">Cabal</field>
         <field name="code">cabal</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3875,7 +3875,7 @@
         <field name="sequence">600</field>
         <field name="name">Caixa</field>
         <field name="code">caixa</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3883,7 +3883,7 @@
         <field name="sequence">600</field>
         <field name="name">Ceconsund</field>
         <field name="code">ceconsund</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3891,7 +3891,7 @@
         <field name="sequence">600</field>
         <field name="name">CMR</field>
         <field name="code">cmr</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3899,7 +3899,7 @@
         <field name="sequence">600</field>
         <field name="name">Cordial</field>
         <field name="code">cordial</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3907,7 +3907,7 @@
         <field name="sequence">600</field>
         <field name="name">Cordobesa</field>
         <field name="code">cordobesa</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3915,7 +3915,7 @@
         <field name="sequence">600</field>
         <field name="name">Codensa</field>
         <field name="code">codensa</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/codensa_easy_credit.png"/>
     </record>
 
@@ -3923,7 +3923,7 @@
         <field name="sequence">600</field>
         <field name="name">Lider</field>
         <field name="code">lider</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3931,7 +3931,7 @@
         <field name="sequence">600</field>
         <field name="name">Magna</field>
         <field name="code">magna</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3941,7 +3941,7 @@
         <field name="sequence">600</field>
         <field name="name">Tarjeta MercadoPago</field>
         <field name="code">mercadopagocard</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3949,7 +3949,7 @@
         <field name="sequence">600</field>
         <field name="name">Mercado Livre</field>
         <field name="code">mercado_livre</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3957,7 +3957,7 @@
         <field name="sequence">600</field>
         <field name="name">Naranja</field>
         <field name="code">naranja</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3965,7 +3965,7 @@
         <field name="sequence">600</field>
         <field name="name">Nativa</field>
         <field name="code">nativa</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3973,7 +3973,7 @@
         <field name="sequence">600</field>
         <field name="name">Oca</field>
         <field name="code">oca</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3981,7 +3981,7 @@
         <field name="sequence">600</field>
         <field name="name">Presto</field>
         <field name="code">presto</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3989,7 +3989,7 @@
         <field name="sequence">600</field>
         <field name="name">Shopping Card</field>
         <field name="code">shopping</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -3997,7 +3997,7 @@
         <field name="sequence">600</field>
         <field name="name">Credit Payment</field>
         <field name="code">credit</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -4005,7 +4005,7 @@
         <field name="sequence">600</field>
         <field name="name">Cencosud</field>
         <field name="code">cencosud</field>
-        <field name="parent_id" eval="ref('payment.payment_method_card')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -4013,7 +4013,7 @@
         <field name="sequence">600</field>
         <field name="name">Banco de Bogota</field>
         <field name="code">banco_de_bogota</field>
-        <field name="parent_id" eval="ref('payment.payment_method_bank_reference')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -4021,7 +4021,7 @@
         <field name="sequence">600</field>
         <field name="name">Bancolombia</field>
         <field name="code">Bancolombia</field>
-        <field name="parent_id" eval="ref('payment.payment_method_bank_reference')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 
@@ -4029,7 +4029,7 @@
         <field name="sequence">600</field>
         <field name="name">Davivienda</field>
         <field name="code">davivienda</field>
-        <field name="parent_id" eval="ref('payment.payment_method_bank_reference')"/>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="image" type="base64" file="payment/static/img/sepa.png"/>
     </record>
 

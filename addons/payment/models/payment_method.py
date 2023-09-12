@@ -15,13 +15,19 @@ class PaymentMethod(models.Model):
     )
     parent_id = fields.Many2one(
         string="Parent", help="The parent payment method", comodel_name='payment.method'
+    primary_payment_method_id = fields.Many2one(
+        string="Primary Payment Method",
+        help="The primary payment method of the current payment method, if the latter is a brand."
+             "\nFor example, \"Card\" is the primary payment method of the card brand \"VISA\".",
+        comodel_name='payment.method',
     )
     brand_ids = fields.One2many(
         string="Brands",
         help="The brands of the payment methods that will be displayed on the payment form.",
         comodel_name='payment.method',
-        inverse_name='parent_id',
+        inverse_name='primary_payment_method_id',
     )
+    is_primary = fields.Boolean(string="Is Primary Payment Method", compute='_compute_is_primary')
     provider_ids = fields.Many2many(
         string="Providers",
         help="The list of providers supporting this payment method.",
@@ -43,23 +49,15 @@ class PaymentMethod(models.Model):
     )
 
     # TODO
-    support_tokenization = fields.Boolean(
-        string="Tokenization Supported",
-        # compute='_compute_feature_support_fields',
-    )
+    support_tokenization = fields.Boolean(string="Tokenization Supported")
     support_manual_capture = fields.Selection(
         string="Manual Capture Supported",
         selection=[('full_only', "Full Only"), ('partial', "Partial")],
-        # compute='_compute_feature_support_fields',
     )
-    support_express_checkout = fields.Boolean(
-        string="Express Checkout Supported",
-        # compute='_compute_feature_support_fields'
-    )
+    support_express_checkout = fields.Boolean(string="Express Checkout Supported")
     support_refund = fields.Selection(
         string="Type of Refund Supported",
         selection=[('full_only', "Full Only"), ('partial', "Partial")],
-        # compute='_compute_feature_support_fields',
     )
     supported_country_ids = fields.Many2many(
         string="Supported Countries", comodel_name='res.country'
@@ -67,6 +65,12 @@ class PaymentMethod(models.Model):
     supported_currency_ids = fields.Many2many(
         string="Supported Currencies", comodel_name='res.currency'
     )
+
+    #=== COMPUTE METHODS ===#
+
+    def _compute_is_primary(self):
+        for payment_method in self:
+            payment_method.is_primary = not payment_method.primary_payment_method_id
 
     # === BUSINESS METHODS === #
 
@@ -83,7 +87,7 @@ class PaymentMethod(models.Model):
         :return: The compatible payment methods.
         :rtype: payment.method
         """
-        return self.search([('provider_ids', 'in', provider_ids), ('parent_id', '=', False)])
+        return self.search([('provider_ids', 'in', provider_ids), ('is_primary', '=', True)])
 
     def _get_from_code(self, code, mapping=None):
         """ Get the payment method corresponding to the given provider-specific code.
