@@ -43,12 +43,6 @@ class PaymentMethod(models.Model):
     )
 
     # TODO
-    supported_country_ids = fields.Many2many(
-        string="Supported Countries", comodel_name='res.country'
-    )
-    supported_currency_ids = fields.Many2many(
-        string="Supported Currencies", comodel_name='res.currency'
-    )
     support_tokenization = fields.Boolean(
         string="Tokenization Supported",
         # compute='_compute_feature_support_fields',
@@ -66,6 +60,12 @@ class PaymentMethod(models.Model):
         string="Type of Refund Supported",
         selection=[('full_only', "Full Only"), ('partial', "Partial")],
         # compute='_compute_feature_support_fields',
+    )
+    supported_country_ids = fields.Many2many(
+        string="Supported Countries", comodel_name='res.country'
+    )
+    supported_currency_ids = fields.Many2many(
+        string="Supported Currencies", comodel_name='res.currency'
     )
 
     # === BUSINESS METHODS === #
