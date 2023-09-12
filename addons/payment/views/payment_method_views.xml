@@ -12,7 +12,8 @@
                         <h1><field name="name" placeholder="Name"/></h1>
                     </div>
                     <group>
-                        <field name="primary_payment_method_id"/>
+                        <field name="is_primary" invisible="True"/>
+                        <field name="primary_payment_method_id" invisible="is_primary"/>
                     </group>
                     <notebook>
                         <page string="Providers list" name="providers">
@@ -31,10 +32,12 @@
         <field name="name">payment.method.tree</field>
         <field name="model">payment.method</field>
         <field name="arch" type="xml">
-            <tree>
-                <field name="sequence" widget="handle"/>
+            <tree decoration-muted="not active">
+<!--                <field name="sequence" widget="handle"/>TODO-->
                 <field name="name"/>
-                <field name="brand_ids" widget="many2many_tags"/>
+                <field name="supported_country_ids" optional="hidden" widget="many2many_tags"/>
+                <field name="supported_currency_ids" optional="hidden" widget="many2many_tags"/>
+                <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -45,10 +48,6 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name" string="Name"/>
-                <filter string="Parent only (to rename)"
-                        name="filter_parent"
-                        domain="[('is_primary', '=', True)]"
-                />
             </search>
         </field>
     </record>
@@ -57,7 +56,8 @@
         <field name="name">Payment Methods</field>
         <field name="res_model">payment.method</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_filter_parent': 1}</field>
+        <field name="domain">[('is_primary', '=', True)]</field>
+        <field name="context">{'active_test': False}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a payment method

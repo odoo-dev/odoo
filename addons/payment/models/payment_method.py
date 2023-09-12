@@ -1,20 +1,18 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import _, fields, models
 
 
 class PaymentMethod(models.Model):
     _name = 'payment.method'
     _description = "Payment Method"
-    _order = 'sequence, name'
+    _order = 'active desc, sequence, name'
 
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(string="Sequence", default=1)
     code = fields.Char(
         string="Code", help="The technical code of this payment method.", required=True
     )
-    parent_id = fields.Many2one(
-        string="Parent", help="The parent payment method", comodel_name='payment.method'
     primary_payment_method_id = fields.Many2one(
         string="Primary Payment Method",
         help="The primary payment method of the current payment method, if the latter is a brand."
@@ -27,12 +25,17 @@ class PaymentMethod(models.Model):
         comodel_name='payment.method',
         inverse_name='primary_payment_method_id',
     )
-    is_primary = fields.Boolean(string="Is Primary Payment Method", compute='_compute_is_primary')
+    is_primary = fields.Boolean(
+        string="Is Primary Payment Method",
+        compute='_compute_is_primary',
+        search='_search_is_primary',
+    )
     provider_ids = fields.Many2many(
         string="Providers",
         help="The list of providers supporting this payment method.",
         comodel_name='payment.provider',
     )
+    active = fields.Boolean(string="Active", default=True)
     image = fields.Image(
         string="Image",
         help="The base image used for this payment method; in a 64x64 px format.",
@@ -71,6 +74,14 @@ class PaymentMethod(models.Model):
     def _compute_is_primary(self):
         for payment_method in self:
             payment_method.is_primary = not payment_method.primary_payment_method_id
+
+    def _search_is_primary(self, operator, value):
+        if operator == '=' and value is True:
+            return [('primary_payment_method_id', '=', False)]
+        elif operator == '=' and value is False:
+            return [('primary_payment_method_id', '!=', False)]
+        else:
+            raise NotImplementedError(_("Operation not supported."))
 
     # === BUSINESS METHODS === #
 
