@@ -19,8 +19,8 @@
                         <page string="Brands" name="brands">
                             <field name="brand_ids"/>
                         </page>
-                        <page string="Supported By" name="providers">
-                            <field name="provider_ids">
+                        <page string="Supported By" name="providers" groups="base.group_no_one">
+                            <field name="provider_ids"> <!-- TODO warning onchange -->
                                 <tree decoration-muted="state == 'disabled'">
                                     <field name="name"/>
                                     <field name="state"/>
@@ -38,7 +38,7 @@
         <field name="model">payment.method</field>
         <field name="arch" type="xml">
             <tree decoration-muted="not active">
-<!--                <field name="sequence" widget="handle"/>TODO-->
+                <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="supported_country_ids" optional="hidden" widget="many2many_tags"/>
                 <field name="supported_currency_ids" optional="hidden" widget="many2many_tags"/>
