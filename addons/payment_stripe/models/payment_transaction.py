@@ -140,7 +140,8 @@ class PaymentTransaction(models.Model):
         :return: The Stripe-formatted payload for the PaymentIntent request.
         :rtype: dict
         """
-        payment_method_type = self.payment_method_id.parent_id.code or self.payment_method_code
+        ppm_code = self.payment_method_id.primary_payment_method_id.code
+        payment_method_type = ppm_code or self.payment_method_code
         payment_intent_payload = {
             'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
             'currency': self.currency_id.name.lower(),
