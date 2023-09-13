@@ -2142,6 +2142,7 @@
         <!-- Parameters description:
             - submit_button_label: The label of the submit button; default: 'Pay Now'.
         -->
+        <t t-set="submit_button_label" t-value="submit_button_label or 'Pay Now'"/>
         <div name="o_checkbox_container" class="form-check mt-2 o_accept_tc_button"/>
         <div class="float-start mt-2">
             <a role="button" href="/shop/cart" class="btn btn-secondary">
@@ -2149,9 +2150,7 @@
             </a>
         </div>
         <div class="float-end mt-2">
-            <t t-call="payment.submit_button">
-                <t t-set="label" t-value="submit_button_label or 'Pay Now'"/>
-            </t>
+            <t t-call="payment.submit_button"/>
         </div>
     </template>
 
