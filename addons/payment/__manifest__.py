@@ -19,10 +19,10 @@
         'views/portal_templates.xml',
 
         # Model views.
-        'views/payment_provider_views.xml',
         'views/payment_method_views.xml',
+        'views/payment_provider_views.xml',  # Depends on `action_payment_method`.
         'views/payment_transaction_views.xml',
-        'views/payment_token_views.xml',  # Depends on `action_payment_transaction_linked_to_token`
+        'views/payment_token_views.xml',  # Depends on `action_payment_transaction_linked_to_token`.
         'views/res_partner_views.xml',
 
         # Security.
