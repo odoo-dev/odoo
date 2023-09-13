@@ -65,11 +65,11 @@
         <menuitem id="menu_ecommerce_payment_providers"
             name="Payment Providers"
             action="payment.action_payment_provider"/>
-        <menuitem id="menu_ecommerce_payment_tokens"
-            action="payment.action_payment_token"
-            groups="base.group_no_one"/>
         <menuitem id="menu_ecommerce_payment_methods"
             action="payment.action_payment_method"
+            name="Payment Methods"/>
+        <menuitem id="menu_ecommerce_payment_tokens"
+            action="payment.action_payment_token"
             groups="base.group_no_one"/>
         <menuitem id="menu_ecommerce_payment_transactions"
             action="payment.action_payment_transaction"
