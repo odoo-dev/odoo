@@ -49,7 +49,8 @@ class PaymentProvider(models.Model):
         help="The main currency of the company, used to display monetary fields.",
     )
     payment_method_ids = fields.Many2many(
-        string="Supported Payment Methods", comodel_name='payment.method')
+        string="Supported Payment Methods", comodel_name='payment.method'
+    )
     allow_tokenization = fields.Boolean(
         string="Allow Saving Payment Methods",
         help="This controls whether customers can save their payment methods as payment tokens.\n"

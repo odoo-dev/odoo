@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class PaymentMethod(models.Model):
@@ -82,6 +82,54 @@ class PaymentMethod(models.Model):
             return [('primary_payment_method_id', '!=', False)]
         else:
             raise NotImplementedError(_("Operation not supported."))
+
+    #=== ONCHANGE METHODS ===#
+
+    @api.onchange('provider_ids')
+    def _onchange_provider_ids_warn_before_disabling_tokens(self):
+        """ Display a warning about the consequences of detaching a payment method from a provider.
+
+        Let the user know that tokens related to a provider get archived if it is detached from the
+        payment methods associated with those tokens.
+
+        :return: A client action with the warning message, if any.
+        :rtype: dict
+        """
+        detached_providers = self._origin.provider_ids.filtered(
+            lambda p: p.id not in self.provider_ids.ids
+        )  # Cannot use recordset difference operation because self.provider_ids is a set of NewIds.
+        if detached_providers:
+            related_tokens = self.env['payment.token'].search([
+                ('payment_method_id', 'in', (self._origin + self._origin.brand_ids).ids),
+                ('provider_id', 'in', detached_providers.ids),
+            ])
+            if related_tokens:
+                return {
+                    'warning': {
+                        'title': _("Warning"),
+                        'message': _(
+                            "This action will also archive %s tokens that are registered with this "
+                            "payment method. Archiving tokens is irreversible.", len(related_tokens)
+                        )
+                    }
+                }
+
+    #=== CRUD METHODS ===#
+
+    def write(self, values):
+        # Handle payment methods being detached from providers.
+        if 'provider_ids' in values:
+            pass
+            # state_changed_providers = self.filtered(
+            #     lambda p: p.state not in ('disabled', values['state'])
+            # )  # Don't handle providers being enabled or whose state is not updated.
+            # state_changed_providers._handle_state_change()
+            # self.env['payment.token'].search([('provider_id', 'in', self.ids)]).write(
+            #     {'active': False})
+
+        result = super().write(values)
+
+        return result
 
     # === BUSINESS METHODS === #
 

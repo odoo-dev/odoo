@@ -77,7 +77,11 @@
                         <page string="Configuration" name="configuration">
                             <group name="provider_config">
                                 <group string="Payment Form" name="payment_form"> <!-- TODO change group name -->
-                                    <field name="payment_method_ids" options="{'no_create': True, 'no_edit': True}" domain="[('is_primary', '=', True)]" widget="many2many_tags"/> <!-- TODO reorder attrs + check if need more options -->
+                                    <field name="payment_method_ids"
+                                           domain="[('is_primary', '=', True)]"
+                                           readonly="True"
+                                           widget="many2many_tags"
+                                    />
                                     <div colspan="2">
                                         <a type="action"
                                            name="%(action_payment_method)d"
@@ -88,13 +92,6 @@
                                             Enable Payment Methods
                                         </a>
                                     </div>
-                                    <button type="action"
-                                            name="%(action_payment_method)d"
-                                            string="Enable Payment Methods"
-                                            class="oe_link"
-                                            icon="fa-arrow-right"
-                                            colspan="2"
-                                    />
                                     <field name="allow_tokenization" invisible="not support_tokenization or not show_allow_tokenization"/>
                                     <field name="capture_manually" invisible="not support_manual_capture"/>
                                     <field name="allow_express_checkout" invisible="not support_express_checkout or not show_allow_express_checkout"/>

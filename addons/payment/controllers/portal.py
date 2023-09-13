@@ -13,7 +13,7 @@ from odoo.addons.payment.controllers.post_processing import PaymentPostProcessin
 from odoo.addons.portal.controllers import portal
 
 
-class PaymentPortal(portal.CustomerPortal):  # TODO split in two
+class PaymentPortal(portal.CustomerPortal):
 
     """ This controller contains the foundations for online payments through the portal.
 
