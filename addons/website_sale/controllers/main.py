@@ -156,7 +156,6 @@ class Website(main.Website):
             'position': request.website.currency_id.position,
         }
 
-# TODO split controllers -> payment needed here to call _get_extra_payment_form_values
 class WebsiteSale(payment_portal.PaymentPortal):
     _express_checkout_route = '/shop/express_checkout'
     _express_checkout_shipping_route = '/shop/express/shipping_address_change'
@@ -179,7 +178,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         order = post.get('order') or request.env['website'].get_current_website().shop_default_sort
         return 'is_published desc, %s, id desc' % order
 
-    def _get_search_domain(self, search, category, attrib_values, search_in_description=True):
+    def _get_shop_domain(self, search, category, attrib_values, search_in_description=True):
         domains = [request.website.sale_product_domain()]
         if search:
             for srch in search.split(" "):
@@ -366,7 +365,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if filter_by_price_enabled:
             # TODO Find an alternative way to obtain the domain through the search metadata.
             Product = request.env['product.template'].with_context(bin_size=True)
-            domain = self._get_search_domain(search, category, attrib_values)
+            domain = self._get_shop_domain(search, category, attrib_values)
 
             # This is ~4 times more efficient than a search for the cheapest and most expensive products
             query = Product._where_calc(domain)
