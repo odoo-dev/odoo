@@ -62,7 +62,10 @@ class PaymentCommon(BaseCommon):
         })
 
         # Activate pm
-        cls.env.ref('payment.payment_method_unknown').write({'active': True})
+        cls.env.ref('payment.payment_method_unknown').write({
+            'active': True,
+            'support_tokenization': True,
+        })
         # Create a dummy provider to allow basic tests without any specific provider implementation
         arch = """
         <form action="dummy" method="post">
