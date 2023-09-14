@@ -84,7 +84,7 @@
                                     />
                                     <div colspan="2">
                                         <a type="object"
-                                           name="action_show_payment_methods"
+                                           name="action_view_payment_methods"
                                            class="btn btn-link"
                                            role="button"
                                         >

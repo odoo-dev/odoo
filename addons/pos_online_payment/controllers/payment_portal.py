@@ -131,6 +131,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids,
             partner_sudo.id,
+            currency_id=currency_id,
         )  # In sudo mode to read the fields of providers.
         if logged_in:
             tokens_sudo = request.env['payment.token']._get_available_tokens(

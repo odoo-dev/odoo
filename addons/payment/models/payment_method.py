@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, Command
 from odoo.osv import expression
 
 
@@ -100,11 +100,10 @@ class PaymentMethod(models.Model):
             lambda p: p.id not in self.provider_ids.ids
         )  # Cannot use recordset difference operation because self.provider_ids is a set of NewIds.
         if detached_providers:
-            related_tokens = self.env['payment.token'].search([
+            related_tokens = self.env['payment.token'].with_context(active_test=True).search([
                 ('payment_method_id', 'in', (self._origin + self._origin.brand_ids).ids),
                 ('provider_id', 'in', detached_providers.ids),
-                ('active', '=', 'True'),
-            ])
+            ])  # Fix `active_test` in the context forwarded by the view.
             if related_tokens:
                 return {
                     'warning': {
@@ -116,16 +115,24 @@ class PaymentMethod(models.Model):
                     }
                 }
 
+    @api.onchange('provider_ids')
+    def _onchange_provider_ids_warn_before_attaching_payment_method(self):
+        """ Display a warning before attaching a payment method to a provider.
+
+        :return: A client action with the warning message, if any.
+        :rtype: dict
+        """
         attached_providers = self.provider_ids.filtered(
-            lambda p: p.ids[0] not in self._origin.provider_ids.ids
+            lambda p: p.id.origin not in self._origin.provider_ids.ids
         )
         if attached_providers:
             return {
                 'warning': {
                     'title': _("Warning"),
                     'message': _(
-                        "Please make sure that %s is compatible with this payment method.",
-                        attached_providers[-1].name
+                        "Please make sure that %(payment_method)s is supported by %(provider)s.",
+                        payment_method=self.name,
+                        provider=', '.join(attached_providers.mapped('name'))
                     )
                 }
             }
@@ -135,70 +142,73 @@ class PaymentMethod(models.Model):
     def write(self, values):
         # Handle payment methods being detached from providers.
         if 'provider_ids' in values:
-            detached_providers = [rest[0] for op, *rest in values.get('provider_ids') if op == 3]
-            if detached_providers:
-                self.env['payment.token'].search([
-                    ('provider_id', 'in', detached_providers),
+            detached_provider_ids = [
+                vals[0] for command, *vals in values['provider_ids'] if command == Command.UNLINK
+            ]
+            if detached_provider_ids:
+                linked_tokens = self.env['payment.token'].with_context(active_test=True).search([
+                    ('provider_id', 'in', detached_provider_ids),
                     ('payment_method_id', 'in', (self + self.brand_ids).ids),
-                    ('active', '=', 'True'),
-                ]).write({'active': False})
-
-        result = super().write(values)
-
-        return result
+                ])  # Fix `active_test` in the context forwarded by the view.
+                linked_tokens.active = False
+        return super().write(values)
 
     # === BUSINESS METHODS === #
 
     def _get_compatible_payment_methods(
-            self, provider_ids, partner_id=False, currency_id=False, force_tokenization=False
+        self, provider_ids, partner_id, currency_id=None, force_tokenization=False,
+        is_express_checkout=False
     ):
-        """ Select and return the payment methods matching the compatibility criteria.
+        """ Search and return the payment methods matching the compatibility criteria.
 
         The compatibility criteria are that payment methods must: be supported by at least one of
-        the providers; be top-level payment methods (not a brand). If provided, the optional keyword
-        arguments further refine the criteria.
+        the providers; support the country of the partner if it exists; be primary payment methods
+        (not a brand). If provided, the optional keyword arguments further refine the criteria.
 
         :param list provider_ids: The list of providers by which the payment methods must be at
                                   least partially supported to be considered compatible, as a list
                                   of `payment.provider` ids.
         :param int partner_id: The partner making the payment, as a `res.partner` id.
         :param int currency_id: The payment currency, if known beforehand, as a `res.currency` id.
-        :param bool force_tokenization: Whether only payment methods allowing tokenization can be
+        :param bool force_tokenization: Whether only payment methods supporting tokenization can be
                                         matched.
+        :param bool is_express_checkout: Whether the payment is made through express checkout.
         :return: The compatible payment methods.
         :rtype: payment.method
         """
-        # Handle partner country.
+        # Compute the base domain for compatible payment methods.
         domain = [('provider_ids', 'in', provider_ids), ('is_primary', '=', True)]
+
+        # Handle the partner country; allow all countries if the list is empty.
         partner = self.env['res.partner'].browse(partner_id)
         if partner.country_id:  # The partner country must either not be set or be supported.
-            domain = expression.AND(
-                [
-                    domain, [
-                        '|',
-                        ('supported_country_ids', '=', False),
-                        ('supported_country_ids', 'in', [partner.country_id.id]),
-                    ]
+            domain = expression.AND([
+                domain, [
+                    '|',
+                    ('supported_country_ids', '=', False),
+                    ('supported_country_ids', 'in', [partner.country_id.id]),
                 ]
-            )
-        # Handle the available currencies (only if supported currencies list is not empty).
+            ])
+        # Handle the supported currencies; allow all currencies if the list is empty.
         if currency_id:
-            domain = expression.AND(
-                [
-                    domain, [
-                        '|',
-                        ('supported_currency_ids', '=', False),
-                        ('supported_currency_ids', 'in', [currency_id]),
-                    ]
+            domain = expression.AND([
+                domain, [
+                    '|',
+                    ('supported_currency_ids', '=', False),
+                    ('supported_currency_ids', 'in', [currency_id]),
                 ]
-            )
+            ])
 
         # Handle tokenization support requirements.
         if force_tokenization:
             domain = expression.AND([domain, [('support_tokenization', '=', True)]])
 
-        compatible_payment_methods = self.env['payment.method'].search(domain)
+        # Handle express checkout.
+        if is_express_checkout:
+            domain = expression.AND([domain, [('support_express_checkout', '=', True)]])
 
+        # Search the payment methods matching the compatibility criteria.
+        compatible_payment_methods = self.env['payment.method'].search(domain)
         return compatible_payment_methods
 
     def _get_from_code(self, code, mapping=None):

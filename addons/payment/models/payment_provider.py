@@ -416,6 +416,17 @@ class PaymentProvider(models.Model):
         else:
             raise UserError(_("You cannot publish a disabled provider."))
 
+    def action_view_payment_methods(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Payment Methods"),
+            'res_model': 'payment.method',
+            'view_mode': 'tree',
+            'domain': [('id', 'in', self.with_context(active_test=False).payment_method_ids.ids)],
+            'context': {'active_test': False},
+        }
+
     #=== BUSINESS METHODS ===#
 
     @api.model
@@ -423,7 +434,7 @@ class PaymentProvider(models.Model):
         self, company_id, partner_id, amount, currency_id=None, force_tokenization=False,
         is_express_checkout=False, is_validation=False, **kwargs
     ):
-        """ Select and return the providers matching the compatibility criteria.
+        """ Search and return the providers matching the compatibility criteria.
 
         The compatibility criteria are that providers must: not be disabled; be in the company that
         is provided; support the country of the partner if it exists; be compatible with the
@@ -451,7 +462,7 @@ class PaymentProvider(models.Model):
         if not self.env.user._is_internal():
             domain = expression.AND([domain, [('is_published', '=', True)]])
 
-        # Handle partner country.
+        # Handle the partner country; allow all countries if the list is empty.
         partner = self.env['res.partner'].browse(partner_id)
         if partner.country_id:  # The partner country must either not be set or be supported.
             domain = expression.AND([
@@ -477,7 +488,7 @@ class PaymentProvider(models.Model):
                 ]
             ])
 
-        # Handle the available currencies (only if supported currencies list is not empty).
+        # Handle the available currencies; allow all currencies if the list is empty.
         if currency:
             domain = expression.AND([
                 domain, [
@@ -495,6 +506,7 @@ class PaymentProvider(models.Model):
         if is_express_checkout:
             domain = expression.AND([domain, [('allow_express_checkout', '=', True)]])
 
+        # Search the providers matching the compatibility criteria.
         compatible_providers = self.env['payment.provider'].search(domain)
         return compatible_providers
 
@@ -644,14 +656,3 @@ class PaymentProvider(models.Model):
         """
         self.ensure_one()
         return self.code
-
-    def action_show_payment_methods(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Payment Methods'),
-            'view_mode': 'tree',
-            'res_model': 'payment.method',
-            'domain': [('id', 'in', self.with_context({'active_test': False}).payment_method_ids.ids)],
-            'context': {'active_test': False},
-        }

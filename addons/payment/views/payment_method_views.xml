@@ -7,16 +7,17 @@
         <field name="arch" type="xml">
             <form string="Payment Method">
                 <sheet>
+                    <field name="is_primary" invisible="True"/>
                     <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
                         <h1><field name="name" placeholder="Name"/></h1>
                     </div>
                     <group>
-                        <field name="is_primary" invisible="True"/>
+                        <field name="code" groups="base.group_no_one"/>
                         <field name="primary_payment_method_id" invisible="is_primary"/>
                     </group>
                     <notebook>
-                        <page string="Brands" name="brands">
+                        <page string="Brands" name="brands" invisible="not is_primary">
                             <field name="brand_ids"/>
                         </page>
                         <page string="Supported By" name="providers" groups="base.group_no_one">
