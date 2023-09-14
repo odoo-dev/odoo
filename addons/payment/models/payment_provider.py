@@ -644,3 +644,14 @@ class PaymentProvider(models.Model):
         """
         self.ensure_one()
         return self.code
+
+    def action_show_payment_methods(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Payment Methods'),
+            'view_mode': 'tree',
+            'res_model': 'payment.method',
+            'domain': [('id', 'in', self.with_context({'active_test': False}).payment_method_ids.ids)],
+            'context': {'active_test': False},
+        }

@@ -129,7 +129,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
         # Select all the payment methods and tokens that match the payment context.
         providers_sudo = self._get_allowed_providers_sudo(pos_order_sudo, partner_sudo.id, amount_to_pay)
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
-            providers_sudo.ids
+            providers_sudo.ids,
+            partner_sudo.id,
         )  # In sudo mode to read the fields of providers.
         if logged_in:
             tokens_sudo = request.env['payment.token']._get_available_tokens(

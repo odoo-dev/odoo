@@ -83,8 +83,8 @@
                                            widget="many2many_tags"
                                     />
                                     <div colspan="2">
-                                        <a type="action"
-                                           name="%(action_payment_method)d"
+                                        <a type="object"
+                                           name="action_show_payment_methods"
                                            class="btn btn-link"
                                            role="button"
                                         >
