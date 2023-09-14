@@ -21,7 +21,7 @@
                             <field name="brand_ids"/>
                         </page>
                         <page string="Supported By" name="providers" groups="base.group_no_one">
-                            <field name="provider_ids"> <!-- TODO warning onchange -->
+                            <field name="provider_ids">
                                 <tree decoration-muted="state == 'disabled'">
                                     <field name="name"/>
                                     <field name="state"/>

@@ -48,6 +48,7 @@ class TestWebsiteSaleCartAbandonedCommon(HttpCaseWithUserPortal):
             'product_id': product.id,
             'product_uom_qty': 1,
         }]]
+        cls.payment_method_id = cls.env.ref('payment.payment_method_unknown').id
         cls.so0before = cls.env['sale.order'].create({
             'partner_id': cls.customer.id,
             'website_id': cls.website0.id,
@@ -228,6 +229,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'reference': abandoned_sale_order.name,
             'amount': abandoned_sale_order.amount_total,
+            'payment_method_id': self.payment_method_id,
             'state': 'error',
             'currency_id': self.env.ref('base.EUR').id,
 
