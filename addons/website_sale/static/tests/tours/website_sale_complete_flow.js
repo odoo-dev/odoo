@@ -120,11 +120,11 @@
     },
     {
         content: "Select `Wire Transfer` payment method",
-        trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]',
+        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
     },
     {
         content: "Pay Now",
-        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]:checked',
+        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
         trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
     },
     {
@@ -257,11 +257,11 @@
     },
     {
         content: "Select `Wire Transfer` payment method",
-        trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]',
+        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
     },
     {
         content: "Pay Now",
-        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]:checked',
+        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
         trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
     },
     {
@@ -360,11 +360,11 @@
     },
     {
         content: "Select `Wire Transfer` payment method",
-        trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]',
+        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
     },
     {
         content: "Pay Now",
-        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="custom_wt"]:checked',
+        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
         trigger: 'button[name="o_payment_submit_button"]:visible',
     },
     {

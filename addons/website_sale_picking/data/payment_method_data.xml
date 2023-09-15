@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_method_pay_on_site" model="payment.method">
+        <field name="sequence">600</field>
+        <field name="name">Pay in store</field>
+        <field name="code">pay_on_site</field>
+        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund"></field>
+    </record>
+
+</odoo>

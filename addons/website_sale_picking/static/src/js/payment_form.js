@@ -14,16 +14,16 @@ publicWidget.registry.websiteSaleDelivery.include({
 
             this.warning = document.createElement('p');
             const boldMsg = document.createElement('b');
-            boldMsg.innerText = _t('No suitable payment option could be found.');
+            boldMsg.innerText = _t("No suitable payment method could be found.");
             this.warning.innerText = _t(
-                'If you believe that it is an error, please contact the website administrator.'
+                "If you believe that it is an error, please contact the website administrator."
             );
             boldMsg.classList.add('d-block');
             this.warning.prepend(boldMsg);
             this.warning.classList.add('alert-warning', 'p-3', 'm-1', 'd-none');
 
-            this.paymentMethodContainer = document.querySelector('#payment_method');
-            this.paymentMethodContainer.querySelector(
+            this.paymentMethodsContainer = document.querySelector('#payment_method');
+            this.paymentMethodsContainer.querySelector(
                 '#o_payment_form_options'
             ).append(this.warning);
         }
@@ -31,9 +31,9 @@ publicWidget.registry.websiteSaleDelivery.include({
     },
 
     /**
-     * Hides or shows a payment option.
-     * @param radio the radio element of the payment option.
-     * @param enabled whether to show or hide the payment option.
+     * Hide or show a payment option.
+     * @param radio - The radio element of the payment method.
+     * @param enabled - Whether the payment method should be shown.
      * @private
      */
     _setEnablePaymentOption(radio, enabled) {

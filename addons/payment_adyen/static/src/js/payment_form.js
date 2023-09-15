@@ -6,10 +6,6 @@ import paymentForm from '@payment/js/payment_form';
 
 paymentForm.include({
 
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
     adyenCheckout: undefined,
     adyenComponents: undefined,
 
