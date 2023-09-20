@@ -11,7 +11,7 @@
         <field name="name">Demo</field>
         <field name="code">demo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/maestro.png"/>
+        <field name="image" type="base64" file="payment/static/img/demo.png"/>
         <field name="support_tokenization">True</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -22,7 +22,7 @@
         <field name="name">Card</field>
         <field name="code">card</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/maestro.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">True</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -33,7 +33,7 @@
         <field name="name">Alipay+</field>
         <field name="code">alipay_plus</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/maestro.png"/>
+        <field name="image" type="base64" file="payment/static/img/alipay_plus.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -44,7 +44,7 @@
         <field name="name">Unknown</field>
         <field name="code">unknown</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/maestro.png"/>
+        <field name="image" type="base64" file="payment/static/img/unknown.png"/>
         <field name="support_tokenization">True</field>
         <field name="support_express_checkout">True</field>
         <field name="support_refund">partial</field>
@@ -288,7 +288,7 @@
         <field name="name">USSD by Flutterwave</field>
         <field name="code">ussd</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/flutterwave.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -300,7 +300,7 @@
         <field name="name">QR payment by Flutterwave</field>
         <field name="code">nqr</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/flutterwave.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -484,7 +484,7 @@
         <field name="name">Cetelem</field>
         <field name="code">cetelem</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/wechatpay.png"/>
+        <field name="image" type="base64" file="payment/static/img/cetelem.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -501,7 +501,7 @@
     </record>
 
     <record id="payment_method_alipay" model="payment.method">
-        <field name="name">Alipay+</field>
+        <field name="name">Alipay</field>
         <field name="code">alipay</field>
         <field name="active">False</field>
         <field name="image" type="base64" file="payment/static/img/alipay.png"/>
@@ -588,7 +588,7 @@
         <field name="name">BECS Direct Debit</field>
         <field name="code">becs_direct_debit</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/paypal.png"/>
+        <field name="image" type="base64" file="payment/static/img/becs_direct_debit.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -714,7 +714,7 @@
         <field name="name">eNETS</field>
         <field name="code">enets</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/paynow.png"/>
+        <field name="image" type="base64" file="payment/static/img/enets.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -777,7 +777,7 @@
         <field name="name">Tamilnad Mercantile Bank Limited</field>
         <field name="code">tmb</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/promptpay.png"/>
+        <field name="image" type="base64" file="payment/static/img/tmb.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -809,7 +809,7 @@
         <field name="name">Google Pay</field>
         <field name="code">googlepay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/google_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">True</field>
         <field name="support_refund">partial</field>
@@ -820,7 +820,7 @@
         <field name="name">Link</field>
         <field name="code">link</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/link.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">True</field>
         <field name="support_refund">partial</field>
@@ -831,7 +831,7 @@
         <field name="name">MobilePay</field>
         <field name="code">mobilepay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mobile_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -858,7 +858,7 @@
         <field name="name">Affirm</field>
         <field name="code">affirm</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/affirm.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -881,7 +881,7 @@
         <field name="name">AfterPay</field>
         <field name="code">afterpay_riverty</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/afterpay_riverty.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -906,7 +906,7 @@
         <field name="name">Afterpay</field>
         <field name="code">afterpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/afterpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -933,7 +933,7 @@
         <field name="name">Clearpay</field>
         <field name="code">clearpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/clearpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -958,7 +958,7 @@
         <field name="name">Zip</field>
         <field name="code">zip</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/zip.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -985,7 +985,7 @@
         <field name="name">Revolut Pay</field>
         <field name="code">revolut_pay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/revolut_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1006,7 +1006,7 @@
         <field name="name">UPI</field>
         <field name="code">upi</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/upi.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1027,7 +1027,7 @@
         <field name="name">GrabPay</field>
         <field name="code">grabpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/grabpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1050,7 +1050,7 @@
         <field name="name">Swish</field>
         <field name="code">swish</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/swish.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1071,7 +1071,7 @@
         <field name="name">Trustly</field>
         <field name="code">trustly</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/trustly.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1108,7 +1108,7 @@
         <field name="name">Twint</field>
         <field name="code">twint</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/twint.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1129,7 +1129,7 @@
         <field name="name">PaySafeCard</field>
         <field name="code">paysafecard</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paysafecard.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1226,7 +1226,7 @@
         <field name="name">AliPayHK</field>
         <field name="code">alipay_hk</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/alipay_hk.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1247,7 +1247,7 @@
         <field name="name">Vipps</field>
         <field name="code">vipps</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/vipps.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1268,7 +1268,7 @@
         <field name="name">MB WAY</field>
         <field name="code">mbway</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mbway.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1289,7 +1289,7 @@
         <field name="name">Alma</field>
         <field name="code">alma</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/alma.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1310,7 +1310,7 @@
         <field name="name">Amazon Pay</field>
         <field name="code">amazonpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/amazon_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1351,7 +1351,7 @@
         <field name="name">Atome</field>
         <field name="code">atome</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/atome.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1374,7 +1374,7 @@
         <field name="name">Benefit</field>
         <field name="code">benefit</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/benefit.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1395,7 +1395,7 @@
         <field name="name">Bizum</field>
         <field name="code">bizum</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bizum.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1416,7 +1416,7 @@
         <field name="name">Dana</field>
         <field name="code">dana</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/dana.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1437,7 +1437,7 @@
         <field name="name">DuitNow</field>
         <field name="code">duitnow</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/duitnow.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1458,7 +1458,7 @@
         <field name="name">GCash</field>
         <field name="code">gcash</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/gcash.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1479,7 +1479,7 @@
         <field name="name">GoPay</field>
         <field name="code">gopay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/gopay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1500,7 +1500,7 @@
         <field name="name">KakaoPay</field>
         <field name="code">kakaopay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/kakaopay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1521,7 +1521,7 @@
         <field name="name">KNET</field>
         <field name="code">knet</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/knet.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1542,7 +1542,7 @@
         <field name="name">MoMo</field>
         <field name="code">momo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/momo.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1563,7 +1563,7 @@
         <field name="name">Napas Card</field>
         <field name="code">napas_card</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/napas.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1585,7 +1585,7 @@
         <field name="name">Paytrail</field>
         <field name="code">paytrail</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paytrail.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1606,7 +1606,7 @@
         <field name="name">Online Banking Czech Republic</field>
         <field name="code">online_banking_czech_republic</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1627,7 +1627,7 @@
         <field name="name">Online Banking India</field>
         <field name="code">online_banking_india</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1649,7 +1649,7 @@
         <field name="name">Online Banking Slovakia</field>
         <field name="code">online_banking_slovakia</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1670,7 +1670,7 @@
         <field name="name">Online Banking Thailand</field>
         <field name="code">online_banking_thailand</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1691,7 +1691,7 @@
         <field name="name">Open banking</field>
         <field name="code">open_banking</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1714,7 +1714,7 @@
         <field name="name">PayBright</field>
         <field name="code">paybright</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paybright.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1735,7 +1735,7 @@
         <field name="name">Pre-authorized debit in Canada</field>
         <field name="code">acss_debit</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1756,7 +1756,7 @@
         <field name="name">Paytm</field>
         <field name="code">paytm</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paytm.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1777,7 +1777,7 @@
         <field name="name">Ratepay</field>
         <field name="code">ratepay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/ratepay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1802,7 +1802,7 @@
         <field name="name">Samsung Pay</field>
         <field name="code">samsung_pay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/samsung_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1813,7 +1813,7 @@
         <field name="name">Touch'n Go</field>
         <field name="code">touchngo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/touchngo.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1834,7 +1834,7 @@
         <field name="name">Walley</field>
         <field name="code">walley</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/walley.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -1861,7 +1861,7 @@
         <field name="name">Rabbit LINE Pay</field>
         <field name="code">twint</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/rabbit_line_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1882,7 +1882,7 @@
         <field name="name">TrueMoney</field>
         <field name="code">truemoney</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/truemoney.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1903,7 +1903,7 @@
         <field name="name">Boost</field>
         <field name="code">boost</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/boost.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1924,7 +1924,7 @@
         <field name="name">BillEase</field>
         <field name="code">billease</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/billease.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1945,7 +1945,7 @@
         <field name="name">Bank of the Philippine Islands</field>
         <field name="code">bpi</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1966,7 +1966,7 @@
         <field name="name">Maya</field>
         <field name="code">maya</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/maya.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1987,7 +1987,7 @@
         <field name="name">Akulaku PayLater</field>
         <field name="code">akulaku</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/akulaku.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2008,7 +2008,7 @@
         <field name="name">Kredivo</field>
         <field name="code">kredivo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/kredivo.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2029,7 +2029,7 @@
         <field name="name">Naver Pay</field>
         <field name="code">naverpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/naverpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2050,7 +2050,7 @@
         <field name="name">Toss Pay</field>
         <field name="code">tosspay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/tosspay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2071,7 +2071,7 @@
         <field name="name">Dolfin</field>
         <field name="code">dolfin</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/dolfin.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2092,7 +2092,7 @@
         <field name="name">LinkAja</field>
         <field name="code">linkaja</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/linkaja.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2113,7 +2113,7 @@
         <field name="name">OVO</field>
         <field name="code">ovo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/ovo.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2134,7 +2134,7 @@
         <field name="name">PayPay</field>
         <field name="code">paypay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paypay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2155,7 +2155,7 @@
         <field name="name">Zalopay</field>
         <field name="code">zalopay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/zalopay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2176,7 +2176,7 @@
         <field name="name">Bangkok Bank</field>
         <field name="code">bangkok_bank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2197,7 +2197,7 @@
         <field name="name">Bank of Ayudhya</field>
         <field name="code">boa</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2218,7 +2218,7 @@
         <field name="name">KrungThai Bank</field>
         <field name="code">krungthai_bank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2239,7 +2239,7 @@
         <field name="name">Siam Commerical Bank</field>
         <field name="code">scb</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2260,7 +2260,7 @@
         <field name="name">Government Savings Bank</field>
         <field name="code">gsb</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2281,7 +2281,7 @@
         <field name="name">Kasikorn Bank</field>
         <field name="code">kasikorn_bank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2302,7 +2302,7 @@
         <field name="name">Bank Negara Indonesia</field>
         <field name="code">bni</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2323,7 +2323,7 @@
         <field name="name">Mandiri</field>
         <field name="code">mandiri</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mandiri.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2344,7 +2344,7 @@
         <field name="name">Maybank</field>
         <field name="code">maybank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/maybank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2365,7 +2365,7 @@
         <field name="name">CIMB Niaga</field>
         <field name="code">cimb_niaga</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cimb_niaga.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2386,7 +2386,7 @@
         <field name="name">Bank Syariah Indonesia</field>
         <field name="code">bsi</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2407,7 +2407,7 @@
         <field name="name">QRIS</field>
         <field name="code">qris</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/qris.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2428,7 +2428,7 @@
         <field name="name">PayU</field>
         <field name="code">payu</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/payu.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2449,7 +2449,7 @@
         <field name="name">BANCOMAT Pay</field>
         <field name="code">bancomat_pay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bancomat_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2470,7 +2470,7 @@
         <field name="name">BRANKAS</field>
         <field name="code">brankas</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/brankas.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2491,7 +2491,7 @@
         <field name="name">Pay-easy</field>
         <field name="code">pay_easy</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/pay_easy.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2512,7 +2512,7 @@
         <field name="name">Pay Later</field>
         <field name="code">pay_later</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2541,7 +2541,7 @@
         <field name="name">Pay Later</field>
         <field name="code">paylater</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -2562,7 +2562,7 @@
         <field name="name">Paylib</field>
         <field name="code">paylib</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/paylib.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2583,7 +2583,7 @@
         <field name="name">Venmo</field>
         <field name="code">venmo</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/venmo.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -2604,7 +2604,7 @@
         <field name="name">MyBank</field>
         <field name="code">mybank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mybank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2625,7 +2625,7 @@
         <field name="name">POLi</field>
         <field name="code">poli</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/poli.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2648,7 +2648,7 @@
         <field name="name">Humm</field>
         <field name="code">humm</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/humm.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2675,7 +2675,7 @@
         <field name="name">Pace.</field>
         <field name="code">pace</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/pace.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2706,7 +2706,7 @@
         <field name="name">ShopBack</field>
         <field name="code">shopback</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/shopback.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2727,7 +2727,7 @@
         <field name="name">Hoolah</field>
         <field name="code">hoolah</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/hoolah.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2754,7 +2754,7 @@
         <field name="name">BancNet</field>
         <field name="code">bancnet</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bancnet.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2775,7 +2775,7 @@
         <field name="name">LINE Pay</field>
         <field name="code">linepay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/linepay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2800,7 +2800,7 @@
         <field name="name">United Overseas Bank</field>
         <field name="code">uob</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2821,7 +2821,7 @@
         <field name="name">FPS</field>
         <field name="code">fps</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2842,7 +2842,7 @@
         <field name="name">HD Bank</field>
         <field name="code">hd</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2886,7 +2886,7 @@
         <field name="name">PPS</field>
         <field name="code">pps</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2907,7 +2907,7 @@
         <field name="name">Techcombank</field>
         <field name="code">techcom</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/techcom.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2928,7 +2928,7 @@
         <field name="name">Tienphong</field>
         <field name="code">tienphong</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2949,7 +2949,7 @@
         <field name="name">TTB</field>
         <field name="code">ttb</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2970,7 +2970,7 @@
         <field name="name">Vietcombank</field>
         <field name="code">vietcom</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/vietcom.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -2991,7 +2991,7 @@
         <field name="name">TENPAY</field>
         <field name="code">tenpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/tenpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3012,7 +3012,7 @@
         <field name="name">TendoPay</field>
         <field name="code">tendopay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/tendopay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3033,7 +3033,7 @@
         <field name="name">BharatQR</field>
         <field name="code">bharatqr</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bharatqr.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3054,7 +3054,7 @@
         <field name="name">Masterpass</field>
         <field name="code">masterpass</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3065,7 +3065,7 @@
         <field name="name">Octopus</field>
         <field name="code">octopus</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/octopus.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3086,7 +3086,7 @@
         <field name="name">Universal Air Travel Plan</field>
         <field name="code">uatp</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/uatp.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3097,7 +3097,7 @@
         <field name="name">Payconiq</field>
         <field name="code">payconiq</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/payconiq.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3118,7 +3118,7 @@
         <field name="name">in3</field>
         <field name="code">in3</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/in3.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3139,7 +3139,7 @@
         <field name="name">Tinka</field>
         <field name="code">tinka</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/tinka.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3160,7 +3160,7 @@
         <field name="name">Billink</field>
         <field name="code">billink</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/billink.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3182,7 +3182,7 @@
         <field name="name">Belfius</field>
         <field name="code">belfius</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/belfius.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3203,7 +3203,7 @@
         <field name="name">cofidis</field>
         <field name="code">cofidis</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cofidis.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3224,7 +3224,7 @@
         <field name="name">Frafinance</field>
         <field name="code">frafinance</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/frafinance.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3245,7 +3245,7 @@
         <field name="name">Jkopay</field>
         <field name="code">jkopay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/jkopay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3266,7 +3266,7 @@
         <field name="name">Visa Electron</field>
         <field name="code">visa_electron</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/visa.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3289,7 +3289,7 @@
         <field name="name">V PAY</field>
         <field name="code">vpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/vpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3312,7 +3312,7 @@
         <field name="name">Mobile money Ghana</field>
         <field name="code">mobile_money_ghana</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mtn-mobile-money.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3333,7 +3333,7 @@
         <field name="name">Mobile money Francophone Africa</field>
         <field name="code">mobile_money_franco</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mtn-mobile-money.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3358,7 +3358,7 @@
         <field name="name">Mobile money Uganda</field>
         <field name="code">mobile_money_uganda</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mtn-mobile-money.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3379,7 +3379,7 @@
         <field name="name">Mobile money Rwanda</field>
         <field name="code">mobile_money_rwanda</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mtn-mobile-money.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3400,7 +3400,7 @@
         <field name="name">Mobile money Zambia</field>
         <field name="code">mobile_money_zambia</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mtn-mobile-money.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3421,7 +3421,7 @@
         <field name="name">PSE</field>
         <field name="code">pse</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3442,7 +3442,7 @@
         <field name="name">PostePay</field>
         <field name="code">poste_pay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/poste_pay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3463,7 +3463,7 @@
         <field name="name">Netbanking</field>
         <field name="code">netbanbking</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -3484,7 +3484,7 @@
         <field name="name">EMI</field>
         <field name="code">emi</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -3505,7 +3505,7 @@
         <field name="name">Wallet</field>
         <field name="code">wallet</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/wallet.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3527,7 +3527,7 @@
         <field name="name">Bank Transfer</field>
         <field name="code">bank_transfer</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund">partial</field>
@@ -3544,7 +3544,7 @@
         <field name="name">Bank Account</field>
         <field name="code">account</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3555,7 +3555,7 @@
         <field name="name">LyfPay</field>
         <field name="code">lyfpay</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/lyfpay.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3576,7 +3576,7 @@
         <field name="name">Lydia</field>
         <field name="code">lydia</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/lydia.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3598,7 +3598,7 @@
         <field name="name">Axis</field>
         <field name="code">axis</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/axis.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3619,7 +3619,7 @@
         <field name="name">Bank reference</field>
         <field name="code">bank_reference</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3630,7 +3630,7 @@
         <field name="name">Floa Bank</field>
         <field name="code">floa_bank</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/floa_bank.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3651,7 +3651,7 @@
         <field name="name">PayMe</field>
         <field name="code">payme</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/payme.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3672,7 +3672,7 @@
         <field name="name">WeLend</field>
         <field name="code">welend</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/welend.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -3714,7 +3714,7 @@
         <field name="code">amex</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/american_express.png"/>
+        <field name="image" type="base64" file="payment/static/img/amex.png"/>
     </record>
 
     <record id="payment_method_discover" model="payment.method">
@@ -3786,7 +3786,7 @@
         <field name="code">carnet</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/discover.png"/>
+        <field name="image" type="base64" file="payment/static/img/wallet.png"/>
     </record>
 
     <record id="payment_method_cartes_bancaires" model="payment.method">
@@ -3795,7 +3795,7 @@
         <field name="code">cartes_bancaires</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/paypal.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
     </record>
 
     <record id="payment_method_elo" model="payment.method">
@@ -3804,7 +3804,7 @@
         <field name="code">elo</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
+        <field name="image" type="base64" file="payment/static/img/elo.png"/>
     </record>
 
     <record id="payment_method_hipercard" model="payment.method">
@@ -3813,7 +3813,7 @@
         <field name="code">hipercard</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
+        <field name="image" type="base64" file="payment/static/img/hipercard.png"/>
     </record>
 
     <record id="payment_method_dankort" model="payment.method">
@@ -3822,7 +3822,7 @@
         <field name="code">dankort</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/mastercard.png"/>
+        <field name="image" type="base64" file="payment/static/img/dankort.png"/>
     </record>
 
     <record id="payment_method_meeza" model="payment.method">
@@ -3831,7 +3831,7 @@
         <field name="code">meeza</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/meeza.png"/>
     </record>
 
     <record id="payment_method_naps" model="payment.method">
@@ -3840,7 +3840,7 @@
         <field name="code">naps</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/naps.png"/>
     </record>
 
     <record id="payment_method_oman_net" model="payment.method">
@@ -3849,7 +3849,7 @@
         <field name="code">omannet</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/omannet.png"/>
     </record>
 
     <record id="payment_method_argencard" model="payment.method">
@@ -3858,7 +3858,7 @@
         <field name="code">argencard</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/argencard.png"/>
     </record>
 
     <record id="payment_method_cabal" model="payment.method">
@@ -3867,7 +3867,7 @@
         <field name="code">cabal</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cabal.png"/>
     </record>
 
     <record id="payment_method_caixa" model="payment.method">
@@ -3876,7 +3876,7 @@
         <field name="code">caixa</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/caixa.png"/>
     </record>
 
     <record id="payment_method_ceconsud" model="payment.method">
@@ -3885,7 +3885,7 @@
         <field name="code">ceconsund</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cencosud.png"/>
     </record>
 
     <record id="payment_method_cmr" model="payment.method">
@@ -3894,7 +3894,7 @@
         <field name="code">cmr</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
     </record>
 
     <record id="payment_method_cordial" model="payment.method">
@@ -3903,7 +3903,7 @@
         <field name="code">cordial</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cordial.png"/>
     </record>
 
     <record id="payment_method_cordobesa" model="payment.method">
@@ -3912,7 +3912,7 @@
         <field name="code">cordobesa</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cordobesa.png"/>
     </record>
 
     <record id="payment_method_codensa" model="payment.method">
@@ -3930,7 +3930,7 @@
         <field name="code">lider</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/lider.png"/>
     </record>
 
     <record id="payment_method_magna" model="payment.method">
@@ -3939,7 +3939,7 @@
         <field name="code">magna</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/magna.png"/>
     </record>
 
     <record id="payment_method_mercado_pago_card" model="payment.method"> <!-- TODO "id": "mercadopagocard",
@@ -3950,7 +3950,7 @@
         <field name="code">mercadopagocard</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mercadopagocard.png"/>
     </record>
 
     <record id="payment_method_mercado_livre" model="payment.method">
@@ -3959,7 +3959,7 @@
         <field name="code">mercado_livre</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/mercado_livre.png"/>
     </record>
 
     <record id="payment_method_naranja" model="payment.method">
@@ -3968,7 +3968,7 @@
         <field name="code">naranja</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/naranja.png"/>
     </record>
 
     <record id="payment_method_nativa" model="payment.method">
@@ -3977,7 +3977,7 @@
         <field name="code">nativa</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/nativa.png"/>
     </record>
 
     <record id="payment_method_oca" model="payment.method">
@@ -3986,7 +3986,7 @@
         <field name="code">oca</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
     </record>
 
     <record id="payment_method_presto" model="payment.method">
@@ -3995,7 +3995,7 @@
         <field name="code">presto</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/presto.png"/>
     </record>
 
     <record id="payment_method_shopping" model="payment.method">
@@ -4004,7 +4004,7 @@
         <field name="code">shopping</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/shopping.png"/>
     </record>
 
     <record id="payment_method_credit" model="payment.method">
@@ -4013,7 +4013,7 @@
         <field name="code">credit</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/card.png"/>
     </record>
 
     <record id="payment_method_cencosud" model="payment.method">
@@ -4022,7 +4022,7 @@
         <field name="code">cencosud</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/cencosud.png"/>
     </record>
 
     <record id="payment_method_banco_de_bogota" model="payment.method">
@@ -4031,7 +4031,7 @@
         <field name="code">banco_de_bogota</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
     </record>
 
     <record id="payment_method_bancolombia" model="payment.method"> <!-- MAYBE ITS SEPRATE PAYMENT NETHID-->
@@ -4040,7 +4040,7 @@
         <field name="code">Bancolombia</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/bancolombia.png"/>
     </record>
 
     <record id="payment_method_davivienda" model="payment.method">
@@ -4049,7 +4049,7 @@
         <field name="code">davivienda</field>
         <field name="primary_payment_method_id" eval="ref('payment.payment_method_bank_reference')"/>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/davivienda.png"/>
     </record>
 
 </odoo>

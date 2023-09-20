@@ -5,7 +5,7 @@
         <field name="sequence">600</field>
         <field name="name">Wire Transfer</field>
         <field name="code">wire_transfer</field>
-        <field name="image" type="base64" file="payment/static/img/sepa.png"/>
+        <field name="image" type="base64" file="payment/static/img/wire_transfer.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>

@@ -381,7 +381,7 @@
         -->
         <span t-out="logo"
               t-options="{'widget': 'image', 'alt-field': 'name'}"
-              class="position-relative d-block rounded overflow-hidden z-index-1"
+              class="position-relative d-block rounded overflow-hidden z-index-1 shadow-sm"
               t-att-title="title"
               data-bs-toggle="tooltip"
               data-bs-placement="top"
