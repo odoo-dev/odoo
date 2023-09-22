@@ -358,7 +358,7 @@ def db_filter(dbs, host=None):
     if config['db_name']:
         # In case --db-filter is not provided and --database is passed, Odoo will
         # use the value of --database as a comma separated list of exposed databases.
-        exposed_dbs = {db.strip() for db in config['db_name'].split(',')}
+        exposed_dbs = {db.strip() for db in config['db_name']}
         return sorted(exposed_dbs.intersection(dbs))
 
     return list(dbs)
@@ -2049,7 +2049,7 @@ class Application:
     @lazy_property
     def nodb_routing_map(self):
         nodb_routing_map = werkzeug.routing.Map(strict_slashes=False, converters=None)
-        for url, endpoint in _generate_routing_rules([''] + odoo.conf.server_wide_modules, nodb_only=True):
+        for url, endpoint in _generate_routing_rules([''] + config['server_wide_modules'], nodb_only=True):
             routing = submap(endpoint.routing, ROUTING_KEYS)
             if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:
                 routing['methods'] = routing['methods'] + ['OPTIONS']

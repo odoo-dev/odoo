@@ -72,9 +72,10 @@ class WebClient(http.Controller):
         lang = request.env.context['lang'].partition('_')[0]
 
         if mods is None:
-            mods = odoo.conf.server_wide_modules or []
             if request.db:
-                mods = request.env.registry._init_modules.union(mods)
+                mods = request.env.registry._init_modules
+            else:
+                mods = odoo.tools.config['server_wide_modules']
 
         translations_per_module = {}
         for addon_name in mods:
@@ -101,7 +102,7 @@ class WebClient(http.Controller):
         if mods:
             mods = mods.split(',')
         elif mods is None:
-            mods = list(request.env.registry._init_modules) + (odoo.conf.server_wide_modules or [])
+            mods = request.env.registry._init_modules
 
         translations_per_module, lang_params = request.env["ir.http"].get_translations_for_webclient(mods, lang)
 

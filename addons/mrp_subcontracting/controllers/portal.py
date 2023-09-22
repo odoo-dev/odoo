@@ -4,7 +4,7 @@
 import werkzeug
 from collections import OrderedDict
 
-from odoo import conf, http, _
+from odoo import http, tools, _
 from odoo.http import request
 from odoo.exceptions import AccessError, MissingError
 from odoo.addons.portal.controllers import portal
@@ -89,7 +89,7 @@ class CustomerPortal(portal.CustomerPortal):
             raise werkzeug.exceptions.NotFound
         session_info = request.env['ir.http'].session_info()
         user_context = dict(request.env.context) if request.session.uid else {}
-        mods = conf.server_wide_modules or []
+        mods = tools.config['server_wide_modules']
         lang = user_context.get("lang")
         translation_hash = request.env['ir.http'].get_web_translations_hash(mods, lang)
         cache_hashes = {

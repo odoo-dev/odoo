@@ -5,6 +5,7 @@ from unittest.mock import patch
 import odoo
 from odoo.http import Session
 from odoo.tests.common import HttpCase
+from odoo.tools import config
 from odoo.tools.func import lazy_property
 from odoo.addons.test_http.utils import MemoryGeoipResolver, MemorySessionStore
 
@@ -18,7 +19,9 @@ class TestHttpBase(HttpCase):
 
         lazy_property.reset_all(odoo.http.root)
         cls.addClassCleanup(lazy_property.reset_all, odoo.http.root)
-        cls.classPatch(odoo.conf, 'server_wide_modules', ['base', 'web', 'test_http'])
+        cls.classPatch(config, 'options', config.options.new_child({
+            'server_wide_modules': ['base', 'web', 'test_http']
+        }))
         cls.classPatch(odoo.http.Application, 'session_store', session_store)
         cls.classPatch(odoo.http.Application, 'geoip_city_db', geoip_resolver)
         cls.classPatch(odoo.http.Application, 'geoip_country_db', geoip_resolver)

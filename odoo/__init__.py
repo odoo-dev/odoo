@@ -108,7 +108,6 @@ def registry(database_name=None):
 #----------------------------------------------------------
 from . import upgrade  # this namespace must be imported first
 from . import addons
-from . import conf
 from . import loglevels
 from . import modules
 from . import netsvc

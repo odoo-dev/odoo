@@ -4,7 +4,7 @@ from collections import OrderedDict
 from operator import itemgetter
 from markupsafe import Markup
 
-from odoo import conf, http, _
+from odoo import http, tools, _
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -141,7 +141,7 @@ class ProjectCustomerPortal(CustomerPortal):
     def _prepare_project_sharing_session_info(self, project, task=None):
         session_info = request.env['ir.http'].session_info()
         user_context = dict(request.env.context) if request.session.uid else {}
-        mods = conf.server_wide_modules or []
+        mods = tools.config['server_wide_modules']
         if request.env.lang:
             lang = request.env.lang
             session_info['user_context']['lang'] = lang

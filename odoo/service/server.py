@@ -1189,7 +1189,7 @@ class WorkerCron(Worker):
 
     def _db_list(self):
         if config['db_name']:
-            db_names = config['db_name'].split(',')
+            db_names = list(config['db_name'])
         else:
             db_names = odoo.service.db.list_dbs(True)
         return db_names
@@ -1245,8 +1245,7 @@ class WorkerCron(Worker):
 server = None
 
 def load_server_wide_modules():
-    server_wide_modules = {'base', 'web'} | set(odoo.conf.server_wide_modules)
-    for m in server_wide_modules:
+    for m in config['server_wide_modules']:
         try:
             odoo.modules.module.load_openerp_module(m)
         except Exception:
