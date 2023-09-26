@@ -928,7 +928,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
         assert.strictEqual(
             popoverDescription.children[2].textContent,
-            "(2 days)",
+            "2 days",
             "The popover description should indicate 2 days"
         );
         await click(target, ".o_cw_popover_close");
@@ -1293,7 +1293,7 @@ QUnit.module("Views", ({ beforeEach }) => {
             "popover should have a close button"
         );
         assert.strictEqual(
-            target.querySelector(".o_cw_popover .list-group-item b.text-capitalize").textContent,
+            target.querySelector(".o_cw_popover .list-group-item span.fw-bold").textContent,
             "December 14, 2016",
             "should display date 'December 14, 2016'"
         );
@@ -1309,8 +1309,8 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
         assert.containsOnce(groups[0], ".o_field_char", "should apply char widget");
         assert.strictEqual(
-            groups[0].querySelector("strong").textContent,
-            "Custom Name: ",
+            groups[0].querySelector("span.fw-bold").textContent,
+            "Custom Name",
             "label should be a 'Custom Name'"
         );
         assert.strictEqual(
@@ -1320,8 +1320,8 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
         assert.containsOnce(groups[1], ".o_form_uri", "should apply m20 widget");
         assert.strictEqual(
-            groups[1].querySelector("strong").textContent,
-            "user: ",
+            groups[1].querySelector("span.fw-bold").textContent,
+            "user",
             "label should be a 'user'"
         );
         assert.strictEqual(
@@ -3467,7 +3467,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         await clickEvent(target, 1);
         assert.strictEqual(
             target.querySelector(".o_cw_popover .list-group-item").textContent,
-            "December 14, 2016 (All day)"
+            "December 14, 2016 "
         );
     });
 
@@ -3994,7 +3994,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         );
         assert.strictEqual(
             target.querySelector(".o_calendar_renderer .fc-day-header").textContent,
-            "Sat 30",
+            "Saturday 30",
             "should display day passed in the context"
         );
     });
@@ -4398,7 +4398,7 @@ QUnit.module("Views", ({ beforeEach }) => {
         assert.containsN(target, ".fc-month", 12);
         assert.strictEqual(
             target.querySelector(".fc-month .fc-header-toolbar").textContent,
-            "Jan 2016"
+            "January 2016"
         );
         assert.containsN(
             target,
@@ -4445,7 +4445,7 @@ QUnit.module("Views", ({ beforeEach }) => {
             .querySelector(".o_popover")
             .textContent.replace(/\s{2,}/g, " ")
             .trim();
-        assert.strictEqual(popoverText, "December 12, 201611:55 event 216:55 event 3");
+        assert.strictEqual(popoverText, "December 12, 201611:55event 216:55event 3");
         await click(target, ".o_cw_popover_close");
         assert.containsNone(target, ".o_popover");
 
@@ -4577,7 +4577,7 @@ QUnit.module("Views", ({ beforeEach }) => {
 
         assert.strictEqual(
             target.querySelector(".o_cw_popover .o_cw_popover_fields_secondary").textContent,
-            "user: name: event 4"
+            "usernameevent 4"
         );
     });
 
