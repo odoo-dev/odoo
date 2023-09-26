@@ -3,7 +3,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { Domain } from "@web/core/domain";
 import { PyDate } from "@web/core/py_js/py_date";
-import { patchWithCleanup } from "../helpers/patch_test_helpers";
+import { patchWithCleanup } from "@web/../tests/hoot/helpers";
 
 describe("@web", "core", "domain", () => {
     //-------------------------------------------------------------------------

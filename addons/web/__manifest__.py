@@ -448,12 +448,12 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/lib/hoot/tests/**/*'),
 
             # Odoo mocks
-            'web/static/tests/hoot/mocks/**/*',
+            'web/static/tests/hoot/_framework/mocks/**/*',
         ],
         # Unit test files
         'web.assets_unit_tests': [
             'web/static/tests/hoot/**/*',
-            ('remove', 'web/static/tests/hoot/mocks/**/*'),
+            ('remove', 'web/static/tests/hoot/_framework/mocks/**/*'),
         ],
         'web.tests_assets': [
             ('include', 'web.assets_backend'),
