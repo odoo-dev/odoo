@@ -6,7 +6,7 @@
         position: absolute;
         bottom: -0.375em;
         right: -0.375em;
-        display: block;
+        aspect-ratio: 1;
         border-radius: 100%;
         border: 1px white solid;
     }
@@ -20,7 +20,7 @@
         color: $danger;
     }
     .o_attendee_status_tentative {
-        background-color: tint-color($dark, 80%);
+        background-color: $gray-200;
         color: $dark;
     }
 }
