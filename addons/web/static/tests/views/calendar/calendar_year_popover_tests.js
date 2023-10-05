@@ -113,8 +113,8 @@ QUnit.module("CalendarView - YearPopover", ({ beforeEach }) => {
                 editRecord: () => assert.step("edit"),
             },
         });
-        assert.containsOnce(target, ".o_cw_body > a");
-        await click(target, ".o_cw_body > a");
+        assert.containsOnce(target, ".o_cw_body a.o_cw_popover_link");
+        await click(target, ".o_cw_body a.o_cw_popover_link");
         assert.verifySteps(["edit"]);
     });
 });
