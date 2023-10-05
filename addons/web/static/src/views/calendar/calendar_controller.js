@@ -96,6 +96,26 @@ export class CalendarController extends Component {
         }
     }
 
+    get date() {
+        return this.model.meta.date || DateTime.now();
+    }
+
+    get currentDay() {
+        return this.date.toFormat("d");
+    }
+
+    get currentYear() {
+        return this.date.toFormat("y");
+    }
+
+    get currentMonth() {
+        return this.date.toFormat("MMMM");
+    }
+
+    get currentWeek() {
+        return this.date.toFormat("WW");
+    }
+
     get rendererProps() {
         return {
             model: this.model,
