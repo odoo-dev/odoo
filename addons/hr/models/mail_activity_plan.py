@@ -8,27 +8,31 @@ from odoo.exceptions import UserError
 class MailActivityPlan(models.Model):
     _inherit = 'mail.activity.plan'
 
-    department_id = fields.Many2one('hr.department', check_company=True, ondelete='cascade')
+    department_id = fields.Many2one(
+        'hr.department', check_company=True,
+        compute='_compute_department_id', ondelete='cascade', readonly=False, store=True)
 
     @api.constrains('res_model')
     def _check_compatibility_with_model(self):
         """ Check that when the model is updated to a model different from employee,
         there are no remaining specific values to employee. """
-        template_ids_to_check = set()
-        error_department = False
-        for plan in self.filtered(lambda plan: plan.res_model != 'hr.employee'):
-            template_ids_to_check.update(plan.template_ids.ids)
-            if plan.department_id:
-                error_department = True
-        errors = [_('Department can only be set with employee plan.')] if error_department else []
-        if template_ids_to_check and self.env['mail.activity.plan.template'].search(
-                [('id', 'in', tuple(template_ids_to_check)),
-                 ('responsible_type', 'in', ('coach', 'manager', 'employee'))], limit=1):
-            errors.append('Coach, manager or employee can only be chosen as template responsible with employee plan.')
-        if errors:
-            raise UserError('\n'.join(errors))
+        plan_tocheck = self.filtered(lambda plan: plan.res_model != 'hr.employee')
+        failing_plans = plan_tocheck.filtered('department_id')
+        if failing_plans:
+            raise UserError(
+                _('Plan %(plan_names)s cannot use a department as it is used only for employee plans.',
+                  plan_names=', '.join(failing_plans.mapped('name')))
+            )
+        failing_templates = plan_tocheck.template_ids.filtered(
+            lambda tpl: tpl.responsible_type in {'coach', 'manager', 'employee'}
+        )
+        if failing_templates:
+            raise UserError(
+                _('Plan activities %(template_names)s cannot use coach, manager or employee responsible as it is used only for employee plans.',
+                  template_names=', '.join(failing_templates.mapped('activity_type_id.name')))
+            )
 
     @api.onchange('res_model')
-    def _onchange_res_model(self):
-        if self.res_model != 'hr.employee':
-            self.department_id = False
+    def _compute_department_id(self):
+        for plan in self.filtered(lambda plan: plan.res_model != 'hr.employee'):
+            plan.department_id = False
