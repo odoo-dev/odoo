@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
-
 from odoo import api, fields, models
 from odoo.tools.misc import groupby as tools_groupby
 
@@ -76,17 +74,3 @@ class MailActivityPlan(models.Model):
             else:
                 plan.assignation_summary = ''
                 plan.has_user_on_demand = False
-
-    def write(self, vals):
-        dedicated_by_record_id = {r.id: r.res_model for r in self if r.res_model}
-        res = super().write(vals)
-        record_ids_by_dedicated_changed = defaultdict(list)
-        for record in self:
-            if record.id in dedicated_by_record_id and not record.res_model:
-                record_ids_by_dedicated_changed[dedicated_by_record_id[record.id]].append(record.id)
-        for dedicated_changed, record_ids in record_ids_by_dedicated_changed.items():
-            self.env['mail.activity.plan'].browse(record_ids)._validate_transition_from_dedicated(dedicated_changed)
-        return res
-
-    def _validate_transition_from_dedicated(self, dedicated_res_model):
-        pass
