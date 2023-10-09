@@ -8,14 +8,7 @@ from odoo.tools.misc import groupby as tools_groupby
 class MailActivityPlan(models.Model):
     _name = 'mail.activity.plan'
     _description = 'Activity Plan'
-
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
-        default_res_model = self._context.get('default_res_model')
-        if 'res_model' in fields and default_res_model:
-            res['res_model'] = default_res_model
-        return res
+    _order = 'id DESC'
 
     def _get_model_selection(self):
         return [
@@ -33,12 +26,22 @@ class MailActivityPlan(models.Model):
         domain="[('company_id', '=', company_id)]",
         check_company=True)
     active = fields.Boolean(default=True)
-    res_model = fields.Selection(selection=_get_model_selection, string="Model", required=True,
-                                 help='Specify a model if the activity should be specific to a model'
-                                      ' and not available when managing activities for other models.')
+    res_model_id = fields.Many2one(
+        'ir.model', string='Applies to',
+        compute="_compute_res_model_id", compute_sudo=True,
+        ondelete="cascade", precompute=True, readonly=False, required=True, store=True)
+    res_model = fields.Selection(
+        selection=_get_model_selection, string="Model", required=True,
+        help='Specify a model if the activity should be specific to a model'
+              ' and not available when managing activities for other models.')
     steps_count = fields.Integer(compute='_compute_steps_count')
     assignation_summary = fields.Html('Assignation summary', compute='_compute_assignation')
     has_user_on_demand = fields.Boolean('Has on demand responsible', compute='_compute_assignation')
+
+    @api.depends('res_model')
+    def _compute_res_model_id(self):
+        for plan in self:
+            plan.res_model_id = self.env['ir.model']._get_id(plan.res_model)
 
     @api.constrains('res_model')
     def _check_res_model_compatibility_with_templates(self):

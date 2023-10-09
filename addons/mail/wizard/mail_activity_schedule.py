@@ -28,13 +28,13 @@ class MailActivitySchedule(models.TransientModel):
         res_model = context.get('active_model') or context.get('params', {}).get('active_model', False)
         if 'res_model' in fields_list:
             res['res_model'] = res_model
-        res_model_id = self.env['ir.model']._get_id(res_model) if res_model else False
-        if 'res_model_id' in fields_list:
-            res['res_model_id'] = res_model_id
         return res
 
-    res_model_id = fields.Many2one('ir.model', required=True, string="res_model_id", ondelete='cascade')
-    res_model = fields.Char(related_sudo='res_model_id.model', store=True, readonly=True)
+    res_model_id = fields.Many2one(
+        'ir.model', string="Applies to",
+        compute="_compute_res_model_id", compute_sudo=True,
+        ondelete="cascade", precompute=True, readonly=False, required=True, store=True)
+    res_model = fields.Char("Model", readonly=True, required=True)
     res_ids = fields.Text('Document IDs', compute='_compute_res_ids', readonly=True, store=True, precompute=True)
     company_id = fields.Many2one('res.company', 'Company',
                                  compute='_compute_company_id', required=True)
@@ -68,6 +68,11 @@ class MailActivitySchedule(models.TransientModel):
     user_id = fields.Many2one('res.users', 'Assigned to', default=lambda self: self.env.user)
     # Technical field used to post process the created activity (meaningless in batch mode)
     activity_id = fields.Many2one('mail.activity')
+
+    @api.depends('res_model')
+    def _compute_res_model_id(self):
+        for scheduler in self:
+            scheduler.res_model_id = self.env['ir.model']._get_id(scheduler.res_model)
 
     def _compute_res_ids(self):
         context = self.env.context
