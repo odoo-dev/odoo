@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="mail_activity_plan_action_config_lead_plan" model="ir.actions.act_window">
+        <record id="mail_activity_plan_action_lead" model="ir.actions.act_window">
             <field name="name">Lead Plans</field>
             <field name="res_model">mail.activity.plan</field>
             <field name="view_mode">tree,form</field>

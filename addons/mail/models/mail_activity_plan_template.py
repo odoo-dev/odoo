@@ -11,6 +11,9 @@ class MailActivityPlanTemplate(models.Model):
     _description = 'Activity plan template'
     _rec_name = 'summary'
 
+    plan_id = fields.Many2one('mail.activity.plan', ondelete='cascade')
+    res_model = fields.Selection(related="plan_id.res_model")
+    sequence = fields.Integer(default=10)
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Activity Type',
@@ -28,27 +31,25 @@ class MailActivityPlanTemplate(models.Model):
         'Other Responsible',
         check_company=True, store=True, compute="_compute_responsible_id", readonly=False,
         help='Specific responsible of activity if not linked to the employee.')
-    plan_id = fields.Many2one('mail.activity.plan', ondelete='cascade')
     note = fields.Html('Note')
-    res_model = fields.Selection(related="plan_id.res_model")
-    sequence = fields.Integer(default=10)
 
     @api.constrains('activity_type_id')
     def _check_activity_type_res_model(self):
-        """ Check that the plan models are compatible with the template activity type model.
-
-        Note that it depends also on "activity_type_id.res_model" and
+        """ Check that the plan models are compatible with the template activity
+        type model. Note that it depends also on "activity_type_id.res_model" and
         "plan_id.res_model". That's why this method is called by those models
         when the mentioned fields are updated.
         """
-        for template in self:
-            activity_type_model = template.activity_type_id.res_model
-            if activity_type_model and template.res_model != activity_type_model:
+        for template in self.filtered(lambda tpl: tpl.activity_type_id.res_model):
+            if template.activity_type_id.res_model != template.plan_id.res_model:
                 raise ValidationError(
                     _('The activity type "%(activity_type_name)s" is not compatible with the plan "%(plan_name)s"'
                       ' because it is limited to the model "%(activity_type_model)s".',
-                      activity_type_name=template.activity_type_id.name, plan_name=template.plan_id.name,
-                      activity_type_model=activity_type_model))
+                      activity_type_name=template.activity_type_id.name,
+                      activity_type_model=template.activity_type_id.res_model,
+                      plan_name=template.plan_id.name,
+                     )
+                )
 
     @api.constrains('responsible_id', 'responsible_type')
     def _check_responsible(self):

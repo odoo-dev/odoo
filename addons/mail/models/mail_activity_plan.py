@@ -46,7 +46,11 @@ class MailActivityPlan(models.Model):
 
     @api.depends('template_ids')
     def _compute_steps_count(self):
-        activity_template_data = self.env['mail.activity.plan.template']._read_group([('plan_id', 'in', self.ids)], ['plan_id'], ['__count'])
+        activity_template_data = self.env['mail.activity.plan.template']._read_group(
+            [('plan_id', 'in', self.ids)],
+            ['plan_id'],
+            ['__count'],
+        )
         steps_count = {plan.id: count for plan, count in activity_template_data}
         for plan in self:
             plan.steps_count = steps_count.get(plan.id, 0)

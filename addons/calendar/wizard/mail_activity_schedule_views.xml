@@ -19,7 +19,7 @@
                 <attribute name="invisible">activity_category == 'meeting'</attribute>
             </xpath>
             <xpath expr="//button[@name='action_schedule_activities']" position="before">
-                  <field name="calendar_event_id" invisible="1" />
+                  <field name="calendar_event_id" invisible="1"/>
                   <button string="Open Calendar"
                           invisible="has_error or activity_category not in ('meeting', 'phonecall') or calendar_event_id"
                           name="action_create_calendar_event"
