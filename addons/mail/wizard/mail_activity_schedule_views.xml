@@ -34,13 +34,15 @@
                         <group invisible="plan_id">
                             <group>
                                 <field name="res_model" invisible="1"/>
-                                <field name="activity_type_id" required="1"
+                                <field name="activity_type_id"
+                                       required="not plan_id"
                                        options="{'no_create': True, 'no_open': True}"/>
                                 <field name="summary" placeholder="e.g. Discuss proposal"/>
                             </group>
                             <group>
                                 <field name="date_deadline"/>
-                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="user_id" widget="many2one_avatar_user"
+                                       required="not plan_id"/>
                             </group>
                             <field name="note" class="oe-bordered-editor" placeholder="Log a note..."/>
                         </group>

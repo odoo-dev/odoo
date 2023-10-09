@@ -101,9 +101,7 @@ class MailActivitySchedule(models.TransientModel):
                                len(applied_on.mapped('company_id')) > 1):
                 errors.add(_('The records must belong to the same company.'))
             if scheduler.plan_id:
-                scheduler._add_errors_plan(errors, applied_on)
-            else:
-                scheduler._add_errors_activity(errors, applied_on)
+                errors |= set(scheduler._check_plan_templates_error(applied_on))
             if errors:
                 error_display = [
                     _('The plan "%s" cannot be launched:', escape(scheduler.plan_id.name)) if scheduler.plan_id
@@ -219,17 +217,15 @@ class MailActivitySchedule(models.TransientModel):
             'domain': [('id', 'in', applied_on.ids)],
         }
 
-    def _add_errors_plan(self, errors, applied_on):
+    def _check_plan_templates_error(self, applied_on):
         self.ensure_one()
-        for record in applied_on:
-            for activity_template in self.plan_id.template_ids:
-                error = activity_template._determine_responsible(self.on_demand_user_id, record)['error']
-                if error:
-                    errors.add(error)
-        if self.plan_id and self.plan_id.id not in self.available_plan_ids.ids:
-            errors.add(
-                _('The plan is not compatible with the selected records (compatible plans: %(compatible_plans)s).',
-                  compatible_plans=','.join(plan.name for plan in self.available_plan_ids)))
+        return filter(
+            None, [
+                activity_template._determine_responsible(self.on_demand_user_id, record)['error']
+                for activity_template in self.plan_id.template_ids
+                for record in applied_on
+            ]
+        )
 
     # ------------------------------------------------------------
     # ACTIVITY-BASED SCHEDULING API
@@ -270,13 +266,6 @@ class MailActivitySchedule(models.TransientModel):
             user_id=self.user_id.id,
             date_deadline=self.date_deadline
         )
-
-    def _add_errors_activity(self, errors, applied_on):
-        self.ensure_one()
-        if not self.user_id:
-            errors.add(_('Responsible is required'))
-        if not self.activity_type_id:
-            errors.add(_('Activity type is required'))
 
     # ------------------------------------------------------------
     # TOOLS

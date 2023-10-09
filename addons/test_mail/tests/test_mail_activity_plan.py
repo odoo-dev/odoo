@@ -165,24 +165,6 @@ class TestActivitySchedule(ActivityScheduleCase):
         self.assertEqual(len(self.test_records[4].activity_ids), 0)
 
     @users('employee')
-    def test_activity_schedule_errors(self):
-        """ Test 'has_error' field of scheduling activities, giving feedback
-        to users about their current schedule configuration """
-        test_records = self.test_records.with_env(self.env)
-        form = self._instantiate_activity_schedule_wizard(test_records)
-        self.assertFalse(form.has_error)
-        form.activity_type_id = self.env['mail.activity.type']
-        self.assertTrue(form.has_error)
-        self.assertIn('Activity type is required', form.error)
-        form.activity_type_id = self.activity_type_todo
-        self.assertFalse(form.has_error)
-        form.user_id = self.env['res.users']
-        self.assertTrue(form.has_error)
-        self.assertIn('Responsible is required', form.error)
-        form.user_id = self.user_admin
-        self.assertFalse(form.has_error)
-
-    @users('employee')
     def test_plan_mode(self):
         """ Test the plan_mode that allows to preselect a compatible plan. """
         test_record = self.test_records[0].with_env(self.env)

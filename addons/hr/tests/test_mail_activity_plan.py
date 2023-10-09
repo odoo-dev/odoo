@@ -143,8 +143,7 @@ class TestActivitySchedule(ActivityScheduleHRCase):
                 else:
                     self.assertFalse(form.department_id)
             for plan in non_authorized_plans:
-                with self.assertRaises(ValidationError), self._instantiate_activity_schedule_wizard(employees) as form:
-                    form.plan_id = plan
+                self.assertNotIn(plan, form.plan_available_ids)
             for plan in authorized_plans:
                 with self._instantiate_activity_schedule_wizard(employees) as form:
                     form.plan_id = plan
