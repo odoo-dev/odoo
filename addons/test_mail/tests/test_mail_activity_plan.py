@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import date
+from datetime import date, timedelta
+from freezegun import freeze_time
 
+from odoo import Command, fields
 from odoo.addons.mail.tests.test_mail_activity import ActivityScheduleCase
 from odoo.exceptions import ValidationError
-from odoo.tests.common import Form
-from odoo.tools import mute_logger
+from odoo.tests import Form, tagged, users
 
 
+@tagged('mail_activity', 'mail_activity_plan')
 class TestActivitySchedule(ActivityScheduleCase):
     """ Test plan and activity schedule
 
-     We test:
      - activity scheduling on a single record and in batch
      - plan scheduling on a single record and in batch
      - plan creation and consistency
@@ -21,141 +22,283 @@ class TestActivitySchedule(ActivityScheduleCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.test_record_1, cls.test_record_2, cls.test_record_3 = cls.env['mail.test.activity'].create([
-            {'name': f'test_record_{idx + 1}'} for idx in range(3)])
-        cls.plan_party.res_model = 'mail.test.activity'
-        cls.plan_onboarding.res_model = 'mail.test.activity'
 
-    def get_default_deadline(self, activity_type, context=None):
-        return self.env['mail.activity'].with_context(**(context or {}))._calculate_date_deadline(activity_type)
+        # prepare plans
+        cls.plan_party = cls.env['mail.activity.plan'].create({
+            'name': 'Test Plan A Party',
+            'res_model': 'mail.test.activity',
+            'template_ids': [
+                Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_type': 'on_demand',
+                    'sequence': 10,
+                    'summary': 'Book a place',
+                }), Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': cls.user_admin.id,
+                    'responsible_type': 'other',
+                    'sequence': 20,
+                    'summary': 'Invite special guest',
+                }),
+            ],
+        })
+        cls.plan_onboarding = cls.env['mail.activity.plan'].create({
+            'name': 'Test Onboarding',
+            'res_model': 'mail.test.activity',
+            'template_ids': [
+                Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': cls.user_admin.id,
+                    'responsible_type': 'other',
+                    'sequence': 10,
+                    'summary': 'Plan training',
+                }), Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': cls.user_admin.id,
+                    'responsible_type': 'other',
+                    'sequence': 20,
+                    'summary': 'Training',
+                }),
+            ]
+        })
 
-    def assertActivitiesFromPlan(self, plan, on_record, given_responsible_id=None, given_date_deadline=None):
-        """ Check that the last activities on the record correspond to the one
-        that the plan must create (number of activities and activities content).
+        # test records
+        cls.reference_now = fields.Datetime.from_string('2023-09-30 14:00:00')
+        cls.test_records = cls.env['mail.test.activity'].create([
+            {
+                'date': cls.reference_now + timedelta(days=(idx - 10)),
+                'email_from': f'customer.activity.{idx}@test.example.com',
+                'name': f'test_record_{idx}'
+            } for idx in range(5)
+        ])
 
-        :param <mail.activity.plan> plan: activity plan that has been applied on the record
-        :param recordset on_record: record on which the plan has been applied
-        :param <res.user> given_responsible_id: responsible provided when scheduling the plan
-        :param date given_date_deadline: deadline provided when scheduling the plan
-        """
-        expected_number_of_activity = len(plan.template_ids)
-        activities = self.get_last_activities(on_record, expected_number_of_activity)
-        default_responsible_id = given_responsible_id or self.env.user
-        self.assertEqual(len(activities), expected_number_of_activity)
-        for activity, template in zip(activities, plan.template_ids):
-            self.assertEqual(activity.activity_type_id, template.activity_type_id)
-            self.assertEqual(activity.summary, template.summary)
-            self.assertEqual(activity.note, template.note)
-            responsible_id = default_responsible_id if template.responsible_type == 'on_demand' else template.responsible_id
-            self.assertEqual(activity.user_id, responsible_id)
-            self.assertEqual(activity.date_deadline,
-                             given_date_deadline or self.get_default_deadline(template.activity_type_id))
-
-    def assertMessagesFromPlan(self, plan, on_record, given_responsible_id=None, given_date_deadline=None):
-        """ Check that the last posted message on the record correspond to the one
-        that the plan must generate (number of activities and activities content).
-
-        :param <mail.activity.plan> plan: activity plan that has been applied on the record
-        :param recordset on_record: record on which the plan has been applied
-        :param <res.user> given_responsible_id: responsible provided when scheduling the plan
-        :param date given_date_deadline: deadline provided when scheduling the plan
-        """
-        default_responsible_id = given_responsible_id or self.env.user
-        message = self.get_last_message(on_record)
-        self.assertIn(f'The plan "{plan.name}" has been started', message.body)
-        for template in plan.template_ids:
-            self.assertIn(template.summary, message.body)
-            responsible_id = default_responsible_id if template.responsible_type == 'on_demand' else template.responsible_id
-            date_deadline = given_date_deadline or self.get_default_deadline(template.activity_type_id)
-            self.assertIn(f'{template.summary or template.activity_type_id.name}, '
-                          f'assigned to {responsible_id.name}, due on the {date_deadline}', message.body)
-
-    def assertPlanExecution(self, records, given_responsible_id=None, given_date_deadline=None):
-        """ Check that the plan has created the right activities and send the
-        right message on the records (see assertActivitiesFromPlan and
-        assertMessagesFromPlan). """
-        for record in records:
-            self.assertActivitiesFromPlan(self.plan_party, record, given_date_deadline=given_date_deadline,
-                                          given_responsible_id=given_responsible_id)
-            self.assertMessagesFromPlan(self.plan_party, record, given_date_deadline=given_date_deadline,
-                                        given_responsible_id=given_responsible_id)
-
-    @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    @users('employee')
     def test_activity_schedule(self):
         """ Test schedule of an activity on a single or multiple records. """
-        for records in (self.test_record_1, self.test_record_1 + self.test_record_2 + self.test_record_3):
-            form = self._instantiate_activity_schedule_wizard(records)
-            self.assertFalse(form.has_error)
-            form.activity_type_id = self.env['mail.activity.type']
-            self.assertTrue(form.has_error)
-            self.assertIn('Activity type is required', form.error)
-            form.activity_type_id = self.activity_type_todo
-            self.assertFalse(form.has_error)
-            form.user_id = self.env['res.users']
-            self.assertTrue(form.has_error)
-            self.assertIn('Responsible is required', form.error)
-            form.user_id = self.user_admin
-            self.assertFalse(form.has_error)
-            form.summary = 'Write specification'
-            form.note = '<p>Useful link ...</p>'
-            wizard = form.save()
-            wizard.action_schedule_activities()
-            for record in records:
-                activity = self.get_last_activities(record, 1)[0]
-                self.assertEqual(activity.activity_type_id, self.activity_type_todo)
-                self.assertEqual(activity.date_deadline, self.get_default_deadline(self.activity_type_todo))
-                self.assertEqual(activity.note, '<p>Useful link ...</p>')
-                self.assertEqual(activity.summary, 'Write specification')
-                self.assertEqual(activity.user_id, self.user_admin)
+        test_records_all = [self.test_records[0], self.test_records[:3]]
+        for test_idx, test_case in enumerate(['mono', 'multi']):
+            test_records = test_records_all[test_idx].with_env(self.env)
+            with self.subTest(test_case=test_case, test_records=test_records):
+                # 1. SCHEDULE ACTIVITIES
+                with freeze_time(self.reference_now):
+                    form = self._instantiate_activity_schedule_wizard(test_records)
+                    form.summary = 'Write specification'
+                    form.note = '<p>Useful link ...</p>'
+                    form.user_id = self.user_admin
+                    with self._mock_activities():
+                        form.save().action_schedule_activities()
 
-            form = self._instantiate_activity_schedule_wizard(records)
-            form.activity_type_id = self.activity_type_call
-            wizard = form.save()
-            wizard.with_context(mail_activity_quick_update=True).action_schedule_and_mark_as_done()
-            for record in records:
-                message = self.get_last_message(record)
-                self.assertEqual(message.mail_activity_type_id, self.activity_type_call)
-                self.assertIn(self.activity_type_call.name, message.body)
-                self.assertIn('done', message.body)
+                for record in test_records:
+                    self.assertActivityCreatedOnRecord(record, {
+                        'activity_type_id': self.activity_type_todo,
+                        'date_deadline': self.reference_now.date() + timedelta(days=4),  # activity type delay
+                        'note': '<p>Useful link ...</p>',
+                        'summary': 'Write specification',
+                        'user_id': self.user_admin,
+                    })
 
-            form = self._instantiate_activity_schedule_wizard(records)
-            form.activity_type_id = self.activity_type_todo
-            wizard = form.save()
-            wizard_res = wizard.with_context(mail_activity_quick_update=True).action_done_schedule_next()
-            self.assertEqual({**wizard_res, 'context': False}, {
-                'name': "Schedule Activity On Selected Records" if len(records) > 1 else "Schedule Activity",
-                'context': False,  # tested below
-                'view_mode': 'form',
-                'res_model': 'mail.activity.schedule',
-                'views': [(False, 'form')],
-                'type': 'ir.actions.act_window',
-                'target': 'new',
+                # 2. LOG DONE ACTIVITIES
+                with freeze_time(self.reference_now):
+                    form = self._instantiate_activity_schedule_wizard(test_records)
+                    form.activity_type_id = self.activity_type_call
+                    with self._mock_activities(), freeze_time(self.reference_now):
+                        form.save().with_context(
+                            mail_activity_quick_update=True
+                        ).action_schedule_and_mark_as_done()
+
+                for record in test_records:
+                    self.assertActivityDoneOnRecord(record, self.activity_type_call)
+
+                # 3. LOG DONE ACTIVITIES, PREPARE SCHEDULE NEXT
+                with freeze_time(self.reference_now):
+                    form = self._instantiate_activity_schedule_wizard(test_records)
+                    form.activity_type_id = self.activity_type_todo
+                    with self._mock_activities():
+                        wizard_res = form.save().with_context(
+                            mail_activity_quick_update=True
+                        ).action_done_schedule_next()
+                self.assertDictEqual(wizard_res, {
+                    'name': "Schedule Activity On Selected Records" if len(test_records) > 1 else "Schedule Activity",
+                    'context': {
+                        'active_id': test_records[0].id,
+                        'active_ids': test_records.ids,
+                        'active_model': test_records._name,
+                        'mail_activity_quick_update': True,
+                        'default_previous_activity_type_id': 4,
+                        'activity_previous_deadline': self.reference_now.date() + timedelta(days=4),
+                        'default_res_ids': repr(test_records.ids),
+                        'default_res_model': test_records._name,
+                    },
+                    'view_mode': 'form',
+                    'res_model': 'mail.activity.schedule',
+                    'views': [(False, 'form')],
+                    'type': 'ir.actions.act_window',
+                    'target': 'new',
+                })
+                for record in test_records:
+                    self.assertActivityDoneOnRecord(record, self.activity_type_todo)
+
+                # 4. CONTINUE WITH SCHEDULE ACTIVITIES
+                # implies deadline addition on top of previous activities
+                with freeze_time(self.reference_now):
+                    form = Form(self.env['mail.activity.schedule'].with_context(wizard_res['context']))
+                    form.activity_type_id = self.activity_type_call
+                    with self._mock_activities():
+                        form.save().with_context(
+                            mail_activity_quick_update=True
+                        ).action_schedule_activities()
+
+                for record in test_records:
+                    self.assertActivityCreatedOnRecord(record, {
+                        'activity_type_id': self.activity_type_call,
+                        'date_deadline': self.reference_now.date() + timedelta(days=5),  # both types delays
+                        'note': False,
+                        'summary': False,
+                        'user_id': self.env.user,
+                    })
+
+        # global activity creation from tests
+        self.assertEqual(len(self.test_records[0].activity_ids), 4)
+        self.assertEqual(len(self.test_records[1].activity_ids), 2)
+        self.assertEqual(len(self.test_records[2].activity_ids), 2)
+        self.assertEqual(len(self.test_records[3].activity_ids), 0)
+        self.assertEqual(len(self.test_records[4].activity_ids), 0)
+
+    @users('employee')
+    def test_activity_schedule_errors(self):
+        """ Test 'has_error' field of scheduling activities, giving feedback
+        to users about their current schedule configuration """
+        test_records = self.test_records.with_env(self.env)
+        form = self._instantiate_activity_schedule_wizard(test_records)
+        self.assertFalse(form.has_error)
+        form.activity_type_id = self.env['mail.activity.type']
+        self.assertTrue(form.has_error)
+        self.assertIn('Activity type is required', form.error)
+        form.activity_type_id = self.activity_type_todo
+        self.assertFalse(form.has_error)
+        form.user_id = self.env['res.users']
+        self.assertTrue(form.has_error)
+        self.assertIn('Responsible is required', form.error)
+        form.user_id = self.user_admin
+        self.assertFalse(form.has_error)
+
+    @users('employee')
+    def test_plan_mode(self):
+        """ Test the plan_mode that allows to preselect a compatible plan. """
+        test_record = self.test_records[0].with_env(self.env)
+        context = {
+            'active_id': test_record.id,
+            'active_ids': test_record.ids,
+            'active_model': test_record._name
+        }
+        plan_mode_context = {**context, 'plan_mode': True}
+
+        with Form(self.env['mail.activity.schedule'].with_context(context)) as form:
+            self.assertFalse(form.plan_id)
+        with Form(self.env['mail.activity.schedule'].with_context(plan_mode_context)) as form:
+            self.assertEqual(form.plan_id, self.plan_party)
+        # should select only model-plans
+        self.plan_party.res_model = 'res.partner'
+        with Form(self.env['mail.activity.schedule'].with_context(plan_mode_context)) as form:
+            self.assertEqual(form.plan_id, self.plan_onboarding)
+
+    @users('employee')
+    def test_plan_schedule(self):
+        """ Test schedule of a plan on a single or multiple records. """
+        test_records_all = [self.test_records[0], self.test_records[:3]]
+        for test_idx, test_case in enumerate(['mono', 'multi']):
+            test_records = test_records_all[test_idx].with_env(self.env)
+            with self.subTest(test_case=test_case, test_records=test_records), \
+                 freeze_time(self.reference_now):
+                # No date_deadline specified, No responsible specified
+                form = self._instantiate_activity_schedule_wizard(test_records)
+                self.assertFalse(form.plan_assignation_summary)
+                form.plan_id = self.plan_onboarding
+                self.assertEqual(form.plan_assignation_summary,
+                                 '<ul><li>To-Do - other: Plan training</li><li>To-Do - other: Training</li></ul>')
+                self.assertTrue(form._get_modifier('on_demand_user_id', 'invisible'))
+                form.plan_id = self.plan_party
+                self.assertIn('Book a place', form.plan_assignation_summary)
+                self.assertFalse(form._get_modifier('on_demand_user_id', 'invisible'))
+                with self._mock_activities():
+                    form.save().action_schedule_plan()
+
+                self.assertPlanExecution(self.plan_party, test_records)
+
+                # date_deadline specified, responsible specified
+                force_date_deadline = date(2050, 1, 15)
+                force_responsible_id = self.user_admin
+                form = self._instantiate_activity_schedule_wizard(test_records)
+                form.plan_id = self.plan_party
+                form.date_plan_deadline = force_date_deadline
+                form.on_demand_user_id = self.env['res.users']
+                self.assertTrue(form.has_error)
+                self.assertIn(f'No responsible specified for {self.activity_type_todo.name}: Book a place',
+                              form.error)
+                form.on_demand_user_id = force_responsible_id
+                self.assertFalse(form.has_error)
+                with self._mock_activities():
+                    form.save().action_schedule_plan()
+
+                self.assertPlanExecution(
+                    self.plan_party, test_records,
+                    force_date_deadline=force_date_deadline,
+                    force_responsible_id=force_responsible_id)
+
+    @users('admin')
+    def test_plan_setup_model_consistency(self):
+        """ Test the model consistency of a plan.
+
+        Model consistency between activity_type - activity_template - plan:
+        - a plan is restricted to a model
+        - a plan contains activity plan templates which can be limited to some model
+        through activity type
+         """
+        # Setup independent activities type to avoid interference with existing data
+        activity_type_1, activity_type_2, activity_type_3 = self.env['mail.activity.type'].create([
+            {'name': 'Todo'},
+            {'name': 'Call'},
+            {'name': 'Partner-specific', 'res_model': 'res.partner'},
+        ])
+        test_plan = self.env['mail.activity.plan'].create({
+            'name': 'Test Plan',
+            'res_model': 'mail.test.activity',
+            'template_ids': [
+                (0, 0, {'activity_type_id': activity_type_1.id}),
+                (0, 0, {'activity_type_id': activity_type_2.id})
+            ],
+        })
+
+        # ok, all activities generic
+        test_plan.res_model = 'res.partner'
+        test_plan.res_model = 'mail.test.activity'
+
+        with self.assertRaises(
+                ValidationError,
+                msg='Cannot set activity type to res.partner as linked to a plan of another model'):
+            activity_type_1.res_model = 'res.partner'
+
+        activity_type_1.res_model = 'mail.test.activity'
+        with self.assertRaises(
+                ValidationError,
+                msg='Cannot set plan to res.partner as using activities linked to another model'):
+            test_plan.res_model = 'res.partner'
+
+        with self.assertRaises(
+                ValidationError,
+                msg='Cannot create activity template for res.partner as linked to a plan of another model'):
+            self.env['mail.activity.plan.template'].create({
+                'activity_type_id': activity_type_3.id,
+                'plan_id': test_plan.id,
             })
-            for record in records:
-                message = self.get_last_message(record)
-                self.assertEqual(message.mail_activity_type_id, self.activity_type_todo)
-                self.assertIn(self.activity_type_todo.name, message.body)
-                self.assertIn('done', message.body)
-            form = Form(self.env['mail.activity.schedule'].with_context(wizard_res['context']))
-            form.activity_type_id = self.activity_type_call
-            wizard = form.save()
-            wizard.with_context(mail_activity_quick_update=True).action_schedule_activities()
-            for record in records:
-                activity = self.get_last_activities(record, 1)[0]
-                self.assertEqual(activity.activity_type_id, self.activity_type_call)
-                self.assertEqual(activity.date_deadline,
-                                 self.get_default_deadline(self.activity_type_call, context=wizard_res['context']))
-                self.assertEqual(activity.note, False)
-                self.assertEqual(activity.summary, False)
-                self.assertEqual(activity.user_id, self.env.user)
 
-        self.assertEqual(len(self.get_last_activities(self.test_record_1)), 4)
-        self.assertEqual(len(self.get_last_activities(self.test_record_2)), 2)
-        self.assertEqual(len(self.get_last_activities(self.test_record_3)), 2)
-
-    def test_plan_create(self):
+    @users('admin')
+    def test_plan_setup_validation(self):
         """ Test plan consistency. """
-        plan = self.env['mail.activity.plan'].create({'name': 'test', 'res_model': 'mail.test.activity'})
+        plan = self.env['mail.activity.plan'].create({
+            'name': 'test',
+            'res_model': 'mail.test.activity',
+        })
         template = self.env['mail.activity.plan.template'].create({
             'activity_type_id': self.activity_type_todo.id,
             'plan_id': plan.id,
@@ -168,97 +311,3 @@ class TestActivitySchedule(ActivityScheduleCase):
                 ValidationError, msg='When selecting responsible "other", you must specify a responsible.'):
             template.responsible_type = 'other'
         template.write({'responsible_type': 'other', 'responsible_id': self.user_admin})
-
-    def test_plan_mode(self):
-        """ Test the plan_mode that allows to preselect a compatible plan. """
-        context = {
-            'active_id': self.test_record_1.id,
-            'active_ids': self.test_record_1.ids,
-            'active_model': 'mail.test.activity',
-        }
-        with Form(self.env['mail.activity.schedule'].with_context(context)) as form:
-            self.assertFalse(form.plan_id)
-        context = {
-            **context,
-            'plan_mode': True,
-        }
-        self.plan_onboarding.res_model = 'res.partner'
-        self.plan_party.res_model = 'mail.test.activity'
-        with Form(self.env['mail.activity.schedule'].with_context(context)) as form:
-            self.assertEqual(form.plan_id, self.plan_party)
-        self.plan_party.res_model = 'res.partner'
-        self.plan_onboarding.res_model = 'mail.test.activity'
-        with Form(self.env['mail.activity.schedule'].with_context(context)) as form:
-            self.assertEqual(form.plan_id, self.plan_onboarding)
-
-    def test_plan_setup_model_consistency(self):
-        """ Test the model consistency of a plan.
-
-        Model consistency between activity_type - activity_template - plan:
-        - a plan is restricted to a model
-        - a plan contains activity plan templates which can be limited to some model
-        through activity type
-         """
-        # Setup independent activities type to avoid interference with existing data
-        activity_type_todo_2, activity_type_call_2 = (
-            self.env['mail.activity.type'].create([{'name': name} for name in ('to do 2', 'call 2')]))
-        for template_id in self.plan_party.template_ids:
-            template_id.activity_type_id = activity_type_todo_2
-
-        self.plan_party.res_model = 'res.partner'
-        with self.assertRaises(
-                ValidationError,
-                msg='Plan limited to "partner" while the to-do activity can only be applied to "mail.test.activity".'):
-            activity_type_todo_2.res_model = 'mail.test.activity'
-        activity_type_todo_2.res_model = 'res.partner'
-        with self.assertRaises(
-                ValidationError,
-                msg='Plan limited to "mail.test.activity" while the to-do activity can only be applied to "partner".'):
-            self.plan_party.res_model = 'mail.test.activity'
-        activity_type_todo_2.res_model = False
-        activity_type_call_2.res_model = 'mail.test.activity'
-        with self.assertRaises(
-                ValidationError,
-                msg='Plan limited to "partner" while the call activity can only be applied to "mail.test.activity".'):
-            self.env['mail.activity.plan.template'].create({
-                'activity_type_id': activity_type_call_2.id,
-                'summary': 'Call room responsible',
-                'responsible_type': 'other',
-                'responsible_id': self.user_admin.id,
-                'plan_id': self.plan_party.id,
-            })
-
-    @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
-    def test_plan_schedule(self):
-        """ Test schedule of a plan on a single or multiple records. """
-        for records in (self.test_record_1, self.test_record_1 + self.test_record_2 + self.test_record_3):
-            # No date_deadline specified, No responsible specified
-            form = self._instantiate_activity_schedule_wizard(records)
-            self.assertFalse(form.plan_assignation_summary)
-            form.plan_id = self.plan_onboarding
-            self.assertEqual(form.plan_assignation_summary,
-                             '<ul><li>To-Do - other: Plan training</li><li>To-Do - other: Training</li></ul>')
-            self.assertTrue(form._get_modifier('on_demand_user_id', 'invisible'))
-            form.plan_id = self.plan_party
-            self.assertIn('Book a place', form.plan_assignation_summary)
-            self.assertFalse(form._get_modifier('on_demand_user_id', 'invisible'))
-            wizard = form.save()
-            wizard.action_schedule_plan()
-            self.assertPlanExecution(records)
-            # date_deadline specified, responsible specified
-            given_date_deadline = date(2050, 1, 15)
-            given_responsible_id = self.user_admin
-            form = self._instantiate_activity_schedule_wizard(records)
-            form.plan_id = self.plan_party
-            form.date_plan_deadline = given_date_deadline
-            form.on_demand_user_id = self.env['res.users']
-            self.assertTrue(form.has_error)
-            self.assertIn(f'No responsible specified for {self.activity_type_todo.name}: Book a place',
-                          form.error)
-            form.on_demand_user_id = given_responsible_id
-            self.assertFalse(form.has_error)
-            wizard = form.save()
-            wizard.action_schedule_plan()
-            self.assertPlanExecution(records,
-                                     given_date_deadline=given_date_deadline,
-                                     given_responsible_id=given_responsible_id)
