@@ -21,10 +21,7 @@ class MailActivityPlan(models.Model):
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company)
     template_ids = fields.One2many(
-        'mail.activity.plan.template', 'plan_id',
-        string='Activities',
-        domain="[('company_id', '=', company_id)]",
-        check_company=True)
+        'mail.activity.plan.template', 'plan_id', string='Activities')
     active = fields.Boolean(default=True)
     res_model_id = fields.Many2one(
         'ir.model', string='Applies to',

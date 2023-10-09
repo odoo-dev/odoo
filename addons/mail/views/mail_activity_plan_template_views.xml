@@ -9,7 +9,6 @@
                     <field name="activity_type_id" context="{'form_view_ref': 'mail.mail_activity_type_form_inherit'}"/>
                     <field name="summary"/>
                     <field name="responsible_type"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
             </field>
         </record>
@@ -25,7 +24,6 @@
                         <group>
                             <field name="activity_type_id" context="{'form_view_ref': 'mail.mail_activity_type_form_inherit'}"/>
                             <field name="summary"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
                             <field name="responsible_type"/>
                             <field name="responsible_id" invisible="responsible_type != 'other'"/>
                             <field name="note"/>

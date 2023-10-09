@@ -184,11 +184,13 @@ class TestActivitySchedule(ActivityScheduleHRCase):
             'responsible_type': 'manager',
             'responsible_id': False,
         })
-        self.plan_onboarding.template_ids += self.env['mail.activity.plan.template'].create({
-            'activity_type_id': self.activity_type_todo.id,
-            'summary': 'Send feedback to the manager',
-            'responsible_type': 'employee',
-            'sequence': 30,
+        self.plan_onboarding.write({
+            'template_ids': [(0, 0, {
+                'activity_type_id': self.activity_type_todo.id,
+                'summary': 'Send feedback to the manager',
+                'responsible_type': 'employee',
+                'sequence': 30,
+            })],
         })
         for employees in (self.employee_1, self.employee_1 + self.employee_2):
             # Happy case

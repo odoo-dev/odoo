@@ -11,10 +11,12 @@ class MailActivityPlanTemplate(models.Model):
     _description = 'Activity plan template'
     _rec_name = 'summary'
 
-    plan_id = fields.Many2one('mail.activity.plan', ondelete='cascade')
+    plan_id = fields.Many2one(
+        'mail.activity.plan', string="Plan",
+        ondelete='cascade', required=True)
     res_model = fields.Selection(related="plan_id.res_model")
+    company_id = fields.Many2one(related='plan_id.company_id')
     sequence = fields.Integer(default=10)
-    company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Activity Type',
         default=lambda self: self.env.ref('mail.mail_activity_data_todo'),
@@ -33,7 +35,7 @@ class MailActivityPlanTemplate(models.Model):
         help='Specific responsible of activity if not linked to the employee.')
     note = fields.Html('Note')
 
-    @api.constrains('activity_type_id')
+    @api.constrains('activity_type_id', 'plan_id')
     def _check_activity_type_res_model(self):
         """ Check that the plan models are compatible with the template activity
         type model. Note that it depends also on "activity_type_id.res_model" and
@@ -61,10 +63,7 @@ class MailActivityPlanTemplate(models.Model):
     @api.depends('activity_type_id')
     def _compute_summary(self):
         for template in self:
-            if template.activity_type_id and template.activity_type_id.summary:
-                template.summary = template.activity_type_id.summary
-            else:
-                template.summary = False
+            template.summary = template.activity_type_id.summary
 
     @api.depends('responsible_type')
     def _compute_responsible_id(self):
