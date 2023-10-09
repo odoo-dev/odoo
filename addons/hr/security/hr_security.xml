@@ -74,6 +74,7 @@
         <field name="groups" eval="[(4, ref('group_hr_manager'))]"/>
         <field name="model_id" ref="mail.model_mail_activity_plan"/>
         <field name="domain_force">[('res_model', '=', 'hr.employee')]</field>
+        <field name="perm_read" eval="False"/>
     </record>
 
     <record id="mail_plan_templates_rule_group_hr_manager" model="ir.rule">
@@ -81,6 +82,7 @@
         <field name="groups" eval="[(4, ref('group_hr_manager'))]"/>
         <field name="model_id" ref="mail.model_mail_activity_plan_template"/>
         <field name="domain_force">[('plan_id.res_model', '=', 'hr.employee')]</field>
+        <field name="perm_read" eval="False"/>
     </record>
 
 </data>
