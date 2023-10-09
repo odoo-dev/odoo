@@ -24,19 +24,6 @@ class MailActivitySchedule(models.TransientModel):
             else:
                 wizard.department_id = False
 
-    @api.model
-    def _get_record_for_scheduling(self, record, responsible):
-        if record._name != 'hr.employee':
-            return super()._get_record_for_scheduling(record, responsible)
-        if not self.env['hr.employee'].with_user(responsible).check_access_rights('read', raise_exception=False):
-            employee = record
-            record = self.env['hr.plan.employee.activity'].sudo().search([('employee_id', '=', employee.id)], limit=1)
-            if not record:
-                record = self.env['hr.plan.employee.activity'].sudo().create({
-                    'employee_id': employee.id,
-                })
-        return record
-
     def _get_search_available_plan_domain(self):
         domain = super()._get_search_available_plan_domain()
         if self.res_model != 'hr.employee':

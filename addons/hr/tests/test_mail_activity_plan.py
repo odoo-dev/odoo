@@ -238,21 +238,3 @@ class TestActivitySchedule(ActivityScheduleHRCase):
                 form.save()
             self.employee_coach.user_id = self.user_coach
             self.employee_manager.user_id = self.user_manager
-
-    def test_responsible_without_access_to_employee(self):
-        """ Check that when the responsible has no access to the employee record, the activity is posted on a pseudo
-         employee record of type hr.plan.employee.activity. """
-        for employees in (self.employee_1, self.employee_1 + self.employee_2):
-            self.plan_onboarding.template_ids[0].responsible_id = self.user_internal_basic
-            form = self._instantiate_activity_schedule_wizard(employees)
-            form.plan_id = self.plan_onboarding
-            wizard = form.save()
-            wizard.action_schedule_plan()
-            for employee in employees:
-                activities = self.get_last_activities(employee, 1)
-                self.assertEqual(len(activities), 1)
-                self.assertEqual(activities[0].user_id, self.user_coach)
-                activities = self.get_last_activities(
-                    self.env['hr.plan.employee.activity'].search([('employee_id', '=', employee.id)]), 1)
-                self.assertEqual(len(activities), 1)
-                self.assertEqual(activities[0].user_id, self.user_internal_basic)
