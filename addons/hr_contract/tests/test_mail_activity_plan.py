@@ -4,10 +4,13 @@
 from freezegun import freeze_time
 
 from odoo import fields
-from odoo.addons.hr.tests.test_mail_activity_plan import TestActivityScheduleHRCase
+from odoo.addons.hr.tests.test_mail_activity_plan import ActivityScheduleHRCase
+from odoo.tests import tagged, users
 
 
-class TestActivitySchedule(TestActivityScheduleHRCase):
+@tagged('mail_activity', 'mail_activity_plan')
+class TestActivitySchedule(ActivityScheduleHRCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -19,17 +22,16 @@ class TestActivitySchedule(TestActivityScheduleHRCase):
                                      (cls.employee_3, '2023-12-01'),
                                      (cls.employee_4, '2024-01-01')):
             employee.contract_ids = cls.env['hr.contract'].create({
-                'name': 'Contract',
                 'employee_id': employee.id,
+                'date_end': fields.Date.from_string('2025-12-31'),
+                'date_start': fields.Date.from_string(date_start),
+                'name': 'Contract',
                 'state': 'draft',
                 'wage': 1,
-                'date_start': fields.Date.from_string(date_start),
-                'date_end': fields.Date.from_string('2025-12-31'),
             })
-        cls.partner_1, cls.partner_2 = cls.env['res.partner'].create([
-            {'name': f'partner{idx + 1}'} for idx in range(2)])
 
     @freeze_time('2023-08-31')
+    @users('admin')
     def test_default_due_date(self):
         for employees, date_plan_deadline in (
                 (self.employee_1, '2023-09-30'),
@@ -45,9 +47,12 @@ class TestActivitySchedule(TestActivityScheduleHRCase):
             with self._instantiate_activity_schedule_wizard(employees) as form:
                 form.plan_id = self.plan_onboarding
                 self.assertEqual(form.date_plan_deadline, fields.Date.from_string(date_plan_deadline))
-        self.plan_onboarding.template_ids[1].responsible_type = 'on_demand'
-        self.plan_onboarding.res_model = 'res.partner'
-        for partners in (self.partner_1, self.partner_1 + self.partner_2):
-            with self._instantiate_activity_schedule_wizard(partners) as form:
-                form.plan_id = self.plan_onboarding
-                self.assertFalse(form.date_plan_deadline)
+
+        # not applicable on other models
+        customers = self.env['res.partner'].create([
+            {'name': 'Customer1',},
+            {'name': 'Customer2',},
+        ])
+        with self._instantiate_activity_schedule_wizard(customers) as form:
+            form.plan_id = self.plan_party
+            self.assertFalse(form.date_plan_deadline)

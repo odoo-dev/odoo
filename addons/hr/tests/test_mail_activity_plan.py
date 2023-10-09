@@ -2,35 +2,103 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
+from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.test_mail_activity import ActivityScheduleCase
 from odoo.exceptions import UserError, ValidationError
+from odoo.tests import tagged, users
 
 
-class TestActivityScheduleHRCase(ActivityScheduleCase):
+class ActivityScheduleHRCase(ActivityScheduleCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model_hr_employee = cls.env.ref('hr.model_hr_employee')
-        cls.user_admin = cls.env.ref('base.user_admin')
-        cls.plan_onboarding.res_model = 'hr.employee'
-        cls.plan_onboarding.template_ids[1].write({
-            'responsible_type': 'coach',
-            'responsible_id': False,
+
+        cls.plan_onboarding = cls.env['mail.activity.plan'].create({
+            'name': 'Test Onboarding',
+            'res_model': 'hr.employee',
+            'template_ids': [
+                Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': cls.user_admin.id,
+                    'responsible_type': 'other',
+                    'sequence': 10,
+                    'summary': 'Plan training',
+                }), Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': False,
+                    'responsible_type': 'coach',
+                    'sequence': 20,
+                    'summary': 'Training',
+                }),
+            ]
         })
-        cls.users = cls.env['res.users'].create([{
-            'name': name,
-            'login': name,
-            'email': f'{name}@example.com',
-        } for name in ('test_manager', 'test_coach', 'test_employee1', 'test_employee2', 'test_employee_dep_b')])
-        cls.user_internal_basic = cls.env['res.users'].create(
-            next({'name': name, 'login': name, 'email': f'{name}@example.com',
-                  'groups_id': [Command.set([cls.env.ref('base.group_user').id])]} for name in ('non_employee',)))
-        cls.user_manager, cls.user_coach, cls.user_employee_1, cls.user_employee_2, cls.user_employee_dep_b = cls.users
-        cls.employees = cls.env['hr.employee'].create([{
-            'name': user.name,
-            'user_id': user.id,
-            'work_email': user.email,
-        } for user in cls.users])
+        cls.plan_party = cls.env['mail.activity.plan'].create({
+            'name': 'Test Party Plan',
+            'res_model': 'res.partner',
+            'template_ids': [
+                Command.create({
+                    'activity_type_id': cls.activity_type_todo.id,
+                    'responsible_id': cls.user_admin.id,
+                    'responsible_type': 'on_demand',
+                    'sequence': 10,
+                    'summary': 'Party',
+                }),
+            ]
+        })
+
+        cls.user_manager = mail_new_test_user(
+            cls.env,
+            email='test.manager@test.mycompany.com',
+            groups='base.group_user,hr.group_hr_manager',
+            login='test_manager',
+            name='Test Manager',
+        )
+        cls.user_coach = mail_new_test_user(
+            cls.env,
+            email='test.coach@test.mycompany.com',
+            groups='base.group_user,hr.group_hr_manager',
+            login='test_coach',
+            name='Test Coach',
+        )
+        cls.user_employee_1 = mail_new_test_user(
+            cls.env,
+            email='test.employee1@test.mycompany.com',
+            groups='base.group_user,hr.group_hr_manager',
+            login='test_employee1',
+            name='Test Employee 1',
+        )
+        cls.user_employee_2 = mail_new_test_user(
+            cls.env,
+            email='test.employee2@test.mycompany.com',
+            groups='base.group_user,hr.group_hr_manager',
+            login='test_employee2',
+            name='Test Employee 2',
+        )
+        cls.user_employee_dep_b = mail_new_test_user(
+            cls.env,
+            email='test.employeedepb@test.mycompany.com',
+            groups='base.group_user,hr.group_hr_manager',
+            login='test_employee_dep_b',
+            name='Test Employee DepB',
+        )
+        cls.users = cls.user_manager + cls.user_coach + cls.user_employee_1 + cls.user_employee_2 + cls.user_employee_dep_b
+
+        cls.user_internal_basic = mail_new_test_user(
+            cls.env,
+            email='non.employee@test.mycompany.com',
+            groups='base.group_user',
+            login='non_employee',
+            name='Non Employee',
+        )
+
+        cls.employees = cls.env['hr.employee'].create([
+            {
+                'name': user.name,
+                'user_id': user.id,
+                'work_email': user.email,
+            } for user in cls.users
+        ])
         cls.employee_manager, cls.employee_coach, cls.employee_1, cls.employee_2, cls.employee_dep_b = cls.employees
         cls.department_a = cls.env['hr.department'].create({
             'name': 'Test Department A',
@@ -48,7 +116,10 @@ class TestActivityScheduleHRCase(ActivityScheduleCase):
         cls.employee_dep_b.coach_id = cls.employee_coach
 
 
-class TestActivitySchedule(TestActivityScheduleHRCase):
+@tagged('mail_activity', 'mail_activity_plan')
+class TestActivitySchedule(ActivityScheduleHRCase):
+
+    @users('admin')
     def test_department(self):
         """ Check that the allowed plan are filtered according to the department. """
         no_plan = self.env['mail.activity.plan']
@@ -146,8 +217,8 @@ class TestActivitySchedule(TestActivityScheduleHRCase):
             self.assertTrue(form.has_error)
             n_error = form.error.count('<li>')
             self.assertEqual(n_error, 2)
-            self.assertIn('Manager of employee test_employee1 is not set.', form.error)
-            self.assertIn('Coach of employee test_employee1 is not set.', form.error)
+            self.assertIn(f'Manager of employee {self.employee_1.name} is not set.', form.error)
+            self.assertIn(f'Coach of employee {self.employee_1.name} is not set.', form.error)
             with self.assertRaises(ValidationError):
                 form.save()
             self.employee_1.parent_id = self.employee_manager
@@ -159,11 +230,11 @@ class TestActivitySchedule(TestActivityScheduleHRCase):
             self.assertTrue(form.has_error)
             n_error = form.error.count('<li>')
             self.assertEqual(n_error, 2 * len(employees))
-            self.assertIn("The user of test_employee1's coach is not set.", form.error)
-            self.assertIn('The manager of test_employee1 should be linked to a user.', form.error)
+            self.assertIn(f"The user of {self.employee_1.name}'s coach is not set.", form.error)
+            self.assertIn(f'The manager of {self.employee_1.name} should be linked to a user.', form.error)
             if len(employees) > 1:
-                self.assertIn("The user of test_employee2's coach is not set.", form.error)
-                self.assertIn('The manager of test_employee2 should be linked to a user.', form.error)
+                self.assertIn(f"The user of {self.employee_2.name}'s coach is not set.", form.error)
+                self.assertIn(f'The manager of {self.employee_2.name} should be linked to a user.', form.error)
             with self.assertRaises(ValidationError):
                 form.save()
             self.employee_coach.user_id = self.user_coach
