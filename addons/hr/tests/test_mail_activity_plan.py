@@ -123,21 +123,19 @@ class TestActivitySchedule(ActivityScheduleHRCase):
     def test_department(self):
         """ Check that the allowed plan are filtered according to the department. """
         no_plan = self.env['mail.activity.plan']
-        plan_department_a, plan_department_b = self.env['mail.activity.plan'].create([{
-            'department_id': department.id,
-            'name': f'plan {department.name}',
-            'res_model': 'hr.employee',
-            'template_ids': [Command.create({
-                'activity_type_id': self.activity_type_todo.id,
-            }),
-            ]
-        } for department in self.department_a + self.department_b])
+        plan_department_a, plan_department_b = self.env['mail.activity.plan'].create([
+            {
+                'department_id': department.id,
+                'name': f'plan {department.name}',
+                'res_model': 'hr.employee',
+                'template_ids': [(0, 0, {'activity_type_id': self.activity_type_todo.id})],
+            } for department in self.department_a + self.department_b
+        ])
         for employees, expected_department, authorized_plans, non_authorized_plans in (
-                (self.employee_1 + self.employee_dep_b, False, self.plan_onboarding, no_plan),
-                (self.employee_1 + self.employee_2, self.department_a,
-                 self.plan_onboarding + plan_department_a, plan_department_b),
-                (self.employee_1, self.department_a, self.plan_onboarding + plan_department_a, plan_department_b),
-                (self.employee_dep_b, self.department_b, self.plan_onboarding + plan_department_b, plan_department_a),
+            (self.employee_1 + self.employee_dep_b, False, self.plan_onboarding, no_plan),
+            (self.employee_1 + self.employee_2, self.department_a, self.plan_onboarding + plan_department_a, plan_department_b),
+            (self.employee_1, self.department_a, self.plan_onboarding + plan_department_a, plan_department_b),
+            (self.employee_dep_b, self.department_b, self.plan_onboarding + plan_department_b, plan_department_a),
         ):
             with self._instantiate_activity_schedule_wizard(employees) as form:
                 if expected_department:

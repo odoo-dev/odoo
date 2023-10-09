@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="mail_activity_plan_template_view_form_inherit_hr" model="ir.ui.view">
+        <record id="mail_activity_plan_template_view_form" model="ir.ui.view">
             <field name="name">mail.activity.plan.template.view.form.inherit.hr</field>
             <field name="model">mail.activity.plan.template</field>
             <field name="inherit_id" ref="mail.mail_activity_plan_template_view_form"/>
@@ -16,7 +16,7 @@
             </field>
         </record>
 
-        <record id="mail_activity_plan_view_form_inherit_hr" model="ir.ui.view">
+        <record id="mail_activity_plan_view_form" model="ir.ui.view">
             <field name="name">mail.activity.plan.view.form.inherit.hr</field>
             <field name="model">mail.activity.plan</field>
             <field name="inherit_id" ref="mail.mail_activity_plan_view_form"/>
@@ -30,10 +30,9 @@
             </field>
         </record>
 
-        <record id="mail_activity_plan_view_tree_inherit_hr" model="ir.ui.view">
+        <record id="mail_activity_plan_view_tree" model="ir.ui.view">
             <field name="name">mail.activity.plan.view.tree.inherit.hr</field>
             <field name="model">mail.activity.plan</field>
-            <field name="mode">primary</field>
             <field name="inherit_id" ref="mail.mail_activity_plan_view_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='steps_count']" position="after">
@@ -108,12 +107,6 @@
             <field name="search_view_id" ref="mail.mail_activity_plan_view_search"/>
             <field name="context">{'default_res_model': 'hr.employee'}</field>
             <field name="domain">[('res_model', '=', 'hr.employee')]</field>
-            <!-- Force the tree view where the department can be shown -->
-            <field name="view_ids"
-                   eval="[(5, 0, 0),
-                          (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.mail_activity_plan_view_tree_inherit_hr')}),
-                          (0, 0, {'view_mode': 'form', 'view_id': ref('mail.mail_activity_plan_view_form')}),
-                         ]"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Add a new plan
