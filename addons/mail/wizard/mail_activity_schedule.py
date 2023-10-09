@@ -181,7 +181,7 @@ class MailActivitySchedule(models.TransientModel):
                     responsible = activity._determine_responsible(self.on_demand_user_id, record)['responsible']
                 date_deadline = self.env['mail.activity']._calculate_date_deadline(
                     activity.activity_type_id) if not self.date_plan_deadline else self.date_plan_deadline
-                self._get_record_for_scheduling(record, responsible).activity_schedule(
+                record.activity_schedule(
                     activity_type_id=activity.activity_type_id.id,
                     summary=activity.summary,
                     note=activity.note,
@@ -285,19 +285,6 @@ class MailActivitySchedule(models.TransientModel):
 
     def _get_applied_on_records(self):
         return self.env[self.res_model].browse(self._evaluate_res_ids())
-
-    @api.model
-    def _get_record_for_scheduling(self, record, responsible):
-        """ Get the record on which the activity will be linked when launching a plan.
-
-        :param <res.user> responsible: responsible
-
-        The base implementation returns the record itself which is the common case.
-        This method is meant to be overriden in other modules to return a different
-        record if needed. That method has been introduced for the hr module where we
-        needed to link the activity to another record for security reason.
-        """
-        return record
 
     def _get_search_available_plan_domain(self):
         self.ensure_one()
