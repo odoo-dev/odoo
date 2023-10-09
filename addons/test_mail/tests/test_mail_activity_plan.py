@@ -104,7 +104,7 @@ class TestActivitySchedule(ActivityScheduleCase):
                     with self._mock_activities(), freeze_time(self.reference_now):
                         form.save().with_context(
                             mail_activity_quick_update=True
-                        ).action_schedule_and_mark_as_done()
+                        ).action_schedule_activities_done()
 
                 for record in test_records:
                     self.assertActivityDoneOnRecord(record, self.activity_type_call)
@@ -116,7 +116,7 @@ class TestActivitySchedule(ActivityScheduleCase):
                     with self._mock_activities():
                         wizard_res = form.save().with_context(
                             mail_activity_quick_update=True
-                        ).action_done_schedule_next()
+                        ).action_schedule_activities_done_and_schedule()
                 self.assertDictEqual(wizard_res, {
                     'name': "Schedule Activity On Selected Records" if len(test_records) > 1 else "Schedule Activity",
                     'context': {
@@ -198,10 +198,10 @@ class TestActivitySchedule(ActivityScheduleCase):
                 form.plan_id = self.plan_onboarding
                 self.assertEqual(form.plan_assignation_summary,
                                  '<ul><li>To-Do - other: Plan training</li><li>To-Do - other: Training</li></ul>')
-                self.assertTrue(form._get_modifier('on_demand_user_id', 'invisible'))
+                self.assertTrue(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 form.plan_id = self.plan_party
                 self.assertIn('Book a place', form.plan_assignation_summary)
-                self.assertFalse(form._get_modifier('on_demand_user_id', 'invisible'))
+                self.assertFalse(form._get_modifier('plan_on_demand_user_id', 'invisible'))
                 with self._mock_activities():
                     form.save().action_schedule_plan()
 
@@ -212,12 +212,12 @@ class TestActivitySchedule(ActivityScheduleCase):
                 force_responsible_id = self.user_admin
                 form = self._instantiate_activity_schedule_wizard(test_records)
                 form.plan_id = self.plan_party
-                form.date_plan_deadline = force_date_deadline
-                form.on_demand_user_id = self.env['res.users']
+                form.plan_date_deadline = force_date_deadline
+                form.plan_on_demand_user_id = self.env['res.users']
                 self.assertTrue(form.has_error)
                 self.assertIn(f'No responsible specified for {self.activity_type_todo.name}: Book a place',
                               form.error)
-                form.on_demand_user_id = force_responsible_id
+                form.plan_on_demand_user_id = force_responsible_id
                 self.assertFalse(form.has_error)
                 with self._mock_activities():
                     form.save().action_schedule_plan()

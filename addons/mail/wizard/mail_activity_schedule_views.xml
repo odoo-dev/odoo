@@ -12,8 +12,8 @@
                     <field name="has_error" invisible="1"/>
                     <field name="plan_has_user_on_demand" invisible="1"/>
                     <field name="res_ids" invisible="1"/>
-                    <field name="available_plan_ids" invisible="1"/>
-                    <header invisible="not bool(available_plan_ids)">
+                    <field name="plan_available_ids" invisible="1"/>
+                    <header invisible="not bool(plan_available_ids)">
                         <group>
                             <field name="plan_id" options='{"no_open": True, "no_create": True}'/>
                         </group>
@@ -21,8 +21,8 @@
                     <sheet>
                         <group invisible="not plan_id">
                             <group>
-                                <field name="date_plan_deadline"/>
-                                <field name="on_demand_user_id" widget="many2one_avatar_user"
+                                <field name="plan_date_deadline"/>
+                                <field name="plan_on_demand_user_id" widget="many2one_avatar_user"
                                        invisible="not plan_has_user_on_demand"/>
                             </group>
                             <group>
@@ -53,15 +53,15 @@
                     <footer invisible="plan_id">
                         <button name="action_schedule_activities" string="Schedule" type="object" class="btn-primary"
                                 invisible="has_error" data-hotkey="q"/>
-                        <button name="action_schedule_and_mark_as_done" string="Schedule &amp; Mark as Done" type="object"
+                        <button name="action_schedule_activities_done" string="Schedule &amp; Mark as Done" type="object"
                                 invisible="has_error or chaining_type == 'trigger'"
                                 class="btn-secondary"  data-hotkey="w"
                                 context="{'mail_activity_quick_update': True}"/>
-                        <button name="action_done_schedule_next" string="Done &amp; Schedule Next" type="object"
+                        <button name="action_schedule_activities_done_and_schedule" string="Done &amp; Schedule Next" type="object"
                                 invisible="has_error or chaining_type == 'trigger'"
                                 class="btn-secondary" data-hotkey="q"
                                 context="{'mail_activity_quick_update': True}"/>
-                        <button name="action_done_schedule_next" string="Done &amp; Launch Next" type="object"
+                        <button name="action_schedule_activities_done_and_schedule" string="Done &amp; Launch Next" type="object"
                                 invisible="has_error or chaining_type == 'suggest'"
                                 class="btn-secondary" data-hotkey="q"
                                 context="{'mail_activity_quick_update': True}"/>
