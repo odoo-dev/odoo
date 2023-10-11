@@ -19,9 +19,9 @@
                     <div class="card-body">
                         <div class="clearfix mb16" t-if="attendee.state != 'needsAction'">
                             <span class="float-end badge text-bg-info">
-                                <t t-if="attendee.state == 'accepted'">Yes I'm going.</t>
-                                <t t-if="attendee.state == 'declined'">No I'm not going.</t>
-                                <t t-if="attendee.state == 'tentative'">Tentative</t>
+                                <t t-if="attendee.state == 'accepted'">Yes, I'm going.</t>
+                                <t t-if="attendee.state == 'declined'">No, I'm not going.</t>
+                                <t t-if="attendee.state == 'tentative'">Maybe</t>
                                 <t t-if="attendee.state == 'needsAction'">No feedback yet</t>
                             </span>
                         </div>
