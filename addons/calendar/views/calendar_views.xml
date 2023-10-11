@@ -126,19 +126,19 @@
                     </div>
                     <group>
                         <group>
-                            <field name="start_date" widget="daterange" options="{'end_date_field': 'stop_date'}" invisible="not allday" required="allday"/>
-                            <field name="start" widget="daterange" options="{'end_date_field': 'stop'}" invisible="allday" required="not allday"/>
+                            <field name="start_date" widget="daterange" string="When?" options="{'end_date_field': 'stop_date'}" invisible="not allday" required="allday"/>
+                            <field name="start" widget="daterange" string="When?" options="{'end_date_field': 'stop'}" invisible="allday" required="not allday"/>
                             <field name="stop_date" invisible="1" />
                             <field name="stop" invisible="1" />
-                            <div class="d-flex gap-2" colspan="2">
-                                <div class="d-flex align-items-start" invisible="allday">
-                                    <label for="duration" class="pe-2 fw-bold text-900" invisible="allday"/>
-                                    <field name="duration" widget="float_time" string="Duration" class="oe_inline pe-2" readonly="(id and recurrency) or not user_can_edit"/>
-                                    <span> hours</span>
-                                </div>
+                            <span class="fw-bold text-nowrap text-900">Duration</span>
+                            <div class="d-flex gap-4">
+                                <span invisible="allday">
+                                    <field name="duration" widget="float_time" class="oe_inline" readonly="(id and recurrency) or not user_can_edit"/>
+                                     hours
+                                </span>
                                 <div>
                                     <label for="allday" class="pe-2 fw-bold text-900"/>
-                                    <field name="allday" class="oe_inline" force_save="1" readonly="not user_can_edit" colspan="1"/>
+                                    <field name="allday" force_save="1" readonly="not user_can_edit" colspan="1"/>
                                 </div>
                             </div>
                             <field name="event_tz" invisible="not recurrency" readonly="not user_can_edit"/>
@@ -148,21 +148,17 @@
                             <field name="rrule_type" invisible="1" />
                             <field name="recurrency" />
                             <field name="rrule_type_ui" class="w-auto" invisible="not recurrency" required="recurrency"/>
-                            <div invisible="not recurrency" colspan="2">
-                                <div class="o_row" invisible="rrule_type_ui != 'custom'">
-                                    <label for="interval" class="fw-bold text-900"/>
-                                    <field name="interval" string="Repeat every" class="oe_inline w-auto" />
-                                    <field name="rrule_type" nolabel="1" class="oe_inline" required="rrule_type_ui == 'custom'"/>
-                                </div>
+                            <label for="interval" class="fw-bold text-900" invisible="not recurrency or rrule_type_ui != 'custom'"/>
+                            <div class="o_row" invisible="rrule_type_ui != 'custom'">
+                                <field name="interval" string="Repeat every" class="oe_inline w-auto" />
+                                <field name="rrule_type" nolabel="1" class="oe_inline" required="rrule_type_ui == 'custom'"/>
                             </div>
-                            <div class="d-flex gap-0" colspan="2" invisible="rrule_type_ui not in ['weekly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'weekly')">
-                                <span class="fw-bold pe-3">Repeat on</span>
-                                <widget name="calendar_week_days" />
-                            </div>
+                            <span class="fw-bold text-nowrap text-900" invisible="rrule_type_ui not in ['weekly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'weekly')">Repeat on</span>
+                            <widget name="calendar_week_days" invisible="rrule_type_ui not in ['weekly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'weekly')"/>
                             <field name="recurrence_id" invisible="1" />
 
-                            <div class="d-flex gap-2" colspan="2" invisible="rrule_type_ui not in ['monthly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'monthly')">
-                                <label string="Day of Month" for="month_by" />
+                            <label string="Day of Month" for="month_by" invisible="rrule_type_ui not in ['monthly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'monthly')"/>
+                            <div class="d-flex gap-2" invisible="rrule_type_ui not in ['monthly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'monthly')">
                                 <field name="month_by" nolabel="1" required="rrule_type_ui == 'monthly' or rrule_type == 'monthly'"/>
                                 <field name="day" nolabel="1"
                                     required="(rrule_type_ui == 'monthly' or rrule_type == 'monthly') and month_by == 'date'"
@@ -177,11 +173,11 @@
                                     invisible="month_by != 'day'"
                                 />
                             </div>
-                            <div class="d-flex gap-2" colspan="2" invisible="not recurrency">
-                                <label string="Until" for="end_type" class="fw-bold text-900"/>
+                            <label string="Until" for="end_type" class="fw-bold text-900" invisible="not recurrency"/>
+                            <div class="d-flex gap-2" invisible="not recurrency">
                                 <field name="end_type" class="oe_inline w-auto" nolabel="1" required="recurrency"/>
                                 <field name="count" class="oe_inline w-auto" nolabel="1" invisible="end_type != 'count'" required="recurrency"/>
-                                <field name="until" class="oe_inline w-auto" nolabel="1" invisible="end_type != 'end_date'"
+                                <field name="until" class="oe_inline w-auto" nolabel="1" invisible="end_type != 'end_date'" placeholder="Choose an end date"
                                     required="recurrency and end_type == 'end_date'"
                                 />
                             </div>
@@ -216,10 +212,10 @@
                         <group>
                             <field name="should_show_status" invisible="1"/>
                             <field name="current_status" class="w-auto" required="should_show_status" readonly="not should_show_status" invisible="not should_show_status"/>
-                            <field name="alarm_ids" widget="many2many_tags" options="{'no_quick_create': True}"/>
+                            <field name="alarm_ids" placeholder="No Reminders" widget="many2many_tags" options="{'no_quick_create': True}"/>
                             <div class="o_row" colspan="2">
-                                <div colspan="1">
-                                    <field name="attendees_count" class="w-auto oe_inline" nolabel="1"/><span> Attendees</span>
+                                <div colspan="1" class="fw-bold text-900">
+                                    <field name="attendees_count" class="w-auto oe_inline" nolabel="1"/> <span invisible="attendees_count > 1 or attendees_count == 0">Attendee</span><span invisible="attendees_count == 1">Attendees</span>
                                 </div>
                                 <div name="send_buttons" class="d-flex gap-2 justify-content-end" colspan="1">
                                     <button name="action_open_composer" help="Send Email to attendees" type="object" string=" EMAIL" icon="fa-envelope"/>
@@ -236,7 +232,6 @@
                                     placeholder="Select attendees..."
                                     context="{'force_email':True}"
                                     domain="[('type','!=','private')]"
-                                    class="oe_inline"
                                     readonly="not user_can_edit"
                                 />
                             </div>
@@ -255,9 +250,9 @@
                                     <field name="email" widget="email"/>
                                     <field name="phone" widget="phone"/>
                                     <field name="state" />
-                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="fa-asterisk"/>
-                                    <button name="do_accept" string="Accept" invisible="state not in ('needsAction', 'tentative', 'declined')" type="object" icon="fa-check text-success"/>
-                                    <button name="do_decline" string="Decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" type="object" icon="fa-times-circle text-danger"/>
+                                    <button name="do_accept" string="Yes" invisible="state not in ('needsAction', 'tentative', 'declined')" type="object" icon="fa-check text-success"/>
+                                    <button name="do_decline" string="No" invisible="state not in ('needsAction', 'tentative', 'accepted')" type="object" icon="fa-times-circle text-danger"/>
+                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Maybe" type="object" icon="fa-asterisk"/>
                                 </tree>
                                 <kanban class="o_kanban_mobile" create="false" delete="false">
                                     <field name="partner_id" />
@@ -272,9 +267,9 @@
                                                 <span>Status: <field name="state" /></span>
 
                                                 <div class="text-end">
-                                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" class="btn fa fa-asterisk"/>
-                                                    <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="btn fa fa-check text-success"/>
-                                                    <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="btn fa fa-times-circle text-danger"/>
+                                                    <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Yes" type="object" class="btn fa fa-check text-success"/>
+                                                    <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="No" type="object" class="btn fa fa-times-circle text-danger"/>
+                                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Maybe" type="object" class="btn fa fa-asterisk"/>
                                                 </div>
                                             </div>
                                         </t>
@@ -303,7 +298,7 @@
                     <field name="videocall_source" invisible="1"/>
                     <field name="access_token" invisible="1"/>
                     <div class="o_row">
-                        <h1 class="w-100"><field name="name" nolabel="1" placeholder="Add title" colspan="2"/></h1>
+                        <h1 class="w-100"><field name="name" nolabel="1" placeholder="Add a title" colspan="2"/></h1>
                     </div>
                     <group>
                         <field name="start_date" widget="daterange" options="{'end_date_field': 'stop_date'}" invisible="not allday" required="allday"/>
@@ -357,7 +352,7 @@
                        filters="1" widget="many2manyattendeeexpandable" write_model="calendar.filters"
                        write_field="partner_id" filter_field="partner_checked" avatar_field="avatar_128"
                 />
-                <field name="videocall_location" widget="url" text="Join Video Call" options="{'icon': 'fa fa-lg fa-video-camera'}" invisible="not videocall_location"/>
+                <field name="videocall_location" widget="url" text="Join Video Call" options="{'icon': 'fa fa-video-camera'}" invisible="not videocall_location"/>
                 <field name="is_highlighted" invisible="1"/>
                 <field name="is_organizer_alone" invisible="1"/>
                 <field name="display_description" invisible="1"/>
@@ -365,12 +360,12 @@
                 <field name="privacy" invisible="1"/>
                 <field name="res_model_name" invisible="not res_model_name" 
                        options="{'icon': 'fa fa-link', 'shouldOpenRecord': true}"/>
-                <field name="alarm_ids" invisible="not alarm_ids" options="{'icon': 'fa fa-bell-o'}"/>
-                <field name="categ_ids" invisible="not categ_ids" options="{'icon': 'fa fa-tag'}"/>
+                <field name="alarm_ids" invisible="not alarm_ids" options="{'icon': 'fa fa-bell'}"/>
+                <field name="categ_ids" invisible="not categ_ids" options="{'color_field': 'color', 'icon': 'fa fa-tag'}"/>
                 <!-- For recurrence update Dialog -->
                 <field name="recurrency" invisible="1"/>
                 <field name="recurrence_update" invisible="1"/>
-                <field name="partner_id" string="Organizer" options="{'icon': 'fa fa-user-o'}"/>
+                <field name="partner_id" string="Organizer" options="{'icon': 'fa fa-user'}"/>
             </calendar>
         </field>
     </record>
