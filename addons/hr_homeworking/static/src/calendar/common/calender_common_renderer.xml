@@ -14,17 +14,19 @@
         </t>
         <t t-else="">
             <div class="o_homework_single">
-                <div class="fc-content text-nowrap" t-att-class="`wl_color_${colorIndex}`">
-                    <t t-if="rawRecord.icon === 'office'">
-                        <div class="fa fa-building me-1"/>
-                    </t>
-                    <t t-elif="rawRecord.icon === 'home'">
-                        <div class="fa fa-home me-1"/>
-                    </t>
-                    <t t-else="">
-                        <div class="fa fa-map-marker me-1"/>
-                    </t>
-                    <t class="fw-bolder" t-esc="title"/>
+                <div class="fc-content px-2 text-nowrap" t-att-class="`wl_color_${colorIndex}`">
+                    <span>
+                        <t t-if="rawRecord.icon === 'office'">
+                            <i class="fa fa-building me-1"/>
+                        </t>
+                        <t t-elif="rawRecord.icon === 'home'">
+                            <i class="fa fa-home me-1"/>
+                        </t>
+                        <t t-else="">
+                            <i class="fa fa-map-marker me-1"/>
+                        </t>
+                        <t t-out="title"/>
+                    </span>
                 </div>
                 <span class="line" t-att-class="`wl_color_${colorIndex}`"/>
             </div>
@@ -38,12 +40,12 @@
     </t>
 
     <t t-name="hr.homeworking.CalendarCommonRenderer.buttonWorklocation">
-        <div class="btnWorklocation w-100">
-            <button class='rounded-pill o_month text-nowrap bg-info-light'>
-                <i class="fa fa-map-marker" aria-hidden="true"></i>
-                Add Location
+        <div class="btnWorklocation d-flex align-items-center w-lg-100 opacity-0 opacity-100-hover">
+            <button class='rounded-pill o_month text-nowrap bg-info bg-opacity-25 px-lg-2 py-0'>
+                <i class="fa fa-map-marker me-lg-1" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline fw-bold">Add Location</span>
             </button>
-            <button class="line bg-info-light"/>
+            <button class="line d-none d-lg-block bg-info bg-opacity-25 p-0"/>
         </div>
     </t>
 </templates>
