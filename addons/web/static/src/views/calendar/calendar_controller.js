@@ -108,7 +108,7 @@ export class CalendarController extends Component {
         return `${this.date.toFormat("d")} ${this.date.toFormat("MMMM")} ${this.date.year}`;
     }
 
-    get monthHeader() {
+    get weekHeader() {
         const { rangeStart, rangeEnd } = this.model;
         if (rangeStart.year != rangeEnd.year) {
             return `${rangeStart.toFormat("MMMM")} ${rangeStart.year} - ${rangeEnd.toFormat(
