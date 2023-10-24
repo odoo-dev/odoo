@@ -3,6 +3,7 @@
 
 {
     'name': "Guinea-Bissau - Accounting",
+    'countries': ['gw'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Guinea-Bissau.

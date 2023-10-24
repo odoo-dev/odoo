@@ -4,6 +4,7 @@
 {
     'name': 'Congo - Accounting',
     'category': 'Accounting/Localizations/Account Charts',
+    'countries': ['cg'],
     'description': """
 This module implements the tax for Congo.
 ===========================================================

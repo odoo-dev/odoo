@@ -3,6 +3,7 @@
 
 {
     'name': "Gabon - Accounting",
+    'countries': ['ga'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Gabon.

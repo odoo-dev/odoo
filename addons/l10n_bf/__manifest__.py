@@ -3,6 +3,7 @@
 
 {
     'name': "Burkina Faso - Accounting",
+    'countries': ['bf'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Burkina Faso.

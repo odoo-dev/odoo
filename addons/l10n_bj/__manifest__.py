@@ -3,6 +3,7 @@
 
 {
     'name': "Benin - Accounting",
+    'countries': ['bj'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Benin.

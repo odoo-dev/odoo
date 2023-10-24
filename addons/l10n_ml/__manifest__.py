@@ -3,6 +3,7 @@
 
 {
     'name': "Mali - Accounting",
+    'countries': ['ml'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Mali.

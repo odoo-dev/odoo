@@ -3,6 +3,7 @@
 
 {
     'name': "Niger - Accounting",
+    'countries': ['ne'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Niger.

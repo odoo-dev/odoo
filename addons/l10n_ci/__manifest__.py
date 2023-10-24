@@ -3,6 +3,7 @@
 
 {
     'name': "Ivory Coast - Accounting",
+    'countries': ['ci'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the taxes for Ivory Coast.

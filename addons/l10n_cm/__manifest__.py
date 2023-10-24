@@ -3,6 +3,7 @@
 
 {
     'name': 'Cameroon - Accounting',
+    'countries': ['cm'],
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
 This module implements the tax for Cameroon.
