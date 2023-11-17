@@ -95,36 +95,8 @@ export class PosData extends Reactive {
     createNewOfflineOrder() {}
 }
 
-PosData.modelToLoad = [
-    "account.tax",
-    "pos.category",
-    "pos.bill",
-    "pos.combo",
-    "pos.config",
-    "pos.order",
-    "pos.session",
-    "product.category",
-    "product.packaging",
-    "product.product",
-    "product.pricelist",
-    "res.company",
-    "res.country.state",
-    "res.country",
-    "res.currency",
-    "res.lang",
-    "res.partner",
-    "stock.picking.type",
-    "res.users",
-    "uom.uom",
-    "pos.payment.method",
-    "pos.order",
-    "pos.order.line",
-    "pos.combo.line",
-    "decimal.precision",
-    "account.tax.repartition.line",
-    "account.fiscal.position",
-    "account.cash.rounding",
-];
+// if empty, all python listed models will be loaded
+PosData.modelToLoad = [];
 
 export const PosDataService = {
     dependencies: PosData.serviceDependencies,

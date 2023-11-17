@@ -248,13 +248,14 @@ class PosSession(models.Model):
         params = self.load_data_params()
         response = {}
         response['data'] = {};
+        response['custom'] = {};
         response['_relations'] = []
 
         # Load data from search_read
         if params.get('search_read'):
             for key, value in params['search_read'].items():
 
-                if not key in models_to_load:
+                if not key in models_to_load and len(models_to_load) > 0:
                     continue
 
                 if type(value['domain']) == list:

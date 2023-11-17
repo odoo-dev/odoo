@@ -6,6 +6,19 @@ class PosSession(models.Model):
 
     _inherit = 'pos.session'
 
+    def load_data_params(self):
+        params = super().load_data_params()
+
+        if self.company_id.country_code == 'AR':
+            params['search_read']['res.partner']['fields'] += ['l10n_ar_afip_responsibility_type_id', 'l10n_latam_identification_type_id']
+            params['search_read']['l10n_ar.afip.responsibility.type'] = {'domain': [], 'fields': ['name']}
+            params['search_read']['l10n_latam.identification.type'] = {
+                'domain': [('l10n_ar_afip_code', '!=', False), ('active', '=', True)],
+                'fields': ['name']
+            }
+
+        return params
+
     @api.model
     def _pos_ui_models_to_load(self):
         res = super()._pos_ui_models_to_load()
