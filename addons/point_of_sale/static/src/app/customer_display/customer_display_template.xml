@@ -36,7 +36,7 @@
             <!-- The remote display replaces pos-customer_facing_display contents, but not it  -->
             <!-- Therefore, pos-no-order is an inner div -->
             <div class="pos-no-order" t-attf-style="background-image: #{backgroundImageURL};">
-                <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.company.id})" />
+                <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.res_company.id})" />
             </div>
         </div>
     </t>
@@ -50,7 +50,7 @@
             <!-- Only visible in portrait orientation -->
             <div class="pos-portrait-top">
                 <div class="pos-header" t-attf-style="background-image: {{backgroundImageURL}};">
-                    <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.company.id})" />
+                    <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.res_company.id})" />
                 </div>
             </div>
 
@@ -61,7 +61,7 @@
 
             <div class="pos-payment_info" t-attf-style="background-image: {{backgroundImageURL}};">
                 <!-- Company Logo only visible in landscape orientation -->
-                <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.company.id})" />
+                <div class="pos-company_logo" t-attf-style="background-image:url(/logo?company=#{pos.res_company.id})" />
 
                 <div class="pos-payment_info_details">
                     <!-- Order Total -->

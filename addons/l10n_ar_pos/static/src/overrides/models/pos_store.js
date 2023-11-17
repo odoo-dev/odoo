@@ -15,7 +15,7 @@ patch(PosStore.prototype, {
         }
     },
     isArgentineanCompany() {
-        return this.company.country?.code == "AR";
+        return this.res_company.country_id.code == "AR";
     },
 });
 

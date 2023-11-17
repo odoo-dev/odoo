@@ -8,7 +8,7 @@
                 <br/>
             </t>
             <t t-if="!pos.company_logo_base64" class="pos-receipt-center-align">
-                <h1 t-esc="pos.company.name" />
+                <h1 t-esc="pos.res_company.name" />
                 <br/>
             </t>
             <br /><br />

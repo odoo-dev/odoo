@@ -41,6 +41,7 @@ export class PosData extends Reactive {
         }
 
         this._relations = response._relations;
+        this.createRelation();
     }
 
     async loadMissingData(model, ids) {
