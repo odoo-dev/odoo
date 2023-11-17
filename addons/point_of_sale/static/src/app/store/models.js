@@ -1524,11 +1524,11 @@ export class Order extends PosModel {
             cashier: this.cashier?.name,
             date: this.receiptDate,
             pos_qr_code:
-                this.pos.company.point_of_sale_use_ticket_qr_code &&
+                this.pos.res_company.point_of_sale_use_ticket_qr_code &&
                 qrCodeSrc(
                     `${this.pos.base_url}/pos/ticket/validate?access_token=${this.access_token}`
                 ),
-            ticket_code: this.pos.company.point_of_sale_ticket_unique_code && this.ticketCode,
+            ticket_code: this.pos.res_company.point_of_sale_ticket_unique_code && this.ticketCode,
             base_url: this.pos.base_url,
             footer: this.pos.config.receipt_footer,
             // FIXME: isn't there a better way to handle this date?
@@ -2332,7 +2332,7 @@ export class Order extends PosModel {
         );
     }
     get_total_tax() {
-        if (this.pos.company.tax_calculation_rounding_method === "round_globally") {
+        if (this.pos.res_company.tax_calculation_rounding_method === "round_globally") {
             // As always, we need:
             // 1. For each tax, sum their amount across all order lines
             // 2. Round that result

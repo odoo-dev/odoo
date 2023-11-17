@@ -161,8 +161,14 @@ export class PartnerListScreen extends Component {
     }
     createPartner() {
         // initialize the edit screen with default details about country, state, and lang
-        const { country_id, state_id } = this.pos.company;
-        this.state.editModeProps.partner = { country_id, state_id, lang: session.user_context.lang };
+        const company = this.pos.res_company;
+        const country_id = company.country_id.id;
+        const state_id = company.state_id.id;
+        this.state.editModeProps.partner = {
+            country_id,
+            state_id,
+            lang: session.user_context.lang,
+        };
         this.activateEditMode();
     }
     async saveChanges(processedChanges) {
@@ -191,8 +197,8 @@ export class PartnerListScreen extends Component {
         if (this.state.query) {
             const search_fields = ["name", "parent_name", "phone_mobile_search", "email"];
             domain = [
-                ...Array(search_fields.length - 1).fill('|'),
-                ...search_fields.map(field => [field, "ilike", this.state.query + "%"])
+                ...Array(search_fields.length - 1).fill("|"),
+                ...search_fields.map((field) => [field, "ilike", this.state.query + "%"]),
             ];
         }
         // FIXME POSREF timeout

@@ -82,13 +82,14 @@ export class PosStore extends Reactive {
         "barcode_reader",
         "hardware_proxy",
         "ui",
+        "pos_data",
     ];
     constructor() {
         super();
         this.ready = this.setup(...arguments).then(() => this);
     }
     // use setup instead of constructor because setup can be patched.
-    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui }) {
+    async setup(env, { popup, orm, number_buffer, hardware_proxy, barcode_reader, ui, pos_data }) {
         this.env = env;
         this.orm = orm;
         this.popup = popup;
@@ -97,6 +98,7 @@ export class PosStore extends Reactive {
         this.ui = ui;
 
         this.db = new PosDB(); // a local database used to search trough products and categories & store pending orders
+        this.data = pos_data;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
@@ -104,7 +106,6 @@ export class PosStore extends Reactive {
         this.company_logo = null;
         this.company_logo_base64 = "";
         this.currency = null;
-        this.company = null;
         this.user = null;
         this.partners = [];
         this.taxes = [];
@@ -242,7 +243,6 @@ export class PosStore extends Reactive {
     }
     async _processData(loadedData) {
         this.version = loadedData["version"];
-        this.company = loadedData["res.company"];
         this.dp = loadedData["decimal.precision"];
         this.units = loadedData["uom.uom"];
         this.units_by_id = loadedData["units_by_id"];
@@ -279,6 +279,36 @@ export class PosStore extends Reactive {
         this.db.addProductIdsToNotDisplay(loadedData["pos_special_products_ids"]);
         await this._loadPosPrinters(loadedData["pos.printer"]);
         this.open_orders_json = loadedData["open_orders"];
+
+        this.res_company = this.data.res_company[0]; // always only one record because its the company of the session.
+
+        // this.account_cash_rounding = this.data.account_cash_rounding;
+        // this.account_fiscal_position = this.data.account_fiscal_position;
+        // this.account_tax = this.data.account_tax;
+        // this.account_tax_repartition_line = this.data.account_tax_repartition_line;
+        // this.decimal_precision = this.data.decimal_precision;
+        // this.pos_category = this.data.pos_category;
+        // this.pos_combo = this.data.pos_combo;
+        // this.pos_combo_line = this.data.pos_combo_line;
+        // this.pos_config = this.data.pos_config;
+        // this.pos_order = this.data.pos_order;
+        // this.pos_order_line = this.data.pos_order_line;
+        // this.pos_payment_method = this.data.pos_payment_method;
+        // this.product_category = this.data.product_category;
+        // this.pos_session = this.data.pos_session;
+        // this.pos_bill = this.data.pos_bill;
+        // this.product_packaging = this.data.product_packaging;
+        // this.product_product = this.data.product_product;
+        // this.product_pricelist = this.data.product_pricelist;
+        // this.res_partner = this.data.res_partner;
+        // this.res_users = this.data.res_users;
+        // this.stock_picking_type = this.data.stock_picking_type;
+        // this.uom_uom = this.data.uom_uom;
+        // this.res_lang = this.data.res_lang;
+        // this.res_country = this.data.res_country;
+        // this.res_country_state = this.data.res_country_state;
+        // this.res_currency = this.data.res_currency;
+        // this.product_attribute = this.data.product_attribute;
     }
     _loadPosSession() {
         // We need to do it here, since only then the local storage has the correct uuid
@@ -408,7 +438,7 @@ export class PosStore extends Reactive {
                 reject();
             };
             this.company_logo.crossOrigin = "anonymous";
-            this.company_logo.src = `/web/image?model=res.company&id=${this.company.id}&field=logo`;
+            this.company_logo.src = `/web/image?model=res.company&id=${this.res_company.id}&field=logo`;
         });
     }
     prepare_new_partners_domain() {
@@ -1402,7 +1432,7 @@ export class PosStore extends Reactive {
 
         // 2) Deal with the rounding methods
 
-        var round_tax = this.company.tax_calculation_rounding_method != "round_globally";
+        var round_tax = this.res_company.tax_calculation_rounding_method != "round_globally";
 
         var initial_currency_rounding = currency_rounding;
         if (!round_tax) {
@@ -1910,7 +1940,7 @@ export class PosStore extends Reactive {
 
     getReceiptHeaderData() {
         return {
-            company: this.company,
+            company: this.res_company,
             cashier: this.get_cashier()?.name,
             header: this.config.receipt_header,
         };
