@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="html_editor.linkPopover">
+        <div class="o-we-linkpopover d-flex bg-white overflow-auto">
+            <div t-if="state.editing" class="m-3 container-fluid">
+                <div class="row d-flex ">
+                    <input class="o_we_label_link col-8 m-1" t-model="state.label" placeholder="Type your link label"/>
+                    <input class="o_we_href_input_link col-8 align-self-stretch m-1" t-model="state.url" placeholder="Type your URL"/>
+                    <button class="o_we_apply_link btn btn-primary align-self-end col-3 m-1" t-on-click="onClickApply">Apply</button>
+                </div>
+            </div>
+            <div t-else="" class="d-flex">
+                <a href="#" class="mx-1 o_we_copy_link text-dark" t-on-click="onClickCopy" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Copy Link')}">
+                    <i class="fa fa-clone"></i>
+                </a>
+                <a href="#" class="mx-1 o_we_edit_link text-dark" t-on-click="onClickEdit" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Edit Link')}">
+                    <i class="fa fa-edit"></i>
+                </a>
+                <a href="#" class="ms-1 o_we_remove_link text-dark" t-on-click="onClickRemove" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Remove Link')}">
+                    <i class="fa fa-chain-broken"></i>
+                </a>
+            </div>
+        </div>
+    </t>
+
+</templates>
