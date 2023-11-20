@@ -123,7 +123,7 @@ class PosSession(models.Model):
                 },
                 'pos.payment.method': {
                     'domain': ['|', ('active', '=', False), ('active', '=', True)],
-                    'fields': ['name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence'],
+                    'fields': ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence'],
                 },
                 'pos.config': {
                     'domain': [('id', '=', self.config_id.id)],
@@ -131,7 +131,7 @@ class PosSession(models.Model):
                 },
                 'pos.printer': {
                     'domain': [('id', 'in', self.config_id.printer_ids.ids)],
-                    'fields': ['name', 'proxy_ip', 'product_categories_ids', 'printer_type'],
+                    'fields': ['id', 'name', 'proxy_ip', 'product_categories_ids', 'printer_type'],
                 },
                 'pos.category': {
                     'domain': [('id', 'in', self.config_id.iface_available_categ_ids.ids)] if self.config_id.limit_categories and self.config_id.iface_available_categ_ids else [],
@@ -139,11 +139,12 @@ class PosSession(models.Model):
                 },
                 'pos.bill': {
                     'domain': ['|', ('id', 'in', self.config_id.default_bill_ids.ids), ('pos_config_ids', '=', False)],
-                    'fields': ['name', 'value']
+                    'fields': ['id', 'name', 'value']
                 },
                 'product.product': {
                     'domain': self.config_id._get_available_product_domain(),
                     'fields': [
+                        'id',
                         'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode',
                         'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
                         'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids',
@@ -167,15 +168,16 @@ class PosSession(models.Model):
                 },
                 'product.packaging': {
                     'domain': lambda data: AND([[('barcode', 'not in', ['', False])], [('product_id', 'in', [x['id'] for x in data['product.product']])] if data else []]),
-                    'fields': ['name', 'barcode', 'product_id', 'qty'],
+                    'fields': ['id', 'name', 'barcode', 'product_id', 'qty'],
                 },
                 'res.users': {
                     'domain': [('id', '=', self.env.user.id)],
-                    'fields': ['name', 'groups_id', 'partner_id'],
+                    'fields': ['id', 'name', 'groups_id', 'partner_id'],
                 },
                 'res.partner': {
                     'domain': [('id', 'in', self.config_id.get_limited_partners_loading())],
                     'fields': [
+                        'id',
                         'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
                         'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist', 'parent_name'
                     ]
@@ -183,6 +185,7 @@ class PosSession(models.Model):
                 'res.company': {
                     'domain': [('id', '=', self.company_id.id)],
                     'fields': [
+                        'id',
                         'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
                         'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
                         'point_of_sale_ticket_unique_code', 'street', 'city', 'zip',
@@ -190,27 +193,27 @@ class PosSession(models.Model):
                 },
                 'decimal.precision': {
                     'domain': [],
-                    'fields': ['name', 'digits'],
+                    'fields': ['id', 'name', 'digits'],
                 },
                 'uom.uom': {
                     'domain': [],
-                    'fields': ['name', 'category_id', 'factor_inv', 'factor', 'uom_type', 'rounding'],
+                    'fields': ['id', 'name', 'category_id', 'factor_inv', 'factor', 'uom_type', 'rounding'],
                 },
                 'res.country.state': {
                     'domain': [],
-                    'fields': ['name', 'code', 'country_id'],
+                    'fields': ['id', 'name', 'code', 'country_id'],
                 },
                 'res.country': {
                     'domain': [],
-                    'fields': ['name', 'code'],
+                    'fields': ['id', 'name', 'code'],
                 },
                 'res.lang': {
                     'domain': [],
-                    'fields': ['name', 'code'],
+                    'fields': ['id', 'name', 'code'],
                 },
                 'product.pricelist' : {
                     'domain': [('id', 'in', self.config_id.available_pricelist_ids.ids)] if self.config_id.use_pricelist else [('id', '=', self.config_id.pricelist_id.id)],
-                    'fields': ['name', 'display_name', 'discount_policy', 'item_ids']
+                    'fields': ['id', 'name', 'display_name', 'discount_policy', 'item_ids']
                 },
                 'product.pricelist.item' : {
                     'domain': lambda data: [('pricelist_id', 'in', [pricelist['id'] for pricelist in data['product.pricelist']])],
@@ -220,22 +223,22 @@ class PosSession(models.Model):
                 },
                 'product.category': {
                     'domain': [],
-                    'fields': ['name', 'parent_id'],
+                    'fields': ['id', 'name', 'parent_id'],
                 },
                 'account.tax': {
                     'domain': [('company_id', '=', self.company_id.id)],
                     'fields': [
-                        'name', 'price_include', 'include_base_amount', 'is_base_affected',
+                        'id', 'name', 'price_include', 'include_base_amount', 'is_base_affected',
                         'amount_type', 'children_tax_ids', 'amount', 'repartition_line_ids', 'id'
                     ],
                 },
                 'account.tax.repartition.line': {
                     'domain': lambda data: [('tax_id', 'in', [tax['id'] for tax in data['account.tax']])],
-                    'fields': ['factor', 'factor_percent', 'id']
+                    'fields': ['id', 'factor', 'factor_percent', 'id']
                 },
                 'account.cash.rounding': {
                     'domain': [('id', '=', self.config_id.rounding_method.id)],
-                    'fields': ['name', 'rounding', 'rounding_method'],
+                    'fields': ['id', 'name', 'rounding', 'rounding_method'],
                 },
                 'account.fiscal.position': {
                     'domain': [('id', 'in', self.config_id.fiscal_position_ids.ids)],
@@ -247,11 +250,11 @@ class PosSession(models.Model):
                 },
                 'stock.picking.type': {
                     'domain': [('id', '=', self.config_id.picking_type_id.id)],
-                    'fields': ['use_create_lots', 'use_existing_lots'],
+                    'fields': ['id', 'use_create_lots', 'use_existing_lots'],
                 },
                 'res.currency': {
                     'domain': [('id', '=', self.config_id.currency_id.id)],
-                    'fields': ['name', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
+                    'fields': ['id', 'name', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
                 },
             },
         }
@@ -261,7 +264,7 @@ class PosSession(models.Model):
     def load_data(self, models_to_load):
         params = self._load_data_params()
         response = {}
-        response['data'] = {};
+        response['data'] = {}
         response['relations'] = {}
         response['custom'] = {
             'server_version': exp_version()
@@ -281,14 +284,22 @@ class PosSession(models.Model):
 
                 model_fields = self.env[key].fields_get(allfields=value['fields'])
                 for name, params in model_fields.items():
+                    if not response['relations'].get(key):
+                        response['relations'][key] = {}
+
                     if params.get("relation"):
-                        if not response['relations'].get(key):
-                            response['relations'][key] = {}
 
                         response['relations'][key][name] = {
                             'name': name,
                             'model': key,
                             'relation': params['relation'],
+                            'type': params['type'],
+                        }
+                        if params['type'] == 'one2many' and params.get('relation_field'):
+                            response['relations'][key][name]['inverse_name'] = params['relation_field']
+                    else:
+                        response['relations'][key][name] = {
+                            'name': name,
                             'type': params['type'],
                         }
 
