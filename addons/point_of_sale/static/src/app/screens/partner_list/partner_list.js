@@ -6,6 +6,7 @@ import { debounce } from "@web/core/utils/timing";
 import { useService } from "@web/core/utils/hooks";
 import { useAsyncLockedMethod } from "@point_of_sale/app/utils/hooks";
 import { session } from "@web/session";
+import { fuzzyLookup } from "@web/core/utils/search";
 
 import { PartnerLine } from "@point_of_sale/app/screens/partner_list/partner_line/partner_line";
 import { PartnerDetailsEdit } from "@point_of_sale/app/screens/partner_list/partner_editor/partner_editor";
@@ -89,6 +90,53 @@ export class PartnerListScreen extends Component {
     }
     // Getters
 
+    get_partners_sorted(max_count) {
+        const partners = [];
+
+        max_count = max_count
+            ? Math.min(this.pos.res_partner.length, max_count)
+            : this.pos.res_partner.length;
+
+        for (var i = 0; i < max_count; i++) {
+            partners.push(this.pos.idMap.res_partner[this.pos.res_partner[i].id]);
+        }
+
+        return partners;
+    }
+
+    partner_search_string(partner) {
+        var str = partner.name || "";
+        if (partner.barcode) {
+            str += "|" + partner.barcode;
+        }
+        if (partner.address) {
+            str += "|" + partner.address;
+        }
+        if (partner.phone) {
+            str += "|" + partner.phone.split(" ").join("");
+        }
+        if (partner.mobile) {
+            str += "|" + partner.mobile.split(" ").join("");
+        }
+        if (partner.email) {
+            str += "|" + partner.email;
+        }
+        if (partner.vat) {
+            str += "|" + partner.vat;
+        }
+        if (partner.parent_name) {
+            str += "|" + partner.parent_name;
+        }
+        str = "" + partner.id + ":" + str.replace(":", "").replace(/\n/g, " ") + "\n";
+        return str;
+    }
+
+    get_partners_searched() {
+        return fuzzyLookup(this.state.query.trim(), this.pos.res_partner, (partner) =>
+            this.partner_search_string(partner)
+        );
+    }
+
     get currentOrder() {
         return this.pos.get_order();
     }
@@ -96,9 +144,9 @@ export class PartnerListScreen extends Component {
     get partners() {
         let res;
         if (this.state.query && this.state.query.trim() !== "") {
-            res = this.pos.db.search_partner(this.state.query.trim());
+            res = this.get_partners_searched();
         } else {
-            res = this.pos.db.get_partners_sorted(1000);
+            res = this.get_partners_sorted(1000);
         }
         res.sort(function (a, b) {
             return (a.name || "").localeCompare(b.name || "");

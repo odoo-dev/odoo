@@ -24,7 +24,7 @@ export class LoginScreen extends Component {
     }
 
     get shopName() {
-        return this.pos.config.name;
+        return this.pos.pos_config.name;
     }
 }
 

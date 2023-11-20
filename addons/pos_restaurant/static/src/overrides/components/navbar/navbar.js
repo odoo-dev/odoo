@@ -9,13 +9,13 @@ patch(Navbar.prototype, {
      * is floor screen, then the order count should be based on all the orders.
      */
     get orderCount() {
-        if (this.pos.config.module_pos_restaurant && this.pos.table) {
+        if (this.pos.pos_config.module_pos_restaurant && this.pos.table) {
             return this.pos.getTableOrders(this.pos.table.id).length;
         }
         return super.orderCount;
     },
     _shouldLoadOrders() {
-        return super._shouldLoadOrders() || this.pos.config.module_pos_restaurant;
+        return super._shouldLoadOrders() || this.pos.pos_config.module_pos_restaurant;
     },
     onSwitchButtonClick() {
         const mode = this.pos.floorPlanStyle == "kanban" ? "default" : "kanban";
@@ -28,7 +28,7 @@ patch(Navbar.prototype, {
     showBackButton() {
         return (
             super.showBackButton(...arguments) ||
-            (this.pos.showBackButton() && this.pos.config.module_pos_restaurant)
+            (this.pos.showBackButton() && this.pos.pos_config.module_pos_restaurant)
         );
     },
 });

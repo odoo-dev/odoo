@@ -34,7 +34,7 @@ patch(PaymentScreen.prototype, {
             }
             remainingAmount += amount;
         }
-        if (!floatIsZero(unpaidAmount - remainingAmount, this.pos.currency.decimal_places)) {
+        if (!floatIsZero(unpaidAmount - remainingAmount, this.pos.res_currency.decimal_places)) {
             this.popup.add(ErrorPopup, {
                 title: _t("Invalid online payments"),
                 body: _t(
@@ -49,7 +49,7 @@ patch(PaymentScreen.prototype, {
     },
     //@override
     async _isOrderValid(isForceValidate) {
-        if (!await super._isOrderValid(...arguments)) {
+        if (!(await super._isOrderValid(...arguments))) {
             return false;
         }
 
@@ -105,18 +105,26 @@ patch(PaymentScreen.prototype, {
                 });
                 return false;
             }
-            const qrCodeImgSrc = qrCodeSrc(`${this.pos.base_url}/pos/pay/${this.currentOrder.server_id}?access_token=${this.currentOrder.access_token}`);
+            const qrCodeImgSrc = qrCodeSrc(
+                `${this.pos.base_url}/pos/pay/${this.currentOrder.server_id}?access_token=${this.currentOrder.access_token}`
+            );
 
             let prevOnlinePaymentLine = null;
             let lastOrderServerOPData = null;
             for (const onlinePaymentLine of onlinePaymentLines) {
                 const onlinePaymentLineAmount = onlinePaymentLine.get_amount();
                 // The local state is not aware if the online payment has already been done.
-                lastOrderServerOPData = await this.currentOrder.update_online_payments_data_with_server(this.pos.orm, onlinePaymentLineAmount);
+                lastOrderServerOPData =
+                    await this.currentOrder.update_online_payments_data_with_server(
+                        this.pos.orm,
+                        onlinePaymentLineAmount
+                    );
                 if (!lastOrderServerOPData) {
                     this.popup.add(ErrorPopup, {
                         title: _t("Online payment unavailable"),
-                        body: _t("There is a problem with the server. The order online payment status cannot be retrieved."),
+                        body: _t(
+                            "There is a problem with the server. The order online payment status cannot be retrieved."
+                        ),
                     });
                     return false;
                 }
@@ -126,14 +134,21 @@ patch(PaymentScreen.prototype, {
                         this.showModifiedOnlinePaymentsPopup();
                         return false;
                     }
-                    if ((prevOnlinePaymentLine && prevOnlinePaymentLine.get_payment_status() !== "done") || !this.checkRemainingOnlinePaymentLines(lastOrderServerOPData.amount_unpaid)) {
+                    if (
+                        (prevOnlinePaymentLine &&
+                            prevOnlinePaymentLine.get_payment_status() !== "done") ||
+                        !this.checkRemainingOnlinePaymentLines(lastOrderServerOPData.amount_unpaid)
+                    ) {
                         this.cancelOnlinePayment(this.currentOrder);
                         return false;
                     }
 
                     onlinePaymentLine.set_payment_status("waiting");
                     this.currentOrder.select_paymentline(onlinePaymentLine);
-                    lastOrderServerOPData = await this.showOnlinePaymentQrCode(qrCodeImgSrc, onlinePaymentLineAmount);
+                    lastOrderServerOPData = await this.showOnlinePaymentQrCode(
+                        qrCodeImgSrc,
+                        onlinePaymentLineAmount
+                    );
                     if (onlinePaymentLine.get_payment_status() === "waiting") {
                         onlinePaymentLine.set_payment_status(undefined);
                     }
@@ -142,7 +157,11 @@ patch(PaymentScreen.prototype, {
             }
 
             if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
-                lastOrderServerOPData = await this.currentOrder.update_online_payments_data_with_server(this.pos.orm, 0);
+                lastOrderServerOPData =
+                    await this.currentOrder.update_online_payments_data_with_server(
+                        this.pos.orm,
+                        0
+                    );
             }
             if (!lastOrderServerOPData || !lastOrderServerOPData.is_paid) {
                 return false;
@@ -151,11 +170,14 @@ patch(PaymentScreen.prototype, {
             await this.afterPaidOrderSavedOnServer(lastOrderServerOPData.paid_order);
             return false; // Cancel normal flow because the current order is already saved on the server.
         } else if (this.currentOrder.server_id) {
-            const orderServerOPData = await this.currentOrder.update_online_payments_data_with_server(this.pos.orm, 0);
+            const orderServerOPData =
+                await this.currentOrder.update_online_payments_data_with_server(this.pos.orm, 0);
             if (!orderServerOPData) {
                 const { confirmed } = await this.popup.add(ConfirmPopup, {
                     title: _t("Online payment unavailable"),
-                    body: _t("There is a problem with the server. The order online payment status cannot be retrieved. Are you sure there is no online payment for this order ?"),
+                    body: _t(
+                        "There is a problem with the server. The order online payment status cannot be retrieved. Are you sure there is no online payment for this order ?"
+                    ),
                     confirmText: _t("Yes"),
                 });
                 return confirmed;
@@ -179,7 +201,9 @@ patch(PaymentScreen.prototype, {
     showSaveOrderOnServerErrorPopup() {
         this.popup.add(ErrorPopup, {
             title: _t("Online payment unavailable"),
-            body: _t("There is a problem with the server. The order cannot be saved and therefore the online payment is not possible."),
+            body: _t(
+                "There is a problem with the server. The order cannot be saved and therefore the online payment is not possible."
+            ),
         });
     },
     showModifiedOnlinePaymentsPopup() {
@@ -198,7 +222,10 @@ patch(PaymentScreen.prototype, {
             order: this.currentOrder,
         };
 
-        const { confirmed, payload: orderServerOPData } = await this.popup.add(OnlinePaymentPopup, this.currentOrder.uiState.PaymentScreen.onlinePaymentData);
+        const { confirmed, payload: orderServerOPData } = await this.popup.add(
+            OnlinePaymentPopup,
+            this.currentOrder.uiState.PaymentScreen.onlinePaymentData
+        );
 
         if (this.currentOrder.uiState.PaymentScreen) {
             delete this.currentOrder.uiState.PaymentScreen.onlinePaymentData;
@@ -244,7 +271,10 @@ patch(PaymentScreen.prototype, {
         this.pos.validated_orders_name_server_id_map[this.currentOrder.name] = this.currentOrder.id;
 
         // Now, do practically the normal flow
-        if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) && this.pos.config.iface_cashdrawer) {
+        if (
+            (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
+            this.pos.pos_config.iface_cashdrawer
+        ) {
             this.hardwareProxy.printer.openCashbox();
         }
 

@@ -21,7 +21,7 @@
                                 <th>Difference</th>
                             </tr>
                         </thead>
-                        <t t-if="pos.config.cash_control">
+                        <t t-if="pos.pos_config.cash_control">
                             <tbody>
                                 <tr>
                                     <td t-esc="props.default_cash_details.name"/>

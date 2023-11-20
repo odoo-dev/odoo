@@ -85,7 +85,7 @@ patch(PosStore.prototype, {
         options.eWalletGiftCardProgram = program;
 
         // If gift card program setting is 'scan_use', ask for the code.
-        if (this.config.gift_card_settings == "scan_use") {
+        if (this.pos_config.gift_card_settings == "scan_use") {
             const { confirmed, payload: code } = await this.env.services.popup.add(TextInputPopup, {
                 title: _t("Generate a Gift Card"),
                 startingValue: "",

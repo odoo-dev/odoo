@@ -80,7 +80,7 @@ export class ReceiptScreen extends Component {
     get orderAmountPlusTip() {
         const order = this.currentOrder;
         const orderTotalAmount = order.get_total_with_tax();
-        const tip_product_id = this.pos.config.tip_product_id?.[0];
+        const tip_product_id = this.pos.pos_config.tip_product_id?.[0];
         const tipLine = order
             .get_orderlines()
             .find((line) => tip_product_id && line.product.id === tip_product_id);

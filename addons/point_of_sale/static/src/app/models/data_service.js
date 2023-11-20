@@ -12,12 +12,13 @@ export class PosData extends Reactive {
     constructor() {
         super();
         this.ready = this.setup(...arguments).then(() => this);
+        this.custom = {};
     }
 
     async setup(env, { orm }) {
         this.orm = orm;
 
-        this._relations = [];
+        this.relations = [];
 
         for (const model of PosData.modelToLoad) {
             this[model.replaceAll(".", "_")] = [];
@@ -52,8 +53,13 @@ export class PosData extends Reactive {
             }
         }
 
-        this._relations = response._relations;
+        for (const [key, value] of Object.entries(response.custom)) {
+            this.custom[key] = value;
+        }
+
+        this.relations = response.relations;
         this.createRelation();
+        this.createIdMap();
     }
 
     async loadMissingData(model, ids) {
@@ -73,16 +79,39 @@ export class PosData extends Reactive {
         }
     }
 
+    createIdMap() {
+        this.idMap = {};
+
+        for (const model of Object.keys(this.relations)) {
+            const modelName = model.replaceAll(".", "_");
+            const modelData = this[modelName];
+
+            if (!modelData || !modelData.length === 0) {
+                continue;
+            }
+
+            this.idMap[modelName] = {};
+
+            for (const data of modelData) {
+                if (!data.id) {
+                    continue;
+                }
+
+                this.idMap[modelName][data.id] = data;
+            }
+        }
+    }
+
     createRelation() {
         const relations = [];
 
-        for (const models of Object.values(this._relations)) {
+        for (const models of Object.values(this.relations)) {
             for (const field of Object.values(models)) {
                 relations.push(field);
             }
         }
 
-        for (const { field, model, relation, type } of relations) {
+        for (const { name, model, relation, type } of relations) {
             const relationModels = relation.replaceAll(".", "_");
             const currentModel = model.replaceAll(".", "_");
 
@@ -91,19 +120,19 @@ export class PosData extends Reactive {
             }
 
             for (const modelData of this[currentModel]) {
-                const currentValue = modelData[field];
+                const currentValue = modelData[name];
 
                 if (!currentValue) {
                     continue;
                 }
 
                 if (type === "many2many" || type === "one2many") {
-                    modelData[field] = this[relationModels].filter((rel) => {
+                    modelData[name] = this[relationModels].filter((rel) => {
                         return currentValue.includes(rel.id);
                     });
                 } else if (type === "many2one") {
                     const rel = this[relationModels].find((rel) => rel.id === currentValue);
-                    modelData[field] = rel ? rel : currentValue;
+                    modelData[name] = rel ? rel : currentValue;
                 }
             }
         }
@@ -115,13 +144,13 @@ export class PosData extends Reactive {
         const data = copy ? copy : this.pos_order;
         const relations = [];
 
-        for (const models of Object.values(this._relations)) {
+        for (const models of Object.values(this.relations)) {
             for (const field of Object.values(models)) {
                 relations.push(field);
             }
         }
 
-        for (const { field, model, type } of relations) {
+        for (const { name, model, type } of relations) {
             const currentModel = model.replaceAll(".", "_");
 
             if (!data[currentModel]) {
@@ -129,16 +158,16 @@ export class PosData extends Reactive {
             }
 
             for (const modelData of data[currentModel]) {
-                const currentValue = modelData[field];
+                const currentValue = modelData[name];
 
                 if (!currentValue) {
                     continue;
                 }
 
                 if (type === "many2many" || type === "one2many") {
-                    modelData[field] = currentValue.map((rel) => rel.id);
+                    modelData[name] = currentValue.map((rel) => rel.id);
                 } else if (type === "many2one") {
-                    modelData[field] = currentValue.id;
+                    modelData[name] = currentValue.id;
                 }
             }
         }

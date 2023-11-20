@@ -6,13 +6,13 @@ import { PosStore } from "@point_of_sale/app/store/pos_store";
 patch(PosStore.prototype, {
     async setup() {
         await super.setup(...arguments);
-        if (this.config.module_pos_hr) {
+        if (this.pos_config.module_pos_hr) {
             this.showTempScreen("LoginScreen");
         }
     },
     async _processData(loadedData) {
         await super._processData(...arguments);
-        if (this.config.module_pos_hr) {
+        if (this.pos_config.module_pos_hr) {
             this.employees = loadedData["hr.employee"];
             this.employee_by_id = loadedData["employee_by_id"];
             this.reset_cashier();
@@ -20,8 +20,8 @@ patch(PosStore.prototype, {
     },
     async after_load_server_data() {
         await super.after_load_server_data(...arguments);
-        if (this.config.module_pos_hr) {
-            this.hasLoggedIn = !this.config.module_pos_hr;
+        if (this.pos_config.module_pos_hr) {
+            this.hasLoggedIn = !this.pos_config.module_pos_hr;
         }
     },
     reset_cashier() {
@@ -51,19 +51,19 @@ patch(PosStore.prototype, {
      * @returns {null|*}
      */
     get_cashier() {
-        if (this.config.module_pos_hr) {
+        if (this.pos_config.module_pos_hr) {
             return this.cashier;
         }
         return super.get_cashier(...arguments);
     },
     get_cashier_user_id() {
-        if (this.config.module_pos_hr) {
+        if (this.pos_config.module_pos_hr) {
             return this.cashier.user_id ? this.cashier.user_id : null;
         }
         return super.get_cashier_user_id(...arguments);
     },
     async logEmployeeMessage(action, message) {
-        if (!this.config.module_pos_hr) {
+        if (!this.pos_config.module_pos_hr) {
             super.logEmployeeMessage(...arguments);
             return;
         }
@@ -79,7 +79,7 @@ patch(PosStore.prototype, {
      * @override
      */
     shouldShowCashControl() {
-        if (this.config.module_pos_hr) {
+        if (this.pos_config.module_pos_hr) {
             return super.shouldShowCashControl(...arguments) && this.hasLoggedIn;
         }
         return super.shouldShowCashControl(...arguments);

@@ -35,9 +35,6 @@ export class PosDB {
         this.product_by_category_id = {};
         this.product_packaging_by_barcode = {};
 
-        this.attribute_by_id = {};
-        this.attribute_value_by_id = {};
-
         this.partner_sorted = [];
         this.partner_by_id = {};
         this.partner_by_barcode = {};
@@ -56,15 +53,6 @@ export class PosDB {
         this.product_ids_to_not_display = [];
     }
 
-    add_attributes(attribute) {
-        for (const attr of Object.values(attribute)) {
-            this.attribute_by_id[attr.id] = attr;
-            for (const val of attr.values) {
-                val.attribute_id = attr.id;
-                this.attribute_value_by_id[val.id] = val;
-            }
-        }
-    }
     /**
      * sets an uuid to prevent conflict in locally stored data between multiple PoS Configs. By
      * using the uuid of the config the local storage from other configs will not get effected nor
@@ -362,108 +350,6 @@ export class PosDB {
                 this.product_packaging_by_barcode[productPackaging.barcode] = productPackaging;
             }
         });
-    }
-    _partner_search_string(partner) {
-        var str = partner.name || "";
-        if (partner.barcode) {
-            str += "|" + partner.barcode;
-        }
-        if (partner.address) {
-            str += "|" + partner.address;
-        }
-        if (partner.phone) {
-            str += "|" + partner.phone.split(" ").join("");
-        }
-        if (partner.mobile) {
-            str += "|" + partner.mobile.split(" ").join("");
-        }
-        if (partner.email) {
-            str += "|" + partner.email;
-        }
-        if (partner.vat) {
-            str += "|" + partner.vat;
-        }
-        if (partner.parent_name) {
-            str += "|" + partner.parent_name;
-        }
-        str = "" + partner.id + ":" + str.replace(":", "").replace(/\n/g, " ") + "\n";
-        return str;
-    }
-    add_partners(partners) {
-        var updated = {};
-        var new_write_date = "";
-        var partner;
-        for (var i = 0, len = partners.length; i < len; i++) {
-            partner = partners[i];
-
-            var local_partner_date = (this.partner_write_date || "").replace(
-                /^(\d{4}-\d{2}-\d{2}) ((\d{2}:?){3})$/,
-                "$1T$2Z"
-            );
-            var dist_partner_date = (partner.write_date || "").replace(
-                /^(\d{4}-\d{2}-\d{2}) ((\d{2}:?){3})$/,
-                "$1T$2Z"
-            );
-            if (
-                this.partner_write_date &&
-                this.partner_by_id[partner.id] &&
-                new Date(local_partner_date).getTime() + 1000 >=
-                    new Date(dist_partner_date).getTime()
-            ) {
-                // FIXME: The write_date is stored with milisec precision in the database
-                // but the dates we get back are only precise to the second. This means when
-                // you read partners modified strictly after time X, you get back partners that were
-                // modified X - 1 sec ago.
-                continue;
-            } else if (new_write_date < partner.write_date) {
-                new_write_date = partner.write_date;
-            }
-            if (!this.partner_by_id[partner.id]) {
-                this.partner_sorted.push(partner.id);
-            } else {
-                const oldPartner = this.partner_by_id[partner.id];
-                if (oldPartner.barcode) {
-                    delete this.partner_by_barcode[oldPartner.barcode];
-                }
-            }
-            if (partner.barcode) {
-                this.partner_by_barcode[partner.barcode] = partner;
-            }
-            updated[partner.id] = partner;
-            this.partner_by_id[partner.id] = partner;
-        }
-
-        this.partner_write_date = new_write_date || this.partner_write_date;
-
-        const updatedChunks = new Set();
-        const CHUNK_SIZE = 100;
-        for (const id in updated) {
-            const chunkId = Math.floor(id / CHUNK_SIZE);
-            if (updatedChunks.has(chunkId)) {
-                // another partner in this chunk was updated and we already rebuild the chunk
-                continue;
-            }
-            updatedChunks.add(chunkId);
-            // If there were updates, we need to rebuild the search string for this chunk
-            let searchString = "";
-
-            for (let id = chunkId * CHUNK_SIZE; id < (chunkId + 1) * CHUNK_SIZE; id++) {
-                if (!(id in this.partner_by_id)) {
-                    continue;
-                }
-                const partner = this.partner_by_id[id];
-                partner.address =
-                    (partner.street ? partner.street + ", " : "") +
-                    (partner.zip ? partner.zip + ", " : "") +
-                    (partner.city ? partner.city + ", " : "") +
-                    (partner.state_id ? partner.state_id[1] + ", " : "") +
-                    (partner.country_id ? partner.country_id[1] : "");
-                searchString += this._partner_search_string(partner);
-            }
-
-            this.partner_search_strings[chunkId] = unaccent(searchString);
-        }
-        return Object.keys(updated).length;
     }
     get_partner_write_date() {
         return this.partner_write_date || "1970-01-01 00:00:00";

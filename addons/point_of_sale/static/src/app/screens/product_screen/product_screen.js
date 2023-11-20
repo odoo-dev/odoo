@@ -112,7 +112,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             { value: "4" },
             { value: "5" },
             { value: "6" },
-            { value: "discount", text: "% Disc", disabled: !this.pos.config.manual_discount },
+            { value: "discount", text: "% Disc", disabled: !this.pos.pos_config.manual_discount },
             { value: "7" },
             { value: "8" },
             { value: "9" },
@@ -453,7 +453,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         return this.pos.searchProductWord.trim();
     }
     getProductListToNotDisplay() {
-        return [this.pos.config.tip_product_id];
+        return [this.pos.pos_config.tip_product_id];
     }
     get productsToDisplay() {
         const { db } = this.pos;

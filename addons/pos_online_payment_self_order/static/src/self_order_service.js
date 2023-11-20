@@ -28,7 +28,7 @@ patch(SelfOrder.prototype, {
         if (exitRoute) {
             exitRouteUrl += `/pos-self/${order_pos_config_id}`;
 
-            if (this.config.self_ordering_pay_after === "each") {
+            if (this.pos_config.self_ordering_pay_after === "each") {
                 exitRouteUrl += `/confirmation/${order.access_token}/order`;
             }
 

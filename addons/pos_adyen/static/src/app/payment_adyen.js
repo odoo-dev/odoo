@@ -56,12 +56,12 @@ export class PaymentAdyen extends PaymentInterface {
     }
 
     _adyen_get_sale_id() {
-        var config = this.pos.config;
+        var config = this.pos.pos_config;
         return sprintf("%s (ID: %s)", config.display_name, config.id);
     }
 
     _adyen_common_message_header() {
-        var config = this.pos.config;
+        var config = this.pos.pos_config;
         this.most_recent_service_id = Math.floor(Math.random() * Math.pow(2, 64)).toString(); // random ID to identify request/response pairs
         this.most_recent_service_id = this.most_recent_service_id.substring(0, 10); // max length is 10
 
@@ -77,7 +77,7 @@ export class PaymentAdyen extends PaymentInterface {
 
     _adyen_pay_data() {
         var order = this.pos.get_order();
-        var config = this.pos.config;
+        var config = this.pos.pos_config;
         var line = order.selected_paymentline;
         var data = {
             SaleToPOIRequest: {
@@ -93,7 +93,7 @@ export class PaymentAdyen extends PaymentInterface {
                     },
                     PaymentTransaction: {
                         AmountsReq: {
-                            Currency: this.pos.currency.name,
+                            Currency: this.pos.res_currency.name,
                             RequestedAmount: line.amount,
                         },
                     },
@@ -126,7 +126,7 @@ export class PaymentAdyen extends PaymentInterface {
     }
 
     _adyen_cancel(ignore_error) {
-        var config = this.pos.config;
+        var config = this.pos.pos_config;
         var previous_service_id = this.most_recent_service_id;
         var header = Object.assign(this._adyen_common_message_header(), {
             MessageCategory: "Abort",
@@ -258,7 +258,7 @@ export class PaymentAdyen extends PaymentInterface {
         );
     }
     handleSuccessResponse(line, notification, additional_response) {
-        const config = this.pos.config;
+        const config = this.pos.pos_config;
         const order = this.pos.get_order();
         const payment_response = notification.SaleToPOIResponse.PaymentResponse;
         const payment_result = payment_response.PaymentResult;
