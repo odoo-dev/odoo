@@ -3,6 +3,8 @@
 import { registry } from "@web/core/registry";
 import { Reactive } from "@web/core/utils/reactive";
 import { clone } from "../utils/clone";
+import { reactive } from "@odoo/owl";
+import { createRelatedModels } from "@point_of_sale/app/models/related_models";
 
 export class PosData extends Reactive {
     // if empty, all python listed models will be loaded
@@ -24,17 +26,10 @@ export class PosData extends Reactive {
             this[model.replaceAll(".", "_")] = [];
         }
 
-        await this.initData();
-
-        // effect(
-        //     (args) => {
-        //         this.saveToLocalStorage();
-        //     },
-        //     [this.pos_order, this.pos_order_line]
-        // );
+        await this.initData(env);
     }
 
-    async initData() {
+    async initData(env) {
         const response = await this.orm.call("pos.session", "load_data", [
             odoo.pos_session_id,
             PosData.modelToLoad,
@@ -60,6 +55,23 @@ export class PosData extends Reactive {
         this.relations = response.relations;
         this.createRelation();
         this.createIdMap();
+
+        this.models = createRelatedModels(this.relations, env, reactive);
+        this.models.loadData(response.data);
+
+        // TODO JCB: Remove the following lines. FTM, they are used for testing.
+        const order1 = this.models["pos.order"].readAll()[0];
+        const line1 = [...order1.lines][0];
+        // think of `serialize` as `export_as_JSON`
+        const line1_json_str = JSON.stringify(line1.serialize());
+        line1.delete();
+        console.log([...order1.lines]);
+        // think of `deserialize` as `init_from_JSON`
+        const recreated_line1 = this.models["pos.order.line"].deserialize(
+            JSON.parse(line1_json_str)
+        );
+        console.log(recreated_line1);
+        console.log([...order1.lines]);
     }
 
     async loadMissingData(model, ids) {
@@ -107,6 +119,9 @@ export class PosData extends Reactive {
 
         for (const models of Object.values(this.relations)) {
             for (const field of Object.values(models)) {
+                if (!field.relation) {
+                    continue;
+                }
                 relations.push(field);
             }
         }
@@ -146,6 +161,9 @@ export class PosData extends Reactive {
 
         for (const models of Object.values(this.relations)) {
             for (const field of Object.values(models)) {
+                if (!field.relation) {
+                    continue;
+                }
                 relations.push(field);
             }
         }
