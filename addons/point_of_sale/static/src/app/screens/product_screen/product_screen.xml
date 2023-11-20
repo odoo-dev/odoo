@@ -45,7 +45,22 @@
             </div>
             <div class="rightpane d-flex flex-grow-1 flex-column bg-300 w-60" t-if="!ui.isSmall || pos.mobile_pane === 'right'">
                 <div t-att-class="{'d-none': scrollDirection.down and ui.isSmall}" class="d-flex bg-view shadow-sm control-top-bar">
-                    <CategorySelector categories="getCategories()" onClick="(id) => this.pos.setSelectedCategoryId(id)" />
+                    <div class="d-flex overflow-auto w-100">
+                        <div class="d-flex">
+                            <button t-on-click="() => this.pos.setSelectedCategoryId(0)"
+                                t-if="this.pos.idMap.pos_category[this.pos.selectedCategoryId]"
+                                class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center p-1 h-100">
+                                <i class="fa fa-home fa-2x" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div t-foreach="getCategories()" t-as="category" t-key="category.id" class="d-flex">
+                            <i t-if="category_index !== 0" t-attf-class="pe-2 fa fa-caret-right" t-attf-style="opacity: {{category.showSeparator ? 1 : 0}}" aria-hidden="true" />
+                            <button t-on-click="() =>  this.pos.setSelectedCategoryId(category.id)" class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center p-1 h-100" style="width: 3rem;">
+                                <img t-if="category.has_image" t-att-src="computeImageUrl(category)" style="height: 3rem;" alt="Category" />
+                                <span t-if="category.name" class="text-center fs-5" t-esc="category.name" />
+                            </button>
+                        </div>
+                    </div>
                     <Input tModel="[pos, 'searchProductWord']"
                         class="'p-2'"
                         isSmall="ui.isSmall"

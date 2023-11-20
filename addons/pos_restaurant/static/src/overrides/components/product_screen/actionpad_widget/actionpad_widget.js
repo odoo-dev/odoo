@@ -50,7 +50,7 @@ patch(ActionpadWidget.prototype, {
 
         const categories = Object.values(orderChange).reduce((acc, curr) => {
             const categoryId = this.pos.db.product_by_id[curr.product_id].pos_categ_ids[0];
-            const category = this.pos.db.category_by_id[categoryId];
+            const category = this.pos.idMap.pos_category[categoryId];
             if (category) {
                 if (!acc[category.id]) {
                     acc[category.id] = { count: curr.quantity, name: category.name };

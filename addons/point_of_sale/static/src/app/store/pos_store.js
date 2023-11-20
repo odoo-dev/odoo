@@ -271,14 +271,13 @@ export class PosStore extends Reactive {
         this.product_pricelist = this.data.product_pricelist;
         this.product_attribute = this.data.product_attribute;
         this.product_template_attribute_value = this.data.product_template_attribute_value;
+        this.pos_category = this.data.pos_category;
+        this.pos_combo = this.data.pos_combo;
+        this.pos_combo_line = this.data.pos_combo_line;
         debugger;
 
-        this.db.add_categories(loadedData["pos.category"]);
-        this.db.add_combos(loadedData["pos.combo"]);
-        this.db.add_combo_lines(loadedData["pos.combo.line"]);
         this._loadProductProduct(loadedData["product.product"]);
         this.db.add_packagings(loadedData["product.packaging"]);
-        this.attributes_by_ptal_id = loadedData["attributes_by_ptal_id"];
         this.cash_rounding = loadedData["account.cash.rounding"];
         this.payment_methods = loadedData["pos.payment.method"];
         this._loadPosPaymentMethod();
@@ -433,7 +432,7 @@ export class PosStore extends Reactive {
 
         let removed_categories_id;
         if (categories) {
-            const previous_categories_id = Object.values(this.db.category_by_id).map((c) => c.id);
+            const previous_categories_id = Object.values(this.pos.idMap.pos_category).map((c) => c.id);
             const received_categories_id = new Set(categories.map((c) => c.id));
             this.db.add_categories(categories);
             removed_categories_id = previous_categories_id.filter(
@@ -1849,7 +1848,7 @@ export class PosStore extends Reactive {
             const image = new Image();
             image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=${product.write_date}`;
         }
-        for (const category of Object.values(this.db.category_by_id)) {
+        for (const category of Object.values(this.idMap.pos_category)) {
             if (category.id == 0) {
                 continue;
             }
