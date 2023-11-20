@@ -7,7 +7,7 @@ export class BaseProductAttribute extends Component {
     setup() {
         this.env.attribute_components.push(this);
         this.attribute = this.props.attribute;
-        this.values = this.attribute.values;
+        this.values = this.attribute.template_value_ids;
         this.state = useState({
             attribute_value_ids: parseFloat(this.values[0].id),
             custom_value: "",

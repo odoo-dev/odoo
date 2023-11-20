@@ -38,7 +38,7 @@ export class PaymentScreen extends Component {
         this.hardwareProxy = useService("hardware_proxy");
         this.printer = useService("printer");
         this.payment_methods_from_config = this.pos.payment_methods.filter((method) =>
-            this.pos.config.payment_method_ids.includes(method.id)
+            this.pos.pos_config.payment_method_ids.includes(method.id)
         );
         this.numberBuffer = useService("number_buffer");
         this.numberBuffer.use(this._getNumberBufferConfig);
@@ -191,8 +191,8 @@ export class PaymentScreen extends Component {
             title: tip ? _t("Change Tip") : _t("Add Tip"),
             startingValue: value,
             isInputSelected: true,
-            nbrDecimal: this.pos.currency.decimal_places,
-            inputSuffix: this.pos.currency.symbol,
+            nbrDecimal: this.pos.res_currency.decimal_places,
+            inputSuffix: this.pos.res_currency.symbol,
         });
 
         if (confirmed) {
@@ -236,7 +236,7 @@ export class PaymentScreen extends Component {
     }
     async validateOrder(isForceValidate) {
         this.numberBuffer.capture();
-        if (this.pos.config.cash_rounding) {
+        if (this.pos.pos_config.cash_rounding) {
             if (!this.pos.get_order().check_paymentlines_rounding()) {
                 this.popup.add(ErrorPopup, {
                     title: _t("Rounding error in payment lines"),
@@ -351,7 +351,7 @@ export class PaymentScreen extends Component {
         if (
             nextScreen === "ReceiptScreen" &&
             !this.currentOrder._printed &&
-            this.pos.config.iface_print_auto
+            this.pos.pos_config.iface_print_auto
         ) {
             const invoiced_finalized = this.currentOrder.is_to_invoice()
                 ? this.currentOrder.finalized
@@ -363,7 +363,7 @@ export class PaymentScreen extends Component {
                     formatCurrency: this.env.utils.formatCurrency,
                 });
 
-                if (printResult && this.pos.config.iface_print_skip_screen) {
+                if (printResult && this.pos.pos_config.iface_print_skip_screen) {
                     this.pos.removeOrder(this.currentOrder);
                     this.pos.add_new_order();
                     nextScreen = "ProductScreen";

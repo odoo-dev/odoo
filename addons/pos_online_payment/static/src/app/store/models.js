@@ -44,7 +44,7 @@ patch(Order.prototype, {
         );
         for (const op of opData.online_payments) {
             const matchingLineIndex = opLinesToUpdate.findIndex(
-                (pl) => pl.payment_method.id === op.payment_method_id && floatIsZero(pl.amount - op.amount, this.pos.currency.decimal_places)
+                (pl) => pl.payment_method.id === op.payment_method_id && floatIsZero(pl.amount - op.amount, this.pos.res_currency.decimal_places)
             );
             let opLine = null;
             if (matchingLineIndex > -1) {

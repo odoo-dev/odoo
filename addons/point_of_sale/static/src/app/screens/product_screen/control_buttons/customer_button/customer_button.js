@@ -21,6 +21,6 @@ ProductScreen.addControlButton({
     component: CustomerButton,
     position: ["before", "SetFiscalPositionButton"],
     condition: function () {
-        return this.pos.config.module_pos_restaurant;
+        return this.pos.pos_config.module_pos_restaurant;
     },
 });

@@ -36,6 +36,6 @@ export class OrderlineNoteButton extends Component {
 ProductScreen.addControlButton({
     component: OrderlineNoteButton,
     condition: function () {
-        return this.pos.config.iface_orderline_notes;
+        return this.pos.pos_config.iface_orderline_notes;
     },
 });

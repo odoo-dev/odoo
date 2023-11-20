@@ -390,7 +390,7 @@ export class FloorScreen extends Component {
         const floor = await this.orm.call("restaurant.floor", "create_from_ui", [
             newName,
             "#ACADAD",
-            this.pos.config.id,
+            this.pos.pos_config.id,
         ]);
         this.pos.floors_by_id[floor.id] = floor;
         this.pos.floors.push(floor);
@@ -415,7 +415,7 @@ export class FloorScreen extends Component {
             const newFloor = await this.orm.call("restaurant.floor", "create_from_ui", [
                 newFloorName,
                 floor.background_color,
-                this.pos.config.id,
+                this.pos.pos_config.id,
             ]);
             this.pos.floors_by_id[newFloor.id] = newFloor;
             this.pos.floors.push(newFloor);

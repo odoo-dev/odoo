@@ -7,7 +7,7 @@ import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/actio
 
 patch(ActionpadWidget.prototype, {
     get swapButton() {
-        return this.props.actionType === "payment" && this.pos.config.module_pos_restaurant;
+        return this.props.actionType === "payment" && this.pos.pos_config.module_pos_restaurant;
     },
     get currentOrder() {
         return this.pos.get_order();

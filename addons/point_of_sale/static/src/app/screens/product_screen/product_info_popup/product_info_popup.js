@@ -24,7 +24,7 @@ export class ProductInfoPopup extends AbstractAwaitablePopup {
         this.cancel();
     }
     _hasMarginsCostsAccessRights() {
-        const isAccessibleToEveryUser = this.pos.config.is_margins_costs_accessible_to_every_user;
+        const isAccessibleToEveryUser = this.pos.pos_config.is_margins_costs_accessible_to_every_user;
         const isCashierManager = this.pos.get_cashier().role === "manager";
         return isAccessibleToEveryUser || isCashierManager;
     }

@@ -13,11 +13,11 @@ export class MoneyDetailsPopup extends AbstractAwaitablePopup {
     setup() {
         super.setup();
         this.pos = usePos();
-        this.currency = this.pos.currency;
+        this.res_currency = this.pos.res_currency;
         this.state = useState({
             moneyDetails: this.props.moneyDetails
                 ? { ...this.props.moneyDetails }
-                : Object.fromEntries(this.pos.bills.map((bill) => [bill.value, 0])),
+                : Object.fromEntries(this.pos.pos_bill.map((bill) => [bill.value, 0])),
         });
     }
     computeTotal(moneyDetails = this.state.moneyDetails) {
@@ -28,10 +28,10 @@ export class MoneyDetailsPopup extends AbstractAwaitablePopup {
     }
     //@override
     async getPayload() {
-        let moneyDetailsNotes = !floatIsZero(this.computeTotal(), this.currency.decimal_places)
+        let moneyDetailsNotes = !floatIsZero(this.computeTotal(), this.res_currency.decimal_places)
             ? "Money details: \n"
             : null;
-        this.pos.bills.forEach((bill) => {
+        this.pos.pos_bill.forEach((bill) => {
             if (this.state.moneyDetails[bill.value]) {
                 moneyDetailsNotes += `  - ${
                     this.state.moneyDetails[bill.value]
@@ -48,7 +48,7 @@ export class MoneyDetailsPopup extends AbstractAwaitablePopup {
     async cancel() {
         super.cancel();
         if (
-            this.pos.config.iface_cashdrawer &&
+            this.pos.pos_config.iface_cashdrawer &&
             this.pos.hardwareProxy.connectionInfo.status === "connected"
         ) {
             this.pos.logEmployeeMessage(this.props.action, "ACTION_CANCELLED");

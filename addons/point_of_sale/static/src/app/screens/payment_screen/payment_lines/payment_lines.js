@@ -32,7 +32,7 @@ export class PaymentScreenPaymentLines extends Component {
                 title: _t("New amount"),
                 startingValue: parseFloat(paymentline.amount),
                 isInputSelected: true,
-                nbrDecimal: this.pos.currency.decimal_places,
+                nbrDecimal: this.pos.res_currency.decimal_places,
             });
 
             if (confirmed) {

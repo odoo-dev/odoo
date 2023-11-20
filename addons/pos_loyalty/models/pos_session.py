@@ -119,10 +119,10 @@ class PosSession(models.Model):
         result.extend(products)
         return result
 
-    def _get_pos_ui_res_partner(self, params):
-        partners = super()._get_pos_ui_res_partner(params)
-        self._set_loyalty_cards(partners)
-        return partners
+    # def _get_pos_ui_res_partner(self, params):
+    #     partners = super()._get_pos_ui_res_partner(params)
+    #     self._set_loyalty_cards(partners)
+    #     return partners
 
     def get_pos_ui_res_partner_by_params(self, custom_search_params):
         partners = super().get_pos_ui_res_partner_by_params(custom_search_params)

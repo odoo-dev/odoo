@@ -8,7 +8,7 @@ patch(PosBus.prototype, {
     setup() {
         super.setup(...arguments);
 
-        if (this.pos.config.module_pos_restaurant) {
+        if (this.pos.pos_config.module_pos_restaurant) {
             this.initTableOrderCount();
         }
     },
@@ -17,7 +17,7 @@ patch(PosBus.prototype, {
         const result = await this.orm.call(
             "pos.config",
             "get_tables_order_count_and_printing_changes",
-            [this.pos.config.id]
+            [this.pos.pos_config.id]
         );
 
         this.ws_syncTableCount(result);
@@ -27,7 +27,7 @@ patch(PosBus.prototype, {
     dispatch(message) {
         super.dispatch(...arguments);
 
-        if (message.type === "TABLE_ORDER_COUNT" && this.pos.config.module_pos_restaurant) {
+        if (message.type === "TABLE_ORDER_COUNT" && this.pos.pos_config.module_pos_restaurant) {
             this.ws_syncTableCount(message.payload);
         }
     },
@@ -42,7 +42,7 @@ patch(PosBus.prototype, {
                 [odoo.pos_session_id],
             ]);
 
-            if (this.pos.config.module_pos_restaurant) {
+            if (this.pos.pos_config.module_pos_restaurant) {
                 this.pos.floors = result;
                 this.pos.loadRestaurantFloor();
             }

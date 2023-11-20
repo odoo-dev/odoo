@@ -11,7 +11,7 @@ import { Component, useState } from "@odoo/owl";
 patch(TicketScreen.prototype, {
     _getScreenToStatusMap() {
         return Object.assign(super._getScreenToStatusMap(...arguments), {
-            PaymentScreen: this.pos.config.set_tip_after_payment
+            PaymentScreen: this.pos.pos_config.set_tip_after_payment
                 ? "OPEN"
                 : super._getScreenToStatusMap(...arguments).PaymentScreen,
             TipScreen: "TIPPING",
@@ -32,7 +32,7 @@ patch(TicketScreen.prototype, {
     },
     //@override
     _getSearchFields() {
-        if (!this.pos.config.module_pos_restaurant) {
+        if (!this.pos.pos_config.module_pos_restaurant) {
             return super._getSearchFields(...arguments);
         }
         return Object.assign({}, super._getSearchFields(...arguments), {
@@ -44,7 +44,7 @@ patch(TicketScreen.prototype, {
         });
     },
     async _setOrder(order) {
-        if (!this.pos.config.module_pos_restaurant || this.pos.table || !order.tableId) {
+        if (!this.pos.pos_config.module_pos_restaurant || this.pos.table || !order.tableId) {
             return super._setOrder(...arguments);
         }
         // we came from the FloorScreen
@@ -53,7 +53,7 @@ patch(TicketScreen.prototype, {
         this.closeTicketScreen();
     },
     get allowNewOrders() {
-        return this.pos.config.module_pos_restaurant
+        return this.pos.pos_config.module_pos_restaurant
             ? Boolean(this.pos.table)
             : super.allowNewOrders;
     },
@@ -112,7 +112,7 @@ patch(TicketScreen.prototype, {
     },
     _getOrderStates() {
         const result = super._getOrderStates(...arguments);
-        if (this.pos.config.set_tip_after_payment) {
+        if (this.pos.pos_config.set_tip_after_payment) {
             result.delete("PAYMENT");
             result.set("OPEN", { text: _t("Open"), indented: true });
             result.set("TIPPING", { text: _t("Tipping"), indented: true });
@@ -121,13 +121,13 @@ patch(TicketScreen.prototype, {
     },
     async onDoRefund() {
         const order = this.getSelectedOrder();
-        if (this.pos.config.module_pos_restaurant && order && !this.pos.table) {
+        if (this.pos.pos_config.module_pos_restaurant && order && !this.pos.table) {
             this.pos.setTable(order.table ? order.table : Object.values(this.pos.tables_by_id)[0]);
         }
         super.onDoRefund(...arguments);
     },
     isDefaultOrderEmpty(order) {
-        if (this.pos.config.module_pos_restaurant) {
+        if (this.pos.pos_config.module_pos_restaurant) {
             return false;
         }
         return super.isDefaultOrderEmpty(...arguments);

@@ -8,8 +8,8 @@ patch(PosStore.prototype, {
     after_load_server_data() {
         var self = this;
         return super.after_load_server_data(...arguments).then(function () {
-            if (self.config.other_devices && self.config.epson_printer_ip) {
-                self.hardwareProxy.printer = new EpsonPrinter({ ip: self.config.epson_printer_ip });
+            if (self.pos_config.other_devices && self.pos_config.epson_printer_ip) {
+                self.hardwareProxy.printer = new EpsonPrinter({ ip: self.pos_config.epson_printer_ip });
             }
         });
     },

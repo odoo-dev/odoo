@@ -76,7 +76,9 @@ export class DiscountButton extends Component {
                             ? _t(
                                   "Tax: %s",
                                   tax_ids_array
-                                      .map((taxId) => this.pos.taxes_by_id[taxId].amount + "%")
+                                      .map(
+                                          (taxId) => this.pos.idMap.account_tax[taxId].amount + "%"
+                                      )
                                       .join(", ")
                               )
                             : _t("No tax")),

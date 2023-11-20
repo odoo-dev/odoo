@@ -26,12 +26,6 @@ class PosSession(models.Model):
             res += ['l10n_ar.afip.responsibility.type', 'l10n_latam.identification.type']
         return res
 
-    def _loader_params_res_partner(self):
-        vals = super()._loader_params_res_partner()
-        if self.company_id.country_code == 'AR':
-            vals['search_params']['fields'] += ['l10n_ar_afip_responsibility_type_id', 'l10n_latam_identification_type_id']
-        return vals
-
     def _pos_data_process(self, loaded_data):
         super()._pos_data_process(loaded_data)
         if self.company_id.country_code == 'AR':

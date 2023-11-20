@@ -169,10 +169,10 @@ export class PaymentSix extends PaymentInterface {
     _sendTransaction(transactionType) {
         var amount = new timapi.Amount(
             Math.round(
-                this.pos.get_order().selected_paymentline.amount / this.pos.currency.rounding
+                this.pos.get_order().selected_paymentline.amount / this.pos.res_currency.rounding
             ),
-            timapi.constants.Currency[this.pos.currency.name],
-            this.pos.currency.decimal_places
+            timapi.constants.Currency[this.pos.res_currency.name],
+            this.pos.res_currency.decimal_places
         );
 
         return new Promise((resolve) => {

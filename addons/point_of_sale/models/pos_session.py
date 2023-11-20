@@ -149,6 +149,14 @@ class PosSession(models.Model):
                         'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids',
                     ],
                 },
+                'product.attribute': {
+                    'domain': [('create_variant', '=', 'no_variant')],
+                    'fields': ['name', 'display_type', 'template_value_ids']
+                },
+                'product.template.attribute.value': {
+                    'domain': lambda data: [('attribute_id', 'in', [attr['id'] for attr in data['product.attribute']])],
+                    'fields': ['attribute_id', 'attribute_line_id', 'product_attribute_value_id', 'price_extra', 'name', 'is_custom', 'html_color', 'image']
+                },
                 'pos.combo': {
                     'domain': lambda data: [('id', 'in', list(set().union(*[product.get('combo_ids') for product in data['product.product']])))],
                     'fields': ['id', 'name', 'combo_line_ids', 'base_price']
@@ -166,7 +174,7 @@ class PosSession(models.Model):
                     'fields': ['name', 'groups_id', 'partner_id'],
                 },
                 'res.partner': {
-                    'domain': [],
+                    'domain': [('id', 'in', self.config_id.get_limited_partners_loading())],
                     'fields': [
                         'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
                         'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist', 'parent_name'
@@ -202,7 +210,13 @@ class PosSession(models.Model):
                 },
                 'product.pricelist' : {
                     'domain': [('id', 'in', self.config_id.available_pricelist_ids.ids)] if self.config_id.use_pricelist else [('id', '=', self.config_id.pricelist_id.id)],
-                    'fields': ['name', 'display_name', 'discount_policy']
+                    'fields': ['name', 'display_name', 'discount_policy', 'item_ids']
+                },
+                'product.pricelist.item' : {
+                    'domain': lambda data: [('pricelist_id', 'in', [pricelist['id'] for pricelist in data['product.pricelist']])],
+                    'fields': ['product_tmpl_id', 'product_id', 'pricelist_id', 'price_surcharge', 'price_discount', 'price_round',
+                        'price_min_margin', 'price_max_margin', 'company_id', 'currency_id', 'date_start', 'date_end', 'compute_price',
+                        'fixed_price', 'percent_price', 'base_pricelist_id', 'base', 'categ_id', 'min_quantity',]
                 },
                 'product.category': {
                     'domain': [],
@@ -248,8 +262,10 @@ class PosSession(models.Model):
         params = self._load_data_params()
         response = {}
         response['data'] = {};
-        response['custom'] = {};
-        response['_relations'] = {}
+        response['relations'] = {}
+        response['custom'] = {
+            'server_version': exp_version()
+        };
 
         # Load data from search_read
         if params.get('search_read'):
@@ -266,15 +282,41 @@ class PosSession(models.Model):
                 model_fields = self.env[key].fields_get(allfields=value['fields'])
                 for name, params in model_fields.items():
                     if params.get("relation"):
-                        if not response['_relations'].get(key):
-                            response['_relations'][key] = {}
+                        if not response['relations'].get(key):
+                            response['relations'][key] = {}
 
-                        response['_relations'][key][name] = {
+                        response['relations'][key][name] = {
                             'name': name,
                             'model': key,
                             'relation': params['relation'],
                             'type': params['type'],
                         }
+
+        # pos_config adaptation
+        config = response['data']['pos.config'][0]
+        response['data']['pos.config'][0]['use_proxy'] = config['is_posbox'] and (
+            config['iface_electronic_scale'] or
+            config['iface_print_via_proxy'] or
+            config['iface_scan_via_proxy'] or
+            config['iface_customer_facing_display_via_proxy']
+        )
+
+        # product_pricelist adaptation
+        if len(response['data']['product.pricelist']) > 0:
+            self.pos_config.use_pricelist = True
+            response['data']['pos.config'][0]['use_pricelist'] = True
+
+            if self.config_id.use_pricelist:
+                default_pricelist = next(
+                    (pl for pl in response['product.pricelist'] if pl['id'] == self.config_id.pricelist_id.id),
+                    False
+                )
+                if default_pricelist:
+                    response['custom']['default_product_pricelist'] = default_pricelist
+
+        # res_users adaptation
+        response['data']['res.users'][0]['role'] = 'manager' if any(id == self.config_id.group_pos_manager_id.id for id in response['data']['res.users'][0]['groups_id']) else 'cashier'
+        del response['data']['res.users'][0]['groups_id']
 
         return response
 
@@ -1844,12 +1886,6 @@ class PosSession(models.Model):
         """
         loaded_data['version'] = exp_version()
 
-        loaded_data['units_by_id'] = {unit['id']: unit for unit in loaded_data['uom.uom']}
-
-        loaded_data['taxes_by_id'] = {tax['id']: tax for tax in loaded_data['account.tax']}
-        for tax in loaded_data['taxes_by_id'].values():
-            tax['children_tax_ids'] = [loaded_data['taxes_by_id'][id] for id in tax['children_tax_ids']]
-
         if self.config_id.use_pricelist:
             default_pricelist = next(
                 (pl for pl in loaded_data['product.pricelist'] if pl['id'] == self.config_id.pricelist_id.id),
@@ -1872,20 +1908,7 @@ class PosSession(models.Model):
     @api.model
     def _pos_ui_models_to_load(self):
         models_to_load = [
-            'uom.uom',
-            'res.country.state',
-            'res.country',
-            'res.lang',
-            'account.tax',
-            'pos.session',
-            'pos.config',
             'pos.printer',
-            'pos.bill',
-            'res.partner',
-            'stock.picking.type',
-            'res.users',
-            'product.pricelist',
-            'res.currency',
             'pos.category',
             'product.product',
             'pos.combo',
@@ -1928,41 +1951,6 @@ class PosSession(models.Model):
 
         return record.id if record else None
 
-    def _loader_params_uom_uom(self):
-        return {'search_params': {'domain': [], 'fields': []}, 'context': {'active_test': False}}
-
-    def _get_pos_ui_uom_uom(self, params):
-        return self.env['uom.uom'].with_context(**params['context']).search_read(**params['search_params'])
-
-    def _loader_params_res_country_state(self):
-        return {'search_params': {'domain': [], 'fields': ['name', 'country_id']}}
-
-    def _get_pos_ui_res_country_state(self, params):
-        return self.env['res.country.state'].search_read(**params['search_params'])
-
-    def _loader_params_res_country(self):
-        return {'search_params': {'domain': [], 'fields': ['name', 'vat_label', 'code']}}
-
-    def _get_pos_ui_res_country(self, params):
-        return self.env['res.country'].search_read(**params['search_params'])
-
-    def _loader_params_res_lang(self):
-        return {'search_params': {'domain': [], 'fields': ['name', 'code']}}
-
-    def _get_pos_ui_res_lang(self, params):
-        return self.env['res.lang'].search_read(**params['search_params'])
-
-    def _loader_params_account_tax(self):
-        return {
-            'search_params': {
-                'domain': self.env['account.tax']._check_company_domain(self.company_id),
-                'fields': [
-                    'name', 'price_include', 'include_base_amount', 'is_base_affected',
-                    'amount_type', 'children_tax_ids', 'amount', 'id'
-                ],
-            },
-        }
-
     def _get_pos_ui_account_tax(self, params):
         taxes = self.env['account.tax'].search_read(**params['search_params'])
 
@@ -1992,120 +1980,8 @@ class PosSession(models.Model):
     def _get_bus_channel_name(self):
         return f'pos_session-{self.id}-{self._ensure_access_token()}'
 
-    def _loader_params_pos_session(self):
-        self._ensure_access_token()
-        return {
-            'search_params': {
-                'domain': [('id', '=', self.id)],
-                'fields': [
-                    'id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number',
-                    'payment_method_ids', 'state', 'update_stock_at_closing', 'cash_register_balance_start', 'access_token'
-                ],
-            },
-        }
-
-    def _get_pos_ui_pos_session(self, params):
-        return self.env['pos.session'].search_read(**params['search_params'])[0]
-
-    def _loader_params_pos_config(self):
-        return {'search_params': {'domain': [('id', '=', self.config_id.id)], 'fields': []}}
-
-    def _get_pos_ui_pos_config(self, params):
-        config = self.env['pos.config'].search_read(**params['search_params'])[0]
-        config['use_proxy'] = config['is_posbox'] and (config['iface_electronic_scale'] or config['iface_print_via_proxy']
-                                                       or config['iface_scan_via_proxy'] or config['iface_customer_facing_display_via_proxy'])
-        config['has_cash_move_permission'] = self.user_has_groups('account.group_account_invoice')
-        return config
-
-    def _loader_params_pos_bill(self):
-        return {'search_params': {'domain': ['|', ('id', 'in', self.config_id.default_bill_ids.ids), ('pos_config_ids', '=', False)], 'fields': ['name', 'value']}}
-
-    def _get_pos_ui_pos_bill(self, params):
-        return self.env['pos.bill'].search_read(**params['search_params'])
-
     def _get_partners_domain(self):
         return []
-
-    def _loader_params_res_partner(self):
-        return {
-            'search_params': {
-                'domain': self._get_partners_domain(),
-                'fields': [
-                    'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
-                    'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist', 'parent_name'
-                ],
-            },
-        }
-
-    def _get_pos_ui_res_partner(self, params):
-        partner_ids = [res[0] for res in self.config_id.get_limited_partners_loading()]
-        # Need to search_read because get_limited_partners_loading
-        # might return a partner id that is not accessible.
-        params['search_params']['domain'] = [('id', 'in', partner_ids)]
-        return self.env['res.partner'].search_read(**params['search_params'])
-
-    def _loader_params_stock_picking_type(self):
-        return {
-            'search_params': {
-                'domain': [('id', '=', self.config_id.picking_type_id.id)],
-                'fields': ['use_create_lots', 'use_existing_lots'],
-            },
-        }
-
-    def _get_pos_ui_stock_picking_type(self, params):
-        return self.env['stock.picking.type'].search_read(**params['search_params'])[0]
-
-    def _loader_params_res_users(self):
-        return {
-            'search_params': {
-                'domain': [('id', '=', self.env.user.id)],
-                'fields': ['name', 'groups_id', 'partner_id'],
-            },
-        }
-
-    def _get_pos_ui_res_users(self, params):
-        user = self.env['res.users'].search_read(**params['search_params'])[0]
-        user['role'] = 'manager' if any(id == self.config_id.group_pos_manager_id.id for id in user['groups_id']) else 'cashier'
-        del user['groups_id']
-        return user
-
-    def _loader_params_product_pricelist(self):
-        if self.config_id.use_pricelist:
-            domain = [('id', 'in', self.config_id.available_pricelist_ids.ids)]
-        else:
-            domain = [('id', '=', self.config_id.pricelist_id.id)]
-        return {'search_params': {'domain': domain, 'fields': ['name', 'display_name', 'discount_policy']}}
-
-    def _product_pricelist_item_fields(self):
-        return [
-                'id',
-                'product_tmpl_id',
-                'product_id',
-                'pricelist_id',
-                'price_surcharge',
-                'price_discount',
-                'price_round',
-                'price_min_margin',
-                'price_max_margin',
-                'company_id',
-                'currency_id',
-                'date_start',
-                'date_end',
-                'compute_price',
-                'fixed_price',
-                'percent_price',
-                'base_pricelist_id',
-                'base',
-                'categ_id',
-                'min_quantity',
-                ]
-
-    def _get_pos_ui_product_pricelist(self, params):
-        pricelists = self.env['product.pricelist'].search_read(**params['search_params'])
-        for pricelist in pricelists:
-            pricelist['items'] = []
-
-        return self._prepare_product_pricelists(pricelists)
 
     def _loader_params_product_category(self):
         return {'search_params': {'domain': [], 'fields': ['name', 'parent_id']}}
@@ -2116,17 +1992,6 @@ class PosSession(models.Model):
         for category in categories:
             category['parent'] = category_by_id[category['parent_id'][0]] if category['parent_id'] else None
         return categories
-
-    def _loader_params_res_currency(self):
-        return {
-            'search_params': {
-                'domain': [('id', '=', self.config_id.currency_id.id)],
-                'fields': ['name', 'symbol', 'position', 'rounding', 'rate', 'decimal_places'],
-            },
-        }
-
-    def _get_pos_ui_res_currency(self, params):
-        return self.env['res.currency'].search_read(**params['search_params'])[0]
 
     def _get_pos_ui_pos_printer(self, params):
         return self.env['pos.printer'].search_read(**params['search_params'])
@@ -2321,27 +2186,6 @@ class PosSession(models.Model):
             amount += order.amount_paid
 
         return amount
-
-    def get_pos_ui_product_pricelists_by_ids(self, pricelist_ids):
-        params = self._loader_params_product_pricelist()
-        params['search_params']['domain'] = [('id', 'in', pricelist_ids)]
-        pricelists = self.env['product.pricelist'].search_read(**params['search_params'])
-        for pricelist in pricelists:
-            if not self.config_id.use_pricelist:
-                self.config_id.use_pricelist = True
-            pricelist_id = self.env['product.pricelist'].browse(pricelist['id'])
-            self.config_id.available_pricelist_ids += pricelist_id
-            pricelist['items'] = []
-
-        return self._prepare_product_pricelists(pricelists)
-
-    def _prepare_product_pricelists(self, pricelists):
-        pricelist_by_id = {pricelist['id']: pricelist for pricelist in pricelists}
-        pricelist_item_domain = [('pricelist_id', 'in', [p['id'] for p in pricelists])]
-        for item in self.env['product.pricelist.item'].search_read(pricelist_item_domain, self._product_pricelist_item_fields()):
-            pricelist_by_id[item['pricelist_id'][0]]['items'].append(item)
-
-        return pricelists
 
     def get_pos_ui_account_fiscal_positions_by_ids(self, fp_ids):
         params = self._loader_params_account_fiscal_position()
