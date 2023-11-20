@@ -129,7 +129,7 @@ export class Product extends PosModel {
         if (!this.pos) {
             return undefined;
         }
-        return this.pos.units_by_id[unit_id];
+        return this.pos.uom_uom.find((u) => u.id === unit_id);
     }
     async _onScaleNotAvailable() {}
     get isScaleAvailable() {
@@ -618,7 +618,9 @@ export class Orderline extends PosModel {
         var unit = this.get_unit();
         if (unit) {
             if (unit.rounding) {
-                var decimals = this.pos.dp["Product Unit of Measure"];
+                var decimals = this.pos.decimal_precision.find(
+                    (dp) => dp.name === "Product Unit of Measure"
+                ).digits;
                 var rounding = Math.max(unit.rounding, Math.pow(10, -decimals));
                 this.quantity = round_pr(quant, rounding);
                 this.quantityStr = formatFloat(this.quantity, {
@@ -720,10 +722,11 @@ export class Orderline extends PosModel {
     // when we add an new orderline we want to merge it with the last line to see reduce the number of items
     // in the orderline. This returns true if it makes sense to merge the two
     can_be_merged_with(orderline) {
+        const productPriceUnit = this.pos.decimal_precision.find(
+            (dp) => dp.name === "Product Price"
+        ).digits;
         var price = parseFloat(
-            round_di(this.price || 0, this.pos.dp["Product Price"]).toFixed(
-                this.pos.dp["Product Price"]
-            )
+            round_di(this.price || 0, productPriceUnit).toFixed(productPriceUnit)
         );
         var order_line_price = orderline
             .get_product()
@@ -802,10 +805,13 @@ export class Orderline extends PosModel {
             : isNaN(parseFloat(price))
             ? 0
             : oParseFloat("" + price);
-        this.price = round_di(parsed_price || 0, this.pos.dp["Product Price"]);
+        this.price = round_di(
+            parsed_price || 0,
+            this.pos.decimal_precision.find((dp) => dp.name === "Product Price").digits
+        );
     }
     get_unit_price() {
-        var digits = this.pos.dp["Product Price"];
+        var digits = this.pos.decimal_precision.find((dp) => dp.name === "Product Price").digits;
         // round and truncate to mimic _symbol_set behavior
         return parseFloat(round_di(this.price || 0, digits).toFixed(digits));
     }
@@ -1016,7 +1022,10 @@ export class Orderline extends PosModel {
     }
     set_lst_price(price) {
         this.order.assert_editable();
-        this.product.lst_price = round_di(parseFloat(price) || 0, this.pos.dp["Product Price"]);
+        this.product.lst_price = round_di(
+            parseFloat(price) || 0,
+            this.pos.decimal_precision.find((dp) => dp.name === "Product Price").digits
+        );
     }
     is_last_line() {
         var order = this.pos.get_order();
@@ -2047,7 +2056,7 @@ export class Order extends PosModel {
             const combo = this.pos.db.combo_by_id[comboLine.combo_id[0]];
             let priceUnit = round_di(
                 (combo.base_price * parentLstPrice) / originalTotal,
-                this.pos.dp["Product Price"]
+                this.pos.decimal_precision.find((dp) => dp.name === "Product Price").digits
             );
             remainingTotal -= priceUnit;
             if (i == options.comboLines.length - 1) {

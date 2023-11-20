@@ -7,8 +7,8 @@ from odoo import models
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
-    def load_data_params(self):
-        params = super().load_data_params()
+    def _load_data_params(self):
+        params = super()._load_data_params()
 
         if self.company_id.country_code == 'IN':
             params['search_read']['product.product']['fields'] += ['l10n_in_hsn_code']
