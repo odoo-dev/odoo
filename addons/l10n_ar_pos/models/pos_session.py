@@ -6,8 +6,8 @@ class PosSession(models.Model):
 
     _inherit = 'pos.session'
 
-    def load_data_params(self):
-        params = super().load_data_params()
+    def _load_data_params(self):
+        params = super()._load_data_params()
 
         if self.company_id.country_code == 'AR':
             params['search_read']['res.partner']['fields'] += ['l10n_ar_afip_responsibility_type_id', 'l10n_latam_identification_type_id']

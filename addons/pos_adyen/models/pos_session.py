@@ -7,8 +7,8 @@ from odoo import models
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
-    def load_data_params(self):
-        params = super().load_data_params()
+    def _load_data_params(self):
+        params = super()._load_data_params()
 
         params['search_read']['pos.payment.method']['fields'] += ['adyen_terminal_identifier']
 

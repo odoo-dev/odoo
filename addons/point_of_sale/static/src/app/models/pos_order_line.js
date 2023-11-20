@@ -1,5 +1,6 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
+import { uuidv4 } from "@point_of_sale/utils";
 
 export class PosOrderline {
     static pythonModel = "pos.order.line";
@@ -10,6 +11,7 @@ export class PosOrderline {
 
     setup(lines) {
         Object.assign(this, lines);
+        this.uuid = lines.uuid ? lines.uuid : uuidv4();
     }
 }
 

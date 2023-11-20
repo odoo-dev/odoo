@@ -101,7 +101,7 @@ class PosSession(models.Model):
 
     _sql_constraints = [('uniq_name', 'unique(name)', "The name of this POS Session must be unique!")]
 
-    def load_data_params(self):
+    def _load_data_params(self):
         params = {
             'search_read': {
                 'pos.order': {
@@ -111,7 +111,7 @@ class PosSession(models.Model):
                 'pos.order.line': {
                     'domain': lambda data: [('order_id', 'in', [order['id'] for order in data['pos.order']])],
                     'fields': [
-                        'qty','attribute_value_ids','custom_attribute_value_ids','price_unit','skip_change','uuid','price_subtotal','price_subtotal_incl',
+                        'qty','attribute_value_ids','custom_attribute_value_ids','price_unit','skip_change','uuid','price_subtotal','price_subtotal_incl', 'order_id',
                         'product_id','discount','tax_ids','pack_lot_ids','customer_note','refunded_qty','price_extra','full_product_name','refunded_orderline_id','combo_parent_id','combo_line_ids'],
                 },
                 'pos.session': {
@@ -177,7 +177,7 @@ class PosSession(models.Model):
                     'fields': [
                         'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
                         'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
-                        'point_of_sale_ticket_unique_code',
+                        'point_of_sale_ticket_unique_code', 'street', 'city', 'zip',
                     ],
                 },
                 'decimal.precision': {
@@ -245,11 +245,11 @@ class PosSession(models.Model):
         return params
 
     def load_data(self, models_to_load):
-        params = self.load_data_params()
+        params = self._load_data_params()
         response = {}
         response['data'] = {};
         response['custom'] = {};
-        response['_relations'] = []
+        response['_relations'] = {}
 
         # Load data from search_read
         if params.get('search_read'):
@@ -266,17 +266,20 @@ class PosSession(models.Model):
                 model_fields = self.env[key].fields_get(allfields=value['fields'])
                 for name, params in model_fields.items():
                     if params.get("relation"):
-                        response['_relations'].append({
-                            'field': name,
+                        if not response['_relations'].get(key):
+                            response['_relations'][key] = {}
+
+                        response['_relations'][key][name] = {
+                            'name': name,
                             'model': key,
                             'relation': params['relation'],
                             'type': params['type'],
-                        })
+                        }
 
         return response
 
     def load_missing_data(self, model, ids):
-        params = self.load_data_params()['search_read'].get(model)
+        params = self._load_data_params()['search_read'].get(model)
 
         if not params:
             return {}
@@ -1869,8 +1872,6 @@ class PosSession(models.Model):
     @api.model
     def _pos_ui_models_to_load(self):
         models_to_load = [
-            'res.company',
-            'decimal.precision',
             'uom.uom',
             'res.country.state',
             'res.country',
@@ -1896,30 +1897,6 @@ class PosSession(models.Model):
         ]
 
         return models_to_load
-
-    def _loader_params_res_company(self):
-        return {
-            'search_params': {
-                'domain': [('id', '=', self.company_id.id)],
-                'fields': [
-                    'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
-                    'country_id', 'state_id', 'tax_calculation_rounding_method', 'nomenclature_id', 'point_of_sale_use_ticket_qr_code',
-                    'point_of_sale_ticket_unique_code',
-                ],
-            }
-        }
-
-    def _get_pos_ui_res_company(self, params):
-        company = self.env['res.company'].search_read(**params['search_params'])[0]
-        params_country = self._loader_params_res_country()
-        if company['country_id']:
-            # TODO: this is redundant we have country_id and country
-            params_country['search_params']['domain'] = [('id', '=', company['country_id'][0])]
-            company['country'] = self.env['res.country'].search_read(**params_country['search_params'])[0]
-        else:
-            company['country'] = None
-
-        return company
 
     def _get_pos_fallback_nomenclature_id(self):
         """
@@ -1950,13 +1927,6 @@ class PosSession(models.Model):
         record = self.env['barcode.nomenclature'].search(domain=domain, limit=1)
 
         return record.id if record else None
-
-    def _loader_params_decimal_precision(self):
-        return {'search_params': {'domain': [], 'fields': ['name', 'digits']}}
-
-    def _get_pos_ui_decimal_precision(self, params):
-        decimal_precisions = self.env['decimal.precision'].search_read(**params['search_params'])
-        return {dp['name']: dp['digits'] for dp in decimal_precisions}
 
     def _loader_params_uom_uom(self):
         return {'search_params': {'domain': [], 'fields': []}, 'context': {'active_test': False}}

@@ -7,6 +7,53 @@ from odoo.osv.expression import OR
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    def _load_data_params(self):
+        params = super()._load_data_params()
+        params['search_read']['product.product']['fields'].append('all_product_tag_ids')
+        params['search_read'].update({
+            'loyalty.program': {
+                'domain': [('id', 'in', self.config_id._get_program_ids().ids)],
+                'fields': [
+                    'name', 'trigger', 'applies_on', 'program_type', 'pricelist_ids', 'date_from',
+                    'date_to', 'limit_usage', 'max_usage', 'is_nominative', 'portal_visible',
+                    'portal_point_name', 'trigger_product_ids',
+                ],
+            },
+            'loyalty.rule': {
+                'domain': [('program_id', 'in', self.config_id._get_program_ids().ids)],
+                'fields': ['program_id', 'valid_product_ids', 'any_product', 'currency_id',
+                    'reward_point_amount', 'reward_point_split', 'reward_point_mode',
+                    'minimum_qty', 'minimum_amount', 'minimum_amount_tax_mode', 'mode', 'code'],
+            },
+            'loyalty.reward': {
+                'domain': [('program_id', 'in', self.config_id._get_program_ids().ids)],
+                'fields': ['description', 'program_id', 'reward_type', 'required_points', 'clear_wallet', 'currency_id',
+                    'discount', 'discount_mode', 'discount_applicability', 'all_discount_product_ids', 'is_global_discount',
+                    'discount_max_amount', 'discount_line_product_id',
+                    'multi_product', 'reward_product_ids', 'reward_product_qty', 'reward_product_uom_id', 'reward_product_domain'],
+            },
+            'loyalty.card': {
+                'domain': [],
+                'fields': ['partner_id', 'code', 'points', 'program_id'],
+            },
+        })
+
+        return params
+
+    def load_data(self, models_to_load):
+        result = super().load_data(models_to_load)
+
+        # adapt product
+        product_params = self._load_data_params()['search_read']['product.product']
+        rewards = self.config_id._get_program_ids().reward_ids
+        products = rewards.discount_line_product_id | rewards.reward_product_ids
+        products |= self.config_id._get_program_ids().filtered(lambda p: p.program_type == 'ewallet').trigger_product_ids
+        products = list(set(products.ids) - set(product['id'] for product in result['data']['product.product']))
+        products = self.env['product.product'].search_read([('id', 'in', products)], fields=product_params['fields'])
+        result['data']['product.product'].extend(products)
+
+        return result
+
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()
         if self.config_id._get_program_ids():

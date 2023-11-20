@@ -17,7 +17,9 @@ export const contextualUtilsService = {
     dependencies: ["pos", "localization"],
     start(env, { pos, localization }) {
         const currency = pos.currency;
-        const productUoMDecimals = pos.dp["Product Unit of Measure"];
+        const productUoMDecimals = pos.decimal_precision.find(
+            (dp) => dp.name === "Product Unit of Measure"
+        ).digits;
         const decimalPoint = localization.decimalPoint;
         const thousandsSep = localization.thousandsSep;
         // Replace the thousands separator and decimal point with regex-escaped versions

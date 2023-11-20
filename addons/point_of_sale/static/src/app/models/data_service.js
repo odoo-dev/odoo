@@ -2,8 +2,11 @@
 
 import { registry } from "@web/core/registry";
 import { Reactive } from "@web/core/utils/reactive";
+import { clone } from "../utils/clone";
 
 export class PosData extends Reactive {
+    // if empty, all python listed models will be loaded
+    static modelToLoad = [];
     static serviceDependencies = ["orm"];
 
     constructor() {
@@ -21,6 +24,13 @@ export class PosData extends Reactive {
         }
 
         await this.initData();
+
+        // effect(
+        //     (args) => {
+        //         this.saveToLocalStorage();
+        //     },
+        //     [this.pos_order, this.pos_order_line]
+        // );
     }
 
     async initData() {
@@ -37,6 +47,8 @@ export class PosData extends Reactive {
             if (registry.category("pos_available_models").contains(model)) {
                 const jsModel = registry.category("pos_available_models").get(model);
                 this[model.replaceAll(".", "_")] = data.map((p) => new jsModel(p));
+            } else {
+                this[model.replaceAll(".", "_")] = data;
             }
         }
 
@@ -62,7 +74,15 @@ export class PosData extends Reactive {
     }
 
     createRelation() {
-        for (const { field, model, relation, type } of this._relations) {
+        const relations = [];
+
+        for (const models of Object.values(this._relations)) {
+            for (const field of Object.values(models)) {
+                relations.push(field);
+            }
+        }
+
+        for (const { field, model, relation, type } of relations) {
             const relationModels = relation.replaceAll(".", "_");
             const currentModel = model.replaceAll(".", "_");
 
@@ -87,16 +107,80 @@ export class PosData extends Reactive {
                 }
             }
         }
+        this.saveToLocalStorage();
     }
 
     // needed to save in localstorage
-    deleteRelation() {}
+    deleteRelation(copy = false) {
+        const data = copy ? copy : this.pos_order;
+        const relations = [];
 
-    createNewOfflineOrder() {}
+        for (const models of Object.values(this._relations)) {
+            for (const field of Object.values(models)) {
+                relations.push(field);
+            }
+        }
+
+        for (const { field, model, type } of relations) {
+            const currentModel = model.replaceAll(".", "_");
+
+            if (!data[currentModel]) {
+                continue;
+            }
+
+            for (const modelData of data[currentModel]) {
+                const currentValue = modelData[field];
+
+                if (!currentValue) {
+                    continue;
+                }
+
+                if (type === "many2many" || type === "one2many") {
+                    modelData[field] = currentValue.map((rel) => rel.id);
+                } else if (type === "many2one") {
+                    modelData[field] = currentValue.id;
+                }
+            }
+        }
+
+        return data;
+    }
+
+    saveToLocalStorage() {
+        const dataToSave = this.deleteRelation({
+            pos_order: clone(this.pos_order),
+            pos_order_line: clone(this.pos_order_line),
+        });
+
+        localStorage.setItem(
+            `pos_order-pos_session${odoo.pos_session_id}`,
+            JSON.stringify(dataToSave)
+        );
+    }
+
+    parseFromLocalStorage() {
+        const data = JSON.parse(
+            localStorage.getItem(`pos_order-pos_session${odoo.pos_session_id}`)
+        );
+
+        if (!data) {
+            return;
+        }
+
+        for (const [model, data] of Object.entries(data)) {
+            if (!data) {
+                continue;
+            }
+
+            if (registry.category("pos_available_models").contains(model)) {
+                const jsModel = registry.category("pos_available_models").get(model);
+                this[model.replaceAll(".", "_")] = data.map((p) => new jsModel(p));
+            }
+        }
+
+        this.createRelation();
+    }
 }
-
-// if empty, all python listed models will be loaded
-PosData.modelToLoad = [];
 
 export const PosDataService = {
     dependencies: PosData.serviceDependencies,

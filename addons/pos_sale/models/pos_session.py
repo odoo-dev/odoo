@@ -10,6 +10,11 @@ class PosSession(models.Model):
 
     crm_team_id = fields.Many2one('crm.team', related='config_id.crm_team_id', string="Sales Team", readonly=True)
 
+    def _load_data_params(self):
+        params = super()._load_data_params()
+        params['search_read']['product.product']['fields'].extend(['invoice_policy', 'type'])
+        params['search_read']['product.product']['domain'] = OR([params['search_read']['product.product']['domain'], [('id', '=', self.config_id.down_payment_product_id.id)]])
+
     def _loader_params_product_product(self):
         result = super()._loader_params_product_product()
         result['search_params']['domain'] = OR([result['search_params']['domain'], [('id', '=', self.config_id.down_payment_product_id.id)]])

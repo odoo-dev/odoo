@@ -10,6 +10,23 @@ import json
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    def _load_data_params(self):
+        params = super()._load_data_params()
+        params['search_read'].update({
+            'restaurant.floor': {
+                'domain': [('pos_config_ids', '=', self.config_id.id)],
+                'fields': ['name', 'background_color', 'table_ids', 'sequence'],
+            },
+            'restaurant.table': {
+                'domain': [('active', '=', True)],
+                'fields': [
+                    'name', 'width', 'height', 'position_h', 'position_v',
+                    'shape', 'floor_id', 'color', 'seats', 'active'
+                ],
+            }
+        })
+        return params
+
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()
         if self.config_id.module_pos_restaurant:

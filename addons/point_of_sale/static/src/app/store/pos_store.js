@@ -243,9 +243,6 @@ export class PosStore extends Reactive {
     }
     async _processData(loadedData) {
         this.version = loadedData["version"];
-        this.dp = loadedData["decimal.precision"];
-        this.units = loadedData["uom.uom"];
-        this.units_by_id = loadedData["units_by_id"];
         this.states = loadedData["res.country.state"];
         this.countries = loadedData["res.country"];
         this.langs = loadedData["res.lang"];
@@ -281,12 +278,12 @@ export class PosStore extends Reactive {
         this.open_orders_json = loadedData["open_orders"];
 
         this.res_company = this.data.res_company[0]; // always only one record because its the company of the session.
-
+        this.decimal_precision = this.data.decimal_precision;
+        this.uom_uom = this.data.uom_uom;
         // this.account_cash_rounding = this.data.account_cash_rounding;
         // this.account_fiscal_position = this.data.account_fiscal_position;
         // this.account_tax = this.data.account_tax;
         // this.account_tax_repartition_line = this.data.account_tax_repartition_line;
-        // this.decimal_precision = this.data.decimal_precision;
         // this.pos_category = this.data.pos_category;
         // this.pos_combo = this.data.pos_combo;
         // this.pos_combo_line = this.data.pos_combo_line;

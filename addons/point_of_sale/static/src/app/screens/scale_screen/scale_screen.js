@@ -76,7 +76,7 @@ export class ScaleScreen extends Component {
         if (!unit_id) {
             return defaultstr;
         }
-        const unit = this.pos.units_by_id[unit_id[0]];
+        const unit = this.pos.uom_uom.find((u) => u.id === unit_id[0]);
         const weight = round_pr(this.state.weight || 0, unit.rounding);
         let weightstr = weight.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
         weightstr += " " + unit.name;
@@ -96,7 +96,7 @@ export class ScaleScreen extends Component {
         if (!this.props.product) {
             return "";
         }
-        return this.pos.units_by_id[this.props.product.uom_id[0]].name;
+        return this.pos.uom_uom.find((u) => u.id === this.props.product.uom_id[0]).name;
     }
 }
 
