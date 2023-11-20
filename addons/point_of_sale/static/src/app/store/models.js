@@ -2058,7 +2058,7 @@ export class Order extends PosModel {
     async addComboLines(comboParent, options) {
         const parentLstPrice = comboParent.product.lst_price;
         const originalTotal = options.comboLines.reduce((acc, comboLine) => {
-            const originalPrice = this.pos.db.combo_by_id[comboLine.combo_id[0]].base_price;
+            const originalPrice = comboLine.combo_id.base_price;
             return acc + originalPrice;
         }, 0);
 
@@ -2066,8 +2066,8 @@ export class Order extends PosModel {
 
         for (let i = 0; i < options.comboLines.length; i++) {
             const comboLine = options.comboLines[i];
-            const product = this.pos.db.product_by_id[comboLine.product_id[0]];
-            const combo = this.pos.db.combo_by_id[comboLine.combo_id[0]];
+            const product = this.pos.db.product_by_id[comboLine.product_id.id];
+            const combo = comboLine.combo_id;
             let priceUnit = round_di(
                 (combo.base_price * parentLstPrice) / originalTotal,
                 this.pos.decimal_precision.find((dp) => dp.name === "Product Price").digits
@@ -2090,7 +2090,7 @@ export class Order extends PosModel {
             const presentLine = childLines.find((l) => l.product.id === comboLine.product_id[0]);
             if (presentLine) {
                 const attributesPriceExtra = (presentLine.attribute_value_ids ?? [])
-                    .map((id) => this.pos.db.attribute_value_by_id[id]?.price_extra || 0)
+                    .map((id) => this.pos.idMap.product_template_attribute_value[id]?.price_extra || 0)
                     .reduce((acc, price) => acc + price, 0);
                 const totalPriceExtra = attributesPriceExtra + comboLine.combo_price;
                 presentLine.set_unit_price(presentLine.get_unit_price() + totalPriceExtra);

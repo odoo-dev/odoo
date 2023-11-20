@@ -26,7 +26,7 @@ export class ComboConfiguratorPopup extends AbstractAwaitablePopup {
         if (floatIsZero(combo_price)) {
             return "";
         } else {
-            const product = this.pos.db.product_by_id[comboLine.product_id[0]];
+            const product = this.pos.db.product_by_id[comboLine.product_id.id];
             return this.env.utils.formatCurrency(product.get_display_price({ price: combo_price }));
         }
     }
@@ -37,6 +37,6 @@ export class ComboConfiguratorPopup extends AbstractAwaitablePopup {
     getPayload() {
         return Object.values(this.state.combo)
             .filter((x) => x) // we only keep the non-zero values
-            .map((x) => this.pos.db.combo_line_by_id[x]);
+            .map((x) => this.pos.idMap.pos_combo_line[x]);
     }
 }

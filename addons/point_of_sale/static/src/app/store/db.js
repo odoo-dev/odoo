@@ -41,15 +41,11 @@ export class PosDB {
         this.partner_search_strings = {};
         this.partner_write_date = null;
 
-        this.category_by_id = {};
-        this.root_category_id = 0;
         this.category_products = {};
         this.category_ancestors = {};
         this.category_childs = {};
         this.category_parent = {};
         this.category_search_string = {};
-        this.combo_by_id = {};
-        this.combo_line_by_id = {};
         this.product_ids_to_not_display = [];
     }
 
@@ -64,25 +60,6 @@ export class PosDB {
         this.name = this.name + "_" + uuid;
     }
 
-    /* returns the category object from its id. If you pass a list of id as parameters, you get
-     * a list of category objects.
-     */
-    get_category_by_id(categ_id) {
-        if (categ_id instanceof Array) {
-            var list = [];
-            for (var i = 0, len = categ_id.length; i < len; i++) {
-                var cat = this.category_by_id[categ_id[i]];
-                if (cat) {
-                    list.push(cat);
-                } else {
-                    console.error("get_category_by_id: no category has id:", categ_id[i]);
-                }
-            }
-            return list;
-        } else {
-            return this.category_by_id[categ_id];
-        }
-    }
     /* returns a list of the category's child categories ids, or an empty list
      * if a category has no childs */
     get_category_childs_ids(categ_id) {
@@ -98,96 +75,6 @@ export class PosDB {
     get_category_parent_id(categ_id) {
         return this.category_parent[categ_id] || this.root_category_id;
     }
-    /* adds categories definitions to the database. categories is a list of categories objects as
-     * returned by the openerp server. Categories must be inserted before the products or the
-     * product/ categories association may (will) not work properly */
-    add_categories(categories) {
-        var self = this;
-        if (!this.category_by_id[this.root_category_id]) {
-            this.category_by_id[this.root_category_id] = {
-                id: this.root_category_id,
-                name: "Root",
-            };
-        }
-        categories.forEach(function (cat) {
-            self.category_by_id[cat.id] = cat;
-        });
-        categories.forEach(function (cat) {
-            var parent_id = cat.parent_id[0];
-            if (!(parent_id && self.category_by_id[parent_id])) {
-                parent_id = self.root_category_id;
-            }
-            self.category_parent[cat.id] = parent_id;
-            if (!self.category_childs[parent_id]) {
-                self.category_childs[parent_id] = [];
-            }
-
-            if (!self.category_childs[parent_id].includes(cat.id)) {
-                self.category_childs[parent_id].push(cat.id);
-            }
-        });
-        function make_ancestors(cat_id, ancestors) {
-            self.category_ancestors[cat_id] = ancestors;
-
-            ancestors = ancestors.slice(0);
-            ancestors.push(cat_id);
-
-            var childs = self.category_childs[cat_id] || [];
-            for (var i = 0, len = childs.length; i < len; i++) {
-                make_ancestors(childs[i], ancestors);
-            }
-        }
-        make_ancestors(this.root_category_id, []);
-    }
-    /**
-     * Removes all categories specified by their id.
-     * @param {integer[]} categories_id
-     */
-    remove_categories(categories_id) {
-        categories_id = categories_id.filter((cat_id) => cat_id !== this.root_category_id);
-        categories_id.forEach((cat_id) => {
-            if (cat_id === undefined || cat_id === null) {
-                return;
-            }
-            const cat = this.category_by_id[cat_id];
-            if (!cat) {
-                return;
-            }
-
-            const parent_id = this.category_parent[cat.id];
-            if (this.category_childs[parent_id]) {
-                this._remove_all_occurrences_from_array(this.category_childs[parent_id], cat.id);
-                if (this.category_childs[parent_id].length === 0) {
-                    delete this.category_childs[parent_id];
-                }
-            }
-            delete this.category_parent[cat.id];
-
-            delete this.category_by_id[cat_id];
-        });
-        const removed_categories_id = new Set(categories_id);
-        for (const cat_id_str in this.category_ancestors) {
-            if (removed_categories_id.has(Number(cat_id_str))) {
-                delete this.category_ancestors[cat_id_str];
-            } else {
-                this.category_ancestors[cat_id_str] = this.category_ancestors[cat_id_str].filter(
-                    (anc_id_str) => !removed_categories_id.has(Number(anc_id_str))
-                );
-            }
-        }
-    }
-    add_combos(combos) {
-        combos.forEach((combo) => {
-            this.combo_by_id[combo.id] = combo;
-        });
-    }
-
-    add_combo_lines(combo_lines) {
-        combo_lines.forEach((combo_line) => {
-            this.combo_line_by_id[combo_line.id] = combo_line;
-        });
-    }
-
     addProductIdsToNotDisplay(product_ids) {
         this.product_ids_to_not_display = this.product_ids_to_not_display.concat(product_ids);
     }

@@ -75,33 +75,35 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         });
         this.scrollDirection = useScrollDirection("products");
     }
-    /**
-     * @returns {import("@point_of_sale/app/generic_components/category_selector/category_selector").Category[]}
-     */
+    getAllParents(category, parents = []) {
+        if (category.parent_id) {
+            parents.unshift(category.parent_id);
+            this.getAllParents(category.parent_id, parents);
+        }
+        return parents;
+    }
     getCategories() {
-        return [
-            ...this.pos.db.get_category_ancestors_ids(this.pos.selectedCategoryId),
-            this.pos.selectedCategoryId,
-            ...this.pos.db.get_category_childs_ids(this.pos.selectedCategoryId),
-        ]
-            .map((id) => this.pos.db.category_by_id[id])
-            .map((category) => {
-                const isRootCategory = category.id === this.pos.db.root_category_id;
-                return {
-                    id: category.id,
-                    name: !isRootCategory ? category.name : "",
-                    icon: isRootCategory ? "fa-home fa-2x" : "",
-                    showSeparator:
-                        !isRootCategory &&
-                        [
-                            ...this.pos.db.get_category_ancestors_ids(this.pos.selectedCategoryId),
-                            this.pos.selectedCategoryId,
-                        ].includes(category.id),
-                    imageUrl:
-                        category?.has_image &&
-                        `/web/image?model=pos.category&field=image_128&id=${category.id}&unique=${category.write_date}`,
-                };
-            });
+        if (this.pos.selectedCategoryId) {
+            const categoryToDisplay = [];
+            const category = this.pos.idMap.pos_category[this.pos.selectedCategoryId];
+
+            if (category.parent_id) {
+                categoryToDisplay.push(...this.getAllParents(category));
+            }
+
+            categoryToDisplay.push(category);
+
+            if (category.child_id) {
+                categoryToDisplay.push(...category.child_id);
+            }
+
+            return categoryToDisplay;
+        } else {
+            return this.pos.pos_category.filter((category) => !category.parent_id);
+        }
+    }
+    computeImageUrl(category) {
+        return `/web/image?model=pos.category&field=image_128&id=${category.id}&unique=${category.write_date}`;
     }
     getNumpadButtons() {
         return [
