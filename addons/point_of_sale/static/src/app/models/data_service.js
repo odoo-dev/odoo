@@ -45,12 +45,7 @@ export class PosData extends Reactive {
         }
 
         // need model override to be able to use the correct mod
-        const [models, records] = createRelatedModels(
-            response.relations,
-            env,
-            reactive,
-            modelClasses
-        );
+        const [models, records] = createRelatedModels(response.relations, modelClasses);
 
         this.relations = response.relations;
         this.models = models;
