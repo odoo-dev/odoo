@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { Reactive } from "@web/core/utils/reactive";
-import { reactive } from "@odoo/owl";
 import { createRelatedModels } from "@point_of_sale/app/models/related_models";
 import { registry } from "@web/core/registry";
 
@@ -45,7 +44,11 @@ export class PosData extends Reactive {
         }
 
         // need model override to be able to use the correct mod
-        const [models, records] = createRelatedModels(response.relations, modelClasses);
+        const [models, records] = createRelatedModels(
+            response.relations,
+            modelClasses,
+            INDEXED_DB_NAME
+        );
 
         this.relations = response.relations;
         this.models = models;

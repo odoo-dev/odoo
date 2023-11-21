@@ -118,9 +118,10 @@ function processModelDefs(modelDefs) {
 }
 
 export class Base {
-    constructor({ models, records }) {
+    constructor({ models, records, model }) {
         this.models = models;
         this.records = records;
+        this.model = model;
     }
     /**
      * Called during instantiation when the instance is fully-populated with field values.
@@ -130,9 +131,19 @@ export class Base {
     setup(_vals) {}
 }
 
-export function createRelatedModels(modelDefs, modelClasses = {}) {
+export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) {
     const [inverseMap, processedModelDefs] = processModelDefs(modelDefs);
     const records = reactive(mapObj(processedModelDefs, () => reactive({})));
+    // object: model -> key -> keyval -> record
+    const indexedRecords = reactive(
+        mapObj(processedModelDefs, (model) => {
+            const container = reactive({});
+            for (const key of indexes[model] || []) {
+                container[key] = reactive({});
+            }
+            return container;
+        })
+    );
 
     function getFields(model) {
         return processedModelDefs[model];
@@ -202,10 +213,20 @@ export function createRelatedModels(modelDefs, modelClasses = {}) {
         }
 
         const Model = modelClasses[model] || Base;
-        const record = reactive(new Model({ models, records }));
+        const record = reactive(new Model({ models, records, model: models[model] }));
         const id = vals["id"];
         record.id = id;
         records[model][id] = record;
+
+        // Save records in the corresponding indexes.
+        for (const key of indexes[model] || []) {
+            const keyVal = vals[key];
+            if (!(typeof keyVal === "string" || typeof keyVal === "number")) {
+                console.warn("Can only use number or string as index.");
+                continue;
+            }
+            indexedRecords[model][key][keyVal] = record;
+        }
 
         const fields = getFields(model);
         for (const name in fields) {
@@ -281,6 +302,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}) {
                 record[name] = vals[name];
             }
         }
+
         record.setup(vals);
         return record;
     }
@@ -345,6 +367,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}) {
 
     function delete_(model, record) {
         const id = record.id;
+        const indexVals = (indexes[model] || []).map((key) => [key, record[key]]);
         const fields = getFields(model);
         for (const name in fields) {
             const field = fields[name];
@@ -357,6 +380,9 @@ export function createRelatedModels(modelDefs, modelClasses = {}) {
             }
         }
         delete records[model][id];
+        for (const [key, val] of indexVals) {
+            delete indexedRecords[model][key][val];
+        }
     }
 
     function createCRUD(model, fields) {
@@ -392,6 +418,12 @@ export function createRelatedModels(modelDefs, modelClasses = {}) {
                     return;
                 }
                 return records[model][id];
+            },
+            readBy(key, val) {
+                if (!(key in indexes[model])) {
+                    throw new Error(`Unable to get record by '${key}'`);
+                }
+                return indexedRecords[model][key][val];
             },
             readAll() {
                 return Object.values(records[model]);
