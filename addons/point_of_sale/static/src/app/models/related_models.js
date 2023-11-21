@@ -158,7 +158,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
 
     function addItem(array, item) {
         const index = array.indexOf(item);
-        if (index >= 0) {
+        if (index === -1) {
             array.push(item);
         }
     }
