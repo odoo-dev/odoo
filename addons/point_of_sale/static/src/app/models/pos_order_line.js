@@ -1,17 +1,14 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
 import { uuidv4 } from "@point_of_sale/utils";
+import { Base } from "./related_models";
 
-export class PosOrderline {
+export class PosOrderline extends Base {
     static pythonModel = "pos.order.line";
 
-    constructor(orderLine) {
-        this.setup(orderLine);
-    }
-
-    setup(lines) {
-        Object.assign(this, lines);
-        this.uuid = lines.uuid ? lines.uuid : uuidv4();
+    setup(vals) {
+        super.setup(vals);
+        this.uuid = vals.uuid ? vals.uuid : uuidv4();
     }
 }
 

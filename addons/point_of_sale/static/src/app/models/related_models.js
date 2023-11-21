@@ -115,18 +115,21 @@ function processModelDefs(modelDefs) {
     return [inverseMap, modelDefs];
 }
 
-export function createRelatedModels(
-    modelDefs,
-    env,
-    reactive = (x) => x,
-    modelOverrides = (x) => x
-) {
+export class Base {
+    constructor(env) {
+        this.env = env;
+    }
+    /**
+     * Called during instantiation when the instance is fully-populated with field values.
+     * Check @create inside `createRelatedModels` below.
+     * @param {*} _vals
+     */
+    setup(_vals) {}
+}
+
+export function createRelatedModels(modelDefs, env, reactive = (x) => x, modelClasses = {}) {
     const [inverseMap, processedModelDefs] = processModelDefs(modelDefs);
     const records = reactive(mapObj(processedModelDefs, () => reactive({})));
-
-    class Base {
-        setup(_vals) {}
-    }
 
     function getFields(model) {
         return processedModelDefs[model];
@@ -195,8 +198,8 @@ export function createRelatedModels(
             vals["id"] = uuid(model);
         }
 
-        const Model = models[model];
-        const record = reactive(new Model(vals));
+        const Model = modelClasses[model] || Base;
+        const record = reactive(new Model(env));
         const id = vals["id"];
         record.id = id;
         records[model][id] = record;
@@ -353,7 +356,7 @@ export function createRelatedModels(
         delete records[model][id];
     }
 
-    function createCRUD(model) {
+    function createCRUD(model, fields) {
         return {
             create(vals) {
                 return create(model, vals);
@@ -402,64 +405,24 @@ export function createRelatedModels(
             findAll(predicate) {
                 return Object.values(records[model]).filter(predicate);
             },
-        };
-    }
-
-    /**
-     * Return a contructor that extends the given `Model` with the given `name`.
-     * @param {Constructor} Model
-     * @param {string} name
-     * @returns {Constructor}
-     */
-    function namedModel(Model, name) {
-        return new Function("Model", `return class ${name} extends Model {};`)(Model);
-    }
-
-    const baseModels = mapObj(processedModelDefs, (model, fields) => {
-        class Model extends Base {
-            static _name = model;
-            static _fields = fields;
-            /**
-             * Called after the instantiation of the record.
-             */
-            setup(_vals) {}
-            get env() {
-                return env;
-            }
-            update(vals) {
-                return update(model, this, vals);
-            }
-            delete() {
-                return delete_(model, this);
-            }
-            serialize() {
+            serialize(record) {
                 const result = {};
                 for (const name in fields) {
                     const field = fields[name];
                     if (field.type === "many2one") {
-                        result[name] = this[name] ? this[name].id : undefined;
+                        result[name] = record[name] ? record[name].id : undefined;
                     } else if (X2MANY_TYPES.has(field.type)) {
-                        result[name] = [...this[name]].map((record) => record.id);
+                        result[name] = [...record[name]].map((record) => record.id);
                     } else {
-                        result[name] = this[name];
+                        result[name] = record[name];
                     }
                 }
                 return result;
-            }
-        }
+            },
+        };
+    }
 
-        return namedModel(
-            Model,
-            model
-                .split(".")
-                .map((word) => word[0].toUpperCase() + word.slice(1))
-                .join("")
-        );
-    });
-
-    const models = { ...baseModels, ...modelOverrides(baseModels) };
-
-    const m = mapObj(processedModelDefs, (model) => createCRUD(model));
+    const m = mapObj(processedModelDefs, (model, fields) => createCRUD(model, fields));
 
     /**
      * Load the data without the relations then link the related records.
@@ -513,5 +476,5 @@ export function createRelatedModels(
     }
 
     m.loadData = loadData;
-    return m;
+    return [m, records];
 }

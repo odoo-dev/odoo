@@ -1,16 +1,9 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
+import { Base } from "./related_models";
 
-export class AccountFiscalPosition {
+export class AccountFiscalPosition extends Base {
     static pythonModel = "account.fiscal.position";
-
-    constructor(data) {
-        this.setup(data);
-    }
-
-    setup(data) {
-        Object.assign(this, data);
-    }
 }
 
 registry
