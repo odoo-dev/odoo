@@ -539,7 +539,7 @@ export class FloorScreen extends Component {
             const originalSelectedFloorId = this.activeFloor.id;
             await this.orm.call("restaurant.floor", "deactivate_floor", [
                 originalSelectedFloorId,
-                this.pos.pos_session.id,
+                this.pos["pos.session"].id,
             ]);
             const floor = this.pos.floors_by_id[originalSelectedFloorId];
             const orderList = [...this.pos.get_order_list()];

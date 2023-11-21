@@ -49,8 +49,8 @@ export class PaymentSix extends PaymentInterface {
         settings.dcc = false;
 
         this.terminal = new timapi.Terminal(settings);
-        this.terminal.setPosId(this.pos.pos_session.name);
-        this.terminal.setUserId(this.pos.pos_session.user_id[0]);
+        this.terminal.setPosId(this.pos["pos.session"].name);
+        this.terminal.setUserId(this.pos["pos.session"].user_id[0]);
 
         this.terminalListener = new timapi.DefaultTerminalListener();
         this.terminalListener.transactionCompleted = this._onTransactionComplete.bind(this);

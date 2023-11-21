@@ -1308,7 +1308,7 @@ export class Order extends PosModel {
         this.to_invoice = false;
         this.orderlines = new PosCollection();
         this.paymentlines = new PosCollection();
-        this.pos_session_id = this.pos.pos_session.id;
+        this.pos_session_id = this.pos["pos.session"].id;
         this.cashier = this.pos.get_cashier();
         this.finalized = false; // if true, cannot be modified.
         this.shippingDate = null;
@@ -1343,7 +1343,7 @@ export class Order extends PosModel {
             }
         } else {
             this.set_pricelist(this.pos.default_pricelist);
-            this.sequence_number = this.pos.pos_session.sequence_number++;
+            this.sequence_number = this.pos["pos.session"].sequence_number++;
             this.access_token = uuidv4(); // unique uuid used to identify the authenticity of the request from the QR code.
             this.ticketCode = this._generateTicketCode(); // 5-digits alphanum code shown on the receipt
             this.uid = this.generate_unique_id();
@@ -1383,16 +1383,16 @@ export class Order extends PosModel {
         let partner;
         if (json.state && ["done", "invoiced", "paid"].includes(json.state)) {
             this.sequence_number = json.sequence_number;
-        } else if (json.pos_session_id !== this.pos.pos_session.id) {
-            this.sequence_number = this.pos.pos_session.sequence_number++;
+        } else if (json.pos_session_id !== this.pos["pos.session"].id) {
+            this.sequence_number = this.pos["pos.session"].sequence_number++;
         } else {
             this.sequence_number = json.sequence_number;
-            this.pos.pos_session.sequence_number = Math.max(
+            this.pos["pos.session"].sequence_number = Math.max(
                 this.sequence_number + 1,
-                this.pos.pos_session.sequence_number
+                this.pos["pos.session"].sequence_number
             );
         }
-        this.session_id = this.pos.pos_session.id;
+        this.session_id = this.pos["pos.session"].id;
         this.uid = json.uid;
         if (json.name) {
             this.name = json.name;
@@ -1807,9 +1807,9 @@ export class Order extends PosModel {
             return s;
         }
         return (
-            zero_pad(this.pos.pos_session.id, 5) +
+            zero_pad(this.pos["pos.session"].id, 5) +
             "-" +
-            zero_pad(this.pos.pos_session.login_number, 3) +
+            zero_pad(this.pos["pos.session"].login_number, 3) +
             "-" +
             zero_pad(this.sequence_number, 4)
         );

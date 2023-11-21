@@ -122,7 +122,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
         }
     }
     async downloadSalesReport() {
-        return this.report.doAction("point_of_sale.sale_details_report", [this.pos.pos_session.id]);
+        return this.report.doAction("point_of_sale.sale_details_report", [this.pos["pos.session"].id]);
     }
     setManualCashInput(amount) {
         if (this.env.utils.isValidFloat(amount) && this.moneyDetails) {
@@ -165,7 +165,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
             const response = await this.orm.call(
                 "pos.session",
                 "post_closing_cash_details",
-                [this.pos.pos_session.id],
+                [this.pos["pos.session"].id],
                 {
                     counted_cash: parseFloat(
                         this.state.payments[this.props.default_cash_details.id].counted
@@ -180,7 +180,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
 
         try {
             await this.orm.call("pos.session", "update_closing_control_state_session", [
-                this.pos.pos_session.id,
+                this.pos["pos.session"].id,
                 this.state.notes,
             ]);
         } catch (error) {
@@ -197,7 +197,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
                 .filter((pm) => pm.type == "bank")
                 .map((pm) => [pm.id, this.getDifference(pm.id)]);
             const response = await this.orm.call("pos.session", "close_session_from_ui", [
-                this.pos.pos_session.id,
+                this.pos["pos.session"].id,
                 bankPaymentMethodDiffPairs,
             ]);
             if (!response.successful) {

@@ -24,7 +24,7 @@ export class SaleDetailsButton extends Component {
         const saleDetails = await this.orm.call(
             "report.point_of_sale.report_saledetails",
             "get_sale_details",
-            [false, false, false, [this.pos.pos_session.id]]
+            [false, false, false, [this.pos["pos.session"].id]]
         );
         const report = renderToElement(
             "point_of_sale.SaleDetailsReport",

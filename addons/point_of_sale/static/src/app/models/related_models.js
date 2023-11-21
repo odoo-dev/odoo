@@ -318,6 +318,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         }
 
         record.setup(vals);
+        createIndex();
         return record;
     }
 
@@ -471,6 +472,23 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         };
     }
 
+    function createIndex() {
+        for (const [name, fields] of Object.entries(indexer)) {
+            const jsName = name.replaceAll(".", "_");
+            indexed[jsName] = {};
+
+            for (const field of fields) {
+                indexed[jsName][field] = {};
+
+                for (const record of Object.values(records[name])) {
+                    if (field in record && record) {
+                        indexed[jsName][field][record[field]] = record;
+                    }
+                }
+            }
+        }
+    }
+
     const models = mapObj(processedModelDefs, (model, fields) => createCRUD(model, fields));
 
     /**
@@ -522,8 +540,10 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
                 }
             }
         }
+
+        createIndex();
     }
 
     models.loadData = loadData;
-    return [models, records];
+    return [models, records, indexed];
 }

@@ -214,7 +214,7 @@ export class SelfOrder extends Reactive {
     }
 
     initKioskData() {
-        if (this.pos_session && this.access_token) {
+        if (this["pos.session"] && this.access_token) {
             this.ordering = true;
         }
 
@@ -231,7 +231,7 @@ export class SelfOrder extends Reactive {
 
     async initMobileData() {
         if (this.config.self_ordering_mode !== "qr_code") {
-            if (this.pos_session && this.access_token) {
+            if (this["pos.session"] && this.access_token) {
                 this.ordering = true;
             }
 

@@ -545,7 +545,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             const { models_data, successful } = await this.orm.call(
                 "pos.session",
                 "load_product_frontend",
-                [this.pos.pos_session.id]
+                [this.pos["pos.session"].id]
             );
             if (!successful) {
                 this.popup.add(ErrorPopup, {

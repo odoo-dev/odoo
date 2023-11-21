@@ -22,6 +22,8 @@ import { renderToString } from "@web/core/utils/render";
 import { batched } from "@web/core/utils/timing";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { EditListPopup } from "./select_lot_popup/select_lot_popup";
+import { ProductConfiguratorPopup } from "./product_configurator_popup/product_configurator_popup";
+import { ComboConfiguratorPopup } from "./combo_configurator_popup/combo_configurator_popup";
 
 /* Returns an array containing all elements of the given
  * array corresponding to the rule function {agg} and without duplicates
@@ -109,7 +111,7 @@ export class PosStore extends Reactive {
         this.user = null;
         this.partners = [];
         this.taxes = [];
-        this.pos_session = null;
+        this["pos.session"] = null;
         this.pos_config = null;
         this.units = [];
         this.units_by_id = {};
@@ -234,6 +236,114 @@ export class PosStore extends Reactive {
         this.markReady();
     }
 
+    async getAddProductOptions(product, code) {
+        const product_packaging_by_barcode = this.indexed.product_packaging.barcode;
+        const attributes = product.attribute_line_ids;
+
+        let price_extra = 0.0;
+        let draftPackLotLines, packLotLinesToEdit, attribute_value_ids;
+        let quantity = 1;
+        let comboLines = [];
+        let attribute_custom_values = {};
+
+        if (code && product_packaging_by_barcode[code.code]) {
+            quantity = product_packaging_by_barcode[code.code].qty;
+        }
+
+        if (attributes.length > 0) {
+            const { confirmed, payload } = await this.env.services.popup.add(
+                ProductConfiguratorPopup,
+                {
+                    product: product,
+                    attributes: attributes,
+                    quantity: quantity,
+                }
+            );
+
+            if (confirmed) {
+                attribute_value_ids = payload.attribute_value_ids;
+                attribute_custom_values = payload.attribute_custom_values;
+                price_extra += payload.price_extra;
+                quantity = payload.quantity;
+            } else {
+                return;
+            }
+        }
+
+        if (this.combo_ids.length) {
+            const { confirmed, payload } = await this.env.services.popup.add(
+                ComboConfiguratorPopup,
+                {
+                    product: product,
+                }
+            );
+            if (!confirmed) {
+                return;
+            }
+            comboLines = payload;
+        }
+        // Gather lot information if required.
+        if (product.isTracked()) {
+            packLotLinesToEdit =
+                (!product.isAllowOnlyOneLot() &&
+                    this.selectedOrder
+                        .get_orderlines()
+                        .filter((line) => !line.get_discount())
+                        .find((line) => line.product.id === product.id)
+                        ?.getPackLotLinesToEdit()) ||
+                [];
+            // if the lot information exists in the barcode, we don't need to ask it from the user.
+            if (code && code.type === "lot") {
+                // consider the old and new packlot lines
+                const modifiedPackLotLines = Object.fromEntries(
+                    packLotLinesToEdit.filter((item) => item.id).map((item) => [item.id, item.text])
+                );
+                const newPackLotLines = [{ lot_name: code.code }];
+                draftPackLotLines = { modifiedPackLotLines, newPackLotLines };
+            } else {
+                draftPackLotLines = await this.getEditedPackLotLines(
+                    product.isAllowOnlyOneLot(),
+                    packLotLinesToEdit,
+                    product.display_name
+                );
+            }
+            if (!draftPackLotLines) {
+                return;
+            }
+        }
+
+        // Take the weight if necessary.
+        if (product.to_weight && this.pos_config.iface_electronic_scale) {
+            // Show the ScaleScreen to weigh the product.
+            if (product.isScaleAvailable) {
+                const product = this;
+                const { confirmed, payload } = await this.env.services.pos.showTempScreen(
+                    "ScaleScreen",
+                    {
+                        product,
+                    }
+                );
+                if (confirmed) {
+                    quantity = payload.weight;
+                } else {
+                    // do not add the product;
+                    return;
+                }
+            } else {
+                await product._onScaleNotAvailable();
+            }
+        }
+
+        return {
+            draftPackLotLines,
+            quantity,
+            attribute_custom_values,
+            price_extra,
+            comboLines,
+            attribute_value_ids,
+        };
+    }
+
     async load_server_data() {
         const loadedData = await this.orm.silent.call("pos.session", "load_pos_data", [
             [odoo.pos_session_id],
@@ -253,7 +363,7 @@ export class PosStore extends Reactive {
         // These fields should be unique for the pos_config
         // and should not change during the session, so we can
         // safely take the first element.
-        this.pos_session = this.data.pos_session[0];
+        this["pos.session"] = this.data["pos.session"][0];
         this.pos_config = this.data.pos_config[0];
         this.res_company = this.data.res_company[0];
         this.res_users = this.data.res_users[0];
@@ -275,6 +385,7 @@ export class PosStore extends Reactive {
         this.pos_combo = this.data.pos_combo;
         this.pos_combo_line = this.data.pos_combo_line;
         this.product_product = this.data.product_product;
+        this.pos_payment_method = this.data.pos_payment_method;
         debugger;
 
         this._loadProductProduct(loadedData["product.product"]);
@@ -433,7 +544,9 @@ export class PosStore extends Reactive {
 
         let removed_categories_id;
         if (categories) {
-            const previous_categories_id = Object.values(this.pos.indexed.pos_category.id).map((c) => c.id);
+            const previous_categories_id = Object.values(this.pos.indexed.pos_category.id).map(
+                (c) => c.id
+            );
             const received_categories_id = new Set(categories.map((c) => c.id));
             this.db.add_categories(categories);
             removed_categories_id = previous_categories_id.filter(
@@ -615,18 +728,18 @@ export class PosStore extends Reactive {
 
         for (var i = 0; i < jsons.length; i++) {
             var json = jsons[i];
-            if (json.pos_session_id === this.pos_session.id) {
+            if (json.pos_session_id === this["pos.session"].id) {
                 orders.push(this.createReactiveOrder(json));
             }
         }
         for (i = 0; i < jsons.length; i++) {
             json = jsons[i];
             if (
-                json.pos_session_id !== this.pos_session.id &&
+                json.pos_session_id !== this["pos.session"].id &&
                 (json.lines.length > 0 || json.statement_ids.length > 0)
             ) {
                 orders.push(this.createReactiveOrder(json));
-            } else if (json.pos_session_id !== this.pos_session.id) {
+            } else if (json.pos_session_id !== this["pos.session"].id) {
                 this.db.remove_unpaid_order(jsons[i]);
             }
         }
@@ -941,7 +1054,7 @@ export class PosStore extends Reactive {
     }
     async getClosePosInfo() {
         return await this.orm.call("pos.session", "get_closing_control_data", [
-            [this.pos_session.id],
+            [this["pos.session"].id],
         ]);
     }
     set_start_order() {
@@ -1198,8 +1311,8 @@ export class PosStore extends Reactive {
         return JSON.stringify(
             {
                 paid_orders: this.db.get_orders(),
-                session: this.pos_session.name,
-                session_id: this.pos_session.id,
+                session: this["pos.session"].name,
+                session_id: this["pos.session"].id,
                 date: new Date().toUTCString(),
                 version: this.server_version.server_version_info,
             },
@@ -1213,8 +1326,8 @@ export class PosStore extends Reactive {
         return JSON.stringify(
             {
                 unpaid_orders: this.db.get_unpaid_orders(),
-                session: this.pos_session.name,
-                session_id: this.pos_session.id,
+                session: this["pos.session"].name,
+                session_id: this["pos.session"].id,
                 date: new Date().toUTCString(),
                 version: this.server_version.server_version_info,
             },
@@ -1262,7 +1375,7 @@ export class PosStore extends Reactive {
 
             for (i = 0; i < json.unpaid_orders.length; i++) {
                 var order = json.unpaid_orders[i];
-                if (order.pos_session_id !== this.pos_session.id) {
+                if (order.pos_session_id !== this["pos.session"].id) {
                     report.unpaid_skipped_session += 1;
                     skipped_sessions[order.pos_session_id] = true;
                 } else if (existing_uids[order.uid]) {
@@ -1294,7 +1407,7 @@ export class PosStore extends Reactive {
 
         for (var i = 0; i < jsons.length; i++) {
             var json = jsons[i];
-            if (json.pos_session_id === this.pos_session.id) {
+            if (json.pos_session_id === this["pos.session"].id) {
                 orders.push(this.createReactiveOrder(json));
             } else {
                 not_loaded_count += 1;
@@ -1630,7 +1743,7 @@ export class PosStore extends Reactive {
     }
     async logEmployeeMessage(action, message) {
         await this.orm.call("pos.session", "log_partner_message", [
-            this.pos_session.id,
+            this["pos.session"].id,
             this.res_users.partner_id.id,
             action,
             message,
@@ -1841,7 +1954,7 @@ export class PosStore extends Reactive {
         }
     }
     shouldShowCashControl() {
-        return this.pos_config.cash_control && this.pos_session.state == "opening_control";
+        return this.pos_config.cash_control && this["pos.session"].state == "opening_control";
     }
 
     preloadImages() {
@@ -1866,7 +1979,7 @@ export class PosStore extends Reactive {
         localStorage["message"] = "";
         localStorage["message"] = JSON.stringify({
             message: "close_tabs",
-            session: this.pos_session.id,
+            session: this["pos.session"].id,
         });
 
         window.addEventListener(
@@ -1874,7 +1987,7 @@ export class PosStore extends Reactive {
             (event) => {
                 if (event.key === "message" && event.newValue) {
                     const msg = JSON.parse(event.newValue);
-                    if (msg.message === "close_tabs" && msg.session == this.pos_session.id) {
+                    if (msg.message === "close_tabs" && msg.session == this["pos.session"].id) {
                         console.info("POS / Session opened in another window. EXITING POS");
                         this.closePos();
                     }

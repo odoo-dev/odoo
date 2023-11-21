@@ -21,7 +21,7 @@ export class CashOpeningPopup extends AbstractAwaitablePopup {
         this.state = useState({
             notes: "",
             openingCash: this.env.utils.formatCurrency(
-                this.pos.pos_session.cash_register_balance_start || 0,
+                this.pos["pos.session"].cash_register_balance_start || 0,
                 false
             ),
         });
@@ -31,9 +31,9 @@ export class CashOpeningPopup extends AbstractAwaitablePopup {
     }
     //@override
     async confirm() {
-        this.pos.pos_session.state = "opened";
+        this.pos["pos.session"].state = "opened";
         this.orm.call("pos.session", "set_cashbox_pos", [
-            this.pos.pos_session.id,
+            this.pos["pos.session"].id,
             parseFloat(this.state.openingCash),
             this.state.notes,
         ]);

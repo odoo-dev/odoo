@@ -44,7 +44,7 @@ export class CashMovePopup extends AbstractAwaitablePopup {
         const extras = { formattedAmount, translatedType };
         const reason = this.state.reason.trim();
         await this.orm.call("pos.session", "try_cash_in_out", [
-            [this.pos.pos_session.id],
+            [this.pos["pos.session"].id],
             type,
             amount,
             reason,

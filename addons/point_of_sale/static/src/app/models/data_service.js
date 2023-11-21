@@ -8,6 +8,7 @@ const INDEXED_DB_NAME = {
     "product.product": ["id", "barcode", "pos_categ_ids", "write_date"],
     "product.template.attribute.value": ["id"],
     "account.tax": ["id"],
+    "product.packaging": ["barcode"],
     "pos.category": ["id"],
     "pos.order": ["id"],
     "res.partner": ["id"],
@@ -51,7 +52,7 @@ export class PosData extends Reactive {
         }
 
         // need model override to be able to use the correct mod
-        const [models, records] = createRelatedModels(
+        const [models, records, indexed] = createRelatedModels(
             response.relations,
             modelClasses,
             INDEXED_DB_NAME
@@ -59,28 +60,15 @@ export class PosData extends Reactive {
 
         this.relations = response.relations;
         this.models = models;
+        this.indexed = indexed;
         this.models.loadData(response.data);
 
+        const zegzeg = ["pos.session"];
         for (const [name, model] of Object.entries(records)) {
-            this[name.replaceAll(".", "_")] = Object.values(model);
-        }
-
-        this.createIndex();
-    }
-
-    createIndex() {
-        for (const [name, fields] of Object.entries(INDEXED_DB_NAME)) {
-            const jsName = name.replaceAll(".", "_");
-            this.indexed[jsName] = {};
-
-            for (const field of fields) {
-                this.indexed[jsName][field] = {};
-
-                for (const record of this[jsName]) {
-                    if (field in record) {
-                        this.indexed[jsName][field][record[field]] = record;
-                    }
-                }
+            if (zegzeg.includes(name)) {
+                this[name] = Object.values(model);
+            } else {
+                this[name.replaceAll(".", "_")] = Object.values(model);
             }
         }
     }
