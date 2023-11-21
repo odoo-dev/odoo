@@ -1,16 +1,9 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
+import { Base } from "./related_models";
 
-export class ResCurrency {
+export class ResCurrency extends Base {
     static pythonModel = "res.currency";
-
-    constructor(data) {
-        this.setup(data);
-    }
-
-    setup(data) {
-        Object.assign(this, data);
-    }
 }
 
 registry.category("pos_available_models").add(ResCurrency.pythonModel, ResCurrency);

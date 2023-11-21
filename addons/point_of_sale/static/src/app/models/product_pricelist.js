@@ -1,16 +1,9 @@
 /** @odoo-module */
 import { registry } from "@web/core/registry";
+import { Base } from "./related_models";
 
-export class ProductPricelist {
+export class ProductPricelist extends Base {
     static pythonModel = "product.pricelist";
-
-    constructor(data) {
-        this.setup(data);
-    }
-
-    setup(data) {
-        Object.assign(this, data);
-    }
 }
 
 registry.category("pos_available_models").add(ProductPricelist.pythonModel, ProductPricelist);

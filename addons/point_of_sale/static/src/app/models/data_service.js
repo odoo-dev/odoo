@@ -34,14 +34,14 @@ export class PosData extends Reactive {
     }
 
     async initData(env) {
-        const modelOverride = {};
+        const modelClasses = {};
         const response = await this.orm.call("pos.session", "load_data", [
             odoo.pos_session_id,
             PosData.modelToLoad,
         ]);
 
         for (const posModel of registry.category("pos_available_models").getAll()) {
-            modelOverride[posModel.pythonModel] = posModel;
+            modelClasses[posModel.pythonModel] = posModel;
         }
 
         // need model override to be able to use the correct mod
@@ -49,7 +49,7 @@ export class PosData extends Reactive {
             response.relations,
             env,
             reactive,
-            modelOverride
+            modelClasses
         );
 
         this.relations = response.relations;
