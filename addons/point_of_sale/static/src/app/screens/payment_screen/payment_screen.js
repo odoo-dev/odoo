@@ -37,6 +37,7 @@ export class PaymentScreen extends Component {
         this.notification = useService("pos_notification");
         this.hardwareProxy = useService("hardware_proxy");
         this.printer = useService("printer");
+        debugger
         this.payment_methods_from_config = this.pos.payment_methods.filter((method) =>
             this.pos["pos.config"].payment_method_ids.includes(method.id)
         );

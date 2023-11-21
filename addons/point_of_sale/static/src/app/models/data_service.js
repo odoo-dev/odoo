@@ -58,14 +58,29 @@ export class PosData extends Reactive {
             INDEXED_DB_NAME
         );
 
+        this.fields = response.fields;
         this.relations = response.relations;
-        this.models = models;
         this.indexed = indexed;
+        this.models = models;
         this.models.loadData(response.data);
 
         for (const [name, model] of Object.entries(records)) {
             this[name] = Object.values(model);
         }
+    }
+
+    // All RPC related to data should pass by this method
+    // It will update the data in the indexedDB and in the models
+    async loadMissingData(model, ids) {
+        const records = await this.orm.read(model, ids, this.fields[model]);
+
+        for (const record of records) {
+            this.models[model].create(record);
+        }
+    }
+
+    deleteRecord(model, id) {
+        this.models[model].delete(id);
     }
 }
 

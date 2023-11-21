@@ -352,11 +352,8 @@ export class PosStore extends Reactive {
         return this.after_load_server_data();
     }
     async _processData(loadedData) {
-        // contain the list of the models that are loaded in the pos,
-        // with record by id
-        this.indexed = this.data.indexed;
-
         // Data who's not corresponding to a model
+        this.indexed = this.data.indexed;
         this.server_version = this.data.custom.server_version;
         this.default_pricelist = this.data.custom.default_pricelist;
 
@@ -385,7 +382,7 @@ export class PosStore extends Reactive {
         this["pos.combo"] = this.data["pos.combo"];
         this["pos.combo.line"] = this.data["pos.combo.line"];
         this["product.product"] = this.data["product.product"];
-        this["pos_payment_method"] = this.data["pos_payment_method"];
+        this["pos.payment.method"] = this.data["pos.payment.method"];
         debugger;
 
         this._loadProductProduct(loadedData["product.product"]);

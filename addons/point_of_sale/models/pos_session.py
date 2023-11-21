@@ -104,6 +104,10 @@ class PosSession(models.Model):
     def _load_data_params(self):
         params = {
             'search_read': {
+                'pos.config': {
+                    'domain': [('id', '=', self.config_id.id)],
+                    'fields': []
+                },
                 'pos.order': {
                     'fields': [],
                     'domain': [],
@@ -124,10 +128,6 @@ class PosSession(models.Model):
                 'pos.payment.method': {
                     'domain': ['|', ('active', '=', False), ('active', '=', True)],
                     'fields': ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence'],
-                },
-                'pos.config': {
-                    'domain': [('id', '=', self.config_id.id)],
-                    'fields': []
                 },
                 'pos.printer': {
                     'domain': [('id', 'in', self.config_id.printer_ids.ids)],
@@ -265,6 +265,7 @@ class PosSession(models.Model):
         params = self._load_data_params()
         response = {}
         response['data'] = {}
+        response['fields'] = {name: data['fields'] for name, data in params['search_read'].items()}
         response['relations'] = {}
         response['custom'] = {
             'server_version': exp_version()

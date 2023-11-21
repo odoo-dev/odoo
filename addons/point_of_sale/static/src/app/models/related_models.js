@@ -236,7 +236,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         for (const key of indexes[model] || []) {
             const keyVal = vals[key];
             if (!(typeof keyVal === "string" || typeof keyVal === "number")) {
-                console.warn("Can only use number or string as index.");
+                console.warn("INDEXER: Can only use number or string as index.");
                 continue;
             }
             indexedRecords[model][key][keyVal] = record;
