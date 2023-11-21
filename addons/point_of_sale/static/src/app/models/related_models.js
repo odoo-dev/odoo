@@ -149,6 +149,20 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
         return processedModelDefs[model];
     }
 
+    function removeItem(array, item) {
+        const index = array.indexOf(item);
+        if (index >= 0) {
+            array.splice(index, 1);
+        }
+    }
+
+    function addItem(array, item) {
+        const index = array.indexOf(item);
+        if (index >= 0) {
+            array.push(item);
+        }
+    }
+
     function connect(field, ownerRecord, recordToConnect) {
         const inverse = inverseMap.get(field);
 
@@ -158,10 +172,10 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
                 return;
             }
             if (recordToConnect && inverse.name in recordToConnect) {
-                recordToConnect[inverse.name].add(ownerRecord);
+                addItem(recordToConnect[inverse.name], ownerRecord);
             }
             if (prevConnectedRecord) {
-                prevConnectedRecord[inverse.name].delete(ownerRecord);
+                removeItem(prevConnectedRecord[inverse.name], ownerRecord);
             }
             ownerRecord[field.name] = recordToConnect;
         } else if (field.type === "one2many") {
@@ -171,12 +185,12 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             }
             recordToConnect[inverse.name] = ownerRecord;
             if (prevConnectedRecord) {
-                prevConnectedRecord[field.name].delete(recordToConnect);
+                removeItem(prevConnectedRecord[field.name], recordToConnect);
             }
-            ownerRecord[field.name].add(recordToConnect);
+            addItem(ownerRecord[field.name], recordToConnect);
         } else if (field.type === "many2many") {
-            ownerRecord[field.name].add(recordToConnect);
-            recordToConnect[inverse.name].add(ownerRecord);
+            addItem(ownerRecord[field.name], recordToConnect);
+            addItem(recordToConnect[inverse.name], ownerRecord);
         }
     }
 
@@ -189,17 +203,17 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
             const prevConnectedRecord = ownerRecord[field.name];
             if (prevConnectedRecord === recordToDisconnect) {
                 ownerRecord[field.name] = undefined;
-                recordToDisconnect[inverse.name].delete(ownerRecord);
+                removeItem(recordToDisconnect[inverse.name], ownerRecord);
             }
         } else if (field.type === "one2many") {
-            ownerRecord[field.name].delete(recordToDisconnect);
+            removeItem(ownerRecord[field.name], recordToDisconnect);
             const prevConnectedRecord = recordToDisconnect[inverse.name];
             if (prevConnectedRecord === ownerRecord) {
                 recordToDisconnect[inverse.name] = undefined;
             }
         } else if (field.type === "many2many") {
-            ownerRecord[field.name].delete(recordToDisconnect);
-            recordToDisconnect[inverse.name].delete(ownerRecord);
+            removeItem(ownerRecord[field.name], recordToDisconnect);
+            removeItem(recordToDisconnect[inverse.name], ownerRecord);
         }
     }
 
@@ -242,7 +256,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
 
             if (RELATION_TYPES.has(field.type)) {
                 if (X2MANY_TYPES.has(field.type)) {
-                    record[name] = new Set([]);
+                    record[name] = [];
                 } else if (field.type === "many2one") {
                     record[name] = undefined;
                 }
