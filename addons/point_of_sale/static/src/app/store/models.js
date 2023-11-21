@@ -342,7 +342,7 @@ export class Product extends PosModel {
     } = {}) {
         const order = this.pos.get_order();
         const taxes = this.pos.get_taxes_after_fp(this.taxes_id, order && order.fiscal_position);
-        const currentTaxes = this.pos.idMap.account_tax[this.taxes_id];
+        const currentTaxes = this.pos.indexed.account_tax.id[this.taxes_id];
         const priceAfterFp = this.pos.computePriceAfterFp(price, currentTaxes);
         const allPrices = this.pos.compute_all(
             taxes,
@@ -577,7 +577,7 @@ export class Orderline extends PosModel {
     set_full_product_name() {
         this.full_product_name = constructFullProductName(
             this,
-            this.pos.idMap.product_template_attribute_value,
+            this.pos.indexed.product_template_attribute_value.id,
             this.product.display_name
         );
     }
@@ -979,7 +979,7 @@ export class Orderline extends PosModel {
     _getProductTaxesAfterFiscalPosition() {
         const product = this.get_product();
         let taxesIds = this.tax_ids || product.taxes_id;
-        taxesIds = taxesIds.filter((t) => t in this.pos.idMap.account_tax);
+        taxesIds = taxesIds.filter((t) => t in this.pos.indexed.account_tax.id);
         return this.pos.get_taxes_after_fp(taxesIds, this.order.fiscal_position);
     }
     get_all_prices(qty = this.get_quantity()) {
@@ -988,7 +988,7 @@ export class Orderline extends PosModel {
 
         var product = this.get_product();
         var taxes_ids = this.tax_ids || product.taxes_id;
-        taxes_ids = taxes_ids.filter((t) => t in this.pos.idMap.account_tax);
+        taxes_ids = taxes_ids.filter((t) => t in this.pos.indexed.account_tax.id);
         var taxdetail = {};
         var product_taxes = this.pos.get_taxes_after_fp(taxes_ids, this.order.fiscal_position);
 
@@ -1888,7 +1888,7 @@ export class Order extends PosModel {
     calculate_base_amount(tax_ids_array, lines) {
         // Consider price_include taxes use case
         const has_taxes_included_in_price = tax_ids_array.filter(
-            (tax_id) => this.pos.idMap.account_tax[tax_id].price_include
+            (tax_id) => this.pos.indexed.account_tax.id[tax_id].price_include
         ).length;
 
         const base_amount = lines.reduce(
@@ -2090,7 +2090,11 @@ export class Order extends PosModel {
             const presentLine = childLines.find((l) => l.product.id === comboLine.product_id[0]);
             if (presentLine) {
                 const attributesPriceExtra = (presentLine.attribute_value_ids ?? [])
-                    .map((id) => this.pos.idMap.product_template_attribute_value[id]?.price_extra || 0)
+                    .map(
+                        (id) =>
+                            this.pos.indexed.product_template_attribute_value.id[id]?.price_extra ||
+                            0
+                    )
                     .reduce((acc, price) => acc + price, 0);
                 const totalPriceExtra = attributesPriceExtra + comboLine.combo_price;
                 presentLine.set_unit_price(presentLine.get_unit_price() + totalPriceExtra);
@@ -2421,8 +2425,8 @@ export class Order extends PosModel {
                 fulldetails.push({
                     amount: details[id].amount,
                     base: details[id].base,
-                    tax: this.pos.idMap.account_tax[id],
-                    name: this.pos.idMap.account_tax[id].name,
+                    tax: this.pos.indexed.account_tax.id[id],
+                    name: this.pos.indexed.account_tax.id[id].name,
                 });
             }
         }

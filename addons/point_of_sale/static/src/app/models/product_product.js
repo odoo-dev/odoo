@@ -239,7 +239,7 @@ export class ProductProduct extends Base {
     } = {}) {
         const order = this.pos.get_order();
         const taxes = this.pos.get_taxes_after_fp(this.taxes_id, order && order.fiscal_position);
-        const currentTaxes = this.pos.idMap.account_tax[this.taxes_id];
+        const currentTaxes = this.pos.indexed.account_tax.id[this.taxes_id];
         const priceAfterFp = this.pos.computePriceAfterFp(price, currentTaxes);
         const allPrices = this.pos.compute_all(
             taxes,

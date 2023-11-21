@@ -85,7 +85,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
     getCategories() {
         if (this.pos.selectedCategoryId) {
             const categoryToDisplay = [];
-            const category = this.pos.idMap.pos_category[this.pos.selectedCategoryId];
+            const category = this.pos.indexed.pos_category.id[this.pos.selectedCategoryId];
 
             if (category.parent_id) {
                 categoryToDisplay.push(...this.getAllParents(category));

@@ -5,7 +5,7 @@
             <header class="modal-header h2" t-esc="props.product.display_name"/>
             <main class="body">
                 <div t-foreach="props.product.combo_ids" t-as="comboId" t-key="comboId" class="d-flex flex-column m-3 mb-4">
-                    <t t-set="combo" t-value="this.pos.idMap.pos_combo[comboId]"/>
+                    <t t-set="combo" t-value="this.pos.indexed.pos_combo.id[comboId]"/>
                     <h3 class="me-auto mb-3" t-esc="combo.name"/>
                     <div class="product-list d-grid gap-1">
                         <div t-foreach="combo.combo_line_ids" t-as="combo_line" t-key="combo_line.id">

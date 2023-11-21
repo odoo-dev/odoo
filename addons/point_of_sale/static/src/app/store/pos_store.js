@@ -244,7 +244,7 @@ export class PosStore extends Reactive {
     async _processData(loadedData) {
         // contain the list of the models that are loaded in the pos,
         // with record by id
-        this.idMap = this.data.idMap;
+        this.indexed = this.data.indexed;
 
         // Data who's not corresponding to a model
         this.server_version = this.data.custom.server_version;
@@ -433,7 +433,7 @@ export class PosStore extends Reactive {
 
         let removed_categories_id;
         if (categories) {
-            const previous_categories_id = Object.values(this.pos.idMap.pos_category).map((c) => c.id);
+            const previous_categories_id = Object.values(this.pos.indexed.pos_category.id).map((c) => c.id);
             const received_categories_id = new Set(categories.map((c) => c.id));
             this.db.add_categories(categories);
             removed_categories_id = previous_categories_id.filter(
@@ -1537,11 +1537,11 @@ export class PosStore extends Reactive {
      */
     get_taxes_after_fp(taxIds, fpos) {
         if (!fpos) {
-            return taxIds.map((taxId) => this.idMap.account_tax[taxId]);
+            return taxIds.map((taxId) => this.indexed.account_tax.id[taxId]);
         }
         const mappedTaxes = [];
         for (const taxId of taxIds) {
-            const tax = this.idMap.account_tax[taxId];
+            const tax = this.indexed.account_tax.id[taxId];
             if (tax) {
                 const taxMaps = Object.values(fpos.fiscal_position_taxes_by_id).filter(
                     (fposTax) => fposTax.tax_src_id[0] === tax.id
@@ -1549,7 +1549,7 @@ export class PosStore extends Reactive {
                 if (taxMaps.length) {
                     for (const taxMap of taxMaps) {
                         if (taxMap.tax_dest_id) {
-                            const mappedTax = this.idMap.account_tax[taxMap.tax_dest_id[0]];
+                            const mappedTax = this.indexed.account_tax.id[taxMap.tax_dest_id[0]];
                             if (mappedTax) {
                                 mappedTaxes.push(mappedTax);
                             }
@@ -1849,7 +1849,7 @@ export class PosStore extends Reactive {
             const image = new Image();
             image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=${product.write_date}`;
         }
-        for (const category of Object.values(this.idMap.pos_category)) {
+        for (const category of Object.values(this.indexed.pos_category.id)) {
             if (category.id == 0) {
                 continue;
             }

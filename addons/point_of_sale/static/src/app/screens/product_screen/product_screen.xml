@@ -48,7 +48,7 @@
                     <div class="d-flex overflow-auto w-100">
                         <div class="d-flex">
                             <button t-on-click="() => this.pos.setSelectedCategoryId(0)"
-                                t-if="this.pos.idMap.pos_category[this.pos.selectedCategoryId]"
+                                t-if="this.pos.indexed.pos_category.id[this.pos.selectedCategoryId]"
                                 class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center p-1 h-100">
                                 <i class="fa fa-home fa-2x" aria-hidden="true"></i>
                             </button>

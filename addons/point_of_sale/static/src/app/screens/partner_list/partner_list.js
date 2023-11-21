@@ -98,7 +98,7 @@ export class PartnerListScreen extends Component {
             : this.pos.res_partner.length;
 
         for (var i = 0; i < max_count; i++) {
-            partners.push(this.pos.idMap.res_partner[this.pos.res_partner[i].id]);
+            partners.push(this.pos.indexed.res_partner.id[this.pos.res_partner[i].id]);
         }
 
         return partners;

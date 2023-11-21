@@ -5,7 +5,14 @@ import { createRelatedModels } from "@point_of_sale/app/models/related_models";
 import { registry } from "@web/core/registry";
 
 const INDEXED_DB_NAME = {
-    "product.product": ["barcode", "pos_categ_ids"],
+    "product.product": ["id", "barcode", "pos_categ_ids", "write_date"],
+    "product.template.attribute.value": ["id"],
+    "account.tax": ["id"],
+    "pos.category": ["id"],
+    "pos.order": ["id"],
+    "res.partner": ["id"],
+    "pos.combo": ["id"],
+    "pos.combo.line": ["id"],
 };
 
 export class PosData extends Reactive {
@@ -17,7 +24,7 @@ export class PosData extends Reactive {
         super();
         this.ready = this.setup(...arguments).then(() => this);
         this.custom = {};
-        this.idMap = {};
+        this.indexed = {};
     }
 
     async setup(env, { orm }) {
@@ -56,28 +63,27 @@ export class PosData extends Reactive {
 
         for (const [name, model] of Object.entries(records)) {
             this[name.replaceAll(".", "_")] = Object.values(model);
-            this.idMap[name.replaceAll(".", "_")] = model;
         }
+
+        this.createIndex();
     }
 
-    async loadMissingData(model, ids) {
-        const response = await this.orm.call("pos.session", "load_missing_data", [
-            odoo.pos_session_id,
-            model,
-            ids,
-        ]);
+    createIndex() {
+        for (const [name, fields] of Object.entries(INDEXED_DB_NAME)) {
+            const jsName = name.replaceAll(".", "_");
+            this.indexed[jsName] = {};
 
-        if (registry.category("pos_available_models").contains(model)) {
-            const jsModel = registry.category("pos_available_models").get(model);
-            this[model.replaceAll(".", "_")] = this[model.replaceAll(".", "_")].push(
-                response.data.map((p) => new jsModel(p))
-            );
+            for (const field of fields) {
+                this.indexed[jsName][field] = {};
 
-            this.createRelation();
+                for (const record of this[jsName]) {
+                    if (field in record) {
+                        this.indexed[jsName][field][record[field]] = record;
+                    }
+                }
+            }
         }
     }
-
-    createIndex() {}
 }
 
 export const PosDataService = {
