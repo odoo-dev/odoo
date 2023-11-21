@@ -2,12 +2,21 @@
 import { registry } from "@web/core/registry";
 import { Base } from "./related_models";
 
+/**
+ * ProductProduct, shadow of product.product in python.
+ * To works properly, this model needs to be registered in the registry
+ * with the key "pos_available_models". And to be instanciated with the
+ * method createRelatedModels from related_models.js
+ *
+ * Models to load: product.product, uom.uom
+ */
+
 export class ProductProduct extends Base {
     static pythonModel = "product.product";
 
     // Getter
     isAllowOnlyOneLot() {
-        const productUnit = this.get_unit();
+        const productUnit = this.uom_uom;
         return this.tracking === "lot" || !productUnit || !productUnit.is_pos_groupable;
     }
 
@@ -17,17 +26,6 @@ export class ProductProduct extends Base {
             (this.pos.stock_picking_type.use_create_lots ||
                 this.pos.stock_picking_type.use_existing_lots)
         );
-    }
-    get_unit() {
-        var unit_id = this.uom_id;
-        if (!unit_id) {
-            return undefined;
-        }
-        unit_id = unit_id[0];
-        if (!this.pos) {
-            return undefined;
-        }
-        return this.pos.uom_uom.find((u) => u.id === unit_id);
     }
     async _onScaleNotAvailable() {}
     get isScaleAvailable() {
