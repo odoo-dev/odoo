@@ -129,6 +129,15 @@ export class Base {
      * @param {*} _vals
      */
     setup(_vals) {}
+    update(vals) {
+        this.model.update(this, vals);
+    }
+    delete() {
+        this.model.delete(this);
+    }
+    serialize() {
+        this.model.serialize(this);
+    }
 }
 
 export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) {
