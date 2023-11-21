@@ -94,11 +94,11 @@ export class PartnerListScreen extends Component {
         const partners = [];
 
         max_count = max_count
-            ? Math.min(this.pos.res_partner.length, max_count)
-            : this.pos.res_partner.length;
+            ? Math.min(this.pos["res.partner"].length, max_count)
+            : this.pos["res.partner"].length;
 
         for (var i = 0; i < max_count; i++) {
-            partners.push(this.pos.indexed.res_partner.id[this.pos.res_partner[i].id]);
+            partners.push(this.pos.indexed["res.partner"].id[this.pos["res.partner"][i].id]);
         }
 
         return partners;
@@ -132,7 +132,7 @@ export class PartnerListScreen extends Component {
     }
 
     get_partners_searched() {
-        return fuzzyLookup(this.state.query.trim(), this.pos.res_partner, (partner) =>
+        return fuzzyLookup(this.state.query.trim(), this.pos["res.partner"], (partner) =>
             this.partner_search_string(partner)
         );
     }
@@ -209,7 +209,7 @@ export class PartnerListScreen extends Component {
     }
     createPartner() {
         // initialize the edit screen with default details about country, state, and lang
-        const company = this.pos.res_company;
+        const company = this.pos["res.company"];
         const country_id = company.country_id.id;
         const state_id = company.state_id.id;
         this.state.editModeProps.partner = {

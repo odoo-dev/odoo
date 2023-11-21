@@ -21,12 +21,12 @@ export class ProductProduct extends Base {
 
     // Getter
     isAllowOnlyOneLot() {
-        const productUnit = this.uom_uom;
+        const productUnit = this["uom.uom"];
         return this.tracking === "lot" || !productUnit || !productUnit.is_pos_groupable;
     }
 
     isTracked() {
-        const stock_picking_type = this.models.stock_picking_type.readAll()[0];
+        const stock_picking_type = this.models["stock.picking.type"].readAll()[0];
 
         return (
             ["serial", "lot"].includes(this.tracking) &&
@@ -38,7 +38,7 @@ export class ProductProduct extends Base {
         return true;
     }
     getFormattedUnitPrice() {
-        const currency = this.models.pos_config.getAll()[0].currency_id;
+        const currency = this.models["pos.config"].getAll()[0].currency_id;
         const formattedUnitPrice = formatCurrency(this.get_display_price(), currency);
 
         if (this.to_weight) {
@@ -95,7 +95,7 @@ export class ProductProduct extends Base {
         }
 
         if (rule.base === "pricelist") {
-            const base_pricelist = this.pos.product_pricelist.find(
+            const base_pricelist = this.pos["product.pricelist"].find(
                 (pricelist) => pricelist.id === rule.base_pricelist_id[0]
             );
             if (base_pricelist) {
@@ -136,17 +136,17 @@ export class ProductProduct extends Base {
         pricelist = this.pos.getDefaultPricelist(),
         quantity = 1,
         price = this.get_price(pricelist, quantity),
-        iface_tax_included = this.pos.pos_config.iface_tax_included,
+        iface_tax_included = this.pos["pos.config"].iface_tax_included,
     } = {}) {
         const order = this.pos.get_order();
         const taxes = this.pos.get_taxes_after_fp(this.taxes_id, order && order.fiscal_position);
-        const currentTaxes = this.pos.indexed.account_tax.id[this.taxes_id];
+        const currentTaxes = this.pos.indexed["account.tax"].id[this.taxes_id];
         const priceAfterFp = this.pos.computePriceAfterFp(price, currentTaxes);
         const allPrices = this.pos.compute_all(
             taxes,
             priceAfterFp,
             1,
-            this.pos.res_currency.rounding
+            this.pos["res.currency"].rounding
         );
         if (iface_tax_included === "total") {
             return allPrices.total_included;

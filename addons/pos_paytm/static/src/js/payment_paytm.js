@@ -26,7 +26,7 @@ export class PaymentPaytm extends PaymentInterface {
         const timeStamp = Math.floor(Date.now() / 1000);
 
         // Preparing Unique Random Reference Id
-        const referencePrefix = this.pos.pos_config?.name.replace(/\s/g, "").slice(0,4)
+        const referencePrefix = this.pos["pos.config"].name.replace(/\s/g, "").slice(0,4)
         const referenceId =  referencePrefix.concat(Math.floor(Math.random()*1000000000))
         const response = await this.makePaymentRequest(transactionAmount, transactionId, referenceId, timeStamp);
         if (!response) {

@@ -85,7 +85,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
     getCategories() {
         if (this.pos.selectedCategoryId) {
             const categoryToDisplay = [];
-            const category = this.pos.indexed.pos_category.id[this.pos.selectedCategoryId];
+            const category = this.pos.indexed["pos.category"].id[this.pos.selectedCategoryId];
 
             if (category.parent_id) {
                 categoryToDisplay.push(...this.getAllParents(category));
@@ -99,7 +99,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
 
             return categoryToDisplay;
         } else {
-            return this.pos.pos_category.filter((category) => !category.parent_id);
+            return this.pos["pos.category"].filter((category) => !category.parent_id);
         }
     }
     computeImageUrl(category) {
@@ -114,7 +114,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             { value: "4" },
             { value: "5" },
             { value: "6" },
-            { value: "discount", text: "% Disc", disabled: !this.pos.pos_config.manual_discount },
+            { value: "discount", text: "% Disc", disabled: !this.pos["pos.config"].manual_discount },
             { value: "7" },
             { value: "8" },
             { value: "9" },
@@ -455,7 +455,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         return this.pos.searchProductWord.trim();
     }
     getProductListToNotDisplay() {
-        return [this.pos.pos_config.tip_product_id];
+        return [this.pos["pos.config"].tip_product_id];
     }
     get productsToDisplay() {
         const { db } = this.pos;

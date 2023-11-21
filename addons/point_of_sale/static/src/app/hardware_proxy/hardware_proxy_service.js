@@ -51,7 +51,7 @@ export class HardwareProxy extends EventBus {
     }
 
     async connect() {
-        if (this.pos.pos_config.iface_print_via_proxy) {
+        if (this.pos["pos.config"].iface_print_via_proxy) {
             this.connectToPrinter();
         }
         try {
@@ -192,7 +192,7 @@ export class HardwareProxy extends EventBus {
     }
     async openCashbox(action = false) {
         if (
-            this.pos.pos_config.iface_cashdrawer &&
+            this.pos["pos.config"].iface_cashdrawer &&
             this.printer &&
             ["connected", "init"].includes(this.connectionInfo.status)
         ) {

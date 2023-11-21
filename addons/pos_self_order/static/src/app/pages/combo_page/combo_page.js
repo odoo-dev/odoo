@@ -56,7 +56,7 @@ export class ComboPage extends Component {
     }
 
     get currentComboId() {
-        return this.props.product.pos_combo_ids[this.state.currentComboIndex];
+        return this.props.product["pos.combo"]_ids[this.state.currentComboIndex];
     }
 
     get currentCombo() {
@@ -110,7 +110,7 @@ export class ComboPage extends Component {
             return;
         }
         this.state.currentComboIndex++;
-        if (this.state.currentComboIndex == this.props.product.pos_combo_ids.length) {
+        if (this.state.currentComboIndex == this.props.product["pos.combo"]_ids.length) {
             this.state.showResume = true;
         }
     }

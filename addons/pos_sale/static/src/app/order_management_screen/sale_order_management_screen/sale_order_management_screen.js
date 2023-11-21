@@ -112,7 +112,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
         if (confirmed) {
             let currentPOSOrder = this.pos.get_order();
             const sale_order = await this._getSaleOrder(clickedOrder.id);
-            clickedOrder.shipping_date = this.pos.pos_config.ship_later && sale_order.shipping_date;
+            clickedOrder.shipping_date = this.pos["pos.config"].ship_later && sale_order.shipping_date;
 
             const currentSaleOrigin = this._getSaleOrderOrigin(currentPOSOrder);
             const currentSaleOriginId = currentSaleOrigin && currentSaleOrigin.id;
@@ -161,7 +161,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                 currentPOSOrder.fiscal_position = orderFiscalPos;
             }
             const orderPricelist = sale_order.pricelist_id
-                ? this.pos.product_pricelist.find(
+                ? this.pos["product.pricelist"].find(
                       (pricelist) => pricelist.id === sale_order.pricelist_id[0]
                   )
                 : false;
@@ -223,8 +223,8 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
 
                     if (
                         new_line.get_product().tracking !== "none" &&
-                        (this.pos.stock_picking_type.use_create_lots ||
-                            this.pos.stock_picking_type.use_existing_lots) &&
+                        (this.pos["stock.picking.type"].use_create_lots ||
+                            this.pos["stock.picking.type"].use_existing_lots) &&
                         line.lot_names.length > 0
                     ) {
                         // Ask once when `useLoadedLots` is undefined, then reuse it's value on the succeeding lines.
@@ -267,10 +267,10 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                 }
             } else {
                 // apply a downpayment
-                if (this.pos.pos_config.down_payment_product_id) {
+                if (this.pos["pos.config"].down_payment_product_id) {
                     const lines = sale_order.order_line.filter((line) => {
                         return (
-                            line.product_id[0] !== this.pos.pos_config.down_payment_product_id[0]
+                            line.product_id[0] !== this.pos["pos.config"].down_payment_product_id[0]
                         );
                     });
                     const tab = lines.map((line) => ({
@@ -280,18 +280,18 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                         total: line.price_total,
                     }));
                     let down_payment_product = this.pos.db.get_product_by_id(
-                        this.pos.pos_config.down_payment_product_id[0]
+                        this.pos["pos.config"].down_payment_product_id[0]
                     );
                     if (!down_payment_product) {
                         await this.pos._addProducts([
-                            this.pos.pos_config.down_payment_product_id[0],
+                            this.pos["pos.config"].down_payment_product_id[0],
                         ]);
                         down_payment_product = this.pos.db.get_product_by_id(
-                            this.pos.pos_config.down_payment_product_id[0]
+                            this.pos["pos.config"].down_payment_product_id[0]
                         );
                     }
                     const down_payment_tax =
-                        this.pos.indexed.account_tax.id[down_payment_product.taxes_id] || false;
+                        this.pos.indexed["account.tax"].id[down_payment_product.taxes_id] || false;
                     let down_payment;
                     if (down_payment_tax) {
                         down_payment = down_payment_tax.price_include
@@ -308,7 +308,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                     const popupSubtitle = _t("Due balance: %s");
                     if (selectedOption == "dpAmount") {
                         popupTitle = _t("Down Payment");
-                        popupInputSuffix = this.pos.res_currency.symbol;
+                        popupInputSuffix = this.pos["res.currency"].symbol;
                     } else {
                         popupTitle = _t("Down Payment");
                         popupInputSuffix = "%";

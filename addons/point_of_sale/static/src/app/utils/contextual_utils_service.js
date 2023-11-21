@@ -16,8 +16,8 @@ import { parseFloat } from "@web/views/fields/parsers";
 export const contextualUtilsService = {
     dependencies: ["pos", "localization"],
     start(env, { pos, localization }) {
-        const res_currency = pos.res_currency;
-        const productUoMDecimals = pos.decimal_precision.find(
+        const res_currency = pos["res.currency"];
+        const productUoMDecimals = pos["decimal.precision"].find(
             (dp) => dp.name === "Product Unit of Measure"
         ).digits;
         const decimalPoint = localization.decimalPoint;

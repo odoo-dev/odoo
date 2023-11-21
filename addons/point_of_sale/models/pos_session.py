@@ -2147,10 +2147,10 @@ class PosSession(models.Model):
         """
         :param custom_search_params: a dictionary containing params of a search_read()
         """
-        params = self._loader_params_res_partner()
+        params = self._load_data_params()['search_read']['res.partner'];
         # custom_search_params will take priority
-        params['search_params'] = {**params['search_params'], **custom_search_params}
-        partners = self.env['res.partner'].search_read(**params['search_params'])
+        params= {**params, **custom_search_params}
+        partners = self.env['res.partner'].search_read(**params)
         return partners
 
     def find_product_by_barcode(self, barcode):

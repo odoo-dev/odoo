@@ -36,6 +36,6 @@ export class PrintBillButton extends Component {
 ProductScreen.addControlButton({
     component: PrintBillButton,
     condition: function () {
-        return this.pos.pos_config.iface_printbill;
+        return this.pos["pos.config"].iface_printbill;
     },
 });

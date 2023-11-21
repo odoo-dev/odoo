@@ -24,8 +24,8 @@ patch(PaymentAdyen.prototype, {
         var data = {
             originalReference: line.transaction_id,
             modificationAmount: {
-                value: parseInt(line.amount * Math.pow(10, this.pos.res_currency.decimal_places)),
-                currency: this.pos.res_currency.name,
+                value: parseInt(line.amount * Math.pow(10, this.pos["res.currency"].decimal_places)),
+                currency: this.pos["res.currency"].name,
             },
             merchantAccount: this.payment_method.adyen_merchant_account,
             additionalData: {

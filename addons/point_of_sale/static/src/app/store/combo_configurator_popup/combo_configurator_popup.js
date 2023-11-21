@@ -37,6 +37,6 @@ export class ComboConfiguratorPopup extends AbstractAwaitablePopup {
     getPayload() {
         return Object.values(this.state.combo)
             .filter((x) => x) // we only keep the non-zero values
-            .map((x) => this.pos.indexed.pos_combo_line.id[x]);
+            .map((x) => this.pos.indexed["pos.combo.line"].id[x]);
     }
 }

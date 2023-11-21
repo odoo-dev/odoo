@@ -19,6 +19,6 @@ export class TransferOrderButton extends Component {
 ProductScreen.addControlButton({
     component: TransferOrderButton,
     condition: function () {
-        return this.pos.pos_config.module_pos_restaurant;
+        return this.pos["pos.config"].module_pos_restaurant;
     },
 });

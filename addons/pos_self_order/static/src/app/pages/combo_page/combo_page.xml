@@ -13,7 +13,7 @@
         <div class="d-flex flex-column overflow-y-auto bg-view flex-grow-1">
             <section t-if="!state.showResume" class="pos_self_order_breadcrumb position-relative px-3 px-md-0 pb-md-4 bg-view">
                 <div class="d-flex justify-content-around my-5">
-                    <div t-foreach="props.product.pos_combo_ids" t-as="combo_id" t-key="combo_id" class="position-relative">
+                    <div t-foreach="props.product['pos.combo']_ids" t-as="combo_id" t-key="combo_id" class="position-relative">
                         <t t-set="isComboCurrent" t-value="currentComboId === combo_id"/>
                         <t t-set="isComboSelected" t-value="false"/>
                         <t t-set="isNextSelected" t-value="false"/>
@@ -25,7 +25,7 @@
                             t-if="!combo_id_first"
                             class="position-absolute end-0 top-50 border-top border-2"
                             t-attf-style="width: calc(100vw / {{
-                                props.product.pos_combo_ids.length}})"
+                                props.product['pos.combo']_ids.length}})"
                             />
 
                         <div class="pos_self_order_breadcrumb_pill d-flex align-items-center justify-content-center ratio ratio-1x1 mx-md-auto">

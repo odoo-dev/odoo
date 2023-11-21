@@ -63,13 +63,8 @@ export class PosData extends Reactive {
         this.indexed = indexed;
         this.models.loadData(response.data);
 
-        const zegzeg = ["pos.session"];
         for (const [name, model] of Object.entries(records)) {
-            if (zegzeg.includes(name)) {
-                this[name] = Object.values(model);
-            } else {
-                this[name.replaceAll(".", "_")] = Object.values(model);
-            }
+            this[name] = Object.values(model);
         }
     }
 }

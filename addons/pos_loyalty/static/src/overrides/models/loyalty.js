@@ -1467,7 +1467,7 @@ patch(Order.prototype, {
                 product: reward.discount_line_product_id,
                 price: -roundDecimals(
                     product.get_price(this.pricelist, freeQuantity),
-                    this.pos.res_currency.decimal_places
+                    this.pos["res.currency"].decimal_places
                 ),
                 tax_ids: product.taxes_id,
                 quantity: freeQuantity,
@@ -1520,7 +1520,7 @@ patch(Order.prototype, {
                 "pos.config",
                 "use_coupon_code",
                 [
-                    [this.pos.pos_config.id],
+                    [this.pos["pos.config"].id],
                     code,
                     this.date_order,
                     customerId,

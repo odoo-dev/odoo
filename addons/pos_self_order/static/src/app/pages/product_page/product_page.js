@@ -81,7 +81,7 @@ export class ProductPage extends Component {
     }
 
     orderlineCanBeMerged() {
-        if (this.props.product.pos_combo_ids.length) {
+        if (this.props.product["pos.combo"]_ids.length) {
             return false;
         }
         const editedLine = this.selfOrder.editedLine;

@@ -46,11 +46,11 @@ export class Navbar extends Component {
     }
 
     get customerFacingDisplayButtonIsShown() {
-        return this.pos.pos_config.iface_customer_facing_display;
+        return this.pos["pos.config"].iface_customer_facing_display;
     }
     get showCashMoveButton() {
         return Boolean(
-            this.pos?.pos_config?.cash_control && this.pos?.pos_config?.has_cash_move_permission
+            this.pos["pos.config"].cash_control && this.pos["pos.config"].has_cash_move_permission
         );
     }
     onCashMoveButtonClick() {
@@ -79,7 +79,7 @@ export class Navbar extends Component {
     }
 
     _shouldLoadOrders() {
-        return this.pos.pos_config.trusted_config_ids.length > 0;
+        return this.pos["pos.config"].trusted_config_ids.length > 0;
     }
 
     get isTicketScreenShown() {

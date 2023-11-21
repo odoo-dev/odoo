@@ -152,7 +152,7 @@ export const customerDisplayService = {
         const {
             iface_customer_facing_display: enabled,
             iface_customer_facing_display_via_proxy: proxy,
-        } = pos.pos_config;
+        } = pos["pos.config"];
         if (!enabled) {
             return;
         }

@@ -31,7 +31,7 @@ export class Product extends Reactive {
         this.name = product.name;
         this.description_self_order = product.description_self_order;
         this.pos_categ_ids = product.pos_categ_ids;
-        this.pos_combo_ids = product.pos_combo_ids;
+        this["pos.combo"]_ids = product["pos.combo"]_ids;
         this.is_pos_groupable = product.is_pos_groupable;
         this.write_date = product.write_date;
         this.self_order_available = product.self_order_available;
@@ -41,6 +41,6 @@ export class Product extends Reactive {
     }
 
     get isCombo() {
-        return this.pos_combo_ids;
+        return this["pos.combo"]_ids;
     }
 }

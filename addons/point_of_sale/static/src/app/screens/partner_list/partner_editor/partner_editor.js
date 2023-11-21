@@ -69,7 +69,7 @@ export class PartnerDetailsEdit extends Component {
         }
         if (
             processedChanges.state_id &&
-            this.pos.res_country_state.find((state) => state.id === processedChanges.state_id)
+            this.pos["res.country.state"].find((state) => state.id === processedChanges.state_id)
                 .country_id[0] !== processedChanges.country_id
         ) {
             processedChanges.state_id = false;

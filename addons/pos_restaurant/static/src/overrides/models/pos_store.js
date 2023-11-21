@@ -30,7 +30,7 @@ patch(PosStore.prototype, {
         this.floorPlanStyle = "default";
         this.isEditMode = false;
         await super.setup(...arguments);
-        if (this.pos_config.module_pos_restaurant) {
+        if (this["pos.config"].module_pos_restaurant) {
             this.setActivityListeners();
             this.showScreen("FloorScreen", { floor: this.table?.floor || null });
         }
@@ -64,7 +64,7 @@ patch(PosStore.prototype, {
     },
     getReceiptHeaderData() {
         const json = super.getReceiptHeaderData(...arguments);
-        if (this.pos_config.module_pos_restaurant) {
+        if (this["pos.config"].module_pos_restaurant) {
             if (this.get_order().getTable()) {
                 json.table = this.get_order().getTable().name;
             }
@@ -76,7 +76,7 @@ patch(PosStore.prototype, {
         const stayPaymentScreen =
             this.mainScreen.component === PaymentScreen && this.get_order().paymentlines.length > 0;
         return (
-            this.pos_config.module_pos_restaurant &&
+            this["pos.config"].module_pos_restaurant &&
             !stayPaymentScreen &&
             this.mainScreen.component !== FloorScreen
         );
@@ -86,13 +86,13 @@ patch(PosStore.prototype, {
         this.setIdleTimer();
     },
     closeScreen() {
-        if (this.pos_config.module_pos_restaurant && !this.get_order()) {
+        if (this["pos.config"].module_pos_restaurant && !this.get_order()) {
             return this.showScreen("FloorScreen");
         }
         return super.closeScreen(...arguments);
     },
     addOrderIfEmpty() {
-        if (!this.pos_config.module_pos_restaurant) {
+        if (!this["pos.config"].module_pos_restaurant) {
             return super.addOrderIfEmpty(...arguments);
         }
     },
@@ -113,13 +113,13 @@ patch(PosStore.prototype, {
         return (
             super.showBackButton(...arguments) ||
             this.mainScreen.component === TipScreen ||
-            (this.mainScreen.component === ProductScreen && this.pos_config.module_pos_restaurant)
+            (this.mainScreen.component === ProductScreen && this["pos.config"].module_pos_restaurant)
         );
     },
     //@override
     async _processData(loadedData) {
         await super._processData(...arguments);
-        if (this.pos_config.module_pos_restaurant) {
+        if (this["pos.config"].module_pos_restaurant) {
             this.floors = loadedData["restaurant.floor"];
             this.loadRestaurantFloor();
         }
@@ -127,7 +127,7 @@ patch(PosStore.prototype, {
     //@override
     async after_load_server_data() {
         var res = await super.after_load_server_data(...arguments);
-        if (this.pos_config.module_pos_restaurant) {
+        if (this["pos.config"].module_pos_restaurant) {
             this.table = null;
         }
         return res;
@@ -136,7 +136,7 @@ patch(PosStore.prototype, {
     // if we have tables, we do not load a default order, as the default order will be
     // set when the user selects a table.
     set_start_order() {
-        if (!this.pos_config.module_pos_restaurant) {
+        if (!this["pos.config"].module_pos_restaurant) {
             super.set_start_order(...arguments);
         }
     },
@@ -187,7 +187,7 @@ patch(PosStore.prototype, {
         this._replaceOrders(tableOrders, ordersJsons);
     },
     async _getOrdersJson() {
-        if (this.pos_config.module_pos_restaurant) {
+        if (this["pos.config"].module_pos_restaurant) {
             const tableIds = [].concat(
                 ...this.floors.map((floor) => floor.tables.map((table) => table.id))
             );
@@ -304,7 +304,7 @@ patch(PosStore.prototype, {
         return tableOrders.reduce((count, order) => count + order.getCustomerCount(), 0);
     },
     isOpenOrderShareable() {
-        return super.isOpenOrderShareable(...arguments) || this.pos_config.module_pos_restaurant;
+        return super.isOpenOrderShareable(...arguments) || this["pos.config"].module_pos_restaurant;
     },
     toggleEditMode() {
         this.isEditMode = !this.isEditMode;
@@ -317,7 +317,7 @@ patch(PosStore.prototype, {
             const result = await this.orm.call(
                 "pos.config",
                 "get_tables_order_count_and_printing_changes",
-                [this.pos_config.id]
+                [this["pos.config"].id]
             );
             for (const table of result) {
                 const table_obj = this.tables_by_id[table.id];

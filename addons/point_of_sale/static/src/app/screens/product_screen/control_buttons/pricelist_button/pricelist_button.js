@@ -25,7 +25,7 @@ export class SetPricelistButton extends Component {
         // Create the list to be passed to the SelectionPopup.
         // Pricelist object is passed as item in the list because it
         // is the object that will be returned when the popup is confirmed.
-        const selectionList = this.pos.product_pricelist.map((pricelist) => ({
+        const selectionList = this.pos["product.pricelist"].map((pricelist) => ({
             id: pricelist.id,
             label: pricelist.name,
             isSelected:
@@ -56,7 +56,6 @@ export class SetPricelistButton extends Component {
 ProductScreen.addControlButton({
     component: SetPricelistButton,
     condition: function () {
-        const { pos_config, pricelists } = this.pos;
-        return pos_config.use_pricelist && pricelists.length > 0;
+        return this.pos["pos.config"].use_pricelist && this.pos.pricelists.length > 0;
     },
 });

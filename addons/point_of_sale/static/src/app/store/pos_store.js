@@ -112,7 +112,7 @@ export class PosStore extends Reactive {
         this.partners = [];
         this.taxes = [];
         this["pos.session"] = null;
-        this.pos_config = null;
+        this["pos.config"] = null;
         this.units = [];
         this.units_by_id = {};
         this.uom_unit_id = null;
@@ -175,7 +175,7 @@ export class PosStore extends Reactive {
         // the hardware proxy should just be part of the pos service?
         this.hardwareProxy.pos = this;
         await this.load_server_data();
-        if (this.pos_config.use_proxy) {
+        if (this["pos.config"].use_proxy) {
             await this.connectToProxy();
         }
         this.closeOtherTabs();
@@ -227,7 +227,7 @@ export class PosStore extends Reactive {
         window.addEventListener("beforeunload", () =>
             this.db.save("TO_REFUND_LINES", this.toRefundLines)
         );
-        const { start_category, iface_start_categ_id } = this.pos_config;
+        const { start_category, iface_start_categ_id } = this["pos.config"];
         this.selectedCategoryId = (start_category && iface_start_categ_id?.[0]) || 0;
         // Push orders in background, do not await
         this.push_orders();
@@ -313,7 +313,7 @@ export class PosStore extends Reactive {
         }
 
         // Take the weight if necessary.
-        if (product.to_weight && this.pos_config.iface_electronic_scale) {
+        if (product.to_weight && this["pos.config"].iface_electronic_scale) {
             // Show the ScaleScreen to weigh the product.
             if (product.isScaleAvailable) {
                 const product = this;
@@ -364,28 +364,28 @@ export class PosStore extends Reactive {
         // and should not change during the session, so we can
         // safely take the first element.
         this["pos.session"] = this.data["pos.session"][0];
-        this.pos_config = this.data.pos_config[0];
-        this.res_company = this.data.res_company[0];
-        this.res_users = this.data.res_users[0];
-        this.stock_picking_type = this.data.stock_picking_type[0];
-        this.res_currency = this.data.res_currency[0];
+        this["pos.config"] = this.data["pos.config"][0];
+        this["res.company"] = this.data["res.company"][0];
+        this["res.users"] = this.data["res.users"][0];
+        this["stock.picking.type"] = this.data["stock.picking.type"][0];
+        this["res.currency"] = this.data["res.currency"][0];
 
-        this.decimal_precision = this.data.decimal_precision;
-        this.uom_uom = this.data.uom_uom;
-        this.res_country_state = this.data.res_country_state;
-        this.res_country = this.data.res_country;
-        this.res_lang = this.data.res_lang;
-        this.account_tax = this.data.account_tax;
-        this.pos_bill = this.data.pos_bill;
-        this.res_partner = this.data.res_partner;
-        this.product_pricelist = this.data.product_pricelist;
-        this.product_attribute = this.data.product_attribute;
-        this.product_template_attribute_value = this.data.product_template_attribute_value;
-        this.pos_category = this.data.pos_category;
-        this.pos_combo = this.data.pos_combo;
-        this.pos_combo_line = this.data.pos_combo_line;
-        this.product_product = this.data.product_product;
-        this.pos_payment_method = this.data.pos_payment_method;
+        this["decimal.precision"] = this.data["decimal.precision"];
+        this["uom.uom"] = this.data["uom.uom"];
+        this["res.country.state"] = this.data["res.country.state"];
+        this["res.country"] = this.data["res.country"];
+        this["res.lang"] = this.data["res.lang"];
+        this["account.tax"] = this.data["account.tax"];
+        this["pos.bill"] = this.data["pos.bill"];
+        this["res.partner"] = this.data["res.partner"];
+        this["product.pricelist"] = this.data["product.pricelist"];
+        this["product.attribute"] = this.data["product.attribute"];
+        this["product.template.attribute.value"] = this.data["product.template.attribute.value"];
+        this["pos.category"] = this.data["pos.category"];
+        this["pos.combo"] = this.data["pos.combo"];
+        this["pos.combo.line"] = this.data["pos.combo.line"];
+        this["product.product"] = this.data["product.product"];
+        this["pos_payment_method"] = this.data["pos_payment_method"];
         debugger;
 
         this._loadProductProduct(loadedData["product.product"]);
@@ -411,7 +411,7 @@ export class PosStore extends Reactive {
                 this.printers_category_ids_set.add(id);
             }
         }
-        this.pos_config.iface_printers = !!this.unwatched.printers.length;
+        this["pos.config"].iface_printers = !!this.unwatched.printers.length;
     }
     create_printer(config) {
         const url = deduceUrl(config.proxy_ip || "");
@@ -441,7 +441,7 @@ export class PosStore extends Reactive {
             return new Product(product);
         });
 
-        for (const pricelist of this.product_pricelist) {
+        for (const pricelist of this["product.pricelist"]) {
             for (const pricelistItem of pricelist.items) {
                 if (pricelistItem.product_id) {
                     const product_id = pricelistItem.product_id[0];
@@ -517,7 +517,7 @@ export class PosStore extends Reactive {
                 reject();
             };
             this.company_logo.crossOrigin = "anonymous";
-            this.company_logo.src = `/web/image?model=res.company&id=${this.res_company.id}&field=logo`;
+            this.company_logo.src = `/web/image?model=res.company&id=${this["res.company"].id}&field=logo`;
         });
     }
     prepare_new_partners_domain() {
@@ -544,7 +544,7 @@ export class PosStore extends Reactive {
 
         let removed_categories_id;
         if (categories) {
-            const previous_categories_id = Object.values(this.pos.indexed.pos_category.id).map(
+            const previous_categories_id = Object.values(this.pos.indexed["pos.category"].id).map(
                 (c) => c.id
             );
             const received_categories_id = new Set(categories.map((c) => c.id));
@@ -637,10 +637,10 @@ export class PosStore extends Reactive {
      * @returns {name: string, id: int, role: string}
      */
     get_cashier() {
-        return this.res_users;
+        return this["res.users"];
     }
     get_cashier_user_id() {
-        return this.res_users.id;
+        return this["res.users"].id;
     }
     get orderPreparationCategories() {
         if (this.printers_category_ids_set) {
@@ -649,7 +649,7 @@ export class PosStore extends Reactive {
         return new Set();
     }
     cashierHasPriceControlRights() {
-        return !this.pos_config.restrict_price_control || this.get_cashier().role == "manager";
+        return !this["pos.config"].restrict_price_control || this.get_cashier().role == "manager";
     }
     _onReactiveOrderUpdated(order) {
         order.save_to_db();
@@ -913,14 +913,14 @@ export class PosStore extends Reactive {
     }
     async _getOrdersJson() {
         return await this.orm.call("pos.order", "export_for_ui_shared_order", [], {
-            config_id: this.pos_config.id,
+            config_id: this["pos.config"].id,
         });
     }
     async _addPricelists(ordersJson) {
         const pricelistsToGet = [];
         ordersJson.forEach((order) => {
             let found = false;
-            for (const pricelist of this.product_pricelist) {
+            for (const pricelist of this["product.pricelist"]) {
                 if (pricelist.id === order.pricelist_id) {
                     found = true;
                     break;
@@ -956,10 +956,10 @@ export class PosStore extends Reactive {
         await this._addProducts(productIds, false);
     }
     _addPosPricelists(pricelistsJson) {
-        if (!this.pos_config.use_pricelist) {
-            this.pos_config.use_pricelist = true;
+        if (!this["pos.config"].use_pricelist) {
+            this["pos.config"].use_pricelist = true;
         }
-        this.product_pricelist.push(...pricelistsJson);
+        this["product.pricelist"].push(...pricelistsJson);
         let message = "";
         const pricelistsNames = pricelistsJson.map((pricelist) => {
             return pricelist.display_name;
@@ -1021,7 +1021,7 @@ export class PosStore extends Reactive {
             [product.id],
             product.get_price(order.pricelist, quantity),
             quantity,
-            this.pos_config.id,
+            this["pos.config"].id,
         ]);
 
         const priceWithoutTax = productInfo["all_prices"]["price_without_tax"];
@@ -1108,14 +1108,14 @@ export class PosStore extends Reactive {
                         mapped_included_taxes,
                         price,
                         1,
-                        this.res_currency.rounding,
+                        this["res.currency"].rounding,
                         true
                     ).total_excluded;
                     return this.compute_all(
                         new_included_taxes,
                         price_without_taxes,
                         1,
-                        this.res_currency.rounding,
+                        this["res.currency"].rounding,
                         false
                     ).total_included;
                 } else {
@@ -1123,7 +1123,7 @@ export class PosStore extends Reactive {
                         mapped_included_taxes,
                         price,
                         1,
-                        this.res_currency.rounding,
+                        this["res.currency"].rounding,
                         true
                     ).total_excluded;
                 }
@@ -1503,7 +1503,7 @@ export class PosStore extends Reactive {
 
         // 2) Deal with the rounding methods
 
-        var round_tax = this.res_company.tax_calculation_rounding_method != "round_globally";
+        var round_tax = this["res.company"].tax_calculation_rounding_method != "round_globally";
 
         var initial_currency_rounding = currency_rounding;
         if (!round_tax) {
@@ -1637,8 +1637,8 @@ export class PosStore extends Reactive {
 
         return {
             taxes: taxes_vals,
-            total_excluded: sign * round_pr(total_excluded, this.res_currency.rounding),
-            total_included: sign * round_pr(total_included, this.res_currency.rounding),
+            total_excluded: sign * round_pr(total_excluded, this["res.currency"].rounding),
+            total_included: sign * round_pr(total_included, this["res.currency"].rounding),
         };
     }
 
@@ -1650,11 +1650,11 @@ export class PosStore extends Reactive {
      */
     get_taxes_after_fp(taxIds, fpos) {
         if (!fpos) {
-            return taxIds.map((taxId) => this.indexed.account_tax.id[taxId]);
+            return taxIds.map((taxId) => this.indexed["account.tax"].id[taxId]);
         }
         const mappedTaxes = [];
         for (const taxId of taxIds) {
-            const tax = this.indexed.account_tax.id[taxId];
+            const tax = this.indexed["account.tax"].id[taxId];
             if (tax) {
                 const taxMaps = Object.values(fpos.fiscal_position_taxes_by_id).filter(
                     (fposTax) => fposTax.tax_src_id[0] === tax.id
@@ -1662,7 +1662,7 @@ export class PosStore extends Reactive {
                 if (taxMaps.length) {
                     for (const taxMap of taxMaps) {
                         if (taxMap.tax_dest_id) {
-                            const mappedTax = this.indexed.account_tax.id[taxMap.tax_dest_id[0]];
+                            const mappedTax = this.indexed["account.tax"].id[taxMap.tax_dest_id[0]];
                             if (mappedTax) {
                                 mappedTaxes.push(mappedTax);
                             }
@@ -1715,7 +1715,7 @@ export class PosStore extends Reactive {
     }
 
     getCurrencySymbol() {
-        return this.res_currency ? this.res_currency.symbol : "$";
+        return this["res.currency"] ? this["res.currency"].symbol : "$";
     }
     /**
      * Make the products corresponding to the given ids to be available_in_pos and
@@ -1732,7 +1732,7 @@ export class PosStore extends Reactive {
         this._loadProductProduct(product);
     }
     isOpenOrderShareable() {
-        return this.pos_config.trusted_config_ids.length > 0;
+        return this["pos.config"].trusted_config_ids.length > 0;
     }
     switchPane() {
         this.mobile_pane = this.mobile_pane === "left" ? "right" : "left";
@@ -1744,7 +1744,7 @@ export class PosStore extends Reactive {
     async logEmployeeMessage(action, message) {
         await this.orm.call("pos.session", "log_partner_message", [
             this["pos.session"].id,
-            this.res_users.partner_id.id,
+            this["res.users"].partner_id.id,
             action,
             message,
         ]);
@@ -1795,9 +1795,9 @@ export class PosStore extends Reactive {
         return new Promise((resolve, reject) => {
             this.barcodeReader?.disconnectFromProxy();
             this.loadingSkipButtonIsShown = true;
-            this.hardwareProxy.autoconnect({ force_ip: this.pos_config.proxy_ip }).then(
+            this.hardwareProxy.autoconnect({ force_ip: this["pos.config"].proxy_ip }).then(
                 () => {
-                    if (this.pos_config.iface_scan_via_proxy) {
+                    if (this["pos.config"].iface_scan_via_proxy) {
                         this.barcodeReader?.connectToProxy();
                     }
                     resolve();
@@ -1954,7 +1954,7 @@ export class PosStore extends Reactive {
         }
     }
     shouldShowCashControl() {
-        return this.pos_config.cash_control && this["pos.session"].state == "opening_control";
+        return this["pos.config"].cash_control && this["pos.session"].state == "opening_control";
     }
 
     preloadImages() {
@@ -1962,7 +1962,7 @@ export class PosStore extends Reactive {
             const image = new Image();
             image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=${product.write_date}`;
         }
-        for (const category of Object.values(this.indexed.pos_category.id)) {
+        for (const category of Object.values(this.indexed["pos.category"].id)) {
             if (category.id == 0) {
                 continue;
             }
@@ -2011,9 +2011,9 @@ export class PosStore extends Reactive {
 
     getReceiptHeaderData() {
         return {
-            company: this.res_company,
+            company: this["res.company"],
             cashier: this.get_cashier()?.name,
-            header: this.pos_config.receipt_header,
+            header: this["pos.config"].receipt_header,
         };
     }
 }

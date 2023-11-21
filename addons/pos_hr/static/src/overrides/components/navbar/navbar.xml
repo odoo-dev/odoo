@@ -4,18 +4,18 @@
     <t t-name="pos_hr.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
         <xpath expr="//li[hasclass('backend-button')]" position="attributes">
             <attribute name="t-if">
-                !pos.pos_config.module_pos_hr or pos.get_cashier().role === 'manager' or pos.get_cashier_user_id() === pos.res_users.id
+                !pos['pos.config'].module_pos_hr or pos.get_cashier().role === 'manager' or pos.get_cashier_user_id() === pos['res.users'].id
             </attribute>
         </xpath>
 
         <xpath expr="//li[hasclass('close-button')]" position="attributes">
             <attribute name="t-if">
-                !pos.pos_config.module_pos_hr or pos.get_cashier().role === 'manager' or pos.get_cashier_user_id() === pos.res_users.id
+                !pos['pos.config'].module_pos_hr or pos.get_cashier().role === 'manager' or pos.get_cashier_user_id() === pos['res.users'].id
             </attribute>
         </xpath>
 
         <xpath expr="//li[hasclass('backend-button')]" position="after">
-            <li t-if="pos.pos_config.module_pos_hr" class="menu-item navbar-button lock-button" t-on-click="showLoginScreen">
+            <li t-if="pos['pos.config'].module_pos_hr" class="menu-item navbar-button lock-button" t-on-click="showLoginScreen">
                 <a class="dropdown-item py-2">
                 Lock
                 </a>

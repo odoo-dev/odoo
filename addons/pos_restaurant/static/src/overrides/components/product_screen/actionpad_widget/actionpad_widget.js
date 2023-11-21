@@ -7,7 +7,7 @@ import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/actio
 
 patch(ActionpadWidget.prototype, {
     get swapButton() {
-        return this.props.actionType === "payment" && this.pos.pos_config.module_pos_restaurant;
+        return this.props.actionType === "payment" && this.pos["pos.config"].module_pos_restaurant;
     },
     get currentOrder() {
         return this.pos.get_order();
@@ -50,7 +50,7 @@ patch(ActionpadWidget.prototype, {
 
         const categories = Object.values(orderChange).reduce((acc, curr) => {
             const categoryId = this.pos.db.product_by_id[curr.product_id].pos_categ_ids[0];
-            const category = this.pos.indexed.pos_category.id[categoryId];
+            const category = this.pos.indexed["pos.category"].id[categoryId];
             if (category) {
                 if (!acc[category.id]) {
                     acc[category.id] = { count: curr.quantity, name: category.name };

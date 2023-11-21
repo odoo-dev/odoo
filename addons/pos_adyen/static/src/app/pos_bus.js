@@ -10,7 +10,7 @@ patch(PosBus.prototype, {
 
         if (
             message.type === "ADYEN_LATEST_RESPONSE" &&
-            message.payload === this.pos.pos_config.id
+            message.payload === this.pos["pos.config"].id
         ) {
             this.pos
                 .getPendingPaymentLine("adyen")

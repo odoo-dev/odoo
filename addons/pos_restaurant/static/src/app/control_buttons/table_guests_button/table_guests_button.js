@@ -54,6 +54,6 @@ export class TableGuestsButton extends Component {
 ProductScreen.addControlButton({
     component: TableGuestsButton,
     condition: function () {
-        return this.pos.pos_config.module_pos_restaurant;
+        return this.pos["pos.config"].module_pos_restaurant;
     },
 });

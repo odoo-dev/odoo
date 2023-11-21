@@ -16,7 +16,7 @@ function assert(condition, message) {
 
 function assertProductPrice(product, pricelist_name, quantity, expected_price) {
     return function () {
-        var pricelist = posmodel.product_pricelist.find(
+        var pricelist = posmodel["product.pricelist"].find(
             (pricelist) => pricelist.name === pricelist_name
         );
         var frontend_price = product.get_price(pricelist, quantity);

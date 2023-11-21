@@ -727,7 +727,7 @@ export class TicketScreen extends Component {
         const limit = this._state.syncedOrders.nPerPage;
         const offset =
             (this._state.syncedOrders.currentPage - 1) * this._state.syncedOrders.nPerPage;
-        const config_id = this.pos.pos_config.id;
+        const config_id = this.pos["pos.config"].id;
         const { ordersInfo, totalCount } = await this.orm.call(
             "pos.order",
             "search_paid_order_ids",

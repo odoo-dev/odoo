@@ -11,7 +11,7 @@ patch(CashierName.prototype, {
     },
     //@Override
     get avatar() {
-        if (this.pos.pos_config.module_pos_hr) {
+        if (this.pos["pos.config"].module_pos_hr) {
             const cashier = this.pos.get_cashier();
             if (!(cashier && cashier.id)) {
                 return "";
@@ -22,7 +22,7 @@ patch(CashierName.prototype, {
     },
     //@Override
     get cssClass() {
-        if (this.pos.pos_config.module_pos_hr) {
+        if (this.pos["pos.config"].module_pos_hr) {
             return { oe_status: true };
         }
         return super.cssClass;

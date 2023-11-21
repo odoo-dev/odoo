@@ -37,6 +37,6 @@ export class SaveButton extends Component {
 ProductScreen.addControlButton({
     component: SaveButton,
     condition: function () {
-        return this.pos.pos_config.trusted_config_ids.length > 0;
+        return this.pos["pos.config"].trusted_config_ids.length > 0;
     },
 });

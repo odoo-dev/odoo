@@ -26,6 +26,6 @@ export class SplitBillButton extends Component {
 ProductScreen.addControlButton({
     component: SplitBillButton,
     condition: function () {
-        return this.pos.pos_config.iface_splitbill;
+        return this.pos["pos.config"].iface_splitbill;
     },
 });

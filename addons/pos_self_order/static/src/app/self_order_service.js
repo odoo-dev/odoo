@@ -195,7 +195,7 @@ export class SelfOrder extends Reactive {
         }, {});
 
         if (this.productsGroupedByCategory[0]) {
-            this.pos_category.push({
+            this["pos.category"].push({
                 has_image: false,
                 id: 0,
                 name: _t("Uncategorised"),
@@ -204,13 +204,13 @@ export class SelfOrder extends Reactive {
         }
 
         this.categoryList = new Set(
-            this.pos_category
+            this["pos.category"]
                 .sort((a, b) => a.sequence - b.sequence)
                 .filter((c) => this.productsGroupedByCategory[c.id])
                 .sort((a, b) => categorySorter(a, b, this.config.iface_start_categ_id))
         );
 
-        this.currentCategory = this.pos_category.length > 0 ? [...this.categoryList][0] : null;
+        this.currentCategory = this["pos.category"].length > 0 ? [...this.categoryList][0] : null;
     }
 
     initKioskData() {
@@ -474,7 +474,7 @@ export class SelfOrder extends Reactive {
         const product = new Product(payload.product, this.config.iface_tax_included);
         this.productByIds[payload.product.id] = product;
         for (const categ of payload.product.pos_categ_ids) {
-            if (!this.pos_category.map((c) => c.id).includes(categ.id)) {
+            if (!this["pos.category"].map((c) => c.id).includes(categ.id)) {
                 continue;
             }
             const index = this.productsGroupedByCategory[categ.id].findIndex(

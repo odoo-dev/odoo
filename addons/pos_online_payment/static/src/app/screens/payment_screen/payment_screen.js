@@ -34,7 +34,7 @@ patch(PaymentScreen.prototype, {
             }
             remainingAmount += amount;
         }
-        if (!floatIsZero(unpaidAmount - remainingAmount, this.pos.res_currency.decimal_places)) {
+        if (!floatIsZero(unpaidAmount - remainingAmount, this.pos["res.currency"].decimal_places)) {
             this.popup.add(ErrorPopup, {
                 title: _t("Invalid online payments"),
                 body: _t(
@@ -273,7 +273,7 @@ patch(PaymentScreen.prototype, {
         // Now, do practically the normal flow
         if (
             (this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) &&
-            this.pos.pos_config.iface_cashdrawer
+            this.pos["pos.config"].iface_cashdrawer
         ) {
             this.hardwareProxy.printer.openCashbox();
         }

@@ -18,7 +18,7 @@ patch(BackButton.prototype, {
      * the logic of the back button changes a bit.
      */
     async onClick() {
-        if (this.pos.mainScreen.component && this.pos.pos_config.module_pos_restaurant) {
+        if (this.pos.mainScreen.component && this.pos["pos.config"].module_pos_restaurant) {
             if (
                 (this.pos.mainScreen.component === ProductScreen &&
                     this.pos.mobile_pane == "right") ||

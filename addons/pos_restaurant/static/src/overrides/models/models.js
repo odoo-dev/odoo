@@ -7,7 +7,7 @@ import { patch } from "@web/core/utils/patch";
 patch(Order.prototype, {
     setup(_defaultObj, options) {
         super.setup(...arguments);
-        if (this.pos.pos_config.module_pos_restaurant) {
+        if (this.pos["pos.config"].module_pos_restaurant) {
             if (this.defaultTableNeeded(options)) {
                 this.tableId = this.pos.table.id;
             }
@@ -17,7 +17,7 @@ patch(Order.prototype, {
     //@override
     export_as_JSON() {
         const json = super.export_as_JSON(...arguments);
-        if (this.pos.pos_config.module_pos_restaurant) {
+        if (this.pos["pos.config"].module_pos_restaurant) {
             json.table_id = this.tableId;
             json.customer_count = this.customerCount;
         }
@@ -27,7 +27,7 @@ patch(Order.prototype, {
     //@override
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);
-        if (this.pos.pos_config.module_pos_restaurant) {
+        if (this.pos["pos.config"].module_pos_restaurant) {
             this.tableId = json.table_id;
             this.customerCount = json.customer_count;
         }
@@ -39,7 +39,7 @@ patch(Order.prototype, {
         this.customerCount = Math.max(count, 0);
     },
     getTable() {
-        if (this.pos.pos_config.module_pos_restaurant) {
+        if (this.pos["pos.config"].module_pos_restaurant) {
             return this.pos.tables_by_id[this.tableId];
         }
         return null;
@@ -50,7 +50,7 @@ patch(Order.prototype, {
     export_for_printing() {
         return {
             ...super.export_for_printing(...arguments),
-            set_tip_after_payment: this.pos.pos_config.set_tip_after_payment,
+            set_tip_after_payment: this.pos["pos.config"].set_tip_after_payment,
         };
     },
 });
@@ -70,7 +70,7 @@ patch(Orderline.prototype, {
     export_as_JSON() {
         const json = super.export_as_JSON(...arguments);
         json.note = this.note;
-        if (this.pos.pos_config.iface_printers) {
+        if (this.pos["pos.config"].iface_printers) {
             json.uuid = this.uuid;
         }
         return json;
@@ -79,7 +79,7 @@ patch(Orderline.prototype, {
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);
         this.note = json.note;
-        if (this.pos.pos_config.iface_printers) {
+        if (this.pos["pos.config"].iface_printers) {
             this.uuid = json.uuid;
         }
     },

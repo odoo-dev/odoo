@@ -10,16 +10,16 @@ patch(Navbar.prototype, {
     },
     get showCloseSessionButton() {
         return (
-            !this.pos.pos_config.module_pos_hr ||
+            !this.pos["pos.config"].module_pos_hr ||
             (this.pos.get_cashier().role === "manager" && this.pos.get_cashier().user_id) ||
-            this.pos.get_cashier_user_id() === this.pos.res_users.id
+            this.pos.get_cashier_user_id() === this.pos["res.users"].id
         );
     },
     get showBackendButton() {
         return (
-            !this.pos.pos_config.module_pos_hr ||
+            !this.pos["pos.config"].module_pos_hr ||
             (this.pos.get_cashier().role === "manager" && this.pos.get_cashier().user_id) ||
-            this.pos.get_cashier_user_id() === this.pos.res_users.id
+            this.pos.get_cashier_user_id() === this.pos["res.users"].id
         );
     },
     async showLoginScreen() {

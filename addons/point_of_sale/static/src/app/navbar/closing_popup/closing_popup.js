@@ -47,7 +47,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
     }
     getInitialState() {
         const initialState = { notes: "", payments: {} };
-        if (this.pos.pos_config.cash_control) {
+        if (this.pos["pos.config"].cash_control) {
             initialState.payments[this.props.default_cash_details.id] = {
                 counted: "0",
             };
@@ -65,7 +65,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
     //@override
     async confirm() {
         if (
-            !this.pos.pos_config.cash_control ||
+            !this.pos["pos.config"].cash_control ||
             this.env.utils.floatIsZero(this.getMaxDifference())
         ) {
             await this.closeSession();
@@ -161,7 +161,7 @@ export class ClosePosPopup extends AbstractAwaitablePopup {
     }
     async closeSession() {
         this.customerDisplay?.update({ closeUI: true });
-        if (this.pos.pos_config.cash_control) {
+        if (this.pos["pos.config"].cash_control) {
             const response = await this.orm.call(
                 "pos.session",
                 "post_closing_cash_details",

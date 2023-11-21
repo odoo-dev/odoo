@@ -15,7 +15,7 @@ patch(ProductScreen.prototype, {
     },
     showReleaseBtn() {
         return (
-            this.pos.pos_config.module_pos_restaurant &&
+            this.pos["pos.config"].module_pos_restaurant &&
             this.pos.table &&
             !this.pos.orders.some(
                 (o) =>

@@ -96,7 +96,7 @@ export class TipScreen extends Component {
     }
     goNextScreen() {
         this.pos.removeOrder(this.currentOrder);
-        if (!this.pos.pos_config.module_pos_restaurant) {
+        if (!this.pos["pos.config"].module_pos_restaurant) {
             this.pos.add_new_order();
         }
         const { name, props } = this.nextScreen;

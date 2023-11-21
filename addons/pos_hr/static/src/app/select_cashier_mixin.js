@@ -59,7 +59,7 @@ export function useCashierSelector(
      * Select a cashier, the returning value will either be an object or nothing (undefined)
      */
     return async function selectCashier() {
-        if (pos.pos_config.module_pos_hr) {
+        if (pos["pos.config"].module_pos_hr) {
             const employeesList = pos.employees
                 .filter((employee) => employee.id !== pos.get_cashier().id)
                 .map((employee) => {

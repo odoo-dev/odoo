@@ -15,8 +15,8 @@
                             </button>
                         </div>
                         <Input tModel="[state, 'amount']"
-                            icon="{type: 'string', value: pos.res_currency.symbol}"
-                            iconOnLeftSide="pos.res_currency.position === 'before'"
+                            icon="{type: 'string', value: pos['res.currency'].symbol}"
+                            iconOnLeftSide="pos['res.currency'].position === 'before'"
                             isValid.bind="env.utils.isValidFloat"
                             autofocus="true"
                             getRef="(ref) => this.inputRef = ref" />

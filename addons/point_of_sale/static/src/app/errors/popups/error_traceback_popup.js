@@ -32,7 +32,7 @@ export class ErrorTracebackPopup extends ErrorPopup {
         return `${_t("error")} ${serializeDateTime(DateTime.now()).replace(/:|\s/gi, "-")}.txt`;
     }
     emailTraceback() {
-        const address = this.pos.res_company.email;
+        const address = this.pos["res.company"].email;
         const subject = _t("IMPORTANT: Bug Report From Odoo Point Of Sale");
         window.open(
             "mailto:" +
