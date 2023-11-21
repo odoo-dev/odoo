@@ -116,8 +116,9 @@ function processModelDefs(modelDefs) {
 }
 
 export class Base {
-    constructor(env) {
-        this.env = env;
+    constructor({ models, records }) {
+        this.models = models;
+        this.records = records;
     }
     /**
      * Called during instantiation when the instance is fully-populated with field values.
@@ -199,7 +200,7 @@ export function createRelatedModels(modelDefs, env, reactive = (x) => x, modelCl
         }
 
         const Model = modelClasses[model] || Base;
-        const record = reactive(new Model(env));
+        const record = reactive(new Model({ models, records }));
         const id = vals["id"];
         record.id = id;
         records[model][id] = record;
@@ -422,7 +423,7 @@ export function createRelatedModels(modelDefs, env, reactive = (x) => x, modelCl
         };
     }
 
-    const m = mapObj(processedModelDefs, (model, fields) => createCRUD(model, fields));
+    const models = mapObj(processedModelDefs, (model, fields) => createCRUD(model, fields));
 
     /**
      * Load the data without the relations then link the related records.
@@ -475,6 +476,6 @@ export function createRelatedModels(modelDefs, env, reactive = (x) => x, modelCl
         }
     }
 
-    m.loadData = loadData;
-    return [m, records];
+    models.loadData = loadData;
+    return [models, records];
 }
