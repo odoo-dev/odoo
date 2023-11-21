@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { reactive } from "@odoo/owl";
+
 const ID_CONTAINER = {};
 
 function uuid(model) {
@@ -128,7 +130,7 @@ export class Base {
     setup(_vals) {}
 }
 
-export function createRelatedModels(modelDefs, env, reactive = (x) => x, modelClasses = {}) {
+export function createRelatedModels(modelDefs, modelClasses = {}) {
     const [inverseMap, processedModelDefs] = processModelDefs(modelDefs);
     const records = reactive(mapObj(processedModelDefs, () => reactive({})));
 
