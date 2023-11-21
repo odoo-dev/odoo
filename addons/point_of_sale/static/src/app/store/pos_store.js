@@ -274,6 +274,7 @@ export class PosStore extends Reactive {
         this.pos_category = this.data.pos_category;
         this.pos_combo = this.data.pos_combo;
         this.pos_combo_line = this.data.pos_combo_line;
+        this.product_product = this.data.product_product;
         debugger;
 
         this._loadProductProduct(loadedData["product.product"]);
