@@ -2,6 +2,27 @@
 <odoo noupdate="1">
 
     <!-- === PRIMARY PAYMENT METHODS === -->
+
+    <record id="payment_method_7eleven" model="payment.method">
+        <field name="name">7Eleven</field>
+        <field name="code">7eleven</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund">partial</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
+                     ])]"
+        />
+    </record>
+
     <record id="payment_method_ach_direct_debit" model="payment.method">
         <field name="name">ACH Direct Debit</field>
         <field name="code">ach_direct_debit</field>
@@ -395,6 +416,27 @@
         <field name="support_refund"></field>
     </record>
 
+    <record id="payment_method_bank_bca" model="payment.method">
+        <field name="name">BCA</field>
+        <field name="code">bca</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="base64" file="payment/static/img/bca.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund"></field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.id'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.IDR'),
+                     ])]"
+        />
+    </record>
+
     <record id="payment_method_bank_of_ayudhya" model="payment.method">
         <field name="name">Bank of Ayudhya</field>
         <field name="code">bank_of_ayudhya</field>
@@ -412,6 +454,27 @@
         <field name="supported_currency_ids"
                eval="[Command.set([
                          ref('base.THB'),
+                     ])]"
+        />
+    </record>
+
+    <record id="payment_method_bank_permata" model="payment.method">
+        <field name="name">Bank Permata</field>
+        <field name="code">permata</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="base64" file="payment/static/img/permata.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund"></field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.id'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.IDR'),
                      ])]"
         />
     </record>
@@ -440,48 +503,6 @@
                eval="[Command.set([
                          ref('base.INR'),
                          ref('base.NGN'),
-                     ])]"
-        />
-    </record>
-
-    <record id="payment_method_bank_permata" model="payment.method">
-        <field name="name">Bank Permata</field>
-        <field name="code">permata</field>
-        <field name="sequence">1000</field>
-        <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/permata.png"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="support_refund"></field>
-        <field name="supported_country_ids"
-               eval="[Command.set([
-                         ref('base.id'),
-                     ])]"
-        />
-        <field name="supported_currency_ids"
-               eval="[Command.set([
-                         ref('base.IDR'),
-                     ])]"
-        />
-    </record>
-
-    <record id="payment_method_bank_bca" model="payment.method">
-        <field name="name">BCA</field>
-        <field name="code">bca</field>
-        <field name="sequence">1000</field>
-        <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/bca.png"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="support_refund"></field>
-        <field name="supported_country_ids"
-               eval="[Command.set([
-                         ref('base.id'),
-                     ])]"
-        />
-        <field name="supported_currency_ids"
-               eval="[Command.set([
-                         ref('base.IDR'),
                      ])]"
         />
     </record>
@@ -760,12 +781,12 @@
         />
     </record>
 
-    <record id="payment_method_bsi" model="payment.method">
-        <field name="name">Bank Syariah Indonesia</field>
-        <field name="code">bsi</field>
+    <record id="payment_method_bri" model="payment.method">
+        <field name="name">BRI</field>
+        <field name="code">bri</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/bsi.png"/>
+        <field name="image" type="base64" file="payment/static/img/bri.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -781,12 +802,12 @@
         />
     </record>
 
-    <record id="payment_method_bank_bri" model="payment.method">
-        <field name="name">BRI</field>
-        <field name="code">bri</field>
+    <record id="payment_method_bsi" model="payment.method">
+        <field name="name">Bank Syariah Indonesia</field>
+        <field name="code">bsi</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/bri.png"/>
+        <field name="image" type="base64" file="payment/static/img/bsi.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_refund"></field>
@@ -1230,7 +1251,7 @@
                eval="[Command.set([
                          ref('base.SGD'),
                          ref('base.MYR'),
-                         ref('base.PHP),
+                         ref('base.PHP'),
                      ])]"
         />
     </record>
@@ -2886,6 +2907,27 @@
         />
     </record>
 
+    <record id="payment_method_shopback" model="payment.method">
+        <field name="name">ShopBack</field>
+        <field name="code">shopback</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="base64" file="payment/static/img/shopback.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund"></field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.sg'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.SGD'),
+                     ])]"
+        />
+    </record>
+
     <record id="payment_method_shopeepay" model="payment.method">
         <field name="name">ShopeePay</field>
         <field name="code">shopeepay</field>
@@ -2904,48 +2946,7 @@
         <field name="supported_currency_ids"
                eval="[Command.set([
                          ref('base.IDR'),
-                         ref('base.PHP'),
-                     ])]"
-        />
-    </record>
 
-    <record id="payment_method_711" model="payment.method">
-        <field name="name">7Eleven</field>
-        <field name="code">7eleven</field>
-        <field name="sequence">1000</field>
-        <field name="active">False</field>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="support_refund">partial</field>
-        <field name="supported_country_ids"
-               eval="[Command.set([
-                         ref('base.ph'),
-                     ])]"
-        />
-        <field name="supported_currency_ids"
-               eval="[Command.set([
-                         ref('base.PHP'),
-                     ])]"
-        />
-    </record>
-
-    <record id="payment_method_shopback" model="payment.method">
-        <field name="name">ShopBack</field>
-        <field name="code">shopback</field>
-        <field name="sequence">1000</field>
-        <field name="active">False</field>
-        <field name="image" type="base64" file="payment/static/img/shopback.png"/>
-        <field name="support_tokenization">False</field>
-        <field name="support_express_checkout">False</field>
-        <field name="support_refund"></field>
-        <field name="supported_country_ids"
-               eval="[Command.set([
-                         ref('base.sg'),
-                     ])]"
-        />
-        <field name="supported_currency_ids"
-               eval="[Command.set([
-                         ref('base.SGD'),
                      ])]"
         />
     </record>

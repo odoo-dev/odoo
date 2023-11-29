@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import pprint
 
 import requests
 
@@ -14,48 +15,15 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentProvider(models.Model):
-    _inherit = "payment.provider"
+    _inherit = 'payment.provider'
 
     code = fields.Selection(
-        selection_add=[('xendit', 'Xendit')],
-        ondelete={'xendit': 'set default'}
+        selection_add=[('xendit', 'Xendit')], ondelete={'xendit': 'set default'}
     )
+    xendit_api_key = fields.Char(string="Xendit API Key", groups='base.group_system')
+    xendit_webhook_token = fields.Char(string="Xendit Callback Token", groups='base.group_system')
 
-    xendit_api_key = fields.Char("Xendit API Key", groups="base.group_system")
-    xendit_webhook_token = fields.Char("Xendit Callback Token", groups="base.group_system")
-
-    def _xendit_make_request(self, api_obj, payload=None, endpoint_param=None, method='POST'):
-        """ All API requests to xendit to be done here. Error handling for most issues will be done here
-
-        :param api_obj: Xendit object to be interacted with, will fetch the corresponding API URL
-        :param payload: data to be passed if POST request is done
-        :param endpoint_param: extra param of URL needed to supply the endpoint
-        :param method: type of HTTP Request GET/POST mostly
-
-        :return Response object in dictionary format
-        """
-        auth = (self.xendit_api_key, '')
-        url = const.API_URL_OBJ.get(api_obj)
-
-        if not url:
-            _logger.error("Invalid API object %s, typo or not registered", api_obj)
-            return
-        if endpoint_param:
-            url = url.format(**endpoint_param)
-
-        try:
-            response = requests.request(method, url, json=payload, auth=auth)
-            response.raise_for_status()
-        except requests.exceptions.ConnectionError:
-            _logger.exception("Unable to reach endpoint at %s", url)
-            raise ValidationError("Xendit: " + _("Could not establish connection to the API"))
-        except requests.exceptions.HTTPError as err:
-            msg = err.response.json().get('message')
-            _logger.exception(
-                "Invalid API request at %s with data %s: %s. Error message: %s", url, payload, err.response.text, msg
-            )
-            raise ValidationError("Xendit: Communication with API failed. Message: %s" % msg)
-        return response.json()
+    # === BUSINESS METHODS ===#
 
     @api.model
     def _get_compatible_providers(self, *args, currency_id=None, **kwargs):
@@ -74,3 +42,45 @@ class PaymentProvider(models.Model):
         if self.code != 'xendit':
             return default_codes
         return const.DEFAULT_PAYMENT_METHODS_CODES
+
+    def _xendit_make_request(self, api_obj, payload=None, endpoint_param=None, method='POST'):
+        """ Make a request to Xendit API and return the JSON-formatted content of the response.
+
+        Note: self.ensure_one()
+
+        :param api_obj: Xendit object to be interacted with, will fetch the corresponding API URL
+        :param dict payload: The payload of the request.
+        :param endpoint_param: extra param of URL needed to supply the endpoint
+        :param method: type of HTTP Request GET/POST mostly
+        :return The JSON-formatted content of the response.
+        :rtype: dict
+        :raise ValidationError: If an HTTP error occurs.
+        """
+        self.ensure_one()
+
+        auth = (self.xendit_api_key, '')
+        url = const.API_URL_OBJ.get(api_obj)
+        if not url:
+            _logger.error("Invalid API object %s, typo or not registered", api_obj)
+            return
+        if endpoint_param:
+            url = url.format(**endpoint_param)
+
+        try:
+            response = requests.request(method, url, json=payload, auth=auth)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            _logger.exception("Unable to reach endpoint at %s", url)
+            raise ValidationError("Xendit: " + _("Could not establish the connection to the API."))
+        except requests.exceptions.HTTPError as err:
+            error_message = err.response.json().get('message')
+            _logger.exception(
+                "Invalid API request at %s with data:\n%s", url, pprint.pformat(payload)
+            )
+            raise ValidationError(
+                "Xendit: " + _(
+                    "The communication with the API failed. Xendit gave us the following"
+                    " information: '%s'", error_message
+                )
+            )
+        return response.json()

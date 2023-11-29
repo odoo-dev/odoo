@@ -16,8 +16,8 @@ _logger = logging.getLogger(__name__)
 
 class XenditController(http.Controller):
 
-    _webhook_url = '/payment/xendit/notification'
     _return_url = '/payment/status'
+    _webhook_url = '/payment/xendit/webhook'
 
     @http.route('/payment/xendit/payment_methods', type='json', auth='public')
     def xendit_create_invoice(self, provider_id, amount, reference, currency_id, partner_id=None, payment_method_code=None, payment_option_id=None, **kwargs):
@@ -31,21 +31,20 @@ class XenditController(http.Controller):
         success_redirect_url (str) - url to redirect to after payment is successful
         failure_redirect_url (str)- url to redirect to after payment fails
         """
-
         provider_sudo = request.env['payment.provider'].sudo().browse(provider_id)
         base_url = provider_sudo.get_base_url()
         currency_code = request.env['res.currency'].browse(currency_id).name
         partner_sudo = partner_id and request.env['res.partner'].sudo().browse(partner_id).exists()
         payload = {
-            "external_id": reference,
-            "amount": amount,
-            "currency": currency_code,
-            "description": reference,
-            "customer": {
-                "given_names": partner_sudo.name,
+            'external_id': reference,
+            'amount': amount,
+            'currency': currency_code,
+            'description': reference,
+            'customer': {
+                'given_names': partner_sudo.name,
             },
-            "success_redirect_url": urls.url_join(base_url, self._return_url),
-            "failure_redirect_url": urls.url_join(base_url, self._return_url),
+            'success_redirect_url': urls.url_join(base_url, self._return_url),
+            'failure_redirect_url': urls.url_join(base_url, self._return_url),
         }
 
         if partner_sudo.phone or partner_sudo.mobile:
@@ -72,19 +71,24 @@ class XenditController(http.Controller):
 
     @http.route(_webhook_url, type='http', methods=['POST'], auth='public', csrf=False)
     def xendit_webhook(self):
-        """ Process notification sent by customer. The 2 possible webhooks right now are invoices paid AND refund success/failure"""
+        """ Process the notification data sent by Xendit to the webhook.
+
+        :return: An empty string to acknowledge the notification.
+        :rtype: str
+        """
         data = request.get_json_data()
-        _logger.info("Received callback from Xendit: %s", pprint.pformat(data))
+        _logger.info("Notification received from Xendit with data:\n%s", pprint.pformat(data))
 
         tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
             'xendit', data
         )
         try:
+            # Check the integrity of the notification.
+            received_signature = request.httprequest.headers.get('x-callback-token')
             tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
                 'xendit', data
             )
-            received_signature = request.httprequest.headers.get('x-callback-token')
-            self._xendit_verify_notification_signature(received_signature, tx_sudo)
+            self._verify_notification_signature(received_signature, tx_sudo)
 
             tx_sudo._handle_notification_data('xendit', data)
         except ValidationError:
@@ -93,16 +97,21 @@ class XenditController(http.Controller):
         return request.make_json_response('')
 
     @staticmethod
-    def _xendit_verify_notification_signature(received_signature, tx_sudo):
-        """Checking received signature if matching the configured field on payment provider
+    def _verify_notification_signature(received_signature, tx_sudo):
+        """ Check that the received signature matches the expected one.
 
-        Making sure that the notification data is coming from xendit
+        :param str received_signature: The signature received with the notification data.
+        :param payment.transaction tx_sudo: The transaction referenced by the notification data.
+        :return: None
+        :raise Forbidden: If the signatures don't match.
         """
+        # Check for the received signature.
         if not received_signature:
             _logger.warning("No signature received on the callback!")
             raise Forbidden()
 
-        xendit_token = tx_sudo.provider_id.xendit_webhook_token
-        if xendit_token != received_signature:
-            _logger.warning("Received signature is not matching the configured token! Transaction ignored!")
+        # Compare the received signature with the expected signature.
+        expected_signature = tx_sudo.provider_id.xendit_webhook_token
+        if expected_signature != received_signature:
+            _logger.warning("Received notification with invalid signature.")
             raise Forbidden()

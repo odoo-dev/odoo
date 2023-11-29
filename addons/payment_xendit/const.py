@@ -1,8 +1,22 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Currencies supported by Xendit
+# The currencies supported by Xendit, in ISO 4217 format.
 SUPPORTED_CURRENCIES = [
-    'IDR', 'PHP'
+    'IDR',
+    'PHP',
+]
+
+# The codes of the payment methods to activate when Xendit is activated.
+DEFAULT_PAYMENT_METHODS_CODES = [
+    # Primary payment methods.
+    'card',
+    'dana',
+    'ovo',
+    'qris',
+
+    # Brand payment methods.
+    'visa',
+    'mastercard',
 ]
 
 API_URL_OBJ = {
@@ -11,7 +25,8 @@ API_URL_OBJ = {
     "CHARGE": "https://api.xendit.co/credit_card_charges",
 }
 
-STATUS_MAPPING = {
+# Mapping of transaction states to Xendit payment statuses.
+PAYMENT_STATUS_MAPPING = {
     'draft': (),
     'pending': ('PENDING',),
     'authorized': ('AUTHORIZED',),
@@ -19,16 +34,3 @@ STATUS_MAPPING = {
     'cancel': ('CANCELLED', 'EXPIRED'),
     'error': ('FAILED',)
 }
-
-DEFAULT_PAYMENT_METHODS_CODES = [
-    # Primary payment methods.
-    'card',
-    # Brand payment methods.
-    'visa',
-    'mastercard',
-
-    # e-wallets
-    'dana',
-    'ovo',
-    'qris'
-]
