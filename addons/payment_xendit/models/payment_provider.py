@@ -1,8 +1,14 @@
-import requests
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import logging
+
+import requests
+
 from odoo import _, api, fields, models
-from odoo.addons.payment_xendit.const import SUPPORTED_CURRENCIES, API_URL_OBJ, DEFAULT_PAYMENT_METHODS_CODES
 from odoo.exceptions import ValidationError
+
+from odoo.addons.payment_xendit import const
+
 
 _logger = logging.getLogger(__name__)
 
@@ -29,7 +35,7 @@ class PaymentProvider(models.Model):
         :return Response object in dictionary format
         """
         auth = (self.xendit_api_key, '')
-        url = API_URL_OBJ.get(api_obj)
+        url = const.API_URL_OBJ.get(api_obj)
 
         if not url:
             _logger.error("Invalid API object %s, typo or not registered", api_obj)
@@ -57,7 +63,7 @@ class PaymentProvider(models.Model):
         providers = super()._get_compatible_providers(*args, currency_id=currency_id, **kwargs)
 
         currency = self.env['res.currency'].browse(currency_id)
-        if currency and currency.name not in SUPPORTED_CURRENCIES:
+        if currency and currency.name not in const.SUPPORTED_CURRENCIES:
             providers = providers.filtered(lambda p: p.code != 'xendit')
 
         return providers
@@ -67,4 +73,4 @@ class PaymentProvider(models.Model):
         default_codes = super()._get_default_payment_method_codes()
         if self.code != 'xendit':
             return default_codes
-        return DEFAULT_PAYMENT_METHODS_CODES
+        return const.DEFAULT_PAYMENT_METHODS_CODES

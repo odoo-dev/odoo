@@ -1,11 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from odoo.exceptions import ValidationError
-from odoo.addons.payment_xendit.const import STATUS_MAPPING
+
 from odoo import models
+from odoo.exceptions import ValidationError
+
+from odoo.addons.payment_xendit.const import STATUS_MAPPING
+
 
 _logger = logging.getLogger(__name__)
+
 
 class PaymentTransaction(models.Model):
     _inherit = "payment.transaction"

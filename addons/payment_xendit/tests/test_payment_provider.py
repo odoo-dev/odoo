@@ -1,7 +1,11 @@
-from odoo.tests import tagged
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from unittest.mock import patch
 
+from odoo.tests import tagged
+
 from odoo.addons.payment_xendit.tests.common import XenditCommon
+
 
 @tagged('post_install', '-at_install')
 class TestPaymentProvider(XenditCommon):
