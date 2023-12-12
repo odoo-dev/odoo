@@ -4,7 +4,6 @@ import hmac
 import logging
 import pprint
 
-from werkzeug import urls
 from werkzeug.exceptions import Forbidden
 
 from odoo import http

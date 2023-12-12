@@ -2,10 +2,9 @@
 
 import logging
 
+from werkzeug import urls
 from odoo import _, models
 from odoo.exceptions import ValidationError
-from werkzeug import urls
-
 from odoo.addons.payment_xendit import const
 
 
