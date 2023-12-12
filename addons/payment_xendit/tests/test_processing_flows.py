@@ -20,7 +20,7 @@ class TestProcessingFlow(XenditCommon, PaymentHttpCommon):
         self._create_transaction('redirect', reference='TEST0001')
         url = self._build_url(XenditController._webhook_url)
         with patch('odoo.addons.payment_xendit.controllers.main.XenditController.'
-                   '_xendit_verify_notification_signature'
+                   '_verify_notification_signature'
                    ) as verify_signature_mock:
             self._make_json_request(url, data=self.webhook_notification_data_invoice)
         self.assertEqual(verify_signature_mock.call_count, 1)
@@ -45,7 +45,7 @@ class TestProcessingFlow(XenditCommon, PaymentHttpCommon):
         url = self._build_url(XenditController._webhook_url)
         with patch(
             'odoo.addons.payment_xendit.controllers.main.XenditController.'
-            '_xendit_verify_notification_signature'
+            '_verify_notification_signature'
         ), patch(
             'odoo.addons.payment.models.payment_transaction.PaymentTransaction'
             '._handle_notification_data'
@@ -60,7 +60,7 @@ class TestProcessingFlow(XenditCommon, PaymentHttpCommon):
 
         self.assertRaises(
             Forbidden,
-            XenditController._xendit_verify_notification_signature,
+            XenditController._verify_notification_signature,
             'bad_signature',
             tx,
         )
@@ -72,7 +72,7 @@ class TestProcessingFlow(XenditCommon, PaymentHttpCommon):
 
         self._assert_does_not_raise(
             Forbidden,
-            XenditController._xendit_verify_notification_signature,
+            XenditController._verify_notification_signature,
             'xnd_wbhook_token',
             tx,
         )

@@ -10,9 +10,11 @@
                 <group invisible="code != 'xendit'">
                     <field name="xendit_api_key"
                            required="code == 'xendit' and state != 'disabled'"
+                           password="True"
                     />
                     <field name="xendit_webhook_token"
                            required="code == 'xendit' and state != 'disabled'"
+                           password="True"
                     />
                 </group>
             </group>

@@ -22,6 +22,6 @@ class TestPaymentProvider(XenditCommon):
             'external_id': 'TEST0001',
             'amount': '100000'
         }
-        with patch('requests.request') as mock_request:
-            self.xendit._xendit_make_request('INVOICE', payload=data)
+        with patch('requests.post') as mock_request:
+            self.xendit._xendit_make_request(payload=data)
             mock_request.assert_called_once()

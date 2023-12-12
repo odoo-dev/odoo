@@ -19,18 +19,19 @@ DEFAULT_PAYMENT_METHODS_CODES = [
     'mastercard',
 ]
 
-API_URL_OBJ = {
-    "INVOICE": "https://api.xendit.co/v2/invoices",
-    "TOKEN": "https://api.xendit.co/credit_card_tokens/{token_id}",
-    "CHARGE": "https://api.xendit.co/credit_card_charges",
-}
-
 # Mapping of transaction states to Xendit payment statuses.
 PAYMENT_STATUS_MAPPING = {
     'draft': (),
-    'pending': ('PENDING',),
-    'authorized': ('AUTHORIZED',),
-    'done': ('SUCCEEDED', 'CAPTURED', 'PAID', 'REQUESTED', 'SETTLED'),
+    'pending': ('PENDING'),
+    'done': ('SUCCEEDED', 'PAID'),
     'cancel': ('CANCELLED', 'EXPIRED'),
     'error': ('FAILED',)
+}
+
+
+# Mapping of payment code to channel code according to Xendit API
+PAYMENT_METHODS_MAPPING = {
+    'card': 'CREDIT_CARD',
+    'bpi': 'DD_BPI',
+    'maya': 'PAYMAYA',
 }

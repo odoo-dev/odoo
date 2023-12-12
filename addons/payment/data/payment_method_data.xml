@@ -1821,7 +1821,7 @@
 
     <record id="payment_method_maya" model="payment.method">
         <field name="name">Maya</field>
-        <field name="code">paymaya</field>
+        <field name="code">maya</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
         <field name="image" type="base64" file="payment/static/img/maya.png"/>

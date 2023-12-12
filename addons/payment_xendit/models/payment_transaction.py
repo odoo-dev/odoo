@@ -4,6 +4,7 @@ import logging
 
 from odoo import _, models
 from odoo.exceptions import ValidationError
+from werkzeug import urls
 
 from odoo.addons.payment_xendit import const
 
@@ -42,9 +43,7 @@ class PaymentTransaction(models.Model):
     def _process_notification_data(self, notification_data):
         """ Override of `payment` to process the transaction based on Xendit data.
 
-        Depending on the data, get the status from data and update status of transaction accordingly
-        If payment is done through credit card on the payment page, notification_data should include 'credit_card_token' information,
-        which we will store internally and used for charges in the future
+        Update the payment state of transaction based on the notification data that contains status information
 
         Note: self.ensure_one()
 
@@ -62,14 +61,11 @@ class PaymentTransaction(models.Model):
         # TODO NNI just do: self.provider_reference = notification_data.get('id')
 
         # Update the payment state.
-        # payment status is either PAID or EXPIRED
+        # payment status is either PAID, EXPIRED, CANCELLED, or FAILED
         payment_status = notification_data.get('status')
-        if not self.provider_reference and payment_status in (const.PAYMENT_STATUS_MAPPING['done'] + const.PAYMENT_STATUS_MAPPING['pending'] + const.PAYMENT_STATUS_MAPPING['authorized']) and notification_data.get('id'):
-            self.provider_reference = notification_data.get('id')
+        self.provider_reference = notification_data.get('id')
 
         if payment_status in const.PAYMENT_STATUS_MAPPING['done']:
-            if self.tokenize and notification_data.get('credit_card_token'):
-                self._xendit_tokenize_notification_data(notification_data)
             self._set_done()
         elif payment_status in const.PAYMENT_STATUS_MAPPING['pending']:
             self._set_pending()
@@ -78,4 +74,43 @@ class PaymentTransaction(models.Model):
         elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
             self._set_canceled()
         elif payment_status in const.PAYMENT_STATUS_MAPPING['error']:
-            self._set_error()
+            self._set_error(_("Payment of transaction %s failed ", self.reference))
+
+    def _get_specific_rendering_values(self, processing_values):
+        """ Override of payment to return Xendit-specific rendering values.
+
+        Note: self.ensure_one() from `_get_processing_values`
+
+        :param dict processing_values: The generic and specific processing values of the transaction
+        :return: The dict of provider-specific processing values.
+        :rtype: dict
+        """
+        res = super()._get_specific_rendering_values(processing_values)
+        if self.provider_code != 'xendit':
+            return res
+
+        base_url = self.provider_id.get_base_url()
+        redirect_url = urls.url_join(base_url, '/payment/status')
+
+        payload = {
+            'external_id': self.reference,
+            'amount': self.amount,
+            'currency': self.currency_id.name,
+            'description': self.reference,
+            'customer': {
+                'given_names': self.partner_name,
+            },
+            'success_redirect_url': redirect_url,
+            'failure_redirect_url': redirect_url,
+            'payment_methods': [const.PAYMENT_METHODS_MAPPING.get(self.payment_method_code, self.payment_method_code.upper())]
+        }
+        if self.partner_id.phone or self.partner_id.mobile:
+            payload['customer']['mobile_number'] = self.partner_id.phone or self.partner_id.mobile
+        if self.partner_id.email:
+            payload['customer']['email'] = self.partner_id.email
+        response_data = self.provider_id._xendit_make_request(payload)
+
+        rendering_values = {
+            'api_url': response_data.get('invoice_url')
+        }
+        return rendering_values
