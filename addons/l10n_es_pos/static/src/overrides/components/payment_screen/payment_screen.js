@@ -23,14 +23,14 @@ patch(PaymentScreen.prototype, {
                 order.to_invoice = Boolean(
                     this.pos.config.raw.l10n_es_simplified_invoice_journal_id
                 );
-                order.partner = this.pos.config.simplified_partner_id;
+                order.set_partner(this.pos.config.simplified_partner_id);
             }
         }
         return await super.validateOrder(...arguments);
     },
     shouldDownloadInvoice() {
         return this.pos.config.is_spanish
-            ? !this.pos.selectedOrder.is_l10n_es_simplified_invoice
+            ? !this.pos.get_order().is_l10n_es_simplified_invoice
             : super.shouldDownloadInvoice();
     },
     async _postPushOrderResolve(order, order_server_ids) {

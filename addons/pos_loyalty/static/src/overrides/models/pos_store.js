@@ -8,12 +8,14 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { TextInputPopup } from "@point_of_sale/app/utils/input_popups/text_input_popup";
 import { Domain, InvalidDomainError } from "@web/core/domain";
 import { PosLoyaltyCard } from "@pos_loyalty/overrides/models/loyalty";
-import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { ask, makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { PartnerList } from "@point_of_sale/app/screens/partner_list/partner_list";
 
 const COUPON_CACHE_MAX_SIZE = 4096; // Maximum coupon cache size, prevents long run memory issues and (to some extent) invalid data
 
 patch(PosStore.prototype, {
-    async addProductFromUi(product, options) {
+    async addLineToCurrentOrder(vals, opt, configure) {
+        const product = vals.product_id;
         const order = this.get_order();
         const linkedPrograms =
             this.models["loyalty.program"].getBy("trigger_product_ids", product.id) || [];
@@ -33,21 +35,22 @@ patch(PosStore.prototype, {
         } else if (linkedPrograms.length === 1) {
             selectedProgram = linkedPrograms[0];
         }
+
         const orderTotal = this.get_order().get_total_with_tax();
         if (
             selectedProgram &&
             ["gift_card", "ewallet"].includes(selectedProgram.program_type) &&
             orderTotal < 0
         ) {
-            options.price = -orderTotal;
+            opt.price = -orderTotal;
         }
         if (selectedProgram && selectedProgram.program_type == "gift_card") {
-            const shouldProceed = await this._setupGiftCardOptions(selectedProgram, options);
+            const shouldProceed = await this._setupGiftCardOptions(selectedProgram, opt);
             if (!shouldProceed) {
                 return;
             }
         } else if (selectedProgram && selectedProgram.program_type == "ewallet") {
-            const shouldProceed = await this.setupEWalletOptions(selectedProgram, options);
+            const shouldProceed = await this.setupEWalletOptions(selectedProgram, opt);
             if (!shouldProceed) {
                 return;
             }
@@ -61,15 +64,16 @@ patch(PosStore.prototype, {
                 }
             }
         }
-        await super.addProductFromUi(product, options);
+        const result = await super.addLineToCurrentOrder(vals, opt, configure);
+
         await order._updatePrograms();
         if (rewardsToApply.length == 1) {
             const reward = rewardsToApply[0];
             order._applyReward(reward.reward, reward.coupon_id, { product: product.id });
         }
-
         order._updateRewards();
-        return options;
+
+        return result;
     },
     /**
      * Sets up the options for the gift card product.
@@ -140,9 +144,30 @@ patch(PosStore.prototype, {
      * in the order, it will be added as free. That is, when added,
      * it comes with the corresponding reward product line.
      */
+    // FIXME should not be in pos.order
+    async pay() {
+        const currentOrder = this.get_order();
+        const eWalletLine = currentOrder
+            .get_orderlines()
+            .find((line) => line.getEWalletGiftCardProgramType() === "ewallet");
+
+        if (eWalletLine && !currentOrder.get_partner()) {
+            const confirmed = await ask(this.env.services.dialog, {
+                title: _t("Customer needed"),
+                body: _t("eWallet requires a customer to be selected"),
+            });
+            if (confirmed) {
+                this.dialog.add(PartnerList, {
+                    getPayload: (newPartner) => this.set_partner(newPartner),
+                });
+            }
+        } else {
+            return super.pay(...arguments);
+        }
+    },
     getPotentialFreeProductRewards() {
         const order = this.get_order();
-        const allCouponPrograms = Object.values(order.couponPointChanges)
+        const allCouponPrograms = Object.values(order.uiState.couponPointChanges)
             .map((pe) => {
                 return {
                     program_id: pe.program_id,
@@ -150,7 +175,7 @@ patch(PosStore.prototype, {
                 };
             })
             .concat(
-                order.codeActivatedCoupons.map((coupon) => {
+                order.uiState.codeActivatedCoupons.map((coupon) => {
                     return {
                         program_id: coupon.program_id,
                         coupon_id: coupon.id,
@@ -162,13 +187,13 @@ patch(PosStore.prototype, {
             const program = this.models["loyalty.program"].get(couponProgram.program_id);
             if (
                 program.pricelist_ids.length > 0 &&
-                (!order.pricelist || !program.pricelist_ids.includes(order.pricelist.id))
+                (!order.pricelist_id || !program.pricelist_ids.includes(order.pricelist_id.id))
             ) {
                 continue;
             }
 
             const points = order._getRealCouponPoints(couponProgram.coupon_id);
-            const hasLine = order.orderlines.filter((line) => !line.is_reward_line).length > 0;
+            const hasLine = order.lines.filter((line) => !line.is_reward_line).length > 0;
             for (const reward of program.reward_ids.filter(
                 (reward) => reward.reward_type == "product"
             )) {
@@ -253,8 +278,8 @@ patch(PosStore.prototype, {
     },
     async initServerData() {
         await super.initServerData(...arguments);
-        if (this.selectedOrder) {
-            this.selectedOrder._updateRewards();
+        if (this.selectedOrderUuid) {
+            this.get_order()._updateRewards();
         }
     },
     set_order(order) {
@@ -285,8 +310,8 @@ patch(PosStore.prototype, {
             this.couponCache = {};
             this.partnerId2CouponIds = {};
             // Make sure that the current order has no invalid data.
-            if (this.selectedOrder) {
-                this.selectedOrder.invalidCoupons = true;
+            if (this.selectedOrderUuid) {
+                this.get_order().invalidCoupons = true;
             }
         }
         const couponList = [];

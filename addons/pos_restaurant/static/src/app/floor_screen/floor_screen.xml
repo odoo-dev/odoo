@@ -3,7 +3,7 @@
     <t t-name="pos_restaurant.FloorScreen">
         <div class="floor-screen screen h-100 position-relative d-flex flex-column flex-nowrap m-0 bg-100 text-start overflow-hidden">
             <t t-set="editButtonClass" t-value="'text-center d-flex flex-column align-items-center btn btn-light text-uppercase'" />
-            <div t-if="pos.orderToTransfer" class="d-flex align-items-center justify-content-between px-3 border-bottom bg-view overflow-x-auto w-100">
+            <div t-if="pos.orderToTransferUuid" class="d-flex align-items-center justify-content-between px-3 border-bottom bg-view overflow-x-auto w-100">
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-att-class="{active: !pos.isTableToMerge}" t-on-click="() => this.pos.isTableToMerge = false">
                     <i class="fa fa-arrow-right" role="img" aria-label="Transfer" title="Transfer" />Transfer</button>
                 <button t-attf-class="{{editButtonClass}}" t-att-class="{active: pos.isTableToMerge}" t-on-click="() => this.pos.isTableToMerge = true">
@@ -61,7 +61,7 @@
                     </div>
                     <div t-else="" t-ref="map" t-att-class="{'d-flex align-items-center justify-content-center flex-wrap': pos.floorPlanStyle == 'kanban'}">
                         <Table t-foreach="activeTables.toSorted((a,b)=>a.id-b.id)" t-as="table" t-key="table_index"
-                            onClick.bind="onSelectTable" table="table"
+                            onClick.bind="onClickTable" table="table"
                             selectedTables="selectedTables" limit="floorMapRef"
                             class="pos.floorPlanStyle == 'kanban' ? 'm-2 position-relative' : 'position-absolute'"
                             style="pos.floorPlanStyle == 'kanban' ? 'width: 120px; height: 120px' :

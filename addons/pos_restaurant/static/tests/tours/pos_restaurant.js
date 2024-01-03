@@ -27,7 +27,6 @@ function isSyncStatusConnected() {
 }
 registry.category("web_tour.tours").add("pos_restaurant_sync", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -102,8 +101,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
                     "acknowledge printing error ( because we don't have printer in the test. )",
             },
             isSyncStatusConnected(),
-            TicketScreen.selectOrder("-0003"),
-            TicketScreen.loadSelectedOrder(),
+            TicketScreen.doubleClickOrder("-0003"),
             FloorScreen.backToFloor(),
 
             // There should be 1 synced draft order.
@@ -117,7 +115,6 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
  */
 registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             // There is one draft synced order from the previous tour
@@ -159,7 +156,6 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
 
 registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -168,6 +164,7 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             ProductScreen.selectedOrderlineHas("Coca-Cola", "1.0"),
             ProductScreen.clickOrderButton(),
             ProductScreen.orderlinesHaveNoChange(),
+            FloorScreen.backToFloor(),
         ].flat(),
 });
 

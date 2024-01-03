@@ -16,7 +16,6 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("SplitBillScreenTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -61,7 +60,6 @@ registry.category("web_tour.tours").add("SplitBillScreenTour", {
 
 registry.category("web_tour.tours").add("SplitBillScreenTour2", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -97,7 +95,6 @@ registry.category("web_tour.tours").add("SplitBillScreenTour2", {
 
 registry.category("web_tour.tours").add("SplitBillScreenTour3", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -133,7 +130,6 @@ registry.category("web_tour.tours").add("SplitBillScreenTour3", {
 
 registry.category("web_tour.tours").add("SplitBillScreenTour4PosCombo", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),

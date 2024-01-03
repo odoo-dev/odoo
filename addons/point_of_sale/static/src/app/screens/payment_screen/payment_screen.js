@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { parseFloat } from "@web/views/fields/parsers";
 import { useErrorHandlers, useAsyncLockedMethod } from "@point_of_sale/app/utils/hooks";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -95,12 +94,12 @@ export class PaymentScreen extends Component {
         return this.pos.get_order();
     }
     get paymentLines() {
-        return this.currentOrder.get_paymentlines();
+        return this.currentOrder.payment_ids;
     }
     get selectedPaymentLine() {
-        return this.currentOrder.selected_paymentline;
+        return this.currentOrder.get_selected_paymentline();
     }
-    addNewPaymentLine(paymentMethod) {
+    async addNewPaymentLine(paymentMethod) {
         // original function: click_paymentmethods
         const result = this.currentOrder.add_paymentline(paymentMethod);
         if (result) {
@@ -131,7 +130,7 @@ export class PaymentScreen extends Component {
             }
         }
         // disable changing amount on paymentlines with running or done payments on a payment terminal
-        const payment_terminal = this.selectedPaymentLine.payment_method.payment_terminal;
+        const payment_terminal = this.selectedPaymentLine.payment_method_id.payment_terminal;
         const hasCashPaymentMethod = this.payment_methods_from_config.some(
             (method) => method.type === "cash"
         );
@@ -151,7 +150,7 @@ export class PaymentScreen extends Component {
             return;
         }
         if (amount === null) {
-            this.deletePaymentLine(this.selectedPaymentLine.cid);
+            this.deletePaymentLine(this.selectedPaymentLine.uuid);
         } else {
             this.selectedPaymentLine.set_amount(amount);
         }
@@ -174,8 +173,8 @@ export class PaymentScreen extends Component {
             isInputSelected: true,
             nbrDecimal: this.pos.currency.decimal_places,
             inputSuffix: this.pos.currency.symbol,
-            getPayload: (num) => {
-                this.currentOrder.set_tip(parseFloat(num ?? ""));
+            getPayload: async (num) => {
+                await this.pos.set_tip(parseFloat(num ?? ""));
             },
         });
     }
@@ -191,15 +190,15 @@ export class PaymentScreen extends Component {
             this.currentOrder.setShippingDate(false);
         }
     }
-    deletePaymentLine(cid) {
-        const line = this.paymentLines.find((line) => line.cid === cid);
+    deletePaymentLine(uuid) {
+        const line = this.paymentLines.find((line) => line.uuid === uuid);
         // If a paymentline with a payment terminal linked to
         // it is removed, the terminal should get a cancel
         // request.
         if (["waiting", "waitingCard", "timeout"].includes(line.get_payment_status())) {
             line.set_payment_status("waitingCancel");
-            line.payment_method.payment_terminal
-                .send_payment_cancel(this.currentOrder, cid)
+            line.payment_method_id.payment_terminal
+                .send_payment_cancel(this.currentOrder, uuid)
                 .then(() => {
                     this.currentOrder.remove_paymentline(line);
                     this.numberBuffer.reset();
@@ -209,8 +208,8 @@ export class PaymentScreen extends Component {
             this.numberBuffer.reset();
         }
     }
-    selectPaymentLine(cid) {
-        const line = this.paymentLines.find((line) => line.cid === cid);
+    selectPaymentLine(uuid) {
+        const line = this.paymentLines.find((line) => line.uuid === uuid);
         this.currentOrder.select_paymentline(line);
         this.numberBuffer.reset();
     }
@@ -242,13 +241,15 @@ export class PaymentScreen extends Component {
             this.hardwareProxy.openCashbox();
         }
 
-        this.currentOrder.date_order = luxon.DateTime.now();
+        this.currentOrder.date_order = luxon.DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss");
         for (const line of this.paymentLines) {
             if (!line.amount === 0) {
                 this.currentOrder.remove_paymentline(line);
             }
         }
-        this.currentOrder.finalized = true;
+
+        this.pos.addPendingOrder([this.currentOrder.id]);
+        this.currentOrder.state = "paid";
 
         this.env.services.ui.block();
         let syncOrderResult;
@@ -260,9 +261,9 @@ export class PaymentScreen extends Component {
             }
             // 2. Invoice.
             if (this.shouldDownloadInvoice() && this.currentOrder.is_to_invoice()) {
-                if (syncOrderResult[0]?.account_move) {
+                if (syncOrderResult[0]?.raw.account_move) {
                     await this.report.doAction("account.account_invoices", [
-                        syncOrderResult[0].account_move,
+                        syncOrderResult[0].raw.account_move,
                     ]);
                 } else {
                     throw {
@@ -304,24 +305,7 @@ export class PaymentScreen extends Component {
             });
         }
     }
-    async afterOrderValidation(suggestToSync = true) {
-        // Remove the order from the local storage so that when we refresh the page, the order
-        // won't be there
-        this.pos.db.remove_unpaid_order(this.currentOrder);
-
-        // Ask the user to sync the remaining unsynced orders.
-        if (suggestToSync && this.pos.db.get_orders().length) {
-            this.dialog.add(ConfirmationDialog, {
-                title: _t("Remaining unsynced orders"),
-                body: _t("There are unsynced orders. Do you want to sync these orders?"),
-                confirm: () => {
-                    // NOTE: Not yet sure if this should be awaited or not.
-                    // If awaited, some operations like changing screen
-                    // might not work.
-                    this.pos.push_orders();
-                },
-            });
-        }
+    async afterOrderValidation() {
         // Always show the next screen regardless of error since pos has to
         // continue working even offline.
         let nextScreen = this.nextScreen;
@@ -346,7 +330,6 @@ export class PaymentScreen extends Component {
                 );
 
                 if (printResult && this.pos.config.iface_print_skip_screen) {
-                    this.pos.removeOrder(this.currentOrder);
                     this.pos.add_new_order();
                     nextScreen = "ProductScreen";
                 }
@@ -357,17 +340,7 @@ export class PaymentScreen extends Component {
     }
     /**
      * This method is meant to be overriden by localization that do not want to print the invoice pdf
-     * every time they create an account move. For example, it can be overriden like this:
-     * ```
-     * shouldDownloadInvoice() {
-     *     const currentCountry = ...
-     *     if (currentCountry.code === 'FR') {
-     *         return false;
-     *     } else {
-     *         return super.shouldDownloadInvoice(); // or this._super(...arguments) depending on the odoo version.
-     *     }
-     * }
-     * ```
+     * every time they create an account move.
      * @returns {boolean} true if the invoice pdf should be downloaded
      */
     shouldDownloadInvoice() {
@@ -399,10 +372,10 @@ export class PaymentScreen extends Component {
         }
 
         const splitPayments = this.paymentLines.filter(
-            (payment) => payment.payment_method.split_transactions
+            (payment) => payment.payment_method_id.split_transactions
         );
         if (splitPayments.length && !this.currentOrder.get_partner()) {
-            const paymentMethod = splitPayments[0].payment_method;
+            const paymentMethod = splitPayments[0].payment_method_id;
             const confirmed = await ask(this.dialog, {
                 title: _t("Customer Required"),
                 body: _t("Customer is required for %s payment method.", paymentMethod.name),
@@ -443,7 +416,7 @@ export class PaymentScreen extends Component {
 
         if (
             this.currentOrder.get_total_with_tax() != 0 &&
-            this.currentOrder.get_paymentlines().length === 0
+            this.currentOrder.payment_ids.length === 0
         ) {
             this.notification.add(_t("Select a payment method to validate the order."));
             return false;
@@ -453,7 +426,7 @@ export class PaymentScreen extends Component {
             return false;
         }
 
-        if (this.currentOrder.has_not_valid_rounding()) {
+        if (this.currentOrder.has_not_valid_rounding() && this.pos.config.cash_rounding) {
             var line = this.currentOrder.has_not_valid_rounding();
             this.dialog.add(AlertDialog, {
                 title: _t("Incorrect rounding"),
@@ -538,11 +511,11 @@ export class PaymentScreen extends Component {
         }
     }
     async sendPaymentCancel(line) {
-        const payment_terminal = line.payment_method.payment_terminal;
+        const payment_terminal = line.payment_method_id.payment_terminal;
         line.set_payment_status("waitingCancel");
         const isCancelSuccessful = await payment_terminal.send_payment_cancel(
             this.currentOrder,
-            line.cid
+            line.uuid
         );
         if (isCancelSuccessful) {
             line.set_payment_status("retry");
@@ -551,10 +524,10 @@ export class PaymentScreen extends Component {
         }
     }
     async sendPaymentReverse(line) {
-        const payment_terminal = line.payment_method.payment_terminal;
+        const payment_terminal = line.payment_method_id.payment_terminal;
         line.set_payment_status("reversing");
 
-        const isReversalSuccessful = await payment_terminal.send_payment_reversal(line.cid);
+        const isReversalSuccessful = await payment_terminal.send_payment_reversal(line.uuid);
         if (isReversalSuccessful) {
             line.set_amount(0);
             line.set_payment_status("reversed");

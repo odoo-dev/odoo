@@ -31,7 +31,7 @@ export class ControlButtons extends Component {
         return this.pos.get_order();
     }
     async clickFiscalPosition() {
-        const currentFiscalPosition = this.currentOrder.fiscal_position;
+        const currentFiscalPosition = this.currentOrder.fiscal_position_id;
         const fiscalPosList = [
             {
                 id: -1,
@@ -61,15 +61,19 @@ export class ControlButtons extends Component {
         }
 
         if (selectedFiscalPosition === "none") {
-            this.currentOrder.set_fiscal_position(false);
+            this.currentOrder.update({
+                fiscal_position_id: false,
+            });
             return;
         }
 
-        this.currentOrder.set_fiscal_position(selectedFiscalPosition);
+        this.currentOrder.update({
+            fiscal_position_id: selectedFiscalPosition ? selectedFiscalPosition.id : false,
+        });
         // IMPROVEMENT: The following is the old implementation and I believe
         // there could be a better way of doing it.
-        for (const line of this.currentOrder.orderlines) {
-            line.set_quantity(line.quantity);
+        for (const line of this.currentOrder.lines) {
+            line.set_quantity(line.qty);
         }
     }
     async clickPricelist() {
@@ -80,7 +84,8 @@ export class ControlButtons extends Component {
             id: pricelist.id,
             label: pricelist.name,
             isSelected:
-                this.currentOrder.pricelist && pricelist.id === this.currentOrder.pricelist.id,
+                this.currentOrder.pricelist_id &&
+                pricelist.id === this.currentOrder.pricelist_id.id,
             item: pricelist,
         }));
 
@@ -88,7 +93,7 @@ export class ControlButtons extends Component {
             selectionList.push({
                 id: null,
                 label: _t("Default Price"),
-                isSelected: !this.currentOrder.pricelist,
+                isSelected: !this.currentOrder.pricelist_id,
                 item: null,
             });
         }
@@ -105,8 +110,11 @@ export class ControlButtons extends Component {
         const partner = order.get_partner();
         const searchDetails = partner ? { fieldName: "PARTNER", searchTerm: partner.name } : {};
         this.pos.showScreen("TicketScreen", {
-            ui: { filter: "SYNCED", searchDetails },
-            destinationOrder: order,
+            stateOverride: {
+                filter: "SYNCED",
+                search: searchDetails,
+                destinationOrder: order,
+            },
         });
     }
     onClickSave() {
@@ -116,13 +124,15 @@ export class ControlButtons extends Component {
             return;
         }
         this._selectEmptyOrder();
+        this.pos.addPendingOrder([this.pos.get_order().id]);
+        this.pos.syncAllOrders();
         this.notification.add(_t("Order saved for later"));
     }
     _selectEmptyOrder() {
         const orders = this.pos.get_order_list();
         const emptyOrders = orders.filter((order) => order.is_empty());
         if (emptyOrders.length > 0) {
-            this.pos.sendDraftToServer();
+            this.pos.syncAllOrders();
             this.pos.set_order(emptyOrders[0]);
         } else {
             this.pos.add_new_order();

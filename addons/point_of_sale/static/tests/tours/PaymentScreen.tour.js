@@ -10,7 +10,6 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("PaymentScreenTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             ProductScreen.addOrderline("Letter Tray", "10"),
@@ -75,7 +74,6 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
 
 registry.category("web_tour.tours").add("PaymentScreenTour2", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             ProductScreen.clickHomeCategory(),
@@ -92,7 +90,6 @@ registry.category("web_tour.tours").add("PaymentScreenTour2", {
 
 registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -123,7 +120,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
 
 registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -154,7 +150,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
 
 registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -213,7 +208,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
 
 registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUpCashAndBank", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -262,7 +256,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUpCashAndBank"
 
 registry.category("web_tour.tours").add("PaymentScreenTotalDueWithOverPayment", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             ProductScreen.clickHomeCategory(),

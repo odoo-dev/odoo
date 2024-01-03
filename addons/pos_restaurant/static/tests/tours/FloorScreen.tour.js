@@ -13,7 +13,6 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("FloorScreenTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             // check floors if they contain their corresponding tables

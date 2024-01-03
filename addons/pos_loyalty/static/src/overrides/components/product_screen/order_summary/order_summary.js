@@ -30,7 +30,7 @@ patch(OrderSummary.prototype, {
             !selectedLine.manual_reward &&
             (key === "Backspace" || key === "Delete")
         ) {
-            const reward = this.pos.models["loyalty.reward"].get(selectedLine.reward_id);
+            const reward = selectedLine.reward_id;
             const confirmed = await ask(this.dialog, {
                 title: _t("Deactivating reward"),
                 body: _t(
@@ -73,17 +73,17 @@ patch(OrderSummary.prototype, {
             return;
         }
         if (selectedLine.is_reward_line && val === "remove") {
-            this.currentOrder.disabledRewards.add(selectedLine.reward_id);
+            this.currentOrder.uiState.disabledRewards.add(selectedLine.reward_id);
             const { couponCache } = this.pos;
             const coupon = couponCache[selectedLine.coupon_id];
             if (
                 coupon &&
                 coupon.id > 0 &&
-                this.currentOrder.codeActivatedCoupons.find((c) => c.code === coupon.code)
+                this.currentOrder.uiState.codeActivatedCoupons.find((c) => c.code === coupon.code)
             ) {
                 delete couponCache[selectedLine.coupon_id];
-                this.currentOrder.codeActivatedCoupons.splice(
-                    this.currentOrder.codeActivatedCoupons.findIndex((coupon) => {
+                this.currentOrder.uiState.codeActivatedCoupons.splice(
+                    this.currentOrder.uiState.codeActivatedCoupons.findIndex((coupon) => {
                         return coupon.id === selectedLine.coupon_id;
                     }),
                     1

@@ -9,7 +9,7 @@ patch(PosStore.prototype, {
         this.onNotified("VIVA_WALLET_LATEST_RESPONSE", () => {
             this.pos
                 .getPendingPaymentLine("viva_wallet")
-                .payment_method.payment_terminal.handleVivaWalletStatusResponse();
+                .payment_method_id.payment_terminal.handleVivaWalletStatusResponse();
         });
     },
 });

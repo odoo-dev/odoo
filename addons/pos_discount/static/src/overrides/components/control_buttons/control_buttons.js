@@ -34,9 +34,7 @@ patch(ControlButtons.prototype, {
             return;
         }
         // Remove existing discounts
-        lines
-            .filter((line) => line.get_product() === product)
-            .forEach((line) => order._unlinkOrderline(line));
+        lines.filter((line) => line.get_product() === product).forEach((line) => line.delete());
 
         // Add one discount line per tax group
         const linesByTax = order.get_orderlines_grouped_by_tax_ids();
@@ -59,26 +57,30 @@ patch(ControlButtons.prototype, {
             // We add the price as manually set to avoid recomputation when changing customer.
             const discount = (-pc / 100.0) * baseToDiscount;
             if (discount < 0) {
-                order.add_product(product, {
-                    price: discount,
-                    lst_price: discount,
-                    tax_ids: taxIds,
-                    merge: false,
-                    description:
-                        `${pc}%, ` +
-                        (tax_ids_array.length
-                            ? _t(
-                                  "Tax: %s",
-                                  this.pos
-                                      .mapTaxValues(taxIds)
-                                      .map((taxValues) => `${taxValues.amount}%`)
-                                      .join(", ")
-                              )
-                            : _t("No tax")),
-                    extras: {
-                        price_type: "automatic",
-                    },
-                });
+                // FIXME handle discount
+                await this.pos.addLineToCurrentOrder(
+                    { product_id: product },
+                    {
+                        price_unit: discount,
+                        lst_price: discount,
+                        tax_ids: taxIds,
+                        merge: false,
+                    }
+                );
+                // order.add_product(product, {
+                //     price: discount,
+                //     lst_price: discount,
+                //     tax_ids: taxIds,
+                //     merge: false,
+                //     description:
+                //         `${pc}%, ` +
+                //         (tax_ids_array.length
+                //             ? _t("Tax: %s", taxIds.map((tax) => tax.amount + "%").join(", "))
+                //             : _t("No tax")),
+                //     extras: {
+                //         price_type: "automatic",
+                //     },
+                // });
             }
         }
     },

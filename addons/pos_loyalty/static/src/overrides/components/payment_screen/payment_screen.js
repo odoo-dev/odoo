@@ -11,7 +11,7 @@ patch(PaymentScreen.prototype, {
     async validateOrder(isForceValidate) {
         const pointChanges = {};
         const newCodes = [];
-        for (const pe of Object.values(this.currentOrder.couponPointChanges)) {
+        for (const pe of Object.values(this.currentOrder.uiState.couponPointChanges)) {
             if (pe.coupon_id > 0) {
                 pointChanges[pe.coupon_id] = pe.points;
             } else if (pe.barcode && !pe.giftCardId) {
@@ -55,8 +55,8 @@ patch(PaymentScreen.prototype, {
                             delete couponCache[couponId];
                         }
                     }
-                    this.currentOrder.codeActivatedCoupons =
-                        this.currentOrder.codeActivatedCoupons.filter(
+                    this.currentOrder.uiState.codeActivatedCoupons =
+                        this.currentOrder.uiState.codeActivatedCoupons.filter(
                             (coupon) => !payload.removed_coupons.includes(coupon.id)
                         );
                 }
@@ -84,7 +84,7 @@ patch(PaymentScreen.prototype, {
         const program_by_id = this.pos.models["loyalty.program"].getAllBy("id");
         const rewardLines = order._get_reward_lines();
         const partner = order.get_partner();
-        let couponData = Object.values(order.couponPointChanges).reduce((agg, pe) => {
+        let couponData = Object.values(order.uiState.couponPointChanges).reduce((agg, pe) => {
             agg[pe.coupon_id] = Object.assign({}, pe, {
                 points: pe.points - order._getPointsCorrection(program_by_id[pe.program_id]),
             });
@@ -124,7 +124,7 @@ patch(PaymentScreen.prototype, {
         );
         if (Object.keys(couponData || []).length > 0) {
             const payload = await this.pos.data.call("pos.order", "confirm_coupon_programs", [
-                server_ids,
+                order.id,
                 couponData,
             ]);
             if (payload.coupon_updates) {

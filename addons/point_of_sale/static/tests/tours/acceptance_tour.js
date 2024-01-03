@@ -264,6 +264,4 @@ steps = steps.concat([
     },
 ]);
 
-registry
-    .category("web_tour.tours")
-    .add("pos_basic_order", { test: true, url: "/pos/ui", steps: () => steps });
+registry.category("web_tour.tours").add("pos_basic_order", { test: true, steps: () => steps });

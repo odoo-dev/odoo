@@ -40,19 +40,21 @@ export class FloorScreen extends Component {
         onWillStart(this.onWillStart);
     }
     getTablesSelectedByDefault() {
-        return this.pos.orderToTransfer ? [this.pos.orderToTransfer.tableId] : [];
+        const oToTrans = this.pos.models["pos.order"].getBy("uuid", this.pos.orderToTransferUuid);
+        return oToTrans ? [oToTrans.table_id.id] : [];
     }
     async onWillStart() {
         const table = this.pos.selectedTable;
+        const tableByIds = this.pos.models["restaurant.table"].getAllBy("id");
         if (table) {
             const orders = this.pos.get_order_list();
             const tableOrders = orders.filter(
-                (order) => order.tableId === table.id && !order.finalized
+                (order) => order.table_id === table.id && !order.finalized
             );
             const qtyChange = tableOrders.reduce(
                 (acc, order) => {
-                    const quantityChange = order.getOrderChanges();
-                    const quantitySkipped = order.getOrderChanges(true);
+                    const quantityChange = this.pos.getOrderChanges();
+                    const quantitySkipped = this.pos.getOrderChanges(true);
                     acc.changed += quantityChange.count;
                     acc.skipped += quantitySkipped.count;
                     return acc;
@@ -60,14 +62,18 @@ export class FloorScreen extends Component {
                 { changed: 0, skipped: 0 }
             );
 
-            this.pos.tableNotifications[table.id] = {
-                changes_count: qtyChange.changed,
-                skip_changes: qtyChange.skipped,
-            };
+            tableByIds[table.id].uiState.orderCount = tableOrders.length;
+            tableByIds[table.id].uiState.changeCount = qtyChange.changed;
         }
         await this.pos.unsetTable();
     }
     onClickFloorMap() {
+        for (const tableId of this.state.selectedTableIds) {
+            const table = this.pos.models["restaurant.table"].get(tableId);
+            this.pos.data.write("restaurant.table", [tableId], {
+                ...table.serialize(true),
+            });
+        }
         this.state.selectedTableIds = this.getTablesSelectedByDefault();
         this.state.isColorPicker = false;
     }
@@ -269,7 +275,7 @@ export class FloorScreen extends Component {
         this.state.selectedFloorId = floor.id;
         this.state.selectedTableIds = [];
     }
-    async onSelectTable(table, ev) {
+    async onClickTable(table, ev) {
         if (this.pos.isEditMode) {
             if (ev.ctrlKey || ev.metaKey) {
                 this.state.selectedTableIds.push(table.id);
@@ -280,10 +286,11 @@ export class FloorScreen extends Component {
             return;
         }
         if (table.parent_id) {
-            this.onSelectTable(table.parent_id, ev);
+            this.onClickTable(table.parent_id, ev);
             return;
         }
-        if (this.pos.orderToTransfer) {
+        const oToTrans = this.pos.models["pos.order"].getBy("uuid", this.pos.orderToTransferUuid);
+        if (oToTrans) {
             await this.pos.transferTable(table);
         } else {
             try {
@@ -296,9 +303,12 @@ export class FloorScreen extends Component {
                 Promise.reject(e);
             }
         }
-        const order = this.pos.get_order();
-        if (order) {
-            this.pos.showScreen(order.get_screen_data().name);
+        const orders = this.pos.getTableOrders(table.id);
+        if (orders.length > 0) {
+            this.pos.showScreen(orders[0].get_screen_data().name);
+        } else {
+            this.pos.add_new_order();
+            this.pos.showScreen("ProductScreen");
         }
     }
     closeEditMode() {
@@ -421,10 +431,11 @@ export class FloorScreen extends Component {
         });
     }
     stopOrderTransfer() {
-        this.pos.set_order(this.pos.orderToTransfer);
+        const order = this.pos.models["pos.order"].getBy("uuid", this.pos.orderToTransferUuid);
+        this.pos.set_order(order);
         this.pos.showScreen("ProductScreen");
         this.pos.isTableToMerge = false;
-        this.pos.orderToTransfer = null;
+        this.pos.orderToTransferUuid = null;
     }
     changeShape(form) {
         for (const table of this.selectedTables) {
@@ -537,7 +548,6 @@ export class FloorScreen extends Component {
 
             activeFloor.delete();
 
-            this.pos.TICKET_SCREEN_STATE.syncedOrders.cache = {};
             if (this.pos.models["restaurant.floor"].length > 0) {
                 this.selectFloor(this.pos.models["restaurant.floor"].getAll()[0]);
             } else {
@@ -567,7 +577,7 @@ export class FloorScreen extends Component {
                 for (const id of originalSelectedTableIds) {
                     //remove order not send to server
                     for (const order of this.pos.get_order_list()) {
-                        if (order.tableId == id) {
+                        if (order.table_id == id) {
                             this.pos.removeOrder(order, false);
                         }
                     }
@@ -596,7 +606,6 @@ export class FloorScreen extends Component {
         if (equalsCheck(this.state.selectedTableIds, originalSelectedTableIds)) {
             this.state.selectedTableIds = [];
         }
-        this.pos.TICKET_SCREEN_STATE.syncedOrders.cache = {};
     }
     getFloorChangeCount(floor) {
         let changeCount = 0;
@@ -605,10 +614,7 @@ export class FloorScreen extends Component {
         }
         const table_ids = floor.table_ids;
         for (const table of table_ids) {
-            const tNotif = this.pos.tableNotifications[table.id];
-            if (tNotif) {
-                changeCount += tNotif.changes_count;
-            }
+            changeCount += table.uiState.changeCount || 0;
         }
 
         return changeCount;

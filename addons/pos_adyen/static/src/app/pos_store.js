@@ -9,7 +9,7 @@ patch(PosStore.prototype, {
         this.onNotified("ADYEN_LATEST_RESPONSE", () => {
             this.pos
                 .getPendingPaymentLine("adyen")
-                .payment_method.payment_terminal.handleAdyenStatusResponse();
+                .payment_method_id.payment_terminal.handleAdyenStatusResponse();
         });
     },
 });

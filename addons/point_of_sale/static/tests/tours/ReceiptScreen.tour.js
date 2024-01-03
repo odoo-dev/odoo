@@ -13,7 +13,6 @@ import { inLeftSide } from "@point_of_sale/../tests/tours/helpers/utils";
 
 registry.category("web_tour.tours").add("ReceiptScreenTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             // press close button in receipt screen
@@ -76,7 +75,6 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
 
 registry.category("web_tour.tours").add("ReceiptScreenDiscountWithPricelistTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -93,7 +91,6 @@ registry.category("web_tour.tours").add("ReceiptScreenDiscountWithPricelistTour"
 
 registry.category("web_tour.tours").add("OrderPaidInCash", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -117,7 +114,6 @@ registry.category("web_tour.tours").add("OrderPaidInCash", {
 
 registry.category("web_tour.tours").add("ReceiptTrackingMethodTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),

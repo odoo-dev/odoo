@@ -14,7 +14,6 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("TicketScreenTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -183,7 +182,6 @@ registry.category("web_tour.tours").add("TicketScreenTour", {
 
 registry.category("web_tour.tours").add("FiscalPositionNoTaxRefund", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -211,7 +209,6 @@ registry.category("web_tour.tours").add("FiscalPositionNoTaxRefund", {
 
 registry.category("web_tour.tours").add("LotRefundTour", {
     test: true,
-    url: "/pos/ui",
     steps: () =>
         [
             Dialog.confirm("Open session"),
