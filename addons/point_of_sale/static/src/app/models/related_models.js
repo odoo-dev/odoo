@@ -1,4 +1,5 @@
 import { reactive, toRaw } from "@odoo/owl";
+import { lazyComputed } from "./lazy_computed";
 import { uuidv4 } from "@point_of_sale/utils";
 
 const ID_CONTAINER = {};
@@ -303,6 +304,22 @@ export class Base {
     }
 }
 
+function getAllGetters(proto) {
+    const getterNames = new Set();
+    const getters = new Set();
+    while (proto !== null) {
+        const descriptors = Object.getOwnPropertyDescriptors(proto);
+        for (const [name, descriptor] of Object.entries(descriptors)) {
+            if (descriptor.get && !getterNames.has(name)) {
+                getterNames.add(name);
+                getters.add([name, descriptor.get]);
+            }
+        }
+        proto = Object.getPrototypeOf(proto);
+    }
+    return getters;
+}
+
 export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
     const indexes = opts.databaseIndex || {};
     const database = opts.databaseTable || {};
@@ -457,29 +474,74 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
         );
     }
 
-    const proxyTraps = {};
-    function getProxyTrap(model) {
-        if (model in proxyTraps) {
-            return proxyTraps[model];
-        }
-        const fields = getFields(model);
-        const proxyTrap = {
-            set(target, prop, value) {
-                if (proxyTrapDisabled || !(prop in fields)) {
-                    return Reflect.set(target, prop, value);
+    const modelClassesAndProxyTrapsCache = {};
+    function instantiateModel(model, { models, records }) {
+        if (!(model in modelClassesAndProxyTrapsCache)) {
+            const ModelClass = modelClasses[model] || Base;
+
+            const getters = new Map();
+            for (const [name, func] of getAllGetters(ModelClass.prototype)) {
+                if (name.startsWith("__") && name.endsWith("__")) {
+                    continue;
                 }
-                const field = fields[prop];
-                if (field && X2MANY_TYPES.has(field.type)) {
-                    if (!isX2ManyCommands(value)) {
-                        value = [["clear"], ["link", ...value]];
+                getters.set(name, [
+                    `__lazy_${name}`,
+                    (obj) => {
+                        return func.call(obj);
+                    },
+                ]);
+            }
+            class ModelWithLazyGetters extends ModelClass {
+                constructor(...args) {
+                    const result = super(...args);
+                    for (const [lazyName, func] of getters.values()) {
+                        lazyComputed(this, lazyName, func);
                     }
+                    return result;
                 }
-                target.update({ [prop]: value });
-                return true;
-            },
-        };
-        proxyTraps[model] = proxyTrap;
-        return proxyTrap;
+            }
+
+            const fields = getFields(model);
+            const proxyTrap = {
+                set(target, prop, value) {
+                    if (proxyTrapDisabled || !(prop in fields)) {
+                        return Reflect.set(target, prop, value);
+                    }
+                    const field = fields[prop];
+                    if (field && X2MANY_TYPES.has(field.type)) {
+                        if (!isX2ManyCommands(value)) {
+                            value = [["clear"], ["link", ...value]];
+                        }
+                    }
+                    target.update({ [prop]: value });
+                    return true;
+                },
+                get(target, prop, receiver) {
+                    if (proxyTrapDisabled) {
+                        return Reflect.get(target, prop, receiver);
+                    }
+                    if (getters.has(prop)) {
+                        try {
+                            proxyTrapDisabled += 1;
+                            const [lazyName] = getters.get(prop);
+                            // For a getter, we should get the value from the receiver.
+                            // Because the receiver is linked to the reactivity.
+                            // We want to read the getter from it to make sure that the getter
+                            // is part of the reactivity as well.
+                            // To avoid infinite recursion, we disable this proxy trap
+                            // during the time the lazy getter is accessed.
+                            return receiver[lazyName];
+                        } finally {
+                            proxyTrapDisabled -= 1;
+                        }
+                    }
+                    return Reflect.get(target, prop, receiver);
+                },
+            };
+            modelClassesAndProxyTrapsCache[model] = [ModelWithLazyGetters, proxyTrap];
+        }
+        const [Model, proxyTrap] = modelClassesAndProxyTrapsCache[model];
+        return new Model({ models, records, model: models[model], proxyTrap });
     }
 
     const create = withoutProxyTrap(_create);
@@ -494,9 +556,7 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
             vals["id"] = uuid(model);
         }
 
-        const Model = modelClasses[model] || Base;
-        const proxyTrap = getProxyTrap(model);
-        const record = reactive(new Model({ models, records, model: models[model], proxyTrap }));
+        const record = reactive(instantiateModel(model, { models, records }));
 
         const id = vals["id"];
         record.id = id;
