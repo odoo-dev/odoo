@@ -1,16 +1,24 @@
 /** @odoo-module */
 
-/** @odoo-module */
-
 import { expect, test } from "@odoo/hoot";
-// import { Deferred } from "@odoo/hoot-mock";
-import { Cache } from "@web/core/utils/cache";
+import { getContent, setupEditor } from "./helpers";
 
-test("one plus one equals two", () => {
 
-    expect(1 + 1).toBe(2);
+test("can instantiate a Editor", async () => {
+    const { el, editor } = await setupEditor("hel[lo] world", {});
+    expect(el.innerHTML).toBe("hello world");
+    expect(getContent(el)).toBe(`<div contenteditable="true" class="odoo-editor-editable">hel[lo] world</div>`);
+    // setSelection("<div>a[dddb]</div>");
+    editor.dispatch("TOGGLE_BOLD")
+    expect(getContent(el)).toBe(`<div contenteditable="true" class="odoo-editor-editable">hel<strong>[]lo</strong> world</div>` );
 });
 
+
+    // const fixture = getFixture();
+    // const testEditor = await mountWithCleanup(TestEditor, {
+    //     props: { innerHTML: "hello" }
+    // });
+    // expect(fixture.innerHTML).toBe('sss');
 
 /**
  * To write:
