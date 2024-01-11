@@ -6,7 +6,7 @@ import { Powerbox } from "./powerbox";
 
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
-    static dependencies = ["hint", "overlay"];
+    static dependencies = ["overlay"];
 
     setup() {
         this.addDomListener(document, "selectionchange", this.handleCommandHint);
@@ -38,7 +38,10 @@ export class PowerboxPlugin extends Plugin {
             const node = selection.anchorNode;
             const el = node instanceof Element ? node : node.parentElement;
             if ((el.tagName === "DIV" || el.tagName === "P") && isEmpty(el)) {
-                this.shared.createTempHint(el, 'Type "/" for commands');
+                this.dispatch("CREATE_HINT", {
+                    el,
+                    text: 'Type "/" for commands',
+                });
             }
         }
     }
