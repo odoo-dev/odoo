@@ -7,7 +7,6 @@ import { isEmpty } from "./utils";
 export class HintPlugin extends Plugin {
     static name = "hint";
     static dependencies = ["history"];
-    static shared = ["createTempHint"];
 
     setup() {
         this.tempHints = new Set();
@@ -30,6 +29,9 @@ export class HintPlugin extends Plugin {
         switch (command) {
             case "CONTENT_UPDATED":
                 this.updateHints();
+                break;
+            case "CREATE_HINT":
+                this.createTempHint(payload.el, payload.text);
                 break;
         }
     }
