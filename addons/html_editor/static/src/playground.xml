@@ -3,7 +3,7 @@
     <t t-name="html_editor.Playground">
         <div class="d-flex justify-content-center">
             <div t-ref="html" class="m-2 p-1" style="width:600px;border:1px solid black; min-height: 500px;max-height:500px;overflow:auto;">
-Hello editor
+Hello Phoenix editor!
 <p>this is a paragraph</p>
 <p>this is another paragraph</p>
 <div>this is a div</div>
@@ -11,6 +11,13 @@ Hello editor
             </div>
         </div>
         this is outside the editor. 
-        <button>this does nothing</button>
+        <button t-on-click="toggleWysiwyg">Toggle Current Editor</button>
+        <t t-if="state.showWysiwyg">
+            <div class="d-flex justify-content-center">
+                <div class="m-2 p-1" style="width:600px;min-height: 500px;max-height:500px;overflow:auto;">
+                    <Wysiwyg options="{}" startWysiwyg="startWysiwyg" editingValue="'hello current editor'"/>
+                </div>
+            </div>
+        </t>
     </t>
 </templates>
