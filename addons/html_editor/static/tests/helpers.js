@@ -7,7 +7,7 @@ import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 export function getContent(node) {
     const sel = window.getSelection();
     const range = sel.getRangeAt(0);
-    return _getContent(node, range);
+    return [...node.childNodes].map((childNode) => _getContent(childNode, range)).join("");
 }
 
 function _getContent(node, range) {
@@ -49,7 +49,7 @@ function getElemContent(el, range) {
         result += "]";
     }
     for (let child of el.childNodes) {
-        result += getContent(child, range);
+        result += _getContent(child, range);
     }
     if (!VOID_ELEMS.has(el.tagName)) {
         result += `</${tag}>`;
