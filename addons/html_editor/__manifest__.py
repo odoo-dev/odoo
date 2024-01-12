@@ -27,15 +27,14 @@
         'views/views.xml',
     ],
     'assets': {
-        'html_editor.assets': [
-            'html_editor/static/src/editor/*',
-        ],
         'web.assets_backend': [
             'html_editor/static/src/**/*',
+            ('include', 'web_editor.backend_assets_wysiwyg'),
         ],
         'web.assets_unit_tests': [
             'html_editor/static/tests/**/*',
         ],
+
 
     },
     'license': 'AGPL-3'
