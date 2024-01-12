@@ -84,9 +84,9 @@ export function setRange(el, content) {
 }
 
 function visitAndSetRange(target, ref, range) {
-    if (target.nodeType === Node.TEXT_NODE) {
-        const text = ref.textContent;
+    function applyRange() {
         let offset = 0;
+        const text = ref.textContent;
         if (text.includes("[")) {
             offset = 1;
             const index = text.indexOf("[");
@@ -96,13 +96,21 @@ function visitAndSetRange(target, ref, range) {
             const index = text.indexOf("]") - offset;
             range.setEnd(target, index);
         }
+    }
+
+    if (target.nodeType === Node.TEXT_NODE) {
+        applyRange();
     } else {
         const targetChildren = [...target.childNodes];
         const refChildren = [...ref.childNodes];
+        if (targetChildren.length === 0 && refChildren.length === 1) {
+            applyRange();
+            return;
+        }
         for (let i = 0; i < targetChildren.length; i++) {
             visitAndSetRange(targetChildren[i], refChildren[i], range);
         }
-    }    
+    }
 }
 
 class TestEditor extends Component {
