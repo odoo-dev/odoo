@@ -13,6 +13,24 @@ test("can instantiate a Editor", async () => {
     expect(getContent(el)).toBe(`<div contenteditable="true" class="odoo-editor-editable">hel<strong>[]lo</strong> world</div>` );
 });
 
+test("with an empty selector", async () => {
+    const { el } = await setupEditor("<div>[]</div>", {});
+    expect(el.innerHTML).toBe(
+        `<div class="o-we-hint" placeholder="Type &quot;/&quot; for commands"></div>`
+    );
+    expect(getContent(el)).toBe(
+        `<div contenteditable="true" class="odoo-editor-editable"><div class="o-we-hint" placeholder="Type "/" for commands">[]</div></div>`
+    );
+});
+
+test("with a part of the selector in an empty HTMLElement", async () => {
+    const { el } = await setupEditor("a[bc<div>]</div>", {});
+    expect(el.innerHTML).toBe(`abc<div></div>`);
+    expect(getContent(el)).toBe(
+        `<div contenteditable="true" class="odoo-editor-editable">a[bc<div>]</div></div>`
+    );
+});
+
 
     // const fixture = getFixture();
     // const testEditor = await mountWithCleanup(TestEditor, {
