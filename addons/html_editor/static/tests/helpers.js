@@ -123,12 +123,12 @@ class TestEditor extends Component {
                 setContent(this.ref.el, this.props.content);
             });
         }
-        this.editor = useWysiwyg("target");
+        this.editor = useWysiwyg("target", this.props.config);
     }
 }
 
-export async function setupEditor(content) {
-    const testEditor = await mountWithCleanup(TestEditor, {props: { content }});
+export async function setupEditor(content, config = {}) {
+    const testEditor = await mountWithCleanup(TestEditor, { props: { content, config } });
 
     return {
         el: testEditor.ref.el,
