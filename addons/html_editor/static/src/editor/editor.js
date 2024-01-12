@@ -26,7 +26,7 @@ export class Editor {
             el.innerHTML = this.config.innerHTML;
         }
         el.setAttribute("contenteditable", true);
-        initElementForEdition(el);
+        initElementForEdition(el, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
         el.classList.add("odoo-editor-editable");
         this.startPlugins();
     }
