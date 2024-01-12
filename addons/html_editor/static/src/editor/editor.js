@@ -1,5 +1,7 @@
 /** @odoo-module */
 
+import { initElementForEdition } from "./core/utils";
+
 /**
  * @typedef {typeof import("./plugin").Plugin} PluginConstructor
  */
@@ -24,6 +26,7 @@ export class Editor {
             el.innerHTML = this.config.innerHTML;
         }
         el.setAttribute("contenteditable", true);
+        initElementForEdition(el);
         el.classList.add("odoo-editor-editable");
         this.startPlugins();
     }
