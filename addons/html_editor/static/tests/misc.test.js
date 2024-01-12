@@ -1,15 +1,15 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { getContent, setupEditor } from "./helpers";
+import { getContent, setupEditor, setContent } from "./helpers";
 
 test("can instantiate a Editor", async () => {
-    const { el, editor } = await setupEditor("hel[lo] world", {});
-    expect(el.innerHTML).toBe("hello world");
-    expect(getContent(el)).toBe(`hel[lo] world`);
-    // setSelection("<div>a[dddb]</div>");
+    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
+    expect(el.innerHTML).toBe(`<p>hello world</p>`);
+    expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
+    setContent(el, "<div>a[dddb]</div>");
     editor.dispatch("TOGGLE_BOLD");
-    expect(getContent(el)).toBe(`hel<strong>[]lo</strong> world`);
+    expect(getContent(el)).toBe(`<div>a<strong>[]dddb</strong></div>`);
 });
 
 test("with an empty selector", async () => {
@@ -23,16 +23,10 @@ test("with an empty selector", async () => {
 });
 
 test("with a part of the selector in an empty HTMLElement", async () => {
-    const { el } = await setupEditor("a[bc<div>]</div>", {});
-    expect(el.innerHTML).toBe(`abc<div></div>`);
-    expect(getContent(el)).toBe(`a[bc<div>]</div>`);
+    const { el } = await setupEditor("<div>a[bc<div>]</div></div>", {});
+    expect(el.innerHTML).toBe(`<div>abc<div></div></div>`);
+    expect(getContent(el)).toBe(`<div>a[bc<div>]</div></div>`);
 });
-
-// const fixture = getFixture();
-// const testEditor = await mountWithCleanup(TestEditor, {
-//     props: { innerHTML: "hello" }
-// });
-// expect(fixture.innerHTML).toBe('sss');
 
 /**
  * To write:
