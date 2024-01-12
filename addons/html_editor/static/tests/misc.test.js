@@ -3,14 +3,13 @@
 import { expect, test } from "@odoo/hoot";
 import { getContent, setupEditor } from "./helpers";
 
-
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("hel[lo] world", {});
     expect(el.innerHTML).toBe("hello world");
-    expect(getContent(el)).toBe(`<div contenteditable="true" class="odoo-editor-editable">hel[lo] world</div>`);
+    expect(getContent(el)).toBe(`hel[lo] world`);
     // setSelection("<div>a[dddb]</div>");
-    editor.dispatch("TOGGLE_BOLD")
-    expect(getContent(el)).toBe(`<div contenteditable="true" class="odoo-editor-editable">hel<strong>[]lo</strong> world</div>` );
+    editor.dispatch("TOGGLE_BOLD");
+    expect(getContent(el)).toBe(`hel<strong>[]lo</strong> world`);
 });
 
 test("with an empty selector", async () => {
@@ -19,24 +18,21 @@ test("with an empty selector", async () => {
         `<div class="o-we-hint" placeholder="Type &quot;/&quot; for commands"></div>`
     );
     expect(getContent(el)).toBe(
-        `<div contenteditable="true" class="odoo-editor-editable"><div class="o-we-hint" placeholder="Type "/" for commands">[]</div></div>`
+        `<div class="o-we-hint" placeholder="Type "/" for commands">[]</div>`
     );
 });
 
 test("with a part of the selector in an empty HTMLElement", async () => {
     const { el } = await setupEditor("a[bc<div>]</div>", {});
     expect(el.innerHTML).toBe(`abc<div></div>`);
-    expect(getContent(el)).toBe(
-        `<div contenteditable="true" class="odoo-editor-editable">a[bc<div>]</div></div>`
-    );
+    expect(getContent(el)).toBe(`a[bc<div>]</div>`);
 });
 
-
-    // const fixture = getFixture();
-    // const testEditor = await mountWithCleanup(TestEditor, {
-    //     props: { innerHTML: "hello" }
-    // });
-    // expect(fixture.innerHTML).toBe('sss');
+// const fixture = getFixture();
+// const testEditor = await mountWithCleanup(TestEditor, {
+//     props: { innerHTML: "hello" }
+// });
+// expect(fixture.innerHTML).toBe('sss');
 
 /**
  * To write:
