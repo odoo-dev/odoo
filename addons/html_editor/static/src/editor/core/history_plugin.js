@@ -7,7 +7,6 @@ export class HistoryPlugin extends Plugin {
     static shared = ["enableObserver", "disableObserver"];
 
     setup() {
-        this.el.setAttribute("contenteditable", true);
         this.observer = new MutationObserver(() => this.handleDOMChange());
         this.enableObserver();
         this._cleanups.push(() => this.observer.disconnect());
