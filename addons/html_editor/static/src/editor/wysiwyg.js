@@ -2,6 +2,7 @@
 
 import { onMounted, onWillDestroy, useEnv, useRef } from "@odoo/owl";
 import { DomPlugin } from "./core/dom_plugin";
+import { FormatPlugin } from "./core/format_plugin";
 import { HintPlugin } from "./core/hint_plugin";
 import { HistoryPlugin } from "./core/history_plugin";
 import { OverlayPlugin } from "./core/overlay_plugin";
@@ -15,6 +16,7 @@ export function wysiwyg(el, env, config) {
         HistoryPlugin,
         HintPlugin,
         DomPlugin,
+        FormatPlugin,
         OverlayPlugin,
         ToolbarPlugin,
         PowerboxPlugin,
@@ -32,6 +34,7 @@ export function useWysiwyg(refName, config = {}) {
         HistoryPlugin,
         HintPlugin,
         DomPlugin,
+        FormatPlugin,
         OverlayPlugin,
         ToolbarPlugin,
         PowerboxPlugin,
