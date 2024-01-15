@@ -18,10 +18,12 @@ export class Editor {
         this.services = services;
         this.plugins = [];
         this.editable = null;
+        this.document = null;
     }
 
     attachTo(editable) {
         this.editable = editable;
+        this.document = editable.ownerDocument;
         if (this.config.innerHTML) {
             editable.innerHTML = this.config.innerHTML;
         }
@@ -62,7 +64,7 @@ export class Editor {
                 console.log(`[${P.name}] ${command} (payload=${str})`);
                 this.dispatch(command, payload);
             };
-            const plugin = new P(this.editable, _shared, dispatch, this.config, this.services);
+            const plugin = new P(this.document, this.editable, _shared, dispatch, this.config, this.services);
             this.plugins.push(plugin);
             for (const h of P.shared) {
                 if (h in shared) {
