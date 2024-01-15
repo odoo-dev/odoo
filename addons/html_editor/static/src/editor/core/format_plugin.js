@@ -15,7 +15,7 @@ export class FormatPlugin extends Plugin {
     setup() {
         this.addDomListener(this.editable, "keydown", this.handleShortcut.bind(this));
     }
-    handleCommand(command) {
+    handleCommand(command, size) {
         switch (command) {
             case "FORMAT_BOLD":
                 formatSelection(this.editable, "bold");
@@ -30,7 +30,10 @@ export class FormatPlugin extends Plugin {
                 formatSelection(this.editable, "strikeThrough");
                 break;
             case "FORMAT_FONT_SIZE":
-                formatSelection(this.editable, "fontSize", { applyStyle: true, formatProps: { size: 12 } });
+                formatSelection(this.editable, "fontSize", {
+                    applyStyle: true,
+                    formatProps: { size },
+                });
                 break;
             case "FORMAT_FONT_SIZE_CLASSNAME":
                 formatSelection(this.editable, "setFontSizeClassName", { formatProps: { className: "o_default_snippet_text" } });
