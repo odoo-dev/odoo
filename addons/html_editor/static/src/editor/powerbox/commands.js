@@ -10,7 +10,7 @@ registry
     .add("format", { name: _t("Format") });
 
 registry
-    .category("powerbox_commands")
+    .category("phoenix_commands")
     // 'structure' commands
     .add("bulleted_list", {
         name: _t("Bulleted list"),
