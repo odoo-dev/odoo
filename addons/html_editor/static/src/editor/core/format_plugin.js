@@ -13,27 +13,27 @@ const shortcuts = {
 export class FormatPlugin extends Plugin {
     static name = "format";
     setup() {
-        this.addDomListener(this.el, "keydown", this.handleShortcut.bind(this));
+        this.addDomListener(this.editable, "keydown", this.handleShortcut.bind(this));
     }
     handleCommand(command) {
         switch (command) {
             case "FORMAT_BOLD":
-                formatSelection(this.el, "bold");
+                formatSelection(this.editable, "bold");
                 break;
             case "FORMAT_ITALIC":
-                formatSelection(this.el, "italic");
+                formatSelection(this.editable, "italic");
                 break;
             case "FORMAT_UNDERLINE":
-                formatSelection(this.el, "underline");
+                formatSelection(this.editable, "underline");
                 break;
             case "FORMAT_STRIKETHROUGH":
-                formatSelection(this.el, "strikeThrough");
+                formatSelection(this.editable, "strikeThrough");
                 break;
             case "FORMAT_FONT_SIZE":
-                formatSelection(this.el, "fontSize", { applyStyle: true, formatProps: { size: 12 } });
+                formatSelection(this.editable, "fontSize", { applyStyle: true, formatProps: { size: 12 } });
                 break;
             case "FORMAT_FONT_SIZE_CLASSNAME":
-                formatSelection(this.el, "setFontSizeClassName", { formatProps: { className: "o_default_snippet_text" } });
+                formatSelection(this.editable, "setFontSizeClassName", { formatProps: { className: "o_default_snippet_text" } });
                 break;
             case "FORMAT_REMOVE_FORMAT":
                 this.removeFormat();
@@ -42,18 +42,18 @@ export class FormatPlugin extends Plugin {
     }
     removeFormat() {
         const textAlignStyles = new Map();
-        for (const element of getTraversedNodes(this.el)) {
+        for (const element of getTraversedNodes(this.editable)) {
             const block = closestBlock(element);
             if (block.style.textAlign) {
                 textAlignStyles.set(block, block.style.textAlign);
             }
         }
         this.config.document.execCommand("removeFormat");
-        for (const node of getTraversedNodes(this.el)) {
+        for (const node of getTraversedNodes(this.editable)) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
         }
-        for (const block of getTraversedNodes(this.el)) {
+        for (const block of getTraversedNodes(this.editable)) {
             block.style.setProperty("text-align", textAlign);
         }
     }

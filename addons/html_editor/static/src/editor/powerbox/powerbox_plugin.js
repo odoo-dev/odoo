@@ -14,9 +14,9 @@ export class PowerboxPlugin extends Plugin {
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
             dispatch: this.dispatch,
-            el: this.el,
+            el: this.editable,
         });
-        this.addDomListener(this.el, "keypress", (ev) => {
+        this.addDomListener(this.editable, "keypress", (ev) => {
             if (ev.key === "/") {
                 this.powerbox.open();
             }
@@ -34,7 +34,7 @@ export class PowerboxPlugin extends Plugin {
     handleCommandHint() {
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
-        if (selection.isCollapsed && this.el.contains(range.commonAncestorContainer)) {
+        if (selection.isCollapsed && this.editable.contains(range.commonAncestorContainer)) {
             const node = selection.anchorNode;
             const el = node instanceof Element ? node : node.parentElement;
             if ((el.tagName === "DIV" || el.tagName === "P") && isEmpty(el)) {
