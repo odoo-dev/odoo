@@ -10,6 +10,7 @@
                         active: props.buttonsActiveState[button.id]
                     }"
                     t-att-title="button.name"
+                    t-att-name="button.id"
                     t-on-click="() => this.dispatch(button.cmd)"/>
             </t>
         </div>
