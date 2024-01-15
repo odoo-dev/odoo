@@ -7,18 +7,6 @@ export class DomPlugin extends Plugin {
 
     handleCommand(command, payload) {
         switch (command) {
-            case "TOGGLE_BOLD":
-                this.toggleTag("strong");
-                break;
-            case "TOGGLE_ITALIC":
-                this.toggleTag("em");
-                break;
-            case "TOGGLE_UNDERLINE":
-                this.toggleTag("u");
-                break;
-            case "TOGGLE_STRIKETHROUGH":
-                this.toggleTag("s");
-                break;
             case "SET_TAG":
                 this.setTag(payload);
                 break;
@@ -37,16 +25,6 @@ export class DomPlugin extends Plugin {
     // --------------------------------------------------------------------------
     // commands
     // --------------------------------------------------------------------------
-
-    toggleTag(tagName) {
-        const selection = document.getSelection();
-        const range = selection.getRangeAt(0);
-        const fragment = range.extractContents();
-        const elem = document.createElement(tagName);
-        elem.appendChild(fragment);
-        range.insertNode(elem);
-        selection.selectAllChildren(elem);
-    }
 
     setTag({ tagName }) {
         const selection = document.getSelection();
