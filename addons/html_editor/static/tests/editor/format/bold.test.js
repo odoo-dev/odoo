@@ -1,10 +1,10 @@
 /** @odoo-module */
 
+import { isSelectionFormat } from "@html_editor/editor/core/utils";
 import { describe, expect, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
-import { bold, notStrong, strong, BOLD_TAGS } from "./utils";
-import { isSelectionFormat } from "@html_editor/editor/core/utils";
+import { BOLD_TAGS, bold, notStrong, strong } from "./utils";
 
 test("should make a few characters bold", async () => {
     await testEditor({
@@ -145,6 +145,19 @@ test("should not format non-editable text (bold)", async () => {
         contentAfter: `<p>${strong("[a")}</p><p contenteditable="false">b</p><p>${strong(
             "c]"
         )}</p>`,
+    });
+});
+test.todo("should insert a span zws when toggling a formatting command twice", () => {
+    return testEditor({
+        contentBefore: `<p>[]<br></p>`,
+        stepFunction: async (editor) => {
+            await bold(editor);
+            await bold(editor);
+        },
+        // todo: It would be better to remove the zws entirely so that
+        // the P could have the "/" hint but that behavior might be
+        // complex with the current implementation.
+        contentAfterEdit: `<p>${strong(`[]\u200B`, "first")}</p>`,
     });
 });
 
