@@ -32,7 +32,7 @@ export class TablePlugin extends Plugin {
         const rect = range.getBoundingClientRect();
         if (rect.width === 0 && rect.height === 0 && rect.x === 0) {
             this.shared.disableObserver();
-            range.startContainer.parentElement.appendChild(document.createElement("br"));
+            range.startContainer.parentElement.appendChild(this.document.createElement("br"));
             this.shared.enableObserver();
         }
         this.picker.open();
@@ -44,7 +44,7 @@ export class TablePlugin extends Plugin {
         const tableHtml = `<table class="table table-bordered o_table"><tbody>${trsHtml}</tbody></table>`;
         const sel = getSelection();
         const elem = sel.anchorNode.parentElement;
-        const tableElem = parseHTML(document, tableHtml);
+        const tableElem = parseHTML(this.document, tableHtml);
         elem.appendChild(tableElem);
     }
 }

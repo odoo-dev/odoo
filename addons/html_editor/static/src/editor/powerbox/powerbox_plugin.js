@@ -9,7 +9,7 @@ export class PowerboxPlugin extends Plugin {
     static dependencies = ["overlay"];
 
     setup() {
-        this.addDomListener(document, "selectionchange", this.handleCommandHint);
+        this.addDomListener(this.document, "selectionchange", this.handleCommandHint);
 
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
