@@ -85,7 +85,7 @@ export class ToolbarPlugin extends Plugin {
     }
 
     updateToolbarVisibility(range) {
-        const inEditor = this.el.contains(range.commonAncestorContainer);
+        const inEditor = this.editable.contains(range.commonAncestorContainer);
         if (this.overlay.isOpen) {
             if (!inEditor || range.collapsed) {
                 this.overlay.close();
