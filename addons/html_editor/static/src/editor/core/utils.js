@@ -27,6 +27,12 @@ export const CTGROUPS = {
     BR: CTYPES.BR,
 };
 
+/**
+ * Array of all the classes used by the editor to change the font size.
+ */
+export const FONT_SIZE_CLASSES = ["display-1-fs", "display-2-fs", "display-3-fs", "display-4-fs", "h1-fs",
+    "h2-fs", "h3-fs", "h4-fs", "h5-fs", "h6-fs", "base-fs", "small"];
+
 export function isEmpty(el) {
     const content = el.innerHTML.trim();
     if (content === "" || content === "<br>") {
