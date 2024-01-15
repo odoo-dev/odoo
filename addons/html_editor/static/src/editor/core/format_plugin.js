@@ -48,7 +48,7 @@ export class FormatPlugin extends Plugin {
                 textAlignStyles.set(block, block.style.textAlign);
             }
         }
-        this.config.document.execCommand("removeFormat");
+        this.document.execCommand("removeFormat");
         for (const node of getTraversedNodes(this.editable)) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
