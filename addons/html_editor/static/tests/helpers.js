@@ -1,9 +1,15 @@
 /** @odoo-module */
 
 import { expect } from "@odoo/hoot";
+import { dispatch } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { useWysiwyg } from "../src/editor/wysiwyg";
+
+export const Direction = {
+    BACKWARD: "BACKWARD",
+    FORWARD: "FORWARD",
+};
 
 export function getContent(node) {
     const sel = window.getSelection();
@@ -71,7 +77,7 @@ export function setRange(el, content) {
         throw new Error("setRange requires the same html content");
     }
 
-    // create range 
+    // create range
     const range = document.createRange();
     const elRef = document.createElement(el.tagName);
     elRef.innerHTML = content;
@@ -158,5 +164,25 @@ export async function testEditor(
     // we should clean the editor here
     if (contentAfter) {
         expect(getContent(el)).toBe(contentAfter);
+    }
+}
+
+export async function insertText(editor, text) {
+    // Create and dispatch events to mock text insertion. Unfortunatly, the
+    // events will be flagged `isTrusted: false` by the browser, requiring
+    // the editor to detect them since they would not trigger the default
+    // browser behavior otherwise.
+    for (const char of text) {
+        // KeyDownEvent is required to trigger deleteRange.
+        dispatch(editor.el, "keydown", { key: char });
+        // KeyPressEvent is not required but is triggered like in the browser.
+        dispatch(editor.el, "keypress", { key: char });
+        // InputEvent is required to simulate the insert text.
+        dispatch(editor.el, "input", {
+            inputType: "insertText",
+            data: char,
+        });
+        // KeyUpEvent is not required but is triggered like the browser would.
+        dispatch(editor.el, "keyup", { key: char });
     }
 }
