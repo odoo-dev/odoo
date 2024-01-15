@@ -17,6 +17,10 @@ export function strikeThrough(editor) {
     editor.dispatch("FORMAT_STRIKETHROUGH");
 }
 
+export function setFontSize(size) {
+    return (editor) => editor.dispatch("FORMAT_FONT_SIZE", size);
+}
+
 // helpers to generate html tags
 const getZwsTag = (tagName, { style } = {}) => {
     const styleAttr = style ? ` style="${style}"` : "";
