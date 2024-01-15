@@ -1,9 +1,10 @@
 /** @odoo-module */
 
-import { describe, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
 import { bold, notStrong, strong, BOLD_TAGS } from "./utils";
+import { isSelectionFormat } from "@html_editor/editor/core/utils";
 
 test("should make a few characters bold", async () => {
     await testEditor({
@@ -188,4 +189,31 @@ describe("inside container font-weight: 500 and strong being strong-weight: 500"
             });
         }
     );
+});
+
+describe("isSelectionFormat", () => {
+    test("return false for isSelectionFormat when partially selecting 2 text node, the anchor is formated and focus is not formated", async () => {
+        await testEditor({
+            contentBefore: `<p>${strong(`a[b`)}</p><p>c]d</p>`,
+            stepFunction: (editor) => {
+                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+            },
+        });
+    });
+    test("return false for isSelectionFormat when partially selecting 2 text node, the anchor is not formated and focus is formated", async () => {
+        await testEditor({
+            contentBefore: `<p>${strong(`a]b`)}</p><p>c[d</p>`,
+            stepFunction: (editor) => {
+                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+            },
+        });
+    });
+    test("return false for isSelectionFormat when selecting 3 text node, the anchor and focus not formated and the text node in between formated", async () => {
+        await testEditor({
+            contentBefore: `<p>a[b</p><p>${strong(`c`)}</p><p>d]e</p>`,
+            stepFunction: (editor) => {
+                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+            },
+        });
+    });
 });
