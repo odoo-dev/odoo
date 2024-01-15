@@ -6,7 +6,7 @@ import { fuzzyLookup } from "@web/core/utils/search";
 import { rotate } from "@web/core/utils/arrays";
 
 const categories = registry.category("powerbox_categories");
-const commands = registry.category("powerbox_commands");
+const commands = registry.category("phoenix_commands");
 
 export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
