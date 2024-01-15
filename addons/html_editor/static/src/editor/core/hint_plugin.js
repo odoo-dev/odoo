@@ -22,7 +22,7 @@ export class HintPlugin extends Plugin {
             "OL LI": _t("List"),
             "CL LI": _t("To-do"),
         };
-        this.addDomListener(document, "selectionchange", this.handleSelectionChange);
+        this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
     }
 
     handleCommand(command, payload) {
