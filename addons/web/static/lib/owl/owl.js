@@ -1592,7 +1592,7 @@
         }
         const handled = _handleError(node, error);
         if (!handled) {
-            console.warn(`[Owl] Unhandled error. Destroying the root component`);
+            console.log(`[Owl] Unhandled error. Destroying the root component`);
             try {
                 node.app.destroy();
             }
