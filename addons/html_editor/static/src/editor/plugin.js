@@ -12,8 +12,8 @@ export class Plugin {
      * @param {*} config
      * @param {*} services
      */
-    constructor(el, shared, dispatch, config, services) {
-        this.el = el;
+    constructor(editable, shared, dispatch, config, services) {
+        this.editable = editable;
         this.config = config;
         this.services = services;
         this.shared = shared;

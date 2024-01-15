@@ -30,7 +30,7 @@ export class OverlayPlugin extends Plugin {
     }
 
     onScroll(ev) {
-        if (ev.target.contains(this.el)) {
+        if (ev.target.contains(this.editable)) {
             this.updatePositions();
         }
     }
@@ -78,7 +78,7 @@ export class Overlay {
         if (!this.el) {
             return;
         }
-        const elRect = this.plugin.el.getBoundingClientRect();
+        const elRect = this.plugin.editable.getBoundingClientRect();
         const overlayRect = this.el.getBoundingClientRect();
         const Y_OFFSET = 6;
 

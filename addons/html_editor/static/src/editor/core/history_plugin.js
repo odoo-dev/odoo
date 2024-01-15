@@ -13,7 +13,7 @@ export class HistoryPlugin extends Plugin {
     }
 
     enableObserver() {
-        this.observer.observe(this.el, {
+        this.observer.observe(this.editable, {
             attributes: true,
             childList: true,
             subtree: true,

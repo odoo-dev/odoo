@@ -17,17 +17,17 @@ export class Editor {
         this.config = config;
         this.services = services;
         this.plugins = [];
-        this.el = null;
+        this.editable = null;
     }
 
-    attachTo(el) {
-        this.el = el;
+    attachTo(editable) {
+        this.editable = editable;
         if (this.config.innerHTML) {
-            el.innerHTML = this.config.innerHTML;
+            editable.innerHTML = this.config.innerHTML;
         }
-        el.setAttribute("contenteditable", true);
-        initElementForEdition(el, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
-        el.classList.add("odoo-editor-editable");
+        editable.setAttribute("contenteditable", true);
+        initElementForEdition(editable, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
+        editable.classList.add("odoo-editor-editable");
         this.startPlugins();
     }
 
@@ -62,7 +62,7 @@ export class Editor {
                 console.log(`[${P.name}] ${command} (payload=${str})`);
                 this.dispatch(command, payload);
             };
-            const plugin = new P(this.el, _shared, dispatch, this.config, this.services);
+            const plugin = new P(this.editable, _shared, dispatch, this.config, this.services);
             this.plugins.push(plugin);
             for (const h of P.shared) {
                 if (h in shared) {
@@ -77,7 +77,7 @@ export class Editor {
     }
 
     dispatch(command, payload = {}) {
-        if (!this.el) {
+        if (!this.editable) {
             throw new Error("Cannot dispatch command while not attached to an element");
         }
         for (const p of this.plugins) {
@@ -86,13 +86,13 @@ export class Editor {
     }
 
     destroy() {
-        if (this.el) {
-            this.el.removeAttribute("contenteditable");
-            this.el.classList.remove("odoo-editor-editable");
+        if (this.editable) {
+            this.editable.removeAttribute("contenteditable");
+            this.editable.classList.remove("odoo-editor-editable");
             for (const p of this.plugins) {
                 p.destroy();
             }
-            this.el = null;
+            this.editable = null;
         }
     }
 }

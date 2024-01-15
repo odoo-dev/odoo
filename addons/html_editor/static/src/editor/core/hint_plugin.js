@@ -47,7 +47,7 @@ export class HintPlugin extends Plugin {
 
     updateHints() {
         // remove all outdated (=non empty) hints
-        for (const hint of this.el.querySelectorAll(".o-we-hint")) {
+        for (const hint of this.editable.querySelectorAll(".o-we-hint")) {
             if (!isEmpty(hint)) {
                 this.removeHint(hint);
                 if (this.tempHints.has(hint)) {
@@ -57,7 +57,7 @@ export class HintPlugin extends Plugin {
         }
         // add new hints, if any
         for (const [selector, text] of Object.entries(this.hints)) {
-            for (const el of this.el.querySelectorAll(selector)) {
+            for (const el of this.editable.querySelectorAll(selector)) {
                 if (!el.classList.contains("o-we-hint") && isEmpty(el)) {
                     this.makeHint(el, text);
                 }
