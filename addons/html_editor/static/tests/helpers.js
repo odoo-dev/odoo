@@ -1,8 +1,9 @@
 /** @odoo-module */
 
-import { useWysiwyg } from "../src/editor/wysiwyg";
+import { expect } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
+import { useWysiwyg } from "../src/editor/wysiwyg";
 
 export function getContent(node) {
     const sel = window.getSelection();
@@ -134,4 +135,28 @@ export async function setupEditor(content, config = {}) {
         el: testEditor.ref.el,
         editor: testEditor.editor,
     };
+}
+
+// TODO maybe we should add "removeCheckIds" and "styleContent" or use setupEditor directly
+export async function testEditor(
+    { contentBefore, contentBeforeEdit, stepFunction, contentAfter, contentAfterEdit },
+    config = {}
+) {
+    const { el, editor } = await setupEditor(contentBefore, config);
+    if (contentBeforeEdit) {
+        // we should do something before (sanitize)
+        expect(getContent(el)).toBe(contentBeforeEdit);
+    }
+
+    if (stepFunction) {
+        await stepFunction(editor);
+    }
+
+    if (contentAfterEdit) {
+        expect(getContent(el)).toBe(contentAfterEdit);
+    }
+    // we should clean the editor here
+    if (contentAfter) {
+        expect(getContent(el)).toBe(contentAfter);
+    }
 }
