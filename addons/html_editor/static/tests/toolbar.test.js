@@ -15,6 +15,6 @@ test("toolbar works: can format bold", async () => {
     await waitFor(".o-we-toolbar");
 
     // click on toggle bold
-    await contains(".btn[title='Toggle bold']").click();
+    await contains(".btn[name='bold']").click();
     expect(getContent(el)).toBe("<p><strong>[test]</strong></p>");
 });
