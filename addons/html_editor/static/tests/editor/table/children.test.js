@@ -2,14 +2,19 @@
 
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
+import { dispatch } from "@odoo/hoot-dom";
 
-
+// TODO use the right commands (ADD_ROW, ADD_COLUMN)
 function addRow(position) {
-    return ( editor) => editor.dispatch()
+    return (editor) => editor.dispatch("ADD_ROW", position);
+}
+
+function addColumn(position) {
+    return (editor) => editor.dispatch("ADD_COLUMN", position);
 }
 
 describe("row", () => {
-    describe("above", async () => {
+    describe("above", () => {
         test.todo("should add a row above the top row", async () => {
             await testEditor({
                 contentBefore:
@@ -18,7 +23,7 @@ describe("row", () => {
                     '<td style="width: 25px;">cd</td>' +
                     '<td style="width: 30px;">ef[]</td>' +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addRow", "before"),
+                stepFunction: addRow("before"),
                 contentAfter:
                     '<table><tbody><tr style="height: 20px;">' +
                     '<td style="width: 20px;"><p><br></p></td>' +
@@ -45,7 +50,7 @@ describe("row", () => {
                     "<td>cd</td>" +
                     "<td>ef[]</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addRow", "before"),
+                stepFunction: addRow("before"),
                 contentAfter:
                     '<table><tbody><tr style="height: 20px;">' +
                     '<td style="width: 20px;">ab</td>' +
@@ -65,6 +70,7 @@ describe("row", () => {
             });
         });
     });
+
     describe("below", () => {
         test.todo("should add a row below the bottom row", async () => {
             await testEditor({
@@ -74,7 +80,7 @@ describe("row", () => {
                     '<td style="width: 25px;">cd</td>' +
                     '<td style="width: 30px;">ef[]</td>' +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addRow", "after"),
+                stepFunction: addRow("after"),
                 contentAfter:
                     '<table><tbody><tr style="height: 20px;">' +
                     '<td style="width: 20px;">ab</td>' +
@@ -101,7 +107,7 @@ describe("row", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addRow", "after"),
+                stepFunction: addRow("after"),
                 contentAfter:
                     '<table><tbody><tr style="height: 20px;">' +
                     '<td style="width: 20px;">ab</td>' +
@@ -138,7 +144,7 @@ describe("column", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addColumn", "before"),
+                stepFunction: addColumn("before"),
                 contentAfter:
                     '<table style="width: 150px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 32px;"><p><br></p></td>' +
@@ -172,7 +178,7 @@ describe("column", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addColumn", "before"),
+                stepFunction: addColumn("before"),
                 contentAfter:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 38px;">ab</td>' +
@@ -195,6 +201,7 @@ describe("column", () => {
             });
         });
     });
+
     describe("right", () => {
         test.todo("should add a column right of the rightmost column", async () => {
             await testEditor({
@@ -209,7 +216,7 @@ describe("column", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addColumn", "after"),
+                stepFunction: addColumn("after"),
                 contentAfter:
                     '<table style="width: 150px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 29px;">ab</td>' +
@@ -246,7 +253,7 @@ describe("column", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("addColumn", "after"),
+                stepFunction: addColumn("after"),
                 contentAfter:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 38px;">ab</td>' +
@@ -267,6 +274,18 @@ describe("column", () => {
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
             });
+        });
+    });
+});
+
+describe("tab", () => {
+    test.todo("should add a new row on press tab at the end of a table", async () => {
+        await testEditor({
+            contentBefore:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
+            stepFunction: async (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+            contentAfter:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef</td></tr><tr style="height: 20px;"><td>[<p><br></p>]</td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
         });
     });
 });
