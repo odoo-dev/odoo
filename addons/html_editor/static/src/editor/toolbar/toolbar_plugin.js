@@ -8,28 +8,28 @@ import { reactive } from "@odoo/owl";
 const buttons = [
     {
         id: "bold",
-        cmd: "TOGGLE_BOLD",
+        cmd: "FORMAT_BOLD",
         icon: "fa-bold",
         name: "Toggle bold",
         isFormatApplied: hasTag("strong"),
     },
     {
         id: "italic",
-        cmd: "TOGGLE_ITALIC",
+        cmd: "FORMAT_ITALIC",
         icon: "fa-italic",
         name: "Toggle italic",
         isFormatApplied: hasTag("em"),
     },
     {
         id: "underline",
-        cmd: "TOGGLE_UNDERLINE",
+        cmd: "FORMAT_UNDERLINE",
         icon: "fa-underline",
         name: "Toggle underline",
         isFormatApplied: hasTag("u"),
     },
     {
         id: "strikethrough",
-        cmd: "TOGGLE_STRIKETHROUGH",
+        cmd: "FORMAT_STRIKETHROUGH",
         icon: "fa-strikethrough",
         name: "Toggle strikethrough",
         isFormatApplied: hasTag("s"),
