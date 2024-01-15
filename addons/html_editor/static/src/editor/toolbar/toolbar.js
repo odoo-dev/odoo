@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onMounted, useRef, useState, useExternalListener } from "@odoo/owl";
+import { Component, onMounted, useRef } from "@odoo/owl";
 
 export class Toolbar extends Component {
     static template = "html_editor.Toolbar";
