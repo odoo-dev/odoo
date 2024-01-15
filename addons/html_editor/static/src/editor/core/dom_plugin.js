@@ -27,12 +27,12 @@ export class DomPlugin extends Plugin {
     // --------------------------------------------------------------------------
 
     setTag({ tagName }) {
-        const selection = document.getSelection();
+        const selection = this.document.getSelection();
         const range = selection.getRangeAt(0);
         const node = range.endContainer;
         const offset = range.endOffset;
         const elem = range.endContainer.parentElement;
-        const newElem = document.createElement(tagName);
+        const newElem = this.document.createElement(tagName);
         const children = [...elem.childNodes];
         let hasOnlyEmptyTextNodes = true;
         for (const child of children) {
@@ -42,16 +42,16 @@ export class DomPlugin extends Plugin {
             }
         }
         if (hasOnlyEmptyTextNodes) {
-            newElem.appendChild(document.createElement("BR"));
+            newElem.appendChild(this.document.createElement("BR"));
         }
         elem.replaceWith(newElem);
         selection.setPosition(node, offset);
     }
 
     insertSeparator() {
-        const selection = document.getSelection();
+        const selection = this.document.getSelection();
         const range = selection.getRangeAt(0);
-        const sep = document.createElement("hr");
+        const sep = this.document.createElement("hr");
         const target = range.commonAncestorContainer;
         target.parentElement.before(sep);
     }
@@ -60,13 +60,13 @@ export class DomPlugin extends Plugin {
         if (type !== "UL" && type !== "OL") {
             throw new Error(`Invalid list type: ${type}`);
         }
-        const selection = document.getSelection();
+        const selection = this.document.getSelection();
         const range = selection.getRangeAt(0);
         const currentNode = range.endContainer;
         const offset = range.endOffset;
         const elem = currentNode.parentElement;
-        const list = document.createElement(type);
-        const li = document.createElement("li");
+        const list = this.document.createElement(type);
+        const li = this.document.createElement("li");
         list.appendChild(li);
         li.appendChild(currentNode);
         elem.replaceWith(list);
