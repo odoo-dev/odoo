@@ -12,7 +12,7 @@ export class TablePlugin extends Plugin {
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.picker = this.shared.createOverlay(TablePicker, "bottom", {
             dispatch: this.dispatch,
-            el: this.el,
+            el: this.editable,
         });
     }
 
