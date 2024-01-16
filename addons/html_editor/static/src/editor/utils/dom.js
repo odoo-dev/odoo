@@ -63,3 +63,46 @@ export function splitElement(element, offset) {
     element.remove();
     return [before, after];
 }
+
+/**
+ * Split around the given elements, until a given ancestor (included). Elements
+ * will be removed in the process so caution is advised in dealing with their
+ * references. Returns the new split root element that is a clone of
+ * limitAncestor or the original limitAncestor if no split occured.
+ *
+ * @see splitElement
+ * @param {Node[] | Node} elements
+ * @param {Node} limitAncestor
+ * @returns {[Node, Node]}
+ */
+export function splitAroundUntil(elements, limitAncestor) {
+    elements = Array.isArray(elements) ? elements : [elements];
+    const firstNode = elements[0];
+    const lastNode = elements[elements.length - 1];
+    if ([firstNode, lastNode].includes(limitAncestor)) {
+        return limitAncestor;
+    }
+    let before = firstNode.previousSibling;
+    let after = lastNode.nextSibling;
+    let beforeSplit, afterSplit;
+    if (!before && !after && elements[0] !== limitAncestor) {
+        return splitAroundUntil(elements[0].parentElement, limitAncestor);
+    }
+    // Split up ancestors up to font
+    while (after && after.parentElement !== limitAncestor) {
+        afterSplit = splitElement(after.parentElement, childNodeIndex(after))[0];
+        after = afterSplit.nextSibling;
+    }
+    if (after) {
+        afterSplit = splitElement(limitAncestor, childNodeIndex(after))[0];
+        limitAncestor = afterSplit;
+    }
+    while (before && before.parentElement !== limitAncestor) {
+        beforeSplit = splitElement(before.parentElement, childNodeIndex(before) + 1)[1];
+        before = beforeSplit.previousSibling;
+    }
+    if (before) {
+        beforeSplit = splitElement(limitAncestor, childNodeIndex(before) + 1)[1];
+    }
+    return beforeSplit || afterSplit || limitAncestor;
+}
