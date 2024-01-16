@@ -36,17 +36,3 @@ export function getColumnIndex(td) {
     );
     return tdSiblings.findIndex((child) => child === td);
 }
-
-// This is a list of "paragraph-related elements", defined as elements that
-// behave like paragraphs.
-export const paragraphRelatedElements = [
-    "P",
-    "H1",
-    "H2",
-    "H3",
-    "H4",
-    "H5",
-    "H6",
-    "PRE",
-    "BLOCKQUOTE",
-];
