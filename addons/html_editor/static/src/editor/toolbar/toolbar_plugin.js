@@ -34,6 +34,27 @@ const buttons = [
         name: "Toggle strikethrough",
         isFormatApplied: hasTag("s"),
     },
+    {
+        id: "bulleted_list",
+        cmd: "TOGGLE_LIST_UL",
+        icon: "fa-list-ul",
+        name: "Bulleted list",
+        isFormatApplied: () => false, // TODO
+    },
+    {
+        id: "numbered_list",
+        cmd: "TOGGLE_LIST_OL",
+        icon: "fa-list-ol",
+        name: "Numbered list",
+        isFormatApplied: () => false, // TODO
+    },
+    {
+        id: "checklist",
+        cmd: "TOGGLE_CHECKLIST",
+        icon: "fa-check-square-o",
+        name: "Checklist",
+        isFormatApplied: () => false, // TODO
+    },
 ];
 
 // TODO: This is a temporary naive solution to generate isFormatApplied callback.

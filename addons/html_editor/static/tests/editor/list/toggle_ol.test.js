@@ -5,7 +5,7 @@ import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
 
 function toggleOrderedList(editor) {
-    throw new Error("toggle OL not done yet");
+    editor.dispatch("TOGGLE_LIST", { type: "OL" });
 }
 
 describe("Range collapsed", () => {
@@ -18,7 +18,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph into a list", async () => {
+        test("should turn a paragraph into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: toggleOrderedList,
@@ -26,7 +26,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a heading into a list", async () => {
+        test("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<h1>ab[]cd</h1>",
                 stepFunction: toggleOrderedList,
@@ -34,7 +34,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph in a div into a list", async () => {
+        test("should turn a paragraph in a div into a list", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[]cd</p></div>",
                 stepFunction: toggleOrderedList,
@@ -116,7 +116,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a paragraph", async () => {
+        test("should turn a list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<ol><li>ab[]cd</li></ol>",
                 stepFunction: toggleOrderedList,
@@ -124,7 +124,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a heading", async () => {
+        test("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<ol><li><h1>ab[]cd</h1></li></ol>",
                 stepFunction: toggleOrderedList,
@@ -132,7 +132,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list item into a paragraph", async () => {
+        test("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ol><li>cd</li><li>ef[]gh</li></ol>",
                 stepFunction: toggleOrderedList,
@@ -210,7 +210,7 @@ describe("Range collapsed", () => {
 
 describe("Range not collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn a paragraph into a list", async () => {
+        test("should turn a paragraph into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><p>cd[ef]gh</p>",
                 stepFunction: toggleOrderedList,
@@ -218,7 +218,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a heading into a list", async () => {
+        test("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><h1>cd[ef]gh</h1>",
                 stepFunction: toggleOrderedList,
@@ -292,7 +292,7 @@ describe("Range not collapsed", () => {
         );
     });
     describe("Remove", () => {
-        test.todo("should turn a list into a paragraph", async () => {
+        test("should turn a list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ol><li>cd[ef]gh</li></ol>",
                 stepFunction: toggleOrderedList,
@@ -300,7 +300,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a heading", async () => {
+        test("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ol><li><h1>cd[ef]gh</h1></li></ol>",
                 stepFunction: toggleOrderedList,
@@ -308,7 +308,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into two paragraphs", async () => {
+        test("should turn a list into two paragraphs", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ol><li>cd[ef</li><li>gh]ij</li></ol>",
                 stepFunction: toggleOrderedList,
@@ -316,7 +316,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list item into a paragraph", async () => {
+        test("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ol><li>cd</li><li>ef[gh]ij</li></ol>",
                 stepFunction: toggleOrderedList,
