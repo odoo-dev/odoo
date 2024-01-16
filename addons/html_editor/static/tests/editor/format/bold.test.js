@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { isSelectionFormat } from "@html_editor/editor/core/utils";
+import { isSelectionFormat } from "@html_editor/editor/utils/formatting";
 import { describe, expect, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
