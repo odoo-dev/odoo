@@ -120,7 +120,7 @@ export function makeContentsInline(node) {
     for (const child of node.childNodes) {
         if (isBlock(child)) {
             if (childIndex && paragraphRelatedElements.includes(child.nodeName)) {
-                child.before(document.createElement('br'));
+                child.before(document.createElement("br"));
             }
             for (const grandChild of child.childNodes) {
                 child.before(grandChild);
@@ -130,4 +130,13 @@ export function makeContentsInline(node) {
         }
         childIndex += 1;
     }
+}
+
+export function unwrapContents(node) {
+    const contents = [...node.childNodes];
+    for (const child of contents) {
+        node.parentNode.insertBefore(child, node);
+    }
+    node.parentNode.removeChild(node);
+    return contents;
 }
