@@ -1,15 +1,7 @@
 /** @odoo-module */
 
-import {
-    DIRECTIONS,
-    childNodeIndex,
-    endPos,
-    leftPos,
-    nodeSize,
-    rightPos,
-    startPos,
-} from "./position";
-import { closestElement, createDOMPathGenerator, firstLeaf } from "./dom_traversal";
+import { isBlock } from "./blocks";
+import { splitTextNode } from "./dom";
 import {
     getDeepestPosition,
     isNotEditableNode,
@@ -19,8 +11,16 @@ import {
     previousLeaf,
 } from "./dom_info";
 import { isFakeLineBreak } from "./dom_state";
-import { isBlock } from "./blocks";
-import { splitTextNode } from "./dom";
+import { closestElement, createDOMPathGenerator, descendants, firstLeaf } from "./dom_traversal";
+import {
+    DIRECTIONS,
+    childNodeIndex,
+    endPos,
+    leftPos,
+    nodeSize,
+    rightPos,
+    startPos,
+} from "./position";
 
 /**
  * From selection position, checks if it is left-to-right or right-to-left.
@@ -348,4 +348,77 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
         range.setEnd(end, endOffset);
     }
     return range;
+}
+
+/**
+ * Returns an array containing all the nodes traversed when walking the
+ * selection.
+ *
+ * @param {Node} editable
+ * @returns {Node[]}
+ */
+export function getTraversedNodes(editable, range = getDeepRange(editable)) {
+    const selectedTableCells = editable.querySelectorAll(".o_selected_td");
+    const document = editable.ownerDocument;
+    if (!range) {
+        return [];
+    }
+    const iterator = document.createNodeIterator(range.commonAncestorContainer);
+    let node;
+    do {
+        node = iterator.nextNode();
+    } while (
+        node &&
+        node !== range.startContainer &&
+        !(selectedTableCells.length && node === selectedTableCells[0])
+    );
+    const traversedNodes = new Set([node, ...descendants(node)]);
+    while (node && node !== range.endContainer) {
+        node = iterator.nextNode();
+        if (node) {
+            const selectedTable = closestElement(node, ".o_selected_table");
+            if (selectedTable) {
+                for (const selectedTd of selectedTable.querySelectorAll(".o_selected_td")) {
+                    traversedNodes.add(selectedTd);
+                    descendants(selectedTd).forEach((descendant) => traversedNodes.add(descendant));
+                }
+            } else {
+                traversedNodes.add(node);
+            }
+        }
+    }
+    return [...traversedNodes];
+}
+
+/**
+ * Returns an array containing all the nodes fully contained in the selection.
+ *
+ * @param {Node} editable
+ * @returns {Node[]}
+ */
+export function getSelectedNodes(editable) {
+    const selectedTableCells = editable.querySelectorAll(".o_selected_td");
+    const document = editable.ownerDocument;
+    const sel = document.getSelection();
+    if (!sel.rangeCount && !selectedTableCells.length) {
+        return [];
+    }
+    const range = sel.getRangeAt(0);
+    return [
+        ...new Set(
+            getTraversedNodes(editable).flatMap((node) => {
+                const td = closestElement(node, ".o_selected_td");
+                if (td) {
+                    return descendants(td);
+                } else if (
+                    range.isPointInRange(node, 0) &&
+                    range.isPointInRange(node, nodeSize(node))
+                ) {
+                    return node;
+                } else {
+                    return [];
+                }
+            })
+        ),
+    ];
 }

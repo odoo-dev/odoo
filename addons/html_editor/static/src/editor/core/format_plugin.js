@@ -1,8 +1,8 @@
 /** @odoo-module */
 
 import { Plugin } from "../plugin";
-import { formatSelection } from '@html_editor/editor/core/utils';
 import { closestElement } from "../utils/dom_traversal";
+import { formatSelection } from "../utils/formatting";
 
 const shortcuts = {
     FORMAT_BOLD: (e) => e.key === 'b' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
