@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { insertText, testEditor } from "../../helpers";
+import { insertText, setSelection, testEditor } from "../../helpers";
 import { s, span, strikeThrough } from "./utils";
 
 test("should make a few characters strikeThrough", async () => {
@@ -18,62 +18,59 @@ test("should make a few characters not strikeThrough", async () => {
         contentAfter: `<p>${s(`ab`)}[cde]${s(`fg`)}</p>`,
     });
 });
-// test.todo("should make a few characters strikeThrough then remove style inside", async () => {
-//     await testEditor({
-//         contentBefore: `<p>ab[c d]ef</p>`,
-//         stepFunction: async (editor) => {
-//             await strikeThrough(editor);
-//             const styleSpan = editor.editable.querySelector("s").childNodes[0];
-//             const selection = {
-//                 anchorNode: styleSpan,
-//                 anchorOffset: 1,
-//                 focusNode: styleSpan,
-//                 focusOffset: 2,
-//                 direction: Direction.FORWARD,
-//             };
-//             await setTestSelection(selection);
-//             await strikeThrough(editor);
-//         },
-//         contentAfter: `<p>ab<s>c</s>[ ]<s>d</s>ef</p>`,
-//     });
-// });
-// test.todo("should make strikeThrough then more then remove", async () => {
-//     await testEditor({
-//         contentBefore: `<p>abc[ ]def</p>`,
-//         stepFunction: async (editor) => {
-//             await strikeThrough(editor);
-//             const pElem = editor.editable.querySelector("p").childNodes;
-//             const selection = {
-//                 anchorNode: pElem[0],
-//                 anchorOffset: 2,
-//                 focusNode: pElem[2],
-//                 focusOffset: 1,
-//                 direction: Direction.FORWARD,
-//             };
-//             await setTestSelection(selection);
-//             await strikeThrough(editor);
-//         },
-//         contentAfter: `<p>ab${s(`[c d]`)}ef</p>`,
-//     });
-//     await testEditor({
-//         contentBefore: `<p>abc[ ]def</p>`,
-//         stepFunction: async (editor) => {
-//             await strikeThrough(editor);
-//             const pElem = editor.editable.querySelector("p").childNodes;
-//             const selection = {
-//                 anchorNode: pElem[0],
-//                 anchorOffset: 2,
-//                 focusNode: pElem[2],
-//                 focusOffset: 1,
-//                 direction: Direction.FORWARD,
-//             };
-//             await setTestSelection(selection);
-//             await strikeThrough(editor);
-//             await strikeThrough(editor);
-//         },
-//         contentAfter: `<p>ab[c d]ef</p>`,
-//     });
-// });
+test("should make a few characters strikeThrough then remove style inside", async () => {
+    await testEditor({
+        contentBefore: `<p>ab[c d]ef</p>`,
+        stepFunction: async (editor) => {
+            await strikeThrough(editor);
+            const styleSpan = editor.editable.querySelector("s").childNodes[0];
+            const selection = {
+                anchorNode: styleSpan,
+                anchorOffset: 1,
+                focusNode: styleSpan,
+                focusOffset: 2,
+            };
+            setSelection(selection);
+            await strikeThrough(editor);
+        },
+        contentAfter: `<p>ab<s>c</s>[ ]<s>d</s>ef</p>`,
+    });
+});
+test.todo("should make strikeThrough then more then remove", async () => {
+    await testEditor({
+        contentBefore: `<p>abc[ ]def</p>`,
+        stepFunction: async (editor) => {
+            await strikeThrough(editor);
+            const pElem = editor.editable.querySelector("p").childNodes;
+            const selection = {
+                anchorNode: pElem[0],
+                anchorOffset: 2,
+                focusNode: pElem[2],
+                focusOffset: 1,
+            };
+            setSelection(selection);
+            await strikeThrough(editor);
+        },
+        contentAfter: `<p>ab${s(`[c d]`)}ef</p>`,
+    });
+    await testEditor({
+        contentBefore: `<p>abc[ ]def</p>`,
+        stepFunction: async (editor) => {
+            await strikeThrough(editor);
+            const pElem = editor.editable.querySelector("p").childNodes;
+            const selection = {
+                anchorNode: pElem[0],
+                anchorOffset: 2,
+                focusNode: pElem[2],
+                focusOffset: 1,
+            };
+            setSelection(selection);
+            await strikeThrough(editor);
+            await strikeThrough(editor);
+        },
+        contentAfter: `<p>ab[c d]ef</p>`,
+    });
+});
 test("should make two paragraphs strikeThrough", async () => {
     await testEditor({
         contentBefore: "<p>[abc</p><p>def]</p>",
@@ -109,16 +106,13 @@ test("should make a whole heading not strikeThrough after a triple click", async
         contentAfter: `<h1>[ab]</h1><p>cd</p>`,
     });
 });
-test(
-    "should make a selection starting with strikeThrough text fully strikeThrough",
-    async () => {
-        await testEditor({
-            contentBefore: `<p>${s(`[ab`)}</p><p>c]d</p>`,
-            stepFunction: strikeThrough,
-            contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]`)}d</p>`,
-        });
-    }
-);
+test("should make a selection starting with strikeThrough text fully strikeThrough", async () => {
+    await testEditor({
+        contentBefore: `<p>${s(`[ab`)}</p><p>c]d</p>`,
+        stepFunction: strikeThrough,
+        contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]`)}d</p>`,
+    });
+});
 test.todo(
     "should make a selection with strikeThrough text in the middle fully strikeThrough",
     async () => {

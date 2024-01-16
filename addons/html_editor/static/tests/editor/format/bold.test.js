@@ -4,7 +4,7 @@ import { isSelectionFormat } from "@html_editor/editor/core/utils";
 import { describe, expect, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
-import { BOLD_TAGS, bold, notStrong, strong } from "./utils";
+import { BOLD_TAGS, bold, notStrong, span, strong } from "./utils";
 
 test("should make a few characters bold", async () => {
     await testEditor({
@@ -147,19 +147,19 @@ test("should not format non-editable text (bold)", async () => {
         )}</p>`,
     });
 });
-test.todo("should insert a span zws when toggling a formatting command twice", () => {
-    return testEditor({
-        contentBefore: `<p>[]<br></p>`,
-        stepFunction: async (editor) => {
-            await bold(editor);
-            await bold(editor);
-        },
-        // todo: It would be better to remove the zws entirely so that
-        // the P could have the "/" hint but that behavior might be
-        // complex with the current implementation.
-        contentAfterEdit: `<p>${strong(`[]\u200B`, "first")}</p>`,
-    });
-});
+// test.todo("should insert a span zws when toggling a formatting command twice", () => {
+//     return testEditor({
+//         contentBefore: `<p>[]<br></p>`,
+//         stepFunction: async (editor) => {
+//             await bold(editor);
+//             await bold(editor);
+//         },
+//         // todo: It would be better to remove the zws entirely so that
+//         // the P could have the "/" hint but that behavior might be
+//         // complex with the current implementation.
+//         contentAfterEdit: `<p>${strong(`[]\u200B`, "first")}</p>`,
+//     });
+// });
 
 describe("inside container or inline with class already bold", () => {
     test.todo("should force the font-weight to normal with an inline with class", async () => {
