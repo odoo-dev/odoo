@@ -26,7 +26,6 @@ export function wysiwyg(el, env, config) {
     // const env = useEnv();
     const editor = new Editor(Plugins, config, env.services);
     return editor;
-
 }
 
 export function useWysiwyg(refName, config = {}) {
