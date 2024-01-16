@@ -10,13 +10,13 @@ import { closestElement } from "./dom_traversal";
  * @returns {number}
  */
 export function getRowIndex(trOrTd) {
-    const tr = closestElement(trOrTd, 'tr');
+    const tr = closestElement(trOrTd, "tr");
     const trParent = tr && tr.parentElement;
     if (!trParent) {
         return -1;
     }
-    const trSiblings = [...trParent.children].filter(child => child.nodeName === 'TR');
-    return trSiblings.findIndex(child => child === tr);
+    const trSiblings = [...trParent.children].filter((child) => child.nodeName === "TR");
+    return trSiblings.findIndex((child) => child === tr);
 }
 
 /**
@@ -31,20 +31,22 @@ export function getColumnIndex(td) {
     if (!tdParent) {
         return -1;
     }
-    const tdSiblings = [...tdParent.children].filter(child => child.nodeName === 'TD' || child.nodeName === 'TH');
-    return tdSiblings.findIndex(child => child === td);
+    const tdSiblings = [...tdParent.children].filter(
+        (child) => child.nodeName === "TD" || child.nodeName === "TH"
+    );
+    return tdSiblings.findIndex((child) => child === td);
 }
 
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
 export const paragraphRelatedElements = [
-    'P',
-    'H1',
-    'H2',
-    'H3',
-    'H4',
-    'H5',
-    'H6',
-    'PRE',
-    'BLOCKQUOTE',
+    "P",
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "PRE",
+    "BLOCKQUOTE",
 ];
