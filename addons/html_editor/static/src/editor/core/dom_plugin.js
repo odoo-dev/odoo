@@ -1,15 +1,17 @@
 /** @odoo-module */
 
 import { Plugin } from "../plugin";
-import { isBlock } from "../utils/blocks";
-import { splitElement, splitTextNode } from "../utils/dom";
+import { closestBlock, isBlock } from "../utils/blocks";
+import { makeContentsInline, splitElement, splitTextNode } from "../utils/dom";
 import {
     allowsParagraphRelatedElements,
+    getDeepestPosition,
     isSelfClosingElement,
+    isShrunkBlock,
     isUnbreakable,
 } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
-import { childNodeIndex } from "../utils/position";
+import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
@@ -35,7 +37,9 @@ export class DomPlugin extends Plugin {
     // Shared
 
     dom_insert(content) {
-        if (!content) return;
+        if (!content) {
+            return;
+        }
         const selection = this.document.getSelection();
         let startNode;
         let insertBefore = false;
@@ -49,11 +53,11 @@ export class DomPlugin extends Plugin {
             startNode = range.startContainer;
         }
 
-        const container = document.createElement('fake-element');
-        const containerFirstChild = document.createElement('fake-element-fc');
-        const containerLastChild = document.createElement('fake-element-lc');
+        const container = document.createElement("fake-element");
+        const containerFirstChild = document.createElement("fake-element-fc");
+        const containerLastChild = document.createElement("fake-element-lc");
 
-        if (typeof content === 'string') {
+        if (typeof content === "string") {
             container.textContent = content;
         } else {
             container.replaceChildren(content);
@@ -61,33 +65,42 @@ export class DomPlugin extends Plugin {
 
         // In case the html inserted starts with a list and will be inserted within
         // a list, unwrap the list elements from the list.
-        if (closestElement(selection.anchorNode, 'UL, OL') &&
-            (container.firstChild.nodeName === 'UL' || container.firstChild.nodeName === 'OL')) {
+        if (
+            closestElement(selection.anchorNode, "UL, OL") &&
+            (container.firstChild.nodeName === "UL" || container.firstChild.nodeName === "OL")
+        ) {
             container.replaceChildren(...container.firstChild.childNodes);
         }
 
         startNode = startNode || this.document.getSelection().anchorNode;
         // If the selection anchorNode is the editable itself, the content
         // should not be unwrapped.
-        if (selection.anchorNode.oid !== 'root') {
+        if (selection.anchorNode.oid !== "root") {
             // In case the html inserted is all contained in a single root <p> or <li>
             // tag, we take the all content of the <p> or <li> and avoid inserting the
             // <p> or <li>. The same is true for a <pre> inside a <pre>.
-            if (container.childElementCount === 1 && (
-                container.firstChild.nodeName === 'P' ||
-                container.firstChild.nodeName === 'LI' ||
-                container.firstChild.nodeName === 'PRE' && closestElement(startNode, 'pre')
-            )) {
+            if (
+                container.childElementCount === 1 &&
+                (container.firstChild.nodeName === "P" ||
+                    container.firstChild.nodeName === "LI" ||
+                    (container.firstChild.nodeName === "PRE" && closestElement(startNode, "pre")))
+            ) {
                 const p = container.firstElementChild;
                 container.replaceChildren(...p.childNodes);
             } else if (container.childElementCount > 1) {
                 // Grab the content of the first child block and isolate it.
-                if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
+                if (
+                    isBlock(container.firstChild) &&
+                    !["TABLE", "UL", "OL"].includes(container.firstChild.nodeName)
+                ) {
                     containerFirstChild.replaceChildren(...container.firstElementChild.childNodes);
                     container.firstElementChild.remove();
                 }
                 // Grab the content of the last child block and isolate it.
-                if (isBlock(container.lastChild) && !['TABLE', 'UL', 'OL'].includes(container.lastChild.nodeName)) {
+                if (
+                    isBlock(container.lastChild) &&
+                    !["TABLE", "UL", "OL"].includes(container.lastChild.nodeName)
+                ) {
                     containerLastChild.replaceChildren(...container.lastElementChild.childNodes);
                     container.lastElementChild.remove();
                 }
@@ -96,7 +109,7 @@ export class DomPlugin extends Plugin {
 
         if (startNode.nodeType === Node.ELEMENT_NODE) {
             if (selection.anchorOffset === 0) {
-                const textNode = this.document.createTextNode('');
+                const textNode = this.document.createTextNode("");
                 if (isSelfClosingElement(startNode)) {
                     startNode.parentNode.insertBefore(textNode, startNode);
                 } else {
@@ -113,11 +126,11 @@ export class DomPlugin extends Plugin {
         let currentNode = startNode;
         let lastChildNode = false;
         const _insertAt = (reference, nodes, insertBefore) => {
-            for (const child of (insertBefore ? nodes.reverse() : nodes)) {
-                reference[insertBefore ? 'before' : 'after'](child);
+            for (const child of insertBefore ? nodes.reverse() : nodes) {
+                reference[insertBefore ? "before" : "after"](child);
                 reference = child;
             }
-        }
+        };
         const lastInsertedNodes = [...containerLastChild.childNodes];
         if (containerLastChild.hasChildNodes()) {
             const toInsert = [...containerLastChild.childNodes]; // Prevent mutation
@@ -138,13 +151,13 @@ export class DomPlugin extends Plugin {
         if (!container.hasChildNodes()) {
             if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
                 // @todo @phoenix verify it works
-                this.dispatch('DOM_SHIFT_ENTER', { element: currentNode.nextSibling, index: 0 });
+                this.dispatch("DOM_SHIFT_ENTER", { element: currentNode.nextSibling, index: 0 });
             } else {
                 // If we arrive here, the o_enter index should always be 0.
                 const parent = currentNode.nextSibling.parentElement;
                 const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
                 // @todo @phoenix verify it works
-                this.dispatch('DOM_ENTER', { element: currentNode.nextSibling, index });
+                this.dispatch("DOM_ENTER", { element: currentNode.nextSibling, index });
             }
         }
 
@@ -157,7 +170,7 @@ export class DomPlugin extends Plugin {
                 while (
                     currentNode.parentElement !== this.editable &&
                     (!allowsParagraphRelatedElements(currentNode.parentElement) ||
-                        currentNode.parentElement.nodeName === 'LI')
+                        currentNode.parentElement.nodeName === "LI")
                 ) {
                     if (isUnbreakable(currentNode.parentElement)) {
                         makeContentsInline(container);
@@ -182,12 +195,11 @@ export class DomPlugin extends Plugin {
             } else {
                 currentNode.after(nodeToInsert);
             }
-            if (currentNode.tagName !== 'BR' && isShrunkBlock(currentNode)) {
+            if (currentNode.tagName !== "BR" && isShrunkBlock(currentNode)) {
                 currentNode.remove();
             }
             currentNode = nodeToInsert;
         }
-
         currentNode = lastChildNode || currentNode;
         selection.removeAllRanges();
         const newRange = new Range();
