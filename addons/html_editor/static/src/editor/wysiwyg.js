@@ -10,6 +10,7 @@ import { Editor } from "./editor";
 import { PowerboxPlugin } from "./powerbox/powerbox_plugin";
 import { ToolbarPlugin } from "./toolbar/toolbar_plugin";
 import { TablePlugin } from "./table/table_plugin";
+import { ListPlugin } from "./list/list_plugin";
 
 export function wysiwyg(el, env, config) {
     const Plugins = [
@@ -21,6 +22,7 @@ export function wysiwyg(el, env, config) {
         ToolbarPlugin,
         PowerboxPlugin,
         TablePlugin,
+        ListPlugin,
     ];
 
     // const env = useEnv();
@@ -38,6 +40,7 @@ export function useWysiwyg(refName, config = {}) {
         ToolbarPlugin,
         PowerboxPlugin,
         TablePlugin,
+        ListPlugin,
     ];
 
     const env = useEnv();
