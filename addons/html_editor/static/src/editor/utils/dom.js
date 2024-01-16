@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { isBlock } from "./blocks";
+import { paragraphRelatedElements } from "./dom_info";
 import { childNodeIndex, DIRECTIONS } from "./position";
 
 /**
