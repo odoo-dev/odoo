@@ -1,10 +1,10 @@
 /** @odoo-module */
 
-import { parseHTML } from "../core/utils";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { splitElement, splitTextNode } from "../utils/dom";
 import { closestElement } from "../utils/dom_traversal";
+import { parseHTML } from "../utils/html";
 import { DIRECTIONS, rightPos, startPos } from "../utils/position";
 import { getDeepRange, getInSelection, setCursorStart, setSelection } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
