@@ -5,11 +5,12 @@ import { closestElement } from "../utils/dom_traversal";
 import { formatSelection } from "../utils/formatting";
 
 const shortcuts = {
-    FORMAT_BOLD: (e) => e.key === 'b' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
-    FORMAT_ITALIC: (e) => e.key === 'i' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
-    FORMAT_UNDERLINE: (e) => e.key === 'u' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
-    FORMAT_STRIKETHROUGH: (e) => e.key === '5' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
-}
+    FORMAT_BOLD: (e) => e.key === "b" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
+    FORMAT_ITALIC: (e) => e.key === "i" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
+    FORMAT_UNDERLINE: (e) => e.key === "u" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
+    FORMAT_STRIKETHROUGH: (e) =>
+        e.key === "5" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
+};
 
 export class FormatPlugin extends Plugin {
     static name = "format";
@@ -37,7 +38,9 @@ export class FormatPlugin extends Plugin {
                 });
                 break;
             case "FORMAT_FONT_SIZE_CLASSNAME":
-                formatSelection(this.editable, "setFontSizeClassName", { formatProps: { className: "o_default_snippet_text" } });
+                formatSelection(this.editable, "setFontSizeClassName", {
+                    formatProps: { className: "o_default_snippet_text" },
+                });
                 break;
             case "FORMAT_REMOVE_FORMAT":
                 this.removeFormat();
