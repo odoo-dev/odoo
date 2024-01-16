@@ -4,6 +4,14 @@ import { closestBlock, isBlock } from "./blocks";
 import { ancestors, closestElement, lastLeaf } from "./dom_traversal";
 import { DIRECTIONS, nodeSize } from "./position";
 
+export function isEmpty(el) {
+    const content = el.innerHTML.trim();
+    if (content === "" || content === "<br>") {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Return true if the given node appears bold. The node is considered to appear
  * bold if its font weight is bigger than 500 (eg.: Heading 1), or if its font
