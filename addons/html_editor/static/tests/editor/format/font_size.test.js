@@ -3,7 +3,7 @@
 import { test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
-import { setFontSize } from "./utils";
+import { setFontSize, strong } from "./utils";
 
 test("should change the font size of a few characters", async () => {
     await testEditor({
@@ -136,7 +136,7 @@ test.todo("should add font size in selected table cells with h1 as first child",
             '<table><tbody><tr><td><h1><span style="font-size: 18px;">[]<br></span></h1></td><td><h1><span style="font-size: 18px;"><br></span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
     });
 });
-test.todo("should add style to a span parent of an inline", async () => {
+test("should add style to a span parent of an inline", async () => {
     await testEditor({
         contentBefore: `<p>a<span style="background-color: black;">${strong(`[bc]`)}</span>d</p>`,
         stepFunction: setFontSize("10px"),
