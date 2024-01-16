@@ -6,11 +6,11 @@ import { dispatch } from "@odoo/hoot-dom";
 
 // TODO use the right commands (ADD_ROW, ADD_COLUMN)
 function addRow(position) {
-    return (editor) => editor.dispatch("ADD_ROW", position);
+    return (editor) => editor.dispatch("ADD_ROW", { position });
 }
 
 function addColumn(position) {
-    return (editor) => editor.dispatch("ADD_COLUMN", position);
+    return (editor) => editor.dispatch("ADD_COLUMN", { position });
 }
 
 describe("row", () => {
@@ -37,7 +37,7 @@ describe("row", () => {
                     "</tr></tbody></table>",
             });
         });
-        test.todo("should add a row above the middle row", async () => {
+        test("should add a row above the middle row", async () => {
             await testEditor({
                 contentBefore:
                     '<table><tbody><tr style="height: 20px;">' +
@@ -72,7 +72,7 @@ describe("row", () => {
     });
 
     describe("below", () => {
-        test.todo("should add a row below the bottom row", async () => {
+        test("should add a row below the bottom row", async () => {
             await testEditor({
                 contentBefore:
                     '<table><tbody><tr style="height: 20px;">' +
@@ -94,7 +94,7 @@ describe("row", () => {
                     "</tr></tbody></table>",
             });
         });
-        test.todo("should add a row below the middle row", async () => {
+        test("should add a row below the middle row", async () => {
             await testEditor({
                 contentBefore:
                     '<table><tbody><tr style="height: 20px;">' +
@@ -131,7 +131,7 @@ describe("row", () => {
 
 describe("column", () => {
     describe("left", () => {
-        test.todo("should add a column left of the leftmost column", async () => {
+        test("should add a column left of the leftmost column", async () => {
             await testEditor({
                 contentBefore:
                     '<table style="width: 150px;"><tbody><tr style="height: 20px;">' +
@@ -203,7 +203,7 @@ describe("column", () => {
     });
 
     describe("right", () => {
-        test.todo("should add a column right of the rightmost column", async () => {
+        test("should add a column right of the rightmost column", async () => {
             await testEditor({
                 contentBefore:
                     '<table style="width: 150px;"><tbody><tr style="height: 20px;">' +
