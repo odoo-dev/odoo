@@ -99,6 +99,7 @@ test.todo("should get ready to type in bold", async () => {
         contentAfter: `<p>ab[]cd</p>`,
     });
 });
+
 test.todo("should get ready to type in not bold", async () => {
     await testEditor({
         contentBefore: `<p>${strong(`ab[]cd`)}</p>`,
