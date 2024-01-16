@@ -1,21 +1,13 @@
 /** @odoo-module */
 
-import {
-    DIRECTIONS,
-    parseHTML,
-    isBlock,
-    rightPos,
-    setCursorStart,
-    setSelection,
-    splitElement,
-    splitTextNode,
-    getDeepRange,
-    startPos,
-} from '../core/utils';
+import { parseHTML } from "../core/utils";
 import { Plugin } from "../plugin";
-import { closestElement } from '../utils/dom_traversal';
-import { getInSelection } from '../utils/selection';
-import { getColumnIndex, getRowIndex } from '../utils/table';
+import { isBlock } from "../utils/blocks";
+import { splitElement, splitTextNode } from "../utils/dom";
+import { closestElement } from "../utils/dom_traversal";
+import { DIRECTIONS, rightPos, startPos } from "../utils/position";
+import { getDeepRange, getInSelection, setCursorStart, setSelection } from "../utils/selection";
+import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
 
 export class TablePlugin extends Plugin {
@@ -70,12 +62,12 @@ export class TablePlugin extends Plugin {
         this.picker.open();
     }
     insertTable({ rowNumber = 2, colNumber = 2 } = {}) {
-        const tdsHtml = new Array(colNumber).fill('<td><p><br></p></td>').join('');
-        const trsHtml = new Array(rowNumber).fill(`<tr>${tdsHtml}</tr>`).join('');
+        const tdsHtml = new Array(colNumber).fill("<td><p><br></p></td>").join("");
+        const trsHtml = new Array(rowNumber).fill(`<tr>${tdsHtml}</tr>`).join("");
         const tableHtml = `<table class="table table-bordered o_table"><tbody>${trsHtml}</tbody></table>`;
         const sel = this.document.getSelection();
         if (!sel.isCollapsed) {
-            this.dispatch('DELETE_RANGE', sel);
+            this.dispatch("DELETE_RANGE", sel);
         }
         while (!isBlock(sel.anchorNode)) {
             const anchorNode = sel.anchorNode;
@@ -87,36 +79,45 @@ export class TablePlugin extends Plugin {
             setSelection(...newPosition, ...newPosition, false);
         }
         const [table] = this.shared.dom_insert(parseHTML(this.document, tableHtml));
-        setCursorStart(table.querySelector('p'));
+        setCursorStart(table.querySelector("p"));
     }
     addColumn({ position, reference } = {}) {
         if (!reference) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            reference = getInSelection(this.document, 'td');
-            if (!reference) return;
+            reference = getInSelection(this.document, "td");
+            if (!reference) {
+                return;
+            }
         }
         const columnIndex = getColumnIndex(reference);
-        const table = closestElement(reference, 'table');
+        const table = closestElement(reference, "table");
         const tableWidth = table.style.width ? parseFloat(table.style.width) : table.clientWidth;
         const referenceColumn = table.querySelectorAll(`tr td:nth-of-type(${columnIndex + 1})`);
-        const referenceCellWidth = reference.style.width ? parseFloat(reference.style.width) : reference.clientWidth;
+        const referenceCellWidth = reference.style.width
+            ? parseFloat(reference.style.width)
+            : reference.clientWidth;
         // Temporarily set widths so proportions are respected.
-        const firstRow = table.querySelector('tr');
-        const firstRowCells = [...firstRow.children].filter(child => child.nodeName === 'TD' || child.nodeName === 'TH');
+        const firstRow = table.querySelector("tr");
+        const firstRowCells = [...firstRow.children].filter(
+            (child) => child.nodeName === "TD" || child.nodeName === "TH"
+        );
         let totalWidth = 0;
         for (const cell of firstRowCells) {
             const width = cell.style.width ? parseFloat(cell.style.width) : cell.clientWidth;
-            cell.style.width = width + 'px';
+            cell.style.width = width + "px";
             // Spread the widths to preserve proportions.
             // -1 for the width of the border of the new column.
-            const newWidth = Math.max(Math.round((width * tableWidth) / (tableWidth + referenceCellWidth - 1)), 13);
-            cell.style.width = newWidth + 'px';
+            const newWidth = Math.max(
+                Math.round((width * tableWidth) / (tableWidth + referenceCellWidth - 1)),
+                13
+            );
+            cell.style.width = newWidth + "px";
             totalWidth += newWidth;
         }
         referenceColumn.forEach((cell, rowIndex) => {
-            const newCell = this.document.createElement('td');
-            const p = this.document.createElement('p');
-            p.append(this.document.createElement('br'));
+            const newCell = this.document.createElement("td");
+            const p = this.document.createElement("p");
+            p.append(this.document.createElement("br"));
             newCell.append(p);
             cell[position](newCell);
             if (rowIndex === 0) {
@@ -124,38 +125,50 @@ export class TablePlugin extends Plugin {
                 totalWidth += parseFloat(cell.style.width);
             }
         });
-        if (totalWidth !== tableWidth - 1) { // -1 for the width of the border of the new column.
-            firstRowCells[firstRowCells.length - 1].style.width = parseFloat(firstRowCells[firstRowCells.length - 1].style.width) + (tableWidth - totalWidth - 1) + 'px';
+        if (totalWidth !== tableWidth - 1) {
+            // -1 for the width of the border of the new column.
+            firstRowCells[firstRowCells.length - 1].style.width =
+                parseFloat(firstRowCells[firstRowCells.length - 1].style.width) +
+                (tableWidth - totalWidth - 1) +
+                "px";
         }
         // Fix the table and row's width so it doesn't change.
-        table.style.width = tableWidth + 'px';
+        table.style.width = tableWidth + "px";
     }
     addRow({ position, reference } = {}) {
         if (!reference) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            reference = getInSelection(this.document, 'tr');
-            if (!reference) return;
+            reference = getInSelection(this.document, "tr");
+            if (!reference) {
+                return;
+            }
         }
-        const referenceRowHeight = reference.style.height ? parseFloat(reference.style.height) : reference.clientHeight;
-        const newRow = this.document.createElement('tr');
-        newRow.style.height = referenceRowHeight + 'px';
-        const cells = reference.querySelectorAll('td');
-        const referenceRowWidths = [...cells].map(cell => cell.style.width || cell.clientWidth + 'px');
-        newRow.append(...Array.from(Array(cells.length)).map(() => {
-            const td = this.document.createElement('td');
-            const p = this.document.createElement('p');
-            p.append(this.document.createElement('br'));
-            td.append(p);
-            return td;
-        }));
+        const referenceRowHeight = reference.style.height
+            ? parseFloat(reference.style.height)
+            : reference.clientHeight;
+        const newRow = this.document.createElement("tr");
+        newRow.style.height = referenceRowHeight + "px";
+        const cells = reference.querySelectorAll("td");
+        const referenceRowWidths = [...cells].map(
+            (cell) => cell.style.width || cell.clientWidth + "px"
+        );
+        newRow.append(
+            ...Array.from(Array(cells.length)).map(() => {
+                const td = this.document.createElement("td");
+                const p = this.document.createElement("p");
+                p.append(this.document.createElement("br"));
+                td.append(p);
+                return td;
+            })
+        );
         reference[position](newRow);
-        newRow.style.height = referenceRowHeight + 'px';
+        newRow.style.height = referenceRowHeight + "px";
         // Preserve the width of the columns (applied only on the first row).
         if (getRowIndex(newRow) === 0) {
             let columnIndex = 0;
             for (const column of newRow.children) {
                 column.style.width = referenceRowWidths[columnIndex];
-                cells[columnIndex].style.width = '';
+                cells[columnIndex].style.width = "";
                 columnIndex++;
             }
         }
@@ -163,51 +176,57 @@ export class TablePlugin extends Plugin {
     removeColumn(cell) {
         if (!cell) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            cell = getInSelection(this.document, 'td');
-            if (!cell) return;
+            cell = getInSelection(this.document, "td");
+            if (!cell) {
+                return;
+            }
         }
-        const table = closestElement(cell, 'table');
-        const cells = [...closestElement(cell, 'tr').querySelectorAll('th, td')];
-        const index = cells.findIndex(td => td === cell);
+        const table = closestElement(cell, "table");
+        const cells = [...closestElement(cell, "tr").querySelectorAll("th, td")];
+        const index = cells.findIndex((td) => td === cell);
         const siblingCell = cells[index - 1] || cells[index + 1];
-        table.querySelectorAll(`tr td:nth-of-type(${index + 1})`).forEach(td => td.remove());
+        table.querySelectorAll(`tr td:nth-of-type(${index + 1})`).forEach((td) => td.remove());
         // @todo @phoenix should I call dispatch('DELETE_TABLE', table) or this.deleteTable?
-        siblingCell ? setSelection(...startPos(siblingCell)) : this.dispatch('DELETE_TABLE', table);
+        siblingCell ? setSelection(...startPos(siblingCell)) : this.dispatch("DELETE_TABLE", table);
     }
     removeRow(row) {
         if (!row) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            row = getInSelection(this.document, 'tr');
-            if (!row) return;
+            row = getInSelection(this.document, "tr");
+            if (!row) {
+                return;
+            }
         }
-        const table = closestElement(row, 'table');
-        const rows = [...table.querySelectorAll('tr')];
-        const rowIndex = rows.findIndex(tr => tr === row);
+        const table = closestElement(row, "table");
+        const rows = [...table.querySelectorAll("tr")];
+        const rowIndex = rows.findIndex((tr) => tr === row);
         const siblingRow = rows[rowIndex - 1] || rows[rowIndex + 1];
         row.remove();
-        siblingRow ? setSelection(...startPos(siblingRow)) : this.dispatch('DELETE_TABLE', table);
+        siblingRow ? setSelection(...startPos(siblingRow)) : this.dispatch("DELETE_TABLE", table);
     }
     resetSize(table) {
         if (!table) {
             getDeepRange(this.editable, { select: true });
-            table = getInSelection(this.document,'table');
+            table = getInSelection(this.document, "table");
         }
-        table.removeAttribute('style');
-        const cells = [...table.querySelectorAll('tr, td')];
-        cells.forEach( cell => {
+        table.removeAttribute("style");
+        const cells = [...table.querySelectorAll("tr, td")];
+        cells.forEach((cell) => {
             const cStyle = cell.style;
-            if (cell.tagName === 'TR') {
-                cStyle.height = '';
+            if (cell.tagName === "TR") {
+                cStyle.height = "";
             } else {
-                cStyle.width = '';
+                cStyle.width = "";
             }
-        })
+        });
     }
     deleteTable(table) {
-        table = table || getInSelection(this.document, 'table');
-        if (!table) return;
-        const p = this.document.createElement('p');
-        p.appendChild(this.document.createElement('br'));
+        table = table || getInSelection(this.document, "table");
+        if (!table) {
+            return;
+        }
+        const p = this.document.createElement("p");
+        p.appendChild(this.document.createElement("br"));
         table.before(p);
         table.remove();
         setSelection(p, 0);
