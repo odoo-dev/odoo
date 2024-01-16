@@ -141,3 +141,34 @@ export function unwrapContents(node) {
     node.parentNode.removeChild(node);
     return contents;
 }
+
+// @todo @phoenix
+// This utils seem to handle a particular case of LI element.
+// If only relevant to the list plugin, a specific util should be created
+// that plugin instead.
+export function setTagName(el, newTagName) {
+    if (el.tagName === newTagName) {
+        return el;
+    }
+    var n = document.createElement(newTagName);
+    var attr = el.attributes;
+    for (var i = 0, len = attr.length; i < len; ++i) {
+        n.setAttribute(attr[i].name, attr[i].value);
+    }
+    while (el.firstChild) {
+        n.append(el.firstChild);
+    }
+    if (el.tagName === "LI") {
+        el.append(n);
+    } else {
+        el.parentNode.replaceChild(n, el);
+    }
+    return n;
+}
+
+export function toggleClass(node, className) {
+    node.classList.toggle(className);
+    if (!node.className) {
+        node.removeAttribute("class");
+    }
+}
