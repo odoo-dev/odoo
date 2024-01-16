@@ -5,20 +5,21 @@ import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
 
 function toggleUnorderedList(editor) {
-    throw new Error("toggle UL not done yet");
+    editor.dispatch("TOGGLE_LIST", { type: "UL" });
 }
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
         test.todo("should turn an empty paragraph into a list", async () => {
             await testEditor({
+                // @todo setting this selection not yet supported
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: toggleUnorderedList,
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
         });
 
-        test.todo("should turn a paragraph into a list", async () => {
+        test("should turn a paragraph into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: toggleUnorderedList,
@@ -26,7 +27,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a heading into a list", async () => {
+        test("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<h1>ab[]cd</h1>",
                 stepFunction: toggleUnorderedList,
@@ -34,7 +35,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph in a div into a list", async () => {
+        test("should turn a paragraph in a div into a list", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[]cd</p></div>",
                 stepFunction: toggleUnorderedList,
@@ -116,7 +117,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a paragraph", async () => {
+        test("should turn a list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<ul><li>ab[]cd</li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -124,7 +125,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a heading", async () => {
+        test("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<ul><li><h1>ab[]cd</h1></li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -132,7 +133,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list item into a paragraph", async () => {
+        test("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd</li><li>ef[]gh</li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -149,7 +150,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn nested list items into paragraphs", async () => {
+        test("should turn nested list items into paragraphs", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <ul>
@@ -267,7 +268,7 @@ describe("Range collapsed", () => {
 
 describe("Range not collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn a paragraph into a list", async () => {
+        test("should turn a paragraph into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><p>cd[ef]gh</p>",
                 stepFunction: toggleUnorderedList,
@@ -275,7 +276,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a heading into a list", async () => {
+        test("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><h1>cd[ef]gh</h1>",
                 stepFunction: toggleUnorderedList,
@@ -348,7 +349,7 @@ describe("Range not collapsed", () => {
             }
         );
 
-        test.todo("should not turn a non-editable paragraph into a list", async () => {
+        test("should not turn a non-editable paragraph into a list", async () => {
             await testEditor({
                 contentBefore: '<p>[ab</p><p contenteditable="false">cd</p><p>ef]</p>',
                 stepFunction: toggleUnorderedList,
@@ -358,7 +359,7 @@ describe("Range not collapsed", () => {
         });
     });
     describe("Remove", () => {
-        test.todo("should turn a list into a paragraph", async () => {
+        test("should turn a list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd[ef]gh</li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -366,7 +367,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into a heading", async () => {
+        test("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li><h1>cd[ef]gh</h1></li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -374,7 +375,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list into two paragraphs", async () => {
+        test("should turn a list into two paragraphs", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd[ef</li><li>gh]ij</li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -382,7 +383,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list item into a paragraph", async () => {
+        test("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd</li><li>ef[gh]ij</li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -390,14 +391,12 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should not turn a non-editable list into a paragraph", async () => {
-            test.todo("should not turn a non-editable list into a paragraph", async () => {
-                await testEditor({
-                    contentBefore:
-                        '<ul><li>[ab</li></ul><p contenteditable="false">cd</p><ul><li>ef]</li></ul>',
-                    stepFunction: toggleUnorderedList,
-                    contentAfter: '<p>[ab</p><p contenteditable="false">cd</p><p>ef]</p>',
-                });
+        test("should not turn a non-editable list into a paragraph", async () => {
+            await testEditor({
+                contentBefore:
+                    '<ul><li>[ab</li></ul><p contenteditable="false">cd</p><ul><li>ef]</li></ul>',
+                stepFunction: toggleUnorderedList,
+                contentAfter: '<p>[ab</p><p contenteditable="false">cd</p><p>ef]</p>',
             });
         });
     });
