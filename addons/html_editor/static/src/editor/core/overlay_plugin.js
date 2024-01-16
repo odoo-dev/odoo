@@ -1,7 +1,21 @@
 /** @odoo-module */
 
 import { Plugin } from "../plugin";
-import { getCurrentRect } from "./utils";
+
+function getCurrentRect() {
+    const range = getSelection().getRangeAt(0);
+    let rect = range.getBoundingClientRect();
+    if (rect.x === 0 && rect.width === 0 && rect.height === 0) {
+        const clonedRange = range.cloneRange();
+        const shadowCaret = document.createTextNode("|");
+        clonedRange.insertNode(shadowCaret);
+        clonedRange.selectNode(shadowCaret);
+        rect = clonedRange.getBoundingClientRect();
+        shadowCaret.remove();
+        clonedRange.detach();
+    }
+    return rect;
+}
 
 /**
  * Provide the following feature:
