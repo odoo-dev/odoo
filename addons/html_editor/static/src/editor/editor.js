@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { initElementForEdition } from "./core/utils";
+import { initElementForEdition } from "./utils/sanitize";
 
 /**
  * @typedef {typeof import("./plugin").Plugin} PluginConstructor
