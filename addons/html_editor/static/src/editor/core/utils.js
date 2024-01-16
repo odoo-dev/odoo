@@ -343,6 +343,25 @@ export function setSelection(
 }
 
 /**
+ * @param {Node} node
+ * @param {boolean} [normalize=true]
+ * @returns {?Array.<Node, number}
+ */
+export function setCursorStart(node, normalize = true) {
+    const pos = startPos(node);
+    return setSelection(...pos, ...pos, normalize);
+}
+/**
+ * @param {Node} node
+ * @param {boolean} [normalize=true]
+ * @returns {?Array.<Node, number}
+ */
+export function setCursorEnd(node, normalize = true) {
+    const pos = endPos(node);
+    return setSelection(...pos, ...pos, normalize);
+}
+
+/**
  * Returns an array containing all the nodes fully contained in the selection.
  *
  * @param {Node} editable
