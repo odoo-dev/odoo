@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { isBlock } from "./blocks";
 import { childNodeIndex, DIRECTIONS } from "./position";
 
 /**
@@ -105,4 +106,28 @@ export function splitAroundUntil(elements, limitAncestor) {
         beforeSplit = splitElement(limitAncestor, childNodeIndex(before) + 1)[1];
     }
     return beforeSplit || afterSplit || limitAncestor;
+}
+
+/**
+ * Take a node and unwrap all of its block contents recursively. All blocks
+ * (except for firstChilds) are preceded by a <br> in order to preserve the line
+ * breaks.
+ *
+ * @param {Node} node
+ */
+export function makeContentsInline(node) {
+    let childIndex = 0;
+    for (const child of node.childNodes) {
+        if (isBlock(child)) {
+            if (childIndex && paragraphRelatedElements.includes(child.nodeName)) {
+                child.before(document.createElement('br'));
+            }
+            for (const grandChild of child.childNodes) {
+                child.before(grandChild);
+                makeContentsInline(grandChild);
+            }
+            child.remove();
+        }
+        childIndex += 1;
+    }
 }

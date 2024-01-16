@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { closestBlock, isBlock } from "./blocks";
-import { closestElement } from "./dom_traversal";
+import { ancestors, closestElement } from "./dom_traversal";
 
 /**
  * Return true if the given node appears bold. The node is considered to appear
@@ -241,3 +241,128 @@ export const isNotEditableNode = (node) =>
     node.getAttribute &&
     node.getAttribute("contenteditable") &&
     node.getAttribute("contenteditable").toLowerCase() === "false";
+
+export function isUnbreakable(node) {
+    if (!node || node.nodeType === Node.TEXT_NODE) {
+        return false;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+        return true;
+    }
+    return (
+        isUnremovable(node) || // An unremovable node is always unbreakable.
+        // @todo @phoenix: move the specific part in a proper plugin.
+        ['TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
+        node.hasAttribute('t') ||
+        (node.nodeType === Node.ELEMENT_NODE &&
+            (node.nodeName === 'T' ||
+                node.getAttribute('t-if') ||
+                node.getAttribute('t-esc') ||
+                node.getAttribute('t-elif') ||
+                node.getAttribute('t-else') ||
+                node.getAttribute('t-foreach') ||
+                node.getAttribute('t-value') ||
+                node.getAttribute('t-out') ||
+                node.getAttribute('t-raw')) ||
+                node.getAttribute('t-field')) ||
+        node.classList.contains('oe_unbreakable')
+    );
+}
+
+export function isUnremovable(node) {
+    return (
+        (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
+        node.oid === 'root' ||
+        // @todo @phoenix: move the specific part in a proper plugin.
+        (node.nodeType === Node.ELEMENT_NODE &&
+            (node.classList.contains('o_editable') || node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
+        (node.classList && node.classList.contains('oe_unremovable')) ||
+        (node.nodeName === 'SPAN' && node.parentElement && node.parentElement.getAttribute('data-oe-type') === 'monetary') ||
+        (node.ownerDocument && node.ownerDocument.defaultWindow && !ancestors(node).find(ancestor => ancestor.oid === 'root')) // Node is in DOM but not in editable.
+    );
+}
+
+const iconTags = ['I', 'SPAN'];
+// @todo @phoenix: move the specific part in a proper plugin.
+const iconClasses = ['fa', 'fab', 'fad', 'far', 'oi'];
+/**
+ * Indicates if the given node is an icon element.
+ *
+ * @see ICON_SELECTOR
+ * @param {?Node} [node]
+ * @returns {boolean}
+ */
+export function isIconElement(node) {
+    return !!(
+        node &&
+        iconTags.includes(node.nodeName) &&
+        iconClasses.some(cls => node.classList.contains(cls))
+    );
+}
+
+// This is a list of "paragraph-related elements", defined as elements that
+// behave like paragraphs.
+export const paragraphRelatedElements = [
+    'P',
+    'H1',
+    'H2',
+    'H3',
+    'H4',
+    'H5',
+    'H6',
+    'PRE',
+    'BLOCKQUOTE',
+];
+
+/**
+ * Return true if the given node allows "paragraph-related elements".
+ *
+ * @see paragraphRelatedElements
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function allowsParagraphRelatedElements(node) {
+    return isBlock(node) && !paragraphRelatedElements.includes(node.nodeName);
+}
+
+/**
+ * Checks whether or not the given block has any visible content, except for
+ * a placeholder BR.
+ *
+ * @param {HTMLElement} blockEl
+ * @returns {boolean}
+ */
+export function isEmptyBlock(blockEl) {
+    if (!blockEl || blockEl.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    if (visibleCharRegex.test(blockEl.textContent)) {
+        return false;
+    }
+    if (blockEl.querySelectorAll('br').length >= 2) {
+        return false;
+    }
+    const nodes = blockEl.querySelectorAll('*');
+    for (const node of nodes) {
+        // There is no text and no double BR, the only thing that could make
+        // this visible is a "visible empty" node like an image.
+        if (node.nodeName != 'BR' && (isSelfClosingElement(node) || isIconElement(node))) {
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * Checks whether or not the given block element has something to make it have
+ * a visible height (except for padding / border).
+ *
+ * @param {HTMLElement} blockEl
+ * @returns {boolean}
+ */
+export function isShrunkBlock(blockEl) {
+    return (
+        isEmptyBlock(blockEl) &&
+        !blockEl.querySelector('br') &&
+        blockEl.nodeName !== "IMG"
+    );
+}
