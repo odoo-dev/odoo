@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { isBlock } from "../utils/blocks";
-import { splitAroundUntil, splitTextNode } from "../utils/dom";
+import { splitAroundUntil, splitTextNode, unwrapContents } from "../utils/dom";
 import {
     isNotEditableNode,
     isSelfClosingElement,
@@ -553,15 +553,6 @@ export function insertText(sel, content) {
     restore();
     setSelection(...boundariesOut(txt), false);
     return txt;
-}
-
-export function unwrapContents(node) {
-    const contents = [...node.childNodes];
-    for (const child of contents) {
-        node.parentNode.insertBefore(child, node);
-    }
-    node.parentNode.removeChild(node);
-    return contents;
 }
 
 /**
