@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { closestBlock, isBlock } from "./blocks";
-import { ancestors, closestElement } from "./dom_traversal";
+import { ancestors, closestElement, lastLeaf } from "./dom_traversal";
+import { DIRECTIONS, nodeSize } from "./position";
 
 /**
  * Return true if the given node appears bold. The node is considered to appear
@@ -369,4 +370,49 @@ export function isEmptyBlock(blockEl) {
  */
 export function isShrunkBlock(blockEl) {
     return isEmptyBlock(blockEl) && !blockEl.querySelector("br") && blockEl.nodeName !== "IMG";
+}
+
+export function getDeepestPosition(node, offset) {
+    let direction = DIRECTIONS.RIGHT;
+    let next = node;
+    while (next) {
+        if (isVisible(next) || isZWS(next)) {
+            // Valid node: update position then try to go deeper.
+            if (next !== node) {
+                [node, offset] = [next, direction ? 0 : nodeSize(next)];
+            }
+            // First switch direction to left if offset is at the end.
+            direction = offset < node.childNodes.length;
+            next = node.childNodes[direction ? offset : offset - 1];
+        } else if (direction && next.nextSibling && !isBlock(next.nextSibling)) {
+            // Invalid node: skip to next sibling (without crossing blocks).
+            next = next.nextSibling;
+        } else {
+            // Invalid node: skip to previous sibling (without crossing blocks).
+            direction = DIRECTIONS.LEFT;
+            next = !isBlock(next.previousSibling) && next.previousSibling;
+        }
+        // Avoid too-deep ranges inside self-closing elements like [BR, 0].
+        next = !isSelfClosingElement(next) && next;
+    }
+    return [node, offset];
+}
+
+export function previousLeaf(node, editable, skipInvisible = false) {
+    let ancestor = node;
+    while (ancestor && !ancestor.previousSibling && ancestor !== editable) {
+        ancestor = ancestor.parentElement;
+    }
+    if (ancestor && ancestor !== editable) {
+        if (skipInvisible && !isVisible(ancestor.previousSibling)) {
+            return previousLeaf(ancestor.previousSibling, editable, skipInvisible);
+        } else {
+            const last = lastLeaf(ancestor.previousSibling);
+            if (skipInvisible && !isVisible(last)) {
+                return previousLeaf(last, editable, skipInvisible);
+            } else {
+                return last;
+            }
+        }
+    }
 }
