@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { isEmpty } from "../core/utils";
+import { isEmpty } from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { Powerbox } from "./powerbox";
 
