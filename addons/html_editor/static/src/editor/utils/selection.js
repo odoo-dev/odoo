@@ -33,10 +33,12 @@ export function getInSelection(document, selector) {
             return selectorInStartAncestors;
         } else {
             const commonElementAncestor = closestElement(range.commonAncestorContainer);
-            return commonElementAncestor && [...commonElementAncestor.querySelectorAll(selector)].find(
-                node => range.intersectsNode(node),
+            return (
+                commonElementAncestor &&
+                [...commonElementAncestor.querySelectorAll(selector)].find((node) =>
+                    range.intersectsNode(node)
+                )
             );
         }
     }
 }
-
