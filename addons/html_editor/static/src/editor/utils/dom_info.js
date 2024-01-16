@@ -236,3 +236,8 @@ export function isVisible(node) {
 export function hasVisibleContent(node) {
     return [...(node?.childNodes || [])].some((n) => isVisible(n));
 }
+
+export const isNotEditableNode = (node) =>
+    node.getAttribute &&
+    node.getAttribute("contenteditable") &&
+    node.getAttribute("contenteditable").toLowerCase() === "false";
