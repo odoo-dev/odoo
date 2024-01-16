@@ -191,3 +191,49 @@ export function firstLeaf(node, stopTraverseFunction) {
     }
     return node;
 }
+
+/**
+ * Returns all the previous siblings of the given node until the first
+ * sibling that does not satisfy the predicate, in lookup order.
+ *
+ * @param {Node} node
+ * @param {Function} [predicate] (node: Node) => boolean
+ */
+export function getAdjacentPreviousSiblings(node, predicate = (n) => !!n) {
+    let previous = node.previousSibling;
+    const list = [];
+    while (previous && predicate(previous)) {
+        list.push(previous);
+        previous = previous.previousSibling;
+    }
+    return list;
+}
+/**
+ * Returns all the next siblings of the given node until the first
+ * sibling that does not satisfy the predicate, in lookup order.
+ *
+ * @param {Node} node
+ * @param {Function} [predicate] (node: Node) => boolean
+ */
+export function getAdjacentNextSiblings(node, predicate = (n) => !!n) {
+    let next = node.nextSibling;
+    const list = [];
+    while (next && predicate(next)) {
+        list.push(next);
+        next = next.nextSibling;
+    }
+    return list;
+}
+/**
+ * Returns all the adjacent siblings of the given node until the first sibling
+ * (in both directions) that does not satisfy the predicate, in index order. If
+ * the given node does not satisfy the predicate, an empty array is returned.
+ *
+ * @param {Node} node
+ * @param {Function} [predicate] (node: Node) => boolean
+ */
+export function getAdjacents(node, predicate = (n) => !!n) {
+    const previous = getAdjacentPreviousSiblings(node, predicate);
+    const next = getAdjacentNextSiblings(node, predicate);
+    return predicate(node) ? [...previous.reverse(), node, ...next] : [];
+}
