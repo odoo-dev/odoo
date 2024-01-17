@@ -24,6 +24,7 @@ describe("Mixed", () => {
             contentAfter: "<ul><li>a[b]c</li></ul>",
         });
     });
+
     test.todo("should turn an unordered list into an ordered list", async () => {
         await testEditor({
             contentBefore: "<ul><li>a[b]c</li></ul>",
@@ -31,6 +32,7 @@ describe("Mixed", () => {
             contentAfter: "<ol><li>a[b]c</li></ol>",
         });
     });
+
     test.todo(
         "should turn a paragraph and an unordered list item into an ordered list and an unordered list",
         async () => {
@@ -41,6 +43,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn a p, an ul list with ao. one nested ul, and another p into one ol with a nested ol",
         async () => {
@@ -73,6 +76,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn unordered list into ordered list with block style applied to it",
         async () => {
@@ -146,6 +150,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn unordered list into ordered list with block and inline style applied to it",
         async () => {
@@ -219,6 +224,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an unordered list item and a paragraph into two list items within an ordered list",
         async () => {
@@ -229,6 +235,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an unordered list, a paragraph and an ordered list into one ordered list with three list items",
         async () => {
@@ -239,6 +246,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an unordered list item, a paragraph and an ordered list into one ordered list with all three as list items",
         async () => {
@@ -249,6 +257,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an ordered list, a paragraph and an unordered list item into one ordered list with all three as list items",
         async () => {
@@ -259,6 +268,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an unordered list within an unordered list into an ordered list within an unordered list",
         async () => {
@@ -289,6 +299,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo(
         "should turn an unordered list with mixed nested elements into an ordered list with only unordered elements",
         async () => {
@@ -347,6 +358,7 @@ describe("Mixed", () => {
             });
         }
     );
+
     test.todo("should convert within mixed lists", async () => {
         await testEditor({
             contentBefore: unformat(`
@@ -402,6 +414,7 @@ describe("Mixed", () => {
                     </ul>`),
         });
     });
+
     test.todo("should turn an unordered list into a checklist", async () => {
         await testEditor({
             removeCheckIds: true,
@@ -410,6 +423,7 @@ describe("Mixed", () => {
             contentAfter: '<ul class="o_checklist"><li>a[b]c</li></ul>',
         });
     });
+
     test.todo("should turn an unordered list into a checklist just after a checklist", async () => {
         await testEditor({
             removeCheckIds: true,
@@ -420,6 +434,7 @@ describe("Mixed", () => {
                 '<ul class="o_checklist"><li class="o_checked">abc</li><li>d[e]f</li></ul>',
         });
     });
+
     test.todo(
         "should turn an unordered list into a checklist just after a checklist and inside a checklist",
         async () => {
