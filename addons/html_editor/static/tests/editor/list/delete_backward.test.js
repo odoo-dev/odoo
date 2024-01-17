@@ -25,6 +25,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]abc</p>",
                 });
             });
+
             test.todo("should delete the first character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>d[]efg</li></ol>",
@@ -32,6 +33,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc</li><li>[]efg</li></ol>",
                 });
             });
+
             test.todo("should delete a character within a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>de[]fg</li></ol>",
@@ -39,6 +41,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc</li><li>d[]fg</li></ol>",
                 });
             });
+
             test.todo("should delete the last character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>defg[]</li></ol>",
@@ -46,6 +49,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc</li><li>def[]</li></ol>",
                 });
             });
+
             test.todo("should remove the only character in a list", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a[]</li></ol>",
@@ -59,6 +63,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>[]<br></li></ol>",
                 });
             });
+
             test.todo("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>[]def</li></ol>",
@@ -79,6 +84,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li><br></li><li><br></li></ol><p>[]abc</p>",
                 });
             });
+
             test.todo("should rejoin sibling lists (ol)", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a</li></ol><p>[]b</p><ol><li>c</li></ol>",
@@ -86,6 +92,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>a[]b</li><li>c</li></ol>",
                 });
             });
+
             test.todo("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -120,6 +127,7 @@ describe("Selection collapsed", () => {
                             </ul>`),
                 });
             });
+
             test.todo("should only rejoin same-level lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -160,6 +168,7 @@ describe("Selection collapsed", () => {
                             </ol>`),
                 });
             });
+
             test.todo("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a</li></ol><p>[]b</p><ul><li>c</li></ul>",
@@ -167,6 +176,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>a[]b</li></ol><ul><li>c</li></ul>",
                 });
             });
+
             test.todo("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -224,6 +234,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a non-indented list item into an indented list item",
                 async () => {
@@ -236,6 +247,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
                 async () => {
@@ -250,6 +262,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo("should outdent a list item", async () => {
                 await testEditor({
                     contentBefore: '<ol><li class="oe-nested"><ol><li>[]abc</li></ol></li></ol>',
@@ -264,6 +277,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>abc</p><p>[]def</p>",
                 });
             });
+
             test.skip("should outdent while nested within a list item", async () => {
                 await testEditor({
                     contentBefore:
@@ -285,6 +299,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<div>abc</div><div><div><div>[]def</div></div></div>",
                 });
             });
+
             test.todo(
                 "should not outdent while nested within a list item if the list is unbreakable",
                 async () => {
@@ -328,6 +343,7 @@ describe("Selection collapsed", () => {
                     // });
                 }
             );
+
             test.todo("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     contentBefore:
@@ -337,6 +353,7 @@ describe("Selection collapsed", () => {
                         '<ol><li>abc</li></ol><p>[]<br></p><ol><li class="oe-nested"><ol><li><br></li></ol></li><li>def</li></ol>',
                 });
             });
+
             test.todo("should outdent an empty list within a list", async () => {
                 await testEditor({
                     contentBefore:
@@ -345,6 +362,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc</li></ol><p>[]<br></p><ol><li>def</li></ol>",
                 });
             });
+
             test.todo("should outdent an empty list", async () => {
                 await testEditor({
                     contentBefore: '<ol><li class="oe-nested"><ol><li><br>[]</li></ol></li></ol>',
@@ -352,6 +370,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]<br></p>",
                 });
             });
+
             test.todo("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>[]<br></li></ol>",
@@ -379,6 +398,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>abcd[]gh</p><ol><li>ij</li></ol>",
                 });
             });
+
             test.todo("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li></ol><p>[]def</p>",
@@ -386,6 +406,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc[]def</li></ol>",
                 });
             });
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending without formatting",
                 async () => {
@@ -396,6 +417,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending with italic text",
                 async () => {
@@ -423,6 +445,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]abc</p>",
                 });
             });
+
             test.todo("should delete the first character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>d[]efg</li></ul>",
@@ -430,6 +453,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc</li><li>[]efg</li></ul>",
                 });
             });
+
             test.todo("should delete a character within a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>de[]fg</li></ul>",
@@ -437,6 +461,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc</li><li>d[]fg</li></ul>",
                 });
             });
+
             test.todo("should delete the last character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>defg[]</li></ul>",
@@ -444,6 +469,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc</li><li>def[]</li></ul>",
                 });
             });
+
             test.todo("should remove the only character in a list", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a[]</li></ul>",
@@ -457,6 +483,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>[]<br></li></ul>",
                 });
             });
+
             test.todo("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>[]def</li></ul>",
@@ -477,6 +504,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li><br></li><li><br></li></ul><p>[]abc</p>",
                 });
             });
+
             test.todo("should rejoin sibling lists (ul)", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a</li></ul><p>[]b</p><ul><li>c</li></ul>",
@@ -484,6 +512,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>a[]b</li><li>c</li></ul>",
                 });
             });
+
             test.todo("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -518,6 +547,7 @@ describe("Selection collapsed", () => {
                             </ul>`),
                 });
             });
+
             test.todo("should only rejoin same-level lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -558,6 +588,7 @@ describe("Selection collapsed", () => {
                             </ul>`),
                 });
             });
+
             test.todo("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a</li></ul><p>[]b</p><ol><li>c</li></ol>",
@@ -565,6 +596,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>a[]b</li></ul><ol><li>c</li></ol>",
                 });
             });
+
             test.todo("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: unformat(`
@@ -637,6 +669,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a non-indented list item into an indented list item",
                 async () => {
@@ -649,6 +682,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
                 async () => {
@@ -663,6 +697,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo("should outdent a list item", async () => {
                 await testEditor({
                     contentBefore: '<ul><li class="oe-nested"><ul><li>[]abc</li></ul></li></ul>',
@@ -677,6 +712,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>abc</p><p>[]def</p>",
                 });
             });
+
             test.todo("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     contentBefore:
@@ -686,6 +722,7 @@ describe("Selection collapsed", () => {
                         '<ul><li>abc</li></ul><p>[]<br></p><ul><li class="oe-nested"><ul><li><br></li></ul></li><li>def</li></ul>',
                 });
             });
+
             test.todo("should outdent an empty list within a list", async () => {
                 await testEditor({
                     contentBefore:
@@ -694,6 +731,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc</li></ul><p>[]<br></p><ul><li>def</li></ul>",
                 });
             });
+
             test.todo("should outdent an empty list", async () => {
                 await testEditor({
                     contentBefore: '<ul><li class="oe-nested"><ul><li><br>[]</li></ul></li></ul>',
@@ -701,6 +739,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]<br></p>",
                 });
             });
+
             test.todo("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>[]<br></li></ul>",
@@ -728,6 +767,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>abcd[]gh</p><ul><li>ij</li></ul>",
                 });
             });
+
             test.todo("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li></ul><p>[]def</p>",
@@ -735,6 +775,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc[]def</li></ul>",
                 });
             });
+
             test.todo(
                 "should not merge a bold list item into a non-formatted list item",
                 async () => {
@@ -759,6 +800,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending without formatting",
                 async () => {
@@ -769,6 +811,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending with italic text",
                 async () => {
@@ -803,6 +846,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]abc</p>",
                 });
             });
+
             test.todo("should delete the first character in a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -813,6 +857,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked">[]efg</li></ul>',
                 });
             });
+
             test.todo("should delete a character within a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -823,6 +868,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked">d[]fg</li></ul>',
                 });
             });
+
             test.todo("should delete the last character in a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -833,6 +879,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked">def[]</li></ul>',
                 });
             });
+
             test.todo("should remove the only character in a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -850,6 +897,7 @@ describe("Selection collapsed", () => {
                     contentAfter: '<ul class="o_checklist"><li class="o_checked">[]<br></li></ul>',
                 });
             });
+
             test.todo("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -910,6 +958,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li><br></li><li><br></li></ul><p>[]abc</p>',
                 });
             });
+
             test.todo("should rejoin sibling lists (cl)", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -920,6 +969,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">a[]b</li><li class="o_checked">c</li></ul>',
                 });
             });
+
             test.todo("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -988,6 +1038,7 @@ describe("Selection collapsed", () => {
                             </ul>`),
                 });
             });
+
             test.todo("should only rejoin same-level lists", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1068,6 +1119,7 @@ describe("Selection collapsed", () => {
                             </ul>`),
                 });
             });
+
             test.todo("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1078,6 +1130,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">a[]b</li></ul><ul><li>c</li></ul>',
                 });
             });
+
             test.todo("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1137,6 +1190,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a non-indented list item into an indented list item",
                 async () => {
@@ -1150,6 +1204,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
                 async () => {
@@ -1166,6 +1221,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo("should outdent a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1183,6 +1239,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>abc</p><p>[]def</p>",
                 });
             });
+
             test.todo("should outdent the list item without removing the header tag", async () => {
                 await testEditor({
                     contentBefore:
@@ -1196,6 +1253,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul>" + "<li>abc</li>" + "</ul>" + "<h1>[]def</h1>",
                 });
             });
+
             test.skip("should outdent while nested within a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1220,6 +1278,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<div>abc</div><div><div><div>[]def</div></div></div>",
                 });
             });
+
             test.todo("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1250,6 +1309,7 @@ describe("Selection collapsed", () => {
                         </ul>`),
                 });
             });
+
             test.todo("should outdent an empty list within a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1260,6 +1320,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li>abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="o_checked">def</li></ul>',
                 });
             });
+
             test.todo("should outdent an empty list", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1269,6 +1330,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<p>[]<br></p>",
                 });
             });
+
             test.todo("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1328,6 +1390,7 @@ describe("Selection collapsed", () => {
                     contentAfter: '<p>abc[]gh</p><ul class="o_checklist"><li>ij</li></ul>',
                 });
             });
+
             test.todo("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1338,6 +1401,7 @@ describe("Selection collapsed", () => {
                         '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
                 });
             });
+
             test.todo("should merge a bold list item into a non-formatted list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
@@ -1360,6 +1424,7 @@ describe("Selection collapsed", () => {
                         "</ul>",
                 });
             });
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending without formatting",
                 async () => {
@@ -1373,6 +1438,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph starting with bold text into a list item with ending with italic text",
                 async () => {
@@ -1424,6 +1490,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>a[]b</li></ul>",
                 });
             });
+
             test.todo(
                 "should merge an ordered list item that is in an unordered list item into a non-indented list item",
                 async () => {
@@ -1436,6 +1503,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge an ordered list item into an unordered list item that is in the same ordered list",
                 async () => {
@@ -1448,6 +1516,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an ordered list that is in an unordered list into a list item that is in the same unordered list, and remove the now empty ordered list",
                 async () => {
@@ -1462,6 +1531,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an ordered list item that is within a unordered list",
                 async () => {
@@ -1480,6 +1550,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty ordered list item within an unordered list",
                 async () => {
@@ -1492,6 +1563,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo("should outdent an empty ordered list within an unordered list", async () => {
                 await testEditor({
                     contentBefore:
@@ -1500,6 +1572,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>abc</li></ul><p>[]<br></p><ul><li>def</li></ul>",
                 });
             });
+
             test.todo(
                 "should outdent an empty ordered list within an unordered list (2)",
                 async () => {
@@ -1547,6 +1620,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>a[]b</li></ol>",
                 });
             });
+
             test.todo(
                 "should merge an unordered list item that is in an ordered list item into a non-indented list item",
                 async () => {
@@ -1577,6 +1651,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge an unordered list item into an ordered list item that is in the same unordered list",
                 async () => {
@@ -1589,6 +1664,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an unordered list that is in an ordered list into a list item that is in the same ordered list, and remove the now empty unordered list",
                 async () => {
@@ -1603,6 +1679,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an unordered list item that is within a ordered list",
                 async () => {
@@ -1621,6 +1698,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list item within an ordered list",
                 async () => {
@@ -1633,6 +1711,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo("should outdent an empty unordered list within an ordered list", async () => {
                 await testEditor({
                     contentBefore:
@@ -1641,6 +1720,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ol><li>abc</li></ol><p>[]<br></p><ol><li>def</li></ol>",
                 });
             });
+
             test.todo(
                 "should outdent an empty unordered list within an ordered list (2)",
                 async () => {
@@ -1691,6 +1771,7 @@ describe("Selection collapsed", () => {
                     contentAfter: "<ul><li>a[]b</li></ul>",
                 });
             });
+
             test.todo(
                 "should merge an checklist list item that is in an unordered list item into a non-indented list item",
                 async () => {
@@ -1707,6 +1788,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge an checklist list item into an unordered list item that is in the same checklist list",
                 async () => {
@@ -1720,6 +1802,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an checklist list that is in an unordered list into a checklist item that is in the same unordered list, and remove the now empty checklist list",
                 async () => {
@@ -1734,6 +1817,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an checklist list item that is within a unordered list",
                 async () => {
@@ -1752,6 +1836,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty checklist list item within an unordered list",
                 async () => {
@@ -1765,6 +1850,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty checklist list within an unordered list",
                 async () => {
@@ -1776,6 +1862,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty checklist list within an unordered list (2)",
                 async () => {
@@ -1834,6 +1921,7 @@ describe("Selection collapsed", () => {
                     contentAfter: '<ul class="o_checklist"><li class="o_checked">a[]b</li></ul>',
                 });
             });
+
             test.todo(
                 "should merge an unordered list item that is in an checklist list item into a non-indented list item",
                 async () => {
@@ -1865,6 +1953,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge an unordered list item into an checklist list item that is in the same unordered list",
                 async () => {
@@ -1878,6 +1967,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should merge the only item in an unordered list that is in an checklist list into a checklist item that is in the same checklist list, and remove the now empty unordered list",
                 async () => {
@@ -1894,6 +1984,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an unordered list item that is within a checklist list",
                 async () => {
@@ -1914,6 +2005,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list item within an checklist list (o_checked)",
                 async () => {
@@ -1927,6 +2019,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list item within an checklist list (unchecked)",
                 async () => {
@@ -1940,6 +2033,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list within an checklist list (checked)",
                 async () => {
@@ -1953,6 +2047,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list within an checklist list (unchecked)",
                 async () => {
@@ -1966,6 +2061,7 @@ describe("Selection collapsed", () => {
                     });
                 }
             );
+
             test.todo(
                 "should outdent an empty unordered list within an otherwise empty checklist list",
                 async () => {
@@ -1992,6 +2088,7 @@ describe("Selection collapsed", () => {
                     "<ol><li><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li><h4>klm</h4></li></ol>",
             });
         });
+
         test.todo("should treat two blocks in a list item and keep blocks (2)", async () => {
             await testEditor({
                 contentBefore:
@@ -2003,6 +2100,7 @@ describe("Selection collapsed", () => {
                     "<ul><li><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li><h4>klm</h4></li></ul>",
             });
         });
+
         test.todo("should treat two blocks in a list item and keep blocks (3)", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -2035,6 +2133,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ol><li>ab[]ef</li></ol>",
             });
         });
+
         test.todo("should delete all the text in a list item", async () => {
             // Forward selection
             await testEditor({
@@ -2049,6 +2148,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ol><li>[]<br></li></ol>",
             });
         });
+
         test.todo("should delete across two list items", async () => {
             // Forward selection
             await testEditor({
@@ -2063,6 +2163,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ol><li>ab[]gh</li></ol>",
             });
         });
+
         test.todo(
             "should delete across an unindented list item and an indented list item",
             async () => {
@@ -2082,6 +2183,7 @@ describe("Selection not collapsed", () => {
                 });
             }
         );
+
         test.todo("should delete a list", async () => {
             // Forward selection
             await testEditor({
@@ -2096,6 +2198,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<p>abc[]</p>",
             });
         });
+
         test.todo(
             "should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is",
             async () => {
@@ -2133,6 +2236,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ul><li>ab[]ef</li></ul>",
             });
         });
+
         test.todo("should delete all the text in a list item", async () => {
             // Forward selection
             await testEditor({
@@ -2147,6 +2251,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
         });
+
         test.todo("should delete across two list items", async () => {
             // Forward selection
             await testEditor({
@@ -2161,6 +2266,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<ul><li>ab[]gh</li></ul>",
             });
         });
+
         test.todo(
             "should delete across an unindented list item and an indented list item",
             async () => {
@@ -2180,6 +2286,7 @@ describe("Selection not collapsed", () => {
                 });
             }
         );
+
         test.todo("should delete a list", async () => {
             // Forward selection
             await testEditor({
@@ -2194,6 +2301,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<p>abc[]</p>",
             });
         });
+
         test.todo(
             "should merge the contents of a list item within a block into a heading, and leave the rest of its list as it is",
             async () => {
@@ -2233,6 +2341,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]ef</li></ul>',
             });
         });
+
         test.todo("should delete all the text in a checklist item", async () => {
             // Forward selection
             await testEditor({
@@ -2249,6 +2358,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">[]<br></li></ul>',
             });
         });
+
         test.todo("should delete across two list items", async () => {
             // Forward selection
             await testEditor({
@@ -2281,6 +2391,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
             });
         });
+
         test.todo(
             "should delete across an unindented list item and an indented list item",
             async () => {
@@ -2326,6 +2437,7 @@ describe("Selection not collapsed", () => {
                 });
             }
         );
+
         test.todo("should delete a checklist", async () => {
             // Forward selection
             await testEditor({
@@ -2342,6 +2454,7 @@ describe("Selection not collapsed", () => {
                 contentAfter: "<p>abc[]</p>",
             });
         });
+
         test.todo(
             "should merge the contents of a checklist item within a block into a heading, and leave the rest of its list as it is",
             async () => {
@@ -2382,6 +2495,7 @@ describe("Selection not collapsed", () => {
                     contentAfter: "<ol><li>ab[]gh</li></ol>",
                 });
             });
+
             test.todo(
                 "should delete across an ordered list item and an unordered list item within an ordered list",
                 async () => {
@@ -2401,6 +2515,7 @@ describe("Selection not collapsed", () => {
                     });
                 }
             );
+
             test.todo("should delete an ordered list and an unordered list", async () => {
                 // Forward selection
                 await testEditor({
@@ -2431,6 +2546,7 @@ describe("Selection not collapsed", () => {
                     contentAfter: "<ul><li>ab[]gh</li></ul>",
                 });
             });
+
             test.todo(
                 "should delete across an unordered list item and an ordered list item within an unordered list",
                 async () => {
@@ -2450,6 +2566,7 @@ describe("Selection not collapsed", () => {
                     });
                 }
             );
+
             test.todo("should delete an ordered list and an unordered list", async () => {
                 // Forward selection
                 await testEditor({
@@ -2484,6 +2601,7 @@ describe("Selection not collapsed", () => {
                     contentAfter: '<ul class="o_checklist"><li class="o_checked">ab[]gh</li></ul>',
                 });
             });
+
             test.todo(
                 "should delete across an checklist list item and an unordered list item within an checklist list",
                 async () => {
@@ -2507,6 +2625,7 @@ describe("Selection not collapsed", () => {
                     });
                 }
             );
+
             test.todo("should delete an checklist list and an unordered list", async () => {
                 // Forward selection
                 await testEditor({
@@ -2541,6 +2660,7 @@ describe("Selection not collapsed", () => {
                     contentAfter: "<ul><li>ab[]gh</li></ul>",
                 });
             });
+
             test.todo(
                 "should delete across an unordered list item and an checklist list item within an unordered list",
                 async () => {
@@ -2560,6 +2680,7 @@ describe("Selection not collapsed", () => {
                     });
                 }
             );
+
             test.todo("should delete an checklist list and an unordered list", async () => {
                 // Forward selection
                 await testEditor({
@@ -2579,6 +2700,7 @@ describe("Selection not collapsed", () => {
         });
     });
 });
+
 test.todo("shoud merge list item in the previous breakable sibling", async () => {
     await testEditor({
         contentBefore: unformat(`
@@ -2613,6 +2735,7 @@ test.todo("shoud merge list item in the previous breakable sibling", async () =>
                 </ol>`),
     });
 });
+
 test.todo("shoud not merge list item in the previous unbreakable sibling", async () => {
     await testEditor({
         contentBefore: unformat(`
