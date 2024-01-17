@@ -316,6 +316,14 @@ export function isIconElement(node) {
         iconClasses.some((cls) => node.classList.contains(cls))
     );
 }
+// @todo @phoenix: move the specific part in a proper plugin.
+export function isMediaElement(node) {
+    return (
+        isIconElement(node) ||
+        (node.classList &&
+            (node.classList.contains("o_image") || node.classList.contains("media_iframe_video")))
+    );
+}
 
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
@@ -378,6 +386,10 @@ export function isEmptyBlock(blockEl) {
  */
 export function isShrunkBlock(blockEl) {
     return isEmptyBlock(blockEl) && !blockEl.querySelector("br") && blockEl.nodeName !== "IMG";
+}
+
+export function isEditorTab(node) {
+    return node && node.nodeName === "SPAN" && node.classList.contains("oe-tabs");
 }
 
 export function getDeepestPosition(node, offset) {
