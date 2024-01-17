@@ -11,6 +11,7 @@ test("should make a few characters underline", async () => {
         contentAfter: `<p>ab${u(`[cde]`)}fg</p>`,
     });
 });
+
 test("should make a few characters not underline", async () => {
     await testEditor({
         contentBefore: `<p>${u(`ab[cde]fg`)}</p>`,
@@ -18,6 +19,7 @@ test("should make a few characters not underline", async () => {
         contentAfter: `<p>${u(`ab`)}[cde]${u(`fg`)}</p>`,
     });
 });
+
 test("should make two paragraphs underline", async () => {
     await testEditor({
         contentBefore: "<p>[abc</p><p>def]</p>",
@@ -25,6 +27,7 @@ test("should make two paragraphs underline", async () => {
         contentAfter: `<p>${u(`[abc`)}</p><p>${u(`def]`)}</p>`,
     });
 });
+
 test("should make two paragraphs not underline", async () => {
     await testEditor({
         contentBefore: `<p>${u(`[abc`)}</p><p>${u(`def]`)}</p>`,
@@ -32,6 +35,7 @@ test("should make two paragraphs not underline", async () => {
         contentAfter: "<p>[abc</p><p>def]</p>",
     });
 });
+
 test("should make qweb tag underline", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
@@ -39,6 +43,7 @@ test("should make qweb tag underline", async () => {
         contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="text-decoration-line: underline;">[Test]</p></div>`,
     });
 });
+
 test("should make a whole heading underline after a triple click", async () => {
     await testEditor({
         contentBefore: `<h1>[ab</h1><p>]cd</p>`,
@@ -46,6 +51,7 @@ test("should make a whole heading underline after a triple click", async () => {
         contentAfter: `<h1>${u(`[ab]`)}</h1><p>cd</p>`,
     });
 });
+
 test("should make a whole heading not underline after a triple click", async () => {
     await testEditor({
         contentBefore: `<h1>${u(`[ab`)}</h1><p>]cd</p>`,
@@ -53,6 +59,7 @@ test("should make a whole heading not underline after a triple click", async () 
         contentAfter: `<h1>[ab]</h1><p>cd</p>`,
     });
 });
+
 test("should make a selection starting with underline text fully underline", async () => {
     await testEditor({
         contentBefore: `<p>${u(`[ab`)}</p><p>c]d</p>`,
@@ -60,6 +67,7 @@ test("should make a selection starting with underline text fully underline", asy
         contentAfter: `<p>${u(`[ab`)}</p><p>${u(`c]`)}d</p>`,
     });
 });
+
 test.todo("should make a selection with underline text in the middle fully underline", async () => {
     await testEditor({
         contentBefore: `<p>[a${u(`b`)}</p><p>${u(`c`)}d]e</p>`,
@@ -67,6 +75,7 @@ test.todo("should make a selection with underline text in the middle fully under
         contentAfter: `<p>${u(`[ab`)}</p><p>${u(`cd]`)}e</p>`,
     });
 });
+
 test.todo("should make a selection ending with underline text fully underline", async () => {
     await testEditor({
         contentBefore: `<p>[ab</h1><p>${u(`c]d`)}</p>`,
@@ -74,6 +83,7 @@ test.todo("should make a selection ending with underline text fully underline", 
         contentAfter: `<p>${u(`[ab`)}</p><p>${u(`c]d`)}</p>`,
     });
 });
+
 test.todo("should get ready to type in underline", async () => {
     await testEditor({
         contentBefore: `<p>ab[]cd</p>`,
@@ -82,6 +92,7 @@ test.todo("should get ready to type in underline", async () => {
         contentAfter: `<p>ab[]cd</p>`,
     });
 });
+
 test.todo("should get ready to type in not underline", async () => {
     await testEditor({
         contentBefore: `<p>${u(`ab[]cd`)}</p>`,
@@ -90,6 +101,7 @@ test.todo("should get ready to type in not underline", async () => {
         contentAfter: `<p>${u(`ab[]cd`)}</p>`,
     });
 });
+
 test("should not format non-editable text (underline)", async () => {
     await testEditor({
         contentBefore: '<p>[a</p><p contenteditable="false">b</p><p>c]</p>',
@@ -110,6 +122,7 @@ describe("with strikeThrough", () => {
             });
         }
     );
+
     test.todo("should restore underline after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
             contentBefore: `<p>ab${u(s(`cd`))}${s(`\u200b[]`, "first")}${u(s(`ef`))}</p>`,
@@ -120,6 +133,7 @@ describe("with strikeThrough", () => {
             contentAfter: `<p>ab${u(s(`cd[]ef`))}</p>`,
         });
     });
+
     test.todo(
         "should remove underline after restoring it after removing it (collapsed, strikeThrough)",
         async () => {
@@ -131,6 +145,7 @@ describe("with strikeThrough", () => {
             });
         }
     );
+
     test.todo(
         "should remove underline after restoring it and writing after removing it (collapsed, strikeThrough)",
         async () => {
@@ -146,6 +161,7 @@ describe("with strikeThrough", () => {
             });
         }
     );
+
     test.todo(
         "should remove underline, write, restore underline, write, remove underline again, write (collapsed, strikeThrough)",
         async () => {
@@ -166,6 +182,7 @@ describe("with strikeThrough", () => {
             });
         }
     );
+
     test("should remove only underline decoration on a span", async () => {
         await testEditor({
             contentBefore: `<p><span style="text-decoration: underline line-through;">[a]</span></p>`,
@@ -187,6 +204,7 @@ describe("with italic", () => {
             contentAfter: `<p>ab[]cd</p>`,
         });
     });
+
     test.todo(
         "should get ready to write in italic, after changing one's mind about underline (two consecutive at the end)",
         async () => {
@@ -202,6 +220,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo(
         "should get ready to write in italic, after changing one's mind about underline (separated by italic)",
         async () => {
@@ -217,6 +236,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo(
         "should get ready to write in italic, after changing one's mind about underline (two consecutive at the beginning)",
         async () => {
@@ -232,6 +252,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo(
         "should get ready to write in italic without underline (underline was first)",
         async () => {
@@ -243,6 +264,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo("should restore underline after removing it (collapsed, italic)", async () => {
         await testEditor({
             contentBefore: `<p>ab${u(em(`cd`))}${em(`[]\u200b`)}${u(em(`ef`))}</p>`,
@@ -251,6 +273,7 @@ describe("with italic", () => {
             contentAfter: `<p>ab${u(em(`cd`))}${em(`[]`)}${u(em(`ef`))}</p>`,
         });
     });
+
     test.todo(
         "should remove underline after restoring it after removing it (collapsed, italic)",
         async () => {
@@ -262,6 +285,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo(
         "should remove underline after restoring it and writing after removing it (collapsed, italic)",
         async () => {
@@ -276,6 +300,7 @@ describe("with italic", () => {
             });
         }
     );
+
     test.todo(
         "should remove underline, write, restore underline, write, remove underline again, write (collapsed, italic)",
         async () => {

@@ -37,6 +37,7 @@ describe("row", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test("should add a row above the middle row", async () => {
             await testEditor({
                 contentBefore:
@@ -94,6 +95,7 @@ describe("row", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test("should add a row below the middle row", async () => {
             await testEditor({
                 contentBefore:
@@ -160,6 +162,7 @@ describe("column", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should add a column left of the middle column", async () => {
             await testEditor({
                 contentBefore:
@@ -235,6 +238,7 @@ describe("column", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should add a column right of the middle column", async () => {
             await testEditor({
                 contentBefore:
