@@ -12,6 +12,7 @@ test("should change the font size of a few characters", async () => {
         contentAfter: '<p>ab<span style="font-size: 10px;">[cde]</span>fg</p>',
     });
 });
+
 test("should change the font size the qweb tag", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
@@ -19,6 +20,7 @@ test("should change the font size the qweb tag", async () => {
         contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="font-size: 36px;">[Test]</p></div>`,
     });
 });
+
 test("should change the font size of a whole heading after a triple click", async () => {
     await testEditor({
         contentBefore: "<h1>[ab</h1><p>]cd</p>",
@@ -26,6 +28,7 @@ test("should change the font size of a whole heading after a triple click", asyn
         contentAfter: '<h1><span style="font-size: 36px;">[ab]</span></h1><p>cd</p>',
     });
 });
+
 test.todo("should get ready to type with a different font size", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
@@ -34,6 +37,7 @@ test.todo("should get ready to type with a different font size", async () => {
         contentAfter: "<p>ab[]cd</p>",
     });
 });
+
 test("should change the font-size for a character in an inline that has a font-size", async () => {
     await testEditor({
         contentBefore: `<p>a<span style="font-size: 10px;">b[c]d</span>e</p>`,
@@ -47,6 +51,7 @@ test("should change the font-size for a character in an inline that has a font-s
                         </p>`),
     });
 });
+
 test("should change the font-size of a character with multiples inline ancestors having a font-size", async () => {
     await testEditor({
         contentBefore: unformat(`<p>
@@ -74,6 +79,7 @@ test("should change the font-size of a character with multiples inline ancestors
                         </p>`),
     });
 });
+
 test("should remove a redundant font-size", async () => {
     await testEditor({
         contentBefore: '<p style="font-size: 10px">b<span style="font-size: 10px;">[c]</span>d</p>',
@@ -81,6 +87,7 @@ test("should remove a redundant font-size", async () => {
         contentAfter: '<p style="font-size: 10px">b[c]d</p>',
     });
 });
+
 test.todo("should change the font-size to default", async () => {
     await testEditor({
         contentBefore: "<p>[ab]</p>",
@@ -88,6 +95,7 @@ test.todo("should change the font-size to default", async () => {
         contentAfter: "<p>[ab]</p>",
     });
 });
+
 test.todo(
     "should change the font-size to default removing the existing style with no empty span at the end",
     async () => {
@@ -109,6 +117,7 @@ test("should not format non-editable text (setFontSize)", async () => {
         `),
     });
 });
+
 test.todo("should add font size in selected table cells", async () => {
     await testEditor({
         contentBefore:
@@ -118,6 +127,7 @@ test.todo("should add font size in selected table cells", async () => {
             '<table><tbody><tr><td><p><span style="font-size: 48px;">[]<br></span></p></td><td><p><span style="font-size: 48px;"><br></span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
     });
 });
+
 test.todo("should add font size in all table cells", async () => {
     await testEditor({
         contentBefore:
@@ -127,6 +137,7 @@ test.todo("should add font size in all table cells", async () => {
             '<table><tbody><tr><td><p><span style="font-size: 36px;">[]<br></span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr><tr><td><p><span style="font-size: 36px;"><br></span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr></tbody></table>',
     });
 });
+
 test.todo("should add font size in selected table cells with h1 as first child", async () => {
     await testEditor({
         contentBefore:
@@ -136,6 +147,7 @@ test.todo("should add font size in selected table cells with h1 as first child",
             '<table><tbody><tr><td><h1><span style="font-size: 18px;">[]<br></span></h1></td><td><h1><span style="font-size: 18px;"><br></span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
     });
 });
+
 test("should add style to a span parent of an inline", async () => {
     await testEditor({
         contentBefore: `<p>a<span style="background-color: black;">${strong(`[bc]`)}</span>d</p>`,
