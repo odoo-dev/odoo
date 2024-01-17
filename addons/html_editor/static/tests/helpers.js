@@ -209,16 +209,16 @@ export async function insertText(editor, text) {
     // browser behavior otherwise.
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.
-        dispatch(editor.el, "keydown", { key: char });
+        dispatch(editor.editable, "keydown", { key: char });
         // KeyPressEvent is not required but is triggered like in the browser.
-        dispatch(editor.el, "keypress", { key: char });
+        dispatch(editor.editable, "keypress", { key: char });
         // InputEvent is required to simulate the insert text.
-        dispatch(editor.el, "input", {
+        dispatch(editor.editable, "input", {
             inputType: "insertText",
             data: char,
         });
         // KeyUpEvent is not required but is triggered like the browser would.
-        dispatch(editor.el, "keyup", { key: char });
+        dispatch(editor.editable, "keyup", { key: char });
     }
 }
 
