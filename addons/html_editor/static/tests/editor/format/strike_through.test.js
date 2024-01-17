@@ -11,6 +11,7 @@ test("should make a few characters strikeThrough", async () => {
         contentAfter: `<p>ab${s(`[cde]`)}fg</p>`,
     });
 });
+
 test("should make a few characters not strikeThrough", async () => {
     await testEditor({
         contentBefore: `<p>${s(`ab[cde]fg`)}</p>`,
@@ -18,6 +19,7 @@ test("should make a few characters not strikeThrough", async () => {
         contentAfter: `<p>${s(`ab`)}[cde]${s(`fg`)}</p>`,
     });
 });
+
 test("should make a few characters strikeThrough then remove style inside", async () => {
     await testEditor({
         contentBefore: `<p>ab[c d]ef</p>`,
@@ -36,6 +38,7 @@ test("should make a few characters strikeThrough then remove style inside", asyn
         contentAfter: `<p>ab<s>c</s>[ ]<s>d</s>ef</p>`,
     });
 });
+
 test.todo("should make strikeThrough then more then remove", async () => {
     await testEditor({
         contentBefore: `<p>abc[ ]def</p>`,
@@ -71,6 +74,7 @@ test.todo("should make strikeThrough then more then remove", async () => {
         contentAfter: `<p>ab[c d]ef</p>`,
     });
 });
+
 test("should make two paragraphs strikeThrough", async () => {
     await testEditor({
         contentBefore: "<p>[abc</p><p>def]</p>",
@@ -78,6 +82,7 @@ test("should make two paragraphs strikeThrough", async () => {
         contentAfter: `<p>${s(`[abc`)}</p><p>${s(`def]`)}</p>`,
     });
 });
+
 test("should make two paragraphs not strikeThrough", async () => {
     await testEditor({
         contentBefore: `<p>${s(`[abc`)}</p><p>${s(`def]`)}</p>`,
@@ -85,6 +90,7 @@ test("should make two paragraphs not strikeThrough", async () => {
         contentAfter: "<p>[abc</p><p>def]</p>",
     });
 });
+
 test("should make qweb tag strikeThrough", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
@@ -92,6 +98,7 @@ test("should make qweb tag strikeThrough", async () => {
         contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="text-decoration-line: line-through;">[Test]</p></div>`,
     });
 });
+
 test("should make a whole heading strikeThrough after a triple click", async () => {
     await testEditor({
         contentBefore: `<h1>[ab</h1><p>]cd</p>`,
@@ -99,6 +106,7 @@ test("should make a whole heading strikeThrough after a triple click", async () 
         contentAfter: `<h1>${s(`[ab]`)}</h1><p>cd</p>`,
     });
 });
+
 test("should make a whole heading not strikeThrough after a triple click", async () => {
     await testEditor({
         contentBefore: `<h1>${s(`[ab`)}</h1><p>]cd</p>`,
@@ -106,6 +114,7 @@ test("should make a whole heading not strikeThrough after a triple click", async
         contentAfter: `<h1>[ab]</h1><p>cd</p>`,
     });
 });
+
 test("should make a selection starting with strikeThrough text fully strikeThrough", async () => {
     await testEditor({
         contentBefore: `<p>${s(`[ab`)}</p><p>c]d</p>`,
@@ -113,6 +122,7 @@ test("should make a selection starting with strikeThrough text fully strikeThrou
         contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]`)}d</p>`,
     });
 });
+
 test.todo(
     "should make a selection with strikeThrough text in the middle fully strikeThrough",
     async () => {
@@ -123,6 +133,7 @@ test.todo(
         });
     }
 );
+
 test.todo(
     "should make a selection ending with strikeThrough text fully strikeThrough",
     async () => {
@@ -133,6 +144,7 @@ test.todo(
         });
     }
 );
+
 test.todo("should get ready to type in strikeThrough", async () => {
     await testEditor({
         contentBefore: `<p>ab[]cd</p>`,
@@ -141,6 +153,7 @@ test.todo("should get ready to type in strikeThrough", async () => {
         contentAfter: `<p>ab[]cd</p>`,
     });
 });
+
 test.todo("should get ready to type in not underline", async () => {
     await testEditor({
         contentBefore: `<p>${s(`ab[]cd`)}</p>`,
@@ -149,6 +162,7 @@ test.todo("should get ready to type in not underline", async () => {
         contentAfter: `<p>${s(`ab[]cd`)}</p>`,
     });
 });
+
 test("should do nothing when a block already has a line-through decoration", async () => {
     await testEditor({
         contentBefore: `<p style="text-decoration: line-through;">a[b]c</p>`,
@@ -156,6 +170,7 @@ test("should do nothing when a block already has a line-through decoration", asy
         contentAfter: `<p style="text-decoration: line-through;">a[b]c</p>`,
     });
 });
+
 test.todo("should insert before strikethrough", async () => {
     await testEditor({
         contentBefore: `<p>d[a${s("bc]<br><br>")}</p>`,
@@ -172,6 +187,7 @@ test.todo("should insert before strikethrough", async () => {
         contentAfter: `<p>${s(`A[]<br><br>`)}</p>`,
     });
 });
+
 test("should not format non-editable text (strikeThrough)", async () => {
     await testEditor({
         contentBefore: '<p>[a</p><p contenteditable="false">b</p><p>c]</p>',

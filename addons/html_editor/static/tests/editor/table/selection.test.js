@@ -30,6 +30,7 @@ describe("select a full table on cross over", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should select a table and some characters", async () => {
             await testEditor({
                 contentBefore:
@@ -41,6 +42,7 @@ describe("select a full table on cross over", () => {
                     '<td class="o_selected_td">e[f</td></tr></tbody></table><p>a]bc</p>',
             });
         });
+
         test.todo("should select some characters, a table and some more characters", async () => {
             await testEditor({
                 contentBefore:
@@ -52,6 +54,7 @@ describe("select a full table on cross over", () => {
                     '<td class="o_selected_td">ef</td></tr></tbody></table><p>a]bc</p>',
             });
         });
+
         test.todo(
             "should select some characters, a table, some more characters and another table",
             async () => {
@@ -70,6 +73,7 @@ describe("select a full table on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should select some characters, a table, some more characters, another table and some more characters",
             async () => {
@@ -109,6 +113,7 @@ describe("select a full table on cross over", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should apply bold to a table and some characters", async () => {
             await testEditor({
                 contentBefore:
@@ -127,6 +132,7 @@ describe("select a full table on cross over", () => {
                     "<p><strong>a]</strong>bc</p>",
             });
         });
+
         test.todo(
             "should apply bold to some characters, a table and some more characters",
             async () => {
@@ -151,6 +157,7 @@ describe("select a full table on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should apply bold to some characters, a table, some more characters and another table",
             async () => {
@@ -185,6 +192,7 @@ describe("select a full table on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should apply bold to some characters, a table, some more characters, another table and some more characters",
             async () => {
@@ -259,6 +267,7 @@ describe("select a full table on cross over", () => {
                     </table>`),
             });
         });
+
         test.todo("should apply a color to a table and some characters", async () => {
             await testEditor({
                 contentBefore:
@@ -287,6 +296,7 @@ describe("select a full table on cross over", () => {
                     </p>`),
             });
         });
+
         test.todo(
             "should apply a color to some characters, a table and some more characters",
             async () => {
@@ -323,6 +333,7 @@ describe("select a full table on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should apply a color to some characters, a table, some more characters and another table",
             async () => {
@@ -377,6 +388,7 @@ describe("select a full table on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should apply a color to some characters, a table, some more characters, another table and some more characters",
             async () => {
@@ -448,6 +460,7 @@ describe("select columns on cross over", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should select a whole row", async () => {
             await testEditor({
                 contentBefore:
@@ -460,6 +473,7 @@ describe("select columns on cross over", () => {
                     "</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
             });
         });
+
         test.todo("should select a whole column", async () => {
             await testEditor({
                 contentBefore:
@@ -488,6 +502,7 @@ describe("select columns on cross over", () => {
                     "</tbody></table>",
             });
         });
+
         test.todo("should select from (0,0) to (1,1) in a 3x3 table", async () => {
             await testEditor({
                 contentBefore:
@@ -516,6 +531,7 @@ describe("select columns on cross over", () => {
                     "</tbody></table>",
             });
         });
+
         test.todo("should select a whole table", async () => {
             await testEditor({
                 contentBefore:
@@ -564,6 +580,7 @@ describe("select columns on cross over", () => {
                     "</tr></tbody></table>",
             });
         });
+
         test.todo("should apply bold to a whole row", async () => {
             await testEditor({
                 contentBefore:
@@ -581,6 +598,7 @@ describe("select columns on cross over", () => {
                     "</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
             });
         });
+
         test.todo("should apply bold to a whole column", async () => {
             await testEditor({
                 contentBefore:
@@ -622,6 +640,7 @@ describe("select columns on cross over", () => {
                     "</tbody></table>",
             });
         });
+
         test.todo("should apply bold from (0,0) to (1,1) in a 3x3 table", async () => {
             await testEditor({
                 contentBefore:
@@ -663,6 +682,7 @@ describe("select columns on cross over", () => {
                     "</tbody></table>",
             });
         });
+
         test.todo("should apply bold to a whole table", async () => {
             await testEditor({
                 contentBefore:
@@ -755,6 +775,7 @@ describe("select columns on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should remove any height or width of the table without loosing the style of the element inside it.",
             async () => {
@@ -823,6 +844,7 @@ describe("select columns on cross over", () => {
                 });
             }
         );
+
         test.todo(
             "should remove any height or width of the table without removig the style of the table.",
             async () => {
@@ -891,6 +913,7 @@ describe("select columns on cross over", () => {
                     </table>`),
             });
         });
+
         test.todo("should apply a color to a whole row", async () => {
             await testEditor({
                 contentBefore:
@@ -921,6 +944,7 @@ describe("select columns on cross over", () => {
                     </table>`),
             });
         });
+
         test.todo("should apply a color to a whole column", async () => {
             await testEditor({
                 contentBefore:
@@ -968,6 +992,7 @@ describe("select columns on cross over", () => {
                     </table>`),
             });
         });
+
         test.todo("should apply a color from (0,0) to (1,1) in a 3x3 table", async () => {
             await testEditor({
                 contentBefore:
@@ -1017,6 +1042,7 @@ describe("select columns on cross over", () => {
                     </table>`),
             });
         });
+
         test.todo("should apply a color to a whole table", async () => {
             await testEditor({
                 contentBefore:
