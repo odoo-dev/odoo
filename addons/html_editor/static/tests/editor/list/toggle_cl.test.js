@@ -19,6 +19,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
             });
         });
+
         test.todo("should turn a paragraph into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -28,6 +29,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
             });
         });
+
         test.todo("should turn a heading into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -37,6 +39,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
             });
         });
+
         test.todo("should turn a paragraph in a div into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -46,6 +49,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<div><ul class="o_checklist"><li>ab[]cd</li></ul></div>',
             });
         });
+
         test.todo("should turn a paragraph with formats into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -55,6 +59,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<ul class="o_checklist"><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>',
             });
         });
+
         test.todo("should turn a paragraph between 2 checklist into a checklist item", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -65,6 +70,7 @@ describe("Range collapsed", () => {
                     '<ul class="o_checklist"><li class="o_checked">abc</li><li>d[]ef</li><li class="o_checked">ghi</li></ul>',
             });
         });
+
         test.todo(
             "should turn a unordered list into a checklist between 2 checklists inside a checklist",
             async () => {
@@ -149,6 +155,7 @@ describe("Range collapsed", () => {
                 });
             }
         );
+
         test.todo("should remove the list-style when change the list style", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -163,6 +170,7 @@ describe("Range collapsed", () => {
                     </ul>`),
             });
         });
+
         test.todo("should add a unique id on a new checklist", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
@@ -175,6 +183,7 @@ describe("Range collapsed", () => {
                 },
             });
         });
+
         test.todo(
             "should turn an empty paragraph of multiple table cells into a checklist",
             async () => {
@@ -246,6 +255,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p>[]<br></p>",
             });
         });
+
         test.todo("should turn a checklist into a paragraph", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
@@ -253,6 +263,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p>ab[]cd</p>",
             });
         });
+
         test.todo("should turn a checklist into a heading", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
@@ -260,6 +271,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<h1>ab[]cd</h1>",
             });
         });
+
         test.todo("should turn a checklist item into a paragraph", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -268,6 +280,7 @@ describe("Range collapsed", () => {
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li>cd</li></ul><p>ef[]gh</p>',
             });
         });
+
         test.todo("should turn a checklist with formats into a paragraph", async () => {
             await testEditor({
                 contentBefore:
@@ -276,6 +289,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p><b>ab</b> <i>cd</i> ef[]gh</p>",
             });
         });
+
         test.todo("should turn nested list items into paragraphs", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -316,6 +330,7 @@ describe("Range collapsed", () => {
                         </ul>`),
             });
         });
+
         test.todo(
             "should turn an list of multiple table cells into a empty paragraph",
             async () => {
@@ -385,6 +400,7 @@ describe("Range not collapsed", () => {
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li>cd[ef]gh</li></ul>',
             });
         });
+
         test.todo("should turn a heading into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -393,6 +409,7 @@ describe("Range not collapsed", () => {
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li><h1>cd[ef]gh</h1></li></ul>',
             });
         });
+
         test.todo("should turn two paragraphs into a checklist with two items", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -401,6 +418,7 @@ describe("Range not collapsed", () => {
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li>cd[ef</li><li>gh]ij</li></ul>',
             });
         });
+
         test.todo(
             "should turn two paragraphs in a div into a checklist with two items",
             async () => {
@@ -413,6 +431,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo("should turn a paragraph and a checklist item into two list items", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -431,6 +450,7 @@ describe("Range not collapsed", () => {
                     '<ul class="o_checklist"><li>a[b</li><li class="o_checked">c]d</li><li class="o_checked">ef</li></ul>',
             });
         });
+
         test.todo("should turn a checklist item and a paragraph into two list items", async () => {
             await testEditor({
                 removeCheckIds: true,
@@ -441,6 +461,7 @@ describe("Range not collapsed", () => {
                     '<ul class="o_checklist"><li>ab</li><li class="o_checked">c[d</li><li>e]f</li></ul>',
             });
         });
+
         test.todo(
             "should turn a checklist, a paragraph and another list into one list with three list items",
             async () => {
@@ -454,6 +475,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should turn a checklist item, a paragraph and another list into one list with all three as list items",
             async () => {
@@ -467,6 +489,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should turn a checklist, a paragraph and a checklist item into one list with all three as list items",
             async () => {
@@ -489,6 +512,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><p>cd[ef]gh</p>",
             });
         });
+
         test.todo("should turn a checklist into a heading", async () => {
             await testEditor({
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li><h1>cd[ef]gh</h1></li></ul>',
@@ -496,6 +520,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><h1>cd[ef]gh</h1>",
             });
         });
+
         test.todo("should turn a checklist into two paragraphs", async () => {
             await testEditor({
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li>cd[ef</li><li>gh]ij</li></ul>',
@@ -503,6 +528,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><p>cd[ef</p><p>gh]ij</p>",
             });
         });
+
         test.todo("should turn a checklist item into a paragraph", async () => {
             await testEditor({
                 removeCheckIds: true,
