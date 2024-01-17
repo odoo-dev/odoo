@@ -28,10 +28,17 @@ test("with a part of the selector in an empty HTMLElement", async () => {
     expect(getContent(el)).toBe(`<div>a[bc<div>]</div></div>`);
 });
 
-test("with a part of the fff in an empty HTMLElement", async () => {
+test("inverse selection", async () => {
     const { el } = await setupEditor("<div>a]bc<div>[</div></div>", {});
     expect(el.innerHTML).toBe(`<div>abc<div></div></div>`);
     expect(getContent(el)).toBe(`<div>a]bc<div>[</div></div>`);
+});
+
+test("with an empty selector and a <br>", async () => {
+    const { el } = await setupEditor("<p>[]<br></p>", {});
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
 });
 
 /**
