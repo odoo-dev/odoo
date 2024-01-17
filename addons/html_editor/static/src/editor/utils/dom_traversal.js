@@ -101,8 +101,6 @@ export const PATH_END_REASONS = {
  * @see leftLeafOnlyNotBlockPath
  * @see leftLeafOnlyInScopeNotBlockEditablePath
  * @see rightLeafOnlyNotBlockPath
- * @see rightLeafOnlyPathNotBlockNotEditablePath
- * @see rightLeafOnlyInScopeNotBlockEditablePath
  * @see rightLeafOnlyNotBlockNotEditablePath
  *
  * @param {number} direction

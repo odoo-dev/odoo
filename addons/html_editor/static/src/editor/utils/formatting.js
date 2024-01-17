@@ -44,7 +44,7 @@ export const FONT_SIZE_CLASSES = [
 
 export const TEXT_STYLE_CLASSES = ["display-1", "display-2", "display-3", "display-4", "lead"];
 
-export const formatsSpecs = {
+const formatsSpecs = {
     italic: {
         tagName: "em",
         isFormatted: isItalic,
