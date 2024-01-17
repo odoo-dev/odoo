@@ -155,6 +155,7 @@ function visitAndSetRange(target, ref, configSelection) {
 
 class TestEditor extends Component {
     static template = xml`<div t-ref="target"/>`;
+    static props = ["content", "config"];
 
     setup() {
         this.ref = useRef("target");
