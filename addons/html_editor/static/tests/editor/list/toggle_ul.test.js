@@ -17,6 +17,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
         });
+
         test.todo("should turn a paragraph into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
@@ -24,6 +25,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<ul><li>ab[]cd</li></ul>",
             });
         });
+
         test.todo("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<h1>ab[]cd</h1>",
@@ -31,6 +33,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<ul><li><h1>ab[]cd</h1></li></ul>",
             });
         });
+
         test.todo("should turn a paragraph in a div into a list", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[]cd</p></div>",
@@ -38,6 +41,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<div><ul><li>ab[]cd</li></ul></div>",
             });
         });
+
         test.todo("should turn a paragraph with formats into a list", async () => {
             await testEditor({
                 contentBefore: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
@@ -45,6 +49,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<ul><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>",
             });
         });
+
         test.todo(
             "should turn an empty paragraph of multiple table cells into a list",
             async () => {
@@ -110,6 +115,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p>[]<br></p>",
             });
         });
+
         test.todo("should turn a list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<ul><li>ab[]cd</li></ul>",
@@ -117,6 +123,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p>ab[]cd</p>",
             });
         });
+
         test.todo("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<ul><li><h1>ab[]cd</h1></li></ul>",
@@ -124,6 +131,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<h1>ab[]cd</h1>",
             });
         });
+
         test.todo("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd</li><li>ef[]gh</li></ul>",
@@ -131,6 +139,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p>ab</p><ul><li>cd</li></ul><p>ef[]gh</p>",
             });
         });
+
         test.todo("should turn a list with formats into a paragraph", async () => {
             await testEditor({
                 contentBefore:
@@ -139,6 +148,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<p><b>ab</b> <i>cd</i> ef[]gh</p>",
             });
         });
+
         test.todo("should turn nested list items into paragraphs", async () => {
             await testEditor({
                 contentBefore: unformat(`
@@ -178,6 +188,7 @@ describe("Range collapsed", () => {
                         </ul>`),
             });
         });
+
         test.todo(
             "should turn an list of multiple table cells into a empty paragraph",
             async () => {
@@ -243,6 +254,7 @@ describe("Range collapsed", () => {
                 contentAfter: "<ul><li>[]<br></li></ul>",
             });
         });
+
         test.todo("should turn an empty ordered list into an unordered list (2)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
@@ -262,6 +274,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><ul><li>cd[ef]gh</li></ul>",
             });
         });
+
         test.todo("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><h1>cd[ef]gh</h1>",
@@ -269,6 +282,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><ul><li><h1>cd[ef]gh</h1></li></ul>",
             });
         });
+
         test.todo("should turn two paragraphs into a list with two items", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><p>cd[ef</p><p>gh]ij</p>",
@@ -276,6 +290,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><ul><li>cd[ef</li><li>gh]ij</li></ul>",
             });
         });
+
         test.todo("should turn two paragraphs in a div into a list with two items", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[cd</p><p>ef]gh</p></div>",
@@ -283,6 +298,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<div><ul><li>ab[cd</li><li>ef]gh</li></ul></div>",
             });
         });
+
         test.todo("should turn a paragraph and a list item into two list items", async () => {
             await testEditor({
                 contentBefore: "<p>a[b</p><ul><li>c]d</li><li>ef</li></ul>",
@@ -290,6 +306,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<ul><li>a[b</li><li>c]d</li><li>ef</li></ul>",
             });
         });
+
         test.todo("should turn a list item and a paragraph into two list items", async () => {
             await testEditor({
                 contentBefore: "<ul><li>ab</li><li>c[d</li></ul><p>e]f</p>",
@@ -297,6 +314,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<ul><li>ab</li><li>c[d</li><li>e]f</li></ul>",
             });
         });
+
         test.todo(
             "should turn a list, a paragraph and another list into one list with three list items",
             async () => {
@@ -307,6 +325,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should turn a list item, a paragraph and another list into one list with all three as list items",
             async () => {
@@ -317,6 +336,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should turn a list, a paragraph and a list item into one list with all three as list items",
             async () => {
@@ -327,6 +347,7 @@ describe("Range not collapsed", () => {
                 });
             }
         );
+
         test.todo("should not turn a non-editable paragraph into a list", async () => {
             await testEditor({
                 contentBefore: '<p>[ab</p><p contenteditable="false">cd</p><p>ef]</p>',
@@ -344,6 +365,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><p>cd[ef]gh</p>",
             });
         });
+
         test.todo("should turn a list into a heading", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li><h1>cd[ef]gh</h1></li></ul>",
@@ -351,6 +373,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><h1>cd[ef]gh</h1>",
             });
         });
+
         test.todo("should turn a list into two paragraphs", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd[ef</li><li>gh]ij</li></ul>",
@@ -358,6 +381,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><p>cd[ef</p><p>gh]ij</p>",
             });
         });
+
         test.todo("should turn a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><ul><li>cd</li><li>ef[gh]ij</li></ul>",
@@ -365,6 +389,7 @@ describe("Range not collapsed", () => {
                 contentAfter: "<p>ab</p><ul><li>cd</li></ul><p>ef[gh]ij</p>",
             });
         });
+
         test.todo("should not turn a non-editable list into a paragraph", async () => {
             test.todo("should not turn a non-editable list into a paragraph", async () => {
                 await testEditor({
