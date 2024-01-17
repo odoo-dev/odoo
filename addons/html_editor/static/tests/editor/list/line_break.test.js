@@ -14,6 +14,7 @@ test.todo("should insert a <br> into an empty list item", async () => {
         contentAfter: "<ul><li><br>[]<br></li></ul>",
     });
 });
+
 test.todo("should insert a <br> at the beggining of a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>[]abc</li></ul>",
@@ -21,6 +22,7 @@ test.todo("should insert a <br> at the beggining of a list item", async () => {
         contentAfter: "<ul><li><br>[]abc</li></ul>",
     });
 });
+
 test.todo("should insert a <br> within a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>ab[]cd</li></ul>",
@@ -28,6 +30,7 @@ test.todo("should insert a <br> within a list item", async () => {
         contentAfter: "<ul><li>ab<br>[]cd</li></ul>",
     });
 });
+
 test.todo("should insert a line break (2 <br>) at the end of a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>abc[]</li></ul>",
