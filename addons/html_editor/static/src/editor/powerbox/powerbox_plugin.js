@@ -33,8 +33,12 @@ export class PowerboxPlugin extends Plugin {
 
     handleCommandHint() {
         const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        if (selection.isCollapsed && this.editable.contains(range.commonAncestorContainer)) {
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        if (
+            selection.isCollapsed &&
+            range &&
+            this.editable.contains(range.commonAncestorContainer)
+        ) {
             const node = selection.anchorNode;
             const el = node instanceof Element ? node : node.parentElement;
             if ((el.tagName === "DIV" || el.tagName === "P") && isEmpty(el)) {
