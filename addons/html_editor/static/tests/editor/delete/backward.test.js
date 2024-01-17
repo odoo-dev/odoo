@@ -38,6 +38,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>[]abc</p>",
             });
         });
+
         test.todo("should delete the first character in a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>a[]bc</p>",
@@ -45,6 +46,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>[]bc</p>",
             });
         });
+
         test.todo("should delete a character within a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]c</p>",
@@ -52,6 +54,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>a[]c</p>",
             });
         });
+
         test.todo("should delete the last character in a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
@@ -66,6 +69,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>ab&nbsp;[]</p>",
             });
         });
+
         test.todo("should merge a paragraph into an empty paragraph", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><p>[]abc</p>",
@@ -73,6 +77,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>[]abc</p>",
             });
         });
+
         test.todo("should merge node correctly", async () => {
             await testEditor({
                 contentBefore: '<div>a<span class="a">b</span><p>[]c</p>d</div>',
@@ -80,6 +85,7 @@ describe("Selection collapsed", () => {
                 contentAfter: '<div>a<span class="a">b[]</span>c<br>d</div>',
             });
         });
+
         test.todo("should ignore ZWS", async () => {
             await testEditor({
                 contentBefore: "<p>ab\u200B[]c</p>",
@@ -87,6 +93,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>a[]c</p>",
             });
         });
+
         test.todo("should keep inline block", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab</p><br><i>c[]</i></div>",
@@ -113,6 +120,7 @@ describe("Selection collapsed", () => {
                 contentAfter: '<div><p>cd</p><br><span class="a">x[]</span></div>',
             });
         });
+
         test.todo("should delete through ZWS and Empty Inline", async () => {
             await testEditor({
                 contentBefore: '<p>ab<span class="style">c</span>d[]e</p>',
@@ -124,6 +132,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p>a[]e</p>",
             });
         });
+
         test.todo("ZWS: should delete element content but keep cursor in", async () => {
             await testEditor({
                 contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
@@ -157,6 +166,7 @@ describe("Selection collapsed", () => {
                 contentAfter: '<p>ab<span class="style">x[]</span>ef</p>',
             });
         });
+
         test.todo("should ignore ZWS and merge (1)", async () => {
             await testEditor({
                 contentBefore:
@@ -186,6 +196,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<p><b>efx[]</b></p>",
             });
         });
+
         test.todo("should ignore ZWS and merge (2)", async () => {
             await testEditor({
                 contentBefore: '<div><p>ab</p><span class="a">[]\u200B</span></div>',
@@ -201,6 +212,7 @@ describe("Selection collapsed", () => {
                 contentAfter: "<div><p>cd</p>x[]</div>",
             });
         });
+
         test.todo("should not break unbreakables", async () => {
             await testEditor({
                 contentBefore:
@@ -330,6 +342,7 @@ describe("Selection collapsed", () => {
                     `</div>`,
             });
         });
+
         test.todo("should remove empty unbreakable", async () => {
             await testEditor({
                 contentBefore:
@@ -342,6 +355,7 @@ describe("Selection collapsed", () => {
                 contentAfter: '<div class="accolade"><div><p>AB[]</p></div></div>',
             });
         });
+
         test.todo("should not remove empty Bootstrap column", async () => {
             await testEditor({
                 contentBefore: '<div><div><p>ABC</p></div><div class="col">X[]</div></div>',
@@ -371,6 +385,7 @@ describe("Selection collapsed", () => {
                 contentAfter: '<div><div><p>ABC</p></div><div class="col-lg-3">[]<br></div></div>',
             });
         });
+
         test.todo("should remove empty unbreakable  (formated 1)", async () => {
             await testEditor({
                 contentBefore: `<div><div><p>ABC</p></div><div>
@@ -384,6 +399,7 @@ X[]
                 contentAfter: "<div><div><p>AB[]</p></div></div>",
             });
         });
+
         test.todo("should remove empty unbreakable (formated 2)", async () => {
             await testEditor({
                 contentBefore: `<div>
@@ -402,6 +418,7 @@ X[]
                                             <p>AB[]</p></div></div>`,
             });
         });
+
         test.todo("should remove empty unbreakable (formated 3)", async () => {
             await testEditor({
                 contentBefore: `<div>
@@ -422,6 +439,7 @@ X[]
                                             <p>AB[]</p></div></div>`,
             });
         });
+
         test.todo("should merge the following inline text node", async () => {
             await testEditor({
                 contentBefore: "<p>abc</p>[]def",
@@ -434,6 +452,7 @@ X[]
                 contentAfter: "<p>abc[]def</p><p>ghi</p>",
             });
         });
+
         test.todo("should delete starting white space and merge paragraphs", async () => {
             await testEditor({
                 contentBefore: `<p>mollis.</p><p>\n <i>[]Pe</i><i>lentesque</i></p>`,
@@ -441,6 +460,7 @@ X[]
                 contentAfter: `<p>mollis.[]<i>Pelentesque</i></p>`,
             });
         });
+
         test.todo('should remove contenteditable="false"', async () => {
             await testEditor({
                 contentBefore: `<div><span contenteditable="false">abc</span>[]def</div>`,
@@ -450,6 +470,7 @@ X[]
                 contentAfter: `<div>[]def</div>`,
             });
         });
+
         test.todo('should remove contenteditable="False"', async () => {
             await testEditor({
                 contentBefore: `<div><span contenteditable="False">abc</span>[]def</div>`,
@@ -459,6 +480,7 @@ X[]
                 contentAfter: `<div>[]def</div>`,
             });
         });
+
         test.todo('should remove contenteditable="false" at the beggining of a P', async () => {
             await testEditor({
                 contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
@@ -468,6 +490,7 @@ X[]
                 contentAfter: `<p>abc</p><p>[]ghi</p>`,
             });
         });
+
         test.todo("should remove a fontawesome", async () => {
             await testEditor({
                 contentBefore: `<div><p>abc</p><span class="fa"></span><p>[]def</p></div>`,
@@ -477,6 +500,7 @@ X[]
                 contentAfter: `<div><p>abc</p><p>[]def</p></div>`,
             });
         });
+
         test.todo("should remove a media element", async () => {
             await testEditor({
                 contentBefore: `<p>abc</p><div class="o_image"></div><p>[]def</p>`,
@@ -487,6 +511,7 @@ X[]
             });
         });
     });
+
     describe("Line breaks", () => {
         describe("Single", () => {
             test.todo("should delete a leading line break", async () => {
@@ -503,6 +528,7 @@ X[]
                     contentAfter: "<p>[]abc</p>",
                 });
             });
+
             test.todo("should delete a line break within a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>[]cd</p>",
@@ -522,6 +548,7 @@ X[]
                     contentAfter: "<p>ab[]cd</p>",
                 });
             });
+
             test.todo("should delete a trailing line break", async () => {
                 await testEditor({
                     contentBefore: "<p>abc<br><br>[]</p>",
@@ -539,6 +566,7 @@ X[]
                     contentAfter: "<p>abc&nbsp;[]</p>",
                 });
             });
+
             test.todo(
                 "should delete a character and a line break, emptying a paragraph",
                 async () => {
@@ -552,6 +580,7 @@ X[]
                     });
                 }
             );
+
             test.todo("should delete a character after a trailing line break", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>c[]</p>",
@@ -562,6 +591,7 @@ X[]
                 });
             });
         });
+
         describe("Consecutive", () => {
             test.todo(
                 "should merge a paragraph with 4 <br> into a paragraph with text",
@@ -574,6 +604,7 @@ X[]
                     });
                 }
             );
+
             test.todo("should delete a line break (1)", async () => {
                 // 2-1
                 await testEditor({
@@ -582,6 +613,7 @@ X[]
                     contentAfter: "<p>ab</p><p>[]<br><br><br></p><p>cd</p>",
                 });
             });
+
             test.todo(
                 "should delete a line break, then merge a paragraph with 3 <br> into a paragraph with text",
                 async () => {
@@ -596,6 +628,7 @@ X[]
                     });
                 }
             );
+
             test.todo("should delete a line break (2)", async () => {
                 // 3-1
                 await testEditor({
@@ -604,6 +637,7 @@ X[]
                     contentAfter: "<p>ab</p><p><br>[]<br><br></p><p>cd</p>",
                 });
             });
+
             test.todo("should delete two line breaks (3)", async () => {
                 // 3-2
                 await testEditor({
@@ -615,6 +649,7 @@ X[]
                     contentAfter: "<p>ab</p><p>[]<br><br></p><p>cd</p>",
                 });
             });
+
             test.todo(
                 "should delete two line breaks, then merge a paragraph with 3 <br> into a paragraph with text",
                 async () => {
@@ -630,6 +665,7 @@ X[]
                     });
                 }
             );
+
             test.todo("should delete a line break when several", async () => {
                 // 4-1
                 await testEditor({
@@ -646,6 +682,7 @@ X[]
                     contentAfter: "<p>ab</p><p><br><br>[]<br></p><p>cd</p>",
                 });
             });
+
             test.todo("should delete two line breaks", async () => {
                 // 4-2
                 await testEditor({
@@ -668,6 +705,7 @@ X[]
                     contentAfter: "<p>ab</p><p><br>[]<br></p><p>cd</p>",
                 });
             });
+
             test.todo("should delete three line breaks (emptying a paragraph)", async () => {
                 // 4-3
                 await testEditor({
@@ -691,6 +729,7 @@ X[]
                     contentAfter: "<p>ab</p><p>[]<br></p><p>cd</p>",
                 });
             });
+
             test.todo(
                 "should delete three line breaks, then merge an empty parargaph into a paragraph with text",
                 async () => {
@@ -719,6 +758,7 @@ X[]
                     });
                 }
             );
+
             test.todo("should merge a paragraph into a paragraph with 4 <br>", async () => {
                 // 6-1
                 await testEditor({
@@ -727,6 +767,7 @@ X[]
                     contentAfter: "<p>ab</p><p><br><br><br>[]cd</p>",
                 });
             });
+
             test.todo(
                 "should merge a paragraph into a paragraph with 4 <br>, then delete a trailing line break",
                 async () => {
@@ -741,6 +782,7 @@ X[]
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph into a paragraph with 4 <br>, then delete two line breaks",
                 async () => {
@@ -756,6 +798,7 @@ X[]
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks",
                 async () => {
@@ -772,6 +815,7 @@ X[]
                     });
                 }
             );
+
             test.todo(
                 "should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks, then merge two paragraphs with text",
                 async () => {
@@ -791,6 +835,7 @@ X[]
             );
         });
     });
+
     describe("Pre", () => {
         test.todo("should delete a character in a pre", async () => {
             await testEditor({
@@ -799,6 +844,7 @@ X[]
                 contentAfter: "<pre>a[]cd</pre>",
             });
         });
+
         test.todo("should delete a character in a pre (space before)", async () => {
             await testEditor({
                 contentBefore: "<pre>     ab[]cd</pre>",
@@ -806,6 +852,7 @@ X[]
                 contentAfter: "<pre>     a[]cd</pre>",
             });
         });
+
         test.todo("should delete a character in a pre (space after)", async () => {
             await testEditor({
                 contentBefore: "<pre>ab[]cd     </pre>",
@@ -813,6 +860,7 @@ X[]
                 contentAfter: "<pre>a[]cd     </pre>",
             });
         });
+
         test.todo("should delete a character in a pre (space before and after)", async () => {
             await testEditor({
                 contentBefore: "<pre>     ab[]cd     </pre>",
@@ -820,6 +868,7 @@ X[]
                 contentAfter: "<pre>     a[]cd     </pre>",
             });
         });
+
         test.todo("should delete a space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>   []  ab</pre>",
@@ -827,6 +876,7 @@ X[]
                 contentAfter: "<pre>  []  ab</pre>",
             });
         });
+
         test.todo("should delete a newline in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab\n[]cd</pre>",
@@ -834,6 +884,7 @@ X[]
                 contentAfter: "<pre>ab[]cd</pre>",
             });
         });
+
         test.todo("should delete all leading space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>     []ab</pre>",
@@ -847,6 +898,7 @@ X[]
                 contentAfter: "<pre>[]ab</pre>",
             });
         });
+
         test.todo("should delete all trailing space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab     []</pre>",
@@ -861,6 +913,7 @@ X[]
             });
         });
     });
+
     describe("Formats", () => {
         test.todo("should delete a character before a format node", async () => {
             await testEditor({
@@ -877,6 +930,7 @@ X[]
             });
         });
     });
+
     describe("Nested Elements", () => {
         test.todo("should delete a h1 inside a td immediately after insertion", async () => {
             await testEditor({
@@ -894,6 +948,7 @@ X[]
                     "<table><tbody><tr><td><p>[]<br></p></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>",
             });
         });
+
         test.todo(
             "should delete a h1 inside a nested list immediately after insertion",
             async () => {
@@ -913,6 +968,7 @@ X[]
             }
         );
     });
+
     describe("Merging different types of elements", () => {
         test.todo("should merge a paragraph with text into a paragraph with text", async () => {
             await testEditor({
@@ -921,6 +977,7 @@ X[]
                 contentAfter: "<p>ab[]cd</p>",
             });
         });
+
         test.todo(
             "should merge a paragraph with formated text into a paragraph with text",
             async () => {
@@ -931,6 +988,7 @@ X[]
                 });
             }
         );
+
         test.todo("should merge a paragraph with text into a heading1 with text", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p>[]cd</p>",
@@ -938,6 +996,7 @@ X[]
                 contentAfter: "<h1>ab[]cd</h1>",
             });
         });
+
         test.todo("should merge an empty paragraph into a heading1 with text", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p>[]<br></p>",
@@ -950,6 +1009,7 @@ X[]
                 contentAfter: "<h1>ab[]</h1>",
             });
         });
+
         test.todo("should remove empty paragraph (keeping the heading)", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><h1>[]ab</h1>",
@@ -957,6 +1017,7 @@ X[]
                 contentAfter: "<h1>[]ab</h1>",
             });
         });
+
         test.todo("should merge with previous node (default behaviour)", async () => {
             await testEditor({
                 contentBefore: "<jw-block-a>a</jw-block-a><jw-block-b>[]b</jw-block-b>",
@@ -969,6 +1030,7 @@ X[]
             //     contentAfter: '<jw-block-a>a[]</jw-block-a>',
             // });
         });
+
         test.todo("should merge nested elements (default behaviour)", async () => {
             await testEditor({
                 contentBefore:
@@ -983,6 +1045,7 @@ X[]
             //     contentAfter: '<jw-block-a><jw-block-b>ab[]</jw-block-b></jw-block-a>',
             // });
         });
+
         test.todo("should not break unbreakables", async () => {
             await testEditor({
                 contentBefore:
@@ -996,6 +1059,7 @@ X[]
                     `<div class="oe_unbreakable">[]abc</div></div></div></div>`,
             });
         });
+
         test.todo(
             "should merge a text preceding a paragraph (removing the paragraph)",
             async () => {
@@ -1012,6 +1076,7 @@ X[]
             }
         );
     });
+
     describe("With attributes", () => {
         test.todo("should remove paragraph with class", async () => {
             await testEditor({
@@ -1020,6 +1085,7 @@ X[]
                 contentAfter: "<p>[]abc</p>",
             });
         });
+
         test.todo("should merge two paragraphs with spans of same classes", async () => {
             await testEditor({
                 contentBefore: '<p><span class="a">ab</span></p><p><span class="a">[]cd</span></p>',
@@ -1027,6 +1093,7 @@ X[]
                 contentAfter: '<p><span class="a">ab[]cd</span></p>',
             });
         });
+
         test.todo(
             "should merge two paragraphs with spans of different classes without merging the spans",
             async () => {
@@ -1038,6 +1105,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should merge two paragraphs of different classes, each containing spans of the same class",
             async () => {
@@ -1049,6 +1117,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should merge two paragraphs of different classes, each containing spans of different classes without merging the spans",
             async () => {
@@ -1061,6 +1130,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should delete a line break between two spans with bold and merge these formats",
             async () => {
@@ -1072,6 +1142,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should delete a character in a span with bold, then a line break between two spans with bold and merge these formats",
             async () => {
@@ -1087,6 +1158,7 @@ X[]
             }
         );
     });
+
     describe("Nested editable zone (inside contenteditable=false element)", () => {
         test.todo(
             "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is empty",
@@ -1110,6 +1182,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should not remove the uneditable nesting zone nor the editable nested zone even if there is a paragraph after",
             async () => {
@@ -1134,6 +1207,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is not empty",
             async () => {
@@ -1156,6 +1230,7 @@ X[]
                 });
             }
         );
+
         test.todo("should remove the uneditable nesting zone from the outside", async () => {
             await testEditor({
                 contentBefore: unformat(`
@@ -1173,6 +1248,7 @@ X[]
             });
         });
     });
+
     describe("POC extra tests", () => {
         test.todo("should delete an unique space between letters", async () => {
             await testEditor({
@@ -1181,6 +1257,7 @@ X[]
                 contentAfter: "<p>ab[]cd</p>",
             });
         });
+
         test.todo("should delete the first character in a paragraph (2)", async () => {
             await testEditor({
                 contentBefore: "<p>a[] bc</p>",
@@ -1188,6 +1265,7 @@ X[]
                 contentAfter: "<p>[]&nbsp;bc</p>",
             });
         });
+
         test.todo("should delete a space", async () => {
             await testEditor({
                 contentBefore: "<p>ab [] de</p>",
@@ -1195,6 +1273,7 @@ X[]
                 contentAfter: "<p>ab[]de</p>",
             });
         });
+
         test.todo(
             "should delete a one letter word followed by visible space (start of block)",
             async () => {
@@ -1210,6 +1289,7 @@ X[]
                 });
             }
         );
+
         test.todo("should delete a one letter word surrounded by visible space", async () => {
             await testEditor({
                 contentBefore: "<p>ab c[] de</p>",
@@ -1222,6 +1302,7 @@ X[]
                 contentAfter: "<p>ab []&nbsp;de</p>",
             });
         });
+
         test.todo(
             "should delete a one letter word preceded by visible space (end of block)",
             async () => {
@@ -1237,6 +1318,7 @@ X[]
                 });
             }
         );
+
         test.todo(
             "should delete an empty paragraph in a table cell",
             async () =>
@@ -1247,6 +1329,7 @@ X[]
                     contentAfter: "<table><tbody><tr><td><p>a[]</p></td></tr></tbody></table>",
                 })
         );
+
         test.todo("should fill empty block with a <br>", async () => {
             await testEditor({
                 contentBefore: "<p>a[]</p>",
@@ -1259,6 +1342,7 @@ X[]
                 contentAfter: "<p>[]<br></p>",
             });
         });
+
         test.todo(
             "should merge a paragraph with text into a paragraph with text removing spaces",
             async () => {
@@ -1282,6 +1366,7 @@ X[]
                 });
             }
         );
+
         test.todo("should remove a br and remove following spaces", async () => {
             await testEditor({
                 contentBefore: "<p>ab<br><b>[]   </b>cd</p>",
@@ -1294,6 +1379,7 @@ X[]
                 contentAfter: "<p>ab[]<b>x</b>cd</p>",
             });
         });
+
         test.todo("should ignore empty inline node between blocks being merged", async () => {
             await testEditor({
                 contentBefore: "<div><p>abc</p><i> </i><p>[]def</p></div>",
@@ -1301,6 +1387,7 @@ X[]
                 contentAfter: "<div><p>abc[]def</p></div>",
             });
         });
+
         test.todo(
             "should merge in nested paragraphs and remove invisible inline content",
             async () => {
@@ -1320,6 +1407,7 @@ X[]
                 });
             }
         );
+
         test.todo("should not merge in nested blocks if inline content afterwards", async () => {
             await testEditor({
                 contentBefore:
@@ -1336,6 +1424,7 @@ X[]
                     '<custom-block style="display: block;"><p>ab</p><img>[]fg</custom-block>',
             });
         });
+
         test.todo("should move paragraph content to empty block", async () => {
             await testEditor({
                 contentBefore: "<p>abc</p><h1><br></h1><p>[]def</p>",
@@ -1343,6 +1432,7 @@ X[]
                 contentAfter: "<p>abc</p><p>[]def</p>",
             });
         });
+
         test.todo("should remove only one br between contents", async () => {
             await testEditor({
                 contentBefore: "<p>abc<br>[]<br>def</p>",
@@ -1350,6 +1440,7 @@ X[]
                 contentAfter: "<p>abc[]<br>def</p>",
             });
         });
+
         test.todo("should remove an empty block instead of merging it", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><p>[]<br></p>",
@@ -1357,6 +1448,7 @@ X[]
                 contentAfter: "<p>[]<br></p>",
             });
         });
+
         test.todo("should not remove a table without selecting it", async () => {
             await testEditor({
                 contentBefore: unformat(
@@ -1378,6 +1470,7 @@ X[]
                 ),
             });
         });
+
         test.todo("should not merge a table into its previous sibling", async () => {
             await testEditor({
                 contentBefore: unformat(
@@ -1399,6 +1492,7 @@ X[]
                 ),
             });
         });
+
         test.todo("should delete an image that is displayed as a block", async () => {
             await testEditor({
                 contentBefore: unformat(`<div>a[b<img style="display: block;"/>c]d</div>`),
@@ -1451,6 +1545,7 @@ describe("Selection not collapsed", () => {
             contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
         });
     });
+
     test.todo("should merge node correctly (1)", async () => {
         await testEditor({
             contentBefore: '<div>a<span class="a">b[c</span><p>d]e</p>f<br>g</div>',
@@ -1461,6 +1556,7 @@ describe("Selection not collapsed", () => {
             contentAfter: '<div>a<span class="a">b[]</span>e<br>f<br>g</div>',
         });
     });
+
     test.todo("should merge node correctly (2)", async () => {
         await testEditor({
             contentBefore: '<div>a<p>b[c</p><span class="a">d]e</span>f<p>xxx</p></div>',
@@ -1468,6 +1564,7 @@ describe("Selection not collapsed", () => {
             contentAfter: '<div>a<p>b[]<span class="a">e</span>f</p><p>xxx</p></div>',
         });
     });
+
     test.todo("should delete part of the text within a paragraph", async () => {
         // Forward selection
         await testEditor({
@@ -1482,6 +1579,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<p>ab[]ef</p>",
         });
     });
+
     test.todo("should delete across two paragraphs", async () => {
         // Forward selection
         await testEditor({
@@ -1496,6 +1594,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<p>ab[]gh</p>",
         });
     });
+
     test.todo("should delete part of the text across two paragraphs", async () => {
         // Forward selection
         await testEditor({
@@ -1510,6 +1609,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<div>a<p>b[]e</p>f</div>",
         });
     });
+
     test.todo("should delete all the text in a paragraph", async () => {
         // Forward selection
         await testEditor({
@@ -1524,6 +1624,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<p>[]<br></p>",
         });
     });
+
     test.todo(
         "should delete a complex selection accross format nodes and multiple paragraphs",
         async () => {
@@ -1551,6 +1652,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should delete all contents of a complex DOM with format nodes and multiple paragraphs",
         async () => {
@@ -1568,6 +1670,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test("should delete a selection accross a heading1 and a paragraph", async () => {
         // Forward selection
         await testEditor({
@@ -1582,6 +1685,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<h1>ab []gh</h1>",
         });
     });
+
     test.todo(
         "should delete a selection from the beginning of a heading1 with a format to the middle of a paragraph",
         async () => {
@@ -1609,6 +1713,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo("should delete a heading (triple click backspace)", async () => {
         await testEditor({
             contentBefore: "<h1>[abc</h1><p>]def</p>",
@@ -1622,6 +1727,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<h1>[]<br></h1><p><br></p><p>def</p>",
         });
     });
+
     test.todo(
         "should delete last character of paragraph, ignoring the selected paragraph break",
         async () => {
@@ -1643,6 +1749,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should delete first character of paragraph, as well as selected paragraph break",
         async () => {
@@ -1653,6 +1760,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should delete last character of paragraph, ignoring the selected paragraph break leading to an unbreakable",
         async () => {
@@ -1682,6 +1790,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should delete first character of unbreakable, ignoring selected paragraph break",
         async () => {
@@ -1692,6 +1801,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo("should remove a fully selected table", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1706,6 +1816,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<p>a[]l</p>",
         });
     });
+
     test.todo("should delete nothing when in an empty table cell", async () => {
         await testEditor({
             contentBefore:
@@ -1715,6 +1826,7 @@ describe("Selection not collapsed", () => {
                 "<table><tbody><tr><td>abc</td><td>[]<br></td><td>abc</td></tr></tbody></table>",
         });
     });
+
     test.todo(
         "should only remove the text content of cells in a partly selected table",
         async () => {
@@ -1737,6 +1849,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should remove some text and a table (even if the table is partly selected)",
         async () => {
@@ -1757,6 +1870,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo(
         "should remove a table and some text (even if the table is partly selected)",
         async () => {
@@ -1777,6 +1891,7 @@ describe("Selection not collapsed", () => {
             });
         }
     );
+
     test.todo("should remove some text, a table and some more text", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1791,6 +1906,7 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>a[]l</p>`,
         });
     });
+
     test.todo("should remove a selection of several tables", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1811,6 +1927,7 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>[]<br></p>`,
         });
     });
+
     test("should remove a selection including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1835,6 +1952,7 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>0[]</p>`,
         });
     });
+
     test.todo("should remove everything, including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1859,6 +1977,7 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>[]<br></p>`,
         });
     });
+
     test.todo("should empty an inline unremovable but remain in it", async () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
@@ -1866,6 +1985,7 @@ describe("Selection not collapsed", () => {
             contentAfter: '<p>ab<b class="oe_unremovable">[]\u200B</b>ef</p>',
         });
     });
+
     test.todo("should delete if first element and append in paragraph", async () => {
         await testEditor({
             contentBefore: `<blockquote><br>[]</blockquote>`,
@@ -1878,6 +1998,7 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>[]abcd</p>`,
         });
     });
+
     test.todo("should not delete styling nodes if not selected", async () => {
         // deleteBackward selection
         await testEditor({
@@ -1886,6 +2007,7 @@ describe("Selection not collapsed", () => {
             contentAfter: '<p>a<span class="style-class">[]\u200B</span>f</p>',
         });
     });
+
     test.todo("should delete styling nodes when delete if empty", async () => {
         // deleteBackward selection
         await testEditor({
@@ -1905,6 +2027,7 @@ describe("Selection not collapsed", () => {
             contentAfter: "<p>u[]yz</p>",
         });
     });
+
     describe("Nested editable zone (inside contenteditable=false element)", () => {
         test.todo(
             "should extend the range to fully include contenteditable=false that are partially selected at the end of the range",
@@ -1924,6 +2047,7 @@ describe("Selection not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should extend the range to fully include contenteditable=false that are partially selected at the start of the range",
             async () => {
@@ -1942,6 +2066,7 @@ describe("Selection not collapsed", () => {
                 });
             }
         );
+
         test.todo(
             "should remove element which is contenteditable=true even if their parent is contenteditable=false",
             async () => {
