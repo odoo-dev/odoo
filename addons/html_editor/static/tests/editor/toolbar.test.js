@@ -3,7 +3,7 @@
 import { expect, test } from "@odoo/hoot";
 import { waitFor, waitUntil } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
-import { getContent, setContent, setupEditor } from "./helpers";
+import { getContent, setContent, setupEditor } from "../helpers";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
