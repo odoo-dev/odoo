@@ -143,7 +143,7 @@ function visitAndSetRange(target, ref, configSelection) {
     } else {
         const targetChildren = [...target.childNodes];
         const refChildren = [...ref.childNodes];
-        if (targetChildren.length === 0 && refChildren.length === 1) {
+        if (targetChildren.length !== refChildren.length) {
             applyRange();
             return;
         }
