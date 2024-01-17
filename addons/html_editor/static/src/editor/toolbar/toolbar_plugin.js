@@ -1,8 +1,8 @@
 /** @odoo-module */
 
+import { reactive } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
-import { reactive } from "@odoo/owl";
 
 // TODO: This comes from a command registry?
 const buttons = [
@@ -53,7 +53,9 @@ export class ToolbarPlugin extends Plugin {
 
     setup() {
         this.buttons = buttons;
-        this.buttonsActiveState = reactive(Object.fromEntries(this.buttons.map(b => [b.id, false])));
+        this.buttonsActiveState = reactive(
+            Object.fromEntries(this.buttons.map((b) => [b.id, false]))
+        );
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Toolbar, "top", {
             dispatch: this.dispatch,
@@ -77,7 +79,8 @@ export class ToolbarPlugin extends Plugin {
     }
 
     handleSelectionChange() {
-        const range = window.getSelection().getRangeAt(0);
+        const sel = window.getSelection();
+        const range = sel.rangeCount ? sel.getRangeAt(0) : false;
         this.updateToolbarVisibility(range);
         if (this.overlay.isOpen) {
             this.updateButtonsActiveState(range);
@@ -85,7 +88,7 @@ export class ToolbarPlugin extends Plugin {
     }
 
     updateToolbarVisibility(range) {
-        const inEditor = this.editable.contains(range.commonAncestorContainer);
+        const inEditor = range && this.editable.contains(range.commonAncestorContainer);
         if (this.overlay.isOpen) {
             if (!inEditor || range.collapsed) {
                 this.overlay.close();
@@ -99,7 +102,7 @@ export class ToolbarPlugin extends Plugin {
 
     updateButtonsActiveState(range) {
         for (const button of this.buttons) {
-            this.buttonsActiveState[button.id] = button.isFormatApplied(range);
+            this.buttonsActiveState[button.id] = range && button.isFormatApplied(range);
         }
     }
 }
