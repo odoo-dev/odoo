@@ -15,6 +15,7 @@ describe("to paragraph", () => {
             contentAfter: "<p>ab[]cd</p>",
         });
     });
+
     test.todo("should turn a heading 1 into a paragraph (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
@@ -22,6 +23,7 @@ describe("to paragraph", () => {
             contentAfter: "<p>a[b]c</p>",
         });
     });
+
     test.todo(
         "should turn a heading 1, a paragraph and a heading 2 into three paragraphs",
         async () => {
@@ -32,6 +34,7 @@ describe("to paragraph", () => {
             });
         }
     );
+
     test.skip("should turn a heading 1 into a paragraph after a triple click", async () => {
         await testEditor({
             contentBefore: "<h1>[ab</h1><h2>]cd</h2>",
@@ -39,6 +42,7 @@ describe("to paragraph", () => {
             contentAfter: "<p>[ab</p><h2>]cd</h2>",
         });
     });
+
     test.todo("should not turn a div into a paragraph", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
@@ -46,6 +50,7 @@ describe("to paragraph", () => {
             contentAfter: "<div><p>[ab]</p></div>",
         });
     });
+
     test.todo(
         "should not add paragraph tag when selection is changed to normal in list",
         async () => {
@@ -56,6 +61,7 @@ describe("to paragraph", () => {
             });
         }
     );
+
     test.todo("should not add paragraph tag to normal text in list", async () => {
         await testEditor({
             contentBefore: "<ul><li>[abcd]</li></ul>",
@@ -63,6 +69,7 @@ describe("to paragraph", () => {
             contentAfter: `<ul><li>[abcd]</li></ul>`,
         });
     });
+
     test.todo(
         "should turn three table cells with heading 1 to table cells with paragraph",
         async () => {
@@ -76,6 +83,7 @@ describe("to paragraph", () => {
             });
         }
     );
+
     test.todo("should not set the tag of non-editable elements", async () => {
         await testEditor({
             contentBefore:
@@ -94,6 +102,7 @@ describe("to heading 1", () => {
             contentAfter: "<h1>ab[]cd</h1>",
         });
     });
+
     test.todo("should turn a paragraph into a heading 1 (character selected)", async () => {
         await testEditor({
             contentBefore: "<p>a[b]c</p>",
@@ -101,6 +110,7 @@ describe("to heading 1", () => {
             contentAfter: "<h1>a[b]c</h1>",
         });
     });
+
     test.todo(
         "should turn a paragraph, a heading 1 and a heading 2 into three headings 1",
         async () => {
@@ -111,6 +121,7 @@ describe("to heading 1", () => {
             });
         }
     );
+
     test.skip("should turn a paragraph into a heading 1 after a triple click", async () => {
         await testEditor({
             contentBefore: "<p>[ab</p><h2>]cd</h2>",
@@ -118,6 +129,7 @@ describe("to heading 1", () => {
             contentAfter: "<h1>[ab</h1><h2>]cd</h2>",
         });
     });
+
     test.todo("should not turn a div into a heading 1", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
@@ -125,6 +137,7 @@ describe("to heading 1", () => {
             contentAfter: "<div><h1>[ab]</h1></div>",
         });
     });
+
     test.todo(
         "should turn three table cells with paragraph to table cells with heading 1",
         async () => {
@@ -148,6 +161,7 @@ describe("to heading 2", () => {
             contentAfter: "<h2>ab[]cd</h2>",
         });
     });
+
     test.todo("should turn a heading 1 into a heading 2 (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
@@ -155,6 +169,7 @@ describe("to heading 2", () => {
             contentAfter: "<h2>a[b]c</h2>",
         });
     });
+
     test.todo(
         "should turn a heading 1, a heading 2 and a paragraph into three headings 2",
         async () => {
@@ -165,6 +180,7 @@ describe("to heading 2", () => {
             });
         }
     );
+
     test.skip("should turn a paragraph into a heading 2 after a triple click", async () => {
         await testEditor({
             contentBefore: "<p>[ab</p><h1>]cd</h1>",
@@ -172,6 +188,7 @@ describe("to heading 2", () => {
             contentAfter: "<h2>[ab</h2><h1>]cd</h1>",
         });
     });
+
     test.todo("should not turn a div into a heading 2", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
@@ -179,6 +196,7 @@ describe("to heading 2", () => {
             contentAfter: "<div><h2>[ab]</h2></div>",
         });
     });
+
     test.todo(
         "should turn three table cells with paragraph to table cells with heading 2",
         async () => {
@@ -202,6 +220,7 @@ describe("to heading 3", () => {
             contentAfter: "<h3>ab[]cd</h3>",
         });
     });
+
     test.todo("should turn a heading 1 into a heading 3 (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
@@ -209,6 +228,7 @@ describe("to heading 3", () => {
             contentAfter: "<h3>a[b]c</h3>",
         });
     });
+
     test.todo(
         "should turn a heading 1, a paragraph and a heading 2 into three headings 3",
         async () => {
@@ -219,6 +239,7 @@ describe("to heading 3", () => {
             });
         }
     );
+
     test.skip("should turn a paragraph into a heading 3 after a triple click", async () => {
         await testEditor({
             contentBefore: "<p>[ab</p><h1>]cd</h1>",
@@ -226,6 +247,7 @@ describe("to heading 3", () => {
             contentAfter: "<h3>[ab</h3><h1>]cd</h1>",
         });
     });
+
     test.todo("should not turn a div into a heading 3", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
@@ -233,6 +255,7 @@ describe("to heading 3", () => {
             contentAfter: "<div><h3>[ab]</h3></div>",
         });
     });
+
     test.todo(
         "should turn three table cells with paragraph to table cells with heading 3",
         async () => {
@@ -256,6 +279,7 @@ describe("to pre", () => {
             contentAfter: "<pre>ab[]cd</pre>",
         });
     });
+
     test.todo("should turn a heading 1 into a pre (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
@@ -263,6 +287,7 @@ describe("to pre", () => {
             contentAfter: "<pre>a[b]c</pre>",
         });
     });
+
     test.todo("should turn a heading 1 a pre and a paragraph into three pres", async () => {
         await testEditor({
             contentBefore: "<h1>a[b</h1><pre>cd</pre><p>e]f</p>",
@@ -270,6 +295,7 @@ describe("to pre", () => {
             contentAfter: "<pre>a[b</pre><pre>cd</pre><pre>e]f</pre>",
         });
     });
+
     test.todo("should turn three table cells with paragraph to table cells with pre", async () => {
         await testEditor({
             contentBefore:
@@ -290,6 +316,7 @@ describe("to blockquote", () => {
             contentAfter: "<blockquote>ab[]cd</blockquote>",
         });
     });
+
     test.todo("should turn a heading 1 into a blockquote (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
@@ -297,6 +324,7 @@ describe("to blockquote", () => {
             contentAfter: "<blockquote>a[b]c</blockquote>",
         });
     });
+
     test.todo(
         "should turn a heading 1, a paragraph and a heading 2 into three blockquote",
         async () => {
@@ -308,6 +336,7 @@ describe("to blockquote", () => {
             });
         }
     );
+
     test.skip("should turn a heading 1 into a blockquote after a triple click", async () => {
         await testEditor({
             contentBefore: "<h1>[ab</h1><h2>]cd</h2>",
@@ -315,6 +344,7 @@ describe("to blockquote", () => {
             contentAfter: "<blockquote>[ab</blockquote><h2>]cd</h2>",
         });
     });
+
     test.todo("should not turn a div into a blockquote", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
@@ -322,6 +352,7 @@ describe("to blockquote", () => {
             contentAfter: "<div><blockquote>[ab]</blockquote></div>",
         });
     });
+
     test.todo(
         "should turn three table cells with paragraph to table cells with blockquote",
         async () => {

@@ -49,6 +49,7 @@ describe("contenteditable", () => {
             });
         }
     );
+
     test.todo(
         "should not display the table ui menu if the table element isContentEditable=false",
         async () => {
@@ -90,6 +91,7 @@ describe("contenteditable", () => {
             });
         }
     );
+
     test("should not display the resizeCursor if the table element isContentEditable=false", async () => {
         await testEditor({
             contentBefore: `
