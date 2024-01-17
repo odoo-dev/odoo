@@ -13,6 +13,7 @@ test("should make a few characters bold", async () => {
         contentAfter: `<p>ab${strong(`[cde]`)}fg</p>`,
     });
 });
+
 test("should make a few characters not bold", async () => {
     await testEditor({
         contentBefore: `<p>${strong(`ab[cde]fg`)}</p>`,
@@ -20,6 +21,7 @@ test("should make a few characters not bold", async () => {
         contentAfter: `<p>${strong(`ab`)}[cde]${strong(`fg`)}</p>`,
     });
 });
+
 test("should make two paragraphs bold", async () => {
     await testEditor({
         contentBefore: "<p>[abc</p><p>def]</p>",
@@ -27,6 +29,7 @@ test("should make two paragraphs bold", async () => {
         contentAfter: `<p>${strong(`[abc`)}</p><p>${strong(`def]`)}</p>`,
     });
 });
+
 test("should make two paragraphs not bold", async () => {
     await testEditor({
         contentBefore: `<p>${strong(`[abc`)}</p><p>${strong(`def]`)}</p>`,
@@ -34,6 +37,7 @@ test("should make two paragraphs not bold", async () => {
         contentAfter: `<p>[abc</p><p>def]</p>`,
     });
 });
+
 test("should make qweb tag bold", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
@@ -46,6 +50,7 @@ test("should make qweb tag bold", async () => {
         contentAfter: `<div><p t-field="record.name" contenteditable="false" style="font-weight: bolder;">[Test]</p></div>`,
     });
 });
+
 test("should make qweb tag bold even with partial selection", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">T[e]st</p></div>`,
@@ -53,6 +58,7 @@ test("should make qweb tag bold even with partial selection", async () => {
         contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="font-weight: bolder;">T[e]st</p></div>`,
     });
 });
+
 test.todo("should make a whole heading bold after a triple click", async () => {
     await testEditor({
         contentBefore: `<h1>${notStrong(`[ab`)}</h1><p>]cd</p>`,
@@ -60,6 +66,7 @@ test.todo("should make a whole heading bold after a triple click", async () => {
         contentAfter: `<h1>[ab]</h1><p>cd</p>`,
     });
 });
+
 test.todo(
     "should make a whole heading not bold after a triple click (heading is considered bold)",
     async () => {
@@ -70,6 +77,7 @@ test.todo(
         });
     }
 );
+
 test("should make a selection starting with bold text fully bold", async () => {
     await testEditor({
         contentBefore: `<p>${strong(`[ab`)}</p><p>c]d</p>`,
@@ -77,6 +85,7 @@ test("should make a selection starting with bold text fully bold", async () => {
         contentAfter: `<p>${strong(`[ab`)}</p><p>${strong(`c]`)}d</p>`,
     });
 });
+
 test.todo("should make a selection with bold text in the middle fully bold", async () => {
     await testEditor({
         contentBefore: `<p>[a${strong(`b`)}</p><p>${strong(`c`)}d]e</p>`,
@@ -84,6 +93,7 @@ test.todo("should make a selection with bold text in the middle fully bold", asy
         contentAfter: `<p>${strong(`[ab`)}</p><p>${strong(`cd]`)}e</p>`,
     });
 });
+
 test.todo("should make a selection ending with bold text fully bold", async () => {
     await testEditor({
         contentBefore: `<h1>${notStrong(`[ab`)}</h1><p>${strong(`c]d`)}</p>`,
@@ -91,6 +101,7 @@ test.todo("should make a selection ending with bold text fully bold", async () =
         contentAfter: `<h1>[ab</h1><p>${strong(`c]d`)}</p>`,
     });
 });
+
 test.todo("should get ready to type in bold", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
@@ -118,6 +129,7 @@ test("should remove a bold tag that was redondant while performing the command",
         });
     }
 });
+
 test("should remove a bold tag that was redondant with different tags while performing the command", async () => {
     await testEditor({
         contentBefore: unformat(`<p>
@@ -139,6 +151,7 @@ test("should remove a bold tag that was redondant with different tags while perf
             </p>`),
     });
 });
+
 test("should not format non-editable text (bold)", async () => {
     await testEditor({
         contentBefore: '<p>[a</p><p contenteditable="false">b</p><p>c]</p>',
@@ -148,6 +161,7 @@ test("should not format non-editable text (bold)", async () => {
         )}</p>`,
     });
 });
+
 test.todo("should insert a span zws when toggling a formatting command twice", () => {
     return testEditor({
         contentBefore: `<p>[]<br></p>`,
@@ -214,6 +228,7 @@ describe("isSelectionFormat", () => {
             },
         });
     });
+
     test("return false for isSelectionFormat when partially selecting 2 text node, the anchor is not formated and focus is formated", async () => {
         await testEditor({
             contentBefore: `<p>${strong(`a]b`)}</p><p>c[d</p>`,
@@ -222,6 +237,7 @@ describe("isSelectionFormat", () => {
             },
         });
     });
+
     test("return false for isSelectionFormat when selecting 3 text node, the anchor and focus not formated and the text node in between formated", async () => {
         await testEditor({
             contentBefore: `<p>a[b</p><p>${strong(`c`)}</p><p>d]e</p>`,
