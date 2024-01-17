@@ -220,3 +220,32 @@ export async function insertText(editor, text) {
         dispatch(editor.el, "keyup", { key: char });
     }
 }
+
+export async function deleteForward(editor) {
+    const selection = document.getSelection();
+    if (selection.isCollapsed) {
+        throw new Error("replace by new command for oDeleteForward");
+        // editor.dispatch("xxx");
+    } else {
+        // Better representation of what happened in the editor when the user
+        // presses the delete key.
+        await dispatch(editor.editable, "keydown", { key: "Delete" });
+        editor.document.execCommand("delete");
+    }
+}
+
+export async function deleteBackward(editor, isMobileTest = false) {
+    // TODO phoenix: find a strategy for test mobile and desktop. (check legacy code)
+
+    const selection = document.getSelection();
+    if (selection.isCollapsed) {
+        editor.execCommand("oDeleteBackward");
+        throw new Error("replace by new command for oDeleteBackward");
+        // editor.dispatch("xxx");
+    } else {
+        // Better representation of what happened in the editor when the user
+        // presses the backspace key.
+        await dispatch(editor.editable, "keydown", { key: "Backspace" });
+        editor.document.execCommand("delete");
+    }
+}
