@@ -62,14 +62,14 @@ export function getInSelection(document, selector) {
     }
 }
 
-export const leftLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIONS.LEFT, {
+const leftLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIONS.LEFT, {
     leafOnly: true,
     inScope: true,
     stopTraverseFunction: (node) => isNotEditableNode(node) || isBlock(node),
     stopFunction: (node) => isNotEditableNode(node) || isBlock(node),
 });
 
-export const rightLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
+const rightLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
     leafOnly: true,
     inScope: true,
     stopTraverseFunction: (node) => isNotEditableNode(node) || isBlock(node),
