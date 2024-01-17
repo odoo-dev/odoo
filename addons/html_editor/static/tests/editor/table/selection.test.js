@@ -3,6 +3,17 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
+import { bold } from "../format/utils";
+
+function applyColor(color, mode, element) {
+    throw new Error("applyColor Not implemented");
+    // return (editor) => editor.dispatch("APPLY_COLOR", color, mode, element);
+}
+
+function resetSize(editor) {
+    throw new Error("applyColor Not implemented");
+    // return editor.execCommand("RESET_SIZE");
+}
 
 describe("select a full table on cross over", () => {
     describe("select", () => {
@@ -88,7 +99,7 @@ describe("select a full table on cross over", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     "<p>a<strong>[bc</strong></p>" +
                     '<table class="o_selected_table"><tbody><tr>' +
@@ -106,7 +117,7 @@ describe("select a full table on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e[f</td>" +
                     "</tr></tbody></table><p>a]bc</p>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody><tr>' +
                     '<td class="o_selected_td"><strong>[ab</strong></td>' +
@@ -128,7 +139,7 @@ describe("select a full table on cross over", () => {
                         "<td>ef</td>" +
                         "</tr></tbody></table>" +
                         "<p>a]bc</p>",
-                    stepFunction: async (editor) => editor.execCommand("bold"),
+                    stepFunction: bold,
                     contentAfterEdit:
                         "<p>a<strong>[bc</strong></p>" +
                         '<table class="o_selected_table"><tbody><tr>' +
@@ -157,7 +168,7 @@ describe("select a full table on cross over", () => {
                         "<td>cd</td>" +
                         "<td>ef</td>" +
                         "</tr></tbody></table>",
-                    stepFunction: async (editor) => editor.execCommand("bold"),
+                    stepFunction: bold,
                     contentAfterEdit:
                         "<p>a<strong>[bc</strong></p>" +
                         '<table class="o_selected_table"><tbody><tr>' +
@@ -192,7 +203,7 @@ describe("select a full table on cross over", () => {
                         "<td>ef</td>" +
                         "</tr></tbody></table>" +
                         "<p>a]bc</p>",
-                    stepFunction: async (editor) => editor.execCommand("bold"),
+                    stepFunction: bold,
                     contentAfterEdit:
                         "<p>a<strong>[bc</strong></p>" +
                         '<table class="o_selected_table"><tbody><tr>' +
@@ -226,8 +237,7 @@ describe("select a full table on cross over", () => {
                             </tr>
                         </tbody>
                     </table>`),
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
@@ -257,8 +267,7 @@ describe("select a full table on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e[f</td>" +
                     "</tr></tbody></table><p>a]bc</p>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -290,8 +299,7 @@ describe("select a full table on cross over", () => {
                         "<td>ef</td>" +
                         "</tr></tbody></table>" +
                         "<p>a]bc</p>",
-                    stepFunction: async (editor) =>
-                        editor.execCommand("applyColor", "aquamarine", "color"),
+                    stepFunction: applyColor("aquamarine", "color"),
                     contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
@@ -332,8 +340,7 @@ describe("select a full table on cross over", () => {
                         "<td>cd</td>" +
                         "<td>ef</td>" +
                         "</tr></tbody></table>",
-                    stepFunction: async (editor) =>
-                        editor.execCommand("applyColor", "aquamarine", "color"),
+                    stepFunction: applyColor("aquamarine", "color"),
                     contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
@@ -388,8 +395,7 @@ describe("select a full table on cross over", () => {
                         "<td>ef</td>" +
                         "</tr></tbody></table>" +
                         "<p>a]bc</p>",
-                    stepFunction: async (editor) =>
-                        editor.execCommand("applyColor", "aquamarine", "color"),
+                    stepFunction: applyColor("aquamarine", "color"),
                     contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
@@ -549,7 +555,7 @@ describe("select columns on cross over", () => {
                     "<td>c]d</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody><tr>' +
                     '<td class="o_selected_td"><strong>[ab</strong></td>' +
@@ -566,7 +572,7 @@ describe("select columns on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e]f</td>" +
                     "</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody><tr>' +
                     '<td class="o_selected_td"><strong>[ab</strong></td>' +
@@ -595,7 +601,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody>' +
                     "<tr>" +
@@ -636,7 +642,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody>' +
                     "<tr>" +
@@ -677,7 +683,7 @@ describe("select columns on cross over", () => {
                     "<td>e]f</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) => editor.execCommand("bold"),
+                stepFunction: bold,
                 contentAfterEdit:
                     '<table class="o_selected_table"><tbody>' +
                     "<tr>" +
@@ -725,7 +731,7 @@ describe("select columns on cross over", () => {
                                         <td style="width: 232.25px;"><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                    stepFunction: async (editor) => editor.execCommand("resetSize"),
+                    stepFunction: resetSize,
                     contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td><p>[]<br></p></td>
@@ -783,7 +789,7 @@ describe("select columns on cross over", () => {
                                             </ol>
                                             </td>
                                     </tr></tbody></table>`,
-                    stepFunction: async (editor) => editor.execCommand("resetSize"),
+                    stepFunction: resetSize,
                     contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td><h1>[]TESTTEXT</h1></td>
@@ -838,7 +844,7 @@ describe("select columns on cross over", () => {
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255); width: 309.672px;"><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                    stepFunction: async (editor) => editor.execCommand("resetSize"),
+                    stepFunction: resetSize,
                     contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255);"><p>[]<br></p></td>
@@ -870,8 +876,7 @@ describe("select columns on cross over", () => {
                     "<td>c]d</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -894,8 +899,7 @@ describe("select columns on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e]f</td>" +
                     "</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("applyColor", "aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -937,8 +941,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("applyColor", "aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -985,8 +988,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -1035,8 +1037,7 @@ describe("select columns on cross over", () => {
                     "<td>e]f</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: async (editor) =>
-                    editor.execCommand("applyColor", "aquamarine", "color"),
+                stepFunction: applyColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
