@@ -7,7 +7,7 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, insertListAfter } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
-import { setTagName, toggleClass } from "../utils/dom";
+import { setTagName } from "../utils/dom";
 
 export class ListPlugin extends Plugin {
     static name = "list";
@@ -107,7 +107,7 @@ function toggleListLI(liElement, mode) {
         }
         setTagName(pnode, "UL");
     } else if (["CLOL", "CLUL"].includes(listMode)) {
-        toggleClass(pnode, "o_checklist");
+        pnode.classList.remove("o_checklist");
         setTagName(pnode, mode);
     } else if (["OLUL", "ULOL"].includes(listMode)) {
         setTagName(pnode, mode);
@@ -179,7 +179,7 @@ function shiftTab(liElement) {
         }
         if (liElement.parentNode.parentNode.tagName === "LI") {
             const lip = document.createElement("li");
-            toggleClass(lip, "oe-nested");
+            lip.classList.add("oe-nested");
             lip.append(ul);
             liElement.parentNode.parentNode.after(lip);
         } else {

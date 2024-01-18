@@ -165,10 +165,3 @@ export function setTagName(el, newTagName) {
     }
     return n;
 }
-
-export function toggleClass(node, className) {
-    node.classList.toggle(className);
-    if (!node.className) {
-        node.removeAttribute("class");
-    }
-}
