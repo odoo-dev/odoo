@@ -240,7 +240,6 @@ export async function deleteBackward(editor, isMobileTest = false) {
 
     const selection = document.getSelection();
     if (selection.isCollapsed) {
-        editor.execCommand("oDeleteBackward");
         throw new Error("replace by new command for oDeleteBackward");
         // editor.dispatch("xxx");
     } else {
