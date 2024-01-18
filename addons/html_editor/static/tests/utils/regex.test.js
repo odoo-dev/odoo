@@ -3,23 +3,30 @@
 import { expect, test } from "@odoo/hoot";
 import { URL_REGEX } from "@html_editor/editor/utils/regex";
 
-function testUrlRegex(url, { expectedUrl } = {}) {
+function testUrlRegex(content, { expectedUrl, insideText } = {}) {
     const message = expectedUrl
-        ? `should have the text be "${url}" with one link ${expectedUrl}`
-        : `should be a link: ${url}`;
+        ? `should have the text be "${content}" with one link ${expectedUrl}`
+        : `should be a link: ${content}`;
     test(message, () => {
+        if (insideText) {
+            expectedUrl = expectedUrl || content;
+            content = `abc ${content} abc`;
+        }
         if (expectedUrl) {
-            const match = url.match(URL_REGEX);
+            const match = content.match(URL_REGEX);
             expect(expectedUrl).toBe(match && match[0]);
         } else {
-            expect(url).toMatch(URL_REGEX);
+            expect(content).toMatch(URL_REGEX);
         }
     });
 }
 
-function testNotUrlRegex(url) {
-    test(`should NOT be a link: ${url}`, () => {
-        expect(url).not.toMatch(URL_REGEX);
+function testNotUrlRegex(content, { insideText } = {}) {
+    test(`should NOT be/content a link: ${content}`, () => {
+        if (insideText) {
+            content = `abc ${content} abc`;
+        }
+        expect(content).not.toMatch(URL_REGEX);
     });
 }
 
@@ -138,3 +145,14 @@ testUrlRegex(`google.com/'ab'/cd`, { expectedUrl: "google.com/'ab'/cd" });
 testUrlRegex(`www.google.com/a!b/c?d,e,f#g!i`, { expectedUrl: "www.google.com/a!b/c?d,e,f#g!i" });
 testUrlRegex(`www.google.com/a%b%c`, { expectedUrl: "www.google.com/a%b%c" });
 testUrlRegex(`http://google.com?a.b.c&d!e#e'f`, { expectedUrl: "http://google.com?a.b.c&d!e#e'f" });
+
+// URL inside text
+testUrlRegex("foo.com", { insideText: true });
+testNotUrlRegex("foo.else", { insideText: true });
+testUrlRegex("www.abc.abc", { insideText: true });
+testUrlRegex("abc.abc.com", { insideText: true });
+testNotUrlRegex("abc.abc.abc", { insideText: true });
+testUrlRegex("http://abc.abc.abc", { insideText: true });
+testUrlRegex("https://abc.abc.abc", { insideText: true });
+testUrlRegex("1234-abc.runbot007.odoo.com/web#id=3&menu_id=221", { insideText: true });
+testUrlRegex("https://1234-abc.runbot007.odoo.com/web#id=3&menu_id=221", { insideText: true });
