@@ -195,6 +195,7 @@ export async function testEditor(
     if (contentAfterEdit) {
         expect(getContent(el)).toBe(contentAfterEdit);
     }
+    editor.dispatch("CLEAN", el);
     // we should clean the editor here
     if (contentAfter) {
         expect(getContent(el)).toBe(contentAfter);
