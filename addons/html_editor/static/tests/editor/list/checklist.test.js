@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { click, testEditor } from "../../helpers";
 import { unformat } from "../../utils";
-
-function click(el, options) {
-    throw new Error("need a proper implementation");
-}
 
 test.todo("should do nothing if do not click on the checkbox", async () => {
     await testEditor({
