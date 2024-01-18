@@ -10,7 +10,7 @@ import {
     isShrunkBlock,
     isUnbreakable,
 } from "../utils/dom_info";
-import { closestElement } from "../utils/dom_traversal";
+import { closestElement, descendants } from "../utils/dom_traversal";
 import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
 
 export class DomPlugin extends Plugin {
@@ -25,6 +25,15 @@ export class DomPlugin extends Plugin {
             case "INSERT_SEPARATOR":
                 this.insertSeparator();
                 break;
+            case "CLEAN": {
+                const root = payload;
+                for (const node of [root, ...descendants(root)]) {
+                    if (node.classList && !node.classList.length) {
+                        node.removeAttribute("class");
+                    }
+                }
+                break;
+            }
         }
     }
 
