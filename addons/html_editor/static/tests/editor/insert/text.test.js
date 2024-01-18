@@ -3,6 +3,57 @@
 import { describe, test } from "@odoo/hoot";
 import { deleteBackward, insertText, testEditor } from "../../helpers";
 
+describe("collapsed selection", () => {
+    test.todo("should insert a char into an empty span without removing the zws", async () => {
+        await testEditor({
+            contentBefore: '<p>ab<span class="a">[]\u200B</span>cd</p>',
+            stepFunction: async (editor) => {
+                await insertText(editor, "x");
+            },
+            contentAfter: '<p>ab<span class="a">x[]\u200B</span>cd</p>',
+        });
+    });
+
+    test.todo(
+        "should insert a char into an empty span surrounded by space without removing the zws",
+        async () => {
+            await testEditor({
+                contentBefore: '<p>ab <span class="a">[]\u200B</span> cd</p>',
+                stepFunction: async (editor) => {
+                    await insertText(editor, "x");
+                },
+                contentAfter: '<p>ab <span class="a">x[]\u200B</span> cd</p>',
+            });
+        }
+    );
+
+    test.todo(
+        "should insert a char into a data-oe-zws-empty-inline span removing the zws and data-oe-zws-empty-inline",
+        async () => {
+            await testEditor({
+                contentBefore: '<p>ab<span data-oe-zws-empty-inline="">[]\u200B</span>cd</p>',
+                stepFunction: async (editor) => {
+                    await insertText(editor, "x");
+                },
+                contentAfter: "<p>abx[]cd</p>",
+            });
+        }
+    );
+
+    test.todo(
+        "should insert a char into a data-oe-zws-empty-inline span surrounded by space without removing the zws and data-oe-zws-empty-inline",
+        async () => {
+            await testEditor({
+                contentBefore: '<p>ab<span data-oe-zws-empty-inline="">[]\u200B</span>cd</p>',
+                stepFunction: async (editor) => {
+                    await insertText(editor, "x");
+                },
+                contentAfter: "<p>abx[]cd</p>",
+            });
+        }
+    );
+});
+
 describe("not collapsed selection", () => {
     test.todo(
         "should insert a character in a fully selected font in a heading, preserving its style",
