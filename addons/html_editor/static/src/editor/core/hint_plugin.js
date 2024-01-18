@@ -33,6 +33,13 @@ export class HintPlugin extends Plugin {
             case "CREATE_HINT":
                 this.createTempHint(payload.el, payload.text);
                 break;
+            case "CLEAN": {
+                const root = payload;
+                for (const hint of root.querySelectorAll(".o-we-hint")) {
+                    this.removeHint(hint);
+                }
+                this.tempHints.clear();
+            }
         }
     }
 
