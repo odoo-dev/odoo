@@ -165,3 +165,13 @@ export function setTagName(el, newTagName) {
     }
     return n;
 }
+
+export function copyAttributes(source, target) {
+    for (const attr of source.attributes) {
+        if (attr.name === "class") {
+            target.classList.add(...source.classList);
+        } else {
+            target.setAttribute(attr.name, attr.value);
+        }
+    }
+}
