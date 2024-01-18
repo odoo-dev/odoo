@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { isBlock } from "./blocks";
-import { splitAroundUntil, unwrapContents } from "./dom";
+import { removeClass, splitAroundUntil, unwrapContents } from "./dom";
 import {
     hasClass,
     isBold,
@@ -87,7 +87,7 @@ const formatsSpecs = {
         hasStyle: (node) => node.style && node.style["font-size"],
         addStyle: (node, props) => {
             node.style["font-size"] = props.size;
-            node.classList.remove(...FONT_SIZE_CLASSES);
+            removeClass(node, ...FONT_SIZE_CLASSES);
         },
         removeStyle: (node) => removeStyle(node, "font-size"),
     },
@@ -95,12 +95,7 @@ const formatsSpecs = {
         isFormatted: hasClass,
         hasStyle: (node, props) => FONT_SIZE_CLASSES.find((cls) => node.classList.contains(cls)),
         addStyle: (node, props) => node.classList.add(props.className),
-        removeStyle: (node) => {
-            node.classList.remove(...FONT_SIZE_CLASSES, ...TEXT_STYLE_CLASSES);
-            if (node.classList.length === 0) {
-                node.removeAttribute("class");
-            }
-        },
+        removeStyle: (node) => removeClass(node, ...FONT_SIZE_CLASSES, ...TEXT_STYLE_CLASSES),
     },
     switchDirection: {
         isFormatted: isDirectionSwitched,
