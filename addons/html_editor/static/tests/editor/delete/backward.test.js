@@ -1953,7 +1953,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should remove everything, including several tables", async () => {
+    test("should remove everything, including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>[01</p>
