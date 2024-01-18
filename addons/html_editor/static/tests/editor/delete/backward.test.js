@@ -2028,6 +2028,19 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    test.todo(
+        "should transform the last space of a container to an &nbsp; after removing the last word through deleteRange",
+        async () => {
+            await testEditor({
+                contentBefore: `<p>a [b]</p>`,
+                stepFunction: async (editor) => {
+                    await deleteBackward(editor);
+                },
+                contentAfter: `<p>a&nbsp;[]</p>`,
+            });
+        }
+    );
+
     describe("Nested editable zone (inside contenteditable=false element)", () => {
         test.todo(
             "should extend the range to fully include contenteditable=false that are partially selected at the end of the range",
