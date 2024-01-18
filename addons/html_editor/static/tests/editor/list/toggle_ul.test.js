@@ -10,7 +10,7 @@ function toggleUnorderedList(editor) {
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn an empty paragraph into a list", async () => {
+        test("should turn an empty paragraph into a list", async () => {
             await testEditor({
                 // @todo setting this selection not yet supported
                 contentBefore: "<p>[]<br></p>",
@@ -109,7 +109,7 @@ describe("Range collapsed", () => {
         );
     });
     describe("Remove", () => {
-        test.todo("should turn an empty list into a paragraph", async () => {
+        test("should turn an empty list into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<ul><li>[]<br></li></ul>",
                 stepFunction: toggleUnorderedList,
@@ -248,7 +248,7 @@ describe("Range collapsed", () => {
         );
     });
     describe("Transform", () => {
-        test.todo("should turn an empty ordered list into an unordered list", async () => {
+        test("should turn an empty ordered list into an unordered list", async () => {
             await testEditor({
                 contentBefore: "<ol><li>[]<br></li></ol>",
                 stepFunction: toggleUnorderedList,
@@ -256,7 +256,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn an empty ordered list into an unordered list (2)", async () => {
+        test("should turn an empty ordered list into an unordered list (2)", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
                 stepFunction: toggleUnorderedList,
