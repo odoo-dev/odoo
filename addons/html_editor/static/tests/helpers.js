@@ -250,3 +250,16 @@ export async function deleteBackward(editor, isMobileTest = false) {
         editor.document.execCommand("delete");
     }
 }
+
+// history
+export function undo(editor) {
+    throw new Error("Not implemented command to replace historyUndo");
+}
+
+export function redo(editor) {
+    throw new Error("Not implemented command to replace historyRedo");
+}
+
+export function click(el, options) {
+    throw new Error("need a proper implementation");
+}
