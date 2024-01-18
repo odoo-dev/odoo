@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
 /**
@@ -97,7 +98,7 @@ export class Editor {
     destroy() {
         if (this.editable) {
             this.editable.removeAttribute("contenteditable");
-            this.editable.classList.remove("odoo-editor-editable");
+            removeClass(this.editable, "odoo-editor-editable");
             for (const p of this.plugins) {
                 p.destroy();
             }
