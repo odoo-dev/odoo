@@ -162,12 +162,12 @@ test("should not format non-editable text (bold)", async () => {
     });
 });
 
-test.todo("should insert a span zws when toggling a formatting command twice", () => {
+test("should insert a span zws when toggling a formatting command twice", () => {
     return testEditor({
         contentBefore: `<p>[]<br></p>`,
         stepFunction: async (editor) => {
-            await bold(editor);
-            await bold(editor);
+            bold(editor);
+            bold(editor);
         },
         // todo: It would be better to remove the zws entirely so that
         // the P could have the "/" hint but that behavior might be

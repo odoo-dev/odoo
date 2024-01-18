@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";
+import { removeClass } from "../utils/dom";
 
 export class HintPlugin extends Plugin {
     static name = "hint";
@@ -89,7 +90,7 @@ export class HintPlugin extends Plugin {
     removeHint(el) {
         this.shared.disableObserver();
         el.removeAttribute("placeholder");
-        el.classList.remove("o-we-hint");
+        removeClass(el, "o-we-hint");
         this.shared.enableObserver();
     }
 }
