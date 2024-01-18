@@ -10,11 +10,13 @@ function toggleOrderedList(editor) {
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn an empty paragraph into a list", async () => {
+        test("should turn an empty paragraph into a list", async () => {
             await testEditor({
+                // In reality, contentBefore would be
+                // <p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: toggleOrderedList,
-                contentAfter: "<ol><li>[]<br></li></ol>",
+                contentAfter: `<ol><li placeholder="List" class="o-we-hint">[]<br></li></ol>`,
             });
         });
 
@@ -108,11 +110,13 @@ describe("Range collapsed", () => {
         );
     });
     describe("Remove", () => {
-        test.todo("should turn an empty list into a paragraph", async () => {
+        test("should turn an empty list into a paragraph", async () => {
             await testEditor({
+                // In reality, contentBefore would be
+                // <ol><li placeholder="List" class="o-we-hint">[]<br></li></ol>
                 contentBefore: "<ol><li>[]<br></li></ol>",
                 stepFunction: toggleOrderedList,
-                contentAfter: "<p>[]<br></p>",
+                contentAfter: `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`,
             });
         });
 
