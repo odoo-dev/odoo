@@ -175,3 +175,17 @@ export function copyAttributes(source, target) {
         }
     }
 }
+
+/**
+ * Removes the specified class names from the given element.  If the element has
+ * no more class names after removal, the "class" attribute is removed.
+ *
+ * @param {Element} element - The element from which to remove the class names.
+ * @param {...string} classNames - The class names to be removed.
+ */
+export function removeClass(element, ...classNames) {
+    element.classList.remove(...classNames);
+    if (!element.classList.length) {
+        element.removeAttribute("class");
+    }
+}
