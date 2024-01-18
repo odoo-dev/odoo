@@ -7,7 +7,7 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, insertListAfter } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
-import { setTagName, copyAttributes } from "../utils/dom";
+import { setTagName, copyAttributes, removeClass } from "../utils/dom";
 
 export class ListPlugin extends Plugin {
     static name = "list";
@@ -107,7 +107,7 @@ function toggleListLI(liElement, mode) {
         }
         setTagName(pnode, "UL");
     } else if (["CLOL", "CLUL"].includes(listMode)) {
-        pnode.classList.remove("o_checklist");
+        removeClass(pnode, "o_checklist");
         setTagName(pnode, mode);
     } else if (["OLUL", "ULOL"].includes(listMode)) {
         setTagName(pnode, mode);
