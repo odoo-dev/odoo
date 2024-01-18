@@ -7,7 +7,7 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, insertListAfter } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
-import { setTagName } from "../utils/dom";
+import { setTagName, copyAttributes } from "../utils/dom";
 
 export class ListPlugin extends Plugin {
     static name = "list";
@@ -126,17 +126,7 @@ function toggleListLI(liElement, mode) {
 function toggleListP(element, mode = "UL") {
     const restoreCursor = preserveCursor(element.ownerDocument);
     const list = insertListAfter(element, mode, [[...element.childNodes]]);
-    const classList = [...list.classList];
-    for (const attribute of element.attributes) {
-        if (attribute.name === "class" && attribute.value && list.className) {
-            list.className = `${list.className} ${attribute.value}`;
-        } else {
-            list.setAttribute(attribute.name, attribute.value);
-        }
-    }
-    for (const className of classList) {
-        list.classList.toggle(className, true); // restore list classes
-    }
+    copyAttributes(element, list);
     element.remove();
 
     restoreCursor(new Map([[element, list.firstChild]]));
@@ -159,13 +149,7 @@ function toggleListHTMLElement(element, offset, mode = "UL") {
         restoreCursor();
     } else {
         const list = insertListAfter(element, mode, [element]);
-        for (const attribute of element.attributes) {
-            if (attribute.name === "class" && attribute.value && list.className) {
-                list.className = `${list.className} ${attribute.value}`;
-            } else {
-                list.setAttribute(attribute.name, attribute.value);
-            }
-        }
+        copyAttributes(element, list);
         restoreCursor(new Map([[element, list.firstElementChild]]));
     }
 }
