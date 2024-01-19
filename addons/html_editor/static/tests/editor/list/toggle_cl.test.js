@@ -5,57 +5,47 @@ import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
 
 function toggleCheckList(editor) {
-    throw new Error("toggle checklins not done yet");
+    editor.dispatch("TOGGLE_LIST", { type: "CL" });
 }
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn an empty paragraph into a checklist", async () => {
+        test("should turn an empty paragraph into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: toggleCheckList,
-                // JW cAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
                 contentAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
             });
         });
 
-        test.todo("should turn a paragraph into a checklist", async () => {
+        test("should turn a paragraph into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: toggleCheckList,
-                // JW cAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                 contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
             });
         });
 
-        test.todo("should turn a heading into a checklist", async () => {
+        test("should turn a heading into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<h1>ab[]cd</h1>",
                 stepFunction: toggleCheckList,
-                // JW cAfter: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
                 contentAfter: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
             });
         });
 
-        test.todo("should turn a paragraph in a div into a checklist", async () => {
+        test("should turn a paragraph in a div into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<div><p>ab[]cd</p></div>",
                 stepFunction: toggleCheckList,
-                // JW cAfter: '<div><ul class="o_checklist"><li>ab[]cd</li></ul></div>',
                 contentAfter: '<div><ul class="o_checklist"><li>ab[]cd</li></ul></div>',
             });
         });
 
         test.todo("should turn a paragraph with formats into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
                 stepFunction: toggleCheckList,
-                // JW cAfter: '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
                 contentAfter: '<ul class="o_checklist"><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>',
             });
         });
@@ -156,9 +146,8 @@ describe("Range collapsed", () => {
             }
         );
 
-        test.todo("should remove the list-style when change the list style", async () => {
+        test("should remove the list-style when change the list style", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: unformat(`
                         <ul>
                             <li style="list-style: cambodian;">a[]</li>
@@ -248,7 +237,7 @@ describe("Range collapsed", () => {
         );
     });
     describe("Remove", () => {
-        test.todo("should turn an empty list into a paragraph", async () => {
+        test("should turn an empty list into a paragraph", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
                 stepFunction: toggleCheckList,
@@ -256,7 +245,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist into a paragraph", async () => {
+        test("should turn a checklist into a paragraph", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                 stepFunction: toggleCheckList,
@@ -264,7 +253,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist into a heading", async () => {
+        test("should turn a checklist into a heading", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
                 stepFunction: toggleCheckList,
@@ -272,7 +261,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist item into a paragraph", async () => {
+        test("should turn a checklist item into a paragraph", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li>cd</li><li>ef[]gh</li></ul>',
@@ -290,7 +279,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn nested list items into paragraphs", async () => {
+        test("should turn nested list items into paragraphs", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: unformat(`
@@ -392,18 +381,16 @@ describe("Range collapsed", () => {
 
 describe("Range not collapsed", () => {
     describe("Insert", () => {
-        test.todo("should turn a paragraph into a checklist", async () => {
+        test("should turn a paragraph into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<p>ab</p><p>cd[ef]gh</p>",
                 stepFunction: toggleCheckList,
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li>cd[ef]gh</li></ul>',
             });
         });
 
-        test.todo("should turn a heading into a checklist", async () => {
+        test("should turn a heading into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<p>ab</p><h1>cd[ef]gh</h1>",
                 stepFunction: toggleCheckList,
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li><h1>cd[ef]gh</h1></li></ul>',
@@ -505,7 +492,7 @@ describe("Range not collapsed", () => {
         );
     });
     describe("Remove", () => {
-        test.todo("should turn a checklist into a paragraph", async () => {
+        test("should turn a checklist into a paragraph", async () => {
             await testEditor({
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li>cd[ef]gh</li></ul>',
                 stepFunction: toggleCheckList,
@@ -513,7 +500,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist into a heading", async () => {
+        test("should turn a checklist into a heading", async () => {
             await testEditor({
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li><h1>cd[ef]gh</h1></li></ul>',
                 stepFunction: toggleCheckList,
@@ -521,7 +508,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist into two paragraphs", async () => {
+        test("should turn a checklist into two paragraphs", async () => {
             await testEditor({
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li>cd[ef</li><li>gh]ij</li></ul>',
                 stepFunction: toggleCheckList,
@@ -529,9 +516,8 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist item into a paragraph", async () => {
+        test("should turn a checklist item into a paragraph", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore:
                     '<p>ab</p><ul class="o_checklist"><li class="o_checked">cd</li><li class="o_checked">ef[gh]ij</li></ul>',
                 stepFunction: toggleCheckList,
