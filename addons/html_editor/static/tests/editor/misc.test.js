@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { getContent, setContent, setupEditor } from "../helpers";
+import { getContent, setContent, setupEditor, testEditor } from "../helpers";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -40,6 +40,20 @@ test("with an empty selector and a <br>", async () => {
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
     );
 });
+
+test.todo(
+    "no arrow key press or mouse click so we remove selection (contenteditable='false')",
+    async () => {
+        await testEditor({
+            contentBefore: '[]<hr contenteditable="false">',
+            contentAfter: '<hr contenteditable="false">',
+        });
+        await testEditor({
+            contentBefore: '<hr contenteditable="false">[]',
+            contentAfter: '<hr contenteditable="false">',
+        });
+    }
+);
 
 /**
  * To write:
