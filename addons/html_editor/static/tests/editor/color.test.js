@@ -172,14 +172,40 @@ test.todo(
         await testEditor({
             contentBefore:
                 '<p><font style="color: rgb(255, 0, 0);" class="bg-200">[abcabc]</font></p>',
-            stepFunction: setColor("", "backgroundColor") && setColor("", "color"),
+            stepFunction: (editor) => {
+                setColor("", "backgroundColor")(editor);
+                setColor("", "color")(editor);
+            },
             contentAfter: "<p>[abcabc]</p>",
         });
         await testEditor({
             contentBefore:
                 '<p><font style="background-color: rgb(255, 0, 0);" class="text-900">[abcabc]</font></p>',
-            stepFunction: setColor("", "color") && setColor("", "backgroundColor"),
+            stepFunction: (editor) => {
+                setColor("", "color")(editor);
+                setColor("", "backgroundColor")(editor);
+            },
             contentAfter: "<p>[abcabc]</p>",
         });
     }
 );
+
+test.todo("should apply a color to a slice of text containing a span", async () => {
+    await testEditor({
+        contentBefore: '<p>a[b<span class="a">c</span>d]e</p>',
+        stepFunction: setColor("rgb(255, 0, 0)", "color"),
+        contentAfter:
+            '<p>a<font style="color: rgb(255, 0, 0);">[b<span class="a">c</span>d]</font>e</p>',
+    });
+});
+
+test.todo("should distribute color to texts and to button separately", async () => {
+    await testEditor({
+        contentBefore: '<p>a[b<a class="btn">c</a>d]e</p>',
+        stepFunction: setColor("rgb(255, 0, 0)", "color"),
+        contentAfter:
+            '<p>a<font style="color: rgb(255, 0, 0);">[b</font>' +
+            '<a class="btn"><font style="color: rgb(255, 0, 0);">c</font></a>' +
+            '<font style="color: rgb(255, 0, 0);">d]</font>e</p>',
+    });
+});
