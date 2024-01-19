@@ -21,6 +21,12 @@ export class HintPlugin extends Plugin {
             H6: _t("Heading 6"),
             "UL LI": _t("List"),
             "OL LI": _t("List"),
+            // @todo @phoenix
+            // Reconsider spec for hint on checklists.
+            // Current web_editor on stable displays no hint for checklists.
+            // This selector finds nothing ('UL.o_checklist LI' instead would work).
+            // Hint uses the ::before pseudo-element to display the hint text, but for checklists
+            // this is already used to display the checkbox.
             "CL LI": _t("To-do"),
         };
         this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
