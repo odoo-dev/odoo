@@ -10,13 +10,42 @@ import { insertText, testEditor } from "../../helpers";
 test.todo("should transform url after space", async () => {
     await testEditor({
         contentBefore: "<p>a http://test.com b http://test.com[] c http://test.com d</p>",
-        stepFunction: async (editor) => {
-            editor.testMode = false;
-            await insertText(editor, " ");
-        },
+        stepFunction: (editor) => insertText(editor, " "),
         contentAfter:
-            '<p>a http://test.com b <a href="http://test.com">http://test.com</a>[] c http://test.com d</p>',
-        //in reality: '<p>a http://test.com b <a href="http://test.com">http://test.com</a>&nbsp;[] c http://test.com d</p>'
+            '<p>a http://test.com b <a href="http://test.com">http://test.com</a> []&nbsp;c http://test.com d</p>',
+    });
+    await testEditor({
+        contentBefore: "<p>http://test.com[]</p>",
+        stepFunction: async (editor) => {
+            // Setup: simulate multiple text nodes in a p: <p>"http://test" ".com"</p>
+            editor.editable.firstChild.firstChild.splitText(11);
+            // Action: insert space
+            insertText(editor, " ");
+        },
+        contentAfter: '<p><a href="http://test.com">http://test.com</a> []</p>',
+    });
+});
+
+test.todo("should transform url followed by punctuation characters after space", async () => {
+    await testEditor({
+        contentBefore: "<p>http://test.com.[]</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter: '<p><a href="http://test.com">http://test.com</a>. []</p>',
+    });
+    await testEditor({
+        contentBefore: "<p>test.com...[]</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter: '<p><a href="http://test.com">test.com</a>... []</p>',
+    });
+    await testEditor({
+        contentBefore: "<p>test.com,[]</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter: '<p><a href="http://test.com">test.com</a>, []</p>',
+    });
+    await testEditor({
+        contentBefore: "<p>test.com,hello[]</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter: '<p><a href="http://test.com">test.com</a>,hello []</p>',
     });
     await testEditor({
         contentBefore: "<p>http://test.com[]</p>",
@@ -58,39 +87,16 @@ test.todo("should transform url after shift+enter", async () => {
 test.todo("should not transform an email url after space", async () => {
     await testEditor({
         contentBefore: "<p>user@domain.com[]</p>",
-        stepFunction: async (editor) => {
-            editor.testMode = false;
-            const selection = document.getSelection();
-            const anchorOffset = selection.anchorOffset;
-            const p = editor.editable.querySelector("p");
-            const textNode = p.childNodes[0];
-            await dispatch(editor.editable, "keydown", { key: " ", code: "Space" });
-            textNode.textContent = "user@domain.com\u00a0";
-            selection.extend(textNode, anchorOffset + 1);
-            selection.collapseToEnd();
-            await dispatch(editor.editable, "input", { data: " ", inputType: "insertText" });
-            await dispatch(editor.editable, "keyup", { key: " ", code: "Space" });
-        },
-        contentAfter: "<p>user@domain.com&nbsp;[]</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter: "<p>user@domain.com []</p>",
     });
 });
 
 test.todo("should not transform url after two space", async () => {
     await testEditor({
-        contentBefore: "<p>a http://test.com b http://test.com [] c http://test.com d</p>",
-        stepFunction: async (editor) => {
-            editor.testMode = false;
-            const selection = document.getSelection();
-            const anchorOffset = selection.anchorOffset;
-            const p = editor.editable.querySelector("p");
-            const textNode = p.childNodes[0];
-            await dispatch(editor.editable, "keydown", { key: " ", code: "Space" });
-            textNode.textContent = "a http://test.com b http://test.com \u00a0 c http://test.com d";
-            selection.extend(textNode, anchorOffset + 1);
-            selection.collapseToEnd();
-            await dispatch(editor.editable, "input", { data: " ", inputType: "insertText" });
-            await dispatch(editor.editable, "keyup", { key: " ", code: "Space" });
-        },
-        contentAfter: "<p>a http://test.com b http://test.com &nbsp;[] c http://test.com d</p>",
+        contentBefore: "<p>a http://test.com b http://test.com&nbsp;[] c http://test.com d</p>",
+        stepFunction: (editor) => insertText(editor, " "),
+        contentAfter:
+            "<p>a http://test.com b http://test.com&nbsp; []&nbsp;c http://test.com d</p>",
     });
 });
