@@ -24,6 +24,7 @@ export class HintPlugin extends Plugin {
             "CL LI": _t("To-do"),
         };
         this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
+        this.updateHints();
     }
 
     handleCommand(command, payload) {
