@@ -31,6 +31,9 @@ export class ListPlugin extends Plugin {
             case "TOGGLE_LIST":
                 this.toggleList(payload.type);
                 break;
+            case "SANITIZE":
+                this.mergeLists();
+                break;
         }
     }
 
@@ -72,6 +75,21 @@ export class ListPlugin extends Plugin {
                 );
             }
         }
+        this.dispatch("SANITIZE");
+    }
+
+    // @todo Naive implementation. Known issues:
+    // - merges a checklist into a unordered list
+    // - fails to merge list with pre-existing previous siblings
+    mergeLists() {
+        const restoreCursor = preserveCursor(this.document);
+        const range = this.document.getSelection().getRangeAt(0);
+        const list = closestElement(range.startContainer, "ul, ol");
+        while (list && list.nextElementSibling?.tagName === list.tagName) {
+            list.append(...list.nextElementSibling.childNodes);
+            list.nextElementSibling.remove();
+        }
+        restoreCursor();
     }
 }
 
