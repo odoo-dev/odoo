@@ -230,7 +230,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn two paragraphs into a list with two items", async () => {
+        test("should turn two paragraphs into a list with two items", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><p>cd[ef</p><p>gh]ij</p>",
                 stepFunction: toggleOrderedList,
@@ -238,7 +238,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn two paragraphs in a div into a list with two items", async () => {
+        test("should turn two paragraphs in a div into a list with two items", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[cd</p><p>ef]gh</p></div>",
                 stepFunction: toggleOrderedList,
@@ -246,7 +246,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph and a list item into two list items", async () => {
+        test("should turn a paragraph and a list item into two list items", async () => {
             await testEditor({
                 contentBefore: "<p>a[b</p><ol><li>c]d</li><li>ef</li></ol>",
                 stepFunction: toggleOrderedList,
@@ -254,7 +254,7 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo("should turn a list item and a paragraph into two list items", async () => {
+        test("should turn a list item and a paragraph into two list items", async () => {
             await testEditor({
                 contentBefore: "<ol><li>ab</li><li>c[d</li></ol><p>e]f</p>",
                 stepFunction: toggleOrderedList,
@@ -262,16 +262,13 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn a list, a paragraph and another list into one list with three list items",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ol><li>a[b</li></ol><p>cd</p><ol><li>e]f</li></ol>",
-                    stepFunction: toggleOrderedList,
-                    contentAfter: "<ol><li>a[b</li><li>cd</li><li>e]f</li></ol>",
-                });
-            }
-        );
+        test("should turn a list, a paragraph and another list into one list with three list items", async () => {
+            await testEditor({
+                contentBefore: "<ol><li>a[b</li></ol><p>cd</p><ol><li>e]f</li></ol>",
+                stepFunction: toggleOrderedList,
+                contentAfter: "<ol><li>a[b</li><li>cd</li><li>e]f</li></ol>",
+            });
+        });
 
         test.todo(
             "should turn a list item, a paragraph and another list into one list with all three as list items",
@@ -284,16 +281,13 @@ describe("Range not collapsed", () => {
             }
         );
 
-        test.todo(
-            "should turn a list, a paragraph and a list item into one list with all three as list items",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ol><li>a[b</li></ol><p>cd</p><ol><li>e]f</li><li>gh</li></ol>",
-                    stepFunction: toggleOrderedList,
-                    contentAfter: "<ol><li>a[b</li><li>cd</li><li>e]f</li><li>gh</li></ol>",
-                });
-            }
-        );
+        test("should turn a list, a paragraph and a list item into one list with all three as list items", async () => {
+            await testEditor({
+                contentBefore: "<ol><li>a[b</li></ol><p>cd</p><ol><li>e]f</li><li>gh</li></ol>",
+                stepFunction: toggleOrderedList,
+                contentAfter: "<ol><li>a[b</li><li>cd</li><li>e]f</li><li>gh</li></ol>",
+            });
+        });
     });
     describe("Remove", () => {
         test("should turn a list into a paragraph", async () => {
