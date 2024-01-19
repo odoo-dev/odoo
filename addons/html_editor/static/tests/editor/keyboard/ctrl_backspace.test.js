@@ -1,9 +1,9 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
-import { unformat } from "../utils";
 import { dispatch } from "@odoo/hoot-dom";
+import { testEditor } from "../../helpers";
+import { unformat } from "../../utils";
 
 // CTRL+BACKSPACE
 test.todo("should not remove the last p with ctrl+backspace", async () => {
