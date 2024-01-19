@@ -6,7 +6,8 @@ export class Plugin {
     static shared = [];
 
     /**
-     * @param {HTMLElement} el
+     * @param {Document} document
+     * @param {HTMLElement} editable
      * @param {*} shared
      * @param {*} dispatch
      * @param {*} config
