@@ -44,11 +44,11 @@ export class ListPlugin extends Plugin {
         const li = new Set();
         const blocks = new Set();
 
-        const selectedBlocks = getTraversedNodes(this.editable);
-        const deepestSelectedBlocks = selectedBlocks.filter(
-            (block) => !descendants(block).some((descendant) => selectedBlocks.includes(descendant))
+        const selectedNodes = getTraversedNodes(this.editable);
+        const deepestSelectedNodes = selectedNodes.filter(
+            (node) => !descendants(node).some((descendant) => selectedNodes.includes(descendant))
         );
-        for (const node of deepestSelectedBlocks) {
+        for (const node of deepestSelectedNodes) {
             if (
                 node.nodeType === Node.TEXT_NODE &&
                 isWhitespace(node) &&
