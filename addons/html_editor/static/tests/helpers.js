@@ -283,3 +283,16 @@ export function redo(editor) {
 export function click(el, options) {
     throw new Error("need a proper implementation");
 }
+
+// list
+export function toggleOrderedList(editor) {
+    editor.dispatch("TOGGLE_LIST", { type: "OL" });
+}
+
+export function toggleUnorderedList(editor) {
+    editor.dispatch("TOGGLE_LIST", { type: "UL" });
+}
+
+export function toggleCheckList(editor) {
+    editor.dispatch("TOGGLE_LIST", { type: "CL" });
+}
