@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor, toggleCheckList } from "../../helpers";
 import { unformat } from "../../utils";
-
-function toggleCheckList(editor) {
-    editor.dispatch("TOGGLE_LIST", { type: "CL" });
-}
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
