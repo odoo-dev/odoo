@@ -2,7 +2,7 @@
 
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { testEditor, undo } from "../../helpers";
+import { testEditor, undo } from "../helpers";
 
 describe("range collapsed", () => {
     test.todo("should ignore cutting an empty selection", async () => {
