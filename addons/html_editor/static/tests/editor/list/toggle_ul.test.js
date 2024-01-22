@@ -325,16 +325,13 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn a list item, a paragraph and another list into one list with all three as list items",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ul><li>ab<li>c[d</li></ul><p>ef</p><ul><li>g]h</li></ul>",
-                    stepFunction: toggleUnorderedList,
-                    contentAfter: "<ul><li>ab</li><li>c[d</li><li>ef</li><li>g]h</li></ul>",
-                });
-            }
-        );
+        test("should turn a list item, a paragraph and another list into one list with all three as list items", async () => {
+            await testEditor({
+                contentBefore: "<ul><li>ab</li><li>c[d</li></ul><p>ef</p><ul><li>g]h</li></ul>",
+                stepFunction: toggleUnorderedList,
+                contentAfter: "<ul><li>ab</li><li>c[d</li><li>ef</li><li>g]h</li></ul>",
+            });
+        });
 
         test("should turn a list, a paragraph and a list item into one list with all three as list items", async () => {
             await testEditor({
