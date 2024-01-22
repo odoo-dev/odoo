@@ -4,13 +4,31 @@ import { Plugin } from "../plugin";
 import { descendants, closestElement, getAdjacents } from "../utils/dom_traversal";
 import { isWhitespace, isVisible } from "../utils/dom_info";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { getListMode, insertListAfter } from "./utils";
+import { getListMode, createList, insertListAfter } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass } from "../utils/dom";
 
 export class ListPlugin extends Plugin {
     static name = "list";
+
+    setup() {
+        // @todo Move this to a tab plugin
+        this.addDomListener(this.editable, "keydown", this.handleKeyDown);
+    }
+
+    // @todo Move this to a tab plugin
+    handleKeyDown(event) {
+        if (event.key === "Tab") {
+            if (event.shiftKey) {
+                this.shiftIndentation("outdent");
+            } else {
+                this.shiftIndentation("indent");
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 
     handleCommand(command, payload) {
         switch (command) {
@@ -30,6 +48,12 @@ export class ListPlugin extends Plugin {
             // the BR is not properly restored after the "/command" is removed (see applyCommand powerbox.js).
             case "TOGGLE_LIST":
                 this.toggleList(payload.type);
+                break;
+            case "INDENT_LIST":
+                this.shiftIndentation("indent");
+                break;
+            case "OUTDENT_LIST":
+                this.shiftIndentation("outdent");
                 break;
             case "SANITIZE":
                 this.mergeLists();
@@ -91,6 +115,34 @@ export class ListPlugin extends Plugin {
         }
         restoreCursor();
     }
+
+    shiftIndentation(mode) {
+        const func = mode === "indent" ? indent : outdent;
+        const restore = preserveCursor(this.document);
+        for (const listItem of this.getTraversedListNodes()) {
+            func(listItem);
+        }
+        restore();
+    }
+
+    // @todo Handle tab on nonList items (interaction with a tab plugin?)
+    getTraversedListNodes() {
+        // Split traversed nodes into list items and the rest.
+        const listItems = new Set();
+        const nonListItems = new Set();
+        for (const node of getTraversedNodes(this.editable)) {
+            const closestLi = closestElement(node, "li");
+            const target = closestLi || node;
+            if (!target.querySelector?.("li")) {
+                if (closestLi) {
+                    listItems.add(closestLi);
+                } else {
+                    nonListItems.add(node);
+                }
+            }
+        }
+        return listItems;
+    }
 }
 
 function toggleList(node, offset, mode) {
@@ -133,7 +185,7 @@ function toggleListLI(liElement, mode) {
         // toggle => remove list
         let node = liElement;
         while (node) {
-            node = shiftTab(node);
+            node = outdent(node);
         }
     }
 
@@ -172,8 +224,29 @@ function toggleListHTMLElement(element, offset, mode = "UL") {
     }
 }
 
+// former oTab
+function indent(liElement) {
+    const doc = liElement.ownerDocument;
+    const lip = doc.createElement("li");
+    const destul =
+        liElement.previousElementSibling?.querySelector("ol, ul") ||
+        liElement.nextElementSibling?.querySelector("ol, ul") ||
+        liElement.closest("ol, ul");
+
+    const ul = createList(getListMode(destul));
+    lip.append(ul);
+
+    const restoreCursor = preserveCursor(doc);
+    lip.classList.add("oe-nested");
+    liElement.before(lip);
+    ul.append(liElement);
+    restoreCursor();
+    return true;
+}
+
 // returns: is still in a <LI> nested list
-function shiftTab(liElement) {
+// former oShiftTab
+function outdent(liElement) {
     if (liElement.nextElementSibling) {
         const ul = liElement.parentElement.cloneNode(false);
         while (liElement.nextSibling) {
