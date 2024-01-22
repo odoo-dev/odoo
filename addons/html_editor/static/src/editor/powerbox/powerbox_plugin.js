@@ -10,17 +10,26 @@ export class PowerboxPlugin extends Plugin {
 
     setup() {
         this.addDomListener(this.document, "selectionchange", this.handleCommandHint);
+        this.offset = 0;
 
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
             dispatch: this.dispatch,
             el: this.editable,
+            offset: () => this.offset,
         });
         this.addDomListener(this.editable, "keypress", (ev) => {
             if (ev.key === "/") {
-                this.powerbox.open();
+                this.openPowerbox();
             }
         });
+    }
+
+    openPowerbox() {
+        const selection = window.getSelection();
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        this.offset = range && range.startOffset;
+        this.powerbox.open();
     }
 
     handleCommand(command, payload) {

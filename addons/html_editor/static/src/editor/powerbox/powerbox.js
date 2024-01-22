@@ -15,6 +15,7 @@ export class Powerbox extends Component {
         close: Function,
         dispatch: Function,
         el: HTMLElement,
+        offset: Function,
     };
 
     setup() {
@@ -23,21 +24,20 @@ export class Powerbox extends Component {
         this.cmdIndex = 0;
         // text node and offset for the / character
         this.node = null;
-        this.offset = 0;
-        this.endOffset = 0;
+        this.offset = this.props.offset();
         this.commands = null;
         this.categories = null;
-        this.computeCommands();
+        const range = window.getSelection().getRangeAt(0);
+        this.endOffset = range.endOffset;
+        this.node = range.startContainer;
+        if (!range.collapsed || this.node instanceof Element) {
+            throw new Error("Need to check if this is legit...");
+        }
+        const search = this.node.nodeValue.slice(this.offset + 1, this.endOffset);
+        this.computeCommands(search);
 
         onMounted(() => {
             this.props.onMounted(ref.el);
-            const range = window.getSelection().getRangeAt(0);
-            this.node = range.startContainer;
-            if (!range.collapsed || this.node instanceof Element) {
-                throw new Error("Need to check if this is legit...");
-            }
-            this.offset = range.startOffset - 1;
-            this.endOffset = this.offset + 1;
             const prevChar = this.node.nodeValue[this.offset];
             if (prevChar !== "/") {
                 this.props.close();
