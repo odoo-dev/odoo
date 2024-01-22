@@ -1,19 +1,20 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor, unformat } from "../../helpers";
+import { testEditor } from "../../helpers";
+import { unformat } from "../../utils";
 import { dispatch } from "@odoo/hoot-dom";
 
 function keyDownTab(editor) {
     dispatch(editor.editable, "keydown", { key: "Tab" });
 }
 
-function indentList() {
-    throw new Error("need a proper implementation");
+function indentList(editor) {
+    editor.dispatch("INDENT_LIST");
 }
 
 describe("Checklist", () => {
-    test.todo("should indent a checklist", async () => {
+    test("should indent a checklist", async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -48,7 +49,7 @@ describe("Checklist", () => {
         });
     });
 
-    test.todo('should indent a checklist and previous ligne become the "title"', async () => {
+    test('should indent a checklist and previous line become the "title"', async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -274,7 +275,7 @@ describe("Checklist", () => {
 });
 
 describe("Regular list", () => {
-    test.todo("should indent a regular list empty item", async () => {
+    test("should indent a regular list empty item", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -322,7 +323,7 @@ describe("Regular list", () => {
 });
 
 describe("with selection collapsed", () => {
-    test.todo("should indent the first element of a list", async () => {
+    test("should indent the first element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -342,7 +343,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent the last element of a list", async () => {
+    test("should indent the last element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -364,7 +365,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent multi-level", async () => {
+    test("should indent multi-level", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -392,17 +393,15 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo(
-        "should indent the last element of a list with proper with unordered list",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should indent the last element of a list with proper with unordered list", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <ol>
                     <li>a</li>
                     <li>[]b</li>
                 </ol>`),
-                stepFunction: indentList,
-                contentAfter: unformat(`
+            stepFunction: indentList,
+            contentAfter: unformat(`
                 <ol>
                     <li>
                         a
@@ -413,11 +412,10 @@ describe("with selection collapsed", () => {
                         </ol>
                     </li>
                 </ol>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo("should indent the middle element of a list", async () => {
+    test("should indent the middle element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -443,7 +441,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent even if the first element of a list is selected", async () => {
+    test("should indent even if the first element of a list is selected", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -555,7 +553,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent unordered list inside a table cell", async () => {
+    test("should indent unordered list inside a table cell", async () => {
         await testEditor({
             contentBefore: unformat(`
                         <table>
@@ -605,7 +603,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent checklist inside a table cell", async () => {
+    test("should indent checklist inside a table cell", async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -658,7 +656,7 @@ describe("with selection collapsed", () => {
 });
 
 describe("with selection", () => {
-    test.todo("should indent the first element of a list", async () => {
+    test("should indent the first element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -678,7 +676,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent the middle element of a list", async () => {
+    test("should indent the middle element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -704,7 +702,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent multi-level", async () => {
+    test("should indent multi-level", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -1086,7 +1084,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent ordered list inside a table cell", async () => {
+    test("should indent ordered list inside a table cell", async () => {
         await testEditor({
             contentBefore: unformat(`
                         <table>
