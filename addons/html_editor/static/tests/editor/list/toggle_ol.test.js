@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor, toggleOrderedList } from "../../helpers";
 import { unformat } from "../../utils";
-
-function toggleOrderedList(editor) {
-    editor.dispatch("TOGGLE_LIST", { type: "OL" });
-}
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
