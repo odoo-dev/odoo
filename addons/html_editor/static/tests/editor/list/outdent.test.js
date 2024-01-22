@@ -1,11 +1,12 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor, unformat } from "../../helpers";
+import { testEditor } from "../../helpers";
+import { unformat } from "../../utils";
 import { dispatch } from "@odoo/hoot-dom";
 
-function outdentList() {
-    throw new Error("need a proper implementation");
+function outdentList(editor) {
+    editor.dispatch("OUTDENT_LIST");
 }
 
 function keyDownshiftTab(editor) {
@@ -13,7 +14,7 @@ function keyDownshiftTab(editor) {
 }
 
 describe("Regular list", () => {
-    test.todo("should remove the list-style when outdent the list", async () => {
+    test("should remove the list-style when outdent the list", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -34,7 +35,7 @@ describe("Regular list", () => {
 });
 
 describe("Checklist", () => {
-    test.todo("should outdent a checklist", async () => {
+    test("should outdent a checklist", async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -69,7 +70,7 @@ describe("Checklist", () => {
         });
     });
 
-    test.todo('should outdent a checklist and previous line as "title"', async () => {
+    test('should outdent a checklist and previous line as "title"', async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -110,7 +111,7 @@ describe("Checklist", () => {
 });
 
 describe("with selection collapsed", () => {
-    test.todo("should outdent the last element of a list", async () => {
+    test("should outdent the last element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -131,11 +132,9 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo(
-        "should outdent the last element of a list with proper with unordered list",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should outdent the last element of a list with proper with unordered list", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                     <ol>
                         <li>
                             a
@@ -146,17 +145,16 @@ describe("with selection collapsed", () => {
                             </ol>
                         </li>
                     </ol>`),
-                stepFunction: outdentList,
-                contentAfter: unformat(`
+            stepFunction: outdentList,
+            contentAfter: unformat(`
                     <ol>
                         <li>a</li>
                         <li>[]b</li>
                     </ol>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo("should outdent the middle element of a list", async () => {
+    test("should outdent the middle element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -182,7 +180,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should outdent if the first element of a list is selected", async () => {
+    test("should outdent if the first element of a list is selected", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -198,7 +196,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should outdent the last element of a list with sublist", async () => {
+    test("should outdent the last element of a list with sublist", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -251,7 +249,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should outdent unordered list inside a table cell", async () => {
+    test("should outdent unordered list inside a table cell", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <table>
@@ -301,7 +299,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should outdent checklist inside a table cell", async () => {
+    test("should outdent checklist inside a table cell", async () => {
         await testEditor({
             removeCheckIds: true,
             contentBefore: unformat(`
@@ -354,7 +352,7 @@ describe("with selection collapsed", () => {
 });
 
 describe("with selection", () => {
-    test.todo("should outdent the middle element of a list", async () => {
+    test("should outdent the middle element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -379,11 +377,9 @@ describe("with selection", () => {
         });
     });
 
-    test.todo(
-        "should inoutdentdent multiples list item in the middle element of a list",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should outdent multiples list item in the middle element of a list", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                     <ul>
                         <li>
                             a
@@ -396,17 +392,16 @@ describe("with selection", () => {
                             d
                         </li>
                     </ul>`),
-                stepFunction: outdentList,
-                contentAfter: unformat(`
+            stepFunction: outdentList,
+            contentAfter: unformat(`
                     <ul>
                         <li>a</li>
                         <li>[b</li>
                         <li>c]</li>
                         <li>d</li>
                     </ul>`),
-            });
-        }
-    );
+        });
+    });
 
     test.todo(
         "should outdent multiples list item in the middle element of a list with sublist",
@@ -558,7 +553,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should outdent a ordered list inside a table cell", async () => {
+    test("should outdent a ordered list inside a table cell", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <table>
