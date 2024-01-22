@@ -207,12 +207,33 @@ export async function insertText(editor, text) {
     // events will be flagged `isTrusted: false` by the browser, requiring
     // the editor to detect them since they would not trigger the default
     // browser behavior otherwise.
+    const sel = window.getSelection();
+    const range = sel.getRangeAt(0);
+    let insertChar = null;
+    if (range.collapsed && range.startContainer.nodeType === Node.TEXT_NODE) {
+        const node = range.startContainer;
+        let offset = range.startOffset;
+        insertChar = (char) => {
+            node.textContent =
+                node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
+            offset++;
+            range.setStart(node, offset);
+            range.setEnd(node, offset);
+        };
+    } else {
+        // maybe need to create text node and do something
+        // const txt = document.createTextNode(char);
+        // range.insertNode(txt);
+        // and set selection
+        throw new Error("need to implement something");
+    }
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.
         dispatch(editor.editable, "keydown", { key: char });
         // KeyPressEvent is not required but is triggered like in the browser.
         dispatch(editor.editable, "keypress", { key: char });
         // InputEvent is required to simulate the insert text.
+        insertChar(char);
         dispatch(editor.editable, "input", {
             inputType: "insertText",
             data: char,
