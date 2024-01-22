@@ -447,19 +447,16 @@ describe("Range not collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn a checklist item, a paragraph and another list into one list with all three as list items",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked">ab<li>c[d</li></ul><p>ef</p><ul class="o_checklist"><li class="o_checked">g]h</li></ul>',
-                    stepFunction: toggleCheckList,
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked">ab</li><li>c[d</li><li>ef</li><li class="o_checked">g]h</li></ul>',
-                });
-            }
-        );
+        test("should turn a checklist item, a paragraph and another list into one list with all three as list items", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked">ab</li><li>c[d</li></ul><p>ef</p><ul class="o_checklist"><li class="o_checked">g]h</li></ul>',
+                stepFunction: toggleCheckList,
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked">ab</li><li>c[d</li><li>ef</li><li class="o_checked">g]h</li></ul>',
+            });
+        });
 
         test("should turn a checklist, a paragraph and a checklist item into one list with all three as list items", async () => {
             await testEditor({
