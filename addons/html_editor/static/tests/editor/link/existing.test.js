@@ -24,7 +24,7 @@ test("should parse correctly a span inside a Link 2", async () => {
     });
 });
 
-test.todo("should parse correctly an empty span inside a Link then add a char", async () => {
+test("should parse correctly an empty span inside a Link then add a char", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b[]<span class="a"></span></a>c</p>',
         stepFunction: async (editor) => {
@@ -34,7 +34,7 @@ test.todo("should parse correctly an empty span inside a Link then add a char", 
     });
 });
 
-test.todo("should parse correctly a span inside a Link then add a char", async () => {
+test("should parse correctly a span inside a Link then add a char", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist"><span class="a">b[]</span></a>d</p>',
         stepFunction: async (editor) => {
@@ -45,7 +45,7 @@ test.todo("should parse correctly a span inside a Link then add a char", async (
     });
 });
 
-test.todo("should parse correctly a span inside a Link then add a char 2", async () => {
+test("should parse correctly a span inside a Link then add a char 2", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist"><span class="a">b[]</span>d</a>e</p>',
         stepFunction: async (editor) => {
@@ -55,7 +55,7 @@ test.todo("should parse correctly a span inside a Link then add a char 2", async
     });
 });
 
-test.todo("should parse correctly a span inside a Link then add a char 3", async () => {
+test("should parse correctly a span inside a Link then add a char 3", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist"><span class="a">b</span>c[]</a>e</p>',
         stepFunction: async (editor) => {
@@ -66,7 +66,7 @@ test.todo("should parse correctly a span inside a Link then add a char 3", async
     });
 });
 
-test.todo("should add a character after the link", async () => {
+test("should add a character after the link", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b[]</a>d</p>',
         stepFunction: async (editor) => {
@@ -77,7 +77,7 @@ test.todo("should add a character after the link", async () => {
     });
 });
 
-test.todo("should add two character after the link", async () => {
+test("should add two character after the link", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b[]</a>e</p>',
         stepFunction: async (editor) => {
@@ -87,7 +87,7 @@ test.todo("should add two character after the link", async () => {
     });
 });
 
-test.todo("should add a character after the link if range just after link", async () => {
+test("should add a character after the link if range just after link", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b</a>[]d</p>',
         stepFunction: async (editor) => {
@@ -107,7 +107,7 @@ test.todo("should add a character in the link after a br tag", async () => {
     });
 });
 
-test.todo("should not add a character in the link if start of paragraph", async () => {
+test("should not add a character in the link if start of paragraph", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b</a></p><p>[]d</p>',
         stepFunction: async (editor) => {
