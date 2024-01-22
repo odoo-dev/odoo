@@ -217,17 +217,14 @@ describe("Mixed", () => {
         });
     });
 
-    test.todo(
-        "should turn an unordered list item, a paragraph and an ordered list into one ordered list with all three as list items",
-        async () => {
-            await testEditor({
-                // @todo invalid HTML, fix this
-                contentBefore: "<ul><li>ab<li>c[d</li></ul><p>ef</p><ol><li>g]h</li></ol>",
-                stepFunction: toggleOrderedList,
-                contentAfter: "<ol><li>ab</li><li>c[d</li><li>ef</li><li>g]h</li></ol>",
-            });
-        }
-    );
+    test("should turn an unordered list item, a paragraph and an ordered list into one ordered list with all three as list items", async () => {
+        await testEditor({
+            // @todo invalid HTML, fix this
+            contentBefore: "<ul><li>ab</li><li>c[d</li></ul><p>ef</p><ol><li>g]h</li></ol>",
+            stepFunction: toggleOrderedList,
+            contentAfter: "<ol><li>ab</li><li>c[d</li><li>ef</li><li>g]h</li></ol>",
+        });
+    });
 
     test("should turn an ordered list, a paragraph and an unordered list item into one ordered list with all three as list items", async () => {
         await testEditor({
