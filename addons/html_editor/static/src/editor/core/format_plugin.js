@@ -3,6 +3,7 @@
 import { Plugin } from "../plugin";
 import { closestElement } from "../utils/dom_traversal";
 import { formatSelection } from "../utils/formatting";
+import { getTraversedNodes } from "../utils/selection";
 
 const shortcuts = {
     FORMAT_BOLD: (e) => e.key === "b" && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey,
@@ -48,20 +49,10 @@ export class FormatPlugin extends Plugin {
         }
     }
     removeFormat() {
-        const textAlignStyles = new Map();
-        for (const element of getTraversedNodes(this.editable)) {
-            const block = closestBlock(element);
-            if (block.style.textAlign) {
-                textAlignStyles.set(block, block.style.textAlign);
-            }
-        }
         this.document.execCommand("removeFormat");
         for (const node of getTraversedNodes(this.editable)) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
-        }
-        for (const block of getTraversedNodes(this.editable)) {
-            block.style.setProperty("text-align", textAlign);
         }
     }
     handleShortcut(e) {
