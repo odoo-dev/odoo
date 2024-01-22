@@ -247,13 +247,14 @@ function indent(liElement) {
 // returns: is still in a <LI> nested list
 // former oShiftTab
 function outdent(liElement) {
+    const doc = liElement.ownerDocument;
     if (liElement.nextElementSibling) {
         const ul = liElement.parentElement.cloneNode(false);
         while (liElement.nextSibling) {
             ul.append(liElement.nextSibling);
         }
         if (liElement.parentNode.parentNode.tagName === "LI") {
-            const lip = document.createElement("li");
+            const lip = doc.createElement("li");
             lip.classList.add("oe-nested");
             lip.append(ul);
             liElement.parentNode.parentNode.after(lip);
@@ -262,7 +263,7 @@ function outdent(liElement) {
         }
     }
 
-    const restoreCursor = preserveCursor(liElement.ownerDocument);
+    const restoreCursor = preserveCursor(doc);
     if (liElement.parentNode.parentNode.tagName === "LI") {
         const ul = liElement.parentNode;
         const shouldRemoveParentLi =
@@ -292,7 +293,7 @@ function outdent(liElement) {
                 p = undefined;
                 ul.after(liElement.firstChild);
             } else {
-                p = p || document.createElement("P");
+                p = p || doc.createElement("P");
                 if (dir) {
                     p.setAttribute("dir", dir);
                     p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
