@@ -4,7 +4,7 @@ import { CLIPBOARD_WHITELISTS } from "@html_editor/editor/utils/clipboard";
 import { setSelection } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { setSelection as setTestSelection, testEditor } from "../../helpers";
+import { setSelection as setTestSelection, testEditor } from "../helpers";
 
 // Mock an paste event and send it to the editor.
 async function pasteData(editor, text, type) {
