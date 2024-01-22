@@ -84,7 +84,7 @@ test.todo("should transform url after shift+enter", async () => {
     });
 });
 
-test.todo("should not transform an email url after space", async () => {
+test("should not transform an email url after space", async () => {
     await testEditor({
         contentBefore: "<p>user@domain.com[]</p>",
         stepFunction: (editor) => insertText(editor, " "),

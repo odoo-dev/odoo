@@ -9,7 +9,7 @@ export function insertLineBreak(editor) {
 }
 
 describe("range collapsed", () => {
-    test.todo("should not change the url when a link is not edited", async () => {
+    test("should not change the url when a link is not edited", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.co">google.com</a>b</p>',
             contentAfter: '<p>a<a href="https://google.co">google.com</a>b</p>',

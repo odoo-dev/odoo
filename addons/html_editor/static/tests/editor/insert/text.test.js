@@ -4,7 +4,7 @@ import { describe, test } from "@odoo/hoot";
 import { deleteBackward, insertText, testEditor } from "../../helpers";
 
 describe("collapsed selection", () => {
-    test.todo("should insert a char into an empty span without removing the zws", async () => {
+    test("should insert a char into an empty span without removing the zws", async () => {
         await testEditor({
             contentBefore: '<p>ab<span class="a">[]\u200B</span>cd</p>',
             stepFunction: async (editor) => {
@@ -14,18 +14,15 @@ describe("collapsed selection", () => {
         });
     });
 
-    test.todo(
-        "should insert a char into an empty span surrounded by space without removing the zws",
-        async () => {
-            await testEditor({
-                contentBefore: '<p>ab <span class="a">[]\u200B</span> cd</p>',
-                stepFunction: async (editor) => {
-                    await insertText(editor, "x");
-                },
-                contentAfter: '<p>ab <span class="a">x[]\u200B</span> cd</p>',
-            });
-        }
-    );
+    test("should insert a char into an empty span surrounded by space without removing the zws", async () => {
+        await testEditor({
+            contentBefore: '<p>ab <span class="a">[]\u200B</span> cd</p>',
+            stepFunction: async (editor) => {
+                await insertText(editor, "x");
+            },
+            contentAfter: '<p>ab <span class="a">x[]\u200B</span> cd</p>',
+        });
+    });
 
     test.todo(
         "should insert a char into a data-oe-zws-empty-inline span removing the zws and data-oe-zws-empty-inline",
