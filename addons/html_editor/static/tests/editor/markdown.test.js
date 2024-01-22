@@ -61,7 +61,7 @@ describe("inline code", () => {
         });
     });
 
-    test.todo("should not convert text into inline code when traversing HTMLElements", async () => {
+    test("should not convert text into inline code when traversing HTMLElements", async () => {
         await testEditor({
             contentBefore: "<p>ab`c<strong>d</strong>e[]fg</p>",
             stepFunction: async (editor) => insertText(editor, "`"),
@@ -69,18 +69,15 @@ describe("inline code", () => {
         });
     });
 
-    test.todo(
-        "should not convert text into inline code when interrupted by linebreak",
-        async () => {
-            await testEditor({
-                contentBefore: "<p>ab`c<br>d[]ef</p>",
-                stepFunction: async (editor) => insertText(editor, "`"),
-                contentAfter: "<p>ab`c<br>d`[]ef</p>",
-            });
-        }
-    );
+    test("should not convert text into inline code when interrupted by linebreak", async () => {
+        await testEditor({
+            contentBefore: "<p>ab`c<br>d[]ef</p>",
+            stepFunction: async (editor) => insertText(editor, "`"),
+            contentAfter: "<p>ab`c<br>d`[]ef</p>",
+        });
+    });
 
-    test.todo("should not convert text into inline code when inside inline code", async () => {
+    test("should not convert text into inline code when inside inline code", async () => {
         await testEditor({
             contentBefore: '<p>a<code class="o_inline_code">b`cd[]e</code>f</p>',
             stepFunction: async (editor) => insertText(editor, "`"),
