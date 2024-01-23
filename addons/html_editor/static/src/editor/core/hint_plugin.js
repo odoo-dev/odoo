@@ -30,7 +30,7 @@ export class HintPlugin extends Plugin {
             // this is already used to display the checkbox.
             "CL LI": _t("To-do"),
         };
-        this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
+        this.addDomListener(this.document, "selectionchange", this.updateTempHints);
         this.updateHints();
     }
 
@@ -38,6 +38,7 @@ export class HintPlugin extends Plugin {
         switch (command) {
             case "CONTENT_UPDATED":
                 this.updateHints();
+                this.updateTempHints();
                 break;
             case "CREATE_HINT":
                 this.createTempHint(payload.el, payload.text);
@@ -81,11 +82,25 @@ export class HintPlugin extends Plugin {
         }
     }
 
-    handleSelectionChange() {
+    updateTempHints() {
         for (const el of this.tempHints) {
             this.removeHint(el);
         }
         this.tempHints.clear();
+        const selection = window.getSelection();
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        if (
+            selection.isCollapsed &&
+            range &&
+            this.editable.contains(range.commonAncestorContainer)
+        ) {
+            for (const hint of this.registry.category("temp_hints").getAll()) {
+                const target = hint.target(selection);
+                if (target) {
+                    this.createTempHint(target, hint.text);
+                }
+            }
+        }
     }
 
     makeHint(el, text) {
