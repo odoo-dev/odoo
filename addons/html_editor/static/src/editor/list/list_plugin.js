@@ -21,9 +21,9 @@ export class ListPlugin extends Plugin {
     handleKeyDown(event) {
         if (event.key === "Tab") {
             if (event.shiftKey) {
-                this.shiftIndentation("outdent");
+                this.outdentList();
             } else {
-                this.shiftIndentation("indent");
+                this.indentList();
             }
             event.preventDefault();
             event.stopPropagation();
@@ -50,10 +50,10 @@ export class ListPlugin extends Plugin {
                 this.toggleList(payload.type);
                 break;
             case "INDENT_LIST":
-                this.shiftIndentation("indent");
+                this.indentList();
                 break;
             case "OUTDENT_LIST":
-                this.shiftIndentation("outdent");
+                this.outdentList();
                 break;
             case "SANITIZE":
                 this.mergeLists();
@@ -93,7 +93,7 @@ export class ListPlugin extends Plugin {
         while (target.length) {
             const node = target.pop();
             // only apply one li per ul
-            if (!toggleList(node, 0, mode)) {
+            if (!this.toggleListNode(node, 0, mode)) {
                 target = target.filter(
                     (li) => li.parentNode != node.parentNode || li.tagName != "LI"
                 );
@@ -116,15 +116,6 @@ export class ListPlugin extends Plugin {
         restoreCursor();
     }
 
-    shiftIndentation(mode) {
-        const func = mode === "indent" ? indent : outdent;
-        const restore = preserveCursor(this.document);
-        for (const listItem of this.getTraversedListNodes()) {
-            func(listItem);
-        }
-        restore();
-    }
-
     // @todo Handle tab on nonList items (interaction with a tab plugin?)
     getTraversedListNodes() {
         // Split traversed nodes into list items and the rest.
@@ -143,173 +134,208 @@ export class ListPlugin extends Plugin {
         }
         return listItems;
     }
-}
 
-function toggleList(node, offset, mode) {
-    if (node.tagName === "#text") {
-        return toggleList(node.parentElement, childNodeIndex(node), mode);
+    /**
+     * @param {Node} node
+     * @param {number} offset
+     * @param {'UL'|'OL'|'CL'} mode
+     * @returns {any} - @todo find this out || make it something logical
+     */
+    toggleListNode(node, offset, mode) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return this.toggleListNode(node.parentElement, childNodeIndex(node), mode);
+        }
+        if (node.tagName === "LI") {
+            return this.toggleListLI(node, mode);
+        }
+        if (node.tagName === "P") {
+            return this.toggleListP(node, mode);
+        }
+        return this.toggleListHTMLElement(node, offset, mode);
     }
-    if (node.tagName === "LI") {
-        return toggleListLI(node, mode);
-    }
-    if (node.tagName === "P") {
-        return toggleListP(node, mode);
-    }
-    return toggleListHTMLElement(node, offset, mode);
-}
 
-function toggleListLI(liElement, mode) {
-    const pnode = liElement.closest("ul, ol");
-    if (!pnode) {
-        return;
-    }
-    const restoreCursor = preserveCursor(liElement.ownerDocument);
-    const listMode = getListMode(pnode) + mode;
-    if (["OLCL", "ULCL"].includes(listMode)) {
-        pnode.classList.add("o_checklist");
-        for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
-            if (li.style.listStyle != "none") {
-                li.style.listStyle = null;
-                if (!li.style.all) {
-                    li.removeAttribute("style");
+    /**
+     * @param {HTMLLIElement} liElement
+     * @param {"UL"|"OL"|"CL"} mode
+     */
+    toggleListLI(liElement, mode) {
+        const pnode = liElement.closest("ul, ol");
+        if (!pnode) {
+            return;
+        }
+        const restoreCursor = preserveCursor(this.document);
+        const listMode = getListMode(pnode) + mode;
+        if (["OLCL", "ULCL"].includes(listMode)) {
+            pnode.classList.add("o_checklist");
+            for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
+                if (li.style.listStyle != "none") {
+                    li.style.listStyle = null;
+                    if (!li.style.all) {
+                        li.removeAttribute("style");
+                    }
                 }
             }
-        }
-        setTagName(pnode, "UL");
-    } else if (["CLOL", "CLUL"].includes(listMode)) {
-        removeClass(pnode, "o_checklist");
-        setTagName(pnode, mode);
-    } else if (["OLUL", "ULOL"].includes(listMode)) {
-        setTagName(pnode, mode);
-    } else {
-        // toggle => remove list
-        let node = liElement;
-        while (node) {
-            node = outdent(node);
-        }
-    }
-
-    restoreCursor();
-    return false;
-}
-
-function toggleListP(element, mode = "UL") {
-    const restoreCursor = preserveCursor(element.ownerDocument);
-    const list = insertListAfter(element, mode, [[...element.childNodes]]);
-    copyAttributes(element, list);
-    element.remove();
-
-    restoreCursor(new Map([[element, list.firstChild]]));
-    return true;
-}
-
-function toggleListHTMLElement(element, offset, mode = "UL") {
-    if (!isBlock(element)) {
-        return toggleList(element.parentElement, childNodeIndex(element));
-    }
-    const inLI = element.closest("li");
-    if (inLI) {
-        return toggleList(inLI, 0, mode);
-    }
-    const restoreCursor = preserveCursor(element.ownerDocument);
-    if (element.classList.contains("odoo-editor-editable")) {
-        const callingNode = element.childNodes[offset];
-        const group = getAdjacents(callingNode, (n) => !isBlock(n));
-        insertListAfter(callingNode, mode, [group]);
-        restoreCursor();
-    } else {
-        const list = insertListAfter(element, mode, [element]);
-        copyAttributes(element, list);
-        restoreCursor(new Map([[element, list.firstElementChild]]));
-    }
-}
-
-// former oTab
-function indent(liElement) {
-    const doc = liElement.ownerDocument;
-    const lip = doc.createElement("li");
-    const destul =
-        liElement.previousElementSibling?.querySelector("ol, ul") ||
-        liElement.nextElementSibling?.querySelector("ol, ul") ||
-        liElement.closest("ol, ul");
-
-    const ul = createList(getListMode(destul));
-    lip.append(ul);
-
-    const restoreCursor = preserveCursor(doc);
-    lip.classList.add("oe-nested");
-    liElement.before(lip);
-    ul.append(liElement);
-    restoreCursor();
-    return true;
-}
-
-// returns: is still in a <LI> nested list
-// former oShiftTab
-function outdent(liElement) {
-    const doc = liElement.ownerDocument;
-    if (liElement.nextElementSibling) {
-        const ul = liElement.parentElement.cloneNode(false);
-        while (liElement.nextSibling) {
-            ul.append(liElement.nextSibling);
-        }
-        if (liElement.parentNode.parentNode.tagName === "LI") {
-            const lip = doc.createElement("li");
-            lip.classList.add("oe-nested");
-            lip.append(ul);
-            liElement.parentNode.parentNode.after(lip);
+            setTagName(pnode, "UL");
+        } else if (["CLOL", "CLUL"].includes(listMode)) {
+            removeClass(pnode, "o_checklist");
+            setTagName(pnode, mode);
+        } else if (["OLUL", "ULOL"].includes(listMode)) {
+            setTagName(pnode, mode);
         } else {
-            liElement.parentNode.after(ul);
+            // toggle => remove list
+            let node = liElement;
+            while (node) {
+                node = this.outdentLI(node);
+            }
+        }
+
+        restoreCursor();
+        return false;
+    }
+
+    /**
+     * @param {HTMLParagraphElement} p
+     * @param {"UL"|"OL"|"CL"} mode
+     */
+    toggleListP(p, mode = "UL") {
+        const restoreCursor = preserveCursor(this.document);
+        const list = insertListAfter(p, mode, [[...p.childNodes]]);
+        copyAttributes(p, list);
+        p.remove();
+
+        restoreCursor(new Map([[p, list.firstChild]]));
+        return true;
+    }
+
+    /**
+     * @param {HTMLElement} element
+     * @param {number} offset
+     * @param {"UL"|"OL"|"CL"} mode
+     */
+    toggleListHTMLElement(element, offset, mode = "UL") {
+        if (!isBlock(element)) {
+            return this.toggleListNode(element.parentElement, childNodeIndex(element));
+        }
+        const inLI = element.closest("li");
+        if (inLI) {
+            return this.toggleListNode(inLI, 0, mode);
+        }
+        const restoreCursor = preserveCursor(this.document);
+        if (element.classList.contains("odoo-editor-editable")) {
+            const callingNode = element.childNodes[offset];
+            const group = getAdjacents(callingNode, (n) => !isBlock(n));
+            insertListAfter(callingNode, mode, [group]);
+            restoreCursor();
+        } else {
+            const list = insertListAfter(element, mode, [element]);
+            copyAttributes(element, list);
+            restoreCursor(new Map([[element, list.firstElementChild]]));
         }
     }
 
-    const restoreCursor = preserveCursor(doc);
-    if (liElement.parentNode.parentNode.tagName === "LI") {
-        const ul = liElement.parentNode;
-        const shouldRemoveParentLi =
-            !liElement.previousElementSibling && !ul.previousElementSibling;
-        const toremove = shouldRemoveParentLi ? ul.parentNode : null;
-        ul.parentNode.after(liElement);
-        if (toremove) {
-            if (toremove.classList.contains("oe-nested")) {
-                // <li>content<ul>...</ul></li>
-                toremove.remove();
+    indentList() {
+        const restoreCursor = preserveCursor(this.document);
+        this.getTraversedListNodes().forEach((li) => this.indentLI(li));
+        restoreCursor();
+    }
+
+    outdentList() {
+        const restoreCursor = preserveCursor(this.document);
+        this.getTraversedListNodes().forEach((li) => this.outdentLI(li));
+        restoreCursor();
+    }
+
+    // @temp comment: former oTab
+    // @todo: handle call with nodes that are children of a LI element (see oTab methods)
+    /**
+     * @param {HTMLLIElement} li
+     */
+    indentLI(li) {
+        const lip = this.document.createElement("li");
+        const destul =
+            li.previousElementSibling?.querySelector("ol, ul") ||
+            li.nextElementSibling?.querySelector("ol, ul") ||
+            li.closest("ol, ul");
+
+        const ul = createList(getListMode(destul));
+        lip.append(ul);
+
+        const restoreCursor = preserveCursor(this.document);
+        lip.classList.add("oe-nested");
+        li.before(lip);
+        ul.append(li);
+        restoreCursor();
+        return true;
+    }
+
+    // @temp comment: former oShiftTab
+    /**
+     * @param {HTMLLIElement} li
+     * @returns is still in a <LI> nested list
+     */
+    outdentLI(li) {
+        if (li.nextElementSibling) {
+            const ul = li.parentElement.cloneNode(false);
+            while (li.nextSibling) {
+                ul.append(li.nextSibling);
+            }
+            if (li.parentNode.parentNode.tagName === "LI") {
+                const lip = this.document.createElement("li");
+                lip.classList.add("oe-nested");
+                lip.append(ul);
+                li.parentNode.parentNode.after(lip);
             } else {
-                // <li class="oe-nested"><ul>...</ul></li>
+                li.parentNode.after(ul);
+            }
+        }
+
+        const restoreCursor = preserveCursor(this.document);
+        if (li.parentNode.parentNode.tagName === "LI") {
+            const ul = li.parentNode;
+            const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
+            const toremove = shouldRemoveParentLi ? ul.parentNode : null;
+            ul.parentNode.after(li);
+            if (toremove) {
+                if (toremove.classList.contains("oe-nested")) {
+                    // <li>content<ul>...</ul></li>
+                    toremove.remove();
+                } else {
+                    // <li class="oe-nested"><ul>...</ul></li>
+                    ul.remove();
+                }
+            }
+            restoreCursor();
+            return li;
+        } else {
+            const ul = li.parentNode;
+            const dir = ul.getAttribute("dir");
+            let p;
+            while (li.firstChild) {
+                if (isBlock(li.firstChild)) {
+                    if (p && isVisible(p)) {
+                        ul.after(p);
+                    }
+                    p = undefined;
+                    ul.after(li.firstChild);
+                } else {
+                    p = p || this.document.createElement("P");
+                    if (dir) {
+                        p.setAttribute("dir", dir);
+                        p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
+                    }
+                    p.append(li.firstChild);
+                }
+            }
+            if (p && isVisible(p)) {
+                ul.after(p);
+            }
+
+            restoreCursor(new Map([[li, ul.nextSibling]]));
+            li.remove();
+            if (!ul.firstElementChild) {
                 ul.remove();
             }
         }
-        restoreCursor();
-        return liElement;
-    } else {
-        const ul = liElement.parentNode;
-        const dir = ul.getAttribute("dir");
-        let p;
-        while (liElement.firstChild) {
-            if (isBlock(liElement.firstChild)) {
-                if (p && isVisible(p)) {
-                    ul.after(p);
-                }
-                p = undefined;
-                ul.after(liElement.firstChild);
-            } else {
-                p = p || doc.createElement("P");
-                if (dir) {
-                    p.setAttribute("dir", dir);
-                    p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
-                }
-                p.append(liElement.firstChild);
-            }
-        }
-        if (p && isVisible(p)) {
-            ul.after(p);
-        }
-
-        restoreCursor(new Map([[liElement, ul.nextSibling]]));
-        liElement.remove();
-        if (!ul.firstElementChild) {
-            ul.remove();
-        }
+        return false;
     }
-    return false;
 }
