@@ -8,6 +8,7 @@ import { getListMode, createList, insertListAfter } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass } from "../utils/dom";
+import { registry } from "@web/core/registry";
 
 export class ListPlugin extends Plugin {
     static name = "list";
@@ -339,3 +340,5 @@ export class ListPlugin extends Plugin {
         return false;
     }
 }
+
+registry.category("phoenix_plugins").add(ListPlugin.name, ListPlugin);

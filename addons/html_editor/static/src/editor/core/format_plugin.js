@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestElement } from "../utils/dom_traversal";
 import { formatSelection } from "../utils/formatting";
@@ -64,3 +65,5 @@ export class FormatPlugin extends Plugin {
         }
     }
 }
+
+registry.category("phoenix_plugins").add(FormatPlugin.name, FormatPlugin);
