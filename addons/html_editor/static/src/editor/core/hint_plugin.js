@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";
 import { removeClass } from "../utils/dom";
+import { registry } from "@web/core/registry";
 
 export class HintPlugin extends Plugin {
     static name = "hint";
@@ -101,3 +102,5 @@ export class HintPlugin extends Plugin {
         this.shared.enableObserver();
     }
 }
+
+registry.category("phoenix_plugins").add(HintPlugin.name, HintPlugin);
