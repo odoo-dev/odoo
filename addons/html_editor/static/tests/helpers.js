@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { expect } from "@odoo/hoot";
+import { expect, getFixture } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
@@ -298,10 +298,9 @@ export function toggleCheckList(editor) {
 }
 
 export function insertTestHtml(innerHtml) {
-    const container = document.createElement("DIV");
+    const container = getFixture();
     container.classList.add("odoo-editor-editable");
     container.setAttribute("contenteditable", true);
     container.innerHTML = innerHtml;
-    document.body.appendChild(container);
     return container.childNodes;
 }
