@@ -13,7 +13,7 @@ export class Plugin {
      * @param {*} config
      * @param {*} services
      */
-    constructor(document, editable, shared, dispatch, config, services) {
+    constructor(document, editable, shared, dispatch, config, services, registry) {
         this.document = document;
         this.editable = editable;
         this.config = config;
@@ -21,6 +21,7 @@ export class Plugin {
         this.shared = shared;
         this.dispatch = dispatch;
         this._cleanups = [];
+        this.registry = registry;
         this.setup();
     }
 

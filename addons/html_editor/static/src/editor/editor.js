@@ -1,7 +1,33 @@
 /** @odoo-module */
 
+import { Registry, registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
+
+function getPlugins() {
+    const plugins = new Set(registry.category("phoenix_plugins").getAll());
+    const inResult = new Set();
+    // need to sort them
+    const result = [];
+    let P;
+
+    function findPlugin() {
+        for (const P of plugins) {
+            if (P.dependencies.every((dep) => inResult.has(dep))) {
+                plugins.delete(P);
+                return P;
+            }
+        }
+    }
+    while ((P = findPlugin())) {
+        inResult.add(P.name);
+        result.push(P);
+    }
+    if (plugins.size) {
+        throw new Error("missing dependency");
+    }
+    return result;
+}
 
 /**
  * @typedef {typeof import("./plugin").Plugin} PluginConstructor
@@ -13,13 +39,13 @@ export class Editor {
      * @param {*} config
      * @param {*} services
      */
-    constructor(Plugins, config, services) {
-        this.Plugins = Plugins;
+    constructor(config, services) {
         this.config = config;
         this.services = services;
         this.plugins = [];
         this.editable = null;
         this.document = null;
+        this.registry = new Registry();
     }
 
     attachTo(editable) {
@@ -35,10 +61,10 @@ export class Editor {
     }
 
     startPlugins() {
+        const Plugins = getPlugins(); // todo: take config into account
         const plugins = new Map();
         const shared = {};
-        // const dispatch = this.dispatch.bind(this);
-        for (const P of this.Plugins) {
+        for (const P of Plugins) {
             if (P.name === "") {
                 throw new Error(`Missing plugin name (class ${P.constructor.name})`);
             }
@@ -71,7 +97,8 @@ export class Editor {
                 _shared,
                 dispatch,
                 this.config,
-                this.services
+                this.services,
+                this.registry
             );
             this.plugins.push(plugin);
             for (const h of P.shared) {

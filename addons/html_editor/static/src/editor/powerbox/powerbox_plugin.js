@@ -3,6 +3,7 @@
 import { isEmpty } from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { Powerbox } from "./powerbox";
+import { registry } from "@web/core/registry";
 
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
@@ -59,3 +60,5 @@ export class PowerboxPlugin extends Plugin {
         }
     }
 }
+
+registry.category("phoenix_plugins").add(PowerboxPlugin.name, PowerboxPlugin);
