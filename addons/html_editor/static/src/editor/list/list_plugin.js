@@ -4,7 +4,7 @@ import { Plugin } from "../plugin";
 import { descendants, closestElement, getAdjacents } from "../utils/dom_traversal";
 import { isWhitespace, isVisible } from "../utils/dom_info";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { getListMode, createList, insertListAfter } from "./utils";
+import { getListMode, createList, insertListAfter, mergeListDeep } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass } from "../utils/dom";
@@ -103,17 +103,17 @@ export class ListPlugin extends Plugin {
         this.dispatch("SANITIZE");
     }
 
-    // @todo Naive implementation. Known issues:
-    // - merges a checklist into a unordered list
-    // - fails to merge list with pre-existing previous siblings
     mergeLists() {
-        const restoreCursor = preserveCursor(this.document);
         const range = this.document.getSelection().getRangeAt(0);
-        const list = closestElement(range.startContainer, "ul, ol");
-        while (list && list.nextElementSibling?.tagName === list.tagName) {
-            list.append(...list.nextElementSibling.childNodes);
-            list.nextElementSibling.remove();
+        let closestList = closestElement(range.startContainer, "ul, ol");
+        if (!closestList) {
+            return;
         }
+        if (closestList.parentNode.matches("li.oe-nested")) {
+            closestList = closestList.parentNode;
+        }
+        const restoreCursor = preserveCursor(this.document);
+        mergeListDeep(closestList);
         restoreCursor();
     }
 
@@ -238,16 +238,17 @@ export class ListPlugin extends Plugin {
         const restoreCursor = preserveCursor(this.document);
         this.getTraversedListNodes().forEach((li) => this.indentLI(li));
         restoreCursor();
+        this.dispatch("SANITIZE");
     }
 
     outdentList() {
         const restoreCursor = preserveCursor(this.document);
         this.getTraversedListNodes().forEach((li) => this.outdentLI(li));
         restoreCursor();
+        this.dispatch("SANITIZE");
     }
 
     // @temp comment: former oTab
-    // @todo: handle call with nodes that are children of a LI element (see oTab methods)
     /**
      * @param {HTMLLIElement} li
      */

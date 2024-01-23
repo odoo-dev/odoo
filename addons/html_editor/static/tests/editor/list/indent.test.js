@@ -124,9 +124,8 @@ describe("Checklist", () => {
         });
     });
 
-    test.todo("should indent a checklist and merge it with previous siblings", async () => {
+    test("should indent a checklist and merge it with previous siblings", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -149,7 +148,6 @@ describe("Checklist", () => {
         });
 
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -173,7 +171,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -198,9 +195,8 @@ describe("Checklist", () => {
         });
     });
 
-    test.todo("should indent a checklist and merge it with next siblings", async () => {
+    test("should indent a checklist and merge it with next siblings", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -224,7 +220,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -248,7 +243,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -461,7 +455,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should indent only one element of a list with sublist", async () => {
+    test("should indent only one element of a list with sublist", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -491,7 +485,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should convert mixed lists", async () => {
+    test("should convert mixed lists", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -521,7 +515,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should rejoin after indent", async () => {
+    test("should rejoin after indent", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ol>
@@ -771,7 +765,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent two multi-levels", async () => {
+    test("should indent two multi-levels", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -860,7 +854,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent multiples list item in the middle element of a list", async () => {
+    test("should indent multiples list item in the middle element of a list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -888,7 +882,7 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should indent multiples list item with reversed range", async () => {
+    test("should indent multiples list item with reversed range", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
@@ -916,11 +910,9 @@ describe("with selection", () => {
         });
     });
 
-    test.todo(
-        "should indent multiples list item in the middle element of a list with sublist",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should indent multiples list item in the middle element of a list with sublist", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <ul>
                     <li>a</li>
                     <li>
@@ -933,8 +925,8 @@ describe("with selection", () => {
                     <li>d]</li>
                     <li>e</li>
                 </ul>`),
-                stepFunction: indentList,
-                contentAfter: unformat(`
+            stepFunction: indentList,
+            contentAfter: unformat(`
                 <ul>
                     <li>
                         a
@@ -954,11 +946,10 @@ describe("with selection", () => {
                     </li>
                     <li>e</li>
                 </ul>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo("should indent with mixed lists", async () => {
+    test("should indent with mixed lists", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>

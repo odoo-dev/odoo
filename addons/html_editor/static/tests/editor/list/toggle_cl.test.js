@@ -46,9 +46,8 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph between 2 checklist into a checklist item", async () => {
+        test("should turn a paragraph between 2 checklist into a checklist item", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>d[]ef</p><ul class="o_checklist"><li class="o_checked">ghi</li></ul>',
                 stepFunction: toggleCheckList,
