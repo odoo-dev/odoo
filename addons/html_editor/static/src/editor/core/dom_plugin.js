@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { makeContentsInline, splitElement, splitTextNode } from "../utils/dom";
@@ -251,3 +252,5 @@ export class DomPlugin extends Plugin {
         target.parentElement.before(sep);
     }
 }
+
+registry.category("phoenix_plugins").add(DomPlugin.name, DomPlugin);
