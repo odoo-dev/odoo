@@ -3,6 +3,7 @@
 import { reactive } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
+import { registry } from "@web/core/registry";
 
 // TODO: This comes from a command registry?
 const buttons = [
@@ -127,3 +128,5 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 }
+
+registry.category("phoenix_plugins").add(ToolbarPlugin.name, ToolbarPlugin);

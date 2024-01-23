@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
 function getCurrentRect() {
@@ -124,3 +125,5 @@ export class Overlay {
         this.el.style.top = top + "px";
     }
 }
+
+registry.category("phoenix_plugins").add(OverlayPlugin.name, OverlayPlugin);
