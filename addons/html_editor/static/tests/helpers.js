@@ -296,3 +296,12 @@ export function toggleUnorderedList(editor) {
 export function toggleCheckList(editor) {
     editor.dispatch("TOGGLE_LIST", { type: "CL" });
 }
+
+export function insertTestHtml(innerHtml) {
+    const container = document.createElement("DIV");
+    container.classList.add("odoo-editor-editable");
+    container.setAttribute("contenteditable", true);
+    container.innerHTML = innerHtml;
+    document.body.appendChild(container);
+    return container.childNodes;
+}
