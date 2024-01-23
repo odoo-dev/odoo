@@ -10,7 +10,6 @@ export class PowerboxPlugin extends Plugin {
     static dependencies = ["overlay"];
 
     setup() {
-        this.addDomListener(this.document, "selectionchange", this.handleCommandHint);
         this.offset = 0;
 
         /** @type {import("../core/overlay_plugin").Overlay} */
@@ -24,6 +23,14 @@ export class PowerboxPlugin extends Plugin {
                 this.openPowerbox();
             }
         });
+        this.registry.category("temp_hints").add("powerbox", {
+            text: 'Type "/" for commands',
+            target(selection) {
+                const node = selection.anchorNode;
+                const el = node instanceof Element ? node : node.parentElement;
+                return (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el) && el;
+            },
+        });
     }
 
     openPowerbox() {
@@ -31,33 +38,6 @@ export class PowerboxPlugin extends Plugin {
         const range = selection.rangeCount && selection.getRangeAt(0);
         this.offset = range && range.startOffset;
         this.powerbox.open();
-    }
-
-    handleCommand(command, payload) {
-        switch (command) {
-            case "CONTENT_UPDATED":
-                this.handleCommandHint();
-                break;
-        }
-    }
-
-    handleCommandHint() {
-        const selection = window.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
-        if (
-            selection.isCollapsed &&
-            range &&
-            this.editable.contains(range.commonAncestorContainer)
-        ) {
-            const node = selection.anchorNode;
-            const el = node instanceof Element ? node : node.parentElement;
-            if ((el.tagName === "DIV" || el.tagName === "P") && isEmpty(el)) {
-                this.dispatch("CREATE_HINT", {
-                    el,
-                    text: 'Type "/" for commands',
-                });
-            }
-        }
     }
 }
 
