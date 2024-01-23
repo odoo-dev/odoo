@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { splitElement, splitTextNode } from "../utils/dom";
@@ -232,3 +233,5 @@ export class TablePlugin extends Plugin {
         setSelection(p, 0);
     }
 }
+
+registry.category("phoenix_plugins").add(TablePlugin.name, TablePlugin);
