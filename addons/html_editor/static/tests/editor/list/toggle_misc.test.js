@@ -381,9 +381,8 @@ describe("Mixed", () => {
         });
     });
 
-    test.todo("should turn an unordered list into a checklist just after a checklist", async () => {
+    test("should turn an unordered list into a checklist just after a checklist", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore:
                 '<ul class="o_checklist"><li class="o_checked">abc</li></ul><ul><li>d[e]f</li></ul>',
             stepFunction: toggleCheckList,
@@ -392,12 +391,9 @@ describe("Mixed", () => {
         });
     });
 
-    test.todo(
-        "should turn an unordered list into a checklist just after a checklist and inside a checklist",
-        async () => {
-            await testEditor({
-                removeCheckIds: true,
-                contentBefore: unformat(`
+    test("should turn an unordered list into a checklist just after a checklist and inside a checklist", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">title</li>
                         <li class="oe-nested">
@@ -411,8 +407,8 @@ describe("Mixed", () => {
                             </ul>
                         </li>
                     </ul>`),
-                stepFunction: toggleCheckList,
-                contentAfter: unformat(`
+            stepFunction: toggleCheckList,
+            contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">title</li>
                         <li class="oe-nested">
@@ -422,7 +418,6 @@ describe("Mixed", () => {
                             </ul>
                         </li>
                     </ul>`),
-            });
-        }
-    );
+        });
+    });
 });
