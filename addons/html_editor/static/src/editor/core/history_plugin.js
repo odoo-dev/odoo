@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
 export class HistoryPlugin extends Plugin {
@@ -33,3 +34,5 @@ export class HistoryPlugin extends Plugin {
         this.dispatch("CONTENT_UPDATED", this.el);
     }
 }
+
+registry.category("phoenix_plugins").add(HistoryPlugin.name, HistoryPlugin);
