@@ -185,7 +185,9 @@ export async function testEditor(
     const { el, editor } = await setupEditor(contentBefore, config);
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
-        expect(getContent(el)).toBe(contentBeforeEdit);
+        expect(getContent(el)).toBe(contentBeforeEdit, {
+            message: "(testEditor) contentBeforeEdit is strictly equal to %actual%",
+        });
     }
 
     if (stepFunction) {
@@ -193,12 +195,16 @@ export async function testEditor(
     }
 
     if (contentAfterEdit) {
-        expect(getContent(el)).toBe(contentAfterEdit);
+        expect(getContent(el)).toBe(contentAfterEdit, {
+            message: "(testEditor) contentAfterEdit is strictly equal to %actual%",
+        });
     }
     editor.dispatch("CLEAN", el);
     // we should clean the editor here
     if (contentAfter) {
-        expect(getContent(el)).toBe(contentAfter);
+        expect(getContent(el)).toBe(contentAfter, {
+            message: "(testEditor) contentAfter is strictly equal to %actual%",
+        });
     }
 }
 
