@@ -8061,7 +8061,7 @@ QUnit.module("Views", (hooks) => {
 
         function getVisibleButtonTexts() {
             return [...target.querySelectorAll(".modal-footer button:not(.d-none)")].map((x) =>
-                x.textContent.trim()
+                x.innerText.trim()
             );
         }
     });
