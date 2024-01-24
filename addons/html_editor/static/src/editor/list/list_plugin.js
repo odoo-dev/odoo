@@ -16,6 +16,12 @@ export class ListPlugin extends Plugin {
     setup() {
         // @todo Move this to a tab plugin
         this.addDomListener(this.editable, "keydown", this.handleKeyDown);
+        this.registry
+            .category("delete_element_backward_before")
+            .add("list", this.deleteElementBackwardBefore.bind(this));
+        this.registry
+            .category("delete_element_forward_before")
+            .add("list", this.deleteElementForwardBefore.bind(this));
     }
 
     // @todo Move this to a tab plugin
@@ -339,6 +345,47 @@ export class ListPlugin extends Plugin {
             }
         }
         return false;
+    }
+
+    deleteElementBackwardBefore({ targetNode, targetOffset, outdentList = true, fromForward }) {
+        if (!fromForward && outdentList && targetNode.tagName === "LI" && targetOffset === 0) {
+            this.dispatch("LIST_OUTDENT", { element: targetNode, index: 0 });
+            return true;
+        }
+    }
+    deleteElementForwardBefore({ targetNode, targetOffset }) {
+        const parentElement = targetNode.parentElement;
+        const nextSibling = targetNode.nextSibling;
+        if (
+            parentElement &&
+            nextSibling &&
+            ["LI", "UL", "OL"].includes(nextSibling.tagName) &&
+            (targetOffset === targetNode.childNodes.length ||
+                (targetNode.childNodes.length === 1 && targetNode.childNodes[0].tagName === "BR"))
+        ) {
+            const nextSiblingNestedLi = nextSibling.querySelector("li:first-child");
+            if (nextSiblingNestedLi) {
+                // Add the first LI from the next sibbling list to the current list.
+                targetNode.after(nextSiblingNestedLi);
+                // Remove the next sibbling list if it's empty.
+                if (!isVisible(nextSibling, false) || nextSibling.textContent === "") {
+                    nextSibling.remove();
+                }
+                this.dispatch("DELETE_ELEMENT_BACKWARD", {
+                    targetNode: nextSiblingNestedLi,
+                    targetOffset: 0,
+                    alreadyMoved: true,
+                    outdentList: false,
+                });
+            } else {
+                this.dispatch("DELETE_ELEMENT_BACKWARD", {
+                    targetNode: nextSibling,
+                    targetOffset: 0,
+                    outdentList: false,
+                });
+            }
+            return true;
+        }
     }
 }
 
