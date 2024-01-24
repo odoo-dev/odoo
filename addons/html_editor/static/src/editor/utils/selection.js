@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { isBlock } from "./blocks";
-import { splitTextNode } from "./dom";
+import { splitTextNode } from "./dom_split";
 import {
     getDeepestPosition,
     isNotEditableNode,
