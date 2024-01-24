@@ -3,7 +3,8 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { makeContentsInline, splitElement, splitTextNode } from "../utils/dom";
+import { makeContentsInline } from "../utils/dom";
+import { splitElement, splitTextNode } from "../utils/dom_split";
 import {
     allowsParagraphRelatedElements,
     getDeepestPosition,
@@ -16,7 +17,7 @@ import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
-    static shared = ["dom_insert"];
+    static shared = ["dom_insert", "getEditableSelection"];
 
     handleCommand(command, payload) {
         switch (command) {
@@ -216,6 +217,20 @@ export class DomPlugin extends Plugin {
         newRange.setEnd(lastPosition[0], lastPosition[1]);
         selection.addRange(newRange);
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
+    }
+
+    getEditableSelection() {
+        const selection = this.document.getSelection();
+        if (selection.rangeCount === 0) {
+            return;
+        }
+        if (
+            this.editable.contains(selection.anchorNode) &&
+            (selection.focusNode === selection.anchorNode ||
+                this.editable.contains(selection.focusNode))
+        ) {
+            return selection;
+        }
     }
 
     // --------------------------------------------------------------------------

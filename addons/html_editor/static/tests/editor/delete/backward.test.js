@@ -11,7 +11,7 @@ import { dispatch } from "@odoo/hoot-dom";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test.todo("should do nothing", async () => {
+        test("should do nothing", async () => {
             // TODO the addition of <br/> "correction" part was judged
             // unnecessary to enforce, the rest of the test still makes
             // sense: not removing the unique <p/> and keeping the
@@ -39,7 +39,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete the first character in a paragraph", async () => {
+        test("should delete the first character in a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>a[]bc</p>",
                 stepFunction: deleteBackward,
@@ -47,7 +47,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete a character within a paragraph", async () => {
+        test("should delete a character within a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]c</p>",
                 stepFunction: deleteBackward,
@@ -70,7 +70,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a paragraph into an empty paragraph", async () => {
+        test("should merge a paragraph into an empty paragraph", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><p>[]abc</p>",
                 stepFunction: deleteBackward,
@@ -86,7 +86,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should ignore ZWS", async () => {
+        test("should ignore ZWS", async () => {
             await testEditor({
                 contentBefore: "<p>ab\u200B[]c</p>",
                 stepFunction: deleteBackward,
@@ -121,7 +121,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete through ZWS and Empty Inline", async () => {
+        test("should delete through ZWS and Empty Inline", async () => {
             await testEditor({
                 contentBefore: '<p>ab<span class="style">c</span>d[]e</p>',
                 stepFunction: async (editor) => {
@@ -167,7 +167,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should ignore ZWS and merge (1)", async () => {
+        test("should ignore ZWS and merge (1)", async () => {
             await testEditor({
                 contentBefore:
                     '<p><b>ab</b><span class="removeme" data-oe-zws-empty-inline="">[]\u200B</span></p>',
@@ -343,7 +343,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should remove empty unbreakable", async () => {
+        test("should remove empty unbreakable", async () => {
             await testEditor({
                 contentBefore:
                     '<div class="accolade"><div><p>ABC</p></div><div class="colibri">X[]</div></div>',
@@ -386,7 +386,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should remove empty unbreakable  (formated 1)", async () => {
+        test("should remove empty unbreakable  (formated 1)", async () => {
             await testEditor({
                 contentBefore: `<div><div><p>ABC</p></div><div>
 X[]
@@ -400,7 +400,7 @@ X[]
             });
         });
 
-        test.todo("should remove empty unbreakable (formated 2)", async () => {
+        test("should remove empty unbreakable (formated 2)", async () => {
             await testEditor({
                 contentBefore: `<div>
                                         <div>
@@ -419,7 +419,7 @@ X[]
             });
         });
 
-        test.todo("should remove empty unbreakable (formated 3)", async () => {
+        test("should remove empty unbreakable (formated 3)", async () => {
             await testEditor({
                 contentBefore: `<div>
                                         <div>
@@ -461,7 +461,7 @@ X[]
             });
         });
 
-        test.todo('should remove contenteditable="false"', async () => {
+        test('should remove contenteditable="false"', async () => {
             await testEditor({
                 contentBefore: `<div><span contenteditable="false">abc</span>[]def</div>`,
                 stepFunction: async (editor) => {
@@ -471,7 +471,7 @@ X[]
             });
         });
 
-        test.todo('should remove contenteditable="False"', async () => {
+        test('should remove contenteditable="False"', async () => {
             await testEditor({
                 contentBefore: `<div><span contenteditable="False">abc</span>[]def</div>`,
                 stepFunction: async (editor) => {
@@ -481,7 +481,7 @@ X[]
             });
         });
 
-        test.todo('should remove contenteditable="false" at the beggining of a P', async () => {
+        test('should remove contenteditable="false" at the beggining of a P', async () => {
             await testEditor({
                 contentBefore: `<p>abc</p><div contenteditable="false">def</div><p>[]ghi</p>`,
                 stepFunction: async (editor) => {
@@ -491,7 +491,7 @@ X[]
             });
         });
 
-        test.todo("should remove a fontawesome", async () => {
+        test("should remove a fontawesome", async () => {
             await testEditor({
                 contentBefore: `<div><p>abc</p><span class="fa"></span><p>[]def</p></div>`,
                 stepFunction: async (editor) => {
@@ -514,7 +514,7 @@ X[]
 
     describe("Line breaks", () => {
         describe("Single", () => {
-            test.todo("should delete a leading line break", async () => {
+            test("should delete a leading line break", async () => {
                 await testEditor({
                     contentBefore: "<p><br>[]abc</p>",
                     stepFunction: deleteBackward,
@@ -529,7 +529,7 @@ X[]
                 });
             });
 
-            test.todo("should delete a line break within a paragraph", async () => {
+            test("should delete a line break within a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>[]cd</p>",
                     stepFunction: deleteBackward,
@@ -567,19 +567,16 @@ X[]
                 });
             });
 
-            test.todo(
-                "should delete a character and a line break, emptying a paragraph",
-                async () => {
-                    await testEditor({
-                        contentBefore: "<p>aaa</p><p><br>a[]</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>aaa</p><p>[]<br></p>",
-                    });
-                }
-            );
+            test("should delete a character and a line break, emptying a paragraph", async () => {
+                await testEditor({
+                    contentBefore: "<p>aaa</p><p><br>a[]</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>aaa</p><p>[]<br></p>",
+                });
+            });
 
             test.todo("should delete a character after a trailing line break", async () => {
                 await testEditor({
@@ -593,17 +590,14 @@ X[]
         });
 
         describe("Consecutive", () => {
-            test.todo(
-                "should merge a paragraph with 4 <br> into a paragraph with text",
-                async () => {
-                    // 1
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p>[]<br><br><br><br></p><p>cd</p>",
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>ab[]<br><br><br><br></p><p>cd</p>",
-                    });
-                }
-            );
+            test("should merge a paragraph with 4 <br> into a paragraph with text", async () => {
+                // 1
+                await testEditor({
+                    contentBefore: "<p>ab</p><p>[]<br><br><br><br></p><p>cd</p>",
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>ab[]<br><br><br><br></p><p>cd</p>",
+                });
+            });
 
             test.todo("should delete a line break (1)", async () => {
                 // 2-1
@@ -759,7 +753,7 @@ X[]
                 }
             );
 
-            test.todo("should merge a paragraph into a paragraph with 4 <br>", async () => {
+            test("should merge a paragraph into a paragraph with 4 <br>", async () => {
                 // 6-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
@@ -768,76 +762,64 @@ X[]
                 });
             });
 
-            test.todo(
-                "should merge a paragraph into a paragraph with 4 <br>, then delete a trailing line break",
-                async () => {
-                    // 6-2
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab</p><p><br><br>[]cd</p>",
-                    });
-                }
-            );
+            test("should merge a paragraph into a paragraph with 4 <br>, then delete a trailing line break", async () => {
+                // 6-2
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab</p><p><br><br>[]cd</p>",
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph into a paragraph with 4 <br>, then delete two line breaks",
-                async () => {
-                    // 6-3
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab</p><p><br>[]cd</p>",
-                    });
-                }
-            );
+            test("should merge a paragraph into a paragraph with 4 <br>, then delete two line breaks", async () => {
+                // 6-3
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab</p><p><br>[]cd</p>",
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks",
-                async () => {
-                    // 6-4
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab</p><p>[]cd</p>",
-                    });
-                }
-            );
+            test("should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks", async () => {
+                // 6-4
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab</p><p>[]cd</p>",
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks, then merge two paragraphs with text",
-                async () => {
-                    // 6-5
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab[]cd</p>",
-                    });
-                }
-            );
+            test("should merge a paragraph into a paragraph with 4 <br>, then delete three line breaks, then merge two paragraphs with text", async () => {
+                // 6-5
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br><br></p><p>[]cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab[]cd</p>",
+                });
+            });
         });
     });
 
     describe("Pre", () => {
-        test.todo("should delete a character in a pre", async () => {
+        test("should delete a character in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab[]cd</pre>",
                 stepFunction: deleteBackward,
@@ -845,7 +827,7 @@ X[]
             });
         });
 
-        test.todo("should delete a character in a pre (space before)", async () => {
+        test("should delete a character in a pre (space before)", async () => {
             await testEditor({
                 contentBefore: "<pre>     ab[]cd</pre>",
                 stepFunction: deleteBackward,
@@ -853,7 +835,7 @@ X[]
             });
         });
 
-        test.todo("should delete a character in a pre (space after)", async () => {
+        test("should delete a character in a pre (space after)", async () => {
             await testEditor({
                 contentBefore: "<pre>ab[]cd     </pre>",
                 stepFunction: deleteBackward,
@@ -861,7 +843,7 @@ X[]
             });
         });
 
-        test.todo("should delete a character in a pre (space before and after)", async () => {
+        test("should delete a character in a pre (space before and after)", async () => {
             await testEditor({
                 contentBefore: "<pre>     ab[]cd     </pre>",
                 stepFunction: deleteBackward,
@@ -869,7 +851,7 @@ X[]
             });
         });
 
-        test.todo("should delete a space in a pre", async () => {
+        test("should delete a space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>   []  ab</pre>",
                 stepFunction: deleteBackward,
@@ -877,7 +859,7 @@ X[]
             });
         });
 
-        test.todo("should delete a newline in a pre", async () => {
+        test("should delete a newline in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab\n[]cd</pre>",
                 stepFunction: deleteBackward,
@@ -885,7 +867,7 @@ X[]
             });
         });
 
-        test.todo("should delete all leading space in a pre", async () => {
+        test("should delete all leading space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>     []ab</pre>",
                 stepFunction: async (BasicEditor) => {
@@ -899,7 +881,7 @@ X[]
             });
         });
 
-        test.todo("should delete all trailing space in a pre", async () => {
+        test("should delete all trailing space in a pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab     []</pre>",
                 stepFunction: async (BasicEditor) => {
@@ -915,7 +897,7 @@ X[]
     });
 
     describe("Formats", () => {
-        test.todo("should delete a character before a format node", async () => {
+        test("should delete a character before a format node", async () => {
             await testEditor({
                 contentBefore: "<p>abc<b>[]def</b></p>",
                 stepFunction: deleteBackward,
@@ -970,7 +952,7 @@ X[]
     });
 
     describe("Merging different types of elements", () => {
-        test.todo("should merge a paragraph with text into a paragraph with text", async () => {
+        test("should merge a paragraph with text into a paragraph with text", async () => {
             await testEditor({
                 contentBefore: "<p>ab</p><p>[]cd</p>",
                 stepFunction: deleteBackward,
@@ -978,18 +960,15 @@ X[]
             });
         });
 
-        test.todo(
-            "should merge a paragraph with formated text into a paragraph with text",
-            async () => {
-                await testEditor({
-                    contentBefore: "<p>aa</p><p>[]a<i>bbb</i></p>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>aa[]a<i>bbb</i></p>",
-                });
-            }
-        );
+        test("should merge a paragraph with formated text into a paragraph with text", async () => {
+            await testEditor({
+                contentBefore: "<p>aa</p><p>[]a<i>bbb</i></p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p>aa[]a<i>bbb</i></p>",
+            });
+        });
 
-        test.todo("should merge a paragraph with text into a heading1 with text", async () => {
+        test("should merge a paragraph with text into a heading1 with text", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p>[]cd</p>",
                 stepFunction: deleteBackward,
@@ -997,7 +976,7 @@ X[]
             });
         });
 
-        test.todo("should merge an empty paragraph into a heading1 with text", async () => {
+        test("should merge an empty paragraph into a heading1 with text", async () => {
             await testEditor({
                 contentBefore: "<h1>ab</h1><p>[]<br></p>",
                 stepFunction: deleteBackward,
@@ -1010,7 +989,7 @@ X[]
             });
         });
 
-        test.todo("should remove empty paragraph (keeping the heading)", async () => {
+        test("should remove empty paragraph (keeping the heading)", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><h1>[]ab</h1>",
                 stepFunction: deleteBackward,
@@ -1046,7 +1025,7 @@ X[]
             // });
         });
 
-        test.todo("should not break unbreakables", async () => {
+        test("should not break unbreakables", async () => {
             await testEditor({
                 contentBefore:
                     `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
@@ -1078,7 +1057,7 @@ X[]
     });
 
     describe("With attributes", () => {
-        test.todo("should remove paragraph with class", async () => {
+        test("should remove paragraph with class", async () => {
             await testEditor({
                 contentBefore: '<p class="a"><br></p><p>[]abc</p>',
                 stepFunction: deleteBackward,
@@ -1094,17 +1073,13 @@ X[]
             });
         });
 
-        test.todo(
-            "should merge two paragraphs with spans of different classes without merging the spans",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p><span class="a">ab</span></p><p><span class="b">[]cd</span></p>',
-                    stepFunction: deleteBackward,
-                    contentAfter: '<p><span class="a">ab[]</span><span class="b">cd</span></p>',
-                });
-            }
-        );
+        test("should merge two paragraphs with spans of different classes without merging the spans", async () => {
+            await testEditor({
+                contentBefore: '<p><span class="a">ab</span></p><p><span class="b">[]cd</span></p>',
+                stepFunction: deleteBackward,
+                contentAfter: '<p><span class="a">ab[]</span><span class="b">cd</span></p>',
+            });
+        });
 
         test.todo(
             "should merge two paragraphs of different classes, each containing spans of the same class",
@@ -1118,18 +1093,15 @@ X[]
             }
         );
 
-        test.todo(
-            "should merge two paragraphs of different classes, each containing spans of different classes without merging the spans",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p class="a"><span class="b">ab</span></p><p class="c"><span class="d">[]cd</span></p>',
-                    stepFunction: deleteBackward,
-                    contentAfter:
-                        '<p class="a"><span class="b">ab[]</span><span class="d">cd</span></p>',
-                });
-            }
-        );
+        test("should merge two paragraphs of different classes, each containing spans of different classes without merging the spans", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p class="a"><span class="b">ab</span></p><p class="c"><span class="d">[]cd</span></p>',
+                stepFunction: deleteBackward,
+                contentAfter:
+                    '<p class="a"><span class="b">ab[]</span><span class="d">cd</span></p>',
+            });
+        });
 
         test.todo(
             "should delete a line break between two spans with bold and merge these formats",
@@ -1160,34 +1132,29 @@ X[]
     });
 
     describe("Nested editable zone (inside contenteditable=false element)", () => {
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is empty",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is empty", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
                             </div>
                         </div>
                     `),
-                    stepFunction: deleteBackward,
-                    contentAfter: unformat(`
+                stepFunction: deleteBackward,
+                contentAfter: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
                             </div>
                         </div>
                     `),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone even if there is a paragraph after",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone even if there is a paragraph after", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
@@ -1195,8 +1162,8 @@ X[]
                         </div>
                         <p>content</p>
                     `),
-                    stepFunction: deleteBackward,
-                    contentAfter: unformat(`
+                stepFunction: deleteBackward,
+                contentAfter: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
@@ -1204,34 +1171,30 @@ X[]
                         </div>
                         <p>content</p>
                     `),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is not empty",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is not empty", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]content</p>
                             </div>
                         </div>
                     `),
-                    stepFunction: deleteBackward,
-                    contentAfter: unformat(`
+                stepFunction: deleteBackward,
+                contentAfter: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]content</p>
                             </div>
                         </div>
                     `),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo("should remove the uneditable nesting zone from the outside", async () => {
+        test("should remove the uneditable nesting zone from the outside", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <div contenteditable="false">
@@ -1250,7 +1213,7 @@ X[]
     });
 
     describe("POC extra tests", () => {
-        test.todo("should delete an unique space between letters", async () => {
+        test("should delete an unique space between letters", async () => {
             await testEditor({
                 contentBefore: "<p>ab []cd</p>",
                 stepFunction: deleteBackward,
@@ -1266,7 +1229,7 @@ X[]
             });
         });
 
-        test.todo("should delete a space", async () => {
+        test("should delete a space", async () => {
             await testEditor({
                 contentBefore: "<p>ab [] de</p>",
                 stepFunction: deleteBackward,
@@ -1319,16 +1282,13 @@ X[]
             }
         );
 
-        test.todo(
-            "should delete an empty paragraph in a table cell",
-            async () =>
-                await testEditor({
-                    contentBefore:
-                        "<table><tbody><tr><td><p>a<br></p><p>[]<br></p></td></tr></tbody></table>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<table><tbody><tr><td><p>a[]</p></td></tr></tbody></table>",
-                })
-        );
+        test("should delete an empty paragraph in a table cell", async () =>
+            await testEditor({
+                contentBefore:
+                    "<table><tbody><tr><td><p>a<br></p><p>[]<br></p></td></tr></tbody></table>",
+                stepFunction: deleteBackward,
+                contentAfter: "<table><tbody><tr><td><p>a[]</p></td></tr></tbody></table>",
+            }));
 
         test.todo("should fill empty block with a <br>", async () => {
             await testEditor({
@@ -1343,31 +1303,28 @@ X[]
             });
         });
 
-        test.todo(
-            "should merge a paragraph with text into a paragraph with text removing spaces",
-            async () => {
-                await testEditor({
-                    contentBefore: "<p>ab   </p>    <p>   []cd</p>",
-                    stepFunction: deleteBackward,
-                    // This is a tricky case: the spaces after ab are
-                    // visible on Firefox but not on Chrome... to be
-                    // consistent we enforce the space removal here but
-                    // maybe not a good idea... see next case ->
-                    contentAfter: "<p>ab[]cd</p>",
-                });
-                await testEditor({
-                    contentBefore: "<p>ab   <br></p>    <p>   []cd</p>",
-                    stepFunction: deleteBackward,
-                    // This is the same visible case as the one above. The
-                    // difference is that here the space after ab is visible
-                    // on both Firefox and Chrome, so it should stay
-                    // visible.
-                    contentAfter: "<p>ab   []cd</p>",
-                });
-            }
-        );
+        test("should merge a paragraph with text into a paragraph with text removing spaces", async () => {
+            await testEditor({
+                contentBefore: "<p>ab   </p>    <p>   []cd</p>",
+                stepFunction: deleteBackward,
+                // This is a tricky case: the spaces after ab are
+                // visible on Firefox but not on Chrome... to be
+                // consistent we enforce the space removal here but
+                // maybe not a good idea... see next case ->
+                contentAfter: "<p>ab[]cd</p>",
+            });
+            await testEditor({
+                contentBefore: "<p>ab   <br></p>    <p>   []cd</p>",
+                stepFunction: deleteBackward,
+                // This is the same visible case as the one above. The
+                // difference is that here the space after ab is visible
+                // on both Firefox and Chrome, so it should stay
+                // visible.
+                contentAfter: "<p>ab   []cd</p>",
+            });
+        });
 
-        test.todo("should remove a br and remove following spaces", async () => {
+        test("should remove a br and remove following spaces", async () => {
             await testEditor({
                 contentBefore: "<p>ab<br><b>[]   </b>cd</p>",
                 stepFunction: deleteBackward,
@@ -1380,7 +1337,7 @@ X[]
             });
         });
 
-        test.todo("should ignore empty inline node between blocks being merged", async () => {
+        test("should ignore empty inline node between blocks being merged", async () => {
             await testEditor({
                 contentBefore: "<div><p>abc</p><i> </i><p>[]def</p></div>",
                 stepFunction: deleteBackward,
@@ -1388,27 +1345,22 @@ X[]
             });
         });
 
-        test.todo(
-            "should merge in nested paragraphs and remove invisible inline content",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<custom-block style="display: block;"><p>ab</p>    </custom-block><p>[]c</p>',
-                    stepFunction: deleteBackward,
-                    contentAfter:
-                        '<custom-block style="display: block;"><p>ab[]c</p></custom-block>',
-                });
-                await testEditor({
-                    contentBefore:
-                        '<custom-block style="display: block;"><p>ab</p> <i> </i> </custom-block><p>[]c</p>',
-                    stepFunction: deleteBackward,
-                    contentAfter:
-                        '<custom-block style="display: block;"><p>ab[]c</p></custom-block>',
-                });
-            }
-        );
+        test("should merge in nested paragraphs and remove invisible inline content", async () => {
+            await testEditor({
+                contentBefore:
+                    '<custom-block style="display: block;"><p>ab</p>    </custom-block><p>[]c</p>',
+                stepFunction: deleteBackward,
+                contentAfter: '<custom-block style="display: block;"><p>ab[]c</p></custom-block>',
+            });
+            await testEditor({
+                contentBefore:
+                    '<custom-block style="display: block;"><p>ab</p> <i> </i> </custom-block><p>[]c</p>',
+                stepFunction: deleteBackward,
+                contentAfter: '<custom-block style="display: block;"><p>ab[]c</p></custom-block>',
+            });
+        });
 
-        test.todo("should not merge in nested blocks if inline content afterwards", async () => {
+        test("should not merge in nested blocks if inline content afterwards", async () => {
             await testEditor({
                 contentBefore:
                     '<custom-block style="display: block;"><p>ab</p>de</custom-block><p>[]fg</p>',
@@ -1425,7 +1377,7 @@ X[]
             });
         });
 
-        test.todo("should move paragraph content to empty block", async () => {
+        test("should move paragraph content to empty block", async () => {
             await testEditor({
                 contentBefore: "<p>abc</p><h1><br></h1><p>[]def</p>",
                 stepFunction: deleteBackward,
@@ -1441,7 +1393,7 @@ X[]
             });
         });
 
-        test.todo("should remove an empty block instead of merging it", async () => {
+        test("should remove an empty block instead of merging it", async () => {
             await testEditor({
                 contentBefore: "<p><br></p><p>[]<br></p>",
                 stepFunction: deleteBackward,
@@ -1471,7 +1423,7 @@ X[]
             });
         });
 
-        test.todo("should not merge a table into its previous sibling", async () => {
+        test("should not merge a table into its previous sibling", async () => {
             await testEditor({
                 contentBefore: unformat(
                     `<p>ab</p>
@@ -1671,7 +1623,7 @@ describe("Selection not collapsed", () => {
         }
     );
 
-    test("should delete a selection accross a heading1 and a paragraph", async () => {
+    test.todo("should delete a selection accross a heading1 and a paragraph", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<h1>ab [cd</h1><p>ef]gh</p>",
@@ -1817,7 +1769,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete nothing when in an empty table cell", async () => {
+    test("should delete nothing when in an empty table cell", async () => {
         await testEditor({
             contentBefore:
                 "<table><tbody><tr><td>abc</td><td>[]<br></td><td>abc</td></tr></tbody></table>",
@@ -1928,7 +1880,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should remove a selection including several tables", async () => {
+    test.todo("should remove a selection including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>0[1</p>
@@ -1953,7 +1905,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test("should remove everything, including several tables", async () => {
+    test.todo("should remove everything, including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>[01</p>
@@ -1986,7 +1938,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete if first element and append in paragraph", async () => {
+    test("should delete if first element and append in paragraph", async () => {
         await testEditor({
             contentBefore: `<blockquote><br>[]</blockquote>`,
             stepFunction: deleteBackward,

@@ -112,6 +112,13 @@ export function isDirectionSwitched(node, editable) {
     return getComputedStyle(closestElement(node)).direction !== defaultDirection;
 }
 
+// /**
+//  * Return true if the given node is a row element.
+//  */
+export function isRow(node) {
+    return ["TH", "TD"].includes(node.tagName);
+}
+
 export function isZWS(node) {
     return node && node.textContent === "\u200B";
 }
