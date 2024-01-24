@@ -3,7 +3,8 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
-import { splitElement, splitTextNode } from "../utils/dom";
+import { splitElement, splitTextNode } from "../utils/dom_split";
+import { isRow } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, rightPos, startPos } from "../utils/position";
@@ -21,6 +22,9 @@ export class TablePlugin extends Plugin {
             dispatch: this.dispatch,
             el: this.editable,
         });
+        this.registry
+            .category("delete_element_backward_before")
+            .add("table", this.deleteBackwardBefore.bind(this));
     }
 
     handleCommand(command, payload) {
@@ -231,6 +235,12 @@ export class TablePlugin extends Plugin {
         table.before(p);
         table.remove();
         setSelection(p, 0);
+    }
+    deleteBackwardBefore({ targetNode, targetOffset }) {
+        // If the cursor is at the beginning of a row, prevent deletion.
+        if (isRow(targetNode) && !targetOffset) {
+            return true;
+        }
     }
 }
 

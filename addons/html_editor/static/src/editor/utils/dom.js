@@ -1,113 +1,15 @@
 /** @odoo-module */
 
-import { isBlock } from "./blocks";
-import { paragraphRelatedElements } from "./dom_info";
-import { childNodeIndex, DIRECTIONS } from "./position";
-
-/**
- * Splits a text node in two parts.
- * If the split occurs at the beginning or the end, the text node stays
- * untouched and unsplit. If a split actually occurs, the original text node
- * still exists and become the right part of the split.
- *
- * Note: if split after or before whitespace, that whitespace may become
- * invisible, it is up to the caller to replace it by nbsp if needed.
- *
- * @param {Node} textNode
- * @param {number} offset
- * @param {DIRECTIONS} originalNodeSide Whether the original node ends up on left
- * or right after the split
- * @returns {number} The parentOffset if the cursor was between the two text
- *          node parts after the split.
- */
-export function splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RIGHT) {
-    let parentOffset = childNodeIndex(textNode);
-
-    if (offset > 0) {
-        parentOffset++;
-
-        if (offset < textNode.length) {
-            const left = textNode.nodeValue.substring(0, offset);
-            const right = textNode.nodeValue.substring(offset);
-            if (originalNodeSide === DIRECTIONS.LEFT) {
-                const newTextNode = document.createTextNode(right);
-                textNode.after(newTextNode);
-                textNode.nodeValue = left;
-            } else {
-                const newTextNode = document.createTextNode(left);
-                textNode.before(newTextNode);
-                textNode.nodeValue = right;
-            }
-        }
-    }
-    return parentOffset;
-}
-
-/**
- * Split the given element at the given offset. The element will be removed in
- * the process so caution is advised in dealing with its reference. Returns a
- * tuple containing the new elements on both sides of the split.
- *
- * @param {Element} element
- * @param {number} offset
- * @returns {[Element, Element]}
- */
-export function splitElement(element, offset) {
-    const before = element.cloneNode();
-    const after = element.cloneNode();
-    let index = 0;
-    for (const child of [...element.childNodes]) {
-        index < offset ? before.appendChild(child) : after.appendChild(child);
-        index++;
-    }
-    element.before(before);
-    element.after(after);
-    element.remove();
-    return [before, after];
-}
-
-/**
- * Split around the given elements, until a given ancestor (included). Elements
- * will be removed in the process so caution is advised in dealing with their
- * references. Returns the new split root element that is a clone of
- * limitAncestor or the original limitAncestor if no split occured.
- *
- * @see splitElement
- * @param {Node[] | Node} elements
- * @param {Node} limitAncestor
- * @returns {[Node, Node]}
- */
-export function splitAroundUntil(elements, limitAncestor) {
-    elements = Array.isArray(elements) ? elements : [elements];
-    const firstNode = elements[0];
-    const lastNode = elements[elements.length - 1];
-    if ([firstNode, lastNode].includes(limitAncestor)) {
-        return limitAncestor;
-    }
-    let before = firstNode.previousSibling;
-    let after = lastNode.nextSibling;
-    let beforeSplit, afterSplit;
-    if (!before && !after && elements[0] !== limitAncestor) {
-        return splitAroundUntil(elements[0].parentElement, limitAncestor);
-    }
-    // Split up ancestors up to font
-    while (after && after.parentElement !== limitAncestor) {
-        afterSplit = splitElement(after.parentElement, childNodeIndex(after))[0];
-        after = afterSplit.nextSibling;
-    }
-    if (after) {
-        afterSplit = splitElement(limitAncestor, childNodeIndex(after))[0];
-        limitAncestor = afterSplit;
-    }
-    while (before && before.parentElement !== limitAncestor) {
-        beforeSplit = splitElement(before.parentElement, childNodeIndex(before) + 1)[1];
-        before = beforeSplit.previousSibling;
-    }
-    if (before) {
-        beforeSplit = splitElement(limitAncestor, childNodeIndex(before) + 1)[1];
-    }
-    return beforeSplit || afterSplit || limitAncestor;
-}
+import { closestBlock, isBlock } from "./blocks";
+import {
+    isSelfClosingElement,
+    isShrunkBlock,
+    isVisible,
+    paragraphRelatedElements,
+} from "./dom_info";
+import { prepareUpdate } from "./dom_state";
+import { boundariesOut, leftPos, nodeSize, rightPos } from "./position";
+import { setSelection } from "./selection";
 
 /**
  * Take a node and unwrap all of its block contents recursively. All blocks
@@ -187,5 +89,106 @@ export function removeClass(element, ...classNames) {
     element.classList.remove(...classNames);
     if (!element.classList.length) {
         element.removeAttribute("class");
+    }
+}
+
+/**
+ * Add a BR in the given node if its closest ancestor block has nothing to make
+ * it visible, and/or add a zero-width space in the given node if it's an empty
+ * inline unremovable so the cursor can stay in it.
+ *
+ * @param {HTMLElement} el
+ * @returns {Object} { br: the inserted <br> if any,
+ *                     zws: the inserted zero-width space if any }
+ */
+export function fillEmpty(el) {
+    const fillers = {};
+    const blockEl = closestBlock(el);
+    if (isShrunkBlock(blockEl)) {
+        const br = document.createElement("br");
+        blockEl.appendChild(br);
+        fillers.br = br;
+    }
+    if (!isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
+        // As soon as there is actual content in the node, the zero-width space
+        // is removed by the sanitize function.
+        const zws = document.createTextNode("\u200B");
+        el.appendChild(zws);
+        el.setAttribute("data-oe-zws-empty-inline", "");
+        fillers.zws = zws;
+        const previousSibling = el.previousSibling;
+        if (previousSibling && previousSibling.nodeName === "BR") {
+            previousSibling.remove();
+        }
+        setSelection(zws, 0, zws, 0);
+    }
+    return fillers;
+}
+/**
+ * Moves the given subset of nodes of a source element to the given destination.
+ * If the source element is left empty it is removed. This ensures the moved
+ * content and its destination surroundings are restored (@see restoreState) to
+ * the way there were.
+ *
+ * It also reposition at the right position on the left of the moved nodes.
+ *
+ * @param {HTMLElement} destinationEl
+ * @param {number} destinationOffset
+ * @param {HTMLElement} sourceEl
+ * @param {number} [startIndex=0]
+ * @param {number} [endIndex=sourceEl.childNodes.length]
+ * @returns {Array.<HTMLElement, number} The position at the left of the moved
+ *     nodes after the move was done (and where the cursor was returned).
+ */
+export function moveNodes(
+    destinationEl,
+    destinationOffset,
+    sourceEl,
+    startIndex = 0,
+    endIndex = sourceEl.childNodes.length
+) {
+    if (isSelfClosingElement(destinationEl)) {
+        throw new Error(`moveNodes: Invalid destination element ${destinationEl.nodeName}`);
+    }
+
+    const nodes = [];
+    for (let i = startIndex; i < endIndex; i++) {
+        nodes.push(sourceEl.childNodes[i]);
+    }
+
+    if (nodes.length) {
+        const restoreDestination = prepareUpdate(destinationEl, destinationOffset);
+        const restoreMoved = prepareUpdate(
+            ...leftPos(sourceEl.childNodes[startIndex]),
+            ...rightPos(sourceEl.childNodes[endIndex - 1])
+        );
+        const fragment = document.createDocumentFragment();
+        nodes.forEach((node) => fragment.appendChild(node));
+        const posRightNode = destinationEl.childNodes[destinationOffset];
+        if (posRightNode) {
+            destinationEl.insertBefore(fragment, posRightNode);
+        } else {
+            console.log(`destinationEl:`, destinationEl);
+            destinationEl.appendChild(fragment);
+        }
+        restoreDestination();
+        restoreMoved();
+    }
+
+    if (!nodeSize(sourceEl)) {
+        const restoreOrigin = prepareUpdate(...boundariesOut(sourceEl));
+        sourceEl.remove();
+        restoreOrigin();
+    }
+
+    // Return cursor position, but don't change it
+    const firstNode = nodes.find((node) => !!node.parentNode);
+    return firstNode ? leftPos(firstNode) : [destinationEl, destinationOffset];
+}
+
+export function toggleClass(node, className) {
+    node.classList.toggle(className);
+    if (!node.className) {
+        node.removeAttribute("class");
     }
 }
