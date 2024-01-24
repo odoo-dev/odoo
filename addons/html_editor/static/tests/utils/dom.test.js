@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { splitAroundUntil, splitTextNode } from "@html_editor/editor/utils/dom";
 import { describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../helpers";
+import { splitAroundUntil, splitTextNode } from "../../src/editor/utils/dom_split";
 
 describe("splitAroundUntil", () => {
     test("should split a slice of text from its inline ancestry (1)", () => {
