@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { splitTextNode } from "./dom";
+import { splitTextNode } from "./dom_split";
 import { prepareUpdate } from "./dom_state";
 import { boundariesOut } from "./position";
 import { setSelection } from "./selection";
