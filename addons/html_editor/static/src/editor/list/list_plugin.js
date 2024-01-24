@@ -12,6 +12,7 @@ import { registry } from "@web/core/registry";
 
 export class ListPlugin extends Plugin {
     static name = "list";
+    static dependencies = ["tabulation"];
 
     setup() {
         this.registry
@@ -20,6 +21,8 @@ export class ListPlugin extends Plugin {
         this.registry
             .category("delete_element_forward_before")
             .add("list", this.deleteElementForwardBefore.bind(this));
+        this.registry.category("handle_tab").add("list", this.handleTab.bind(this));
+        this.registry.category("handle_shift_tab").add("list", this.handleShiftTab.bind(this));
     }
 
     handleCommand(command, payload) {
@@ -51,6 +54,41 @@ export class ListPlugin extends Plugin {
                 this.mergeLists();
                 break;
         }
+    }
+
+    handleTab() {
+        const { listItems, nonListItems } = this.separateListNodes();
+        if (listItems.size) {
+            this.indentListNodes(listItems);
+            this.shared.indentNodes(nonListItems);
+            return true;
+        }
+    }
+
+    handleShiftTab() {
+        const { listItems, nonListItems } = this.separateListNodes();
+        if (listItems.size) {
+            this.outdentListNodes(listItems);
+            this.shared.outdentNodes(nonListItems);
+            return true;
+        }
+    }
+
+    separateListNodes() {
+        const listItems = new Set();
+        const nonListItems = new Set();
+        for (const node of getTraversedNodes(this.editable)) {
+            const closestLi = closestElement(node, "li");
+            const target = closestLi || node;
+            if (!target.querySelector?.("li")) {
+                if (closestLi) {
+                    listItems.add(closestLi);
+                } else {
+                    nonListItems.add(node);
+                }
+            }
+        }
+        return { listItems, nonListItems };
     }
 
     toggleList(mode) {
@@ -106,25 +144,6 @@ export class ListPlugin extends Plugin {
         const restoreCursor = preserveCursor(this.document);
         mergeListDeep(closestList);
         restoreCursor();
-    }
-
-    // @todo Handle tab on nonList items (interaction with a tab plugin?)
-    getTraversedListNodes() {
-        // Split traversed nodes into list items and the rest.
-        const listItems = new Set();
-        const nonListItems = new Set();
-        for (const node of getTraversedNodes(this.editable)) {
-            const closestLi = closestElement(node, "li");
-            const target = closestLi || node;
-            if (!target.querySelector?.("li")) {
-                if (closestLi) {
-                    listItems.add(closestLi);
-                } else {
-                    nonListItems.add(node);
-                }
-            }
-        }
-        return listItems;
     }
 
     /**
@@ -226,15 +245,29 @@ export class ListPlugin extends Plugin {
     }
 
     indentList() {
+        const { listItems } = this.separateListNodes();
+        this.indentListNodes(listItems);
+    }
+
+    outdentList() {
+        const { listItems } = this.separateListNodes();
+        this.outdentListNodes(listItems);
+    }
+
+    indentListNodes(listNodes) {
         const restoreCursor = preserveCursor(this.document);
-        this.getTraversedListNodes().forEach((li) => this.indentLI(li));
+        for (const li of listNodes) {
+            this.indentLI(li);
+        }
         restoreCursor();
         this.dispatch("SANITIZE");
     }
 
-    outdentList() {
+    outdentListNodes(listNodes) {
         const restoreCursor = preserveCursor(this.document);
-        this.getTraversedListNodes().forEach((li) => this.outdentLI(li));
+        for (const li of listNodes) {
+            this.outdentLI(li);
+        }
         restoreCursor();
         this.dispatch("SANITIZE");
     }
