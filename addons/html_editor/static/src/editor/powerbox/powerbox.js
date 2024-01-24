@@ -23,20 +23,24 @@ export class Powerbox extends Component {
         this.search = "";
         this.cmdIndex = 0;
         // text node and offset for the / character
-        this.node = null;
         this.offset = this.props.offset();
         this.commands = null;
         this.categories = null;
         const range = window.getSelection().getRangeAt(0);
         this.endOffset = range.endOffset;
         this.node = range.startContainer;
-        if (!range.collapsed || this.node instanceof Element) {
+        if (!range.collapsed) {
             throw new Error("Need to check if this is legit...");
         }
-        const search = this.node.nodeValue.slice(this.offset + 1, this.endOffset);
+        const search = this.node.nodeValue?.slice(this.offset + 1, this.endOffset) || "";
         this.computeCommands(search);
 
         onMounted(() => {
+            if (this.node.nodeType !== Node.TEXT_NODE) {
+                // in this case, we have an element, but we want the text node that
+                // was created by the new character "/";
+                this.node = this.node.firstChild;
+            }
             this.props.onMounted(ref.el);
             const prevChar = this.node.nodeValue[this.offset];
             if (prevChar !== "/") {

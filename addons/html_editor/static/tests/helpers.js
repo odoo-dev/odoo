@@ -215,24 +215,24 @@ export async function insertText(editor, text) {
     // browser behavior otherwise.
     const sel = window.getSelection();
     const range = sel.getRangeAt(0);
-    let insertChar = null;
-    if (range.collapsed && range.startContainer.nodeType === Node.TEXT_NODE) {
-        const node = range.startContainer;
-        let offset = range.startOffset;
-        insertChar = (char) => {
-            node.textContent =
-                node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
-            offset++;
-            range.setStart(node, offset);
-            range.setEnd(node, offset);
-        };
-    } else {
-        // maybe need to create text node and do something
-        // const txt = document.createTextNode(char);
-        // range.insertNode(txt);
-        // and set selection
-        throw new Error("need to implement something");
+    if (!range.collapsed) {
+        throw new Error("need to implement something... maybe");
     }
+    if (range.startContainer.nodeType !== Node.TEXT_NODE) {
+        const txt = document.createTextNode("");
+        range.startContainer.appendChild(txt);
+        range.insertNode(txt);
+        setSelection({ anchorNode: txt, anchorOffset: 0, focusNode: txt, focusOffset: 0 });
+    }
+    const node = range.startContainer;
+    let offset = range.startOffset;
+    const insertChar = (char) => {
+        node.textContent =
+            node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
+        offset++;
+        range.setStart(node, offset);
+        range.setEnd(node, offset);
+    };
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.
         dispatch(editor.editable, "keydown", { key: char });
