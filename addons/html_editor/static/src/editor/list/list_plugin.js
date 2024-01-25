@@ -21,8 +21,12 @@ export class ListPlugin extends Plugin {
         this.registry
             .category("delete_element_forward_before")
             .add("list", this.deleteElementForwardBefore.bind(this));
-        this.registry.category("handle_tab").add("list", this.handleTab.bind(this));
-        this.registry.category("handle_shift_tab").add("list", this.handleShiftTab.bind(this));
+        this.registry
+            .category("handle_tab")
+            .add("list", this.handleTab.bind(this), { sequence: 10 });
+        this.registry
+            .category("handle_shift_tab")
+            .add("list", this.handleShiftTab.bind(this), { sequence: 10 });
     }
 
     handleCommand(command, payload) {
