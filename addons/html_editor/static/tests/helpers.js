@@ -4,6 +4,7 @@ import { expect, getFixture } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
+import { defaultConfig } from "../src/editor/editor";
 import { useWysiwyg } from "../src/editor/wysiwyg";
 
 export const Direction = {
@@ -164,7 +165,7 @@ class TestEditor extends Component {
                 setContent(this.ref.el, this.props.content);
             });
         }
-        this.editor = useWysiwyg("target", this.props.config);
+        this.editor = useWysiwyg("target", { ...defaultConfig, ...this.props.config });
     }
 }
 
