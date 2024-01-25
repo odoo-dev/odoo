@@ -4,13 +4,12 @@ import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 
 export async function insertLineBreak(editor) {
-    throw new Error("Not implemented command to replace oShiftEnter");
-    // editor.dispatch('oShiftEnter');
+    editor.dispatch("INSERT_LINEBREAK");
 }
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test.todo("should insert a <br> into an empty paragraph", async () => {
+        test("should insert a <br> into an empty paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: insertLineBreak,
@@ -32,7 +31,7 @@ describe("Selection collapsed", () => {
             // });
         });
 
-        test.todo("should insert a <br> at the beggining of a paragraph", async () => {
+        test("should insert a <br> at the beggining of a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]abc</p>",
                 stepFunction: insertLineBreak,
@@ -68,7 +67,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a line break (2 <br>) at the end of a paragraph", async () => {
+        test("should insert a line break (2 <br>) at the end of a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: insertLineBreak,
@@ -80,7 +79,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Consecutive", () => {
-        test.todo("should insert two <br> at the beggining of an empty paragraph", async () => {
+        test("should insert two <br> at the beggining of an empty paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -113,7 +112,7 @@ describe("Selection collapsed", () => {
             // });
         });
 
-        test.todo("should insert two <br> at the beggining of a paragraph", async () => {
+        test("should insert two <br> at the beggining of a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]abc</p>",
                 stepFunction: async (editor) => {
@@ -124,7 +123,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert two <br> within text", async () => {
+        test("should insert two <br> within text", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -135,7 +134,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert two line breaks (3 <br>) at the end of a paragraph", async () => {
+        test("should insert two line breaks (3 <br>) at the end of a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: async (editor) => {
@@ -284,7 +283,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("With attributes", () => {
-        test.todo("should insert a line break before a span with class", async () => {
+        test("should insert a line break before a span with class", async () => {
             await testEditor({
                 contentBefore:
                     '<p><span class="a">dom to</span></p><p><span class="b">[]edit</span></p>',
@@ -294,7 +293,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a line break within a span with a bold", async () => {
+        test("should insert a line break within a span with a bold", async () => {
             await testEditor({
                 contentBefore: '<p><span class="a"><b>ab[]cd</b></span></p>',
                 stepFunction: insertLineBreak,

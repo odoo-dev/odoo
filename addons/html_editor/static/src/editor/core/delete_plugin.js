@@ -31,9 +31,10 @@ import {
     nodeSize,
     rightPos,
 } from "../utils/position";
-import { getDeepRange, setSelection } from "../utils/selection";
+import { setSelection } from "../utils/selection";
 import { CTGROUPS, CTYPES } from "../utils/content_types";
 import { splitTextNode } from "../utils/dom_split";
+import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
     static dependencies = ["dom"];
@@ -71,7 +72,7 @@ export class DeletePlugin extends Plugin {
         if (!selection) {
             return;
         }
-        if (handleZWS(this.editable, selection)) {
+        if (collapseIfZWS(this.editable, selection)) {
             this.dispatch("DELETE_RANGE");
             return;
         }
@@ -87,7 +88,7 @@ export class DeletePlugin extends Plugin {
         if (!selection) {
             return;
         }
-        if (handleZWS(this.editable, selection)) {
+        if (collapseIfZWS(this.editable, selection)) {
             this.dispatch("DELETE_RANGE");
             return;
         }
@@ -628,37 +629,7 @@ export class DeletePlugin extends Plugin {
 }
 
 /**
- * Set a deep selection that split the text and collapse it if only one ZWS is
- * selected.
- *
- * @param {HTMLElement} editable
- * @param {Selection} selection
- * @returns {boolean} true if the selection has only one ZWS.
- */
-function handleZWS(editable, selection) {
-    const range = getDeepRange(editable, {
-        selection,
-        splitText: true,
-        select: true,
-        correctTripleClick: true,
-    });
-
-    if (
-        range &&
-        range.startContainer === range.endContainer &&
-        range.endContainer.nodeType === Node.TEXT_NODE &&
-        range.cloneContents().textContent === "\u200B"
-    ) {
-        // We Collapse the selection and bypass deleteRange
-        // if the range content is only one ZWS.
-        selection.collapseToStart();
-        return true;
-    }
-    return false;
-}
-
-/**
- * Handle text node deletion for deteteBackward and deleteForward.
+ * Handle text node deletion for Text.oDeleteForward and Text.oDeleteBackward.
  *
  * @param {string} element
  * @param {int} charSize
