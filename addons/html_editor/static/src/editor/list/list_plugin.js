@@ -14,27 +14,12 @@ export class ListPlugin extends Plugin {
     static name = "list";
 
     setup() {
-        // @todo Move this to a tab plugin
-        this.addDomListener(this.editable, "keydown", this.handleKeyDown);
         this.registry
             .category("delete_element_backward_before")
             .add("list", this.deleteElementBackwardBefore.bind(this));
         this.registry
             .category("delete_element_forward_before")
             .add("list", this.deleteElementForwardBefore.bind(this));
-    }
-
-    // @todo Move this to a tab plugin
-    handleKeyDown(event) {
-        if (event.key === "Tab") {
-            if (event.shiftKey) {
-                this.outdentList();
-            } else {
-                this.indentList();
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        }
     }
 
     handleCommand(command, payload) {
