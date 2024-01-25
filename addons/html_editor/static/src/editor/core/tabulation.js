@@ -34,6 +34,7 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
+
         const selection = this.document.getSelection();
         if (selection.isCollapsed) {
             this.insertTab();

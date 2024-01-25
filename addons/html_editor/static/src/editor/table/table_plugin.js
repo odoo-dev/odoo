@@ -7,7 +7,7 @@ import { splitElement, splitTextNode } from "../utils/dom_split";
 import { isRow } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { DIRECTIONS, rightPos, startPos } from "../utils/position";
+import { DIRECTIONS, endPos, rightPos, startPos } from "../utils/position";
 import { getDeepRange, getInSelection, setCursorStart, setSelection } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
@@ -25,6 +25,8 @@ export class TablePlugin extends Plugin {
         this.registry
             .category("delete_element_backward_before")
             .add("table", this.deleteBackwardBefore.bind(this));
+        this.registry.category("handle_tab").add("table", this.handleTab.bind(this));
+        this.registry.category("handle_shift_tab").add("table", this.handleShiftTab.bind(this));
     }
 
     handleCommand(command, payload) {
@@ -53,6 +55,30 @@ export class TablePlugin extends Plugin {
             case "DELETE_TABLE":
                 this.deleteTable(payload);
                 break;
+        }
+    }
+
+    handleTab() {
+        const selection = this.document.getSelection();
+        const inTable = closestElement(selection.anchorNode, "table");
+        if (inTable) {
+            // Move cursor to next cell.
+            const shouldAddNewRow = !this.shiftCursorToTableCell(1);
+            if (shouldAddNewRow) {
+                this.addRow({ position: "after" });
+                this.shiftCursorToTableCell(1);
+            }
+            return true;
+        }
+    }
+
+    handleShiftTab() {
+        const selection = this.document.getSelection();
+        const inTable = closestElement(selection.anchorNode, "table");
+        if (inTable) {
+            // Move cursor to previous cell.
+            this.shiftCursorToTableCell(-1);
+            return true;
         }
     }
 
@@ -241,6 +267,29 @@ export class TablePlugin extends Plugin {
         if (isRow(targetNode) && !targetOffset) {
             return true;
         }
+    }
+
+    // @todo @phoenix This could be usefull for handling arrow up and down in tables (spec change?).
+    /**
+     * Moves the cursor by shiftIndex table cells.
+     *
+     * @param {Number} shiftIndex - The index to shift the cursor by.
+     * @returns {boolean} - True if the cursor was successfully moved, false otherwise.
+     */
+    shiftCursorToTableCell(shiftIndex) {
+        const sel = this.document.getSelection();
+        const currentTd = closestElement(sel.anchorNode, "td");
+        const closestTable = closestElement(currentTd, "table");
+        if (!currentTd || !closestTable) {
+            return false;
+        }
+        const tds = [...closestTable.querySelectorAll("td")];
+        const cursorDestination = tds[tds.findIndex((td) => currentTd === td) + shiftIndex];
+        if (!cursorDestination) {
+            return false;
+        }
+        setSelection(...startPos(cursorDestination), ...endPos(cursorDestination), true);
+        return true;
     }
 }
 
