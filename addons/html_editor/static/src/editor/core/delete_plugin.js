@@ -35,16 +35,11 @@ import { getDeepRange, setSelection } from "../utils/selection";
 import { CTGROUPS, CTYPES } from "../utils/content_types";
 import { splitTextNode } from "../utils/dom_split";
 
-const shortcuts = {
-    DELETE_BACKWARD: (e) => e.key === "Backspace" && !e.ctrlKey && !e.metaKey,
-};
-
 export class DeletePlugin extends Plugin {
     static dependencies = ["dom"];
     static name = "delete";
 
     setup() {
-        this.addDomListener(this.editable, "keydown", this.handleShortcut.bind(this));
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
     }
     handleCommand(command, payload) {
@@ -628,15 +623,6 @@ export class DeletePlugin extends Plugin {
         } else if (e.inputType === "deleteContentForward") {
             e.preventDefault();
             this.deleteForward();
-        }
-    }
-
-    handleShortcut(e) {
-        for (const [command, shortcut] of Object.entries(shortcuts)) {
-            if (shortcut(e)) {
-                e.preventDefault();
-                this.dispatch(command);
-            }
         }
     }
 }

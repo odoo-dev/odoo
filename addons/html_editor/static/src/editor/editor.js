@@ -4,6 +4,18 @@ import { Registry, registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
+export const defaultConfig = {
+    shortcuts: [
+        { hotkey: "control+b", command: "FORMAT_BOLD" },
+        { hotkey: "control+i", command: "FORMAT_ITALIC" },
+        { hotkey: "control+u", command: "FORMAT_UNDERLINE" },
+        { hotkey: "control+5", command: "FORMAT_STRIKETHROUGH" },
+        { hotkey: "tab", command: "INDENT_LIST" },
+        { hotkey: "shift+tab", command: "OUTDENT_LIST" },
+        { hotkey: "backspace", command: "DELETE_BACKWARD" },
+    ],
+};
+
 function getPlugins() {
     const plugins = new Set(registry.category("phoenix_plugins").getAll());
     const inResult = new Set();
