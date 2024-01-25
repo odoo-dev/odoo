@@ -49,15 +49,22 @@ function getElemContent(el, selection) {
     }
     const attrStr = (attrs.length ? " " : "") + attrs.join(" ");
     let result = `<${tag + attrStr}>`;
-    if (selection.anchorNode === el) {
-        result += "[";
+
+    function addTextSelection() {
+        if (selection.anchorNode === el && index === selection.anchorOffset) {
+            result += "[";
+        }
+        if (selection.focusNode === el && index === selection.focusOffset) {
+            result += "]";
+        }
     }
-    if (selection.focusNode === el) {
-        result += "]";
-    }
+    let index = 0;
     for (const child of el.childNodes) {
+        addTextSelection();
         result += _getContent(child, selection);
+        index++;
     }
+    addTextSelection();
     if (!VOID_ELEMS.has(el.tagName)) {
         result += `</${tag}>`;
     }
