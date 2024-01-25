@@ -578,7 +578,7 @@ X[]
                 });
             });
 
-            test.todo("should delete a character after a trailing line break", async () => {
+            test("should delete a character after a trailing line break", async () => {
                 await testEditor({
                     contentBefore: "<p>ab<br>c[]</p>",
                     stepFunction: deleteBackward,
