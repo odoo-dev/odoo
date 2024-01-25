@@ -81,7 +81,7 @@ export class LineBreakPlugin extends Plugin {
     }
 
     onBeforeInput(e) {
-        if (e.inputType === "insertParagraph") {
+        if (e.inputType === "insertLineBreak") {
             e.preventDefault();
             this.insertLineBreak();
         }
