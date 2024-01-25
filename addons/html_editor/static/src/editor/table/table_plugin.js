@@ -25,8 +25,12 @@ export class TablePlugin extends Plugin {
         this.registry
             .category("delete_element_backward_before")
             .add("table", this.deleteBackwardBefore.bind(this));
-        this.registry.category("handle_tab").add("table", this.handleTab.bind(this));
-        this.registry.category("handle_shift_tab").add("table", this.handleShiftTab.bind(this));
+        this.registry
+            .category("handle_tab")
+            .add("table", this.handleTab.bind(this), { sequence: 20 });
+        this.registry
+            .category("handle_shift_tab")
+            .add("table", this.handleShiftTab.bind(this), { sequence: 20 });
     }
 
     handleCommand(command, payload) {
