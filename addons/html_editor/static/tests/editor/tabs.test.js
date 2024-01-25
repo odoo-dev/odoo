@@ -15,6 +15,14 @@ function oeTab(size, contenteditable = true) {
     );
 }
 
+function keydownTab(editor) {
+    return dispatch(editor.editable, "keydown", { key: "Tab" });
+}
+
+function keydownShiftTab(editor) {
+    return dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
+}
+
 describe("insert tabulation", () => {
     test.todo("should insert a tab character", async () => {
         await testEditor({
@@ -471,49 +479,40 @@ describe("remove tabulation with shift+tab", () => {
         });
     });
 
-    test.todo("should remove a tab character", async () => {
+    test("should remove a tab character", async () => {
         await testEditor({
             contentBefore: `<p>${oeTab()}a[]b</p>`,
-            stepFunction: (editor) =>
-                dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+            stepFunction: keydownShiftTab,
             contentAfter: `<p>a[]b</p>`,
         });
     });
 
-    test.todo(
-        "should keep selection and remove a tab character from the beginning of the paragraph",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>${oeTab()}a[xxx]b</p>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfter: `<p>a[xxx]b</p>`,
-            });
-        }
-    );
+    test("should keep selection and remove a tab character from the beginning of the paragraph", async () => {
+        await testEditor({
+            contentBefore: `<p>${oeTab()}a[xxx]b</p>`,
+            stepFunction: keydownShiftTab,
+            contentAfter: `<p>a[xxx]b</p>`,
+        });
+    });
 
-    test.todo("should remove two tab characters", async () => {
+    test("should remove two tab characters", async () => {
         await testEditor({
             contentBefore: `<p>${oeTab()}${oeTab()}a[]b</p>`,
             stepFunction: async (editor) => {
-                await dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
-                await dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
+                keydownShiftTab(editor);
+                keydownShiftTab(editor);
             },
             contentAfter: `<p>a[]b</p>`,
         });
     });
 
-    test.todo(
-        "should remove tab characters from the beginning of two separate paragraphs",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>${oeTab()}a[b</p>` + `<p>${oeTab()}c]d</p>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfter: `<p>a[b</p>` + `<p>c]d</p>`,
-            });
-        }
-    );
+    test("should remove tab characters from the beginning of two separate paragraphs", async () => {
+        await testEditor({
+            contentBefore: `<p>${oeTab()}a[b</p>` + `<p>${oeTab()}c]d</p>`,
+            stepFunction: keydownShiftTab,
+            contentAfter: `<p>a[b</p>` + `<p>c]d</p>`,
+        });
+    });
 
     test.todo(
         "should remove tab characters from the beginning of two separate double-indented paragraphs",
@@ -566,27 +565,23 @@ describe("remove tabulation with shift+tab", () => {
         }
     );
 
-    test.todo(
-        "should remove tab characters from the beginning of three separate blocks",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab()}a[b</p>` +
-                    `<h1>${oeTab()}cd</h1>` +
-                    `<blockquote>${oeTab()}e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfter:
-                    `<p>xxx</p>` +
-                    `<p>a[b</p>` +
-                    `<h1>cd</h1>` +
-                    `<blockquote>e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-            });
-        }
-    );
+    test("should remove tab characters from the beginning of three separate blocks", async () => {
+        await testEditor({
+            contentBefore:
+                `<p>xxx</p>` +
+                `<p>${oeTab()}a[b</p>` +
+                `<h1>${oeTab()}cd</h1>` +
+                `<blockquote>${oeTab()}e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            stepFunction: keydownShiftTab,
+            contentAfter:
+                `<p>xxx</p>` +
+                `<p>a[b</p>` +
+                `<h1>cd</h1>` +
+                `<blockquote>e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+        });
+    });
 
     test.todo(
         "should remove tab characters from the beginning of three separate blocks of mixed indentation",
@@ -683,34 +678,27 @@ describe("remove tabulation with shift+tab", () => {
         }
     );
 
-    test.todo("should remove a tab character from formatted text", async () => {
+    test("should remove a tab character from formatted text", async () => {
         await testEditor({
             contentBefore: `<p><strong>${oeTab()}a[]b</strong></p>`,
-            stepFunction: (editor) =>
-                dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+            stepFunction: keydownShiftTab,
             contentAfter: `<p><strong>a[]b</strong></p>`,
         });
     });
 
-    test.todo(
-        "should remove tab characters from the beginning of two separate formatted paragraphs",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>${oeTab()}<strong>a[b</strong></p>` +
-                    `<p>${oeTab()}<strong>c]d</strong></p>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfter: `<p><strong>a[b</strong></p>` + `<p><strong>c]d</strong></p>`,
-            });
-        }
-    );
+    test("should remove tab characters from the beginning of two separate formatted paragraphs", async () => {
+        await testEditor({
+            contentBefore:
+                `<p>${oeTab()}<strong>a[b</strong></p>` + `<p>${oeTab()}<strong>c]d</strong></p>`,
+            stepFunction: keydownShiftTab,
+            contentAfter: `<p><strong>a[b</strong></p>` + `<p><strong>c]d</strong></p>`,
+        });
+    });
 
-    test.todo("should remove a tab character from styled text", async () => {
+    test("should remove a tab character from styled text", async () => {
         await testEditor({
             contentBefore: `<p><font style="background-color: rgb(255,255,0);">${oeTab()}a[]b</font></p>`,
-            stepFunction: (editor) =>
-                dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+            stepFunction: keydownShiftTab,
             contentAfter: `<p><font style="background-color: rgb(255,255,0);">a[]b</font></p>`,
         });
     });
