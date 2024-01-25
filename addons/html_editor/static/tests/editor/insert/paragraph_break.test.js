@@ -300,29 +300,28 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert line breaks outside the edges of an anchor", async () => {
-            const pressEnter = (editor) => {
-                editor._resetLinkZws(); // Any interaction causing insertParagraph should trigger this.
-                editor.document.execCommand("insertParagraph");
+        test("should insert line breaks outside the edges of an anchor", async () => {
+            const insertLinebreak = (editor) => {
+                editor.dispatch("INSERT_LINEBREAK");
             };
             await testEditor({
                 contentBefore: "<div>ab<a>[]cd</a></div>",
-                stepFunction: pressEnter,
+                stepFunction: insertLinebreak,
                 contentAfter: "<div>ab<br><a>[]cd</a></div>",
             });
             await testEditor({
                 contentBefore: "<div><a>a[]b</a></div>",
-                stepFunction: pressEnter,
+                stepFunction: insertLinebreak,
                 contentAfter: "<div><a>a<br>[]b</a></div>",
             });
             await testEditor({
                 contentBefore: "<div><a>ab[]</a></div>",
-                stepFunction: pressEnter,
+                stepFunction: insertLinebreak,
                 contentAfter: "<div><a>ab</a><br>[]<br></div>",
             });
             await testEditor({
                 contentBefore: "<div><a>ab[]</a>cd</div>",
-                stepFunction: pressEnter,
+                stepFunction: insertLinebreak,
                 contentAfter: "<div><a>ab</a><br>[]cd</div>",
             });
         });
