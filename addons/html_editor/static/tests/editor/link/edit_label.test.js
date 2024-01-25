@@ -4,8 +4,7 @@ import { describe, test } from "@odoo/hoot";
 import { deleteBackward, insertText, testEditor, undo } from "../../helpers";
 
 export function insertLineBreak(editor) {
-    throw new Error("Not implemented command to replace oShiftEnter");
-    // editor.dispatch('oShiftEnter');
+    editor.dispatch("INSERT_LINEBREAK");
 }
 
 describe("range collapsed", () => {
