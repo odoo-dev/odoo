@@ -2,16 +2,19 @@
 import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useWysiwyg } from "./editor/wysiwyg";
+import { defaultConfig } from "./editor/editor";
 
 export class Playground extends Component {
     static template = "html_editor.Playground";
-    static components = { };
+    static components = {};
     static props = ["*"];
 
     setup() {
-        this.editor = useWysiwyg("html");
+        this.editor = useWysiwyg("html", { ...defaultConfig });
         this.state = useState({ showWysiwyg: false });
-        this.constructor.components.Wysiwyg = odoo.loader.modules.get("@web_editor/js/wysiwyg/wysiwyg").Wysiwyg;
+        this.constructor.components.Wysiwyg = odoo.loader.modules.get(
+            "@web_editor/js/wysiwyg/wysiwyg"
+        ).Wysiwyg;
     }
 
     toggleWysiwyg() {
