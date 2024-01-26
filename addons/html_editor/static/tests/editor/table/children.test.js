@@ -283,7 +283,7 @@ describe("column", () => {
 });
 
 describe("tab", () => {
-    test.todo("should add a new row on press tab at the end of a table", async () => {
+    test("should add a new row on press tab at the end of a table", async () => {
         await testEditor({
             contentBefore:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
