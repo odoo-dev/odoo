@@ -99,11 +99,10 @@ class AssetsBundle(object):
                     self.stylesheets.append(LessStylesheetAsset(self, **params, **css_params))
                 elif extension == 'css':
                     self.stylesheets.append(StylesheetAsset(self, **params, **css_params))
-            if js:
-                if extension == 'js':
-                    self.javascripts.append(JavascriptAsset(self, **params))
-                elif extension == 'xml':
-                    self.templates.append(XMLAsset(self, **params))
+            if js and extension == 'js':
+                self.javascripts.append(JavascriptAsset(self, **params))
+            elif extension == 'xml':
+                self.templates.append(XMLAsset(self, **params))
 
     def get_links(self):
         """
@@ -116,12 +115,15 @@ class AssetsBundle(object):
 
         if self.has_js and self.javascripts:
             response.append(self.get_link('js'))
+            response.append(self.get_link('xml'))
 
         return self.external_assets + response
 
     def get_link(self, asset_type):
         unique = self.get_version(asset_type) if not self.is_debug_assets else 'debug'
         extension = asset_type if self.is_debug_assets else f'min.{asset_type}'
+        if asset_type == 'xml':
+            extension += '.js'
         return self.get_asset_url(unique=unique, extension=extension)
 
     def get_version(self, asset_type):
@@ -133,12 +135,15 @@ class AssetsBundle(object):
         We compute a SHA512/256 on the rendered bundle + combined linked files last_modified date
         """
         if asset_type not in self._checksum_cache:
-            if asset_type == 'css':
-                assets = self.stylesheets
-            elif asset_type == 'js':
-                assets = self.javascripts + self.templates
-            else:
-                raise ValueError(f'Asset type {asset_type} not known')
+            match asset_type:
+                case "css":
+                    assets = self.stylesheets
+                case "js":
+                    assets = self.javascripts
+                case "xml":
+                    assets = self.templates
+                case _:
+                    raise ValueError(f"Unknown assets type: “{asset_type}”")
 
             unique_descriptor = ','.join(asset.unique_descriptor for asset in assets)
 
@@ -268,7 +273,7 @@ class AssetsBundle(object):
 
         :return the ir.attachment records for a given bundle.
         """
-        assert extension in ('js', 'min.js', 'js.map', 'css', 'min.css', 'css.map', 'xml', 'min.xml')
+        assert extension in ('js', 'min.js', 'js.map', 'css', 'min.css', 'css.map', 'xml', 'min.xml', 'xml.js')
         ira = self.env['ir.attachment']
 
         # Set user direction in name to store two bundles
@@ -320,21 +325,6 @@ class AssetsBundle(object):
 
         if not js_attachment:
             template_bundle = ''
-            if self.templates:
-                templates = self.generate_xml_bundle()
-                template_bundle = textwrap.dedent(f"""
-
-                    /*******************************************
-                    *  Templates                               *
-                    *******************************************/
-
-                    odoo.define("{self.name}.bundle.xml", ["@web/core/templates"], function(require) {{
-                        "use strict";
-                        const {{ checkPrimaryTemplateParents, registerTemplate, registerTemplateExtension }} = require("@web/core/templates");
-                        /* {self.name} */
-                        {templates}
-                    }});
-                """)
 
             if is_minified:
                 content_bundle = ';\n'.join(asset.minify() for asset in self.javascripts)
@@ -344,6 +334,22 @@ class AssetsBundle(object):
                 js_attachment = self.js_with_sourcemap(template_bundle=template_bundle)
 
         return js_attachment[0]
+
+    def xml2(self):
+        if attachments := self.get_attachments('xml.js'):
+            return attachments[0]
+        bundle_content = textwrap.dedent(f"""
+            document.addEventListener("DOMContentLoaded", () => {{
+                odoo.define("{self.name}.bundle.xml", ["@web/core/templates"], function (require) {{
+                    "use strict";
+                    const {{ checkPrimaryTemplateParents, registerTemplate, registerTemplateExtension }} = require("@web/core/templates");
+                    /* {self.name} */
+                    {self.generate_xml_bundle()}
+                }});
+            }});
+        """)
+        return self.save_attachment('xml.js', bundle_content)[0]
+
 
     def js_with_sourcemap(self, template_bundle=None):
         """Create the ir.attachment representing the not-minified content of the bundleJS
