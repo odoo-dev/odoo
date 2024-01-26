@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { test, describe } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor, deleteForward } from "../../helpers";
 import { unformat } from "../../utils";
-
-function deleteForward() {
-    throw new Error("need a proper implementation");
-}
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
@@ -37,7 +33,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete the first character in a list item", async () => {
+        test("should delete the first character in a list item", async () => {
             await testEditor({
                 contentBefore: "<ul><li>abc</li><li>[]defg</li></ul>",
                 stepFunction: deleteForward,
@@ -75,7 +71,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a list item with its next list item", async () => {
+        test("should merge a list item with its next list item", async () => {
             await testEditor({
                 contentBefore: "<ul><li>abc[]</li><li>def</li></ul>",
                 stepFunction: deleteForward,
@@ -180,7 +176,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not convert mixed lists on rejoin (ol)", async () => {
+        test("should not convert mixed lists on rejoin (ol)", async () => {
             await testEditor({
                 contentBefore: "<ol><li>a[]</li></ol><p>b</p><ul><li>c</li></ul>",
                 stepFunction: deleteForward,
@@ -188,7 +184,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not convert mixed multi-level lists on rejoin (ol)", async () => {
+        test("should not convert mixed multi-level lists on rejoin (ol)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ol>
@@ -229,7 +225,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete the first character in a checklist item", async () => {
+        test("should delete the first character in a checklist item", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -278,7 +274,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a checklist item with its next list item", async () => {
+        test("should merge a checklist item with its next list item", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -395,7 +391,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not convert mixed lists on rejoin (ul)", async () => {
+        test("should not convert mixed lists on rejoin (ul)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -406,7 +402,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not convert mixed multi-level lists on rejoin (ul)", async () => {
+        test("should not convert mixed multi-level lists on rejoin (ul)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: unformat(`
@@ -474,7 +470,7 @@ describe("Selection collapsed", () => {
             }
         );
 
-        test.todo("should merge a non-indented list item into an indented list item", async () => {
+        test("should merge a non-indented list item into an indented list item", async () => {
             await testEditor({
                 contentBefore:
                     '<ul><li class="oe-nested"><ul><li>abc[]</li></ul></li><li>def</li></ul>',
@@ -498,7 +494,7 @@ describe("Selection collapsed", () => {
             }
         );
 
-        test.todo("should merge an indented list item into a non-indented list item", async () => {
+        test("should merge an indented list item into a non-indented list item", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -511,20 +507,17 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list (2)",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li>abc[]</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li></ul>',
-                    stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                    },
-                    contentAfter: '<ul class="o_checklist"><li>abc[]def</li></ul>',
-                });
-            }
-        );
+        test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list (2)", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li>abc[]</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li></ul>',
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                },
+                contentAfter: '<ul class="o_checklist"><li>abc[]def</li></ul>',
+            });
+        });
     });
     describe("Complex merges", () => {
         test.todo("should merge a list item into a paragraph", async () => {
@@ -539,7 +532,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a paragraph into a list item", async () => {
+        test("should merge a paragraph into a list item", async () => {
             await testEditor({
                 contentBefore: "<ul><li>abc[]</li></ul><p>def</p>",
                 stepFunction: deleteForward,
@@ -547,7 +540,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a bold list item into a non-formatted list item", async () => {
+        test("should merge a bold list item into a non-formatted list item", async () => {
             await testEditor({
                 contentBefore:
                     "<ul><li>abc</li><li><b>de</b>fg[]</li><li><b>hij</b>klm</li><li>nop</li></ul>",
@@ -557,27 +550,21 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge a paragraph starting with bold text into a list item with ending without formatting",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ul><li><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>",
-                    stepFunction: deleteForward,
-                    contentAfter: "<ul><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>",
-                });
-            }
-        );
+        test("should merge a paragraph starting with bold text into a list item with ending without formatting", async () => {
+            await testEditor({
+                contentBefore: "<ul><li><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>",
+                stepFunction: deleteForward,
+                contentAfter: "<ul><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>",
+            });
+        });
 
-        test.todo(
-            "should merge a paragraph starting with bold text into a list item with ending with italic text",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ul><li><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>",
-                    stepFunction: deleteForward,
-                    contentAfter: "<ul><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>",
-                });
-            }
-        );
+        test("should merge a paragraph starting with bold text into a list item with ending with italic text", async () => {
+            await testEditor({
+                contentBefore: "<ul><li><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>",
+                stepFunction: deleteForward,
+                contentAfter: "<ul><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>",
+            });
+        });
 
         test.todo("should merge a checklist item into a paragraph", async () => {
             await testEditor({
@@ -595,7 +582,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a paragraph into a checklist item", async () => {
+        test("should merge a paragraph into a checklist item", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -605,33 +592,30 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should treat two blocks in a checklist item (checked/unchecked) as two list items and merge them",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]</h2><h3>ghi</h3></li><li class="o_checked"><h4>klm</h4></li></ul>',
-                    stepFunction: deleteForward,
-                    // Paragraphs in list items are treated as nonsense.
-                    // unchecked folowed by checked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li class="o_checked"><h4>klm</h4></li></ul>',
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]</h2><h3>ghi</h3></li><li><h4>klm</h4></li></ul>',
-                    stepFunction: deleteForward,
-                    // Paragraphs in list items are treated as nonsense.
-                    // checked folowed by unchecked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]ghi</h2></li><li><h4>klm</h4></li></ul>',
-                });
-            }
-        );
+        test("should treat two blocks in a checklist item (checked/unchecked) as two list items and merge them", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]</h2><h3>ghi</h3></li><li class="o_checked"><h4>klm</h4></li></ul>',
+                stepFunction: deleteForward,
+                // Paragraphs in list items are treated as nonsense.
+                // unchecked folowed by checked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li class="o_checked"><h4>klm</h4></li></ul>',
+            });
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]</h2><h3>ghi</h3></li><li><h4>klm</h4></li></ul>',
+                stepFunction: deleteForward,
+                // Paragraphs in list items are treated as nonsense.
+                // checked folowed by unchecked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]ghi</h2></li><li><h4>klm</h4></li></ul>',
+            });
+        });
 
-        test.todo("should merge a bold list item into a non-formatted list item (2)", async () => {
+        test("should merge a bold list item into a non-formatted list item (2)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -643,87 +627,78 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge a bold list item (checked/unchecked) into a non-formatted list item",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
-                    stepFunction: deleteForward,
-                    // all checked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
-                    stepFunction: deleteForward,
-                    // only the removed li are unchecked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li>abc</li><li><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li>nop</li></ul>',
-                    stepFunction: deleteForward,
-                    // only the removed li are checked
-                    contentAfter:
-                        '<ul class="o_checklist"><li>abc</li><li><b>de</b>fg[]<b>hij</b>klm</li><li>nop</li></ul>',
-                });
-            }
-        );
+        test("should merge a bold list item (checked/unchecked) into a non-formatted list item", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+                stepFunction: deleteForward,
+                // all checked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+            });
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]</li><li><b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+                stepFunction: deleteForward,
+                // only the removed li are unchecked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked">abc</li><li class="o_checked"><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+            });
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li>abc</li><li><b>de</b>fg[]</li><li class="o_checked"><b>hij</b>klm</li><li>nop</li></ul>',
+                stepFunction: deleteForward,
+                // only the removed li are checked
+                contentAfter:
+                    '<ul class="o_checklist"><li>abc</li><li><b>de</b>fg[]<b>hij</b>klm</li><li>nop</li></ul>',
+            });
+        });
 
-        test.todo(
-            "should merge a paragraph starting with bold text into a checklist item with ending without formatting",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
-                    stepFunction: deleteForward,
-                    contentAfter:
-                        '<ul class="o_checklist"><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
-                    stepFunction: deleteForward,
-                    // kepp checked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
-                });
-            }
-        );
+        test("should merge a paragraph starting with bold text into a checklist item with ending without formatting", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
+                stepFunction: deleteForward,
+                contentAfter: '<ul class="o_checklist"><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
+            });
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]</li></ul><p><b>ghi</b>jkl</p>',
+                stepFunction: deleteForward,
+                // kepp checked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
+            });
+        });
 
-        test.todo(
-            "should merge a paragraph starting with bold text into a checklist item with ending with italic text",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
-                    stepFunction: deleteForward,
-                    contentAfter:
-                        '<ul class="o_checklist"><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore:
-                        '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
-                    stepFunction: deleteForward,
-                    // kepp checked
-                    contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
-                });
-            }
-        );
+        test("should merge a paragraph starting with bold text into a checklist item with ending with italic text", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
+                stepFunction: deleteForward,
+                contentAfter:
+                    '<ul class="o_checklist"><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
+            });
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i></li></ul><p><b>ghi</b>jkl</p>',
+                stepFunction: deleteForward,
+                // kepp checked
+                contentAfter:
+                    '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
+            });
+        });
     });
+
     describe("Complex merges with some containers parsed in list item", () => {
-        test.todo("should treat two blocks in a list item and keep the blocks", async () => {
+        test("should treat two blocks in a list item and keep the blocks", async () => {
             await testEditor({
                 contentBefore:
                     "<ul><li><h1>abc</h1></li><li><h2>def[]</h2><h3>ghi</h3></li><li><h4>klm</h4></li></ul>",
@@ -735,7 +710,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should treat two blocks in a checklist item and keep the blocks", async () => {
+        test("should treat two blocks in a checklist item and keep the blocks", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -853,6 +828,7 @@ describe("Selection not collapsed", () => {
             }
         );
     });
+
     describe("Unordered", () => {
         test.todo("should delete text within a list item", async () => {
             // Forward selection
