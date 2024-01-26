@@ -6,12 +6,11 @@ import { unformat } from "../utils";
 
 function setColor(color, mode) {
     return async (editor) => {
-        throw new Error("Not implemented command: applyColor");
-        // editor.dispatch('applyColor', color, mode);
+        editor.dispatch("APPLY_COLOR", { color, mode });
     };
 }
 
-test.todo("should apply a color to a slice of text in a span in a font", async () => {
+test("should apply a color to a slice of text in a span in a font", async () => {
     await testEditor({
         contentBefore: '<p>a<font class="a">b<span class="b">c[def]g</span>h</font>i</p>',
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -36,7 +35,7 @@ test.todo("should apply a color to the qweb tag", async () => {
     });
 });
 
-test.todo("should apply a background color to a slice of text in a span in a font", async () => {
+test("should apply a background color to a slice of text in a span in a font", async () => {
     await testEditor({
         contentBefore: '<p>a<font class="a">b<span class="b">c[def]g</span>h</font>i</p>',
         stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),
@@ -87,7 +86,7 @@ test.todo("should apply a background color on empty selection", async () => {
     });
 });
 
-test.todo("should not merge line on background color change", async () => {
+test("should not merge line on background color change", async () => {
     await testEditor({
         contentBefore: "<p><strong>[abcd</strong><br><strong>efghi]</strong></p>",
         stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),
@@ -97,7 +96,7 @@ test.todo("should not merge line on background color change", async () => {
     });
 });
 
-test.todo("should not merge line on color change", async () => {
+test("should not merge line on color change", async () => {
     await testEditor({
         contentBefore: "<p><strong>[abcd</strong><br><strong>efghi]</strong></p>",
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -107,7 +106,7 @@ test.todo("should not merge line on color change", async () => {
     });
 });
 
-test.todo("should not apply color on an uneditable element", async () => {
+test("should not apply color on an uneditable element", async () => {
     await testEditor({
         contentBefore: '<p>[a</p><p contenteditable="false">b</p><p>c]</p>',
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -140,7 +139,7 @@ test.todo(
     }
 );
 
-test.todo("should remove font tag after removing font color", async () => {
+test("should remove font tag after removing font color", async () => {
     await testEditor({
         contentBefore: '<p><font style="color: rgb(255, 0, 0);">[abcabc]</font></p>',
         stepFunction: setColor("", "color"),
@@ -153,7 +152,7 @@ test.todo("should remove font tag after removing font color", async () => {
     });
 });
 
-test.todo("should remove font tag after removing background color applied as style", async () => {
+test("should remove font tag after removing background color applied as style", async () => {
     await testEditor({
         contentBefore: '<p><font style="background-color: rgb(255, 0, 0);">[abcabc]</font></p>',
         stepFunction: setColor("", "backgroundColor"),
@@ -166,31 +165,27 @@ test.todo("should remove font tag after removing background color applied as sty
     });
 });
 
-test.todo(
-    "should remove font tag if font-color and background-color both are removed one by one",
-    async () => {
-        await testEditor({
-            contentBefore:
-                '<p><font style="color: rgb(255, 0, 0);" class="bg-200">[abcabc]</font></p>',
-            stepFunction: (editor) => {
-                setColor("", "backgroundColor")(editor);
-                setColor("", "color")(editor);
-            },
-            contentAfter: "<p>[abcabc]</p>",
-        });
-        await testEditor({
-            contentBefore:
-                '<p><font style="background-color: rgb(255, 0, 0);" class="text-900">[abcabc]</font></p>',
-            stepFunction: (editor) => {
-                setColor("", "color")(editor);
-                setColor("", "backgroundColor")(editor);
-            },
-            contentAfter: "<p>[abcabc]</p>",
-        });
-    }
-);
+test("should remove font tag if font-color and background-color both are removed one by one", async () => {
+    await testEditor({
+        contentBefore: '<p><font style="color: rgb(255, 0, 0);" class="bg-200">[abcabc]</font></p>',
+        stepFunction: (editor) => {
+            setColor("", "backgroundColor")(editor);
+            setColor("", "color")(editor);
+        },
+        contentAfter: "<p>[abcabc]</p>",
+    });
+    await testEditor({
+        contentBefore:
+            '<p><font style="background-color: rgb(255, 0, 0);" class="text-900">[abcabc]</font></p>',
+        stepFunction: (editor) => {
+            setColor("", "color")(editor);
+            setColor("", "backgroundColor")(editor);
+        },
+        contentAfter: "<p>[abcabc]</p>",
+    });
+});
 
-test.todo("should apply a color to a slice of text containing a span", async () => {
+test("should apply a color to a slice of text containing a span", async () => {
     await testEditor({
         contentBefore: '<p>a[b<span class="a">c</span>d]e</p>',
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -199,7 +194,7 @@ test.todo("should apply a color to a slice of text containing a span", async () 
     });
 });
 
-test.todo("should distribute color to texts and to button separately", async () => {
+test("should distribute color to texts and to button separately", async () => {
     await testEditor({
         contentBefore: '<p>a[b<a class="btn">c</a>d]e</p>',
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
