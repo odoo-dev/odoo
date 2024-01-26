@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { test, describe } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { deleteBackward, testEditor } from "../../helpers";
 import { unformat } from "../../utils";
-
-function deleteBackward() {
-    throw new Error("need a proper implementation");
-}
 
 describe("Selection collapsed", () => {
     // Note: All tests on ordered lists should be duplicated
@@ -26,7 +22,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the first character in a list item", async () => {
+            test("should delete the first character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>d[]efg</li></ol>",
                     stepFunction: deleteBackward,
@@ -34,7 +30,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete a character within a list item", async () => {
+            test("should delete a character within a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>de[]fg</li></ol>",
                     stepFunction: deleteBackward,
@@ -42,7 +38,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the last character in a list item", async () => {
+            test("should delete the last character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>defg[]</li></ol>",
                     stepFunction: deleteBackward,
@@ -169,7 +165,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed lists on rejoin", async () => {
+            test("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a</li></ol><p>[]b</p><ul><li>c</li></ul>",
                     stepFunction: deleteBackward,
@@ -177,7 +173,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed multi-level lists on rejoin", async () => {
+            test("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ol>
@@ -300,49 +296,46 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should not outdent while nested within a list item if the list is unbreakable",
-                async () => {
-                    // Only one LI.
-                    await testEditor({
-                        contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                    });
-                    // First LI.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                    // });
-                    // // In the middle.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                    // });
-                    // // Last LI.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                    // });
-                    // // With a div before the list:
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                    // });
-                }
-            );
+            test("should not outdent while nested within a list item if the list is unbreakable", async () => {
+                // Only one LI.
+                await testEditor({
+                    contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+                });
+                // First LI.
+                // await testEditor({
+                //     contentBefore:
+                //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+                //     stepFunction: deleteBackward,
+                //     contentAfter:
+                //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+                // });
+                // // In the middle.
+                // await testEditor({
+                //     contentBefore:
+                //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
+                //     stepFunction: deleteBackward,
+                //     contentAfter:
+                //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
+                // });
+                // // Last LI.
+                // await testEditor({
+                //     contentBefore:
+                //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
+                //     stepFunction: deleteBackward,
+                //     contentAfter:
+                //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
+                // });
+                // // With a div before the list:
+                // await testEditor({
+                //     contentBefore:
+                //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+                //     stepFunction: deleteBackward,
+                //     contentAfter:
+                //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+                // });
+            });
 
             test.todo("should outdent an empty list item within a list", async () => {
                 await testEditor({
@@ -399,7 +392,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a paragraph into a list item", async () => {
+            test("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li></ol><p>[]def</p>",
                     stepFunction: deleteBackward,
@@ -407,28 +400,21 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending without formatting",
-                async () => {
-                    await testEditor({
-                        contentBefore: "<ol><li><i>abc</i>def</li></ol><p><b>[]ghi</b>jkl</p>",
-                        stepFunction: deleteBackward,
-                        contentAfter: "<ol><li><i>abc</i>def[]<b>ghi</b>jkl</li></ol>",
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending without formatting", async () => {
+                await testEditor({
+                    contentBefore: "<ol><li><i>abc</i>def</li></ol><p><b>[]ghi</b>jkl</p>",
+                    stepFunction: deleteBackward,
+                    contentAfter: "<ol><li><i>abc</i>def[]<b>ghi</b>jkl</li></ol>",
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending with italic text",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            "<ol><li><b>abc</b><i>def</i></li></ol><p><b>[]ghi</b>jkl</p>",
-                        stepFunction: deleteBackward,
-                        contentAfter: "<ol><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ol>",
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending with italic text", async () => {
+                await testEditor({
+                    contentBefore: "<ol><li><b>abc</b><i>def</i></li></ol><p><b>[]ghi</b>jkl</p>",
+                    stepFunction: deleteBackward,
+                    contentAfter: "<ol><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ol>",
+                });
+            });
         });
     });
     describe("Unordered", () => {
@@ -446,7 +432,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the first character in a list item", async () => {
+            test("should delete the first character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>d[]efg</li></ul>",
                     stepFunction: deleteBackward,
@@ -454,7 +440,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete a character within a list item", async () => {
+            test("should delete a character within a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>de[]fg</li></ul>",
                     stepFunction: deleteBackward,
@@ -462,7 +448,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the last character in a list item", async () => {
+            test("should delete the last character in a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>defg[]</li></ul>",
                     stepFunction: deleteBackward,
@@ -589,7 +575,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed lists on rejoin", async () => {
+            test("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a</li></ul><p>[]b</p><ol><li>c</li></ol>",
                     stepFunction: deleteBackward,
@@ -597,7 +583,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed multi-level lists on rejoin", async () => {
+            test("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ul>
@@ -768,7 +754,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a paragraph into a list item", async () => {
+            test("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li></ul><p>[]def</p>",
                     stepFunction: deleteBackward,
@@ -801,28 +787,21 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending without formatting",
-                async () => {
-                    await testEditor({
-                        contentBefore: "<ul><li><i>abc</i>def</li></ul><p><b>[]ghi</b>jkl</p>",
-                        stepFunction: deleteBackward,
-                        contentAfter: "<ul><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>",
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending without formatting", async () => {
+                await testEditor({
+                    contentBefore: "<ul><li><i>abc</i>def</li></ul><p><b>[]ghi</b>jkl</p>",
+                    stepFunction: deleteBackward,
+                    contentAfter: "<ul><li><i>abc</i>def[]<b>ghi</b>jkl</li></ul>",
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending with italic text",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            "<ul><li><b>abc</b><i>def</i></li></ul><p><b>[]ghi</b>jkl</p>",
-                        stepFunction: deleteBackward,
-                        contentAfter: "<ul><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>",
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending with italic text", async () => {
+                await testEditor({
+                    contentBefore: "<ul><li><b>abc</b><i>def</i></li></ul><p><b>[]ghi</b>jkl</p>",
+                    stepFunction: deleteBackward,
+                    contentAfter: "<ul><li><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>",
+                });
+            });
         });
     });
     describe("Checklist", () => {
@@ -847,7 +826,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the first character in a list item", async () => {
+            test("should delete the first character in a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -858,7 +837,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete a character within a list item", async () => {
+            test("should delete a character within a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -869,7 +848,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should delete the last character in a list item", async () => {
+            test("should delete the last character in a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1120,7 +1099,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed lists on rejoin", async () => {
+            test("should not convert mixed lists on rejoin", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1131,7 +1110,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should not convert mixed multi-level lists on rejoin", async () => {
+            test("should not convert mixed multi-level lists on rejoin", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: unformat(`
@@ -1391,7 +1370,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a paragraph into a list item", async () => {
+            test("should merge a paragraph into a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1425,33 +1404,27 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending without formatting",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def</li></ul><p><b>[]ghi</b>jkl</p>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending without formatting", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def</li></ul><p><b>[]ghi</b>jkl</p>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked"><i>abc</i>def[]<b>ghi</b>jkl</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should merge a paragraph starting with bold text into a list item with ending with italic text",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def</i></li></ul><p><b>[]ghi</b>jkl</p>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
-                    });
-                }
-            );
+            test("should merge a paragraph starting with bold text into a list item with ending with italic text", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def</i></li></ul><p><b>[]ghi</b>jkl</p>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked"><b>abc</b><i>def[]</i><b>ghi</b>jkl</li></ul>',
+                });
+            });
         });
     });
     describe("Mixed", () => {
@@ -2077,7 +2050,7 @@ describe("Selection collapsed", () => {
         });
     });
     describe("Complex merges with some containers parsed in list item", () => {
-        test.todo("should treat two blocks in a list item and keep blocks", async () => {
+        test("should treat two blocks in a list item and keep blocks", async () => {
             await testEditor({
                 contentBefore:
                     "<ol><li><h1>abc</h1></li><li><h2>def</h2><h3>[]ghi</h3></li><li><h4>klm</h4></li></ol>",
@@ -2089,7 +2062,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should treat two blocks in a list item and keep blocks (2)", async () => {
+        test("should treat two blocks in a list item and keep blocks (2)", async () => {
             await testEditor({
                 contentBefore:
                     "<ul><li><h1>abc</h1></li><li><h2>def</h2><h3>[]ghi</h3></li><li><h4>klm</h4></li></ul>",
@@ -2101,7 +2074,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should treat two blocks in a list item and keep blocks (3)", async () => {
+        test("should treat two blocks in a list item and keep blocks (3)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
