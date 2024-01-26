@@ -31,7 +31,7 @@ export class HistoryPlugin extends Plugin {
 
     handleDOMChange() {
         // not sure about this, but cool to see in logs if a change has been observed
-        this.dispatch("CONTENT_UPDATED", this.el);
+        this.dispatch("CONTENT_UPDATED", this.editable);
     }
 }
 
