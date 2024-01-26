@@ -1,13 +1,9 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor, insertLineBreak } from "../../helpers";
 
-function insertLineBreak() {
-    throw new Error("need a proper implementation");
-}
-
-test.todo("should insert a <br> into an empty list item", async () => {
+test("should insert a <br> into an empty list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>[]<br></li></ul>",
         stepFunction: insertLineBreak,
@@ -15,7 +11,7 @@ test.todo("should insert a <br> into an empty list item", async () => {
     });
 });
 
-test.todo("should insert a <br> at the beggining of a list item", async () => {
+test("should insert a <br> at the beggining of a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>[]abc</li></ul>",
         stepFunction: insertLineBreak,
@@ -23,7 +19,7 @@ test.todo("should insert a <br> at the beggining of a list item", async () => {
     });
 });
 
-test.todo("should insert a <br> within a list item", async () => {
+test("should insert a <br> within a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>ab[]cd</li></ul>",
         stepFunction: insertLineBreak,
@@ -31,7 +27,7 @@ test.todo("should insert a <br> within a list item", async () => {
     });
 });
 
-test.todo("should insert a line break (2 <br>) at the end of a list item", async () => {
+test("should insert a line break (2 <br>) at the end of a list item", async () => {
     await testEditor({
         contentBefore: "<ul><li>abc[]</li></ul>",
         stepFunction: insertLineBreak,
