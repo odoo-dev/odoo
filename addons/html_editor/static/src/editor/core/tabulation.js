@@ -39,7 +39,8 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            this.indent();
+            const traversedNodes = getTraversedNodes(this.editable);
+            this.indentNodes(traversedNodes);
         }
     }
 
@@ -49,21 +50,12 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
-        this.outdent();
+        const traversedNodes = getTraversedNodes(this.editable);
+        this.outdentNodes(traversedNodes);
     }
 
     insertTab() {
         this.shared.dom_insert(parseHTML(this.document, tabHtml));
-    }
-
-    indent() {
-        const traversedNodes = getTraversedNodes(this.editable);
-        this.indentNodes(traversedNodes);
-    }
-
-    outdent() {
-        const traversedNodes = getTraversedNodes(this.editable);
-        this.outdentNodes(traversedNodes);
     }
 
     /**
