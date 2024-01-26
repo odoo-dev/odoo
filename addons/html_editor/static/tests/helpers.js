@@ -300,3 +300,7 @@ export function insertTestHtml(innerHtml) {
     container.innerHTML = innerHtml;
     return container.childNodes;
 }
+
+export function insertLineBreak(editor) {
+    editor.dispatch("INSERT_LINEBREAK");
+}
