@@ -34,6 +34,10 @@ export class HintPlugin extends Plugin {
         this.updateHints();
     }
 
+    destroy() {
+        this.removeHints();
+    }
+
     handleCommand(command, payload) {
         switch (command) {
             case "CONTENT_UPDATED":
@@ -43,14 +47,17 @@ export class HintPlugin extends Plugin {
             case "CREATE_HINT":
                 this.createTempHint(payload.el, payload.text);
                 break;
-            case "CLEAN": {
-                const root = payload;
-                for (const hint of root.querySelectorAll(".o-we-hint")) {
-                    this.removeHint(hint);
-                }
-                this.tempHints.clear();
-            }
+            case "CLEAN":
+                this.removeHints();
+                break;
         }
+    }
+
+    removeHints() {
+        for (const hint of this.editable.querySelectorAll(".o-we-hint")) {
+            this.removeHint(hint);
+        }
+        this.tempHints.clear();
     }
 
     createTempHint(el, text) {
