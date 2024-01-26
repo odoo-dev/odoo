@@ -96,9 +96,10 @@ export class TablePlugin extends Plugin {
         }
         this.picker.open();
     }
-    insertTable({ rowNumber = 2, colNumber = 2 } = {}) {
-        const tdsHtml = new Array(colNumber).fill("<td><p><br></p></td>").join("");
-        const trsHtml = new Array(rowNumber).fill(`<tr>${tdsHtml}</tr>`).join("");
+
+    insertTable({ rows = 2, cols = 2 } = {}) {
+        const tdsHtml = new Array(cols).fill("<td><p><br></p></td>").join("");
+        const trsHtml = new Array(rows).fill(`<tr>${tdsHtml}</tr>`).join("");
         const tableHtml = `<table class="table table-bordered o_table"><tbody>${trsHtml}</tbody></table>`;
         const sel = this.document.getSelection();
         if (!sel.isCollapsed) {
