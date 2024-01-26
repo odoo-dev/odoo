@@ -4,18 +4,25 @@ import { Plugin } from "../plugin";
 import { registry } from "@web/core/registry";
 import { closestBlock } from "../utils/blocks";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
-import { isEditorTab } from "../utils/dom_info";
+import { isEditorTab, isZWS } from "../utils/dom_info";
 import { splitTextNode } from "../utils/dom_split";
 import { DIRECTIONS } from "../utils/position";
 import { getTraversedNodes, preserveCursor, setSelection } from "../utils/selection";
 import { parseHTML } from "../utils/html";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
+const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
 
 export class TabulationPlugin extends Plugin {
     static name = "tabulation";
     static dependencies = ["dom"];
     static shared = ["indentNodes", "outdentNodes"];
+
+    setup() {
+        for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
+            tab.setAttribute("contenteditable", "false");
+        }
+    }
 
     handleCommand(command, payload) {
         switch (command) {
@@ -25,6 +32,16 @@ export class TabulationPlugin extends Plugin {
             case "SHIFT_TAB":
                 this.handleShiftTab();
                 break;
+            case "CONTENT_UPDATED": {
+                const root = payload;
+                // @todo obs: this triggers a new CONTENT_UPDATED with the current historyPlugin.
+                this.alignTabs(root);
+                break;
+            }
+            case "CLEAN":
+                for (const tab of this.editable.querySelectorAll("span.oe-tabs")) {
+                    tab.removeAttribute("contenteditable");
+                }
         }
     }
 
@@ -122,6 +139,45 @@ export class TabulationPlugin extends Plugin {
             tab.remove();
         }
         restore();
+    }
+
+    /**
+     * @param {HTMLSpanElement} tabSpan - span.oe-tabs element
+     */
+    adjustTabWidth(tabSpan) {
+        let tabPreviousSibling = tabSpan.previousSibling;
+        while (isZWS(tabPreviousSibling)) {
+            tabPreviousSibling = tabPreviousSibling.previousSibling;
+        }
+        if (isEditorTab(tabPreviousSibling)) {
+            tabSpan.style.width = `${GRID_COLUMN_WIDTH}px`;
+            return;
+        }
+        const spanRect = tabSpan.getBoundingClientRect();
+        const referenceRect = this.editable.firstElementChild?.getBoundingClientRect();
+        // @ todo @phoenix Re-evaluate if this check is necessary.
+        // Values from getBoundingClientRect() are all zeros during
+        // Editor startup or saving. We cannot recalculate the tabs
+        // width in thoses cases.
+        if (!referenceRect?.width || !spanRect.width) {
+            return;
+        }
+        const relativePosition = spanRect.left - referenceRect.left;
+        const distToNextGridLine = GRID_COLUMN_WIDTH - (relativePosition % GRID_COLUMN_WIDTH);
+        // Round to the first decimal point.
+        const width = distToNextGridLine.toFixed(1);
+        tabSpan.style.width = `${width}px`;
+    }
+
+    /**
+     * Aligns the tabs under the specified tree to a grid.
+     *
+     * @param {HTMLElement} [root] - The tree root.
+     */
+    alignTabs(root = this.editable) {
+        for (const tab of root.querySelectorAll("span.oe-tabs")) {
+            this.adjustTabWidth(tab);
+        }
     }
 }
 
