@@ -222,7 +222,7 @@ export async function insertText(editor, text) {
     // the editor to detect them since they would not trigger the default
     // browser behavior otherwise.
     const sel = window.getSelection();
-    const range = sel.getRangeAt(0);
+    let range = sel.getRangeAt(0);
     if (!range.collapsed) {
         throw new Error("need to implement something... maybe");
     }
@@ -231,6 +231,7 @@ export async function insertText(editor, text) {
         range.startContainer.appendChild(txt);
         range.insertNode(txt);
         setSelection({ anchorNode: txt, anchorOffset: 0, focusNode: txt, focusOffset: 0 });
+        range = sel.getRangeAt(0);
     }
     const node = range.startContainer;
     let offset = range.startOffset;
