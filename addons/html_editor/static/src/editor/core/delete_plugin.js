@@ -41,6 +41,7 @@ export class DeletePlugin extends Plugin {
     static name = "delete";
 
     setup() {
+        this.registry.category("shortcuts").add("backspace", { command: "DELETE_BACKWARD" });
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
     }
     handleCommand(command, payload) {

@@ -22,6 +22,8 @@ export class TabulationPlugin extends Plugin {
         for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
             tab.setAttribute("contenteditable", "false");
         }
+        this.registry.category("shortcuts").add("tab", { command: "TAB" });
+        this.registry.category("shortcuts").add("shift+tab", { command: "SHIFT_TAB" });
     }
 
     handleCommand(command, payload) {
