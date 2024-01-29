@@ -237,13 +237,16 @@ export class DomPlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
-    setTag({ tagName }) {
+    setTag({ tagName, extraClass }) {
         const selection = this.document.getSelection();
         const range = selection.getRangeAt(0);
         const node = range.endContainer;
         const offset = range.endOffset;
         const elem = range.endContainer.parentElement;
         const newElem = this.document.createElement(tagName);
+        if (extraClass) {
+            newElem.classList.add(extraClass);
+        }
         const children = [...elem.childNodes];
         let hasOnlyEmptyTextNodes = true;
         for (const child of children) {

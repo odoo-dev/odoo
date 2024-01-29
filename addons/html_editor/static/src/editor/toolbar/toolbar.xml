@@ -3,7 +3,10 @@
     <t t-name="html_editor.Toolbar">
         <div t-ref="root" class="o-we-toolbar position-absolute bg-white d-flex align-items-center" style="width:300px;height:40px">
             <t t-foreach="props.buttons" t-as="button" t-key="button.id">
-                <div
+                <t t-if="button.component">
+                    <t t-component="button.component" dispatch.bind="dispatch"/>
+                </t>
+                <div t-else=""
                     class="btn btn-light fa fa-fw ps-1 pe-3 mx-1"
                     t-att-class="{
                         [button.icon]: true,
