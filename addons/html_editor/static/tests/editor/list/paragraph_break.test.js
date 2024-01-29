@@ -4,8 +4,8 @@ import { test, describe } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 import { unformat } from "../../utils";
 
-function insertParagraphBreak() {
-    throw new Error("need a proper implementation");
+function insertParagraphBreak(editor) {
+    editor.dispatch("SPLIT_BLOCK");
 }
 
 function insertText() {
@@ -15,7 +15,7 @@ function insertText() {
 describe("Selection collapsed", () => {
     describe("Ordered", () => {
         describe("Basic", () => {
-            test.todo("should add an empty list item before a list item", async () => {
+            test("should add an empty list item before a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>[]abc</li></ol>",
                     stepFunction: insertParagraphBreak,
@@ -23,7 +23,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should split a list item in two", async () => {
+            test("should split a list item in two", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>ab[]cd</li></ol>",
                     stepFunction: insertParagraphBreak,
@@ -31,7 +31,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should add an empty list item after a list item", async () => {
+            test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc[]</li></ol>",
                     stepFunction: insertParagraphBreak,
@@ -219,7 +219,7 @@ describe("Selection collapsed", () => {
     });
     describe("Unordered", () => {
         describe("Basic", () => {
-            test.todo("should add an empty list item before a list item", async () => {
+            test("should add an empty list item before a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>[]abc</li></ul>",
                     stepFunction: insertParagraphBreak,
@@ -227,7 +227,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should split a list item in two", async () => {
+            test("should split a list item in two", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>ab[]cd</li></ul>",
                     stepFunction: insertParagraphBreak,
@@ -235,7 +235,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should add an empty list item after a list item", async () => {
+            test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc[]</li></ul>",
                     stepFunction: insertParagraphBreak,
@@ -345,7 +345,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should keep the list-style when add li", async () => {
+            test("should keep the list-style when add li", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ul>
@@ -363,31 +363,25 @@ describe("Selection collapsed", () => {
     });
     describe("Checklist", () => {
         describe("Basic", () => {
-            test.todo(
-                "should add an empty list item before a checklist item (unchecked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
-                        stepFunction: insertParagraphBreak,
-                        contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item before a checklist item (unchecked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should add an empty list item before a checklist item (checked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
-                        stepFunction: insertParagraphBreak,
-                        contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item before a checklist item (checked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
+                });
+            });
 
-            test.todo("should split a checklist item in two (unchecked)", async () => {
+            test("should split a checklist item in two (unchecked)", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',

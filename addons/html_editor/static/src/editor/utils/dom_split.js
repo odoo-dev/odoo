@@ -64,6 +64,29 @@ export function splitElement(element, offset) {
     element.remove();
     return [before, after];
 }
+
+/**
+ * Split the given element at the given offset, until the given limit ancestor.
+ * The element will be removed in the process so caution is advised in dealing
+ * with its reference. Returns a tuple containing the new elements on both sides
+ * of the split.
+ *
+ * @param {Element} element
+ * @param {number} offset
+ * @param {Element} limitAncestor
+ * @returns {[Element, Element]}
+ */
+export function splitElementUntil(element, offset, limitAncestor) {
+    if (element === limitAncestor) {
+        return [element, element];
+    }
+    let [before, after] = splitElement(element, offset);
+    if (after.parentElement !== limitAncestor) {
+        const afterIndex = childNodeIndex(after);
+        [before, after] = splitElementUntil(after.parentElement, afterIndex, limitAncestor);
+    }
+    return [before, after];
+}
 /**
  * Split around the given elements, until a given ancestor (included). Elements
  * will be removed in the process so caution is advised in dealing with their
