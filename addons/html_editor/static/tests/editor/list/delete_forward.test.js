@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { test, describe } from "@odoo/hoot";
-import { testEditor, deleteForward } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { deleteForward } from "../../test_helpers/user_actions";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../helpers";
+import { insertTestHtml } from "../test_helpers/editor";
 import { splitAroundUntil, splitTextNode } from "../../src/editor/utils/dom_split";
 
 describe("splitAroundUntil", () => {

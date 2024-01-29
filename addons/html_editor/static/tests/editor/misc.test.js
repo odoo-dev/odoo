@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { getContent, setContent, setupEditor, testEditor } from "../helpers";
+import { setupEditor, testEditor } from "../test_helpers/editor";
+import { getContent, setContent } from "../test_helpers/selection";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});

@@ -1,14 +1,9 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
-import { unformat } from "../utils";
-
-function setColor(color, mode) {
-    return async (editor) => {
-        editor.dispatch("APPLY_COLOR", { color, mode });
-    };
-}
+import { testEditor } from "../test_helpers/editor";
+import { unformat } from "../test_helpers/format";
+import { setColor } from "../test_helpers/user_actions";
 
 test("should apply a color to a slice of text in a span in a font", async () => {
     await testEditor({

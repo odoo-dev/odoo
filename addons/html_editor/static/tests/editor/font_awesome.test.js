@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteBackward, deleteForward, insertText, testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
+import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
 
 describe("parse/render", () => {
     test.todo("should parse an old-school fontawesome", async () => {

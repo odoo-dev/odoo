@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteBackward, testEditor } from "../helpers";
-import { unformat } from "../utils";
+import { testEditor } from "../test_helpers/editor";
+import { unformat } from "../test_helpers/format";
+import { deleteBackward } from "../test_helpers/user_actions";
 
 describe("monetary field", () => {
     test.todo("should make a span inside a monetary field be unremovable", async () => {

@@ -11,7 +11,7 @@ import {
     startPos,
 } from "@html_editor/editor/utils/position";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../helpers";
+import { insertTestHtml } from "../test_helpers/editor";
 
 describe("leftPos", () => {
     test("should return the left position of a lonely text node", () => {
