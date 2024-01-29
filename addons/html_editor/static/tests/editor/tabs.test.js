@@ -290,6 +290,7 @@ describe("insert tabulation", () => {
                 <blockquote>f${oeTab()}]g</blockquote>
             `),
             stepFunction: keydownTab,
+            // prettier-ignore
             contentAfterEdit: unformat(`
                 <p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB,false)}</p>
                 <ul>
@@ -306,6 +307,7 @@ describe("insert tabulation", () => {
                 </ul>
                 <blockquote>${oeTab(tabInBlockquote, false)}f${oeTab(tabAfterFinBlockquote, false)}]g</blockquote>,
             `),
+            // prettier-ignore
             contentAfter: unformat(`
                 <p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>
                 <ul>
@@ -487,9 +489,17 @@ describe("delete mixed tabulation", () => {
 
 describe("remove tabulation with shift+tab", () => {
     test("should not remove a non-leading tab character", async () => {
+        function oeTab(size, contenteditable = true) {
+            return (
+                `<span class="oe-tabs"` +
+                (size ? ` style="width: ${size.toFixed(1)}px;"` : "") +
+                (contenteditable ? "" : ' contenteditable="false"') +
+                `>\u0009</span>\u200B`
+            );
+        }
         const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
-            contentBefore: `<p>a${oeTab()}[]b</p>`,
+            contentBefore: `<p>a${oeTab(tabAfterA)}[]b</p>`,
             stepFunction: keydownShiftTab,
             contentAfterEdit: `<p>a${oeTab(tabAfterA, false)}[]b</p>`,
             contentAfter: `<p>a${oeTab(tabAfterA)}[]b</p>`,
