@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor, toggleOrderedList } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { toggleOrderedList } from "../../test_helpers/user_actions";
 
 describe("Range collapsed", () => {
     describe("Insert", () => {

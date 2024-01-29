@@ -4,32 +4,9 @@ import { CLIPBOARD_WHITELISTS } from "@html_editor/editor/utils/clipboard";
 import { setSelection } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { setSelection as setTestSelection, testEditor } from "../helpers";
-
-// Mock an paste event and send it to the editor.
-async function pasteData(editor, text, type) {
-    const mockEvent = {
-        dataType: "text/plain",
-        data: text,
-        clipboardData: {
-            getData: (datatype) => (type === datatype ? text : null),
-            files: [],
-            items: [],
-        },
-        preventDefault: () => {},
-    };
-    // TODO @phoenix need to replace _onPaste.
-    await editor._onPaste(mockEvent);
-}
-function pasteText(editor, text) {
-    return pasteData(editor, text, "text/plain");
-}
-function pasteHtml(editor, html) {
-    return pasteData(editor, html, "text/html");
-}
-function pasteOdooEditorHtml(editor, html) {
-    return pasteData(editor, html, "text/odoo-editor");
-}
+import { testEditor } from "../test_helpers/editor";
+import { setSelection as setTestSelection } from "../test_helpers/selection";
+import { pasteHtml, pasteOdooEditorHtml, pasteText } from "../test_helpers/user_actions";
 
 function isInline(node) {
     return ["I", "B", "U", "S", "EM", "STRONG", "IMG", "BR", "A", "FONT"].includes(node);

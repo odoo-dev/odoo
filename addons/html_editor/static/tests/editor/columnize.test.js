@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
 
 function columnsContainer(contents) {
     return `<div class="container o_text_columns"><div class="row">${contents}</div></div>`;

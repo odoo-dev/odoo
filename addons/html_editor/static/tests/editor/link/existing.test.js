@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { insertText, testEditor } from "../../helpers";
+import { testEditor } from "../../test_helpers/editor";
+import { insertText } from "../../test_helpers/user_actions";
 
 test("should parse correctly a span inside a Link", async () => {
     await testEditor({

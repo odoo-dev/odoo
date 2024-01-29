@@ -1,8 +1,10 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { insertText, setSelection, testEditor } from "../../helpers";
-import { s, span, strikeThrough } from "./utils";
+import { insertText, testEditor } from "../../test_helpers/editor";
+import { setSelection } from "../../test_helpers/selection";
+import { s, span } from "../../test_helpers/tags";
+import { strikeThrough } from "../../test_helpers/user_actions";
 
 test("should make a few characters strikeThrough", async () => {
     await testEditor({

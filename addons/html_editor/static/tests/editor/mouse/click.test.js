@@ -1,27 +1,8 @@
 /** @odoo-module */
 
-import { childNodeIndex } from "@html_editor/editor/utils/position";
 import { test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
-import { testEditor } from "../../helpers";
-
-// Simulates placing the cursor at the editable root after a mouse click.
-async function simulateMouseClick(editor, node, after = false) {
-    let editableChild = node;
-    while (editableChild.parentNode !== editor.editable) {
-        editableChild = editableChild.parentNode;
-    }
-    const index = after ? childNodeIndex(editableChild) + 1 : childNodeIndex(editableChild);
-    const pos = [editor.editable, index];
-    dispatch(editor.editable, "mousedown");
-    const selection = editor.document.getSelection();
-    selection.setBaseAndExtent(...pos, ...pos);
-
-    //TODO @phoenix check if this is still needed nextTick
-    // await nextTick();
-    dispatch(editor.editable, "mouseup");
-    dispatch(editor.editable, "click");
-}
+import { testEditor } from "../../test_helpers/editor";
+import { simulateMouseClick } from "../../test_helpers/user_actions";
 
 test.todo("should insert a paragraph at end of editable and place cursor in it", async () => {
     await testEditor({

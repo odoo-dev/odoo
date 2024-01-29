@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteForward, testEditor, insertText } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { deleteForward, insertText } from "../../test_helpers/user_actions";
 
 /**
  * content of the "deleteForward" sub suite in editor.test.js

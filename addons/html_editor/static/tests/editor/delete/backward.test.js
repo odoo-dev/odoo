@@ -1,9 +1,10 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor, deleteBackward, insertText } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
 import { dispatch } from "@odoo/hoot-dom";
+import { deleteBackward, insertText } from "../../test_helpers/user_actions";
 
 /**
  * content of the "deleteBackward" sub suite in editor.test.js

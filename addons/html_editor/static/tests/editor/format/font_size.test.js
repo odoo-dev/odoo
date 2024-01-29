@@ -1,9 +1,10 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-import { setFontSize, strong } from "./utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { strong } from "../../test_helpers/tags";
+import { setFontSize } from "../../test_helpers/user_actions";
 
 test("should change the font size of a few characters", async () => {
     await testEditor({
