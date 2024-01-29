@@ -27,6 +27,8 @@ export class Plugin {
 
     setup() {}
 
+    start() {}
+
     /**
      * add it here so it is available in tooling
      *
