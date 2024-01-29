@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { setupEditor } from "../../helpers";
+import { setupEditor } from "../../test_helpers/editor";
 
 function insertTable(editor, cols, rows) {
     editor.dispatch("INSERT_TABLE", { cols, rows });

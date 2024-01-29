@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { getContent, setupEditor } from "../helpers";
+import { setupEditor } from "../test_helpers/editor";
+import { getContent } from "../test_helpers/selection";
 
 test("hints are removed when editor is destroyed", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
