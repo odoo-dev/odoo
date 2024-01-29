@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.FontSelector">
+        <Dropdown togglerClass="'btn btn-light'">
+            <t t-set-slot="toggler">
+                <t t-esc="fontName"/>
+            </t>
+            <t t-foreach="items" t-as="item" t-key="item_index">
+                <DropdownItem onSelected="() => this.dispatch('SET_TAG', item)">
+                    <div class="user-select-none" t-esc="item.name"/>
+                </DropdownItem>
+            </t>
+        </Dropdown>
+    </t>
+</templates>
