@@ -1,5 +1,7 @@
 /** @odoo-module */
+
 import { expect } from "@odoo/hoot";
+import { testEditor } from "./editor";
 
 export const TAB_WIDTH = 40;
 
@@ -74,7 +76,7 @@ function extractWidth(content) {
  * @param {string} contentSpec
  * @param {"contentAfterEdit"|"contentAfter"} mode
  */
-export function compare(contentEl, contentSpec, mode) {
+function compare(contentEl, contentSpec, mode) {
     const maxDiff = 0.5;
     const { text: receivedContent, widths: receivedWidths } = extractWidth(contentEl);
     const { text: expectedContent, widths: expectedWidths } = extractWidth(contentSpec);
@@ -97,4 +99,8 @@ export function compare(contentEl, contentSpec, mode) {
                 )
                 .join("\n"),
     });
+}
+
+export function testTabulation(params) {
+    return testEditor({ ...params, compareFunction: compare });
 }
