@@ -4,17 +4,7 @@ import { Registry, registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
-export const defaultConfig = {
-    shortcuts: [
-        { hotkey: "control+b", command: "FORMAT_BOLD" },
-        { hotkey: "control+i", command: "FORMAT_ITALIC" },
-        { hotkey: "control+u", command: "FORMAT_UNDERLINE" },
-        { hotkey: "control+5", command: "FORMAT_STRIKETHROUGH" },
-        { hotkey: "tab", command: "TAB" },
-        { hotkey: "shift+tab", command: "SHIFT_TAB" },
-        { hotkey: "backspace", command: "DELETE_BACKWARD" },
-    ],
-};
+export const defaultConfig = {};
 
 function getPlugins() {
     const plugins = new Set(registry.category("phoenix_plugins").getAll());
@@ -122,6 +112,10 @@ export class Editor {
                 }
                 shared[h] = plugin[h].bind(plugin);
             }
+        }
+
+        for (const plugin of this.plugins) {
+            plugin.start();
         }
     }
 

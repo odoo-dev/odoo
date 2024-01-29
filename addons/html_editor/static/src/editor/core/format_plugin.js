@@ -9,6 +9,13 @@ import { getTraversedNodes } from "../utils/selection";
 export class FormatPlugin extends Plugin {
     static name = "format";
 
+    setup() {
+        this.registry.category("shortcuts").add("control+b", { command: "FORMAT_BOLD" });
+        this.registry.category("shortcuts").add("control+i", { command: "FORMAT_ITALIC" });
+        this.registry.category("shortcuts").add("control+u", { command: "FORMAT_UNDERLINE" });
+        this.registry.category("shortcuts").add("control+5", { command: "FORMAT_STRIKETHROUGH" });
+    }
+
     handleCommand(command, size) {
         switch (command) {
             case "FORMAT_BOLD":
