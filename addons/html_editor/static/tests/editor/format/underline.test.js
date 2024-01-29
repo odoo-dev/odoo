@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { em, italic, s, span, u, underline } from "./utils";
+import { testEditor } from "../../test_helpers/editor";
+import { em, s, span, u } from "../../test_helpers/tags";
+import { italic, underline } from "../../test_helpers/user_actions";
 
 test("should make a few characters underline", async () => {
     await testEditor({

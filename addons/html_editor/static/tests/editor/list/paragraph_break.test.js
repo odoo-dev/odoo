@@ -1,12 +1,9 @@
 /** @odoo-module */
 
 import { test, describe } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-
-function insertParagraphBreak(editor) {
-    editor.dispatch("SPLIT_BLOCK");
-}
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { insertParagraphBreak } from "../../test_helpers/user_actions";
 
 function insertText() {
     throw new Error("need a proper implementation");

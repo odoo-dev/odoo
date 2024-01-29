@@ -2,8 +2,8 @@
 
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
 
 describe("move selection with tab/shift+tab", () => {
     describe("tab", () => {

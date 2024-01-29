@@ -1,19 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-import { bold } from "../format/utils";
-
-function applyColor(color, mode, element) {
-    throw new Error("applyColor Not implemented");
-    // return (editor) => editor.dispatch("APPLY_COLOR", color, mode, element);
-}
-
-function resetSize(editor) {
-    throw new Error("applyColor Not implemented");
-    // return editor.execCommand("RESET_SIZE");
-}
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { applyColor, bold, resetSize } from "../../test_helpers/user_actions";
 
 describe("select a full table on cross over", () => {
     describe("select", () => {

@@ -12,7 +12,7 @@ import {
     lastLeaf,
 } from "@html_editor/editor/utils/dom_traversal";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../helpers";
+import { insertTestHtml } from "../test_helpers/editor";
 
 describe("closestElement", () => {
     test("should find the closest element to a text node", () => {

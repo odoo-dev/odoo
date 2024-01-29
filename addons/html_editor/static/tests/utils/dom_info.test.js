@@ -7,7 +7,7 @@ import {
     previousLeaf,
 } from "@html_editor/editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../helpers";
+import { insertTestHtml } from "../test_helpers/editor";
 
 describe("previousLeaf", () => {
     test("should find the previous leaf of a deeply nested node", () => {

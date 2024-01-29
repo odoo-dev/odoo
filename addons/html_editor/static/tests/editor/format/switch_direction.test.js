@@ -1,8 +1,8 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { switchDirection } from "./utils";
+import { testEditor } from "../../test_helpers/editor";
+import { switchDirection } from "../../test_helpers/user_actions";
 
 test.todo("should switch direction on a collapsed range", async () => {
     await testEditor({

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor } from "../../test_helpers/editor";
 
 test.todo("should remove the background image when clear the format", async () => {
     await testEditor({

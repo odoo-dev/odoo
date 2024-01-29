@@ -1,15 +1,10 @@
 /** @odoo-module */
 
 import { test, describe, getFixture, expect, before } from "@odoo/hoot";
-import {
-    deleteForward,
-    deleteBackward,
-    insertText,
-    testEditor,
-    setupEditor,
-    getContent,
-} from "../helpers";
+import { testEditor, setupEditor } from "../test_helpers/editor";
 import { dispatch } from "@odoo/hoot-dom";
+import { getContent } from "../test_helpers/selection";
+import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
 
 const TAB_WIDTH = 40;
 let charWidths = undefined;
