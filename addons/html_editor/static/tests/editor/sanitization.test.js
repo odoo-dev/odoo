@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
 
 test("should remove empty class attribute", async () => {
     // content after is compared after cleaning up DOM

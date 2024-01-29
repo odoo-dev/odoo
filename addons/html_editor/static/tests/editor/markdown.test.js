@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { insertText, testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
+import { insertText } from "../test_helpers/user_actions";
 
 describe("inline code", () => {
     test.todo("should convert text into inline code (start)", async () => {

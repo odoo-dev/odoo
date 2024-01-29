@@ -1,27 +1,13 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
-
-function justifyLeft(editor) {
-    throw new Error("Not implemented command: justifyLeft");
-    // editor.dispatch('xxx');
-}
-
-function justifyCenter(editor) {
-    throw new Error("Not implemented command: justifyCenter");
-    // editor.dispatch('xxx');
-}
-
-function justifyRight(editor) {
-    throw new Error("Not implemented command: justifyRight");
-    // editor.dispatch('xxx');
-}
-
-function justifyFull(editor) {
-    throw new Error("Not implemented command: justifyFull");
-    // editor.dispatch('xxx');
-}
+import { testEditor } from "../test_helpers/editor";
+import {
+    justifyCenter,
+    justifyFull,
+    justifyLeft,
+    justifyRight,
+} from "../test_helpers/user_actions";
 
 describe("left", () => {
     test.todo("should align left", async () => {

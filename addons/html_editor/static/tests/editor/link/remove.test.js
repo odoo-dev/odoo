@@ -1,12 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-
-function unlink(editor) {
-    throw new Error("Not implemented command to replace unlink");
-    // editor.dispatch('unlink');
-}
+import { testEditor } from "../../test_helpers/editor";
+import { unlink } from "../../test_helpers/user_actions";
 
 describe("range collapsed", () => {
     test.todo("should remove the link if collapsed range at the end of a link", async () => {

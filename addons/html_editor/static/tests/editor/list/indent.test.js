@@ -1,17 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-import { dispatch } from "@odoo/hoot-dom";
-
-function keyDownTab(editor) {
-    dispatch(editor.editable, "keydown", { key: "Tab" });
-}
-
-function indentList(editor) {
-    editor.dispatch("INDENT_LIST");
-}
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { indentList, keyDownTab } from "../../test_helpers/user_actions";
 
 describe("Checklist", () => {
     test("should indent a checklist", async () => {

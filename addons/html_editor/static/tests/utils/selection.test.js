@@ -14,8 +14,8 @@ import {
 } from "@html_editor/editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { insertTestHtml, insertText, setupEditor, testEditor } from "../helpers";
-import { unformat } from "../utils";
+import { insertTestHtml, insertText, setupEditor, testEditor } from "../test_helpers/editor";
+import { unformat } from "../test_helpers/format";
 
 describe("getTraversedNodes", () => {
     test("should return the anchor node of a collapsed selection", async () => {

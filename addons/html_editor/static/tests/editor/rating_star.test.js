@@ -2,7 +2,9 @@
 
 import { test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { deleteBackward, insertText, testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
+import { insertText } from "../../src/editor/utils/insertion";
+import { deleteBackward } from "../test_helpers/user_actions";
 
 /**
  * Rating Star Element Tests

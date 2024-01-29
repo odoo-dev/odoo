@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteBackward, insertText, testEditor } from "../../helpers";
+import { testEditor } from "../../test_helpers/editor";
+import { deleteBackward, insertText } from "../../test_helpers/user_actions";
 
 describe("collapsed selection", () => {
     test("should insert a char into an empty span without removing the zws", async () => {

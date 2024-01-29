@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
+import { testEditor } from "../../test_helpers/editor";
 import { dispatch } from "@odoo/hoot-dom";
 
 // TODO use the right commands (ADD_ROW, ADD_COLUMN)

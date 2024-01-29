@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteBackward, insertText, redo, testEditor, undo } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
+import { deleteBackward, insertText, redo, undo } from "../test_helpers/user_actions";
 
 describe("undo", () => {
     test.todo("should undo a backspace", async () => {

@@ -1,11 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-
-export async function insertParagraphBreak(editor) {
-    editor.dispatch("SPLIT_BLOCK");
-}
+import { testEditor } from "../../test_helpers/editor";
+import { insertParagraphBreak } from "../../test_helpers/user_actions";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {

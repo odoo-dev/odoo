@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../helpers";
+import { testEditor } from "../test_helpers/editor";
 
 /**
  * content of the "init" sub suite in editor.test.js

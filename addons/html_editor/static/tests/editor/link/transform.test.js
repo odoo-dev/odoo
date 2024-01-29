@@ -2,7 +2,8 @@
 
 import { test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { insertText, testEditor } from "../../helpers";
+import { testEditor } from "../../test_helpers/editor";
+import { insertText } from "../../test_helpers/user_actions";
 
 /**
  * Automatic link creation when pressing Space, Enter or Shift+Enter after an url

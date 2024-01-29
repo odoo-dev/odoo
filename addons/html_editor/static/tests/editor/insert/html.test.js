@@ -3,8 +3,8 @@
 import { parseHTML } from "@html_editor/editor/utils/html";
 import { setCursorEnd } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
 
 function span(text) {
     const span = document.createElement("span");

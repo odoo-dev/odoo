@@ -1,17 +1,9 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-import { dispatch } from "@odoo/hoot-dom";
-
-function outdentList(editor) {
-    editor.dispatch("OUTDENT_LIST");
-}
-
-function keyDownshiftTab(editor) {
-    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
-}
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { keyDownshiftTab, outdentList } from "../../test_helpers/user_actions";
 
 describe("Regular list", () => {
     test("should remove the list-style when outdent the list", async () => {
