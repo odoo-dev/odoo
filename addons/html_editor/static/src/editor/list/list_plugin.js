@@ -4,7 +4,7 @@ import { Plugin } from "../plugin";
 import { descendants, closestElement, getAdjacents } from "../utils/dom_traversal";
 import { isWhitespace, isVisible } from "../utils/dom_info";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { getListMode, createList, insertListAfter, mergeListDeep } from "./utils";
+import { getListMode, createList, insertListAfter, mergeSimilarLists, applyToTree } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass } from "../utils/dom";
@@ -137,20 +137,13 @@ export class ListPlugin extends Plugin {
                 );
             }
         }
+        // @todo @phoenix NBY: use history step instead
         this.dispatch("SANITIZE");
     }
 
-    mergeLists() {
-        const range = this.document.getSelection().getRangeAt(0);
-        let closestList = closestElement(range.startContainer, "ul, ol");
-        if (!closestList) {
-            return;
-        }
-        if (closestList.parentNode.matches("li.oe-nested")) {
-            closestList = closestList.parentNode;
-        }
+    mergeLists(root = this.editable) {
         const restoreCursor = preserveCursor(this.document);
-        mergeListDeep(closestList);
+        applyToTree(root, mergeSimilarLists);
         restoreCursor();
     }
 
@@ -268,6 +261,7 @@ export class ListPlugin extends Plugin {
             this.indentLI(li);
         }
         restoreCursor();
+        // @todo @phoenix NBY: use history step instead
         this.dispatch("SANITIZE");
     }
 
@@ -277,6 +271,7 @@ export class ListPlugin extends Plugin {
             this.outdentLI(li);
         }
         restoreCursor();
+        // @todo @phoenix NBY: use history step instead
         this.dispatch("SANITIZE");
     }
 

@@ -70,23 +70,19 @@ function compareListTypes(a, b) {
     return true;
 }
 
-/**
- * Merges a list with its similar siblings.
- * Children nested lists are also merged.
- *
- * @param {HTMLElement} list
- */
-export function mergeListDeep(list) {
-    if (!list.matches("ul, ol, li.oe-nested")) {
-        return list;
+export function mergeSimilarLists(element) {
+    if (!element.matches("ul, ol, li.oe-nested")) {
+        return element;
     }
-    // Merge list with similar siblings.
-    const mergedList = mergeSimilarSiblings(list, compareListTypes);
-    // Same for the children of the resulting list (depth-first).
-    let nextChildList = mergedList.firstElementChild;
-    while (nextChildList) {
-        const mergedChildList = mergeListDeep(nextChildList);
-        nextChildList = mergedChildList.nextElementSibling;
+    return mergeSimilarSiblings(element, compareListTypes);
+}
+
+export function applyToTree(root, func) {
+    const modifiedRoot = func(root);
+    let next = modifiedRoot.firstElementChild;
+    while (next) {
+        const modifiedNext = applyToTree(next, func);
+        next = modifiedNext.nextElementSibling;
     }
-    return mergedList;
+    return modifiedRoot;
 }
