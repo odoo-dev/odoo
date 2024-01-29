@@ -2,9 +2,8 @@
 
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { setupEditor, testEditor } from "../test_helpers/editor";
-import { getContent } from "../test_helpers/selection";
-import { TAB_WIDTH, compare, getCharWidth, oeTab } from "../test_helpers/tabs";
+import { testEditor } from "../test_helpers/editor";
+import { TAB_WIDTH, getCharWidth, oeTab, testTabulation } from "../test_helpers/tabs";
 import {
     deleteBackward,
     deleteForward,
@@ -12,20 +11,6 @@ import {
     keydownShiftTab,
     keydownTab,
 } from "../test_helpers/user_actions";
-
-async function testTabulation({ contentBefore, stepFunction, contentAfterEdit, contentAfter }) {
-    const { el, editor } = await setupEditor(contentBefore);
-
-    await stepFunction(editor);
-
-    if (contentAfterEdit) {
-        compare(getContent(el), contentAfterEdit, "contentAfterEdit");
-    }
-    editor.dispatch("CLEAN", el);
-    if (contentAfter) {
-        compare(getContent(el), contentAfter, "contentAfter");
-    }
-}
 
 describe("insert tabulation", () => {
     test("should insert a tab character", async () => {
