@@ -27,6 +27,10 @@ export class ListPlugin extends Plugin {
         this.registry
             .category("handle_shift_tab")
             .add("list", this.handleShiftTab.bind(this), { sequence: 10 });
+        // @todo @phoenix check this is still needed for checklist
+        // this.registry
+        //     .category("split_element_block_before")
+        //     .add("list", this.splitElementBlockBefore.bind(this));
     }
 
     handleCommand(command, payload) {
@@ -405,6 +409,22 @@ export class ListPlugin extends Plugin {
                     targetOffset: 0,
                     outdentList: false,
                 });
+            }
+            return true;
+        }
+    }
+
+    splitElementBlockBefore(params) {
+        const { targetNode, skipList } = params;
+        if (targetNode.tagName === "LI" && !skipList) {
+            // If not empty list item, regular block split
+            if (targetNode.textContent) {
+                const node = this.shared.splitElementBlock({ ...params, skipList: true });
+                if (node.classList.contains("o_checked")) {
+                    removeClass(node, "o_checked");
+                }
+            } else {
+                this.outdentList();
             }
             return true;
         }
