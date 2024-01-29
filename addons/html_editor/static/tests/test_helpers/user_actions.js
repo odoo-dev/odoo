@@ -157,7 +157,7 @@ export function unlink(editor) {
     // editor.dispatch('unlink');
 }
 
-export function keyDownTab(editor) {
+export function keydownTab(editor) {
     dispatch(editor.editable, "keydown", { key: "Tab" });
 }
 
@@ -169,7 +169,7 @@ export function outdentList(editor) {
     editor.dispatch("OUTDENT_LIST");
 }
 
-export function keyDownshiftTab(editor) {
+export function keydownShiftTab(editor) {
     dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
 }
 
