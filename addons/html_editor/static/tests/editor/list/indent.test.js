@@ -3,7 +3,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { indentList, keyDownTab } from "../../test_helpers/user_actions";
+import { indentList, keydownTab } from "../../test_helpers/user_actions";
 
 describe("Checklist", () => {
     test("should indent a checklist", async () => {
@@ -561,7 +561,7 @@ describe("with selection collapsed", () => {
                             </tbody>
                         </table>
                     `),
-            stepFunction: async (editor) => keyDownTab(editor),
+            stepFunction: async (editor) => keydownTab(editor),
             contentAfter: unformat(`
                         <table>
                             <tbody>
@@ -612,7 +612,7 @@ describe("with selection collapsed", () => {
                             </tbody>
                         </table>
                     `),
-            stepFunction: async (editor) => keyDownTab(editor),
+            stepFunction: async (editor) => keydownTab(editor),
             contentAfter: unformat(`
                         <table>
                             <tbody>
@@ -1089,7 +1089,7 @@ describe("with selection", () => {
                             </tbody>
                         </table>
                     `),
-            stepFunction: async (editor) => keyDownTab(editor),
+            stepFunction: async (editor) => keydownTab(editor),
             contentAfter: unformat(`
                         <table>
                             <tbody>
