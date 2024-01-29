@@ -976,68 +976,65 @@ describe("with selection", () => {
         });
     });
 
-    test.todo(
-        "should indent nested list and list with elements in a upper level than the rangestart",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    test("should indent nested list and list with elements in a upper level than the rangestart", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>a</li>
+                    <li>
+                        b
+                    </li>
+                    <li class="oe-nested">
                         <ul>
-                            <li>a</li>
+                            <li>c</li>
+                            <li>[d</li>
+                        </ul>
+                    </li>
+                    <li>
+                        e
+                    </li>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>f</li>
+                            <li>g</li>
+                        </ul>
+                    </li>
+                    <li>h]</li>
+                    <li>i</li>
+                </ul>`),
+            stepFunction: indentList,
+            contentAfter: unformat(`
+                <ul>
+                    <li>a</li>
+                    <li>
+                        b
+                    </li>
+                    <li class="oe-nested">
+                        <ul>
                             <li>
-                                b
+                                c
                             </li>
                             <li class="oe-nested">
                                 <ul>
-                                    <li>c</li>
                                     <li>[d</li>
                                 </ul>
                             </li>
                             <li>
-                                e
+                            e
                             </li>
                             <li class="oe-nested">
-                                <ul>
-                                    <li>f</li>
-                                    <li>g</li>
-                                </ul>
-                            </li>
-                            <li>h]</li>
-                            <li>i</li>
-                        </ul>`),
-                stepFunction: indentList,
-                contentAfter: unformat(`
-                        <ul>
-                            <li>a</li>
-                            <li>
-                                b
-                            </li>
-                            <li class="oe-nested">
-                                <ul>
-                                    <li>
-                                        c
-                                    </li>
-                                    <li class="oe-nested">
-                                        <ul>
-                                            <li>[d</li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                    e
-                                    </li>
-                                    <li class="oe-nested">
-                                    <ul>
-                                        <li>f</li>
-                                        <li>g</li>
-                                    </ul>
-                                </li>
-                                <li>h]</li>
-                                </ul>
-                            </li>
-                            <li>i</li>
-                        </ul>`),
-            });
-        }
-    );
+                            <ul>
+                                <li>f</li>
+                                <li>g</li>
+                            </ul>
+                        </li>
+                        <li>h]</li>
+                        </ul>
+                    </li>
+                    <li>i</li>
+                </ul>`),
+        });
+    });
 
     test.todo("should not intent a non-editable list", async () => {
         await testEditor({
