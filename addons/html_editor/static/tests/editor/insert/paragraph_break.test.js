@@ -4,13 +4,12 @@ import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../helpers";
 
 export async function insertParagraphBreak(editor) {
-    throw new Error("Not implemented command to replace oEnter");
-    // editor.dispatch('oEnter');
+    editor.dispatch("SPLIT_BLOCK");
 }
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test.todo("should duplicate an empty paragraph", async () => {
+        test("should duplicate an empty paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: insertParagraphBreak,
@@ -31,7 +30,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert an empty paragraph before a paragraph", async () => {
+        test("should insert an empty paragraph before a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]abc</p>",
                 stepFunction: insertParagraphBreak,
@@ -67,7 +66,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert an empty paragraph after a paragraph", async () => {
+        test("should insert an empty paragraph after a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: insertParagraphBreak,
@@ -100,7 +99,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Consecutive", () => {
-        test.todo("should duplicate an empty paragraph twice", async () => {
+        test("should duplicate an empty paragraph twice", async () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
@@ -130,7 +129,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert two empty paragraphs before a paragraph", async () => {
+        test("should insert two empty paragraphs before a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>[]abc</p>",
                 stepFunction: async (editor) => {
@@ -141,7 +140,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph in three", async () => {
+        test("should split a paragraph in three", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -152,7 +151,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph in four", async () => {
+        test("should split a paragraph in four", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -164,7 +163,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert two empty paragraphs after a paragraph", async () => {
+        test("should insert two empty paragraphs after a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: async (editor) => {
@@ -237,7 +236,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph at the beginning of a format node", async () => {
+        test("should split a paragraph at the beginning of a format node", async () => {
             await testEditor({
                 contentBefore: "<p>[]<b>abc</b></p>",
                 stepFunction: insertParagraphBreak,
@@ -328,20 +327,16 @@ describe("Selection collapsed", () => {
     });
 
     describe("With attributes", () => {
-        test.todo(
-            "should insert an empty paragraph before a paragraph with a span with a class",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p><span class="a">ab</span></p><p><span class="b">[]cd</span></p>',
-                    stepFunction: insertParagraphBreak,
-                    contentAfter:
-                        '<p><span class="a">ab</span></p><p><br></p><p><span class="b">[]cd</span></p>',
-                });
-            }
-        );
+        test("should insert an empty paragraph before a paragraph with a span with a class", async () => {
+            await testEditor({
+                contentBefore: '<p><span class="a">ab</span></p><p><span class="b">[]cd</span></p>',
+                stepFunction: insertParagraphBreak,
+                contentAfter:
+                    '<p><span class="a">ab</span></p><p><br></p><p><span class="b">[]cd</span></p>',
+            });
+        });
 
-        test.todo("should split a paragraph with a span with a bold in two", async () => {
+        test("should split a paragraph with a span with a bold in two", async () => {
             await testEditor({
                 contentBefore: '<p><span class="a"><b>ab[]cd</b></span></p>',
                 stepFunction: insertParagraphBreak,
@@ -350,20 +345,17 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should split a paragraph at its end, with a paragraph after it, and both have the same class",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p class="a">a[]</p><p class="a"><br></p>',
-                    stepFunction: insertParagraphBreak,
-                    contentAfter: '<p class="a">a</p><p class="a">[]<br></p><p class="a"><br></p>',
-                });
-            }
-        );
+        test("should split a paragraph at its end, with a paragraph after it, and both have the same class", async () => {
+            await testEditor({
+                contentBefore: '<p class="a">a[]</p><p class="a"><br></p>',
+                stepFunction: insertParagraphBreak,
+                contentAfter: '<p class="a">a</p><p class="a">[]<br></p><p class="a"><br></p>',
+            });
+        });
     });
 
     describe("POC extra tests", () => {
-        test.todo("should insert a paragraph after an empty h1", async () => {
+        test("should insert a paragraph after an empty h1", async () => {
             await testEditor({
                 contentBefore: "<h1>[]<br></h1>",
                 stepFunction: insertParagraphBreak,
@@ -371,17 +363,14 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should insert a paragraph after an empty h1 with styles and a zero-width space",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<h1><font style="color: red;" data-oe-zws-empty-inline="">[]\u200B</font><br></h1>',
-                    stepFunction: insertParagraphBreak,
-                    contentAfter: "<h1><br></h1><p>[]<br></p>",
-                });
-            }
-        );
+        test("should insert a paragraph after an empty h1 with styles and a zero-width space", async () => {
+            await testEditor({
+                contentBefore:
+                    '<h1><font style="color: red;" data-oe-zws-empty-inline="">[]\u200B</font><br></h1>',
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<h1><br></h1><p>[]<br></p>",
+            });
+        });
     });
 });
 
