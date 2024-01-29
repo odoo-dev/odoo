@@ -2,26 +2,8 @@
 
 import { test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { setSelection, testEditor } from "../../helpers";
-import { childNodeIndex } from "@html_editor/editor/utils/position";
-
-// TODO @phoenix: we should maybe use it in each test ???
-// Simulates placing the cursor at the editable root after an arrow key press
-async function simulateArrowKeyPress(editor, key) {
-    const selection = editor.document.getSelection();
-    const node = selection.anchorNode;
-    let editableChild = node;
-    while (editableChild.parentNode !== editor.editable) {
-        editableChild = editableChild.parentNode;
-    }
-    const index =
-        key === "ArrowRight" ? childNodeIndex(editableChild) + 1 : childNodeIndex(editableChild);
-    const pos = [editor.editable, index];
-    dispatch(editor.editable, "keydown", { key });
-    selection.setBaseAndExtent(...pos, ...pos);
-    // TODO @phoenix to check if we need the nextTick
-    // await nextTick();
-}
+import { setSelection, testEditor } from "../../test_helpers/editor";
+import { simulateArrowKeyPress } from "../../test_helpers/user_actions";
 
 test.todo("should move past a zws (collapsed - ArrowRight)", async () => {
     await testEditor({

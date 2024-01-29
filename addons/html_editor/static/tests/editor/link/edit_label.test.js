@@ -1,7 +1,8 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { deleteBackward, insertText, testEditor, undo, insertLineBreak } from "../../helpers";
+import { deleteBackward, insertLineBreak, insertText, undo } from "../../test_helpers/user_actions";
+import { testEditor } from "../../test_helpers/editor";
 
 describe("range collapsed", () => {
     test("should not change the url when a link is not edited", async () => {
