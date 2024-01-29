@@ -5,7 +5,13 @@ import { dispatch } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "../test_helpers/editor";
 import { getContent } from "../test_helpers/selection";
 import { TAB_WIDTH, compare, getCharWidth, oeTab } from "../test_helpers/tabs";
-import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
+import {
+    deleteBackward,
+    deleteForward,
+    insertText,
+    keydownShiftTab,
+    keydownTab,
+} from "../test_helpers/user_actions";
 
 async function testTabulation({ contentBefore, stepFunction, contentAfterEdit, contentAfter }) {
     const { el, editor } = await setupEditor(contentBefore);
@@ -19,14 +25,6 @@ async function testTabulation({ contentBefore, stepFunction, contentAfterEdit, c
     if (contentAfter) {
         compare(getContent(el), contentAfter, "contentAfter");
     }
-}
-
-function keydownTab(editor) {
-    return dispatch(editor.editable, "keydown", { key: "Tab" });
-}
-
-function keydownShiftTab(editor) {
-    return dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
 }
 
 describe("insert tabulation", () => {
