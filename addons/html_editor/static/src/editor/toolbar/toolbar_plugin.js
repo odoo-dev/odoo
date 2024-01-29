@@ -4,9 +4,16 @@ import { reactive } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
 import { registry } from "@web/core/registry";
+import { FontSelector } from "./font_selector";
 
 // TODO: This comes from a command registry?
 const buttons = [
+    {
+        id: "font",
+        name: "FontSelector",
+        component: FontSelector,
+        isFormatApplied: () => false, // TODO
+    },
     {
         id: "bold",
         cmd: "FORMAT_BOLD",
