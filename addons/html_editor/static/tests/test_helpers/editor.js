@@ -38,15 +38,27 @@ export async function setupEditor(content, config = {}) {
 
 // TODO maybe we should add "removeCheckIds" and "styleContent" or use setupEditor directly
 export async function testEditor(
-    { contentBefore, contentBeforeEdit, stepFunction, contentAfter, contentAfterEdit },
+    {
+        contentBefore,
+        contentBeforeEdit,
+        stepFunction,
+        contentAfter,
+        contentAfterEdit,
+        compareFunction,
+    },
     config = {}
 ) {
+    if (!compareFunction) {
+        compareFunction = (content, expected, phase) => {
+            expect(content).toBe(expected, {
+                message: `(testEditor) ${phase} is strictly equal to %actual%"`,
+            });
+        };
+    }
     const { el, editor } = await setupEditor(contentBefore, config);
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
-        expect(getContent(el)).toBe(contentBeforeEdit, {
-            message: "(testEditor) contentBeforeEdit is strictly equal to %actual%",
-        });
+        compareFunction(getContent(el), contentBeforeEdit, "contentBeforeEdit");
     }
 
     if (stepFunction) {
@@ -54,16 +66,12 @@ export async function testEditor(
     }
 
     if (contentAfterEdit) {
-        expect(getContent(el)).toBe(contentAfterEdit, {
-            message: "(testEditor) contentAfterEdit is strictly equal to %actual%",
-        });
+        compareFunction(getContent(el), contentAfterEdit, "contentAfterEdit");
     }
     editor.dispatch("CLEAN", el);
     // we should clean the editor here
     if (contentAfter) {
-        expect(getContent(el)).toBe(contentAfter, {
-            message: "(testEditor) contentAfter is strictly equal to %actual%",
-        });
+        compareFunction(getContent(el), contentAfter, "contentAfter");
     }
 }
 
