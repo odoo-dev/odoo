@@ -1,100 +1,11 @@
 /** @odoo-module */
 
-import { test, describe, getFixture, expect, before } from "@odoo/hoot";
-import { testEditor, setupEditor } from "../test_helpers/editor";
+import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
+import { setupEditor, testEditor } from "../test_helpers/editor";
 import { getContent } from "../test_helpers/selection";
+import { TAB_WIDTH, compare, getCharWidth, oeTab } from "../test_helpers/tabs";
 import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
-
-const TAB_WIDTH = 40;
-let charWidths = undefined;
-
-// Callback for "before"
-function setCharWidths() {
-    // charWidths is a global variable that needs to be set only once.
-    if (charWidths) {
-        return;
-    }
-    charWidths = {};
-
-    const rootDiv = document.createElement("div");
-    rootDiv.classList.add("odoo-editor-editable");
-    rootDiv.contentEditable = true;
-    getFixture().append(rootDiv);
-
-    const range = new Range();
-    const tags = ["p", "h1", "blockquote"];
-    const letters = ["a", "b", "c", "d", "e"];
-    for (const tag of tags) {
-        const element = document.createElement(tag);
-        rootDiv.append(element);
-        charWidths[tag] = {};
-        for (const letter of letters) {
-            element.textContent = letter;
-            range.selectNodeContents(element);
-            const width = range.getBoundingClientRect().width;
-            charWidths[tag][letter] = width.toFixed(1);
-        }
-    }
-    rootDiv.remove();
-}
-
-function oeTab(size, contenteditable = true) {
-    return (
-        `<span class="oe-tabs"` +
-        (contenteditable ? "" : ' contenteditable="false"') +
-        (size ? ` style="width: ${size}px;"` : "") +
-        `>\u0009</span>\u200B`
-    );
-}
-
-/**
- * Extracts the style.width values from the given content and replaces them with a placeholder.
- * @param {string} content
- * @returns {Object} - { text: string, widths: number[] }
- */
-function extractWidth(content) {
-    const regex = /width: ([\d.]+)px;/g;
-    const widths = [];
-    const text = content.replaceAll(regex, (_, w) => {
-        widths.push(parseFloat(w));
-        return `width: _px;`;
-    });
-    return { text, widths };
-}
-
-/**
- * Compares the two contents with hoot expect.
- * Style.width values are allowed to differ by a margin of tolerance.
- *
- * @param {string} contentEl
- * @param {string} contentSpec
- * @param {"contentAfterEdit"|"contentAfter"} mode
- */
-function compare(contentEl, contentSpec, mode) {
-    const maxDiff = 0.5;
-    const { text: receivedContent, widths: receivedWidths } = extractWidth(contentEl);
-    const { text: expectedContent, widths: expectedWidths } = extractWidth(contentSpec);
-
-    expect(receivedContent).toBe(expectedContent, {
-        message: `(testEditor) ${mode} is strictly equal to %actual%`,
-    });
-
-    const diffs = expectedWidths.map((width, i) => Math.abs(width - receivedWidths[i]));
-    expect(Math.max(...diffs)).toBeLessThan(maxDiff, {
-        message:
-            `(testEditor) (${mode}) tab widths differ by less than ${maxDiff} pixel\n` +
-            diffs
-                .map(
-                    (diff, i) =>
-                        `tab[${i}] ` +
-                        `received: ${receivedWidths[i]}, ` +
-                        `expected: ${expectedWidths[i]}, ` +
-                        `diff: ${diff}`
-                )
-                .join("\n"),
-    });
-}
 
 async function testTabulation({ contentBefore, stepFunction, contentAfterEdit, contentAfter }) {
     const { el, editor } = await setupEditor(contentBefore);
@@ -119,10 +30,8 @@ function keydownShiftTab(editor) {
 }
 
 describe("insert tabulation", () => {
-    before(setCharWidths);
-
     test("should insert a tab character", async () => {
-        const expectedTabWidth = TAB_WIDTH - charWidths.p.a;
+        const expectedTabWidth = TAB_WIDTH - getCharWidth("p", "a");
         await testTabulation({
             contentBefore: `<p>a[]b</p>`,
             stepFunction: keydownTab,
@@ -141,7 +50,7 @@ describe("insert tabulation", () => {
     });
 
     test("should insert two tab characters", async () => {
-        const expectedTabWidth = TAB_WIDTH - charWidths.p.a;
+        const expectedTabWidth = TAB_WIDTH - getCharWidth("p", "a");
         await testTabulation({
             contentBefore: `<p>a[]b</p>`,
             stepFunction: async (editor) => {
@@ -157,7 +66,7 @@ describe("insert tabulation", () => {
     });
 
     test("should insert two tab characters with one char between them", async () => {
-        const expectedTabWidth = TAB_WIDTH - charWidths.p.a;
+        const expectedTabWidth = TAB_WIDTH - getCharWidth("p", "a");
         await testTabulation({
             contentBefore: `<p>a[]b</p>`,
             stepFunction: async (editor) => {
@@ -222,10 +131,10 @@ describe("insert tabulation", () => {
     });
 
     test("should insert tab characters at the beginning of two separate paragraphs with tabs in them", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
-        const tabAfterB = TAB_WIDTH - charWidths.p.b;
-        const tabAfterC = TAB_WIDTH - charWidths.p.c;
-        const tabAfterD = TAB_WIDTH - charWidths.p.d;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterC = TAB_WIDTH - getCharWidth("p", "c");
+        const tabAfterD = TAB_WIDTH - getCharWidth("p", "d");
         await testTabulation({
             contentBefore:
                 `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` + `<p>c${oeTab()}]d${oeTab()}</p>`,
@@ -327,12 +236,12 @@ describe("insert tabulation", () => {
     test.todo(
         "should insert tab characters at the beginning of three separate blocks with tabs in them",
         async () => {
-            const tabAfterA = TAB_WIDTH - charWidths.p.a;
-            const tabAfterB = TAB_WIDTH - charWidths.p.b;
-            const tabAfterCinH1 = TAB_WIDTH - charWidths.h1.c;
-            const tabAfterDinH1 = TAB_WIDTH - charWidths.h1.d;
+            const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+            const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+            const tabAfterCinH1 = TAB_WIDTH - getCharWidth("h1", "c");
+            const tabAfterDinH1 = TAB_WIDTH - getCharWidth("h1", "d");
             // @todo: account for the blockquote border + padding
-            const tabAfterEinBlockquote = TAB_WIDTH - charWidths.blockquote.e;
+            const tabAfterEinBlockquote = TAB_WIDTH - getCharWidth("blockquote", "e");
 
             await testTabulation({
                 contentBefore:
@@ -408,10 +317,8 @@ describe("insert tabulation", () => {
 });
 
 describe("delete backward tabulation", () => {
-    before(setCharWidths);
-
     test("should remove one tab character", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]b</p>`,
             stepFunction: async (editor) => {
@@ -429,7 +336,7 @@ describe("delete backward tabulation", () => {
     });
 
     test.todo("should remove two tab characters", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}${oeTab()}[]b</p>`,
             stepFunction: async (editor) => {
@@ -462,10 +369,8 @@ describe("delete backward tabulation", () => {
 });
 
 describe("delete forward tabulation", () => {
-    before(setCharWidths);
-
     test("should remove one tab character", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testTabulation({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}b1</p>`,
             stepFunction: async (editor) => {
@@ -490,7 +395,7 @@ describe("delete forward tabulation", () => {
     });
 
     test("should remove two tab characters", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}${oeTab()}b1</p>`,
             stepFunction: async (editor) => {
@@ -531,10 +436,8 @@ describe("delete forward tabulation", () => {
 });
 
 describe("delete mixed tabulation", () => {
-    before(setCharWidths);
-
     test.todo("should remove all tab characters", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b1</p>`,
             stepFunction: async (editor) => {
@@ -573,10 +476,8 @@ describe("delete mixed tabulation", () => {
 });
 
 describe("remove tabulation with shift+tab", () => {
-    before(setCharWidths);
-
     test("should not remove a non-leading tab character", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab()}[]b</p>`,
             stepFunction: keydownShiftTab,
@@ -645,10 +546,10 @@ describe("remove tabulation with shift+tab", () => {
     });
 
     test("should remove tab characters from the beginning of two separate paragraphs with tabs in them", async () => {
-        const tabAfterA = TAB_WIDTH - charWidths.p.a;
-        const tabAfterB = TAB_WIDTH - charWidths.p.b;
-        const tabAfterC = TAB_WIDTH - charWidths.p.c;
-        const tabAfterD = TAB_WIDTH - charWidths.p.d;
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterC = TAB_WIDTH - getCharWidth("p", "c");
+        const tabAfterD = TAB_WIDTH - getCharWidth("p", "d");
         await testTabulation({
             contentBefore:
                 `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` + `<p>c${oeTab()}]d${oeTab()}</p>`,
