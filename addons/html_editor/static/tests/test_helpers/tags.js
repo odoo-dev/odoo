@@ -1,31 +1,5 @@
 /** @odoo-module */
 
-// Format commands
-export function bold(editor) {
-    editor.dispatch("FORMAT_BOLD");
-}
-
-export function italic(editor) {
-    editor.dispatch("FORMAT_ITALIC");
-}
-
-export function underline(editor) {
-    editor.dispatch("FORMAT_UNDERLINE");
-}
-
-export function strikeThrough(editor) {
-    editor.dispatch("FORMAT_STRIKETHROUGH");
-}
-
-export function setFontSize(size) {
-    return (editor) => editor.dispatch("FORMAT_FONT_SIZE", size);
-}
-
-export function switchDirection(editor) {
-    console.log("should dispatch FORMAT_SWITCH_DIRECTION");
-    //editor.execCommand('switchDirection')}
-}
-
 // helpers to generate html tags
 const getZwsTag = (tagName, { style } = {}) => {
     const styleAttr = style ? ` style="${style}"` : "";

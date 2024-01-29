@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { em, italic, span } from "./utils";
+import { testEditor } from "../../test_helpers/editor";
+import { em, span } from "../../test_helpers/tags";
+import { italic } from "../../test_helpers/user_actions";
 
 test("should make a few characters italic", async () => {
     await testEditor({

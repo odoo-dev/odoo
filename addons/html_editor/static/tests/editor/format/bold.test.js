@@ -2,9 +2,10 @@
 
 import { isSelectionFormat } from "@html_editor/editor/utils/formatting";
 import { describe, expect, test } from "@odoo/hoot";
-import { testEditor } from "../../helpers";
-import { unformat } from "../../utils";
-import { BOLD_TAGS, bold, notStrong, span, strong } from "./utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { BOLD_TAGS, notStrong, span, strong } from "../../test_helpers/tags";
+import { bold } from "../../test_helpers/user_actions";
 
 test("should make a few characters bold", async () => {
     await testEditor({

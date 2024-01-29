@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { test, describe } from "@odoo/hoot";
-import { deleteBackward, testEditor } from "../../helpers";
-import { unformat } from "../../utils";
+import { testEditor } from "../../test_helpers/editor";
+import { unformat } from "../../test_helpers/format";
+import { deleteBackward } from "../../test_helpers/user_actions";
 
 describe("Selection collapsed", () => {
     // Note: All tests on ordered lists should be duplicated
