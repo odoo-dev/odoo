@@ -1,9 +1,14 @@
 /** @odoo-module */
 
 import { describe, test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
 import { testEditor } from "../test_helpers/editor";
-import { TAB_WIDTH, getCharWidth, oeTab, testTabulation } from "../test_helpers/tabs";
+import {
+    TAB_WIDTH,
+    getCharWidth,
+    getIndentWidth,
+    oeTab,
+    testTabulation,
+} from "../test_helpers/tabs";
 import {
     deleteBackward,
     deleteForward,
@@ -11,6 +16,7 @@ import {
     keydownShiftTab,
     keydownTab,
 } from "../test_helpers/user_actions";
+import { unformat } from "../test_helpers/format";
 
 describe("insert tabulation", () => {
     test("should insert a tab character", async () => {
@@ -24,7 +30,7 @@ describe("insert tabulation", () => {
     });
 
     test("should keep selection and insert a tab character at the beginning of the paragraph", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>a[xxx]b</p>`,
             stepFunction: keydownTab,
             contentAfterEdit: `<p>${oeTab(TAB_WIDTH, false)}a[xxx]b</p>`,
@@ -66,7 +72,7 @@ describe("insert tabulation", () => {
     });
 
     test("should insert tab characters at the beginning of two separate paragraphs", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>a[b</p>` + `<p>c]d</p>`,
             stepFunction: keydownTab,
             contentAfterEdit:
@@ -76,7 +82,7 @@ describe("insert tabulation", () => {
     });
 
     test("should insert tab characters at the beginning of two separate indented paragraphs", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>${oeTab()}a[b</p>` + `<p>${oeTab()}c]d</p>`,
             // @todo: add contentBeforeEdit in some test cases to test the addition
             // of the contenteditable="false" attribute by setup.
@@ -91,9 +97,9 @@ describe("insert tabulation", () => {
     });
 
     test("should insert tab characters at the beginning of two separate paragraphs (one indented, the other not)", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>${oeTab()}a[b</p>` + `<p>c]d</p>`,
-            stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+            stepFunction: keydownTab,
             contentAfterEdit:
                 `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[b</p>` +
                 `<p>${oeTab(TAB_WIDTH, false)}c]d</p>`,
@@ -101,9 +107,9 @@ describe("insert tabulation", () => {
                 `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[b</p>` +
                 `<p>${oeTab(TAB_WIDTH)}c]d</p>`,
         });
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>a[b</p>` + `<p>${oeTab()}c]d</p>`,
-            stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+            stepFunction: keydownTab,
             contentAfterEdit:
                 `<p>${oeTab(TAB_WIDTH, false)}a[b</p>` +
                 `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}c]d</p>`,
@@ -118,10 +124,11 @@ describe("insert tabulation", () => {
         const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
         const tabAfterC = TAB_WIDTH - getCharWidth("p", "c");
         const tabAfterD = TAB_WIDTH - getCharWidth("p", "d");
+
         await testTabulation({
             contentBefore:
                 `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` + `<p>c${oeTab()}]d${oeTab()}</p>`,
-            stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+            stepFunction: keydownTab,
             contentAfter:
                 `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(
                     tabAfterB
@@ -129,172 +136,192 @@ describe("insert tabulation", () => {
         });
     });
 
-    test.todo(
-        "should insert tab characters at the beginning of three separate blocks",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>xxx</p>` +
-                    `<p>a[b</p>` +
-                    `<h1>cd</h1>` +
-                    `<blockquote>e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
-                contentAfterEdit:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH, false)}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH, false)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH, false)}e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                contentAfter:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH)}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH)}e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-            });
-        }
-    );
+    test("should insert tab characters at the beginning of three separate blocks", async () => {
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
 
-    test.todo(
-        "should insert tab characters at the beginning of three separate indented blocks",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>${oeTab()}xxx</p>` +
-                    `<p>${oeTab()}a[b</p>` +
-                    `<h1>${oeTab()}cd</h1>` +
-                    `<blockquote>${oeTab()}e]f</blockquote>` +
-                    `<h4>${oeTab()}zzz</h4>`,
-                stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
-                contentAfterEdit:
-                    `<p>${oeTab(TAB_WIDTH, false)}xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH, false)}${oeTab(
-                        TAB_WIDTH,
-                        false
-                    )}e]f</blockquote>` +
-                    `<h4>${oeTab(TAB_WIDTH, false)}zzz</h4>`,
-                contentAfter:
-                    `<p>${oeTab(TAB_WIDTH)}xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}e]f</blockquote>` +
-                    `<h4>${oeTab(TAB_WIDTH)}zzz</h4>`,
-            });
-        }
-    );
-
-    test.todo(
-        "should insert tab characters at the beginning of three separate blocks of mixed indentation",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab()}${oeTab()}a[b</p>` +
-                    `<h1>${oeTab()}cd</h1>` +
-                    `<blockquote>e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
-                contentAfterEdit:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}${oeTab(
-                        TAB_WIDTH,
-                        false
-                    )}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH, false)}e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                contentAfter:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[b</p>` +
-                    `<h1>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}cd</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH)}e]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-            });
-        }
-    );
-
-    test.todo(
-        "should insert tab characters at the beginning of three separate blocks with tabs in them",
-        async () => {
-            const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
-            const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
-            const tabAfterCinH1 = TAB_WIDTH - getCharWidth("h1", "c");
-            const tabAfterDinH1 = TAB_WIDTH - getCharWidth("h1", "d");
-            // @todo: account for the blockquote border + padding
-            const tabAfterEinBlockquote = TAB_WIDTH - getCharWidth("blockquote", "e");
-
-            await testTabulation({
-                contentBefore:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
-                    `<h1>c${oeTab()}d${oeTab()}</h1>` +
-                    `<blockquote>e${oeTab()}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
-                contentAfterEdit:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(
-                        tabAfterA,
-                        false
-                    )}b${oeTab(tabAfterB, false)}</p>` +
-                    `<h1>${oeTab(TAB_WIDTH, false)}c${oeTab(tabAfterCinH1, false)}d${oeTab(
-                        tabAfterDinH1,
-                        false
-                    )}</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH, false)}e${oeTab(
-                        tabAfterEinBlockquote,
-                        false
-                    )}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                contentAfter:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(
-                        tabAfterB
-                    )}</p>` +
-                    `<h1>${oeTab(TAB_WIDTH)}c${oeTab(tabAfterCinH1)}d${oeTab(tabAfterDinH1)}</h1>` +
-                    `<blockquote>${oeTab(TAB_WIDTH)}e${oeTab(
-                        tabAfterEinBlockquote
-                    )}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-            });
-        }
-    );
-
-    test.todo("should insert tab characters in blocks and indent lists", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore:
-                `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
-                `<ul>` +
-                `<li>c${oeTab()}d${oeTab()}</li>` +
-                `<li class="oe-nested"><ul><li>${oeTab()}e${oeTab()}</li></ul></li>` +
-                `</ul>` +
-                `<blockquote>f${oeTab()}]g</blockquote>`,
-            stepFunction: (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+                `<p>xxx</p>` +
+                `<p>a[b</p>` +
+                `<h1>cd</h1>` +
+                `<blockquote>e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            stepFunction: keydownTab,
             contentAfterEdit:
-                `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(
-                    32.8906,
-                    false
-                )}b${oeTab(32, false)}</p>` +
-                `<ul>` +
-                `<li class="oe-nested"><ul><li>c${oeTab(32.8906, false)}d${oeTab(32, false)}</li>` +
-                `<li class="oe-nested"><ul><li>${oeTab(TAB_WIDTH, false)}e${oeTab(
-                    32.8906,
-                    false
-                )}</li></ul></li></ul></li>` +
-                `</ul>` +
-                `<blockquote>${oeTab(TAB_WIDTH, false)}f${oeTab(34.6719, false)}]g</blockquote>`,
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH, false)}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH, false)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}e]f</blockquote>` +
+                `<h4>zzz</h4>`,
             contentAfter:
-                `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(32.8906)}b${oeTab(32)}</p>` +
-                `<ul>` +
-                `<li class="oe-nested"><ul><li>c${oeTab(32.8906)}d${oeTab(32)}</li>` +
-                `<li class="oe-nested"><ul><li>${oeTab(TAB_WIDTH)}e${oeTab(
-                    32.8906
-                )}</li></ul></li></ul></li>` +
-                `</ul>` +
-                `<blockquote>${oeTab(TAB_WIDTH)}f${oeTab(34.6719)}]g</blockquote>`,
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH)}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote)}e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+        });
+    });
+
+    test("should insert tab characters at the beginning of three separate indented blocks", async () => {
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
+
+        await testTabulation({
+            contentBefore:
+                `<p>${oeTab()}xxx</p>` +
+                `<p>${oeTab()}a[b</p>` +
+                `<h1>${oeTab()}cd</h1>` +
+                `<blockquote>${oeTab()}e]f</blockquote>` +
+                `<h4>${oeTab()}zzz</h4>`,
+            stepFunction: keydownTab,
+            contentAfterEdit:
+                `<p>${oeTab(TAB_WIDTH, false)}xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}${oeTab(
+                    TAB_WIDTH,
+                    false
+                )}e]f</blockquote>` +
+                `<h4>${oeTab(TAB_WIDTH, false)}zzz</h4>`,
+            contentAfter:
+                `<p>${oeTab(TAB_WIDTH)}xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote)}${oeTab(TAB_WIDTH)}e]f</blockquote>` +
+                `<h4>${oeTab(TAB_WIDTH)}zzz</h4>`,
+        });
+    });
+
+    test("should insert tab characters at the beginning of three separate blocks of mixed indentation", async () => {
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
+
+        await testTabulation({
+            contentBefore:
+                `<p>xxx</p>` +
+                `<p>${oeTab()}${oeTab()}a[b</p>` +
+                `<h1>${oeTab()}cd</h1>` +
+                `<blockquote>e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            stepFunction: keydownTab,
+            contentAfterEdit:
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}${oeTab(
+                    TAB_WIDTH,
+                    false
+                )}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            contentAfter:
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[b</p>` +
+                `<h1>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}cd</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote)}e]f</blockquote>` +
+                `<h4>zzz</h4>`,
+        });
+    });
+
+    test("should insert tab characters at the beginning of three separate blocks with tabs in them", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterCinH1 = TAB_WIDTH - getCharWidth("h1", "c");
+        const tabAfterDinH1 = TAB_WIDTH - getCharWidth("h1", "d");
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
+        const tabAfterEinBlockquote = TAB_WIDTH - getCharWidth("blockquote", "e"); // in bloquote, after a tab
+
+        await testTabulation({
+            contentBefore:
+                `<p>xxx</p>` +
+                `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
+                `<h1>c${oeTab()}d${oeTab()}</h1>` +
+                `<blockquote>e${oeTab()}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            stepFunction: keydownTab,
+            contentAfterEdit:
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(
+                    tabAfterA,
+                    false
+                )}b${oeTab(tabAfterB, false)}</p>` +
+                `<h1>${oeTab(TAB_WIDTH, false)}c${oeTab(tabAfterCinH1, false)}d${oeTab(
+                    tabAfterDinH1,
+                    false
+                )}</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}e${oeTab(
+                    tabAfterEinBlockquote,
+                    false
+                )}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            contentAfter:
+                `<p>xxx</p>` +
+                `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(
+                    tabAfterB
+                )}</p>` +
+                `<h1>${oeTab(TAB_WIDTH)}c${oeTab(tabAfterCinH1)}d${oeTab(tabAfterDinH1)}</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote)}e${oeTab(
+                    tabAfterEinBlockquote
+                )}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+        });
+    });
+
+    // @todo @phoenix: list merge seems to fail in this test.
+    test.todo("should insert tab characters in blocks and indent lists", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterCinNestedLI =
+            TAB_WIDTH - ((2 * getIndentWidth("li") + getCharWidth("li", "c")) % TAB_WIDTH);
+        const tabAfterD = TAB_WIDTH - getCharWidth("li", "d"); // in LI, after a tab
+        const tabInDoubleNestedList = TAB_WIDTH - ((3 * getIndentWidth("li")) % TAB_WIDTH);
+        const tabAfterE = TAB_WIDTH - getCharWidth("li", "e"); // in LI, after a tab
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
+        const tabAfterFinBlockquote = TAB_WIDTH - getCharWidth("blockquote", "f"); // in blockquote, after a tab
+
+        await testTabulation({
+            contentBefore: unformat(`
+                <p>${oeTab()}a[${oeTab()}b${oeTab()}</p>
+                <ul>
+                    <li>c${oeTab()}d${oeTab()}</li>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>${oeTab()}e${oeTab()}</li>
+                        </ul>
+                    </li>
+                </ul>
+                <blockquote>f${oeTab()}]g</blockquote>
+            `),
+            stepFunction: keydownTab,
+            contentAfterEdit: unformat(`
+                <p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB,false)}</p>
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>c${oeTab(tabAfterCinNestedLI, false)}d${oeTab(tabAfterD, false)}</li>
+                            <li class="oe-nested">
+                                <ul>
+                                    <li>${oeTab(tabInDoubleNestedList, false)}e${oeTab(tabAfterE, false)}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <blockquote>${oeTab(tabInBlockquote, false)}f${oeTab(tabAfterFinBlockquote, false)}]g</blockquote>,
+            `),
+            contentAfter: unformat(`
+                <p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>c${oeTab(tabAfterCinNestedLI)}d${oeTab(tabAfterD)}</li>
+                            <li class="oe-nested">
+                                <ul>
+                                    <li>${oeTab(tabInDoubleNestedList)}e${oeTab(tabAfterE)}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <blockquote>${oeTab(tabInBlockquote)}f${oeTab(tabAfterFinBlockquote)}]g</blockquote>,
+            `),
         });
     });
 });
@@ -505,7 +532,7 @@ describe("remove tabulation with shift+tab", () => {
     });
 
     test("should remove tab characters from the beginning of two separate double-indented paragraphs", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>${oeTab()}${oeTab()}a[b</p>` + `<p>${oeTab()}${oeTab()}c]d</p>`,
             stepFunction: keydownShiftTab,
             contentAfterEdit:
@@ -515,13 +542,13 @@ describe("remove tabulation with shift+tab", () => {
     });
 
     test("should remove tab characters from the beginning of two separate paragraphs of mixed indentations", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>${oeTab()}${oeTab()}a[b</p>` + `<p>${oeTab()}c]d</p>`,
             stepFunction: keydownShiftTab,
             contentAfterEdit: `<p>${oeTab(TAB_WIDTH, false)}a[b</p>` + `<p>c]d</p>`,
             contentAfter: `<p>${oeTab(TAB_WIDTH)}a[b</p>` + `<p>c]d</p>`,
         });
-        await testEditor({
+        await testTabulation({
             contentBefore: `<p>a[b</p>` + `<p>${oeTab()}c]d</p>`,
             stepFunction: keydownShiftTab,
             contentAfter: `<p>a[b</p>` + `<p>c]d</p>`,
@@ -565,7 +592,7 @@ describe("remove tabulation with shift+tab", () => {
     });
 
     test("should remove tab characters from the beginning of three separate blocks of mixed indentation", async () => {
-        await testEditor({
+        await testTabulation({
             contentBefore:
                 `<p>xxx</p>` +
                 `<p>${oeTab()}${oeTab()}a[b</p>` +
@@ -588,72 +615,81 @@ describe("remove tabulation with shift+tab", () => {
         });
     });
 
-    test.todo(
-        "should remove tab characters from the beginning of three separate blocks with tabs in them",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>xxx</p>` +
-                    `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
-                    `<h1>${oeTab()}c${oeTab()}d${oeTab()}</h1>` +
-                    `<blockquote>${oeTab()}e${oeTab()}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfterEdit:
-                    `<p>xxx</p>` +
-                    `<p>a[${oeTab(32.8906, false)}b${oeTab(32, false)}</p>` +
-                    `<h1>c${oeTab(25.7969, false)}d${oeTab(22.2031, false)}</h1>` +
-                    `<blockquote>e${oeTab(32.8906, false)}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-                contentAfter:
-                    `<p>xxx</p>` +
-                    `<p>a[${oeTab(32.8906)}b${oeTab(32)}</p>` +
-                    `<h1>c${oeTab(25.7969)}d${oeTab(22.2031)}</h1>` +
-                    `<blockquote>e${oeTab(32.8906)}]f</blockquote>` +
-                    `<h4>zzz</h4>`,
-            });
-        }
-    );
+    test("should remove tab characters from the beginning of three separate blocks with tabs in them", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterCinH1 = TAB_WIDTH - getCharWidth("h1", "c");
+        const tabAfterDinH1 = TAB_WIDTH - getCharWidth("h1", "d");
+        const tabAfterEinBlockquote =
+            TAB_WIDTH - (getIndentWidth("blockquote") + getCharWidth("blockquote", "e"));
 
-    test.todo(
-        "should remove tab characters from the beginning of blocks and outdent lists",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    `<p>${oeTab()}${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
-                    `<ul>` +
-                    `<li class="oe-nested"><ul><li>c${oeTab()}d${oeTab()}</li>` +
-                    `<li class="oe-nested"><ul><li>${oeTab()}e${oeTab()}</li></ul></li></ul></li>` +
-                    `</ul>` +
-                    `<blockquote>${oeTab()}f${oeTab()}]g</blockquote>`,
-                stepFunction: (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
-                contentAfterEdit:
-                    `<p>${oeTab(TAB_WIDTH, false)}a[${oeTab(32.8906, false)}b${oeTab(
-                        32,
-                        false
-                    )}</p>` +
-                    `<ul>` +
-                    `<li>c${oeTab(32.8906, false)}d${oeTab(32, false)}</li>` +
-                    `<li class="oe-nested"><ul><li>${oeTab(TAB_WIDTH, false)}e${oeTab(
-                        32.8906,
-                        false
-                    )}</li></ul></li>` +
-                    `</ul>` +
-                    `<blockquote>f${oeTab(34.6719, false)}]g</blockquote>`,
-                contentAfter:
-                    `<p>${oeTab(TAB_WIDTH)}a[${oeTab(32.8906)}b${oeTab(32)}</p>` +
-                    `<ul>` +
-                    `<li>c${oeTab(32.8906)}d${oeTab(32)}</li>` +
-                    `<li class="oe-nested"><ul><li>${oeTab(TAB_WIDTH)}e${oeTab(
-                        32.8906
-                    )}</li></ul></li>` +
-                    `</ul>` +
-                    `<blockquote>f${oeTab(34.6719)}]g</blockquote>`,
-            });
-        }
-    );
+        await testTabulation({
+            contentBefore:
+                `<p>xxx</p>` +
+                `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
+                `<h1>${oeTab()}c${oeTab()}d${oeTab()}</h1>` +
+                `<blockquote>${oeTab()}e${oeTab()}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            stepFunction: keydownShiftTab,
+            contentAfterEdit:
+                `<p>xxx</p>` +
+                `<p>a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB, false)}</p>` +
+                `<h1>c${oeTab(tabAfterCinH1, false)}d${oeTab(tabAfterDinH1, false)}</h1>` +
+                `<blockquote>e${oeTab(tabAfterEinBlockquote, false)}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+            contentAfter:
+                `<p>xxx</p>` +
+                `<p>a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>` +
+                `<h1>c${oeTab(tabAfterCinH1)}d${oeTab(tabAfterDinH1)}</h1>` +
+                `<blockquote>e${oeTab(tabAfterEinBlockquote)}]f</blockquote>` +
+                `<h4>zzz</h4>`,
+        });
+    });
+
+    test("should remove tab characters from the beginning of blocks and outdent lists", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
+        const tabAfterCinLI =
+            TAB_WIDTH - ((getIndentWidth("li") + getCharWidth("li", "c")) % TAB_WIDTH);
+        const tabAfterD = TAB_WIDTH - getCharWidth("li", "d"); // in LI, after a tab
+        const tabAfterE = TAB_WIDTH - getCharWidth("li", "e"); // in LI, after a tab
+        const tabInNestedList = TAB_WIDTH - ((2 * getIndentWidth("li")) % TAB_WIDTH);
+        const tabAfterFinBlockquote =
+            TAB_WIDTH - (getIndentWidth("blockquote") + getCharWidth("blockquote", "f"));
+
+        await testTabulation({
+            contentBefore:
+                `<p>${oeTab()}${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
+                `<ul>` +
+                `<li class="oe-nested"><ul><li>c${oeTab()}d${oeTab()}</li>` +
+                `<li class="oe-nested"><ul><li>${oeTab()}e${oeTab()}</li></ul></li></ul></li>` +
+                `</ul>` +
+                `<blockquote>${oeTab()}f${oeTab()}]g</blockquote>`,
+            stepFunction: keydownShiftTab,
+            contentAfterEdit:
+                `<p>${oeTab(TAB_WIDTH, false)}a[${oeTab(tabAfterA, false)}b${oeTab(
+                    tabAfterB,
+                    false
+                )}</p>` +
+                `<ul>` +
+                `<li>c${oeTab(tabAfterCinLI, false)}d${oeTab(tabAfterD, false)}</li>` +
+                `<li class="oe-nested"><ul><li>${oeTab(tabInNestedList, false)}e${oeTab(
+                    tabAfterE,
+                    false
+                )}</li></ul></li>` +
+                `</ul>` +
+                `<blockquote>f${oeTab(tabAfterFinBlockquote, false)}]g</blockquote>`,
+            contentAfter:
+                `<p>${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>` +
+                `<ul>` +
+                `<li>c${oeTab(tabAfterCinLI)}d${oeTab(tabAfterD)}</li>` +
+                `<li class="oe-nested"><ul><li>${oeTab(tabInNestedList)}e${oeTab(
+                    tabAfterE
+                )}</li></ul></li>` +
+                `</ul>` +
+                `<blockquote>f${oeTab(tabAfterFinBlockquote)}]g</blockquote>`,
+        });
+    });
 
     test("should remove a tab character from formatted text", async () => {
         await testEditor({

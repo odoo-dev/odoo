@@ -6,49 +6,79 @@ import { testEditor } from "./editor";
 export const TAB_WIDTH = 40;
 
 let charWidths = undefined;
+let indentWidths = undefined;
 
-// Callback for "before"
-function setCharWidths() {
-    // charWidths is a global variable that needs to be set only once.
-    if (charWidths) {
+function setWidths() {
+    if (charWidths && indentWidths) {
+        // charWidths and indentWidths are global variables that need to be set
+        // only once.
         return;
     }
     charWidths = {};
+    indentWidths = {};
 
     const rootDiv = document.createElement("div");
     rootDiv.classList.add("odoo-editor-editable");
     rootDiv.contentEditable = true;
     document.body.append(rootDiv);
 
+    const referenceBlock = document.createElement("p");
+    rootDiv.append(referenceBlock);
+    const referenceLeft = referenceBlock.getBoundingClientRect().left;
+
     const range = new Range();
-    const tags = ["p", "h1", "blockquote"];
-    const letters = ["a", "b", "c", "d", "e"];
+    const tags = ["p", "h1", "blockquote", "li"];
+    const chars = ["a", "b", "c", "d", "e", "f"];
     for (const tag of tags) {
-        const element = document.createElement(tag);
-        rootDiv.append(element);
+        let element;
+        if (tag === "li") {
+            const ul = document.createElement("ul");
+            element = document.createElement("li");
+            ul.append(element);
+            rootDiv.append(ul);
+        } else {
+            element = document.createElement(tag);
+            rootDiv.append(element);
+        }
+
+        // Calculate the base indentation (result of margin, padding and border)
+        // for the given block.
+        element.textContent = "|";
+        range.selectNodeContents(element);
+        const indentWidth = range.getBoundingClientRect().left - referenceLeft;
+        indentWidths[tag] = indentWidth;
+
+        // Calculate the width of each char in the given block.
         charWidths[tag] = {};
-        for (const letter of letters) {
-            element.textContent = letter;
+        for (const char of chars) {
+            element.textContent = char;
             range.selectNodeContents(element);
             const width = range.getBoundingClientRect().width;
-            charWidths[tag][letter] = width.toFixed(1);
+            charWidths[tag][char] = width;
         }
     }
     rootDiv.remove();
 }
 
-export function getCharWidth(tag, letter) {
+export function getCharWidth(tag, char) {
     if (!charWidths) {
-        setCharWidths();
+        setWidths();
     }
-    return charWidths[tag][letter];
+    return charWidths[tag][char];
+}
+
+export function getIndentWidth(tag) {
+    if (!indentWidths) {
+        setWidths();
+    }
+    return indentWidths[tag];
 }
 
 export function oeTab(size, contenteditable = true) {
     return (
         `<span class="oe-tabs"` +
         (contenteditable ? "" : ' contenteditable="false"') +
-        (size ? ` style="width: ${size}px;"` : "") +
+        (size ? ` style="width: ${size.toFixed(1)}px;"` : "") +
         `>\u0009</span>\u200B`
     );
 }
@@ -95,7 +125,7 @@ function compare(contentEl, contentSpec, mode) {
                         `tab[${i}] ` +
                         `received: ${receivedWidths[i]}, ` +
                         `expected: ${expectedWidths[i]}, ` +
-                        `diff: ${diff}`
+                        `diff: ${diff.toFixed(1)}`
                 )
                 .join("\n"),
     });
