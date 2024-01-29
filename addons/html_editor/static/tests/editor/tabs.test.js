@@ -16,7 +16,6 @@ import {
     keydownShiftTab,
     keydownTab,
 } from "../test_helpers/user_actions";
-import { unformat } from "../test_helpers/format";
 
 describe("insert tabulation", () => {
     test("should insert a tab character", async () => {
@@ -264,8 +263,7 @@ describe("insert tabulation", () => {
         });
     });
 
-    // @todo @phoenix: list merge seems to fail in this test.
-    test.todo("should insert tab characters in blocks and indent lists", async () => {
+    test("should insert tab characters in blocks and indent lists", async () => {
         const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         const tabAfterB = TAB_WIDTH - getCharWidth("p", "b");
         const tabAfterCinNestedLI =
@@ -276,54 +274,51 @@ describe("insert tabulation", () => {
         const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
         const tabAfterFinBlockquote = TAB_WIDTH - getCharWidth("blockquote", "f"); // in blockquote, after a tab
 
+        // prettier-ignore
         await testTabulation({
-            contentBefore: unformat(`
-                <p>${oeTab()}a[${oeTab()}b${oeTab()}</p>
-                <ul>
-                    <li>c${oeTab()}d${oeTab()}</li>
-                    <li class="oe-nested">
-                        <ul>
-                            <li>${oeTab()}e${oeTab()}</li>
-                        </ul>
-                    </li>
-                </ul>
-                <blockquote>f${oeTab()}]g</blockquote>
-            `),
+            // Obs: cannot use `unformat` for tests with tabs (as it removes the \t chars)
+            contentBefore:
+                `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` +
+                `<ul>` +
+                    `<li>c${oeTab()}d${oeTab()}</li>` +
+                    `<li class="oe-nested">` +
+                        `<ul>` +
+                            `<li>${oeTab()}e${oeTab()}</li>` +
+                        `</ul>` +
+                    `</li>` +
+                `</ul>` +
+                `<blockquote>f${oeTab()}]g</blockquote>`,
             stepFunction: keydownTab,
-            // prettier-ignore
-            contentAfterEdit: unformat(`
-                <p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB,false)}</p>
-                <ul>
-                    <li class="oe-nested">
-                        <ul>
-                            <li>c${oeTab(tabAfterCinNestedLI, false)}d${oeTab(tabAfterD, false)}</li>
-                            <li class="oe-nested">
-                                <ul>
-                                    <li>${oeTab(tabInDoubleNestedList, false)}e${oeTab(tabAfterE, false)}</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                <blockquote>${oeTab(tabInBlockquote, false)}f${oeTab(tabAfterFinBlockquote, false)}]g</blockquote>,
-            `),
-            // prettier-ignore
-            contentAfter: unformat(`
-                <p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>
-                <ul>
-                    <li class="oe-nested">
-                        <ul>
-                            <li>c${oeTab(tabAfterCinNestedLI)}d${oeTab(tabAfterD)}</li>
-                            <li class="oe-nested">
-                                <ul>
-                                    <li>${oeTab(tabInDoubleNestedList)}e${oeTab(tabAfterE)}</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                <blockquote>${oeTab(tabInBlockquote)}f${oeTab(tabAfterFinBlockquote)}]g</blockquote>,
-            `),
+            contentAfterEdit:
+                `<p>${oeTab(TAB_WIDTH, false)}${oeTab(TAB_WIDTH, false)}a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB,false)}</p>` +
+                `<ul>` +
+                    `<li class="oe-nested">` +
+                        `<ul>` +
+                            `<li>c${oeTab(tabAfterCinNestedLI, false)}d${oeTab(tabAfterD, false)}</li>` +
+                            `<li class="oe-nested">` +
+                                `<ul>` +
+                                    `<li>${oeTab(tabInDoubleNestedList, false)}e${oeTab(tabAfterE, false)}</li>` +
+                                `</ul>` +
+                            `</li>` +
+                        `</ul>` +
+                    `</li>` +
+                `</ul>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}f${oeTab(tabAfterFinBlockquote, false)}]g</blockquote>`,
+            contentAfter:
+                `<p>${oeTab(TAB_WIDTH)}${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>` +
+                `<ul>` +
+                    `<li class="oe-nested">` +
+                        `<ul>` +
+                            `<li>c${oeTab(tabAfterCinNestedLI)}d${oeTab(tabAfterD)}</li>` +
+                            `<li class="oe-nested">` +
+                                `<ul>` +
+                                    `<li>${oeTab(tabInDoubleNestedList)}e${oeTab(tabAfterE)}</li>` +
+                                `</ul>` +
+                            `</li>` +
+                        `</ul>` +
+                    `</li>` +
+                `</ul>` +
+                `<blockquote>${oeTab(tabInBlockquote)}f${oeTab(tabAfterFinBlockquote)}]g</blockquote>`,
         });
     });
 });
