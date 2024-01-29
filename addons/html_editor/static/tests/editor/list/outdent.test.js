@@ -3,7 +3,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { keyDownshiftTab, outdentList } from "../../test_helpers/user_actions";
+import { keydownShiftTab, outdentList } from "../../test_helpers/user_actions";
 
 describe("Regular list", () => {
     test("should remove the list-style when outdent the list", async () => {
@@ -267,7 +267,7 @@ describe("with selection collapsed", () => {
                         </tbody>
                     </table>
                 `),
-            stepFunction: (editor) => keyDownshiftTab(editor),
+            stepFunction: (editor) => keydownShiftTab(editor),
             contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -318,7 +318,7 @@ describe("with selection collapsed", () => {
                         </tbody>
                     </table>
                 `),
-            stepFunction: (editor) => keyDownshiftTab(editor),
+            stepFunction: (editor) => keydownShiftTab(editor),
             contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -571,7 +571,7 @@ describe("with selection", () => {
                         </tbody>
                     </table>
                 `),
-            stepFunction: (editor) => keyDownshiftTab(editor),
+            stepFunction: (editor) => keydownShiftTab(editor),
             contentAfter: unformat(`
                     <table>
                         <tbody>
