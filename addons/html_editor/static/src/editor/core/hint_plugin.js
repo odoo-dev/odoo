@@ -32,6 +32,15 @@ export class HintPlugin extends Plugin {
         };
         this.addDomListener(this.document, "selectionchange", this.updateTempHints);
         this.updateHints();
+        this.registry.category("history_rendering_classes").add("hint", ["o-we-hint"]);
+        this.registry.category("filter_mutation_record").add("hint", (records) => {
+            return records.filter((record) => {
+                if (record.type === "attributes" && record.attributeName === "placeholder") {
+                    return false;
+                }
+                return true;
+            });
+        });
     }
 
     destroy() {
@@ -111,17 +120,13 @@ export class HintPlugin extends Plugin {
     }
 
     makeHint(el, text) {
-        this.shared.disableObserver();
         el.setAttribute("placeholder", text);
         el.classList.add("o-we-hint");
-        this.shared.enableObserver();
     }
 
     removeHint(el) {
-        this.shared.disableObserver();
         el.removeAttribute("placeholder");
         removeClass(el, "o-we-hint");
-        this.shared.enableObserver();
     }
 }
 
