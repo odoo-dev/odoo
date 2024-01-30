@@ -99,7 +99,7 @@ describe("range collapsed", () => {
         }
     );
 
-    test.todo("should change the url in one step", async () => {
+    test("should change the url in one step", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.co">google.co[]</a>b</p>',
             stepFunction: async (editor) => {

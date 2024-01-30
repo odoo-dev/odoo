@@ -63,7 +63,7 @@ export class Editor {
     }
 
     startPlugins() {
-        const Plugins = getPlugins(); // todo: take config into account
+        const Plugins = [getPlugins(), this.config.Plugins || []].flat(); // todo: take config into account
         const plugins = new Map();
         const shared = {};
         for (const P of Plugins) {

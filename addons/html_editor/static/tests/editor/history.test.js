@@ -1,11 +1,12 @@
 /** @odoo-module */
 
-import { describe, test } from "@odoo/hoot";
+import { expect, describe, test } from "@odoo/hoot";
 import { testEditor } from "../test_helpers/editor";
-import { deleteBackward, insertText, redo, undo } from "../test_helpers/user_actions";
+import { addStep, deleteBackward, insertText, redo, undo } from "../test_helpers/user_actions";
+import { Plugin } from "../../src/editor/plugin";
 
 describe("undo", () => {
-    test.todo("should undo a backspace", async () => {
+    test("should undo a backspace", async () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
@@ -16,7 +17,7 @@ describe("undo", () => {
         });
     });
 
-    test.todo("should undo a backspace, then do nothing on undo", async () => {
+    test("should undo a backspace, then do nothing on undo", async () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
@@ -30,7 +31,7 @@ describe("undo", () => {
 });
 
 describe("redo", () => {
-    test.todo("should undo, then redo a backspace", async () => {
+    test("should undo, then redo a backspace", async () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
@@ -42,23 +43,20 @@ describe("redo", () => {
         });
     });
 
-    test.todo(
-        "should undo, then redo a backspace, then undo again to get back to the starting point",
-        async () => {
-            await testEditor({
-                contentBefore: "<p>ab []cd</p>",
-                stepFunction: async (editor) => {
-                    await deleteBackward(editor); // <p>ab[]cd</p>
-                    undo(editor); // <p>ab []cd</p>
-                    redo(editor); // <p>ab[]cd</p>
-                    undo(editor); // <p>ab []cd</p>
-                },
-                contentAfter: "<p>ab []cd</p>",
-            });
-        }
-    );
+    test("should undo, then redo a backspace, then undo again to get back to the starting point", async () => {
+        await testEditor({
+            contentBefore: "<p>ab []cd</p>",
+            stepFunction: async (editor) => {
+                await deleteBackward(editor); // <p>ab[]cd</p>
+                undo(editor); // <p>ab []cd</p>
+                redo(editor); // <p>ab[]cd</p>
+                undo(editor); // <p>ab []cd</p>
+            },
+            contentAfter: "<p>ab []cd</p>",
+        });
+    });
 
-    test.todo("should undo, then redo a backspace, then do nothing on redo", async () => {
+    test("should undo, then redo a backspace, then do nothing on redo", async () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
@@ -71,26 +69,23 @@ describe("redo", () => {
         });
     });
 
-    test.todo(
-        "should undo, then undo, then redo, then redo two backspaces, then do nothing on redo, then undo",
-        async () => {
-            await testEditor({
-                contentBefore: "<p>ab []cd</p>",
-                stepFunction: async (editor) => {
-                    await deleteBackward(editor); // <p>ab[]cd</p>
-                    await deleteBackward(editor); // <p>a[]cd</p>
-                    undo(editor); // <p>ab[]cd</p>
-                    undo(editor); // <p>ab []cd</p>
-                    redo(editor); // <p>ab[]cd</p>
-                    redo(editor); // <p>a[]cd</p>
-                    redo(editor); // <p>a[]cd</p> (nothing to redo)
-                },
-                contentAfter: "<p>a[]cd</p>",
-            });
-        }
-    );
+    test("should undo, then undo, then redo, then redo two backspaces, then do nothing on redo, then undo", async () => {
+        await testEditor({
+            contentBefore: "<p>ab []cd</p>",
+            stepFunction: async (editor) => {
+                await deleteBackward(editor); // <p>ab[]cd</p>
+                await deleteBackward(editor); // <p>a[]cd</p>
+                undo(editor); // <p>ab[]cd</p>
+                undo(editor); // <p>ab []cd</p>
+                redo(editor); // <p>ab[]cd</p>
+                redo(editor); // <p>a[]cd</p>
+                redo(editor); // <p>a[]cd</p> (nothing to redo)
+            },
+            contentAfter: "<p>a[]cd</p>",
+        });
+    });
 
-    test.todo("should 2x undo, then 2x redo, then 2x undo, then 2x redo a backspace", async () => {
+    test("should 2x undo, then 2x redo, then 2x undo, then 2x redo a backspace", async () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
@@ -108,7 +103,7 @@ describe("redo", () => {
         });
     });
 
-    test.todo("should type a, b, c, undo x2, d, undo x2, redo x2", async () => {
+    test("should type a, b, c, undo x2, d, undo x2, redo x2", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
@@ -127,7 +122,7 @@ describe("redo", () => {
         });
     });
 
-    test.todo("should type a, b, c, undo x2, d, undo, redo x2", async () => {
+    test("should type a, b, c, undo x2, d, undo, redo x2", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
@@ -178,40 +173,46 @@ describe("step", () => {
 });
 
 describe("prevent renderingClasses to be set from history", () => {
-    test.todo("should prevent renderingClasses to be added", async () => {
+    class TestRenderingClassesPlugin extends Plugin {
+        static name = "testRenderClasses";
+
+        setup() {
+            this.registry.category("history_rendering_classes").add("test", ["x"]);
+        }
+    }
+    test("should prevent renderingClasses to be added", async () => {
         await testEditor(
             {
                 contentBefore: `<p>a</p>`,
                 stepFunction: async (editor) => {
                     const p = editor.editable.querySelector("p");
                     p.className = "x";
-                    editor.observerFlush();
-                    editor.historyStep();
-                    window.chai.expect(editor._historySteps.length).to.eql(1);
+                    editor.dispatch("ADD_STEP");
+                    const history = editor.plugins.find((p) => p.constructor.name === "history");
+                    expect(history.steps.length).toBe(1);
                 },
             },
             {
-                renderingClasses: ["x"],
+                Plugins: [TestRenderingClassesPlugin],
             }
         );
     });
 
-    test.todo("should prevent renderingClasses to be added when adding 2 classes", async () => {
+    test("should prevent renderingClasses to be added when adding 2 classes", async () => {
         await testEditor(
             {
                 contentBefore: `<p>a</p>`,
                 stepFunction: async (editor) => {
                     const p = editor.editable.querySelector("p");
                     p.className = "x y";
-                    editor.observerFlush();
-                    editor.historyStep();
-                    editor.historyUndo();
-                    editor.historyRedo();
+                    addStep(editor);
+                    undo(editor);
+                    redo(editor);
                 },
                 contentAfter: `<p class="y">a</p>`,
             },
             {
-                renderingClasses: ["x"],
+                Plugins: [TestRenderingClassesPlugin],
             }
         );
     });
@@ -235,7 +236,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 contentAfter: `<p class="y">a</p>`,
             },
             {
-                renderingClasses: ["x"],
+                Plugins: [TestRenderingClassesPlugin],
             }
         );
     });
@@ -255,7 +256,7 @@ describe("prevent renderingClasses to be set from history", () => {
                 contentAfter: `<p class="x">a</p>`,
             },
             {
-                renderingClasses: ["y"],
+                Plugins: [TestRenderingClassesPlugin],
             }
         );
     });
