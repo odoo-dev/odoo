@@ -1,13 +1,14 @@
 /** @odoo-module */
 
 import { test } from "@odoo/hoot";
-import { click, deleteBackward, insertText } from "../../test_helpers/user_actions";
+import { deleteBackward, insertText } from "../../test_helpers/user_actions";
 import { testEditor } from "../../test_helpers/editor";
 
 async function clickOnLink(editor) {
-    const a = editor.editable.querySelector("a");
-    await click(a, { clientX: a.getBoundingClientRect().left + 5 });
-    return a;
+    throw new Error("clickOnLink not implemented");
+    // const a = editor.editable.querySelector("a");
+    // await click(a, { clientX: a.getBoundingClientRect().left + 5 });
+    // return a;
 }
 
 test.todo("should restrict editing to link when clicked", async () => {
