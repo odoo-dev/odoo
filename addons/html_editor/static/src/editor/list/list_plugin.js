@@ -7,7 +7,7 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, createList, insertListAfter, mergeSimilarLists, applyToTree } from "./utils";
 import { childNodeIndex } from "../utils/position";
 import { preserveCursor, getTraversedNodes } from "../utils/selection";
-import { setTagName, copyAttributes, removeClass } from "../utils/dom";
+import { setTagName, copyAttributes, removeClass, toggleClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
 export class ListPlugin extends Plugin {
@@ -31,6 +31,8 @@ export class ListPlugin extends Plugin {
         // this.registry
         //     .category("split_element_block_before")
         //     .add("list", this.splitElementBlockBefore.bind(this));
+
+        this.addDomListener(this.editable, "mousedown", this.onMousedown);
     }
 
     handleCommand(command, payload) {
@@ -423,6 +425,38 @@ export class ListPlugin extends Plugin {
             }
             return true;
         }
+    }
+
+    onMousedown(ev) {
+        const node = ev.target;
+        const isChecklistItem = node.tagName == "LI" && getListMode(node.parentElement) == "CL";
+        if (isChecklistItem && this.isPointerInsideCheckbox(node, ev.offsetX, ev.offsetY)) {
+            toggleClass(node, "o_checked");
+            ev.preventDefault();
+            // @todo: historyStep
+            this.dispatch("SANITIZE");
+        }
+    }
+
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLLIElement} li - LI element inside a checklist.
+     */
+    isPointerInsideCheckbox(li, pointerOffsetX, pointerOffsetY) {
+        const beforeStyle = this.document.defaultView.getComputedStyle(li, ":before");
+        const checkboxPosition = {
+            left: parseInt(beforeStyle.left),
+            top: parseInt(beforeStyle.top),
+        };
+        checkboxPosition.right = checkboxPosition.left + parseInt(beforeStyle.width);
+        checkboxPosition.bottom = checkboxPosition.top + parseInt(beforeStyle.height);
+
+        return (
+            pointerOffsetX >= checkboxPosition.left &&
+            pointerOffsetX <= checkboxPosition.right &&
+            pointerOffsetY >= checkboxPosition.top &&
+            pointerOffsetY <= checkboxPosition.bottom
+        );
     }
 }
 
