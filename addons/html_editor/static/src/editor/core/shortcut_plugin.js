@@ -18,6 +18,7 @@ export class ShortCutPlugin extends Plugin {
         this.services.hotkey.add(hotkey, action, {
             area: () => this.editable,
             bypassEditableProtection: true,
+            allowRepeat: true,
         });
     }
 }

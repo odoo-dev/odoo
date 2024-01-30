@@ -57,12 +57,15 @@ export async function deleteBackward(editor, isMobileTest = false) {
 }
 
 // history
+export function addStep(editor) {
+    editor.dispatch("ADD_STEP");
+}
 export function undo(editor) {
-    throw new Error("Not implemented command to replace historyUndo");
+    editor.dispatch("HISTORY_UNDO");
 }
 
 export function redo(editor) {
-    throw new Error("Not implemented command to replace historyRedo");
+    editor.dispatch("HISTORY_REDO");
 }
 
 // list
