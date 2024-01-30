@@ -61,6 +61,7 @@ export class TabulationPlugin extends Plugin {
             const traversedNodes = getTraversedNodes(this.editable);
             this.indentNodes(traversedNodes);
         }
+        this.dispatch("ADD_STEP");
     }
 
     handleShiftTab() {
@@ -71,6 +72,7 @@ export class TabulationPlugin extends Plugin {
         }
         const traversedNodes = getTraversedNodes(this.editable);
         this.outdentNodes(traversedNodes);
+        this.dispatch("ADD_STEP");
     }
 
     insertTab() {

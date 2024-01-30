@@ -90,9 +90,7 @@ export class TablePlugin extends Plugin {
         const range = getSelection().getRangeAt(0);
         const rect = range.getBoundingClientRect();
         if (rect.width === 0 && rect.height === 0 && rect.x === 0) {
-            this.shared.disableObserver();
             range.startContainer.parentElement.appendChild(this.document.createElement("br"));
-            this.shared.enableObserver();
         }
         this.picker.open();
     }

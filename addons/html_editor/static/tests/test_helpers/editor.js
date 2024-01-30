@@ -56,6 +56,7 @@ export async function testEditor(
         };
     }
     const { el, editor } = await setupEditor(contentBefore, config);
+    editor.dispatch("HISTORY_STAGE_SELECTION");
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
         compareFunction(getContent(el), contentBeforeEdit, "contentBeforeEdit");
