@@ -83,6 +83,7 @@ export class DeletePlugin extends Plugin {
             targetNode: selection.anchorNode,
             targetOffset: selection.anchorOffset,
         });
+        this.dispatch("ADD_STEP");
     }
     deleteForward() {
         let selection = this.shared.getEditableSelection();
