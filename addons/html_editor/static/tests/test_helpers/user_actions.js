@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { dispatch } from "@odoo/hoot-dom";
+import { click, dispatch } from "@odoo/hoot-dom";
 import { setSelection } from "./selection";
 import { childNodeIndex } from "@html_editor/editor/utils/position";
 
@@ -65,10 +65,6 @@ export function redo(editor) {
     throw new Error("Not implemented command to replace historyRedo");
 }
 
-export function click(el, options) {
-    throw new Error("need a proper implementation");
-}
-
 // list
 export function toggleOrderedList(editor) {
     editor.dispatch("TOGGLE_LIST", { type: "OL" });
@@ -80,6 +76,20 @@ export function toggleUnorderedList(editor) {
 
 export function toggleCheckList(editor) {
     editor.dispatch("TOGGLE_LIST", { type: "CL" });
+}
+
+/**
+ * Clicks on the checkbox of a checklist item.
+ *
+ * @param {HTMLLIElement} li
+ * @throws {Error} If the provided element is not a LI element within a checklist.
+ */
+export function clickCheckbox(li) {
+    if (li.tagName !== "LI" || !li.parentNode.classList.contains("o_checklist")) {
+        throw new Error("Expected a LI element in a checklist");
+    }
+    const liRect = li.getBoundingClientRect();
+    click(li, { position: { clientX: liRect.left - 10, clientY: liRect.top + 10 } });
 }
 
 export function insertLineBreak(editor) {
