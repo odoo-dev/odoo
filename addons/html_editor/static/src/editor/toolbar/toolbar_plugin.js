@@ -5,7 +5,9 @@ import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
 import { registry } from "@web/core/registry";
 import { FontSelector } from "./font_selector";
+import { isSelectionFormat } from "../utils/formatting";
 
+const isFormatted = (format) => (el) => isSelectionFormat(el, format);
 // TODO: This comes from a command registry?
 const buttons = [
     {
@@ -19,28 +21,28 @@ const buttons = [
         cmd: "FORMAT_BOLD",
         icon: "fa-bold",
         name: "Toggle bold",
-        isFormatApplied: hasTag("strong"),
+        isFormatApplied: isFormatted("bold"),
     },
     {
         id: "italic",
         cmd: "FORMAT_ITALIC",
         icon: "fa-italic",
         name: "Toggle italic",
-        isFormatApplied: hasTag("em"),
+        isFormatApplied: isFormatted("italic"),
     },
     {
         id: "underline",
         cmd: "FORMAT_UNDERLINE",
         icon: "fa-underline",
         name: "Toggle underline",
-        isFormatApplied: hasTag("u"),
+        isFormatApplied: isFormatted("underline"),
     },
     {
         id: "strikethrough",
         cmd: "FORMAT_STRIKETHROUGH",
         icon: "fa-strikethrough",
         name: "Toggle strikethrough",
-        isFormatApplied: hasTag("s"),
+        isFormatApplied: isFormatted("strikeThrough"),
     },
     {
         id: "bulleted_list",
@@ -64,17 +66,6 @@ const buttons = [
         isFormatApplied: () => false, // TODO
     },
 ];
-
-// TODO: This is a temporary naive solution to generate isFormatApplied callback.
-function hasTag(tagName) {
-    return (range) => {
-        let el = range.startContainer;
-        if (el.nodeType !== Node.ELEMENT_NODE) {
-            el = el.parentElement;
-        }
-        return !!el.closest(tagName);
-    };
-}
 
 export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
@@ -112,7 +103,7 @@ export class ToolbarPlugin extends Plugin {
         const range = sel.rangeCount ? sel.getRangeAt(0) : false;
         this.updateToolbarVisibility(range);
         if (this.overlay.isOpen) {
-            this.updateButtonsActiveState(range);
+            this.updateButtonsActiveState();
         }
     }
 
@@ -129,9 +120,9 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateButtonsActiveState(range) {
+    updateButtonsActiveState() {
         for (const button of this.buttons) {
-            this.buttonsActiveState[button.id] = range && button.isFormatApplied(range);
+            this.buttonsActiveState[button.id] = button.isFormatApplied(this.editable);
         }
     }
 }
