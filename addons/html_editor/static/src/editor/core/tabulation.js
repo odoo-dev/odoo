@@ -80,7 +80,7 @@ export class TabulationPlugin extends Plugin {
     }
 
     /**
-     * @param {Set} nodes
+     * @param {Set|Array} nodes
      */
     indentNodes(nodes) {
         const restore = preserveCursor(this.document);
@@ -94,55 +94,55 @@ export class TabulationPlugin extends Plugin {
     }
 
     /**
-     * @todo understand/rewrite? this method
-     * @param {Set} nodes
+     * @param {Set|Array} nodes
      */
     outdentNodes(nodes) {
-        // @todo check if preserveCursor is needed here.
-        const restore = preserveCursor(this.document);
-        const editorTabs = new Set(
-            [...nodes]
-                .map((node) => {
-                    const block = closestBlock(node);
-                    return descendants(block).find((child) => isEditorTab(child));
-                })
-                .filter(
-                    (node) =>
-                        // Filter out tabs preceded by visible text.
-                        node &&
-                        !getAdjacentPreviousSiblings(node).some(
-                            (sibling) =>
-                                sibling.nodeType === Node.TEXT_NODE &&
-                                !/^[\u200B\s]*$/.test(sibling.textContent)
-                        )
-                )
-        );
-        for (const tab of editorTabs) {
-            const selection = this.document.getSelection();
-            const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
-            const updateAnchor = anchorNode === tab.nextSibling;
-            const updateFocus = focusNode === tab.nextSibling;
-            let zwsRemoved = 0;
-            while (
-                tab.nextSibling &&
-                tab.nextSibling.nodeType === Node.TEXT_NODE &&
-                tab.nextSibling.textContent.startsWith("\u200B")
-            ) {
-                splitTextNode(tab.nextSibling, 1, DIRECTIONS.LEFT);
-                tab.nextSibling.remove();
-                zwsRemoved++;
-            }
-            if (updateAnchor || updateFocus) {
-                setSelection(
-                    updateAnchor ? tab.nextSibling : anchorNode,
-                    updateAnchor ? Math.max(0, anchorOffset - zwsRemoved) : anchorOffset,
-                    updateFocus ? tab.nextSibling : focusNode,
-                    updateFocus ? Math.max(0, focusOffset - zwsRemoved) : focusOffset
-                );
-            }
+        for (const tab of this.getIndentationTabs(nodes)) {
+            this.removeTrailingZWS(tab);
             tab.remove();
         }
-        restore();
+    }
+
+    getIndentationTabs(nodes) {
+        const blocks = new Set([...nodes].map((node) => closestBlock(node)).filter((node) => node));
+        const firstTabs = [...blocks]
+            .map((block) => descendants(block).find(isEditorTab))
+            .filter(Boolean);
+
+        // Filter out tabs preceded by visible text.
+        return firstTabs.filter(
+            (tab) =>
+                !getAdjacentPreviousSiblings(tab).some(
+                    (sibling) =>
+                        sibling.nodeType === Node.TEXT_NODE &&
+                        !/^[\u200B\s]*$/.test(sibling.textContent)
+                )
+        );
+    }
+
+    removeTrailingZWS(tab) {
+        const selection = this.document.getSelection();
+        const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+        const updateAnchor = anchorNode === tab.nextSibling;
+        const updateFocus = focusNode === tab.nextSibling;
+        let zwsRemoved = 0;
+        while (
+            tab.nextSibling &&
+            tab.nextSibling.nodeType === Node.TEXT_NODE &&
+            tab.nextSibling.textContent.startsWith("\u200B")
+        ) {
+            splitTextNode(tab.nextSibling, 1, DIRECTIONS.LEFT);
+            tab.nextSibling.remove();
+            zwsRemoved++;
+        }
+        if (updateAnchor || updateFocus) {
+            setSelection(
+                updateAnchor ? tab.nextSibling : anchorNode,
+                updateAnchor ? Math.max(0, anchorOffset - zwsRemoved) : anchorOffset,
+                updateFocus ? tab.nextSibling : focusNode,
+                updateFocus ? Math.max(0, focusOffset - zwsRemoved) : focusOffset
+            );
+        }
     }
 
     /**
