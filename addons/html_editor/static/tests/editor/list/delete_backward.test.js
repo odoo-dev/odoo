@@ -10,7 +10,7 @@ describe("Selection collapsed", () => {
     // with unordered lists and checklists, and vice versae.
     describe("Ordered", () => {
         describe("Basic", () => {
-            test.todo("should convert to paragraph", async () => {
+            test("should convert to paragraph", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><br>[]</li></ol>",
                     stepFunction: deleteBackward,
@@ -61,7 +61,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a list item with its previous list item", async () => {
+            test("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc</li><li>[]def</li></ol>",
                     stepFunction: deleteBackward,
@@ -232,35 +232,29 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge a non-indented list item into an indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li class="oe-nested"><ol><li>abc</li></ol></li><li>[]def</li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ol><li class="oe-nested"><ol><li>abc</li></ol></li></ol><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge a non-indented list item into an indented list item", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li class="oe-nested"><ol><li>abc</li></ol></li><li>[]def</li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ol><li class="oe-nested"><ol><li>abc</li></ol></li></ol><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li>abc</li><li class="oe-nested"><ol><li>[]def</li></ol></li></ol>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<ol><li>abc[]def</li></ol>",
-                    });
-                }
-            );
+            test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li>abc</li><li class="oe-nested"><ol><li>[]def</li></ol></li></ol>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<ol><li>abc[]def</li></ol>",
+                });
+            });
 
-            test.todo("should outdent a list item", async () => {
+            test("should outdent a list item", async () => {
                 await testEditor({
                     contentBefore: '<ol><li class="oe-nested"><ol><li>[]abc</li></ol></li></ol>',
                     stepFunction: deleteBackward,
@@ -297,48 +291,51 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test("should not outdent while nested within a list item if the list is unbreakable", async () => {
-                // Only one LI.
-                await testEditor({
-                    contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                    stepFunction: deleteBackward,
-                    contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                });
-                // First LI.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                // });
-                // // In the middle.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                // });
-                // // Last LI.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                // });
-                // // With a div before the list:
-                // await testEditor({
-                //     contentBefore:
-                //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                // });
-            });
+            test.todo(
+                "should not outdent while nested within a list item if the list is unbreakable",
+                async () => {
+                    // Only one LI.
+                    await testEditor({
+                        contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+                        stepFunction: deleteBackward,
+                        contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+                    });
+                    // First LI.
+                    // await testEditor({
+                    //     contentBefore:
+                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+                    //     stepFunction: deleteBackward,
+                    //     contentAfter:
+                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+                    // });
+                    // // In the middle.
+                    // await testEditor({
+                    //     contentBefore:
+                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
+                    //     stepFunction: deleteBackward,
+                    //     contentAfter:
+                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
+                    // });
+                    // // Last LI.
+                    // await testEditor({
+                    //     contentBefore:
+                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
+                    //     stepFunction: deleteBackward,
+                    //     contentAfter:
+                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
+                    // });
+                    // // With a div before the list:
+                    // await testEditor({
+                    //     contentBefore:
+                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+                    //     stepFunction: deleteBackward,
+                    //     contentAfter:
+                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+                    // });
+                }
+            );
 
-            test.todo("should outdent an empty list item within a list", async () => {
+            test("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>[]<br></li><li><br></li></ol></li><li>def</li></ol>',
@@ -348,7 +345,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list within a list", async () => {
+            test("should outdent an empty list within a list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>[]<br></li></ol></li><li>def</li></ol>',
@@ -357,7 +354,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list", async () => {
+            test("should outdent an empty list", async () => {
                 await testEditor({
                     contentBefore: '<ol><li class="oe-nested"><ol><li><br>[]</li></ol></li></ol>',
                     stepFunction: deleteBackward,
@@ -365,7 +362,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent a list to the point that it's a paragraph", async () => {
+            test("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>[]<br></li></ol>",
                     stepFunction: deleteBackward,
@@ -380,7 +377,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Complex merges", () => {
-            test.todo("should merge a list item into a paragraph", async () => {
+            test("should merge a list item into a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<p>abcd</p><ol><li>ef[]gh</li><li>ij</li></ol>",
                     stepFunction: async (editor) => {
@@ -420,7 +417,7 @@ describe("Selection collapsed", () => {
     });
     describe("Unordered", () => {
         describe("Basic", () => {
-            test.todo("should do nothing", async () => {
+            test("should do nothing", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><br>[]</li></ul>",
                     stepFunction: deleteBackward,
@@ -471,7 +468,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a list item with its previous list item", async () => {
+            test("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc</li><li>[]def</li></ul>",
                     stepFunction: deleteBackward,
@@ -657,35 +654,29 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge a non-indented list item into an indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li class="oe-nested"><ul><li>abc</li></ul></li></ul><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge a non-indented list item into an indented list item", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li class="oe-nested"><ul><li>abc</li></ul></li></ul><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<ul><li>abc[]def</li></ul>",
-                    });
-                }
-            );
+            test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<ul><li>abc[]def</li></ul>",
+                });
+            });
 
-            test.todo("should outdent a list item", async () => {
+            test("should outdent a list item", async () => {
                 await testEditor({
                     contentBefore: '<ul><li class="oe-nested"><ul><li>[]abc</li></ul></li></ul>',
                     stepFunction: deleteBackward,
@@ -700,7 +691,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list item within a list", async () => {
+            test("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li>def</li></ul>',
@@ -710,7 +701,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list within a list", async () => {
+            test("should outdent an empty list within a list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li>def</li></ul>',
@@ -719,7 +710,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list", async () => {
+            test("should outdent an empty list", async () => {
                 await testEditor({
                     contentBefore: '<ul><li class="oe-nested"><ul><li><br>[]</li></ul></li></ul>',
                     stepFunction: deleteBackward,
@@ -727,7 +718,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent a list to the point that it's a paragraph", async () => {
+            test("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>[]<br></li></ul>",
                     stepFunction: deleteBackward,
@@ -742,7 +733,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Complex merges", () => {
-            test.todo("should merge a list item into a paragraph", async () => {
+            test("should merge a list item into a paragraph", async () => {
                 await testEditor({
                     contentBefore: "<p>abcd</p><ul><li>ef[]gh</li><li>ij</li></ul>",
                     stepFunction: async (editor) => {
@@ -763,30 +754,27 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should not merge a bold list item into a non-formatted list item",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            "<ul>" +
-                            "<li>abc</li>" +
-                            "<li><b>de</b>fg</li>" +
-                            "<li><b>[]hij</b>klm</li>" +
-                            "<li>nop</li>" +
-                            "</ul>",
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            "<ul>" +
-                            "<li>abc</li>" +
-                            "<li><b>de</b>fg</li>" +
-                            "</ul>" +
-                            "<p><b>[]hij</b>klm</p>" +
-                            "<ul>" +
-                            "<li>nop</li>" +
-                            "</ul>",
-                    });
-                }
-            );
+            test("should not merge a bold list item into a non-formatted list item", async () => {
+                await testEditor({
+                    contentBefore:
+                        "<ul>" +
+                        "<li>abc</li>" +
+                        "<li><b>de</b>fg</li>" +
+                        "<li><b>[]hij</b>klm</li>" +
+                        "<li>nop</li>" +
+                        "</ul>",
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        "<ul>" +
+                        "<li>abc</li>" +
+                        "<li><b>de</b>fg</li>" +
+                        "</ul>" +
+                        "<p><b>[]hij</b>klm</p>" +
+                        "<ul>" +
+                        "<li>nop</li>" +
+                        "</ul>",
+                });
+            });
 
             test("should merge a paragraph starting with bold text into a list item with ending without formatting", async () => {
                 await testEditor({
@@ -807,7 +795,7 @@ describe("Selection collapsed", () => {
     });
     describe("Checklist", () => {
         describe("Basic", () => {
-            test.todo("should remove the list and turn into p", async () => {
+            test("should remove the list and turn into p", async () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li><br>[]</li></ul>',
                     stepFunction: deleteBackward,
@@ -878,7 +866,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a list item with its previous list item", async () => {
+            test("should merge a list item with its previous list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1171,38 +1159,32 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge a non-indented list item into an indented list item",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li><li class="o_checked">[]def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li></ul><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge a non-indented list item into an indented list item", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li><li class="o_checked">[]def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li></ul><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
-                    });
-                }
-            );
+            test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
+                });
+            });
 
-            test.todo("should outdent a list item", async () => {
+            test("should outdent a list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1220,7 +1202,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent the list item without removing the header tag", async () => {
+            test("should outdent the list item without removing the header tag", async () => {
                 await testEditor({
                     contentBefore:
                         "<ul>" +
@@ -1259,7 +1241,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list item within a list", async () => {
+            test("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: unformat(`
@@ -1290,7 +1272,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list within a list", async () => {
+            test("should outdent an empty list within a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1301,7 +1283,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent an empty list", async () => {
+            test("should outdent an empty list", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1311,7 +1293,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should outdent a list to the point that it's a paragraph", async () => {
+            test("should outdent a list to the point that it's a paragraph", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
@@ -1328,7 +1310,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Complex merges", () => {
-            test.todo("should merge a list item into a paragraph", async () => {
+            test("should merge a list item into a paragraph", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1382,7 +1364,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge a bold list item into a non-formatted list item", async () => {
+            test("should merge a bold list item into a non-formatted list item", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -1465,80 +1447,64 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge an ordered list item that is in an unordered list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ol><li>[]def</li><li>ghi</li></ol></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li>abc</li></ul><p>[]def</p><ul><li class="oe-nested"><ol><li>ghi</li></ol></li></ul>',
-                    });
-                }
-            );
+            test("should merge an ordered list item that is in an unordered list item into a non-indented list item", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ol><li>[]def</li><li>ghi</li></ol></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li>abc</li></ul><p>[]def</p><ul><li class="oe-nested"><ol><li>ghi</li></ol></li></ul>',
+                });
+            });
 
-            test.todo(
-                "should merge an ordered list item into an unordered list item that is in the same ordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ol><li class="oe-nested"><ul><li>abc</li></ul></li></ol><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge an ordered list item into an unordered list item that is in the same ordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ol><li class="oe-nested"><ul><li>abc</li></ul></li></ol><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an ordered list that is in an unordered list into a list item that is in the same unordered list, and remove the now empty ordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ol><li>[]def</li></ol></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<ul><li>abc[]def</li></ul>",
-                    });
-                }
-            );
+            test("should merge the only item in an ordered list that is in an unordered list into a list item that is in the same unordered list, and remove the now empty ordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ol><li>[]def</li></ol></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<ul><li>abc[]def</li></ul>",
+                });
+            });
 
-            test.todo(
-                "should outdent an ordered list item that is within a unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ol><li>[]abc</li></ol></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]abc</p>",
-                    });
-                    // With a paragraph before the list:
-                    await testEditor({
-                        contentBefore:
-                            '<p>abc</p><ul><li class="oe-nested"><ol><li>[]def</li></ol></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>abc</p><p>[]def</p>",
-                    });
-                }
-            );
+            test("should outdent an ordered list item that is within a unordered list", async () => {
+                await testEditor({
+                    contentBefore: '<ul><li class="oe-nested"><ol><li>[]abc</li></ol></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]abc</p>",
+                });
+                // With a paragraph before the list:
+                await testEditor({
+                    contentBefore:
+                        '<p>abc</p><ul><li class="oe-nested"><ol><li>[]def</li></ol></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>abc</p><p>[]def</p>",
+                });
+            });
 
-            test.todo(
-                "should outdent an empty ordered list item within an unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ol><li>[]<br></li><li><br></li></ol></li><li>def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li>abc</li></ul><p>[]<br></p><ul><li class="oe-nested"><ol><li><br></li></ol></li><li>def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty ordered list item within an unordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ol><li>[]<br></li><li><br></li></ol></li><li>def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li>abc</li></ul><p>[]<br></p><ul><li class="oe-nested"><ol><li><br></li></ol></li><li>def</li></ul>',
+                });
+            });
 
-            test.todo("should outdent an empty ordered list within an unordered list", async () => {
+            test("should outdent an empty ordered list within an unordered list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li>abc</li><li class="oe-nested"><ol><li>[]<br></li></ol></li><li>def</li></ul>',
@@ -1547,17 +1513,13 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should outdent an empty ordered list within an unordered list (2)",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ol><li><br>[]</li></ol></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]<br></p>",
-                    });
-                }
-            );
+            test("should outdent an empty ordered list within an unordered list (2)", async () => {
+                await testEditor({
+                    contentBefore: '<ul><li class="oe-nested"><ol><li><br>[]</li></ol></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]<br></p>",
+                });
+            });
         });
         describe("Unordered to ordered", () => {
             test.todo("should merge an unordered list into an ordered list", async () => {
@@ -1595,11 +1557,9 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge an unordered list item that is in an ordered list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore: unformat(`
+            test("should merge an unordered list item that is in an ordered list item into a non-indented list item", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
                             <ol>
                                 <li>abc</li>
                                 <li class="oe-nested">
@@ -1609,8 +1569,8 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ol>`),
-                        stepFunction: deleteBackward,
-                        contentAfter: unformat(`
+                    stepFunction: deleteBackward,
+                    contentAfter: unformat(`
                             <ol>
                                 <li>abc</li>
                             </ol>
@@ -1622,71 +1582,57 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ol>`),
-                    });
-                }
-            );
+                });
+            });
 
-            test.todo(
-                "should merge an unordered list item into an ordered list item that is in the same unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ol><li>abc</li></ol></li><li>[]def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li class="oe-nested"><ol><li>abc</li></ol></li></ul><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge an unordered list item into an ordered list item that is in the same unordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li class="oe-nested"><ol><li>abc</li></ol></li><li>[]def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li class="oe-nested"><ol><li>abc</li></ol></li></ul><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an unordered list that is in an ordered list into a list item that is in the same ordered list, and remove the now empty unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li>abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ol>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<ol><li>abc[]def</li></ol>",
-                    });
-                }
-            );
+            test("should merge the only item in an unordered list that is in an ordered list into a list item that is in the same ordered list, and remove the now empty unordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li>abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ol>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<ol><li>abc[]def</li></ol>",
+                });
+            });
 
-            test.todo(
-                "should outdent an unordered list item that is within a ordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li class="oe-nested"><ul><li>[]abc</li></ul></li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]abc</p>",
-                    });
-                    // With a paragraph before the list:
-                    await testEditor({
-                        contentBefore:
-                            '<p>abc</p><ol><li class="oe-nested"><ul><li>[]def</li></ul></li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>abc</p><p>[]def</p>",
-                    });
-                }
-            );
+            test("should outdent an unordered list item that is within a ordered list", async () => {
+                await testEditor({
+                    contentBefore: '<ol><li class="oe-nested"><ul><li>[]abc</li></ul></li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]abc</p>",
+                });
+                // With a paragraph before the list:
+                await testEditor({
+                    contentBefore:
+                        '<p>abc</p><ol><li class="oe-nested"><ul><li>[]def</li></ul></li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>abc</p><p>[]def</p>",
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list item within an ordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li>abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li>def</li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ol><li>abc</li></ol><p>[]<br></p><ol><li class="oe-nested"><ul><li><br></li></ul></li><li>def</li></ol>',
-                    });
-                }
-            );
+            test("should outdent an empty unordered list item within an ordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li>abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li>def</li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ol><li>abc</li></ol><p>[]<br></p><ol><li class="oe-nested"><ul><li><br></li></ul></li><li>def</li></ol>',
+                });
+            });
 
-            test.todo("should outdent an empty unordered list within an ordered list", async () => {
+            test("should outdent an empty unordered list within an ordered list", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li>def</li></ol>',
@@ -1695,17 +1641,13 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should outdent an empty unordered list within an ordered list (2)",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li class="oe-nested"><ul><li><br>[]</li></ul></li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]<br></p>",
-                    });
-                }
-            );
+            test("should outdent an empty unordered list within an ordered list (2)", async () => {
+                await testEditor({
+                    contentBefore: '<ol><li class="oe-nested"><ul><li><br>[]</li></ul></li></ol>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]<br></p>",
+                });
+            });
         });
         describe("Checklist to unordered", () => {
             test.todo("should merge an checklist list into an unordered list", async () => {
@@ -1763,91 +1705,73 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge an checklist list item into an unordered list item that is in the same checklist list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul><li>abc</li></ul></li></ul><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge an checklist list item into an unordered list item that is in the same checklist list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul><li>abc</li></ul></li><li>[]def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul><li>abc</li></ul></li></ul><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an checklist list that is in an unordered list into a checklist item that is in the same unordered list, and remove the now empty checklist list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<ul><li>abc[]def</li></ul>",
-                    });
-                }
-            );
+            test("should merge the only item in an checklist list that is in an unordered list into a checklist item that is in the same unordered list, and remove the now empty checklist list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<ul><li>abc[]def</li></ul>",
+                });
+            });
 
-            test.todo(
-                "should outdent an checklist list item that is within a unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]abc</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]abc</p>",
-                    });
-                    // With a paragraph before the list:
-                    await testEditor({
-                        contentBefore:
-                            '<p>abc</p><ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>abc</p><p>[]def</p>",
-                    });
-                }
-            );
+            test("should outdent an checklist list item that is within a unordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]abc</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]abc</p>",
+                });
+                // With a paragraph before the list:
+                await testEditor({
+                    contentBefore:
+                        '<p>abc</p><ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>abc</p><p>[]def</p>",
+                });
+            });
 
-            test.todo(
-                "should outdent an empty checklist list item within an unordered list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>[]<br></li><li><br></li></ul></li><li>def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li>abc</li></ul><p>[]<br></p><ul><li class="oe-nested"><ul class="o_checklist"><li><br></li></ul></li><li>def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty checklist list item within an unordered list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>[]<br></li><li><br></li></ul></li><li>def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li>abc</li></ul><p>[]<br></p><ul><li class="oe-nested"><ul class="o_checklist"><li><br></li></ul></li><li>def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an empty checklist list within an unordered list",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>[]<br></li></ul></li><li>def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<ul><li>abc</li></ul><p>[]<br></p><ul><li>def</li></ul>",
-                    });
-                }
-            );
+            test("should outdent an empty checklist list within an unordered list", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>[]<br></li></ul></li><li>def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<ul><li>abc</li></ul><p>[]<br></p><ul><li>def</li></ul>",
+                });
+            });
 
-            test.todo(
-                "should outdent an empty checklist list within an unordered list (2)",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ul class="o_checklist"><li><br>[]</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]<br></p>",
-                    });
-                }
-            );
+            test("should outdent an empty checklist list within an unordered list (2)", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li class="oe-nested"><ul class="o_checklist"><li><br>[]</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]<br></p>",
+                });
+            });
         });
         describe("Unordered to checklist", () => {
             test.todo("should merge an unordered list into an checklist list", async () => {
@@ -1928,126 +1852,102 @@ describe("Selection collapsed", () => {
                 }
             );
 
-            test.todo(
-                "should merge an unordered list item into an checklist list item that is in the same unordered list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li><li>[]def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li></ul><p>[]def</p>',
-                    });
-                }
-            );
+            test("should merge an unordered list item into an checklist list item that is in the same unordered list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li><li>[]def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc</li></ul></li></ul><p>[]def</p>',
+                });
+            });
 
-            test.todo(
-                "should merge the only item in an unordered list that is in an checklist list into a checklist item that is in the same checklist list, and remove the now empty unordered list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
-                    });
-                }
-            );
+            test("should merge the only item in an unordered list that is in an checklist list into a checklist item that is in the same checklist list, and remove the now empty unordered list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc[]def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an unordered list item that is within a checklist list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul><li>[]abc</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]abc</p>",
-                    });
-                    // With a paragraph before the list:
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<p>abc</p><ul class="o_checklist"><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>abc</p><p>[]def</p>",
-                    });
-                }
-            );
+            test("should outdent an unordered list item that is within a checklist list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul><li>[]abc</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]abc</p>",
+                });
+                // With a paragraph before the list:
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<p>abc</p><ul class="o_checklist"><li class="oe-nested"><ul><li>[]def</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>abc</p><p>[]def</p>",
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list item within an checklist list (o_checked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li class="o_checked">def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="oe-nested"><ul><li><br></li></ul></li><li class="o_checked">def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty unordered list item within an checklist list (o_checked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li class="o_checked">def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="oe-nested"><ul><li><br></li></ul></li><li class="o_checked">def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list item within an checklist list (unchecked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li>def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li>abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="oe-nested"><ul><li><br></li></ul></li><li>def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty unordered list item within an checklist list (unchecked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul><li>[]<br></li><li><br></li></ul></li><li>def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li>abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="oe-nested"><ul><li><br></li></ul></li><li>def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list within an checklist list (checked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li class="o_checked">def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="o_checked">def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty unordered list within an checklist list (checked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li class="o_checked">def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p><ul class="o_checklist"><li class="o_checked">def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list within an checklist list (unchecked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li>def</li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter:
-                            '<ul class="o_checklist"><li>abc</li></ul><p>[]<br></p><ul class="o_checklist"><li>def</li></ul>',
-                    });
-                }
-            );
+            test("should outdent an empty unordered list within an checklist list (unchecked)", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li><li>def</li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter:
+                        '<ul class="o_checklist"><li>abc</li></ul><p>[]<br></p><ul class="o_checklist"><li>def</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should outdent an empty unordered list within an otherwise empty checklist list",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="oe-nested"><ul><li><br>[]</li></ul></li></ul>',
-                        stepFunction: deleteBackward,
-                        contentAfter: "<p>[]<br></p>",
-                    });
-                }
-            );
+            test("should outdent an empty unordered list within an otherwise empty checklist list", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="oe-nested"><ul><li><br>[]</li></ul></li></ul>',
+                    stepFunction: deleteBackward,
+                    contentAfter: "<p>[]<br></p>",
+                });
+            });
         });
     });
     describe("Complex merges with some containers parsed in list item", () => {
