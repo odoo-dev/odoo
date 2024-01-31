@@ -369,7 +369,7 @@ export class ListPlugin extends Plugin {
 
     deleteElementBackwardBefore({ targetNode, targetOffset, outdentList = true, fromForward }) {
         if (!fromForward && outdentList && targetNode.tagName === "LI" && targetOffset === 0) {
-            this.dispatch("LIST_OUTDENT", { element: targetNode, index: 0 });
+            this.toggleListLI(targetNode, getListMode(targetNode.parentElement));
             return true;
         }
     }
