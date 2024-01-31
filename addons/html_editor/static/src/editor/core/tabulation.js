@@ -2,21 +2,34 @@
 
 import { Plugin } from "../plugin";
 import { registry } from "@web/core/registry";
-import { closestBlock } from "../utils/blocks";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { isEditorTab, isZWS } from "../utils/dom_info";
 import { splitTextNode } from "../utils/dom_split";
 import { DIRECTIONS } from "../utils/position";
-import { getTraversedNodes, preserveCursor, setSelection } from "../utils/selection";
+import { getTraversedBlocks, preserveCursor, setSelection } from "../utils/selection";
 import { parseHTML } from "../utils/html";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
 const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
 
+/**
+ * Checks if the given tab element represents an indentation.
+ * An indentation tab is one that is not preceded by visible text.
+ *
+ * @param {HTMLElement} tab - The tab element to check.
+ * @returns {boolean} - True if the tab represents an indentation, false otherwise.
+ */
+function isIndentationTab(tab) {
+    return !getAdjacentPreviousSiblings(tab).some(
+        (sibling) =>
+            sibling.nodeType === Node.TEXT_NODE && !/^[\u200B\s]*$/.test(sibling.textContent)
+    );
+}
+
 export class TabulationPlugin extends Plugin {
     static name = "tabulation";
     static dependencies = ["dom"];
-    static shared = ["indentNodes", "outdentNodes"];
+    static shared = ["indentBlocks", "outdentBlocks"];
 
     setup() {
         for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
@@ -58,8 +71,8 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            const traversedNodes = getTraversedNodes(this.editable);
-            this.indentNodes(traversedNodes);
+            const traversedBlocks = getTraversedBlocks(this.editable);
+            this.indentBlocks(traversedBlocks);
         }
         this.dispatch("ADD_STEP");
     }
@@ -70,8 +83,8 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
-        const traversedNodes = getTraversedNodes(this.editable);
-        this.outdentNodes(traversedNodes);
+        const traversedBlocks = getTraversedBlocks(this.editable);
+        this.outdentBlocks(traversedBlocks);
         this.dispatch("ADD_STEP");
     }
 
@@ -79,45 +92,23 @@ export class TabulationPlugin extends Plugin {
         this.shared.dom_insert(parseHTML(this.document, tabHtml));
     }
 
-    /**
-     * @param {Set|Array} nodes
-     */
-    indentNodes(nodes) {
+    indentBlocks(blocks) {
         const restore = preserveCursor(this.document);
         const tab = parseHTML(this.document, tabHtml);
-        for (const block of new Set(
-            [...nodes].map((node) => closestBlock(node)).filter((node) => node)
-        )) {
+        for (const block of blocks) {
             block.prepend(tab.cloneNode(true));
         }
         restore();
     }
 
-    /**
-     * @param {Set|Array} nodes
-     */
-    outdentNodes(nodes) {
-        for (const tab of this.getIndentationTabs(nodes)) {
-            this.removeTrailingZWS(tab);
-            tab.remove();
+    outdentBlocks(blocks) {
+        for (const block of blocks) {
+            const firstTab = descendants(block).find(isEditorTab);
+            if (firstTab && isIndentationTab(firstTab)) {
+                this.removeTrailingZWS(firstTab);
+                firstTab.remove();
+            }
         }
-    }
-
-    getIndentationTabs(nodes) {
-        const blocks = new Set([...nodes].map((node) => closestBlock(node)).filter((node) => node));
-        const firstTabs = [...blocks]
-            .map((block) => descendants(block).find(isEditorTab))
-            .filter(Boolean);
-
-        // Filter out tabs preceded by visible text.
-        return firstTabs.filter(
-            (tab) =>
-                !getAdjacentPreviousSiblings(tab).some(
-                    (sibling) =>
-                        sibling.nodeType === Node.TEXT_NODE &&
-                        !/^[\u200B\s]*$/.test(sibling.textContent)
-                )
-        );
     }
 
     removeTrailingZWS(tab) {
