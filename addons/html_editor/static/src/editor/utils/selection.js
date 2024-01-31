@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { isBlock } from "./blocks";
+import { closestBlock, isBlock } from "./blocks";
 import { splitTextNode } from "./dom_split";
 import {
     getDeepestPosition,
@@ -350,6 +350,7 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
     return range;
 }
 
+// @todo @phoenix: remove table logic from this util
 /**
  * Returns an array containing all the nodes traversed when walking the
  * selection.
@@ -388,6 +389,10 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
         }
     }
     return [...traversedNodes];
+}
+
+export function getTraversedBlocks(editable, range = getDeepRange(editable)) {
+    return [...new Set(getTraversedNodes(editable, range).map(closestBlock).filter(Boolean))];
 }
 
 /**

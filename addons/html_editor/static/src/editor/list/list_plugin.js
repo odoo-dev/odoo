@@ -6,7 +6,7 @@ import { isWhitespace, isVisible } from "../utils/dom_info";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, createList, insertListAfter, mergeSimilarLists, applyToTree } from "./utils";
 import { childNodeIndex } from "../utils/position";
-import { preserveCursor, getTraversedNodes } from "../utils/selection";
+import { preserveCursor, getTraversedNodes, getTraversedBlocks } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass, toggleClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
@@ -67,35 +67,32 @@ export class ListPlugin extends Plugin {
     }
 
     handleTab() {
-        const { listItems, nonListItems } = this.separateListNodes();
-        if (listItems.size) {
+        const { listItems, nonListItems } = this.separateListItems();
+        if (listItems.length) {
             this.indentListNodes(listItems);
-            this.shared.indentNodes(nonListItems);
+            this.shared.indentBlocks(nonListItems);
             return true;
         }
     }
 
     handleShiftTab() {
-        const { listItems, nonListItems } = this.separateListNodes();
-        if (listItems.size) {
+        const { listItems, nonListItems } = this.separateListItems();
+        if (listItems.length) {
             this.outdentListNodes(listItems);
-            this.shared.outdentNodes(nonListItems);
+            this.shared.outdentBlocks(nonListItems);
             return true;
         }
     }
 
-    separateListNodes() {
-        const listItems = new Set();
-        const nonListItems = new Set();
-        for (const node of getTraversedNodes(this.editable)) {
-            const closestLi = closestElement(node, "li");
-            const target = closestLi || node;
-            if (!target.querySelector?.("li")) {
-                if (closestLi) {
-                    listItems.add(closestLi);
-                } else {
-                    nonListItems.add(node);
-                }
+    separateListItems() {
+        const listItems = [];
+        const nonListItems = [];
+        for (const block of getTraversedBlocks(this.editable)) {
+            // Keep deepest list items only.
+            if (block.tagName === "LI" && !block.querySelector("li")) {
+                listItems.push(block);
+            } else if (!["UL", "OL"].includes(block.tagName)) {
+                nonListItems.push(block);
             }
         }
         return { listItems, nonListItems };
@@ -248,12 +245,12 @@ export class ListPlugin extends Plugin {
     }
 
     indentList() {
-        const { listItems } = this.separateListNodes();
+        const { listItems } = this.separateListItems();
         this.indentListNodes(listItems);
     }
 
     outdentList() {
-        const { listItems } = this.separateListNodes();
+        const { listItems } = this.separateListItems();
         this.outdentListNodes(listItems);
     }
 
