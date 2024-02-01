@@ -6,8 +6,19 @@ import { Toolbar } from "./toolbar";
 import { registry } from "@web/core/registry";
 import { FontSelector } from "./font_selector";
 import { isSelectionFormat } from "../utils/formatting";
+import { closestBlock } from "../utils/blocks";
+import { getListMode } from "../list/utils";
 
 const isFormatted = (format) => (el) => isSelectionFormat(el, format);
+
+const isListActive = (listMode) => (editable) => {
+    // @todo @phoenix get selection from the dom plugin once this is moved
+    // to the ListPlugin
+    const selection = editable.ownerDocument.getSelection();
+    const block = closestBlock(selection.anchorNode);
+    return block?.tagName === "LI" && getListMode(block.parentNode) === listMode;
+};
+
 // TODO: This comes from a command registry?
 const buttons = [
     {
@@ -16,6 +27,7 @@ const buttons = [
         component: FontSelector,
         isFormatApplied: () => false, // TODO
     },
+    // @todo @phoenix move buttons registration to FORMAT Plugin
     {
         id: "bold",
         cmd: "FORMAT_BOLD",
@@ -44,26 +56,27 @@ const buttons = [
         name: "Toggle strikethrough",
         isFormatApplied: isFormatted("strikeThrough"),
     },
+    // @todo @phoenix move buttons registration to LIST Plugin
     {
         id: "bulleted_list",
         cmd: "TOGGLE_LIST_UL",
         icon: "fa-list-ul",
         name: "Bulleted list",
-        isFormatApplied: () => false, // TODO
+        isFormatApplied: isListActive("UL"),
     },
     {
         id: "numbered_list",
         cmd: "TOGGLE_LIST_OL",
         icon: "fa-list-ol",
         name: "Numbered list",
-        isFormatApplied: () => false, // TODO
+        isFormatApplied: isListActive("OL"),
     },
     {
         id: "checklist",
         cmd: "TOGGLE_CHECKLIST",
         icon: "fa-check-square-o",
         name: "Checklist",
-        isFormatApplied: () => false, // TODO
+        isFormatApplied: isListActive("CL"),
     },
 ];
 
