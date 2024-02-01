@@ -7,8 +7,8 @@ export class ShortCutPlugin extends Plugin {
     static name = "shortcut";
 
     start() {
-        for (const [hotkey, shortcut] of this.registry.category("shortcuts").getEntries()) {
-            this.addShortcut(hotkey, () => {
+        for (const shortcut of this.resources["shortcuts"]) {
+            this.addShortcut(shortcut.hotkey, () => {
                 this.dispatch(shortcut.command);
             });
         }
