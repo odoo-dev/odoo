@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { getAdjacents } from "../utils/dom_traversal";
 
 export function getListMode(pnode) {

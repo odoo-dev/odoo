@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { expect, describe, test } from "@odoo/hoot";
 import { testEditor } from "../test_helpers/editor";
 import { addStep, deleteBackward, insertText, redo, undo } from "../test_helpers/user_actions";

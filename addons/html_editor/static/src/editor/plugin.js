@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 export class Plugin {
     static name = "";
     static dependencies = [];

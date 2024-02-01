@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { em, s, span, u } from "../../test_helpers/tags";

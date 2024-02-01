@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { click, dispatch } from "@odoo/hoot-dom";
 import { setSelection } from "./selection";
 import { childNodeIndex } from "@html_editor/editor/utils/position";

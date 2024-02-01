@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { closestPath, findNode } from "./dom_traversal";
 
 const blockTagNames = [

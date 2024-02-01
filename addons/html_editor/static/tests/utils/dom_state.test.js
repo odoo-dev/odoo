@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { CTYPES } from "@html_editor/editor/utils/content_types";
 import { splitTextNode } from "../../src/editor/utils/dom_split";
 import { enforceWhitespace, getState, restoreState } from "@html_editor/editor/utils/dom_state";

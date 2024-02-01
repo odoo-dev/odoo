@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { closestElement } from "./dom_traversal";
 
 /**

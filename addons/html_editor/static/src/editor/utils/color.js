@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 /**
  * Takes a color (rgb, rgba or hex) and returns its hex representation. If the
  * color is given in rgba, the background color of the node whose color we're

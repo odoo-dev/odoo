@@ -1,4 +1,3 @@
-/** @odoo-module */
 import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useWysiwyg } from "./editor/wysiwyg";

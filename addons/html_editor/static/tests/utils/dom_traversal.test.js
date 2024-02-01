@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { isBlock } from "@html_editor/editor/utils/blocks";
 import {
     ancestors,

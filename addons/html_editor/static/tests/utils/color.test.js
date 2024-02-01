@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { rgbToHex } from "@html_editor/editor/utils/color";
 import { expect, getFixture, test } from "@odoo/hoot";
 

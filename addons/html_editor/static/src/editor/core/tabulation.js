@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Plugin } from "../plugin";
 import { registry } from "@web/core/registry";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";

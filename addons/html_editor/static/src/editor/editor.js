@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";

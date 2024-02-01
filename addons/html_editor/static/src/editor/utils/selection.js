@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { closestBlock, isBlock } from "./blocks";
 import { splitTextNode } from "./dom_split";
 import {

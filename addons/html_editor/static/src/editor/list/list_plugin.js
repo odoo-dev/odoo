@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Plugin } from "../plugin";
 import { descendants, closestElement, getAdjacents } from "../utils/dom_traversal";
 import { isWhitespace, isVisible } from "../utils/dom_info";
