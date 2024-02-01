@@ -7,20 +7,25 @@ import { setSelection } from "../utils/selection";
 export class HistoryPlugin extends Plugin {
     static name = "history";
     static dependencies = ["dom"];
+    static resources = () => ({
+        shortcuts: [
+            { hotkey: "control+z", command: "HISTORY_UNDO" },
+            { hotkey: "control+y", command: "HISTORY_REDO" },
+        ],
+    });
 
     // @todo @phoenix usefull for the collaboration plugin. See if we still want
     // to handle the serialization through that property later.
     isSerializable = false;
 
     setup() {
-        this.registry.category("shortcuts").add("control+z", { command: "HISTORY_UNDO" });
-        this.registry.category("shortcuts").add("control+y", { command: "HISTORY_REDO" });
         this.addDomListener(this.editable, "input", this.addStep);
         this.addDomListener(this.editable, "keydown", this.stageSelection);
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
     }
+
     start() {
         this.enableObserver();
         this.reset();
@@ -37,9 +42,7 @@ export class HistoryPlugin extends Plugin {
         // ensure it is the same history branch.
         // this.branchStepIds = [];
 
-        this.renderingClasses = new Set(
-            this.registry.category("history_rendering_classes").getAll().flat()
-        );
+        this.renderingClasses = new Set(this.resources["history_rendering_classes"]);
     }
     handleCommand(command, payload) {
         switch (command) {
@@ -142,7 +145,7 @@ export class HistoryPlugin extends Plugin {
         }
     }
     filterMutationRecords(records) {
-        for (const callback of this.registry.category("filter_mutation_record").getAll()) {
+        for (const callback of this.resources["filter_mutation_record"]) {
             records = callback(records);
         }
 

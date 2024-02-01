@@ -175,10 +175,9 @@ describe("step", () => {
 describe("prevent renderingClasses to be set from history", () => {
     class TestRenderingClassesPlugin extends Plugin {
         static name = "testRenderClasses";
-
-        setup() {
-            this.registry.category("history_rendering_classes").add("test", ["x"]);
-        }
+        static resources = () => ({
+            history_rendering_classes: ["x"],
+        });
     }
     test("should prevent renderingClasses to be added", async () => {
         await testEditor(

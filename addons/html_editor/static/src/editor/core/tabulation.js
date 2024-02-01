@@ -30,13 +30,22 @@ export class TabulationPlugin extends Plugin {
     static name = "tabulation";
     static dependencies = ["dom"];
     static shared = ["indentBlocks", "outdentBlocks"];
+    static resources = () => ({
+        shortcuts: [
+            { hotkey: "tab", command: "TAB" },
+            { hotkey: "shift+tab", command: "SHIFT_TAB" },
+        ],
+    });
 
     setup() {
         for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
             tab.setAttribute("contenteditable", "false");
         }
-        this.registry.category("shortcuts").add("tab", { command: "TAB" });
-        this.registry.category("shortcuts").add("shift+tab", { command: "SHIFT_TAB" });
+    }
+
+    start() {
+        this.resources["handle_tab"].sort((a, b) => a.sequence - b.sequence);
+        this.resources["handle_shift_tab"].sort((a, b) => a.sequence - b.sequence);
     }
 
     handleCommand(command, payload) {
@@ -61,7 +70,7 @@ export class TabulationPlugin extends Plugin {
     }
 
     handleTab() {
-        for (const callback of this.registry.category("handle_tab").getAll()) {
+        for (const { callback } of this.resources["handle_tab"]) {
             if (callback()) {
                 return;
             }
@@ -78,7 +87,7 @@ export class TabulationPlugin extends Plugin {
     }
 
     handleShiftTab() {
-        for (const callback of this.registry.category("handle_shift_tab").getAll()) {
+        for (const { callback } of this.resources["handle_shift_tab"]) {
             if (callback()) {
                 return;
             }
