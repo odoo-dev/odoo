@@ -1,17 +1,28 @@
 import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useWysiwyg } from "./editor/wysiwyg";
-import { defaultConfig } from "./editor/editor";
+import { Wysiwyg } from "./editor/wysiwyg";
+
+const testHtml = `Hello Phoenix editor!
+<p>this is a paragraph</p>
+<p>this is another paragraph</p>
+<div>this is a div</div>
+<p>this is another paragraph</p>
+            </div>
+`;
 
 export class Playground extends Component {
     static template = "html_editor.Playground";
-    static components = {};
+    static components = { Wysiwyg };
     static props = ["*"];
 
     setup() {
-        this.editor = useWysiwyg("html", { ...defaultConfig });
+        this.testHtml = testHtml;
+        // this.editor = useWysiwyg("html", { ...defaultConfig });
         this.state = useState({ showWysiwyg: false });
-        this.constructor.components.Wysiwyg = odoo.loader.modules.get(
+        this.config = useState({
+            showToolbar: false,
+        });
+        this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
             "@web_editor/js/wysiwyg/wysiwyg"
         ).Wysiwyg;
     }

@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.Playground">
-        <div class="d-flex justify-content-center">
-            <div t-ref="html" class="m-2 p-1" style="width:600px;border:1px solid black; min-height: 500px;max-height:500px;overflow:auto;">
-Hello Phoenix editor!
-<p>this is a paragraph</p>
-<p>this is another paragraph</p>
-<div>this is a div</div>
-<p>this is another paragraph</p>
+        <div>
+            <div>Editor Config
+                <span><input type="checkbox" id="showToolbar" t-model="config.showToolbar"/><label for="showToolbar">Show Toolbar</label></span>
             </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <Wysiwyg
+                content="testHtml"
+                class="'m-2'"
+                t-key="config.showToolbar"
+                style="'width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;overflow:auto;'"
+                toolbar="config.showToolbar"/>
         </div>
         this is outside the editor. 
         <button t-on-click="toggleWysiwyg">Toggle Current Editor</button>
         <t t-if="state.showWysiwyg">
             <div class="d-flex justify-content-center">
                 <div class="m-2 p-1" style="width:600px;min-height: 500px;max-height:500px;overflow:auto;">
-                    <Wysiwyg options="{value: 'hello current editor...'}" startWysiwyg="startWysiwyg" />
+                    <CurrentWysiwyg options="{value: testHtml}" startWysiwyg="startWysiwyg" />
                 </div>
             </div>
         </t>

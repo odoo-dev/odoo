@@ -20,7 +20,7 @@ export class FontSelector extends Component {
     get fontName() {
         const sel = this.props.getSelection();
         if (!sel) {
-            return "";
+            return "Normal";
         }
         const anchorNode = sel.anchorNode;
         const block = closestBlock(anchorNode);
