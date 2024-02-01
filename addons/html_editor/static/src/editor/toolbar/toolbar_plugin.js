@@ -22,7 +22,7 @@ const buttons = [
     {
         id: "font",
         name: "FontSelector",
-        component: FontSelector,
+        Component: FontSelector,
         isFormatApplied: () => false, // TODO
     },
     // @todo @phoenix move buttons registration to FORMAT Plugin
