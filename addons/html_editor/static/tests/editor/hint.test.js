@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { expect, test } from "@odoo/hoot";
 import { setupEditor } from "../test_helpers/editor";
 import { getContent } from "../test_helpers/selection";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { insertLineBreak } from "../../test_helpers/user_actions";

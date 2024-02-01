@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { DIRECTIONS } from "@html_editor/editor/utils/position";
 import {
     ensureFocus,
