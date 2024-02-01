@@ -45,6 +45,7 @@ export class Editor {
         this.plugins = [];
         this.editable = null;
         this.document = null;
+        this.shared = {};
     }
 
     attachTo(editable) {
@@ -62,7 +63,6 @@ export class Editor {
     startPlugins() {
         const Plugins = [getPlugins(), this.config.Plugins || []].flat(); // todo: take config into account
         const plugins = new Map();
-        const shared = {};
         for (const P of Plugins) {
             if (P.name === "") {
                 throw new Error(`Missing plugin name (class ${P.constructor.name})`);
@@ -74,7 +74,7 @@ export class Editor {
             for (const dep of P.dependencies) {
                 if (plugins.has(dep)) {
                     for (const h of plugins.get(dep).shared) {
-                        _shared[h] = shared[h];
+                        _shared[h] = this.shared[h];
                     }
                 } else {
                     throw new Error(`Missing dependency for plugin ${P.name}: ${dep}`);
@@ -100,16 +100,15 @@ export class Editor {
             );
             this.plugins.push(plugin);
             for (const h of P.shared) {
-                if (h in shared) {
+                if (h in this.shared) {
                     throw new Error(`Duplicate shared name: ${h}`);
                 }
                 if (!(h in plugin)) {
                     throw new Error(`Missing helper implementation: ${h} in plugin ${P.name}`);
                 }
-                shared[h] = plugin[h].bind(plugin);
+                this.shared[h] = plugin[h].bind(plugin);
             }
         }
-
         const resources = this.createResources();
         for (const plugin of this.plugins) {
             plugin.resources = resources;

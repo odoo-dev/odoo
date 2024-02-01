@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.FontColorSelector">
-        <Dropdown togglerClass="'btn btn-light o-select-color-' + props.type" menuClass="'o_font_color_selector'">
+        <Dropdown togglerClass="'btn btn-light o-select-color-' + props.type" menuClass="'o_font_color_selector'" autoOpen="false">
             <t t-set-slot="toggler">
                 <t t-if="props.type === 'foreground'">
                     <i class="fa fa-font fore-color" title="Font Color"/>
