@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { waitFor, waitUntil } from "@odoo/hoot-dom";
+import { click, waitFor, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
@@ -77,4 +77,37 @@ test("toolbar buttons react to selection change (2)", async () => {
     setContent(el, "<p><strong>test [so]me</strong> some text</p>");
     await animationFrame();
     expect(".btn[name='bold']").toHaveClass("active");
+});
+
+test("toolbar list buttons react to selection change", async () => {
+    const { el } = await setupEditor("<ul><li>[abc]</li></ul>");
+
+    await waitFor(".o-we-toolbar");
+    expect(".btn[name='bulleted_list']").toHaveClass("active");
+    expect(".btn[name='numbered_list']").not.toHaveClass("active");
+    expect(".btn[name='checklist']").not.toHaveClass("active");
+
+    // Toggle to numbered list
+    click(".btn[name='numbered_list']");
+    await waitFor(".btn[name='numbered_list'].active");
+    expect(getContent(el)).toBe("<ol><li>[abc]</li></ol>");
+    expect(".btn[name='bulleted_list']").not.toHaveClass("active");
+    expect(".btn[name='numbered_list']").toHaveClass("active");
+    expect(".btn[name='checklist']").not.toHaveClass("active");
+
+    // Toggle to checklist
+    click(".btn[name='checklist']");
+    await waitFor(".btn[name='checklist'].active");
+    expect(getContent(el)).toBe('<ul class="o_checklist"><li>[abc]</li></ul>');
+    expect(".btn[name='bulleted_list']").not.toHaveClass("active");
+    expect(".btn[name='numbered_list']").not.toHaveClass("active");
+    expect(".btn[name='checklist']").toHaveClass("active");
+
+    // Toggle list off
+    click(".btn[name='checklist']");
+    await waitFor(".btn[name='checklist']:not(.active)");
+    expect(getContent(el)).toBe("<p>[abc]</p>");
+    expect(".btn[name='bulleted_list']").not.toHaveClass("active");
+    expect(".btn[name='numbered_list']").not.toHaveClass("active");
+    expect(".btn[name='checklist']").not.toHaveClass("active");
 });
