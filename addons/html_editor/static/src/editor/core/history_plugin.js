@@ -22,9 +22,6 @@ export class HistoryPlugin extends Plugin {
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
         this._cleanups.push(() => this.observer.disconnect());
-    }
-
-    start() {
         this.enableObserver();
         this.reset();
 
