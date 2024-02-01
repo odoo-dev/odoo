@@ -4,7 +4,7 @@ import { Plugin } from "../plugin";
 export class ShortCutPlugin extends Plugin {
     static name = "shortcut";
 
-    start() {
+    setup() {
         for (const shortcut of this.resources["shortcuts"]) {
             this.addShortcut(shortcut.hotkey, () => {
                 this.dispatch(shortcut.command);
