@@ -1,4 +1,10 @@
 .o-we-toolbar {
     box-shadow: $box-shadow;
     border-radius: 4px;
+    height: 40px;
+    padding: 0 2px;
+    
+    .btn-group:not(:first-child) {
+        border-left: 1px solid lightgrey;
+    }
 }
