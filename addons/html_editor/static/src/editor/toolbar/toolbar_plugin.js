@@ -6,6 +6,7 @@ import { Toolbar } from "./toolbar";
 export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
     static dependencies = ["overlay", "dom"];
+    static shared = ["getToolbarInfo"];
 
     setup() {
         this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
@@ -14,10 +15,8 @@ export class ToolbarPlugin extends Plugin {
         );
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Toolbar, "top", {
-            dispatch: this.dispatch,
-            buttonGroups: this.buttonGroups,
-            buttonsActiveState: this.buttonsActiveState,
-            getSelection: () => this.shared.getEditableSelection(),
+            toolbar: this.getToolbarInfo(),
+            floating: true,
         });
         this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
     }
@@ -35,16 +34,28 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
+    getToolbarInfo() {
+        return {
+            dispatch: this.dispatch,
+            buttonGroups: this.buttonGroups,
+            buttonsActiveState: this.buttonsActiveState,
+            getSelection: () => this.shared.getEditableSelection(),
+        };
+    }
+
     handleSelectionChange() {
         const sel = window.getSelection();
         const range = sel.rangeCount ? sel.getRangeAt(0) : false;
         this.updateToolbarVisibility(range);
-        if (this.overlay.isOpen) {
+        if (this.overlay.isOpen || this.disableFloatingToolbar) {
             this.updateButtonsActiveState();
         }
     }
 
     updateToolbarVisibility(range) {
+        if (this.config.disableFloatingToolbar) {
+            return;
+        }
         const inEditor = range && this.editable.contains(range.commonAncestorContainer);
         if (this.overlay.isOpen) {
             if (!inEditor || range.collapsed) {
