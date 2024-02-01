@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { isBlock } from "./blocks";
 import { removeClass, unwrapContents } from "./dom";
 import { splitAroundUntil } from "./dom_split";

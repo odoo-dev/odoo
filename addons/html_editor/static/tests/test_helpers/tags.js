@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 // helpers to generate html tags
 const getZwsTag = (tagName, { style } = {}) => {
     const styleAttr = style ? ` style="${style}"` : "";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { expect } from "@odoo/hoot";
 import { testEditor } from "./editor";
 

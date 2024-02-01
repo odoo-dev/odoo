@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { test } from "@odoo/hoot";
 import { insertText, testEditor } from "../../test_helpers/editor";
 import { setSelection } from "../../test_helpers/selection";

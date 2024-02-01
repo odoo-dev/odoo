@@ -1,4 +1,3 @@
-/** @odoo-module */
 /* eslint-disable prettier/prettier */
 
 const tldWhitelist = [
