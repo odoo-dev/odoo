@@ -60,7 +60,7 @@ export class ToolbarPlugin extends Plugin {
     updateButtonsActiveState() {
         for (const buttonGroup of this.buttonGroups) {
             for (const button of buttonGroup.buttons) {
-                this.buttonsActiveState[button.id] = button.isFormatApplied(this.editable);
+                this.buttonsActiveState[button.id] = button.isFormatApplied?.(this.editable);
             }
         }
     }

@@ -15,7 +15,7 @@ Hello Phoenix editor!
         <t t-if="state.showWysiwyg">
             <div class="d-flex justify-content-center">
                 <div class="m-2 p-1" style="width:600px;min-height: 500px;max-height:500px;overflow:auto;">
-                    <Wysiwyg options="{}" startWysiwyg="startWysiwyg" editingValue="'hello current editor'"/>
+                    <Wysiwyg options="{value: 'hello current editor...'}" startWysiwyg="startWysiwyg" />
                 </div>
             </div>
         </t>
