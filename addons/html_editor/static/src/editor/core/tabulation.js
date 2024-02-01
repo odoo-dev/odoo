@@ -39,9 +39,6 @@ export class TabulationPlugin extends Plugin {
         for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
             tab.setAttribute("contenteditable", "false");
         }
-    }
-
-    start() {
         this.resources["handle_tab"].sort((a, b) => a.sequence - b.sequence);
         this.resources["handle_shift_tab"].sort((a, b) => a.sequence - b.sequence);
     }
