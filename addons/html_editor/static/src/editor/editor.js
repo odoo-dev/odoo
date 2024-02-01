@@ -113,7 +113,7 @@ export class Editor {
         const resources = this.createResources();
         for (const plugin of this.plugins) {
             plugin.resources = resources;
-            plugin.start();
+            plugin.setup();
         }
     }
 
