@@ -5,9 +5,21 @@ import { Plugin } from "../plugin";
 import { Powerbox } from "./powerbox";
 import { registry } from "@web/core/registry";
 
+function target(selection) {
+    const node = selection.anchorNode;
+    const el = node instanceof Element ? node : node.parentElement;
+    return (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el) && el;
+}
+
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
     static dependencies = ["overlay"];
+    static resources = () => ({
+        temp_hints: {
+            text: 'Type "/" for commands',
+            target,
+        },
+    });
 
     setup() {
         this.offset = 0;
@@ -22,14 +34,6 @@ export class PowerboxPlugin extends Plugin {
             if (ev.key === "/") {
                 this.openPowerbox();
             }
-        });
-        this.registry.category("temp_hints").add("powerbox", {
-            text: 'Type "/" for commands',
-            target(selection) {
-                const node = selection.anchorNode;
-                const el = node instanceof Element ? node : node.parentElement;
-                return (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el) && el;
-            },
         });
     }
 

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Registry, registry } from "@web/core/registry";
+import { registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
@@ -47,7 +47,6 @@ export class Editor {
         this.plugins = [];
         this.editable = null;
         this.document = null;
-        this.registry = new Registry();
     }
 
     attachTo(editable) {
@@ -99,8 +98,7 @@ export class Editor {
                 _shared,
                 dispatch,
                 this.config,
-                this.services,
-                this.registry
+                this.services
             );
             this.plugins.push(plugin);
             for (const h of P.shared) {
@@ -114,9 +112,34 @@ export class Editor {
             }
         }
 
+        const resources = this.createResources();
         for (const plugin of this.plugins) {
+            plugin.resources = resources;
             plugin.start();
         }
+    }
+
+    createResources() {
+        const resources = {};
+        for (const plugin of this.plugins) {
+            if (!plugin.constructor.resources) {
+                continue;
+            }
+
+            const pluginResources = plugin.constructor.resources(plugin);
+            for (const key in pluginResources) {
+                if (!(key in resources)) {
+                    resources[key] = [];
+                }
+                resources[key].push(pluginResources[key]);
+            }
+        }
+
+        for (const key in resources) {
+            resources[key] = resources[key].flat();
+        }
+
+        return resources;
     }
 
     dispatch(command, payload = {}) {

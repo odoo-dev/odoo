@@ -13,20 +13,14 @@ import { registry } from "@web/core/registry";
 export class ListPlugin extends Plugin {
     static name = "list";
     static dependencies = ["tabulation"];
+    static resources = (p) => ({
+        delete_element_backward_before: { callback: p.deleteElementBackwardBefore.bind(p) },
+        delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
+        handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
+        handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
+    });
 
     setup() {
-        this.registry
-            .category("delete_element_backward_before")
-            .add("list", this.deleteElementBackwardBefore.bind(this));
-        this.registry
-            .category("delete_element_forward_before")
-            .add("list", this.deleteElementForwardBefore.bind(this));
-        this.registry
-            .category("handle_tab")
-            .add("list", this.handleTab.bind(this), { sequence: 10 });
-        this.registry
-            .category("handle_shift_tab")
-            .add("list", this.handleShiftTab.bind(this), { sequence: 10 });
         // @todo @phoenix check this is still needed for checklist
         // this.registry
         //     .category("split_element_block_before")

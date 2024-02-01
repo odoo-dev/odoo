@@ -6,9 +6,22 @@ import { isEmpty } from "../utils/dom_info";
 import { removeClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
+function filterMutationRecords(records) {
+    return records.filter((record) => {
+        if (record.type === "attributes" && record.attributeName === "placeholder") {
+            return false;
+        }
+        return true;
+    });
+}
+
 export class HintPlugin extends Plugin {
     static name = "hint";
     static dependencies = ["history"];
+    static resources = () => ({
+        history_rendering_classes: ["o-we-hint"],
+        filter_mutation_record: filterMutationRecords,
+    });
 
     setup() {
         this.tempHints = new Set();
@@ -32,15 +45,6 @@ export class HintPlugin extends Plugin {
         };
         this.addDomListener(this.document, "selectionchange", this.updateTempHints);
         this.updateHints();
-        this.registry.category("history_rendering_classes").add("hint", ["o-we-hint"]);
-        this.registry.category("filter_mutation_record").add("hint", (records) => {
-            return records.filter((record) => {
-                if (record.type === "attributes" && record.attributeName === "placeholder") {
-                    return false;
-                }
-                return true;
-            });
-        });
     }
 
     destroy() {
@@ -110,7 +114,7 @@ export class HintPlugin extends Plugin {
             range &&
             this.editable.contains(range.commonAncestorContainer)
         ) {
-            for (const hint of this.registry.category("temp_hints").getAll()) {
+            for (const hint of this.resources["temp_hints"]) {
                 const target = hint.target(selection);
                 if (target) {
                     this.createTempHint(target, hint.text);
