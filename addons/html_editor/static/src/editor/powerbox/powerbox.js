@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Component, onMounted, onPatched, useExternalListener, useRef } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { fuzzyLookup } from "@web/core/utils/search";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { describe, test } from "@odoo/hoot";
 import { deleteBackward, insertLineBreak, insertText, undo } from "../../test_helpers/user_actions";
 import { testEditor } from "../../test_helpers/editor";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { expect, test } from "@odoo/hoot";
 import { URL_REGEX } from "@html_editor/editor/utils/regex";
 

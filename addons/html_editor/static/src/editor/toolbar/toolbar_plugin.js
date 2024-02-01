@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { reactive } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";

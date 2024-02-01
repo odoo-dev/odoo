@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 export function getContent(node) {
     const selection = window.getSelection();
     return [...node.childNodes].map((childNode) => _getContent(childNode, selection)).join("");

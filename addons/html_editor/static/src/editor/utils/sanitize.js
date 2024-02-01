@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { isBlock } from "./blocks";
 
 export function initElementForEdition(element, options = {}) {

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unlink } from "../../test_helpers/user_actions";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { isSelectionFormat } from "@html_editor/editor/utils/formatting";
 import { describe, expect, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";

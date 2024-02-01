@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 /**
  * Unformat the given html in order to use it with `innerHTML`.
  */

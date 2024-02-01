@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { closestBlock } from "@html_editor/editor/utils/blocks";
 import { isVisibleTextNode } from "@html_editor/editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
