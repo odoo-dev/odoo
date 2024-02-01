@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { closestBlock, isBlock } from "./blocks";
 import { ancestors, closestElement, lastLeaf } from "./dom_traversal";
 import { DIRECTIONS, nodeSize } from "./position";

@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { CLIPBOARD_WHITELISTS } from "@html_editor/editor/utils/clipboard";
 import { setSelection } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";

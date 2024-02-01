@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 export const CTYPES = {
     // Short for CONTENT_TYPES
     // Inline group

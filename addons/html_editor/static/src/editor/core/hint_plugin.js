@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";

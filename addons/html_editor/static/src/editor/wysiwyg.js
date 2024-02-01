@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { onMounted, onWillDestroy, useEnv, useRef } from "@odoo/owl";
 import { Editor } from "./editor";
 

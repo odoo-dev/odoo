@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { isBlock } from "./blocks";
 import { CTGROUPS, CTYPES, ctypeToString } from "./content_types";
 import { isInPre, isVisible, isWhitespace, whitespace } from "./dom_info";

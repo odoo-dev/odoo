@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { setSelection } from "@html_editor/editor/utils/selection";
 import { test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
