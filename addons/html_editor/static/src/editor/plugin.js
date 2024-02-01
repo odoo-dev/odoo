@@ -20,12 +20,9 @@ export class Plugin {
         this.dispatch = dispatch;
         this._cleanups = [];
         this.resources = null; // set before start
-        this.setup();
     }
 
     setup() {}
-
-    start() {}
 
     /**
      * add it here so it is available in tooling
