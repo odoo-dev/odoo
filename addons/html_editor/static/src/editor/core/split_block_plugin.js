@@ -48,11 +48,12 @@ export class SplitBlockPlugin extends Plugin {
     splitElementBlock(params) {
         let { targetNode, targetOffset } = params;
 
-        for (const callback of this.registry.category("split_element_block").getAll()) {
-            if (callback({ ...params })) {
-                return;
-            }
-        }
+        // @todo @phoenix: remove this code, we don't use it actually
+        // for (const callback of this.registry.category("split_element_block").getAll()) {
+        //     if (callback({ ...params })) {
+        //         return;
+        //     }
+        // }
 
         const result = this.splitBlockPRE(targetNode, targetOffset);
 

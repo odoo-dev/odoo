@@ -39,11 +39,14 @@ import { collapseIfZWS } from "../utils/zws";
 export class DeletePlugin extends Plugin {
     static dependencies = ["dom"];
     static name = "delete";
+    static resources = () => ({
+        shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],
+    });
 
     setup() {
-        this.registry.category("shortcuts").add("backspace", { command: "DELETE_BACKWARD" });
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
     }
+
     handleCommand(command, payload) {
         switch (command) {
             case "DELETE_BACKWARD":
@@ -105,7 +108,7 @@ export class DeletePlugin extends Plugin {
     deleteElementBackward(params) {
         const { targetNode, targetOffset } = params;
 
-        for (const callback of this.registry.category("delete_element_backward_before").getAll()) {
+        for (const { callback } of this.resources["delete_element_backward_before"]) {
             if (callback({ ...params })) {
                 return;
             }
@@ -423,7 +426,7 @@ export class DeletePlugin extends Plugin {
     }
 
     deleteElementForward(params) {
-        for (const callback of this.registry.category("delete_element_forward_before").getAll()) {
+        for (const { callback } of this.resources["delete_element_forward_before"]) {
             if (callback({ ...params })) {
                 return;
             }
