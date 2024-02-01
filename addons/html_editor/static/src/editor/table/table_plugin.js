@@ -15,6 +15,11 @@ import { TablePicker } from "./table_picker";
 export class TablePlugin extends Plugin {
     static name = "table";
     static dependencies = ["dom", "history", "overlay"];
+    static resources = (p) => ({
+        delete_element_backward_before: { callback: p.deleteBackwardBefore.bind(p) },
+        handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
+        handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
+    });
 
     setup() {
         /** @type {import("../core/overlay_plugin").Overlay} */
@@ -22,15 +27,6 @@ export class TablePlugin extends Plugin {
             dispatch: this.dispatch,
             el: this.editable,
         });
-        this.registry
-            .category("delete_element_backward_before")
-            .add("table", this.deleteBackwardBefore.bind(this));
-        this.registry
-            .category("handle_tab")
-            .add("table", this.handleTab.bind(this), { sequence: 20 });
-        this.registry
-            .category("handle_shift_tab")
-            .add("table", this.handleShiftTab.bind(this), { sequence: 20 });
     }
 
     handleCommand(command, payload) {
