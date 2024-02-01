@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.FontColorSelector">
+        <Dropdown togglerClass="'btn btn-light o-select-color-' + props.type" menuClass="'o_font_color_selector'">
+            <t t-set-slot="toggler">
+                <t t-if="props.type === 'foreground'">
+                    <i class="fa fa-font fore-color" title="Font Color"/>
+                </t>
+                <t t-else="">
+                    <i class="fa fa-paint-brush hilite-color" title="Background Color"/>
+                </t>
+            </t>
+            <div class="user-select-none">
+                <div class="mb-1">
+                    <div class="btn btn-sm btn-light ms-1"
+                        t-att-class="{active: state.activeTab === 'solid'}"
+                        t-on-click="() => this.setTab('solid')">
+                        Solid
+                    </div> 
+                    <div class="btn btn-sm btn-light"
+                        t-att-class="{active: state.activeTab === 'custom'}"
+                        t-on-click="() => this.setTab('custom')">
+                        Custom
+                    </div> 
+                    <div class="btn btn-sm btn-light"
+                        t-att-class="{active: state.activeTab === 'gradient'}"
+                        t-on-click="() => this.setTab('gradient')">
+                        Gradient
+                    </div> 
+                </div>
+                <div>
+                    <t t-if="state.activeTab==='solid'">
+                        <div class="p-1"
+                            t-on-click="onColorClick">
+                            <t t-foreach="DEFAULT_COLORS" t-as="line" t-key="line_index">
+                                <div class="o_color_section d-flex">
+                                    <t t-foreach="line" t-as="color" t-key="color_index">
+                                        <div class="o_color_button btn" t-att-data-color="color" t-attf-style="background-color: {{color}}" t-on-mouseenter="onColorEnter"/>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-if="state.activeTab==='custom'">
+                        TODO!
+                        <Colorpicker
+                            onColorSelect.bind="onColorSelect"
+                            onColorPreview.bind="onColorPreview" />
+                    </t>
+                    <t t-if="state.activeTab==='gradient'">
+                    TODO!
+                    gradient content
+                    </t>
+                </div>
+            </div>
+        </Dropdown>
+    </t>
+</templates>
