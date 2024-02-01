@@ -5,6 +5,7 @@ import { closestElement, descendants } from "../utils/dom_traversal";
 import { getDeepRange, getSelectedNodes, preserveCursor } from "../utils/selection";
 import { splitAroundUntil } from "../utils/dom_split";
 import { fillEmpty } from "../utils/dom";
+import { FontColorSelector } from "./font_color_selector";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
@@ -53,6 +54,28 @@ function hasColor(element, mode) {
 export class ColorPlugin extends Plugin {
     static name = "color";
     static dependencies = ["dom"];
+    static resources = () => ({
+        toolbarGroup: {
+            id: "color",
+            sequence: 28,
+            buttons: [
+                {
+                    id: "forecolor",
+                    Component: FontColorSelector,
+                    props: {
+                        type: "foreground",
+                    },
+                },
+                {
+                    id: "backcolor",
+                    Component: FontColorSelector,
+                    props: {
+                        type: "background",
+                    },
+                },
+            ],
+        },
+    });
 
     handleCommand(command, payload) {
         switch (command) {
