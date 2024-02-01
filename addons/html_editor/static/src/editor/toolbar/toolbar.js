@@ -7,7 +7,7 @@ export class Toolbar extends Component {
         dispatch: Function,
         close: Function,
         // TODO: more specific prop validation for buttons after its format has been defined.
-        buttons: Array,
+        buttonGroups: Array,
         buttonsActiveState: Object,
     };
 
