@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.Toolbar">
-        <div t-ref="root" class="o-we-toolbar position-absolute bg-white d-flex align-items-center">
-            <t t-foreach="props.buttonGroups" t-as="buttonGroup" t-key="buttonGroup.id">
+        <div t-ref="root" class="o-we-toolbar bg-white d-flex align-items-center"
+            t-att-class="{'overlay position-absolute': props.floating}">
+            <t t-foreach="props.toolbar?.buttonGroups || []" t-as="buttonGroup" t-key="buttonGroup.id">
                 <div class="btn-group" t-att-name="buttonGroup.id">
                     <t t-foreach="buttonGroup.buttons" t-as="button" t-key="button.id">
                         <t t-if="button.Component">
-                            <t t-component="button.Component" t-props="button.props" dispatch.bind="dispatch" getSelection.bind="props.getSelection"/>
+                            <t t-component="button.Component" t-props="button.props" dispatch.bind="dispatch" getSelection.bind="props.toolbar.getSelection"/>
                         </t>
                         <div t-else=""
                             class="btn btn-light fa fa-fw ps-1 pe-3 mx-1"
                             t-att-class="{
                                 [button.icon]: true,
-                                active: props.buttonsActiveState[button.id]
+                                active: buttonsActiveState[button.id]
                             }"
                             t-att-title="button.name"
                             t-att-name="button.id"

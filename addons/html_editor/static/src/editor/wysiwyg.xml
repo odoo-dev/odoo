@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.Wysiwyg">
+        <div class="o-wysiwyg" t-att-class="props.class" t-att-style="props.style">
+            <t t-if="props.toolbar and state.showToolbar">
+                <Toolbar toolbar="editor.shared.getToolbarInfo()" />
+            </t>
+            <div class="p-1" t-ref="content"/>
+        </div>
+    </t>
+</templates>
