@@ -18,63 +18,78 @@ const isListActive = (listMode) => (editable) => {
 };
 
 // TODO: This comes from a command registry?
-const buttons = [
+const buttonGroups = [
     {
-        id: "font",
-        name: "FontSelector",
-        Component: FontSelector,
-        isFormatApplied: () => false, // TODO
+        id: "style",
+        buttons: [
+            {
+                id: "font",
+                name: "FontSelector",
+                Component: FontSelector,
+                isFormatApplied: () => false, // TODO
+            },
+        ],
     },
     // @todo @phoenix move buttons registration to FORMAT Plugin
     {
-        id: "bold",
-        cmd: "FORMAT_BOLD",
-        icon: "fa-bold",
-        name: "Toggle bold",
-        isFormatApplied: isFormatted("bold"),
+        id: "decoration",
+        buttons: [
+            {
+                id: "bold",
+                cmd: "FORMAT_BOLD",
+                icon: "fa-bold",
+                name: "Toggle bold",
+                isFormatApplied: isFormatted("bold"),
+            },
+            {
+                id: "italic",
+                cmd: "FORMAT_ITALIC",
+                icon: "fa-italic",
+                name: "Toggle italic",
+                isFormatApplied: isFormatted("italic"),
+            },
+            {
+                id: "underline",
+                cmd: "FORMAT_UNDERLINE",
+                icon: "fa-underline",
+                name: "Toggle underline",
+                isFormatApplied: isFormatted("underline"),
+            },
+            {
+                id: "strikethrough",
+                cmd: "FORMAT_STRIKETHROUGH",
+                icon: "fa-strikethrough",
+                name: "Toggle strikethrough",
+                isFormatApplied: isFormatted("strikeThrough"),
+            },
+        ],
     },
     {
-        id: "italic",
-        cmd: "FORMAT_ITALIC",
-        icon: "fa-italic",
-        name: "Toggle italic",
-        isFormatApplied: isFormatted("italic"),
-    },
-    {
-        id: "underline",
-        cmd: "FORMAT_UNDERLINE",
-        icon: "fa-underline",
-        name: "Toggle underline",
-        isFormatApplied: isFormatted("underline"),
-    },
-    {
-        id: "strikethrough",
-        cmd: "FORMAT_STRIKETHROUGH",
-        icon: "fa-strikethrough",
-        name: "Toggle strikethrough",
-        isFormatApplied: isFormatted("strikeThrough"),
-    },
-    // @todo @phoenix move buttons registration to LIST Plugin
-    {
-        id: "bulleted_list",
-        cmd: "TOGGLE_LIST_UL",
-        icon: "fa-list-ul",
-        name: "Bulleted list",
-        isFormatApplied: isListActive("UL"),
-    },
-    {
-        id: "numbered_list",
-        cmd: "TOGGLE_LIST_OL",
-        icon: "fa-list-ol",
-        name: "Numbered list",
-        isFormatApplied: isListActive("OL"),
-    },
-    {
-        id: "checklist",
-        cmd: "TOGGLE_CHECKLIST",
-        icon: "fa-check-square-o",
-        name: "Checklist",
-        isFormatApplied: isListActive("CL"),
+        // @todo @phoenix move buttons registration to LIST Plugin
+        id: "list",
+        buttons: [
+            {
+                id: "bulleted_list",
+                cmd: "TOGGLE_LIST_UL",
+                icon: "fa-list-ul",
+                name: "Bulleted list",
+                isFormatApplied: isListActive("UL"),
+            },
+            {
+                id: "numbered_list",
+                cmd: "TOGGLE_LIST_OL",
+                icon: "fa-list-ol",
+                name: "Numbered list",
+                isFormatApplied: isListActive("OL"),
+            },
+            {
+                id: "checklist",
+                cmd: "TOGGLE_CHECKLIST",
+                icon: "fa-check-square-o",
+                name: "Checklist",
+                isFormatApplied: isListActive("CL"),
+            },
+        ],
     },
 ];
 
@@ -83,17 +98,19 @@ export class ToolbarPlugin extends Plugin {
     static dependencies = ["overlay"];
 
     setup() {
-        this.buttons = buttons;
+        this.buttonGroups = buttonGroups;
         this.buttonsActiveState = reactive(
-            Object.fromEntries(this.buttons.map((b) => [b.id, false]))
+            Object.fromEntries(
+                this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
+            )
         );
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Toolbar, "top", {
             dispatch: this.dispatch,
-            buttons: this.buttons,
+            buttonGroups: this.buttonGroups,
             buttonsActiveState: this.buttonsActiveState,
         });
-        this.addDomListener(document, "selectionchange", this.handleSelectionChange);
+        this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
     }
 
     handleCommand(command, payload) {
@@ -132,8 +149,10 @@ export class ToolbarPlugin extends Plugin {
     }
 
     updateButtonsActiveState() {
-        for (const button of this.buttons) {
-            this.buttonsActiveState[button.id] = button.isFormatApplied(this.editable);
+        for (const buttonGroup of this.buttonGroups) {
+            for (const button of buttonGroup.buttons) {
+                this.buttonsActiveState[button.id] = button.isFormatApplied(this.editable);
+            }
         }
     }
 }
