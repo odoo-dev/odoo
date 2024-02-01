@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { DIRECTIONS } from "./position";
 
 export const closestPath = function* (node) {

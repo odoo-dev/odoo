@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { childNodeIndex, DIRECTIONS } from "./position";
 
 /**

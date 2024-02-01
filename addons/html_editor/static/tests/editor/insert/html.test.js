@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { parseHTML } from "@html_editor/editor/utils/html";
 import { setCursorEnd } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";

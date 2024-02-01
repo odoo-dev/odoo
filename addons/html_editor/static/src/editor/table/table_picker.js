@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { Component, onMounted, useRef, useExternalListener, useState } from "@odoo/owl";
 
 export class TablePicker extends Component {
