@@ -5,6 +5,7 @@ export class Toolbar extends Component {
     static props = {
         onMounted: Function,
         dispatch: Function,
+        getSelection: Function,
         close: Function,
         // TODO: more specific prop validation for buttons after its format has been defined.
         buttonGroups: Array,
