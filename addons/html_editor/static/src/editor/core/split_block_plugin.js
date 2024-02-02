@@ -46,12 +46,11 @@ export class SplitBlockPlugin extends Plugin {
     splitElementBlock(params) {
         let { targetNode, targetOffset } = params;
 
-        // @todo @phoenix: remove this code, we don't use it actually
-        // for (const callback of this.registry.category("split_element_block").getAll()) {
-        //     if (callback({ ...params })) {
-        //         return;
-        //     }
-        // }
+        for (const { callback } of this.resources["split_element_block"]) {
+            if (callback(params)) {
+                return;
+            }
+        }
 
         const result = this.splitBlockPRE(targetNode, targetOffset);
 
@@ -64,6 +63,7 @@ export class SplitBlockPlugin extends Plugin {
         }
         const restore = prepareUpdate(targetNode, targetOffset);
 
+        // @todo @phoenix: list stuff, review this.
         const listElement = targetNode.nodeName !== "LI" && targetNode.closest("LI > *");
         const elementToSplit = listElement || closestElement(targetNode, (el) => isBlock(el));
 
