@@ -18,12 +18,13 @@ const isListActive = (listMode) => (editable) => {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation"];
+    static dependencies = ["tabulation", "split_block"];
     static resources = (p) => ({
         delete_element_backward_before: { callback: p.deleteElementBackwardBefore.bind(p) },
         delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
+        split_element_block: { callback: p.splitElementBlockBefore.bind(p) },
         toolbarGroup: {
             id: "list",
             sequence: 30,
@@ -54,11 +55,6 @@ export class ListPlugin extends Plugin {
     });
 
     setup() {
-        // @todo @phoenix check this is still needed for checklist
-        // this.registry
-        //     .category("split_element_block_before")
-        //     .add("list", this.splitElementBlockBefore.bind(this));
-
         this.addDomListener(this.editable, "mousedown", this.onMousedown);
     }
 
@@ -437,16 +433,17 @@ export class ListPlugin extends Plugin {
 
     splitElementBlockBefore(params) {
         const { targetNode, skipList } = params;
-        if (targetNode.tagName === "LI" && !skipList) {
-            // If not empty list item, regular block split
-            if (targetNode.textContent) {
-                const node = this.shared.splitElementBlock({ ...params, skipList: true });
-                if (node.classList.contains("o_checked")) {
-                    removeClass(node, "o_checked");
-                }
-            } else {
-                this.outdentList();
-            }
+        const closestLI = closestElement(targetNode, "LI");
+        if (!closestLI || skipList) {
+            return;
+        }
+        if (!closestLI.textContent) {
+            this.outdentLI(closestLI);
+            return true;
+        }
+        if (closestLI.classList.contains("o_checked")) {
+            const newLI = this.shared.splitElementBlock({ ...params, skipList: true });
+            removeClass(newLI, "o_checked");
             return true;
         }
     }

@@ -73,37 +73,31 @@ describe("Selection collapsed", () => {
             );
         });
         describe("Removing items", () => {
-            test.todo(
-                "should add an empty list item at the end of a list, then remove it",
-                async () => {
-                    await testEditor({
-                        contentBefore: "<ol><li>abc[]</li></ol>",
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter: "<ol><li>abc</li></ol><p>[]<br></p>",
-                    });
-                }
-            );
+            test("should add an empty list item at the end of a list, then remove it", async () => {
+                await testEditor({
+                    contentBefore: "<ol><li>abc[]</li></ol>",
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter: "<ol><li>abc</li></ol><p>[]<br></p>",
+                });
+            });
 
-            test.todo(
-                "should add an empty list item at the end of an indented list, then remove it",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li>abc</li><li class="oe-nested"><ol><li>def[]</li></ol></li><li>ghi</li></ol>',
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter:
-                            '<ol><li>abc</li><li class="oe-nested"><ol><li>def</li></ol></li><li>[]<br></li><li>ghi</li></ol>',
-                    });
-                }
-            );
+            test("should add an empty list item at the end of an indented list, then remove it", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li>abc</li><li class="oe-nested"><ol><li>def[]</li></ol></li><li>ghi</li></ol>',
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter:
+                        '<ol><li>abc</li><li class="oe-nested"><ol><li>def</li></ol></li><li>[]<br></li><li>ghi</li></ol>',
+                });
+            });
 
-            test.todo("should remove a list with p", async () => {
+            test("should remove a list with p", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><p>[]<br></p></li></ol>",
                     stepFunction: insertParagraphBreak,
@@ -239,37 +233,31 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Removing items", () => {
-            test.todo(
-                "should add an empty list item at the end of a list, then remove it",
-                async () => {
-                    await testEditor({
-                        contentBefore: "<ul><li>abc[]</li></ul>",
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter: "<ul><li>abc</li></ul><p>[]<br></p>",
-                    });
-                }
-            );
+            test("should add an empty list item at the end of a list, then remove it", async () => {
+                await testEditor({
+                    contentBefore: "<ul><li>abc[]</li></ul>",
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter: "<ul><li>abc</li></ul><p>[]<br></p>",
+                });
+            });
 
-            test.todo(
-                "should add an empty list item at the end of an indented list, then remove it",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul><li>def[]</li></ul></li><li>ghi</li></ul>',
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter:
-                            '<ul><li>abc</li><li class="oe-nested"><ul><li>def</li></ul></li><li>[]<br></li><li>ghi</li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item at the end of an indented list, then remove it", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul><li>def[]</li></ul></li><li>ghi</li></ul>',
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter:
+                        '<ul><li>abc</li><li class="oe-nested"><ul><li>def</li></ul></li><li>[]<br></li><li>ghi</li></ul>',
+                });
+            });
 
-            test.todo("should remove a list", async () => {
+            test("should remove a list", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><p>[]<br></p></li></ul>",
                     stepFunction: insertParagraphBreak,
@@ -385,7 +373,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should split a checklist item in two (checked)", async () => {
+            test("should split a checklist item in two (checked)", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">ab[]cd</li></ul>',
@@ -395,87 +383,64 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should add an empty list item after a checklist item (unchecked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
-                        stepFunction: insertParagraphBreak,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item after a checklist item (unchecked)", async () => {
+                await testEditor({
+                    contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
+                });
+            });
 
-            test.todo(
-                "should add an empty list item after a checklist item (checked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
-                        stepFunction: insertParagraphBreak,
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item after a checklist item (checked)", async () => {
+                await testEditor({
+                    contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
+                });
+            });
         });
         describe("Removing items", () => {
-            test.todo(
-                "should add an empty list item at the end of a checklist, then remove it",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p>',
-                    });
-                }
-            );
+            test("should add an empty list item at the end of a checklist, then remove it", async () => {
+                await testEditor({
+                    contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p>',
+                });
+            });
 
-            test.todo(
-                "should add an empty list item at the end of an indented list, then outdent it (checked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item at the end of an indented list, then outdent it (checked)", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
+                });
+            });
 
-            test.todo(
-                "should add an empty list item at the end of an indented list, then outdent it (unchecked)",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
-                        stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
-                            await insertParagraphBreak(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
-                    });
-                }
-            );
+            test("should add an empty list item at the end of an indented list, then outdent it (unchecked)", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
+                    stepFunction: async (editor) => {
+                        await insertParagraphBreak(editor);
+                        await insertParagraphBreak(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
+                });
+            });
 
-            test.todo("should remove a checklist", async () => {
+            test("should remove a checklist", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p>[]<br></p></li></ul>',
