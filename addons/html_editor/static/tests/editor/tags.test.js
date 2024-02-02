@@ -14,7 +14,7 @@ describe("to paragraph", () => {
         });
     });
 
-    test.todo("should turn a heading 1 into a paragraph (character selected)", async () => {
+    test("should turn a heading 1 into a paragraph (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
             stepFunction: setTag("p"),
@@ -22,16 +22,13 @@ describe("to paragraph", () => {
         });
     });
 
-    test.todo(
-        "should turn a heading 1, a paragraph and a heading 2 into three paragraphs",
-        async () => {
-            await testEditor({
-                contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
-                stepFunction: setTag("p"),
-                contentAfter: "<p>a[b</p><p>cd</p><p>e]f</p>",
-            });
-        }
-    );
+    test("should turn a heading 1, a paragraph and a heading 2 into three paragraphs", async () => {
+        await testEditor({
+            contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
+            stepFunction: setTag("p"),
+            contentAfter: "<p>a[b</p><p>cd</p><p>e]f</p>",
+        });
+    });
 
     test.skip("should turn a heading 1 into a paragraph after a triple click", async () => {
         await testEditor({
@@ -41,7 +38,7 @@ describe("to paragraph", () => {
         });
     });
 
-    test.todo("should not turn a div into a paragraph", async () => {
+    test("should not turn a div into a paragraph", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
             stepFunction: setTag("p"),
@@ -60,7 +57,7 @@ describe("to paragraph", () => {
         }
     );
 
-    test.todo("should not add paragraph tag to normal text in list", async () => {
+    test("should not add paragraph tag to normal text in list", async () => {
         await testEditor({
             contentBefore: "<ul><li>[abcd]</li></ul>",
             stepFunction: setTag("p"),
@@ -82,7 +79,7 @@ describe("to paragraph", () => {
         }
     );
 
-    test.todo("should not set the tag of non-editable elements", async () => {
+    test("should not set the tag of non-editable elements", async () => {
         await testEditor({
             contentBefore:
                 '<h1>[before</h1><h1 contenteditable="false">noneditable</h1><h1>after]</h1>',
@@ -101,7 +98,7 @@ describe("to heading 1", () => {
         });
     });
 
-    test.todo("should turn a paragraph into a heading 1 (character selected)", async () => {
+    test("should turn a paragraph into a heading 1 (character selected)", async () => {
         await testEditor({
             contentBefore: "<p>a[b]c</p>",
             stepFunction: setTag("h1"),
@@ -109,16 +106,13 @@ describe("to heading 1", () => {
         });
     });
 
-    test.todo(
-        "should turn a paragraph, a heading 1 and a heading 2 into three headings 1",
-        async () => {
-            await testEditor({
-                contentBefore: "<p>a[b</p><h1>cd</h1><h2>e]f</h2>",
-                stepFunction: setTag("h1"),
-                contentAfter: "<h1>a[b</h1><h1>cd</h1><h1>e]f</h1>",
-            });
-        }
-    );
+    test("should turn a paragraph, a heading 1 and a heading 2 into three headings 1", async () => {
+        await testEditor({
+            contentBefore: "<p>a[b</p><h1>cd</h1><h2>e]f</h2>",
+            stepFunction: setTag("h1"),
+            contentAfter: "<h1>a[b</h1><h1>cd</h1><h1>e]f</h1>",
+        });
+    });
 
     test.skip("should turn a paragraph into a heading 1 after a triple click", async () => {
         await testEditor({
@@ -128,7 +122,7 @@ describe("to heading 1", () => {
         });
     });
 
-    test.todo("should not turn a div into a heading 1", async () => {
+    test("should not turn a div into a heading 1", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
             stepFunction: setTag("h1"),
@@ -160,7 +154,7 @@ describe("to heading 2", () => {
         });
     });
 
-    test.todo("should turn a heading 1 into a heading 2 (character selected)", async () => {
+    test("should turn a heading 1 into a heading 2 (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
             stepFunction: setTag("h2"),
@@ -168,16 +162,13 @@ describe("to heading 2", () => {
         });
     });
 
-    test.todo(
-        "should turn a heading 1, a heading 2 and a paragraph into three headings 2",
-        async () => {
-            await testEditor({
-                contentBefore: "<h1>a[b</h1><h2>cd</h2><p>e]f</p>",
-                stepFunction: setTag("h2"),
-                contentAfter: "<h2>a[b</h2><h2>cd</h2><h2>e]f</h2>",
-            });
-        }
-    );
+    test("should turn a heading 1, a heading 2 and a paragraph into three headings 2", async () => {
+        await testEditor({
+            contentBefore: "<h1>a[b</h1><h2>cd</h2><p>e]f</p>",
+            stepFunction: setTag("h2"),
+            contentAfter: "<h2>a[b</h2><h2>cd</h2><h2>e]f</h2>",
+        });
+    });
 
     test.skip("should turn a paragraph into a heading 2 after a triple click", async () => {
         await testEditor({
@@ -187,7 +178,7 @@ describe("to heading 2", () => {
         });
     });
 
-    test.todo("should not turn a div into a heading 2", async () => {
+    test("should not turn a div into a heading 2", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
             stepFunction: setTag("h2"),
@@ -219,7 +210,7 @@ describe("to heading 3", () => {
         });
     });
 
-    test.todo("should turn a heading 1 into a heading 3 (character selected)", async () => {
+    test("should turn a heading 1 into a heading 3 (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
             stepFunction: setTag("h3"),
@@ -227,16 +218,13 @@ describe("to heading 3", () => {
         });
     });
 
-    test.todo(
-        "should turn a heading 1, a paragraph and a heading 2 into three headings 3",
-        async () => {
-            await testEditor({
-                contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
-                stepFunction: setTag("h3"),
-                contentAfter: "<h3>a[b</h3><h3>cd</h3><h3>e]f</h3>",
-            });
-        }
-    );
+    test("should turn a heading 1, a paragraph and a heading 2 into three headings 3", async () => {
+        await testEditor({
+            contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
+            stepFunction: setTag("h3"),
+            contentAfter: "<h3>a[b</h3><h3>cd</h3><h3>e]f</h3>",
+        });
+    });
 
     test.skip("should turn a paragraph into a heading 3 after a triple click", async () => {
         await testEditor({
@@ -246,7 +234,7 @@ describe("to heading 3", () => {
         });
     });
 
-    test.todo("should not turn a div into a heading 3", async () => {
+    test("should not turn a div into a heading 3", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
             stepFunction: setTag("h3"),
@@ -278,7 +266,7 @@ describe("to pre", () => {
         });
     });
 
-    test.todo("should turn a heading 1 into a pre (character selected)", async () => {
+    test("should turn a heading 1 into a pre (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
             stepFunction: setTag("pre"),
@@ -286,7 +274,7 @@ describe("to pre", () => {
         });
     });
 
-    test.todo("should turn a heading 1 a pre and a paragraph into three pres", async () => {
+    test("should turn a heading 1 a pre and a paragraph into three pres", async () => {
         await testEditor({
             contentBefore: "<h1>a[b</h1><pre>cd</pre><p>e]f</p>",
             stepFunction: setTag("pre"),
@@ -315,7 +303,7 @@ describe("to blockquote", () => {
         });
     });
 
-    test.todo("should turn a heading 1 into a blockquote (character selected)", async () => {
+    test("should turn a heading 1 into a blockquote (character selected)", async () => {
         await testEditor({
             contentBefore: "<h1>a[b]c</h1>",
             stepFunction: setTag("blockquote"),
@@ -323,17 +311,14 @@ describe("to blockquote", () => {
         });
     });
 
-    test.todo(
-        "should turn a heading 1, a paragraph and a heading 2 into three blockquote",
-        async () => {
-            await testEditor({
-                contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
-                stepFunction: setTag("blockquote"),
-                contentAfter:
-                    "<blockquote>a[b</blockquote><blockquote>cd</blockquote><blockquote>e]f</blockquote>",
-            });
-        }
-    );
+    test("should turn a heading 1, a paragraph and a heading 2 into three blockquote", async () => {
+        await testEditor({
+            contentBefore: "<h1>a[b</h1><p>cd</p><h2>e]f</h2>",
+            stepFunction: setTag("blockquote"),
+            contentAfter:
+                "<blockquote>a[b</blockquote><blockquote>cd</blockquote><blockquote>e]f</blockquote>",
+        });
+    });
 
     test.skip("should turn a heading 1 into a blockquote after a triple click", async () => {
         await testEditor({
@@ -343,7 +328,7 @@ describe("to blockquote", () => {
         });
     });
 
-    test.todo("should not turn a div into a blockquote", async () => {
+    test("should not turn a div into a blockquote", async () => {
         await testEditor({
             contentBefore: "<div>[ab]</div>",
             stepFunction: setTag("blockquote"),
