@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { makeContentsInline } from "../utils/dom";
+import { makeContentsInline, setTagName } from "../utils/dom";
 import { splitElement, splitTextNode } from "../utils/dom_split";
 import {
     allowsParagraphRelatedElements,
@@ -10,8 +10,10 @@ import {
     isShrunkBlock,
     isUnbreakable,
 } from "../utils/dom_info";
-import { closestElement, descendants } from "../utils/dom_traversal";
+import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
+import { getDeepRange, getTraversedNodes } from "../utils/selection";
+import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
@@ -235,29 +237,72 @@ export class DomPlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
-    setTag({ tagName, extraClass }) {
-        const selection = this.document.getSelection();
-        const range = selection.getRangeAt(0);
-        const node = range.endContainer;
-        const offset = range.endOffset;
-        const elem = range.endContainer.parentElement;
-        const newElem = this.document.createElement(tagName);
-        if (extraClass) {
-            newElem.classList.add(extraClass);
-        }
-        const children = [...elem.childNodes];
-        let hasOnlyEmptyTextNodes = true;
-        for (const child of children) {
-            newElem.appendChild(child);
-            if (!(child instanceof Text) || child.nodeValue !== "") {
-                hasOnlyEmptyTextNodes = false;
+    setTag({ tagName, extraClass = "" }) {
+        const range = getDeepRange(this.editable, { correctTripleClick: true });
+        const selectedBlocks = [
+            ...new Set(getTraversedNodes(this.editable, range).map(closestBlock)),
+        ];
+        const deepestSelectedBlocks = selectedBlocks.filter(
+            (block) =>
+                !descendants(block).some((descendant) => selectedBlocks.includes(descendant)) &&
+                block.isContentEditable
+        );
+        const [startContainer, startOffset, endContainer, endOffset] = [
+            firstLeaf(range.startContainer),
+            range.startOffset,
+            lastLeaf(range.endContainer),
+            range.endOffset,
+        ];
+        for (const block of deepestSelectedBlocks) {
+            if (
+                ["P", "PRE", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BLOCKQUOTE"].includes(
+                    block.nodeName
+                )
+            ) {
+                const inLI = block.closest("li");
+                if (inLI && tagName === "p") {
+                    // TODO @phoenix need to replace oToggleList
+                    //this.dispatch("TOGGLE_LIST_OFF", { node: inLI });
+                    // inLI.oToggleList(0);
+                } else {
+                    const newEl = setTagName(block, tagName);
+                    newEl.classList.remove(
+                        ...FONT_SIZE_CLASSES,
+                        ...TEXT_STYLE_CLASSES,
+                        // We want to be able to edit the case `<h2 class="h3">`
+                        // but in that case, we want to display "Header 2" and
+                        // not "Header 3" as it is more important to display
+                        // the semantic tag being used (especially for h1 ones).
+                        // This is why those are not in `TEXT_STYLE_CLASSES`.
+                        "h1",
+                        "h2",
+                        "h3",
+                        "h4",
+                        "h5",
+                        "h6"
+                    );
+                    delete newEl.style.fontSize;
+                    if (extraClass) {
+                        newEl.classList.add(extraClass);
+                    }
+                    if (newEl.classList.length === 0) {
+                        newEl.removeAttribute("class");
+                    }
+                }
+            } else {
+                // eg do not change a <div> into a h1: insert the h1
+                // into it instead.
+                const newBlock = this.document.createElement(tagName);
+                const children = [...block.childNodes];
+                block.insertBefore(newBlock, block.firstChild);
+                children.forEach((child) => newBlock.appendChild(child));
             }
         }
-        if (hasOnlyEmptyTextNodes) {
-            newElem.appendChild(this.document.createElement("BR"));
-        }
-        elem.replaceWith(newElem);
-        selection.setPosition(node, offset);
+        const newRange = new Range();
+        newRange.setStart(startContainer, startOffset);
+        newRange.setEnd(endContainer, endOffset);
+        getDeepRange(this.editable, { range: newRange, select: true });
+        this.dispatch("ADD_STEP");
     }
 
     insertSeparator() {
