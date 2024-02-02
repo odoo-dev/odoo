@@ -8,6 +8,14 @@ import { preserveCursor, getTraversedNodes, getTraversedBlocks } from "../utils/
 import { setTagName, copyAttributes, removeClass, toggleClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
+const isListActive = (listMode) => (editable) => {
+    // @todo @phoenix get selection from the dom plugin once this is moved
+    // to the ListPlugin
+    const selection = editable.ownerDocument.getSelection();
+    const block = closestBlock(selection.anchorNode);
+    return block?.tagName === "LI" && getListMode(block.parentNode) === listMode;
+};
+
 export class ListPlugin extends Plugin {
     static name = "list";
     static dependencies = ["tabulation"];
@@ -16,6 +24,33 @@ export class ListPlugin extends Plugin {
         delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
+        toolbarGroup: {
+            id: "list",
+            sequence: 30,
+            buttons: [
+                {
+                    id: "bulleted_list",
+                    cmd: "TOGGLE_LIST_UL",
+                    icon: "fa-list-ul",
+                    name: "Bulleted list",
+                    isFormatApplied: isListActive("UL"),
+                },
+                {
+                    id: "numbered_list",
+                    cmd: "TOGGLE_LIST_OL",
+                    icon: "fa-list-ol",
+                    name: "Numbered list",
+                    isFormatApplied: isListActive("OL"),
+                },
+                {
+                    id: "checklist",
+                    cmd: "TOGGLE_CHECKLIST",
+                    icon: "fa-check-square-o",
+                    name: "Checklist",
+                    isFormatApplied: isListActive("CL"),
+                },
+            ],
+        },
     });
 
     setup() {

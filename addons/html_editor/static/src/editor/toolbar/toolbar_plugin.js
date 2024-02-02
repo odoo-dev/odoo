@@ -1,114 +1,23 @@
 import { reactive } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
-import { registry } from "@web/core/registry";
-import { FontSelector } from "./font_selector";
-import { isSelectionFormat } from "../utils/formatting";
-import { closestBlock } from "../utils/blocks";
-import { getListMode } from "../list/utils";
-
-const isFormatted = (format) => (el) => isSelectionFormat(el, format);
-
-const isListActive = (listMode) => (editable) => {
-    // @todo @phoenix get selection from the dom plugin once this is moved
-    // to the ListPlugin
-    const selection = editable.ownerDocument.getSelection();
-    const block = closestBlock(selection.anchorNode);
-    return block?.tagName === "LI" && getListMode(block.parentNode) === listMode;
-};
-
-// TODO: This comes from a command registry?
-const buttonGroups = [
-    {
-        id: "style",
-        buttons: [
-            {
-                id: "font",
-                name: "FontSelector",
-                Component: FontSelector,
-                isFormatApplied: () => false, // TODO
-            },
-        ],
-    },
-    // @todo @phoenix move buttons registration to FORMAT Plugin
-    {
-        id: "decoration",
-        buttons: [
-            {
-                id: "bold",
-                cmd: "FORMAT_BOLD",
-                icon: "fa-bold",
-                name: "Toggle bold",
-                isFormatApplied: isFormatted("bold"),
-            },
-            {
-                id: "italic",
-                cmd: "FORMAT_ITALIC",
-                icon: "fa-italic",
-                name: "Toggle italic",
-                isFormatApplied: isFormatted("italic"),
-            },
-            {
-                id: "underline",
-                cmd: "FORMAT_UNDERLINE",
-                icon: "fa-underline",
-                name: "Toggle underline",
-                isFormatApplied: isFormatted("underline"),
-            },
-            {
-                id: "strikethrough",
-                cmd: "FORMAT_STRIKETHROUGH",
-                icon: "fa-strikethrough",
-                name: "Toggle strikethrough",
-                isFormatApplied: isFormatted("strikeThrough"),
-            },
-        ],
-    },
-    {
-        // @todo @phoenix move buttons registration to LIST Plugin
-        id: "list",
-        buttons: [
-            {
-                id: "bulleted_list",
-                cmd: "TOGGLE_LIST_UL",
-                icon: "fa-list-ul",
-                name: "Bulleted list",
-                isFormatApplied: isListActive("UL"),
-            },
-            {
-                id: "numbered_list",
-                cmd: "TOGGLE_LIST_OL",
-                icon: "fa-list-ol",
-                name: "Numbered list",
-                isFormatApplied: isListActive("OL"),
-            },
-            {
-                id: "checklist",
-                cmd: "TOGGLE_CHECKLIST",
-                icon: "fa-check-square-o",
-                name: "Checklist",
-                isFormatApplied: isListActive("CL"),
-            },
-        ],
-    },
-];
 
 export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
-    static dependencies = ["overlay"];
+    static dependencies = ["overlay", "dom"];
 
     setup() {
-        this.buttonGroups = buttonGroups;
+        this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
         this.buttonsActiveState = reactive(
-            Object.fromEntries(
-                this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
-            )
+            this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
         );
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Toolbar, "top", {
             dispatch: this.dispatch,
             buttonGroups: this.buttonGroups,
             buttonsActiveState: this.buttonsActiveState,
+            getSelection: () => this.shared.getEditableSelection(),
         });
         this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
     }

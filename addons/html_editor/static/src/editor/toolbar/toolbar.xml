@@ -6,7 +6,7 @@
                 <div class="btn-group" t-att-name="buttonGroup.id">
                     <t t-foreach="buttonGroup.buttons" t-as="button" t-key="button.id">
                         <t t-if="button.Component">
-                            <t t-component="button.Component" dispatch.bind="dispatch"/>
+                            <t t-component="button.Component" t-props="button.props" dispatch.bind="dispatch" getSelection.bind="props.getSelection"/>
                         </t>
                         <div t-else=""
                             class="btn btn-light fa fa-fw ps-1 pe-3 mx-1"
