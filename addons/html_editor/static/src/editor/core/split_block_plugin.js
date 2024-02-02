@@ -5,7 +5,7 @@ import { fillEmpty, setTagName } from "../utils/dom";
 import { isVisible, isVisibleTextNode } from "../utils/dom_info";
 import { splitElementUntil, splitTextNode } from "../utils/dom_split";
 import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
-import { setCursorEnd, setCursorStart } from "../utils/selection";
+import { setCursorStart } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 import { prepareUpdate } from "../utils/dom_state";
 
@@ -37,30 +37,24 @@ export class SplitBlockPlugin extends Plugin {
         this.dispatch("DELETE_RANGE");
         selection = this.shared.getEditableSelection();
 
-        const targetNode = selection.anchorNode;
-        const targetOffset = selection.anchorOffset;
+        let targetNode = selection.anchorNode;
+        let targetOffset = selection.anchorOffset;
 
-        this.splitElementBlock({ targetNode, targetOffset });
-    }
-
-    splitElementBlock(params) {
-        let { targetNode, targetOffset } = params;
-
-        for (const { callback } of this.resources["split_element_block"]) {
-            if (callback(params)) {
-                return;
-            }
-        }
-
-        const result = this.splitBlockPRE(targetNode, targetOffset);
-
-        if (result) {
-            return;
-        }
         if (targetNode.nodeType === Node.TEXT_NODE) {
             targetOffset = splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
+
+        for (const { callback } of this.resources["split_element_block"]) {
+            if (callback({ targetNode, targetOffset })) {
+                return;
+            }
+        }
+
+        this.splitElementBlock({ targetNode, targetOffset });
+    }
+
+    splitElementBlock({ targetNode, targetOffset }) {
         const restore = prepareUpdate(targetNode, targetOffset);
 
         // @todo @phoenix: list stuff, review this.
@@ -91,6 +85,7 @@ export class SplitBlockPlugin extends Plugin {
         return afterElement;
     }
 
+    // @todo @phoenix: move this to Font Plugin
     /**
      * Specific behavior for headings: do not split in two if cursor at the end but
      * instead create a paragraph.
@@ -104,25 +99,6 @@ export class SplitBlockPlugin extends Plugin {
                 node.replaceChildren(document.createElement("br"));
                 return node;
             }
-        }
-    }
-    /**
-     * Specific behavior for pre: insert newline (\n) in text or insert p at
-     * end.
-     */
-    splitBlockPRE(targetNode, offset) {
-        if (targetNode.tagName === "PRE") {
-            if (offset < targetNode.childNodes.length) {
-                const lineBreak = document.createElement("br");
-                targetNode.insertBefore(lineBreak, targetNode.childNodes[offset]);
-                setCursorEnd(lineBreak);
-            } else {
-                const node = document.createElement("p");
-                targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
-                fillEmpty(node);
-                setCursorStart(node);
-            }
-            return true;
         }
     }
     onBeforeInput(e) {

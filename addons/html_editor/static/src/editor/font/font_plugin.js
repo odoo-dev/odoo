@@ -3,6 +3,8 @@ import { Plugin } from "../plugin";
 import { FontSelector } from "./font_selector";
 import { _t } from "@web/core/l10n/translation";
 import { closestBlock } from "../utils/blocks";
+import { setCursorEnd, setCursorStart } from "../utils/selection";
+import { fillEmpty } from "../utils/dom";
 
 const fontItems = [
     {
@@ -56,7 +58,8 @@ const fontItems = [
 
 export class FontPlugin extends Plugin {
     static name = "font";
-    static resources = () => ({
+    static resources = (p) => ({
+        split_element_block: { callback: p.handleSplitBlock.bind(p) },
         toolbarGroup: {
             id: "style",
             sequence: 10,
@@ -95,6 +98,26 @@ export class FontPlugin extends Plugin {
             ],
         },
     });
+
+    /**
+     * Specific behavior for pre: insert newline (\n) in text or insert p at
+     * end.
+     */
+    handleSplitBlock({ targetNode, targetOffset }) {
+        if (targetNode.tagName === "PRE") {
+            if (targetOffset < targetNode.childNodes.length) {
+                const lineBreak = document.createElement("br");
+                targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
+                setCursorEnd(lineBreak);
+            } else {
+                const node = document.createElement("p");
+                targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
+                fillEmpty(node);
+                setCursorStart(node);
+            }
+            return true;
+        }
+    }
 }
 
 registry.category("phoenix_plugins").add(FontPlugin.name, FontPlugin);
