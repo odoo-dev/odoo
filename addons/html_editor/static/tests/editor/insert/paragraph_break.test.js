@@ -76,7 +76,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Pre", () => {
-        test.todo("should insert a line break within the pre", async () => {
+        test("should insert a line break within the pre", async () => {
             await testEditor({
                 contentBefore: "<pre>ab[]cd</pre>",
                 stepFunction: insertParagraphBreak,
@@ -84,7 +84,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a new paragraph after the pre", async () => {
+        test("should insert a new paragraph after the pre", async () => {
             await testEditor({
                 contentBefore: "<pre>abc[]</pre>",
                 stepFunction: insertParagraphBreak,

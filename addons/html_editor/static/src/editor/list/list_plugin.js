@@ -24,7 +24,7 @@ export class ListPlugin extends Plugin {
         delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
-        split_element_block: { callback: p.splitElementBlockBefore.bind(p) },
+        split_element_block: { callback: p.handleSplitBlock.bind(p) },
         toolbarGroup: {
             id: "list",
             sequence: 30,
@@ -431,10 +431,9 @@ export class ListPlugin extends Plugin {
         }
     }
 
-    splitElementBlockBefore(params) {
-        const { targetNode, skipList } = params;
-        const closestLI = closestElement(targetNode, "LI");
-        if (!closestLI || skipList) {
+    handleSplitBlock(params) {
+        const closestLI = closestElement(params.targetNode, "LI");
+        if (!closestLI) {
             return;
         }
         if (!closestLI.textContent) {
@@ -442,7 +441,7 @@ export class ListPlugin extends Plugin {
             return true;
         }
         if (closestLI.classList.contains("o_checked")) {
-            const newLI = this.shared.splitElementBlock({ ...params, skipList: true });
+            const newLI = this.shared.splitElementBlock(params);
             removeClass(newLI, "o_checked");
             return true;
         }
