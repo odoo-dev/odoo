@@ -1,8 +1,12 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestElement } from "../utils/dom_traversal";
-import { formatSelection } from "../utils/formatting";
+import { formatSelection, isSelectionFormat } from "../utils/formatting";
 import { getTraversedNodes } from "../utils/selection";
+
+function isFormatted(format) {
+    return (el) => isSelectionFormat(el, format);
+}
 
 export class FormatPlugin extends Plugin {
     static name = "format";
@@ -13,6 +17,40 @@ export class FormatPlugin extends Plugin {
             { hotkey: "control+u", command: "FORMAT_UNDERLINE" },
             { hotkey: "control+5", command: "FORMAT_STRIKETHROUGH" },
         ],
+        toolbarGroup: {
+            id: "decoration",
+            sequence: 20,
+            buttons: [
+                {
+                    id: "bold",
+                    cmd: "FORMAT_BOLD",
+                    icon: "fa-bold",
+                    name: "Toggle bold",
+                    isFormatApplied: isFormatted("bold"),
+                },
+                {
+                    id: "italic",
+                    cmd: "FORMAT_ITALIC",
+                    icon: "fa-italic",
+                    name: "Toggle italic",
+                    isFormatApplied: isFormatted("italic"),
+                },
+                {
+                    id: "underline",
+                    cmd: "FORMAT_UNDERLINE",
+                    icon: "fa-underline",
+                    name: "Toggle underline",
+                    isFormatApplied: isFormatted("underline"),
+                },
+                {
+                    id: "strikethrough",
+                    cmd: "FORMAT_STRIKETHROUGH",
+                    icon: "fa-strikethrough",
+                    name: "Toggle strikethrough",
+                    isFormatApplied: isFormatted("strikeThrough"),
+                },
+            ],
+        },
     });
 
     handleCommand(command, size) {

@@ -109,3 +109,16 @@ test("toolbar list buttons react to selection change", async () => {
     expect(".btn[name='numbered_list']").not.toHaveClass("active");
     expect(".btn[name='checklist']").not.toHaveClass("active");
 });
+
+test("toolbar works: can select font", async () => {
+    const { el } = await setupEditor("<p>test</p>");
+    expect(getContent(el)).toBe("<p>test</p>");
+
+    // set selection to open toolbar
+    expect(".o-we-toolbar").toHaveCount(0);
+    setContent(el, "<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+    await contains(".o-we-toolbar [name='style'] .dropdown-toggle").click();
+    await contains(".o-we-toolbar [name='style'] .dropdown-item:contains('Header 2')").click();
+    expect(getContent(el)).toBe("<h2>test[]</h2>"); // TODO @phoenix: should be <h2>[test]</h2>
+});
