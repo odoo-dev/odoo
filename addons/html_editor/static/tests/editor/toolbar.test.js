@@ -120,5 +120,5 @@ test("toolbar works: can select font", async () => {
     await waitFor(".o-we-toolbar");
     await contains(".o-we-toolbar [name='style'] .dropdown-toggle").click();
     await contains(".o-we-toolbar [name='style'] .dropdown-item:contains('Header 2')").click();
-    expect(getContent(el)).toBe("<h2>test[]</h2>"); // TODO @phoenix: should be <h2>[test]</h2>
+    expect(getContent(el)).toBe("<h2>[test]</h2>");
 });

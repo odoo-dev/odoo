@@ -81,7 +81,7 @@ export class FontPlugin extends Plugin {
                             });
 
                             if (!matchingItems.length) {
-                                return "";
+                                return "Normal";
                             }
 
                             return (
