@@ -1,7 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { indentList, keydownTab } from "../../test_helpers/user_actions";
+import { keydownTab } from "../../test_helpers/user_actions";
 
 describe("Checklist", () => {
     test("should indent a checklist", async () => {
@@ -11,7 +11,7 @@ describe("Checklist", () => {
                     <ul class="o_checklist">
                         <li class="o_checked">a[b]c</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -27,7 +27,7 @@ describe("Checklist", () => {
                     <ul class="o_checklist">
                         <li>a[b]c</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -47,7 +47,7 @@ describe("Checklist", () => {
                         <li class="o_checked">abc</li>
                         <li class="o_checked">d[e]f</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -65,7 +65,7 @@ describe("Checklist", () => {
                         <li class="o_checked">abc</li>
                         <li>d[e]f</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -83,7 +83,7 @@ describe("Checklist", () => {
                         <li>abc</li>
                         <li>d[e]f</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -101,7 +101,7 @@ describe("Checklist", () => {
                         <li>abc</li>
                         <li class="o_checked">d[e]f</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -125,7 +125,7 @@ describe("Checklist", () => {
                         </li>
                         <li class="o_checked">g[h]i</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -148,7 +148,7 @@ describe("Checklist", () => {
                         </li>
                         <li class="o_checked">g[h]i</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -171,7 +171,7 @@ describe("Checklist", () => {
                         </li>
                         <li>g[h]i</li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -197,7 +197,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -220,7 +220,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -243,7 +243,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -267,7 +267,7 @@ describe("Regular list", () => {
                         <li>[]</li>
                     </ul>
                     <p>def</p>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <ul>
                         <li>abc</li>
@@ -314,7 +314,7 @@ describe("with selection collapsed", () => {
                     <li>a[]</li>
                     <li>b</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li class="oe-nested">
@@ -334,7 +334,7 @@ describe("with selection collapsed", () => {
                     <li>a</li>
                     <li>[]b</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -360,7 +360,7 @@ describe("with selection collapsed", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -384,7 +384,7 @@ describe("with selection collapsed", () => {
                     <li>a</li>
                     <li>[]b</li>
                 </ol>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ol>
                     <li>
@@ -407,7 +407,7 @@ describe("with selection collapsed", () => {
                     <li>[]b</li>
                     <li>c</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -432,7 +432,7 @@ describe("with selection collapsed", () => {
                     <li>[]a</li>
                     <li>b</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li class="oe-nested">
@@ -459,7 +459,7 @@ describe("with selection collapsed", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -489,7 +489,7 @@ describe("with selection collapsed", () => {
                         </ol>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -523,7 +523,7 @@ describe("with selection collapsed", () => {
                         </ol>
                     </li>
                 </ol>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ol>
                     <li class="oe-nested">
@@ -647,7 +647,7 @@ describe("with selection", () => {
                     <li>[a]</li>
                     <li>b</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li class="oe-nested">
@@ -668,7 +668,7 @@ describe("with selection", () => {
                     <li>[b]</li>
                     <li>c</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -699,7 +699,7 @@ describe("with selection", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -732,7 +732,7 @@ describe("with selection", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -773,7 +773,7 @@ describe("with selection", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -816,7 +816,7 @@ describe("with selection", () => {
                         </ul>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -853,7 +853,7 @@ describe("with selection", () => {
                     <li>c]</li>
                     <li>d</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -881,7 +881,7 @@ describe("with selection", () => {
                     <li>c[</li>
                     <li>d</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -915,7 +915,7 @@ describe("with selection", () => {
                     <li>d]</li>
                     <li>e</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -952,7 +952,7 @@ describe("with selection", () => {
                         </ol>
                     </li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>
@@ -1000,7 +1000,7 @@ describe("with selection", () => {
                     <li>h]</li>
                     <li>i</li>
                 </ul>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                 <ul>
                     <li>a</li>
@@ -1045,7 +1045,7 @@ describe("with selection", () => {
                         <li>a</li>
                     </ul>
                     <p>after]</p>`),
-            stepFunction: indentList,
+            stepFunction: keydownTab,
             contentAfter: unformat(`
                     <p>[before</p>
                     <ul>

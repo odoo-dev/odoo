@@ -68,15 +68,15 @@ export function redo(editor) {
 
 // list
 export function toggleOrderedList(editor) {
-    editor.dispatch("TOGGLE_LIST", { type: "OL" });
+    editor.dispatch("TOGGLE_LIST", { mode: "OL" });
 }
 
 export function toggleUnorderedList(editor) {
-    editor.dispatch("TOGGLE_LIST", { type: "UL" });
+    editor.dispatch("TOGGLE_LIST", { mode: "UL" });
 }
 
 export function toggleCheckList(editor) {
-    editor.dispatch("TOGGLE_LIST", { type: "CL" });
+    editor.dispatch("TOGGLE_LIST", { mode: "CL" });
 }
 
 /**
@@ -170,14 +170,6 @@ export function unlink(editor) {
 
 export function keydownTab(editor) {
     dispatch(editor.editable, "keydown", { key: "Tab" });
-}
-
-export function indentList(editor) {
-    editor.dispatch("INDENT_LIST");
-}
-
-export function outdentList(editor) {
-    editor.dispatch("OUTDENT_LIST");
 }
 
 export function keydownShiftTab(editor) {
