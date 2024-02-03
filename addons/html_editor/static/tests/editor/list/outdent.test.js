@@ -1,7 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { keydownShiftTab, outdentList } from "../../test_helpers/user_actions";
+import { keydownShiftTab } from "../../test_helpers/user_actions";
 
 describe("Regular list", () => {
     test("should remove the list-style when outdent the list", async () => {
@@ -14,7 +14,7 @@ describe("Regular list", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li style="list-style: cambodian;"></li>
@@ -36,7 +36,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                 <ul class="o_checklist">
                     <li class="o_checked">a[b]c</li>
@@ -52,7 +52,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>a[b]c</li>
@@ -72,7 +72,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -90,7 +90,7 @@ describe("Checklist", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -113,7 +113,7 @@ describe("with selection collapsed", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -135,7 +135,7 @@ describe("with selection collapsed", () => {
                             </ol>
                         </li>
                     </ol>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ol>
                         <li>a</li>
@@ -160,7 +160,7 @@ describe("with selection collapsed", () => {
                             c
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -177,7 +177,7 @@ describe("with selection collapsed", () => {
                         <li>[]a</li>
                         <li>b</li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <p>[]a</p>
                     <ul>
@@ -203,7 +203,7 @@ describe("with selection collapsed", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>
@@ -228,7 +228,7 @@ describe("with selection collapsed", () => {
                             </ul>
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>
@@ -357,7 +357,7 @@ describe("with selection", () => {
                             c
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -382,7 +382,7 @@ describe("with selection", () => {
                             d
                         </li>
                     </ul>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -413,7 +413,7 @@ describe("with selection", () => {
                         </li>
                         <li>e</li>
                     </ul>`),
-                stepFunction: outdentList,
+                stepFunction: keydownShiftTab,
                 contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -446,7 +446,7 @@ describe("with selection", () => {
                         </li>
                         <li>e</li>
                     </ul>`),
-                stepFunction: outdentList,
+                stepFunction: keydownShiftTab,
                 contentAfter: unformat(`
                     <ul>
                         <li>
@@ -491,7 +491,7 @@ describe("with selection", () => {
                         </li>
                         <li>i</li>
                     </ul>`),
-                stepFunction: outdentList,
+                stepFunction: keydownShiftTab,
                 contentAfter: unformat(`
                     <ul>
                         <li>a</li>
@@ -530,7 +530,7 @@ describe("with selection", () => {
                     <li>a</li>
                 </ul>
                 <p>after]</p>`),
-            stepFunction: outdentList,
+            stepFunction: keydownShiftTab,
             contentAfter: unformat(`
                 <p>[before</p>
                 <ul>
