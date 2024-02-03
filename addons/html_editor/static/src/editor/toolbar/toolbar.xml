@@ -16,7 +16,7 @@
                             }"
                             t-att-title="button.name"
                             t-att-name="button.id"
-                            t-on-click="() => this.dispatch(button.cmd)"/>
+                            t-on-click="() => this.dispatch(button.cmd, button.cmdPayload)"/>
                     </t>
                 </div>
             </t>
