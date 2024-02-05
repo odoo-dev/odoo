@@ -1,6 +1,7 @@
 import { Component } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { closestBlock } from "../utils/blocks";
 
 export class FontSelector extends Component {
     static template = "html_editor.FontSelector";
@@ -9,7 +10,6 @@ export class FontSelector extends Component {
         getSelection: Function,
 
         getItems: Function,
-        getSelectedName: Function,
     };
     static components = { Dropdown, DropdownItem };
 
@@ -18,7 +18,26 @@ export class FontSelector extends Component {
     }
 
     get fontName() {
-        return this.props.getSelectedName(this.props.getSelection, this.items);
+        const sel = this.props.getSelection();
+        if (!sel) {
+            return "";
+        }
+        const anchorNode = sel.anchorNode;
+        const block = closestBlock(anchorNode);
+        const tagName = block.tagName.toLowerCase();
+
+        const matchingItems = this.items.filter((item) => {
+            return item.tagName === tagName;
+        });
+
+        if (!matchingItems.length) {
+            return "Normal";
+        }
+
+        return (
+            matchingItems.find((item) => block.classList.contains(item.extraClass)) ||
+            matchingItems[0]
+        ).name;
     }
 
     dispatch(cmd, payload) {

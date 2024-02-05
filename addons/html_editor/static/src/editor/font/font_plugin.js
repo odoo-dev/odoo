@@ -2,7 +2,6 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { FontSelector } from "./font_selector";
 import { _t } from "@web/core/l10n/translation";
-import { closestBlock } from "../utils/blocks";
 import { setCursorEnd, setCursorStart } from "../utils/selection";
 import { fillEmpty } from "../utils/dom";
 
@@ -67,32 +66,8 @@ export class FontPlugin extends Plugin {
                 {
                     id: "font",
                     Component: FontSelector,
-                    isFormatApplied: () => false, // TODO
                     props: {
                         getItems: () => fontItems,
-                        getSelectedName(getSelection, items) {
-                            const sel = getSelection();
-                            if (!sel) {
-                                return "";
-                            }
-                            const anchorNode = sel.anchorNode;
-                            const block = closestBlock(anchorNode);
-                            const tagName = block.tagName.toLowerCase();
-
-                            const matchingItems = items.filter((item) => {
-                                return item.tagName === tagName;
-                            });
-
-                            if (!matchingItems.length) {
-                                return "Normal";
-                            }
-
-                            return (
-                                matchingItems.find((item) =>
-                                    block.classList.contains(item.extraClass)
-                                ) || matchingItems[0]
-                            ).name;
-                        },
                     },
                 },
             ],
