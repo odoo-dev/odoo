@@ -37,9 +37,13 @@ export class SplitBlockPlugin extends Plugin {
         this.dispatch("DELETE_RANGE");
         selection = this.shared.getEditableSelection();
 
-        let targetNode = selection.anchorNode;
-        let targetOffset = selection.anchorOffset;
+        this.splitBlockNode({
+            targetNode: selection.anchorNode,
+            targetOffset: selection.anchorOffset,
+        });
+    }
 
+    splitBlockNode({ targetNode, targetOffset }) {
         if (targetNode.nodeType === Node.TEXT_NODE) {
             targetOffset = splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
