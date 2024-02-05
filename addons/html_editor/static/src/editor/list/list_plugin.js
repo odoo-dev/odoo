@@ -1,10 +1,9 @@
 import { Plugin } from "../plugin";
-import { descendants, closestElement, getAdjacents } from "../utils/dom_traversal";
-import { isWhitespace, isVisible } from "../utils/dom_info";
+import { closestElement, getAdjacents } from "../utils/dom_traversal";
+import { isShrunkBlock, isVisible } from "../utils/dom_info";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { getListMode, createList, insertListAfter, mergeSimilarLists, applyToTree } from "./utils";
-import { childNodeIndex } from "../utils/position";
-import { preserveCursor, getTraversedNodes, getTraversedBlocks } from "../utils/selection";
+import { preserveCursor, getTraversedBlocks } from "../utils/selection";
 import { setTagName, copyAttributes, removeClass, toggleClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
@@ -69,15 +68,6 @@ export class ListPlugin extends Plugin {
             case "TOGGLE_LIST":
                 this.toggleList(payload.mode);
                 break;
-            // @temp: former oToggleList
-            case "TOGGLE_LIST_NODE": {
-                const { node, offset, mode } = payload;
-                this.toggleListNode(node, offset, mode);
-                break;
-            }
-            case "TOGGLE_OFF_LIST_ITEM":
-                this.toggleOffLI(payload.node);
-                break;
             case "SANITIZE":
                 this.mergeLists();
                 break;
@@ -88,71 +78,64 @@ export class ListPlugin extends Plugin {
     // Commands
     // --------------------------------------------------------------------------
 
-    // @todo @phoenix: refactor this
+    /**
+     * Classifies the selected blocks into three categories:
+     * - LI that are part of a list of the same mode as the target one.
+     * - Lists (UL or OL) that need to have its mode switched to the target mode.
+     * - Blocks that need to be converted to lists.
+     *
+     *  If (and only if) all blocks fall into the first category, the list items
+     *  are converted into paragraphs (result is toggle list OFF).
+     *  Otherwise, the LIs in this category remain unchanged and the other two
+     *  categories are processed.
+     *
+     * @param {string} mode - The list mode to toggle (UL, OL, CL).
+     * @throws {Error} If an invalid list type is provided.
+     */
     toggleList(mode) {
         if (!["UL", "OL", "CL"].includes(mode)) {
             throw new Error(`Invalid list type: ${mode}`);
         }
 
-        // @todo @phoenix: consider using getTraversedBlocks instead
-        const selectedNodes = getTraversedNodes(this.editable);
-        let deepestSelectedNodes = selectedNodes.filter(
-            (node) => !descendants(node).some((descendant) => selectedNodes.includes(descendant))
-        );
+        // @todo @phoenix: original implementation removed whitespace-only text nodes from traversedNodes.
+        // Check if this is necessary.
 
-        // @todo
-        // Powerbox commands for lists on a empty paragraph do not work because
-        // the BR is not properly restored after the "/command" is removed (see applyCommand powerbox.js),
-        // and the remaining empty text node is removed.
-
-        // Remove whitespace-only text nodes.
-        deepestSelectedNodes = deepestSelectedNodes.filter((node) => {
-            if (
-                node.nodeType === Node.TEXT_NODE &&
-                isWhitespace(node) &&
-                closestElement(node).isContentEditable
-            ) {
-                node.remove();
-                return false;
+        // Classify selected blocks.
+        const sameModeListItems = new Set();
+        const nonListBlocks = new Set();
+        const listsToSwitch = new Set();
+        for (const block of getTraversedBlocks(this.editable)) {
+            if (["OL", "UL"].includes(block.tagName) || !block.isContentEditable) {
+                continue;
             }
-            return true;
-        });
-
-        // Does the li set only contain li elems to be toggled off?
-        const li = new Set();
-        const blocks = new Set();
-        for (const node of deepestSelectedNodes) {
-            let block = closestBlock(node);
-            if (!["OL", "UL"].includes(block.tagName) && block.isContentEditable) {
-                block = block.closest("li") || block;
-                const ublock = block.closest("ol, ul");
-                ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
+            const li = block.closest("li");
+            if (li) {
+                if (getListMode(li.parentElement) === mode) {
+                    sameModeListItems.add(li);
+                } else {
+                    listsToSwitch.add(li.parentElement);
+                }
+            } else {
+                nonListBlocks.add(block);
             }
         }
 
-        let target = [...(blocks.size ? blocks : li)];
-        while (target.length) {
-            const node = target.pop();
-            // only apply one li per ul
-            if (!this.toggleListNode(node, 0, mode)) {
-                target = target.filter(
-                    (li) => li.parentNode != node.parentNode || li.tagName != "LI"
-                );
+        // Apply changes.
+        if (listsToSwitch.size || nonListBlocks.size) {
+            for (const list of listsToSwitch) {
+                this.switchListMode(list, mode);
+            }
+            for (const block of nonListBlocks) {
+                this.blockToList(block, mode);
+            }
+        } else {
+            for (const li of sameModeListItems) {
+                this.liToP(li);
             }
         }
-        // @todo @phoenix NBY: use history step instead
-        this.dispatch("SANITIZE");
-    }
 
-    /**
-     * Outdents the given list item until it is no longer in a list.
-     *
-     * @param {HTMLLIElement} li
-     */
-    toggleOffLI(li) {
-        while (li) {
-            li = this.outdentLI(li);
-        }
+        this.mergeLists();
+        this.dispatch("ADD_STEP");
     }
 
     mergeLists(root = this.editable) {
@@ -162,262 +145,94 @@ export class ListPlugin extends Plugin {
     }
 
     // --------------------------------------------------------------------------
-    // Helpers
+    // Helpers for toggleList
     // --------------------------------------------------------------------------
-
-    indentListNodes(listNodes) {
-        const restoreCursor = preserveCursor(this.document);
-        for (const li of listNodes) {
-            this.indentLI(li);
-        }
-        restoreCursor();
-        // @todo @phoenix NBY: use history step instead
-        this.mergeLists();
-    }
-
-    outdentListNodes(listNodes) {
-        const restoreCursor = preserveCursor(this.document);
-        for (const li of listNodes) {
-            this.outdentLI(li);
-        }
-        restoreCursor();
-        // @todo @phoenix NBY: use history step instead
-        this.mergeLists();
-    }
-
-    separateListItems() {
-        const listItems = [];
-        const nonListItems = [];
-        for (const block of getTraversedBlocks(this.editable)) {
-            // Keep deepest list items only.
-            if (block.tagName === "LI" && !block.querySelector("li")) {
-                listItems.push(block);
-            } else if (!["UL", "OL"].includes(block.tagName)) {
-                nonListItems.push(block);
-            }
-        }
-        return { listItems, nonListItems };
-    }
 
     /**
-     * @param {MouseEvent} ev
-     * @param {HTMLLIElement} li - LI element inside a checklist.
+     * Switches the list mode of the given list element.
+     *
+     * @param {HTMLOListElement|HTMLUListElement} list - The list element to switch the mode of.
+     * @param {"UL"|"OL"|"CL"} newMode - The new mode to switch to.
+     * @returns {HTMLOListElement|HTMLUListElement} The modified list element.
      */
-    isPointerInsideCheckbox(li, pointerOffsetX, pointerOffsetY) {
-        const beforeStyle = this.document.defaultView.getComputedStyle(li, ":before");
-        const checkboxPosition = {
-            left: parseInt(beforeStyle.left),
-            top: parseInt(beforeStyle.top),
-        };
-        checkboxPosition.right = checkboxPosition.left + parseInt(beforeStyle.width);
-        checkboxPosition.bottom = checkboxPosition.top + parseInt(beforeStyle.height);
-
-        return (
-            pointerOffsetX >= checkboxPosition.left &&
-            pointerOffsetX <= checkboxPosition.right &&
-            pointerOffsetY >= checkboxPosition.top &&
-            pointerOffsetY <= checkboxPosition.bottom
-        );
-    }
-
-    // --------------------------------------------------------------------------
-    // Handlers of other plugins commands
-    // --------------------------------------------------------------------------
-
-    handleTab() {
-        const { listItems, nonListItems } = this.separateListItems();
-        if (listItems.length) {
-            this.indentListNodes(listItems);
-            this.shared.indentBlocks(nonListItems);
-            return true;
-        }
-    }
-
-    handleShiftTab() {
-        const { listItems, nonListItems } = this.separateListItems();
-        if (listItems.length) {
-            this.outdentListNodes(listItems);
-            this.shared.outdentBlocks(nonListItems);
-            return true;
-        }
-    }
-
-    handleSplitBlock(params) {
-        const closestLI = closestElement(params.targetNode, "LI");
-        if (!closestLI) {
+    switchListMode(list, newMode) {
+        if (getListMode(list) === newMode) {
             return;
         }
-        if (!closestLI.textContent) {
-            this.outdentLI(closestLI);
-            return true;
-        }
-        if (closestLI.classList.contains("o_checked")) {
-            const newLI = this.shared.splitElementBlock(params);
-            removeClass(newLI, "o_checked");
-            return true;
-        }
-    }
-
-    deleteElementBackwardBefore({ targetNode, targetOffset, outdentList = true, fromForward }) {
-        if (!fromForward && outdentList && targetNode.tagName === "LI" && targetOffset === 0) {
-            this.toggleOffLI(targetNode);
-            return true;
-        }
-    }
-
-    deleteElementForwardBefore({ targetNode, targetOffset }) {
-        const parentElement = targetNode.parentElement;
-        const nextSibling = targetNode.nextSibling;
-        if (
-            parentElement &&
-            nextSibling &&
-            ["LI", "UL", "OL"].includes(nextSibling.tagName) &&
-            (targetOffset === targetNode.childNodes.length ||
-                (targetNode.childNodes.length === 1 && targetNode.childNodes[0].tagName === "BR"))
-        ) {
-            const nextSiblingNestedLi = nextSibling.querySelector("li:first-child");
-            if (nextSiblingNestedLi) {
-                // Add the first LI from the next sibbling list to the current list.
-                targetNode.after(nextSiblingNestedLi);
-                // Remove the next sibbling list if it's empty.
-                if (!isVisible(nextSibling, false) || nextSibling.textContent === "") {
-                    nextSibling.remove();
+        const newTag = newMode === "CL" ? "UL" : newMode;
+        const restoreCursor = preserveCursor(this.document);
+        const newList = setTagName(list, newTag);
+        // Clear list style (@todo @phoenix - why??)
+        for (const li of newList.children) {
+            if (li.style.listStyle !== "none") {
+                li.style.listStyle = null;
+                if (!li.style.all) {
+                    li.removeAttribute("style");
                 }
-                this.dispatch("DELETE_ELEMENT_BACKWARD", {
-                    targetNode: nextSiblingNestedLi,
-                    targetOffset: 0,
-                    alreadyMoved: true,
-                    outdentList: false,
-                });
-            } else {
-                this.dispatch("DELETE_ELEMENT_BACKWARD", {
-                    targetNode: nextSibling,
-                    targetOffset: 0,
-                    outdentList: false,
-                });
             }
-            return true;
         }
-    }
-
-    // --------------------------------------------------------------------------
-    // Event handlers
-    // --------------------------------------------------------------------------
-
-    onMousedown(ev) {
-        const node = ev.target;
-        const isChecklistItem = node.tagName == "LI" && getListMode(node.parentElement) == "CL";
-        if (isChecklistItem && this.isPointerInsideCheckbox(node, ev.offsetX, ev.offsetY)) {
-            toggleClass(node, "o_checked");
-            ev.preventDefault();
-            // @todo: historyStep
-            this.dispatch("SANITIZE");
+        removeClass(list, "o_checklist");
+        if (newMode === "CL") {
+            newList.classList.add("o_checklist");
         }
-    }
-
-    // --------------------------------------------------------------------------
-    // Former oToggleList on different prototypes (@temp)
-    // --------------------------------------------------------------------------
-
-    // @temp comment: former oToggleList
-    /**
-     * @param {Node} node
-     * @param {number} offset
-     * @param {'UL'|'OL'|'CL'} mode
-     * @returns {any} - @todo find this out || make it something logical
-     */
-    toggleListNode(node, offset, mode) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            return this.toggleListNode(node.parentElement, childNodeIndex(node), mode);
-        }
-        if (node.tagName === "LI") {
-            return this.toggleListLI(node, mode);
-        }
-        if (node.tagName === "P") {
-            return this.toggleListP(node, mode);
-        }
-        return this.toggleListHTMLElement(node, offset, mode);
+        restoreCursor(new Map([[list, newList]]));
+        return newList;
     }
 
     /**
-     * @param {HTMLLIElement} liElement
+     * @param {HTMLElement} block element
      * @param {"UL"|"OL"|"CL"} mode
      */
-    toggleListLI(liElement, mode) {
-        const pnode = liElement.closest("ul, ol");
-        if (!pnode) {
-            return;
+    blockToList(element, mode) {
+        if (element.tagName === "P") {
+            return this.pToList(element, mode);
         }
+        let list;
         const restoreCursor = preserveCursor(this.document);
-        const listMode = getListMode(pnode) + mode;
-        // Convertion to checklist
-        if (["OLCL", "ULCL"].includes(listMode)) {
-            pnode.classList.add("o_checklist");
-            for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
-                if (li.style.listStyle != "none") {
-                    li.style.listStyle = null;
-                    if (!li.style.all) {
-                        li.removeAttribute("style");
-                    }
-                }
-            }
-            setTagName(pnode, "UL");
-            // Convertion from checklist
-        } else if (["CLOL", "CLUL"].includes(listMode)) {
-            removeClass(pnode, "o_checklist");
-            setTagName(pnode, mode);
-            // Convertion between OL and UL
-        } else if (["OLUL", "ULOL"].includes(listMode)) {
-            setTagName(pnode, mode);
+        if (element === this.editable) {
+            // @todo @phoenix: check if this is needed
+            const callingNode = element.firstChild;
+            const group = getAdjacents(callingNode, (n) => !isBlock(n));
+            list = insertListAfter(callingNode, mode, [group]);
+            restoreCursor();
         } else {
-            this.toggleOffLI(liElement);
-            // @todo @phoenix Avoid restoreCursor?
-            // return;
+            list = insertListAfter(element, mode, [element]);
+            copyAttributes(element, list);
+            restoreCursor(new Map([[element, list.firstElementChild]]));
         }
-
-        restoreCursor();
-        return false;
+        return list;
     }
 
     /**
      * @param {HTMLParagraphElement} p
      * @param {"UL"|"OL"|"CL"} mode
      */
-    toggleListP(p, mode = "UL") {
+    pToList(p, mode) {
         const restoreCursor = preserveCursor(this.document);
         const list = insertListAfter(p, mode, [[...p.childNodes]]);
         copyAttributes(p, list);
         p.remove();
 
         restoreCursor(new Map([[p, list.firstChild]]));
-        return true;
+        return list;
     }
 
     /**
-     * @param {HTMLElement} element
-     * @param {number} offset
-     * @param {"UL"|"OL"|"CL"} mode
+     * Transforms a LI into a paragraph.
+     *
+     * @param {HTMLLIElement} li
      */
-    toggleListHTMLElement(element, offset, mode = "UL") {
-        if (!isBlock(element)) {
-            return this.toggleListNode(element.parentElement, childNodeIndex(element));
-        }
-        const inLI = element.closest("li");
-        if (inLI) {
-            return this.toggleListNode(inLI, 0, mode);
-        }
+    liToP(li) {
         const restoreCursor = preserveCursor(this.document);
-        if (element.classList.contains("odoo-editor-editable")) {
-            const callingNode = element.childNodes[offset];
-            const group = getAdjacents(callingNode, (n) => !isBlock(n));
-            insertListAfter(callingNode, mode, [group]);
-            restoreCursor();
-        } else {
-            const list = insertListAfter(element, mode, [element]);
-            copyAttributes(element, list);
-            restoreCursor(new Map([[element, list.firstElementChild]]));
+        while (li) {
+            li = this.outdentLI(li);
         }
+        restoreCursor();
     }
+
+    // --------------------------------------------------------------------------
+    // Indentation
+    // --------------------------------------------------------------------------
 
     // @temp comment: former oTab
     /**
@@ -438,10 +253,10 @@ export class ListPlugin extends Plugin {
         li.before(lip);
         ul.append(li);
         restoreCursor();
-        return true;
     }
 
     // @temp comment: former oShiftTab
+    // @todo @phoenix: consider refactoring this method. It should return a P of a LI.
     /**
      * @param {HTMLLIElement} li
      * @returns is still in a <LI> nested list
@@ -510,6 +325,156 @@ export class ListPlugin extends Plugin {
             }
         }
         return false;
+    }
+
+    indentListNodes(listNodes) {
+        const restoreCursor = preserveCursor(this.document);
+        for (const li of listNodes) {
+            this.indentLI(li);
+        }
+        restoreCursor();
+        // @todo @phoenix NBY: use history step instead
+        this.mergeLists();
+    }
+
+    outdentListNodes(listNodes) {
+        const restoreCursor = preserveCursor(this.document);
+        for (const li of listNodes) {
+            this.outdentLI(li);
+        }
+        restoreCursor();
+        // @todo @phoenix NBY: use history step instead
+        this.mergeLists();
+    }
+
+    separateListItems() {
+        const listItems = [];
+        const nonListItems = [];
+        for (const block of getTraversedBlocks(this.editable)) {
+            // Keep deepest list items only.
+            if (block.tagName === "LI" && !block.querySelector("li")) {
+                listItems.push(block);
+            } else if (!["UL", "OL"].includes(block.tagName)) {
+                nonListItems.push(block);
+            }
+        }
+        return { listItems, nonListItems };
+    }
+
+    // --------------------------------------------------------------------------
+    // Handlers of other plugins commands
+    // --------------------------------------------------------------------------
+
+    handleTab() {
+        const { listItems, nonListItems } = this.separateListItems();
+        if (listItems.length) {
+            this.indentListNodes(listItems);
+            this.shared.indentBlocks(nonListItems);
+            return true;
+        }
+    }
+
+    handleShiftTab() {
+        const { listItems, nonListItems } = this.separateListItems();
+        if (listItems.length) {
+            this.outdentListNodes(listItems);
+            this.shared.outdentBlocks(nonListItems);
+            return true;
+        }
+    }
+
+    handleSplitBlock(params) {
+        const closestLI = closestElement(params.targetNode, "LI");
+        if (!closestLI) {
+            return;
+        }
+        if (!closestLI.textContent) {
+            this.outdentLI(closestLI);
+            return true;
+        }
+        if (closestLI.classList.contains("o_checked")) {
+            const newLI = this.shared.splitElementBlock(params);
+            removeClass(newLI, "o_checked");
+            return true;
+        }
+    }
+
+    deleteElementBackwardBefore({ targetNode, targetOffset, outdentList = true, fromForward }) {
+        if (!fromForward && outdentList && targetNode.tagName === "LI" && targetOffset === 0) {
+            this.liToP(targetNode);
+            return true;
+        }
+    }
+
+    deleteElementForwardBefore({ targetNode, targetOffset }) {
+        const parentElement = targetNode.parentElement;
+        const nextSibling = targetNode.nextSibling;
+        if (
+            parentElement &&
+            nextSibling &&
+            ["LI", "UL", "OL"].includes(nextSibling.tagName) &&
+            (targetOffset === targetNode.childNodes.length ||
+                (targetNode.childNodes.length === 1 && targetNode.childNodes[0].tagName === "BR"))
+        ) {
+            const nextSiblingNestedLi = nextSibling.querySelector("li:first-child");
+            if (nextSiblingNestedLi) {
+                // Add the first LI from the next sibbling list to the current list.
+                targetNode.after(nextSiblingNestedLi);
+                // Remove the next sibbling list if it's empty.
+                if (!isVisible(nextSibling, false) || nextSibling.textContent === "") {
+                    nextSibling.remove();
+                }
+                this.dispatch("DELETE_ELEMENT_BACKWARD", {
+                    targetNode: nextSiblingNestedLi,
+                    targetOffset: 0,
+                    alreadyMoved: true,
+                    outdentList: false,
+                });
+            } else {
+                this.dispatch("DELETE_ELEMENT_BACKWARD", {
+                    targetNode: nextSibling,
+                    targetOffset: 0,
+                    outdentList: false,
+                });
+            }
+            return true;
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // Event handlers
+    // --------------------------------------------------------------------------
+
+    onMousedown(ev) {
+        const node = ev.target;
+        const isChecklistItem = node.tagName == "LI" && getListMode(node.parentElement) == "CL";
+        if (isChecklistItem && this.isPointerInsideCheckbox(node, ev.offsetX, ev.offsetY)) {
+            toggleClass(node, "o_checked");
+            ev.preventDefault();
+            // @todo: historyStep
+            this.dispatch("SANITIZE");
+        }
+    }
+
+    /**
+     * @param {MouseEvent} ev
+     * @param {HTMLLIElement} li - LI element inside a checklist.
+     */
+    isPointerInsideCheckbox(li, pointerOffsetX, pointerOffsetY) {
+        const beforeStyle = this.document.defaultView.getComputedStyle(li, ":before");
+        const checkboxPosition = {
+            left: parseInt(beforeStyle.left),
+            top: parseInt(beforeStyle.top),
+        };
+        checkboxPosition.right = checkboxPosition.left + parseInt(beforeStyle.width);
+        checkboxPosition.bottom = checkboxPosition.top + parseInt(beforeStyle.height);
+
+        return (
+            pointerOffsetX >= checkboxPosition.left &&
+            pointerOffsetX <= checkboxPosition.right &&
+            pointerOffsetY >= checkboxPosition.top &&
+            pointerOffsetY <= checkboxPosition.bottom
+        );
     }
 }
 
