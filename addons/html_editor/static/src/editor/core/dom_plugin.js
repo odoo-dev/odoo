@@ -238,6 +238,7 @@ export class DomPlugin extends Plugin {
     // --------------------------------------------------------------------------
 
     setTag({ tagName, extraClass = "" }) {
+        tagName = tagName.toUpperCase();
         const range = getDeepRange(this.editable, { correctTripleClick: true });
         const selectedBlocks = [
             ...new Set(getTraversedNodes(this.editable, range).map(closestBlock)),
@@ -259,35 +260,38 @@ export class DomPlugin extends Plugin {
                     block.nodeName
                 )
             ) {
-                const inLI = block.closest("li");
-                if (inLI && tagName === "p") {
-                    // TODO @phoenix need to replace oToggleList
-                    //this.dispatch("TOGGLE_LIST_OFF", { node: inLI });
-                    // inLI.oToggleList(0);
-                } else {
-                    const newEl = setTagName(block, tagName);
-                    newEl.classList.remove(
-                        ...FONT_SIZE_CLASSES,
-                        ...TEXT_STYLE_CLASSES,
-                        // We want to be able to edit the case `<h2 class="h3">`
-                        // but in that case, we want to display "Header 2" and
-                        // not "Header 3" as it is more important to display
-                        // the semantic tag being used (especially for h1 ones).
-                        // This is why those are not in `TEXT_STYLE_CLASSES`.
-                        "h1",
-                        "h2",
-                        "h3",
-                        "h4",
-                        "h5",
-                        "h6"
-                    );
-                    delete newEl.style.fontSize;
-                    if (extraClass) {
-                        newEl.classList.add(extraClass);
+                if (tagName === "P") {
+                    if (block.nodeName === "LI") {
+                        continue;
+                    } else if (block.parentNode.nodeName === "LI") {
+                        block.before(...block.childNodes);
+                        block.remove();
+                        continue;
                     }
-                    if (newEl.classList.length === 0) {
-                        newEl.removeAttribute("class");
-                    }
+                }
+
+                const newEl = setTagName(block, tagName);
+                newEl.classList.remove(
+                    ...FONT_SIZE_CLASSES,
+                    ...TEXT_STYLE_CLASSES,
+                    // We want to be able to edit the case `<h2 class="h3">`
+                    // but in that case, we want to display "Header 2" and
+                    // not "Header 3" as it is more important to display
+                    // the semantic tag being used (especially for h1 ones).
+                    // This is why those are not in `TEXT_STYLE_CLASSES`.
+                    "h1",
+                    "h2",
+                    "h3",
+                    "h4",
+                    "h5",
+                    "h6"
+                );
+                delete newEl.style.fontSize;
+                if (extraClass) {
+                    newEl.classList.add(extraClass);
+                }
+                if (newEl.classList.length === 0) {
+                    newEl.removeAttribute("class");
                 }
             } else {
                 // eg do not change a <div> into a h1: insert the h1
