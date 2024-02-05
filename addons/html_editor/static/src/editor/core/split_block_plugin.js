@@ -1,10 +1,10 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
-import { fillEmpty, setTagName } from "../utils/dom";
-import { isVisible, isVisibleTextNode } from "../utils/dom_info";
+import { fillEmpty } from "../utils/dom";
+import { isVisible } from "../utils/dom_info";
 import { splitElementUntil, splitTextNode } from "../utils/dom_split";
-import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
+import { closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { setCursorStart } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 import { prepareUpdate } from "../utils/dom_state";
@@ -65,7 +65,7 @@ export class SplitBlockPlugin extends Plugin {
         const listElement = targetNode.nodeName !== "LI" && targetNode.closest("LI > *");
         const elementToSplit = listElement || closestElement(targetNode, (el) => isBlock(el));
 
-        let [beforeElement, afterElement] = splitElementUntil(
+        const [beforeElement, afterElement] = splitElementUntil(
             targetNode,
             targetOffset,
             elementToSplit.parentElement
@@ -83,28 +83,11 @@ export class SplitBlockPlugin extends Plugin {
         removeEmptyAndFill(lastLeaf(beforeElement));
         removeEmptyAndFill(firstLeaf(afterElement));
 
-        afterElement = this.splitBlockEndHeading(afterElement) || afterElement;
         setCursorStart(afterElement);
 
         return afterElement;
     }
 
-    // @todo @phoenix: move this to Font Plugin
-    /**
-     * Specific behavior for headings: do not split in two if cursor at the end but
-     * instead create a paragraph.
-     * Cursor end of line: <h1>title[]</h1> + ENTER <=> <h1>title</h1><p>[]<br/></p>
-     * Cursor in the line: <h1>tit[]le</h1> + ENTER <=> <h1>tit</h1><h1>[]le</h1>
-     */
-    splitBlockEndHeading(newElement) {
-        if (["H1", "H2", "H3", "H4", "H5", "H6"].includes(newElement.tagName)) {
-            if (!descendants(newElement).some(isVisibleTextNode)) {
-                const node = setTagName(newElement, "P");
-                node.replaceChildren(document.createElement("br"));
-                return node;
-            }
-        }
-    }
     onBeforeInput(e) {
         if (e.inputType === "insertParagraph") {
             e.preventDefault();
