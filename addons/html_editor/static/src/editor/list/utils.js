@@ -15,6 +15,7 @@ export function createList(mode) {
     return node;
 }
 
+// @todo use the correct document
 export function insertListAfter(afterNode, mode, content = []) {
     const list = createList(mode);
     afterNode.after(list);
