@@ -3,7 +3,9 @@ import { Plugin } from "../plugin";
 import { FontSelector } from "./font_selector";
 import { _t } from "@web/core/l10n/translation";
 import { setCursorEnd, setCursorStart } from "../utils/selection";
-import { fillEmpty } from "../utils/dom";
+import { fillEmpty, setTagName } from "../utils/dom";
+import { closestElement, descendants } from "../utils/dom_traversal";
+import { isVisibleTextNode } from "../utils/dom_info";
 
 const fontItems = [
     {
@@ -57,8 +59,12 @@ const fontItems = [
 
 export class FontPlugin extends Plugin {
     static name = "font";
+    static dependencies = ["split_block"];
     static resources = (p) => ({
-        split_element_block: { callback: p.handleSplitBlock.bind(p) },
+        split_element_block: [
+            { callback: p.handleSplitBlockPRE.bind(p) },
+            { callback: p.handleSplitBlockHeading.bind(p) },
+        ],
         toolbarGroup: {
             id: "style",
             sequence: 10,
@@ -74,11 +80,12 @@ export class FontPlugin extends Plugin {
         },
     });
 
+    // @todo @phoenix: Move this to a specific Pre/CodeBlock plugin?
     /**
      * Specific behavior for pre: insert newline (\n) in text or insert p at
      * end.
      */
-    handleSplitBlock({ targetNode, targetOffset }) {
+    handleSplitBlockPRE({ targetNode, targetOffset }) {
         if (targetNode.tagName === "PRE") {
             if (targetOffset < targetNode.childNodes.length) {
                 const lineBreak = document.createElement("br");
@@ -89,6 +96,34 @@ export class FontPlugin extends Plugin {
                 targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
                 fillEmpty(node);
                 setCursorStart(node);
+            }
+            return true;
+        }
+    }
+
+    // @todo @phoenix: Move this to a specific Heading plugin?
+    /**
+     * Specific behavior for headings: do not split in two if cursor at the end but
+     * instead create a paragraph.
+     * Cursor end of line: <h1>title[]</h1> + ENTER <=> <h1>title</h1><p>[]<br/></p>
+     * Cursor in the line: <h1>tit[]le</h1> + ENTER <=> <h1>tit</h1><h1>[]le</h1>
+     */
+    handleSplitBlockHeading(params) {
+        const headingTags = ["H1", "H2", "H3", "H4", "H5", "H6"];
+        const closestHeading = closestElement(params.targetNode, (element) =>
+            headingTags.includes(element.tagName)
+        );
+        if (closestHeading) {
+            const newElement = this.shared.splitElementBlock(params);
+            // @todo @phoenix: if this condition can be anticipated before the split,
+            // handle the splitBlock only in such case.
+            if (
+                headingTags.includes(newElement.tagName) &&
+                !descendants(newElement).some(isVisibleTextNode)
+            ) {
+                const p = setTagName(newElement, "P");
+                p.replaceChildren(this.document.createElement("br"));
+                setCursorStart(p);
             }
             return true;
         }
