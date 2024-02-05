@@ -46,16 +46,21 @@ describe("to paragraph", () => {
         });
     });
 
-    test.todo(
-        "should not add paragraph tag when selection is changed to normal in list",
-        async () => {
-            await testEditor({
-                contentBefore: "<ul><li><h1>[abcd]</h1></li></ul>",
-                stepFunction: setTag("p"),
-                contentAfter: `<ul><li>[abcd]</li></ul>`,
-            });
-        }
-    );
+    test("should not add paragraph tag when selection is changed to normal in list", async () => {
+        await testEditor({
+            contentBefore: "<ul><li><h1>[abcd]</h1></li></ul>",
+            stepFunction: setTag("p"),
+            contentAfter: `<ul><li>[abcd]</li></ul>`,
+        });
+    });
+
+    test("should not add paragraph tag when selection is changed to normal in list (2)", async () => {
+        await testEditor({
+            contentBefore: "<ul><li><h1>[ab<span>cd]</span></h1></li></ul>",
+            stepFunction: setTag("p"),
+            contentAfter: `<ul><li>[ab<span>cd]</span></li></ul>`,
+        });
+    });
 
     test("should not add paragraph tag to normal text in list", async () => {
         await testEditor({
