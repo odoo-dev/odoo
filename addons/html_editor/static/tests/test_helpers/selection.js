@@ -117,16 +117,14 @@ export function setRange(el, content) {
 
 function visitAndSetRange(target, ref, configSelection) {
     function applyRange() {
-        let offset = 0;
         const text = ref.textContent;
         if (text.includes("[")) {
-            offset = 1;
-            const index = text.indexOf("[");
+            const index = text.replace("]", "").indexOf("[");
             configSelection.anchorNode = target;
             configSelection.anchorOffset = index;
         }
         if (text.includes("]")) {
-            const index = text.indexOf("]") - offset;
+            const index = text.replace("[", "").indexOf("]");
             configSelection.focusNode = target;
             configSelection.focusOffset = index;
         }
