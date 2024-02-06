@@ -44,10 +44,10 @@ export class ToolbarPlugin extends Plugin {
     }
 
     handleSelectionChange() {
-        const sel = window.getSelection();
-        const range = sel.rangeCount ? sel.getRangeAt(0) : false;
+        const sel = this.shared.getEditableSelection();
+        const range = sel ? sel.getRangeAt(0) : false;
         this.updateToolbarVisibility(range);
-        if (this.overlay.isOpen || this.disableFloatingToolbar) {
+        if (sel && (this.overlay.isOpen || this.config.disableFloatingToolbar)) {
             this.updateButtonsActiveState();
         }
     }
