@@ -589,7 +589,6 @@ describe("with selection collapsed", () => {
 
     test("should indent checklist inside a table cell", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                         <table>
                             <tbody>
@@ -635,6 +634,30 @@ describe("with selection collapsed", () => {
                             </tbody>
                         </table>
                     `),
+        });
+    });
+
+    test("should indent list item containing a block", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>
+                        <h1>[abc]</h1>
+                    </li>
+                </ul>
+            `),
+            stepFunction: async (editor) => keydownTab(editor),
+            contentAfter: unformat(`
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>
+                                <h1>[abc]</h1>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            `),
         });
     });
 });
