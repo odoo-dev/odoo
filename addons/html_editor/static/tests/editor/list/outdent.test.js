@@ -393,6 +393,7 @@ describe("with selection", () => {
         });
     });
 
+    // @todo @phoenix: is this a valid contentBefore?
     test.todo(
         "should outdent multiples list item in the middle element of a list with sublist",
         async () => {
