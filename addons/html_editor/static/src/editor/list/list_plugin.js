@@ -68,9 +68,11 @@ export class ListPlugin extends Plugin {
             case "TOGGLE_LIST":
                 this.toggleList(payload.mode);
                 break;
-            case "SANITIZE":
-                this.mergeLists();
+            case "CONTENT_UPDATED": {
+                const root = payload || this.editable;
+                applyToTree(root, mergeSimilarLists);
                 break;
+            }
         }
     }
 
@@ -134,14 +136,7 @@ export class ListPlugin extends Plugin {
             }
         }
 
-        this.mergeLists();
         this.dispatch("ADD_STEP");
-    }
-
-    mergeLists(root = this.editable) {
-        const restoreCursor = preserveCursor(this.document);
-        applyToTree(root, mergeSimilarLists);
-        restoreCursor();
     }
 
     // --------------------------------------------------------------------------
@@ -341,8 +336,7 @@ export class ListPlugin extends Plugin {
             this.indentLI(li);
         }
         restoreCursor();
-        // @todo @phoenix NBY: use history step instead
-        this.mergeLists();
+        this.dispatch("ADD_STEP");
     }
 
     outdentListNodes(listNodes) {
@@ -351,8 +345,7 @@ export class ListPlugin extends Plugin {
             this.outdentLI(li);
         }
         restoreCursor();
-        // @todo @phoenix NBY: use history step instead
-        this.mergeLists();
+        this.dispatch("ADD_STEP");
     }
 
     separateListItems() {
@@ -462,8 +455,7 @@ export class ListPlugin extends Plugin {
         if (isChecklistItem && this.isPointerInsideCheckbox(node, ev.offsetX, ev.offsetY)) {
             toggleClass(node, "o_checked");
             ev.preventDefault();
-            // @todo: historyStep
-            this.dispatch("SANITIZE");
+            this.dispatch("ADD_STEP");
         }
     }
 
