@@ -5,7 +5,7 @@ import { Toolbar } from "./toolbar";
 
 export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
-    static dependencies = ["overlay", "dom"];
+    static dependencies = ["overlay", "selection"];
     static shared = ["getToolbarInfo"];
 
     setup() {

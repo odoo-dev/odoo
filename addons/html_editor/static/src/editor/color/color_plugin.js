@@ -53,7 +53,7 @@ function hasColor(element, mode) {
 
 export class ColorPlugin extends Plugin {
     static name = "color";
-    static dependencies = ["dom"];
+    static dependencies = ["selection"];
     static resources = () => ({
         toolbarGroup: {
             id: "color",
