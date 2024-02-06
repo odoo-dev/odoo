@@ -16,7 +16,7 @@ registry
         category: "structure",
         fontawesome: "fa-list-ul",
         action(dispatch) {
-            dispatch("TOGGLE_LIST", { type: "UL" });
+            dispatch("TOGGLE_LIST", { mode: "UL" });
         },
     })
     .add("numbered_list", {
@@ -25,7 +25,7 @@ registry
         category: "structure",
         fontawesome: "fa-list-ol",
         action(dispatch) {
-            dispatch("TOGGLE_LIST", { type: "OL" });
+            dispatch("TOGGLE_LIST", { mode: "OL" });
         },
     })
     .add("checklist", {
@@ -34,7 +34,7 @@ registry
         category: "structure",
         fontawesome: "fa-check-square-o",
         action(dispatch) {
-            dispatch("TOGGLE_CHECKLIST");
+            dispatch("TOGGLE_LIST", { mode: "CL" });
         },
     })
     .add("separator", {

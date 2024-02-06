@@ -107,3 +107,21 @@ test.todo("should close the powerbox if keyup event is called on other block", a
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
 });
+
+test("should toggle list on empty paragraph", async () => {
+    const { el, editor } = await setupEditor("<p>[]<br></p>");
+    // Simulate typing "/checklist" in an empty paragraph (br gets removed)
+    el.querySelector("p > br").remove();
+    await insertText(editor, "/checklist");
+    expect(getContent(el)).toBe("<p>/checklist[]</p>");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Checklist"]);
+    expect(".o-we-powerbox").toHaveCount(1);
+    await dispatch(editor.editable, "keydown", { key: "Enter" });
+    expect(getContent(el)).toBe(
+        `<ul class="o_checklist"><li placeholder="List" class="o-we-hint">[]<br></li></ul>`
+    );
+    // need 1 animation frame to close
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+});
