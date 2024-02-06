@@ -17,7 +17,7 @@ import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
-    static shared = ["dom_insert", "getEditableSelection"];
+    static shared = ["dom_insert"];
 
     handleCommand(command, payload) {
         switch (command) {
@@ -217,20 +217,6 @@ export class DomPlugin extends Plugin {
         newRange.setEnd(lastPosition[0], lastPosition[1]);
         selection.addRange(newRange);
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
-    }
-
-    getEditableSelection() {
-        const selection = this.document.getSelection();
-        if (selection.rangeCount === 0) {
-            return;
-        }
-        if (
-            this.editable.contains(selection.anchorNode) &&
-            (selection.focusNode === selection.anchorNode ||
-                this.editable.contains(selection.focusNode))
-        ) {
-            return selection;
-        }
     }
 
     // --------------------------------------------------------------------------
