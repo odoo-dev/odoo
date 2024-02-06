@@ -359,9 +359,12 @@ export class ListPlugin extends Plugin {
         const listItems = [];
         const nonListItems = [];
         for (const block of getTraversedBlocks(this.editable)) {
-            // Keep deepest list items only.
-            if (block.tagName === "LI" && !block.querySelector("li")) {
-                listItems.push(block);
+            const closestLI = block.closest("li");
+            if (closestLI) {
+                // Keep deepest list items only.
+                if (!closestLI.querySelector("li")) {
+                    listItems.push(closestLI);
+                }
             } else if (!["UL", "OL"].includes(block.tagName)) {
                 nonListItems.push(block);
             }
