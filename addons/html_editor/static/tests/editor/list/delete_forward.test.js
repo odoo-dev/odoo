@@ -91,7 +91,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should rejoin sibling lists (ul)", async () => {
+        test("should rejoin sibling lists (ul)", async () => {
             await testEditor({
                 contentBefore: "<ul><li>a[]</li></ul><p>b</p><ul><li>c</li></ul>",
                 stepFunction: deleteForward,
@@ -99,7 +99,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should rejoin multi-level sibling lists (1)", async () => {
+        test("should rejoin multi-level sibling lists (1)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ul>
@@ -134,7 +134,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should only rejoin same-level lists (ol)", async () => {
+        test("should only rejoin same-level lists (ol)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                             <ol>
@@ -301,7 +301,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should rejoin sibling lists (cl)", async () => {
+        test("should rejoin sibling lists (cl)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -312,7 +312,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should rejoin multi-level sibling lists (2)", async () => {
+        test("should rejoin multi-level sibling lists (2)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: unformat(`
@@ -348,7 +348,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should only rejoin same-level lists (ul)", async () => {
+        test("should only rejoin same-level lists (ul)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: unformat(`
