@@ -10,7 +10,7 @@ import { collapseIfZWS } from "../utils/zws";
 import { prepareUpdate } from "../utils/dom_state";
 
 export class SplitBlockPlugin extends Plugin {
-    static dependencies = ["dom"];
+    static dependencies = ["selection"];
     static name = "split_block";
     static shared = ["splitElementBlock"];
 

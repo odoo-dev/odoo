@@ -35,7 +35,7 @@ import { splitTextNode } from "../utils/dom_split";
 import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
-    static dependencies = ["dom"];
+    static dependencies = ["dom", "selection"];
     static name = "delete";
     static resources = () => ({
         shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],

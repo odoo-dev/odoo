@@ -4,7 +4,7 @@ import { setSelection } from "../utils/selection";
 
 export class HistoryPlugin extends Plugin {
     static name = "history";
-    static dependencies = ["dom"];
+    static dependencies = ["selection"];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },

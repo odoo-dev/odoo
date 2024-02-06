@@ -8,7 +8,7 @@ import { setSelection } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 
 export class LineBreakPlugin extends Plugin {
-    static dependencies = ["dom"];
+    static dependencies = ["selection"];
     static name = "line_break";
 
     setup() {
