@@ -1,4 +1,5 @@
 import { getAdjacents } from "../utils/dom_traversal";
+import { preserveCursor } from "../utils/selection";
 
 export function getListMode(pnode) {
     if (pnode.tagName == "OL") {
@@ -73,7 +74,10 @@ export function mergeSimilarLists(element) {
     if (!element.matches("ul, ol, li.oe-nested")) {
         return element;
     }
-    return mergeSimilarSiblings(element, compareListTypes);
+    const restoreCursor = preserveCursor(element.ownerDocument);
+    const mergedList = mergeSimilarSiblings(element, compareListTypes);
+    restoreCursor();
+    return mergedList;
 }
 
 export function applyToTree(root, func) {
