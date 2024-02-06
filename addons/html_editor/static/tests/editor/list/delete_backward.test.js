@@ -80,7 +80,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin sibling lists (ol)", async () => {
+            test("should rejoin sibling lists (ol)", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a</li></ol><p>[]b</p><ol><li>c</li></ol>",
                     stepFunction: deleteBackward,
@@ -88,7 +88,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin multi-level sibling lists", async () => {
+            test("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ul>
@@ -123,7 +123,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should only rejoin same-level lists", async () => {
+            test("should only rejoin same-level lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ol>
@@ -214,21 +214,18 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Indented", () => {
-            test.todo(
-                "should merge an indented list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<ol><li>abc</li><li class="oe-nested"><ol><li>[]def</li><li>ghi</li></ol></li></ol>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter:
-                            '<ol><li>abc[]def</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
-                    });
-                }
-            );
+            test("should merge an indented list item into a non-indented list item", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ol><li>abc</li><li class="oe-nested"><ol><li>[]def</li><li>ghi</li></ol></li></ol>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter:
+                        '<ol><li>abc[]def</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
+                });
+            });
 
             test("should merge a non-indented list item into an indented list item", async () => {
                 await testEditor({
@@ -487,7 +484,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin sibling lists (ul)", async () => {
+            test("should rejoin sibling lists (ul)", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a</li></ul><p>[]b</p><ul><li>c</li></ul>",
                     stepFunction: deleteBackward,
@@ -495,7 +492,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin multi-level sibling lists", async () => {
+            test("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ul>
@@ -530,7 +527,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should only rejoin same-level lists", async () => {
+            test("should only rejoin same-level lists", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                             <ul>
@@ -621,11 +618,9 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Indented", () => {
-            test.todo(
-                "should merge an indented list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        contentBefore: unformat(`
+            test("should merge an indented list item into a non-indented list item", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
                             <ul>
                                 <li>abc</li>
                                 <li class="oe-nested">
@@ -635,11 +630,11 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ul>`),
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: unformat(`
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: unformat(`
                             <ul>
                                 <li>abc[]def</li>
                                 <li class="oe-nested">
@@ -648,9 +643,8 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ul>`),
-                    });
-                }
-            );
+                });
+            });
 
             test("should merge a non-indented list item into an indented list item", async () => {
                 await testEditor({
@@ -925,7 +919,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin sibling lists (cl)", async () => {
+            test("should rejoin sibling lists (cl)", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
@@ -936,7 +930,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should rejoin multi-level sibling lists", async () => {
+            test("should rejoin multi-level sibling lists", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: unformat(`
@@ -1005,7 +999,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should only rejoin same-level lists", async () => {
+            test("should only rejoin same-level lists", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: unformat(`
@@ -1140,22 +1134,19 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Indented", () => {
-            test.todo(
-                "should merge an indented list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li><li class="o_checked">ghi</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter:
-                            '<ul class="o_checklist"><li class="o_checked">abc[]def</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
-                    });
-                }
-            );
+            test("should merge an indented list item into a non-indented list item", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li><li class="o_checked">ghi</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked">abc[]def</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
+                });
+            });
 
             test("should merge a non-indented list item into an indented list item", async () => {
                 await testEditor({
@@ -1686,22 +1677,19 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge an checklist list item that is in an unordered list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore:
-                            '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li><li class="o_checked">ghi</li></ul></li></ul>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter:
-                            '<ul><li>abc[]def</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
-                    });
-                }
-            );
+            test("should merge an checklist list item that is in an unordered list item into a non-indented list item", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore:
+                        '<ul><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">[]def</li><li class="o_checked">ghi</li></ul></li></ul>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter:
+                        '<ul><li>abc[]def</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">ghi</li></ul></li></ul>',
+                });
+            });
 
             test("should merge an checklist list item into an unordered list item that is in the same checklist list", async () => {
                 await testEditor({
@@ -1818,12 +1806,10 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should merge an unordered list item that is in an checklist list item into a non-indented list item",
-                async () => {
-                    await testEditor({
-                        removeCheckIds: true,
-                        contentBefore: unformat(`
+            test("should merge an unordered list item that is in an checklist list item into a non-indented list item", async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: unformat(`
                             <ul class="o_checklist">
                                 <li class="o_checked">abc</li>
                                 <li class="oe-nested">
@@ -1833,11 +1819,11 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ul>`),
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: unformat(`
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: unformat(`
                             <ul class="o_checklist">
                                 <li class="o_checked">abc[]def</li>
                                 <li class="oe-nested">
@@ -1846,9 +1832,8 @@ describe("Selection collapsed", () => {
                                     </ul>
                                 </li>
                             </ul>`),
-                    });
-                }
-            );
+                });
+            });
 
             test("should merge an unordered list item into an checklist list item that is in the same unordered list", async () => {
                 await testEditor({
