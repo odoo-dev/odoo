@@ -16,10 +16,18 @@ import {
     isVisibleTextNode,
     isWhitespace,
     isZWS,
+    nextLeaf,
     paragraphRelatedElements,
+    previousLeaf,
 } from "../utils/dom_info";
 import { getState, prepareUpdate } from "../utils/dom_state";
-import { closestElement, createDOMPathGenerator, findNode } from "../utils/dom_traversal";
+import {
+    closestElement,
+    createDOMPathGenerator,
+    findNode,
+    firstLeaf,
+    getFurthestUneditableParent,
+} from "../utils/dom_traversal";
 import {
     DIRECTIONS,
     boundariesOut,
@@ -29,13 +37,13 @@ import {
     nodeSize,
     rightPos,
 } from "../utils/position";
-import { setSelection } from "../utils/selection";
+import { getDeepRange, preserveCursor, setSelection } from "../utils/selection";
 import { CTGROUPS, CTYPES } from "../utils/content_types";
 import { splitTextNode } from "../utils/dom_split";
 import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
-    static dependencies = ["dom", "selection"];
+    static dependencies = ["dom", "history", "selection"];
     static name = "delete";
     static resources = () => ({
         shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],
@@ -74,8 +82,8 @@ export class DeletePlugin extends Plugin {
         if (!selection) {
             return;
         }
-        if (collapseIfZWS(this.editable, selection)) {
-            this.dispatch("DELETE_RANGE");
+        if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+            this.deleteRange();
             return;
         }
         selection = this.shared.getEditableSelection();
@@ -91,8 +99,8 @@ export class DeletePlugin extends Plugin {
         if (!selection) {
             return;
         }
-        if (collapseIfZWS(this.editable, selection)) {
-            this.dispatch("DELETE_RANGE");
+        if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+            this.deleteRange();
             return;
         }
         selection = this.shared.getEditableSelection();
@@ -104,7 +112,7 @@ export class DeletePlugin extends Plugin {
     }
 
     deleteElementBackward(params) {
-        const { targetNode, targetOffset } = params;
+        const { targetNode, targetOffset = 0 } = params;
 
         for (const { callback } of this.resources["delete_element_backward_before"]) {
             if (callback({ ...params })) {
@@ -127,6 +135,9 @@ export class DeletePlugin extends Plugin {
             return;
         }
 
+        // Get the current nextSibling before moving the nodes.
+        const nextSibling = targetNode.nextSibling;
+
         const [moveDest, alreadyMoved, cursorNode, cursorOffset] =
             this.deleteElementBackwardMoveNode(
                 targetNode,
@@ -139,10 +150,10 @@ export class DeletePlugin extends Plugin {
         // Propagate if this is still a block on the left of where the nodes
         // were moved.
         this.deleteElementBackwardPropagate(
+            nextSibling,
             moveDest,
             cursorNode,
             cursorOffset,
-            targetNode,
             alreadyMoved
         );
     }
@@ -386,8 +397,7 @@ export class DeletePlugin extends Plugin {
         );
         return [moveDest, alreadyMoved, cursorNode, cursorOffset];
     }
-    deleteElementBackwardPropagate(moveDest, cursorNode, cursorOffset, targetNode, alreadyMoved) {
-        const nextSibling = targetNode.nextSibling;
+    deleteElementBackwardPropagate(nextSibling, moveDest, cursorNode, cursorOffset, alreadyMoved) {
         if (
             cursorNode.nodeType === Node.TEXT_NODE &&
             (cursorOffset === 0 || cursorOffset === cursorNode.length)
@@ -618,7 +628,331 @@ export class DeletePlugin extends Plugin {
         }
     }
 
-    deleteRange() {}
+    deleteRange() {
+        for (const { callback } of this.resources["delete_range_before"]) {
+            if (callback()) {
+                return;
+            }
+        }
+        // @todo @phoenix shouldn't it be done somewhere else?
+        // function fixEmptyEditable() {
+        //     // if (!this.editable.childElementCount) {
+        //     //     // Ensure the editable has content.
+        //     //     const p = document.createElement("p");
+        //     //     p.append(document.createElement("br"));
+        //     //     this.editable.append(p);
+        //     //     setSelection(p, 0);
+        //     //     return;
+        //     // }
+        // }
+        // fixEmptyEditable();
+
+        const [selection, extractRange] = this.deleteRangeGetSelectionAndRange();
+
+        const insertedZws = this.deleteRangeProtectForExtractContents(selection, extractRange);
+
+        const { startContainer, startOffset, endContainer, endOffset } = extractRange;
+        const [startBlock, endBlock] = [closestBlock(startContainer), closestBlock(endContainer)];
+        const next = nextLeaf(endContainer, this.editable);
+
+        this.deleteRangeSplitTextNode(startContainer, startOffset, endContainer, endOffset);
+        const restoreUpdate = this.deleteRangeGetRestore(startContainer, endContainer);
+
+        // ---------------------------------------------------------------------
+
+        // Let the DOM split and delete the range.
+        extractRange.extractContents();
+
+        setSelection(startContainer, nodeSize(startContainer));
+        const documentRange = getDeepRange(this.editable, { sel: selection });
+
+        // ---------------------------------------------------------------------
+
+        this.deleteRangeRestoreUnremovable();
+
+        // @todo @phoenix do we want to handle unremovable here?
+        const isRemovableInvisible = (node) =>
+            !isVisible(node) && !isZWS(node) && !isUnremovable(node);
+        const newEndContainer = this.deleteRangeRemoveEndContainerIfEmpty(
+            endContainer,
+            documentRange.endContainer,
+            isRemovableInvisible
+        );
+        const newStartContainer = this.deleteRangeRemoveStartContainerIfEmpty(
+            startContainer,
+            documentRange.startContainer,
+            newEndContainer,
+            isRemovableInvisible
+        );
+
+        this.deletRangeFillEmpty(newStartContainer, newEndContainer);
+
+        const joinWith = this.deleteRangeRejoinBlocks(
+            extractRange,
+            documentRange,
+            startBlock,
+            endBlock,
+            next
+        );
+
+        this.deleteRangeRemoveEmptyStart(startBlock, endBlock);
+        this.deleteRangeRemoveZws(insertedZws);
+        this.deleteRangeFillJoined(joinWith);
+
+        const restoreCursor = preserveCursor(this.document);
+        restoreUpdate();
+        restoreCursor();
+    }
+    deleteRangeGetSelectionAndRange() {
+        const selection = this.shared.getEditableSelection();
+        if (!selection) {
+            return;
+        }
+        // @todo @phoenix is it still needed?
+        // let range = getDeepRange(this.editable, {
+        //     sel,
+        //     splitText: true,
+        //     select: true,
+        //     correctTripleClick: true,
+        // });
+        // if (!range) {
+        //     return;
+        // }
+        const range = selection.getRangeAt(0);
+
+        // Expand the range to fully include all contentEditable=False elements.
+        const commonAncestorContainer = this.editable.contains(range.commonAncestorContainer)
+            ? range.commonAncestorContainer
+            : this.editable;
+        const startUneditable = getFurthestUneditableParent(
+            range.startContainer,
+            commonAncestorContainer
+        );
+        if (startUneditable) {
+            const leaf = previousLeaf(startUneditable);
+            if (leaf) {
+                range.setStart(leaf, nodeSize(leaf));
+            } else {
+                range.setStart(commonAncestorContainer, 0);
+            }
+        }
+        const endUneditable = getFurthestUneditableParent(
+            range.endContainer,
+            commonAncestorContainer
+        );
+        if (endUneditable) {
+            const leaf = nextLeaf(endUneditable);
+            if (leaf) {
+                range.setEnd(leaf, 0);
+            } else {
+                range.setEnd(commonAncestorContainer, nodeSize(commonAncestorContainer));
+            }
+        }
+        return [selection, range];
+    }
+    deleteRangeProtectForExtractContents(selection, range) {
+        if (
+            selection &&
+            !selection.isCollapsed &&
+            !range.startOffset &&
+            !range.startContainer.previousSibling
+        ) {
+            // Insert a zero-width space before the selection if the selection
+            // is non-collapsed and at the beginning of its parent, so said
+            // parent will have content after extraction. This ensures that the
+            // parent will not be removed by "tricking" `range.extractContents`.
+            // Eg, <h1><font>[...]</font></h1> will preserve the styles of the
+            // <font> node. If it remains empty, it will be cleaned up later by
+            // the sanitizer.
+            const zws = document.createTextNode("\u200B");
+            range.startContainer.before(zws);
+            return zws;
+        }
+    }
+    deleteRangeSplitTextNode(startContainer, startOffset, endContainer, endOffset) {
+        // Get the boundaries of the range so as to get the state to restore.
+        if (endContainer.nodeType === Node.TEXT_NODE) {
+            splitTextNode(endContainer, endOffset);
+            endOffset = nodeSize(endContainer);
+        }
+        if (startContainer.nodeType === Node.TEXT_NODE) {
+            splitTextNode(startContainer, startOffset);
+            startOffset = 0;
+        }
+        return [startOffset, endOffset];
+    }
+    deleteRangeGetRestore(startContainer, endContainer) {
+        return prepareUpdate(
+            ...boundariesOut(startContainer).slice(0, 2),
+            ...boundariesOut(endContainer).slice(2, 4),
+            { allowReenter: false, label: "deleteRange" }
+        );
+    }
+    deleteRangeRestoreUnremovable() {
+        // @todo @phoenix this is not tested and the code seems wrong (if there is multiples unremovable, inside another unremovable, how could it work?)
+        // const restoreUnremovable = () => {
+        //     // Restore unremovables removed by extractContents.
+        //     [...contents.querySelectorAll("*")].filter(isUnremovable).forEach((n) => {
+        //         closestBlock(newRange.endContainer).after(n);
+        //         n.textContent = "";
+        //     });
+        // };
+        // restoreUnremovable();
+    }
+    deleteRangeRemoveEndContainerIfEmpty(
+        currentEndContainer,
+        newEndContainer,
+        isRemovableInvisible
+    ) {
+        // If the end container was fully selected, extractContents may have
+        // emptied it without removing it. Ensure it's gone.
+        while (
+            currentEndContainer &&
+            isRemovableInvisible(currentEndContainer) &&
+            !currentEndContainer.contains(newEndContainer)
+        ) {
+            const parent = currentEndContainer.parentNode;
+            currentEndContainer.remove();
+            currentEndContainer = parent;
+        }
+        return currentEndContainer;
+    }
+    deleteRangeRemoveStartContainerIfEmpty(
+        currentStartContainer,
+        newStartContainer,
+        newEndContainer,
+        isRemovableInvisible
+    ) {
+        const endIsStart = newStartContainer === newEndContainer;
+        // Same with the start container
+        while (
+            currentStartContainer &&
+            !isBlock(currentStartContainer) &&
+            isRemovableInvisible(currentStartContainer) &&
+            !(endIsStart && currentStartContainer.contains(newStartContainer))
+        ) {
+            const parent = currentStartContainer.parentNode;
+            currentStartContainer.remove();
+            currentStartContainer = parent;
+        }
+        return currentStartContainer;
+    }
+    deletRangeFillEmpty(currentStartContainer, newEndContainer) {
+        // Ensure empty blocks be given a <br> child.
+        if (currentStartContainer) {
+            fillEmpty(closestBlock(currentStartContainer));
+        }
+        fillEmpty(closestBlock(newEndContainer));
+    }
+    deleteRangeRejoinBlocks(range, newRange, startBlock, endBlock, next) {
+        // let next = nextLeaf(endContainer, this.editable);
+        const doJoin =
+            (startBlock !== closestBlock(range.commonAncestorContainer) ||
+                endBlock !== closestBlock(range.commonAncestorContainer)) &&
+            startBlock.tagName !== "TD" &&
+            endBlock.tagName !== "TD";
+        let joinWith = newRange.endContainer;
+        const getRightLeaf = createDOMPathGenerator(DIRECTIONS.RIGHT, {
+            leafOnly: true,
+            stopTraverseFunction: isBlock,
+            stopFunction: isBlock,
+        });
+        const rightLeaf = getRightLeaf(joinWith).next().value;
+        if (rightLeaf && rightLeaf.nodeValue === " ") {
+            joinWith = rightLeaf;
+        }
+        // Rejoin blocks that extractContents may have split in two.
+        let i = 0;
+        // @todo @phoenix seems odd to call deleteElementBackward to joins
+        // the elements. That might have unwanted side effects if plugins
+        // have custom delete behaviors. This should probably be done in a
+        // different way, avoidind to need getCurrentMutationLength and
+        // reverting the mutations.
+        while (
+            doJoin &&
+            next &&
+            !(next.previousSibling && next.previousSibling === joinWith) &&
+            this.editable.contains(next) &&
+            // @todo @phoenix this seems specific to table
+            closestElement(joinWith, "TD") === closestElement(next, "TD")
+        ) {
+            // @todo @phoenix see if we still need it
+            if (i++ > 100) {
+                throw new Error("Infinite loop in deleteRangeRejoinBlocks");
+            }
+            // @todo @phoenix see if we still need it
+            // const restore = preserveCursor(this.document);
+            // this.observerFlush();
+            this.shared.handleObserverRecords();
+            const mutationsLength = this.shared.getCurrentMutations().length;
+            const backupSelection = this.shared.getEditableSelectionStatic();
+            this.deleteElementBackward({
+                targetNode: next,
+                targetOffset: 0,
+            });
+            if (!this.editable.contains(joinWith)) {
+                this.shared.handleObserverRecords();
+                this.shared.revertCurrentMutationsUntil(mutationsLength);
+                setSelection(
+                    backupSelection.anchorNode,
+                    backupSelection.anchorOffset,
+                    backupSelection.focusNode,
+                    backupSelection.focusOffset
+                );
+                break;
+            }
+            next = firstLeaf(next);
+
+            // const res = this._protect(() => {
+            // if (!this.editable.contains(joinWith)) {
+            //     this._toRollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
+            // } else {
+            // }
+            // }, this._currentStep.mutations.length);
+            // if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
+            // @todo @phoenix see if we still need it
+            //     restore();
+            //     break;
+            // }
+        }
+        return joinWith;
+    }
+    deleteRangeRemoveEmptyStart(startBlock, endBlock) {
+        // If the oDeleteBackward loop emptied the start block and the range
+        // ends in another element (rangeStart !== rangeEnd), we delete the
+        // start block and move the cursor to the end block.
+        if (
+            startBlock &&
+            startBlock.textContent === "\u200B" &&
+            endBlock &&
+            startBlock !== endBlock &&
+            !isEmptyBlock(endBlock) &&
+            paragraphRelatedElements.includes(endBlock.nodeName)
+        ) {
+            startBlock.remove();
+            setSelection(endBlock, 0);
+            fillEmpty(endBlock);
+        }
+    }
+    deleteRangeRemoveZws(insertedZws) {
+        if (insertedZws) {
+            // Remove the zero-width space (zws) that was added to preserve
+            // the parent styles, then call `fillEmpty` to properly add a
+            // flagged zws if still needed.
+            const el = closestElement(insertedZws);
+            const next = insertedZws.nextSibling;
+            insertedZws.remove();
+            el && fillEmpty(el);
+            setSelection(next, 0);
+        }
+    }
+
+    deleteRangeFillJoined(joinWith) {
+        if (joinWith) {
+            const el = closestElement(joinWith);
+            el && fillEmpty(el);
+        }
+    }
 
     onBeforeInput(e) {
         if (e.inputType === "deleteContentBackward") {
@@ -683,4 +1017,4 @@ function filterFunc(node) {
     return isSelfClosingElement(node) || isVisibleTextNode(node) || isNotEditableNode(node);
 }
 
-registry.category("phoenix_plugins").add("delete", DeletePlugin);
+registry.category("phoenix_plugins").add(DeletePlugin.name, DeletePlugin);

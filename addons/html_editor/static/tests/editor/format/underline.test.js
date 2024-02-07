@@ -83,7 +83,7 @@ test.todo("should make a selection ending with underline text fully underline", 
     });
 });
 
-test.todo("should get ready to type in underline", async () => {
+test("should get ready to type in underline", async () => {
     await testEditor({
         contentBefore: `<p>ab[]cd</p>`,
         stepFunction: underline,
@@ -145,21 +145,17 @@ describe("with strikeThrough", () => {
         }
     );
 
-    test.todo(
-        "should remove underline after restoring it and writing after removing it (collapsed, strikeThrough)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(s(`cd`))}${s(u(`ghi[]`))}${u(s(`ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`${u(`ghi`)}`)}${s(
-                    `[]\u200b`,
-                    "first"
-                )}${u(s(`ef`))}</p>`,
-                // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
-                contentAfter: `<p>ab${u(s(`cd`))}${s(u(`ghi`))}[]${u(s(`ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline after restoring it and writing after removing it (collapsed, strikeThrough)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(s(`cd`))}${s(u(`ghi[]`))}${u(s(`ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`${u(`ghi`)}`)}${s(`[]\u200b`, "first")}${u(
+                s(`ef`)
+            )}</p>`,
+            // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
+            contentAfter: `<p>ab${u(s(`cd`))}${s(u(`ghi`))}[]${u(s(`ef`))}</p>`,
+        });
+    });
 
     test.todo(
         "should remove underline, write, restore underline, write, remove underline again, write (collapsed, strikeThrough)",
@@ -192,7 +188,7 @@ describe("with strikeThrough", () => {
 });
 
 describe("with italic", () => {
-    test.todo("should get ready to write in italic and underline", async () => {
+    test("should get ready to write in italic and underline", async () => {
         await testEditor({
             contentBefore: `<p>ab[]cd</p>`,
             stepFunction: async (editor) => {
@@ -204,53 +200,44 @@ describe("with italic", () => {
         });
     });
 
-    test.todo(
-        "should get ready to write in italic, after changing one's mind about underline (two consecutive at the end)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab[]cd</p>`,
-                stepFunction: async (editor) => {
-                    await italic(editor);
-                    await underline(editor);
-                    await underline(editor);
-                },
-                contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
-                contentAfter: `<p>ab[]cd</p>`,
-            });
-        }
-    );
+    test("should get ready to write in italic, after changing one's mind about underline (two consecutive at the end)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab[]cd</p>`,
+            stepFunction: async (editor) => {
+                await italic(editor);
+                await underline(editor);
+                await underline(editor);
+            },
+            contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
+            contentAfter: `<p>ab[]cd</p>`,
+        });
+    });
 
-    test.todo(
-        "should get ready to write in italic, after changing one's mind about underline (separated by italic)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab[]cd</p>`,
-                stepFunction: async (editor) => {
-                    await underline(editor);
-                    await italic(editor);
-                    await underline(editor);
-                },
-                contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
-                contentAfter: `<p>ab[]cd</p>`,
-            });
-        }
-    );
+    test("should get ready to write in italic, after changing one's mind about underline (separated by italic)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab[]cd</p>`,
+            stepFunction: async (editor) => {
+                await underline(editor);
+                await italic(editor);
+                await underline(editor);
+            },
+            contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
+            contentAfter: `<p>ab[]cd</p>`,
+        });
+    });
 
-    test.todo(
-        "should get ready to write in italic, after changing one's mind about underline (two consecutive at the beginning)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab[]cd</p>`,
-                stepFunction: async (editor) => {
-                    await underline(editor);
-                    await underline(editor);
-                    await italic(editor);
-                },
-                contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
-                contentAfter: `<p>ab[]cd</p>`,
-            });
-        }
-    );
+    test("should get ready to write in italic, after changing one's mind about underline (two consecutive at the beginning)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab[]cd</p>`,
+            stepFunction: async (editor) => {
+                await underline(editor);
+                await underline(editor);
+                await italic(editor);
+            },
+            contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
+            contentAfter: `<p>ab[]cd</p>`,
+        });
+    });
 
     test.todo(
         "should get ready to write in italic without underline (underline was first)",
@@ -264,7 +251,7 @@ describe("with italic", () => {
         }
     );
 
-    test.todo("should restore underline after removing it (collapsed, italic)", async () => {
+    test("should restore underline after removing it (collapsed, italic)", async () => {
         await testEditor({
             contentBefore: `<p>ab${u(em(`cd`))}${em(`[]\u200b`)}${u(em(`ef`))}</p>`,
             stepFunction: underline,
@@ -285,20 +272,17 @@ describe("with italic", () => {
         }
     );
 
-    test.todo(
-        "should remove underline after restoring it and writing after removing it (collapsed, italic)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(em(`cd`))}${em(u(`ghi[]`))}${u(em(`ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(em(`cd`))}${em(
-                    u(`ghi`)
-                )}<em data-oe-zws-empty-inline="">[]\u200b</em>${u(em(`ef`))}</p>`,
-                // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
-                contentAfter: `<p>ab${u(em(`cd`))}${em(u(`ghi`))}[]${u(em(`ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline after restoring it and writing after removing it (collapsed, italic)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(em(`cd`))}${em(u(`ghi[]`))}${u(em(`ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(em(`cd`))}${em(
+                u(`ghi`)
+            )}<em data-oe-zws-empty-inline="">[]\u200b</em>${u(em(`ef`))}</p>`,
+            // The reason the cursor is after the tag <s> is because when the editor get's cleaned, the zws tag gets deleted.
+            contentAfter: `<p>ab${u(em(`cd`))}${em(u(`ghi`))}[]${u(em(`ef`))}</p>`,
+        });
+    });
 
     test.todo(
         "should remove underline, write, restore underline, write, remove underline again, write (collapsed, italic)",

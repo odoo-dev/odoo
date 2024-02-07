@@ -17,6 +17,7 @@ export class TablePlugin extends Plugin {
         delete_element_backward_before: { callback: p.deleteBackwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
+        delete_range_before: { callback: p.deleteRangeBefore.bind(p) },
     });
 
     setup() {
@@ -261,10 +262,13 @@ export class TablePlugin extends Plugin {
     }
     deleteBackwardBefore({ targetNode, targetOffset }) {
         // If the cursor is at the beginning of a row, prevent deletion.
-        if (isRow(targetNode) && !targetOffset) {
+        if (targetNode.nodeType === Node.ELEMENT_NODE && isRow(targetNode) && !targetOffset) {
             return true;
         }
     }
+
+    // @todo @phoenix to implement
+    deleteRangeBefore() {}
 
     // @todo @phoenix This could be usefull for handling arrow up and down in tables (spec change?).
     /**

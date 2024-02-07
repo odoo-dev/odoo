@@ -28,7 +28,7 @@ test("should change the font size of a whole heading after a triple click", asyn
     });
 });
 
-test.todo("should get ready to type with a different font size", async () => {
+test("should get ready to type with a different font size", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
         stepFunction: setFontSize("36px"),
