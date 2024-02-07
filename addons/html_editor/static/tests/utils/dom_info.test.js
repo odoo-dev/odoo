@@ -101,7 +101,7 @@ describe("previousLeaf", () => {
 
 describe("nextLeaf", () => {
     // TODO @phoenix: add nextLeaf test cases when we add it in the code base
-    test.todo("should find the next leaf of a deeply nested node", () => {
+    test("should find the next leaf of a deeply nested node", () => {
         const [div] = insertTestHtml(
             "<div><div><p><b>ab<i>cd<u>ef</u>gh</i></b><span>ij</span>kl</p></div></div>"
         );
@@ -113,7 +113,7 @@ describe("nextLeaf", () => {
         expect(result).toBe(ij);
     });
 
-    test.todo("should find no next leaf and return undefined", () => {
+    test("should find no next leaf and return undefined", () => {
         const [div] = insertTestHtml(
             "<div><div><p><b>ab<i>cd<u>ef</u>gh</i></b><span>ij</span>kl</p></div></div>"
         );
@@ -124,7 +124,7 @@ describe("nextLeaf", () => {
         expect(result).toBe(undefined);
     });
 
-    test.todo("should find the next leaf of a deeply nested node, skipping invisible nodes", () => {
+    test("should find the next leaf of a deeply nested node, skipping invisible nodes", () => {
         const [div] = insertTestHtml(
             `<div>
                 <div>
@@ -146,7 +146,7 @@ describe("nextLeaf", () => {
         expect(result).toBe(ij);
     });
 
-    test.todo("should find no next leaf, skipping invisible nodes, and return undefined", () => {
+    test("should find no next leaf, skipping invisible nodes, and return undefined", () => {
         const [div] = insertTestHtml(
             `<div>
                 <div>
@@ -166,7 +166,7 @@ describe("nextLeaf", () => {
         expect(result).toBe(undefined);
     });
 
-    test.todo("should find the next leaf of a deeply nested node to be whitespace", () => {
+    test("should find the next leaf of a deeply nested node to be whitespace", () => {
         const [div] = insertTestHtml(
             `<div>
                 <div>

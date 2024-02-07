@@ -340,7 +340,7 @@ describe("delete backward tabulation", () => {
         });
     });
 
-    test.todo("should remove two tab characters", async () => {
+    test("should remove two tab characters", async () => {
         const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}${oeTab()}[]b</p>`,
@@ -441,7 +441,7 @@ describe("delete forward tabulation", () => {
 });
 
 describe("delete mixed tabulation", () => {
-    test.todo("should remove all tab characters", async () => {
+    test("should remove all tab characters", async () => {
         const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b1</p>`,

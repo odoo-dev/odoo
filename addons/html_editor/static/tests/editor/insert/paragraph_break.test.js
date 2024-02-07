@@ -370,7 +370,7 @@ describe("Selection collapsed", () => {
 });
 
 describe("Selection not collapsed", () => {
-    test.todo("should delete the first half of a paragraph, then split it", async () => {
+    test("should delete the first half of a paragraph, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>[ab]cd</p>",
@@ -385,7 +385,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete part of a paragraph, then split it", async () => {
+    test("should delete part of a paragraph, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>a[bc]d</p>",
@@ -400,7 +400,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete the last half of a paragraph, then split it", async () => {
+    test("should delete the last half of a paragraph, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>ab[cd]</p>",
@@ -415,7 +415,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete all contents of a paragraph, then split it", async () => {
+    test("should delete all contents of a paragraph, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>[abcd]</p>",
