@@ -1217,7 +1217,7 @@ X[]
             });
         });
 
-        test.todo("should delete the first character in a paragraph (2)", async () => {
+        test("should delete the first character in a paragraph (2)", async () => {
             await testEditor({
                 contentBefore: "<p>a[] bc</p>",
                 stepFunction: deleteBackward,
@@ -1233,23 +1233,20 @@ X[]
             });
         });
 
-        test.todo(
-            "should delete a one letter word followed by visible space (start of block)",
-            async () => {
-                await testEditor({
-                    contentBefore: "<p>a[] b</p>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>[]&nbsp;b</p>",
-                });
-                await testEditor({
-                    contentBefore: "<p>[a] b</p>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>[]&nbsp;b</p>",
-                });
-            }
-        );
+        test("should delete a one letter word followed by visible space (start of block)", async () => {
+            await testEditor({
+                contentBefore: "<p>a[] b</p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p>[]&nbsp;b</p>",
+            });
+            await testEditor({
+                contentBefore: "<p>[a] b</p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p>[]&nbsp;b</p>",
+            });
+        });
 
-        test.todo("should delete a one letter word surrounded by visible space", async () => {
+        test("should delete a one letter word surrounded by visible space", async () => {
             await testEditor({
                 contentBefore: "<p>ab c[] de</p>",
                 stepFunction: deleteBackward,
@@ -1946,20 +1943,17 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should delete styling nodes when delete if empty with space around inline (backward)",
-        async () => {
-            // deleteBackward selection
-            await testEditor({
-                contentBefore: '<p>ab <span class="style-class">[cd]</span> ef</p>',
-                stepFunction: async (editor) => {
-                    await deleteBackward(editor);
-                    await deleteBackward(editor);
-                },
-                contentAfter: "<p>ab[]&nbsp;ef</p>",
-            });
-        }
-    );
+    test("should delete styling nodes when delete if empty with space around inline (backward)", async () => {
+        // deleteBackward selection
+        await testEditor({
+            contentBefore: '<p>ab <span class="style-class">[cd]</span> ef</p>',
+            stepFunction: async (editor) => {
+                await deleteBackward(editor);
+                await deleteBackward(editor);
+            },
+            contentAfter: "<p>ab[]&nbsp;ef</p>",
+        });
+    });
     test("should delete styling nodes when delete if empty (backward)", async () => {
         await testEditor({
             contentBefore: '<p>uv<span class="style-class">[wx]</span>yz</p>',

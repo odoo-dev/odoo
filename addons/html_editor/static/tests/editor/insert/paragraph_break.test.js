@@ -39,7 +39,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph in two", async () => {
+        test("should split a paragraph in two", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: insertParagraphBreak,
@@ -171,7 +171,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Format", () => {
-        test.todo("should split a paragraph before a format node", async () => {
+        test("should split a paragraph before a format node", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]<b>def</b></p>",
                 stepFunction: insertParagraphBreak,
@@ -202,7 +202,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph after a format node", async () => {
+        test("should split a paragraph after a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>abc</b>[]def</p>",
                 stepFunction: insertParagraphBreak,
@@ -252,7 +252,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph within a format node", async () => {
+        test("should split a paragraph within a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>ab[]cd</b></p>",
                 stepFunction: insertParagraphBreak,

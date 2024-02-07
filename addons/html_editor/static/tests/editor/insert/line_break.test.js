@@ -43,7 +43,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a <br> within text", async () => {
+        test("should insert a <br> within text", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: insertLineBreak,
@@ -147,7 +147,7 @@ describe("Selection collapsed", () => {
     });
 
     describe("Format", () => {
-        test.todo("should insert a <br> before a format node", async () => {
+        test("should insert a <br> before a format node", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]<b>def</b></p>",
                 stepFunction: insertLineBreak,
@@ -176,7 +176,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a <br> after a format node", async () => {
+        test("should insert a <br> after a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>abc</b>[]def</p>",
                 stepFunction: insertLineBreak,
@@ -230,7 +230,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a <br> within a format node", async () => {
+        test("should insert a <br> within a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>ab[]cd</b></p>",
                 stepFunction: insertLineBreak,
