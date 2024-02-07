@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { click, waitFor, waitUntil } from "@odoo/hoot-dom";
+import { click, queryAllTexts, waitFor, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
@@ -118,7 +118,22 @@ test("toolbar works: can select font", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
-    await contains(".o-we-toolbar [name='style'] .dropdown-toggle").click();
-    await contains(".o-we-toolbar [name='style'] .dropdown-item:contains('Header 2')").click();
+    await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
+    await contains(".o-we-toolbar [name='font'] .dropdown-item:contains('Header 2')").click();
     expect(getContent(el)).toBe("<h2>[test]</h2>");
+});
+
+test("toolbar works: can select font size", async () => {
+    const { el } = await setupEditor("<p>test</p>");
+    expect(getContent(el)).toBe("<p>test</p>");
+
+    // set selection to open toolbar
+    expect(".o-we-toolbar").toHaveCount(0);
+    setContent(el, "<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+    await contains(".o-we-toolbar [name='font-size'] .dropdown-toggle").click();
+    const items = ["80", "72", "64", "56", "28", "21", "18", "17", "15", "14"];
+    expect(queryAllTexts(".o-we-toolbar [name='font-size'] .dropdown-item")).toEqual(items);
+    await contains(".o-we-toolbar [name='font-size'] .dropdown-item:contains('28')").click();
+    expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
 });

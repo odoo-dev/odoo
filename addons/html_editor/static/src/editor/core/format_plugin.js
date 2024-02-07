@@ -53,7 +53,7 @@ export class FormatPlugin extends Plugin {
         },
     });
 
-    handleCommand(command, size) {
+    handleCommand(command, payload) {
         switch (command) {
             case "FORMAT_BOLD":
                 formatSelection(this.editable, "bold");
@@ -70,12 +70,12 @@ export class FormatPlugin extends Plugin {
             case "FORMAT_FONT_SIZE":
                 formatSelection(this.editable, "fontSize", {
                     applyStyle: true,
-                    formatProps: { size },
+                    formatProps: { size: payload.size },
                 });
                 break;
             case "FORMAT_FONT_SIZE_CLASSNAME":
                 formatSelection(this.editable, "setFontSizeClassName", {
-                    formatProps: { className: "o_default_snippet_text" },
+                    formatProps: { className: payload.className },
                 });
                 break;
             case "FORMAT_REMOVE_FORMAT":
