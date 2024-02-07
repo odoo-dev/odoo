@@ -15,7 +15,7 @@ function _getContent(node, selection) {
 }
 
 function getTextContent(node, selection) {
-    let text = node.textContent;
+    let text = node.textContent.replace(/\u00a0/g, "&nbsp;");
     if (selection.focusNode === node) {
         text = text.slice(0, selection.focusOffset) + "]" + text.slice(selection.focusOffset);
     }
