@@ -101,7 +101,7 @@ test.todo("should make a selection ending with bold text fully bold", async () =
     });
 });
 
-test.todo("should get ready to type in bold", async () => {
+test("should get ready to type in bold", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
         stepFunction: bold,

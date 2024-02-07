@@ -209,7 +209,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a <br> at the beginning of a format node", async () => {
+        test("should insert a <br> at the beginning of a format node", async () => {
             await testEditor({
                 contentBefore: "<p>[]<b>abc</b></p>",
                 stepFunction: insertLineBreak,
@@ -302,7 +302,7 @@ describe("Selection collapsed", () => {
 });
 
 describe("Selection not collapsed", () => {
-    test.todo("should delete the first half of a paragraph, then insert a <br>", async () => {
+    test("should delete the first half of a paragraph, then insert a <br>", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>[ab]cd</p>",
@@ -317,7 +317,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete part of a paragraph, then insert a <br>", async () => {
+    test("should delete part of a paragraph, then insert a <br>", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>a[bc]d</p>",
@@ -332,29 +332,26 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should delete the last half of a paragraph, then insert a line break (2 <br>)",
-        async () => {
-            // Forward selection
-            await testEditor({
-                contentBefore: "<p>ab[cd]</p>",
-                stepFunction: insertLineBreak,
-                // the second <br> is needed to make the first one
-                // visible.
-                contentAfter: "<p>ab<br>[]<br></p>",
-            });
-            // Backward selection
-            await testEditor({
-                contentBefore: "<p>ab]cd[</p>",
-                stepFunction: insertLineBreak,
-                // the second <br> is needed to make the first one
-                // visible.
-                contentAfter: "<p>ab<br>[]<br></p>",
-            });
-        }
-    );
+    test("should delete the last half of a paragraph, then insert a line break (2 <br>)", async () => {
+        // Forward selection
+        await testEditor({
+            contentBefore: "<p>ab[cd]</p>",
+            stepFunction: insertLineBreak,
+            // the second <br> is needed to make the first one
+            // visible.
+            contentAfter: "<p>ab<br>[]<br></p>",
+        });
+        // Backward selection
+        await testEditor({
+            contentBefore: "<p>ab]cd[</p>",
+            stepFunction: insertLineBreak,
+            // the second <br> is needed to make the first one
+            // visible.
+            contentAfter: "<p>ab<br>[]<br></p>",
+        });
+    });
 
-    test.todo("should delete all contents of a paragraph, then insert a line break", async () => {
+    test("should delete all contents of a paragraph, then insert a line break", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<p>[abcd]</p>",

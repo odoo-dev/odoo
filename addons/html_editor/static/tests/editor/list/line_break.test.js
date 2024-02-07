@@ -36,7 +36,7 @@ test("should insert a line break (2 <br>) at the end of a list item", async () =
     });
 });
 
-test.todo("should delete part of a list item, then insert a <br>", async () => {
+test("should delete part of a list item, then insert a <br>", async () => {
     await testEditor({
         contentBefore: "<ul><li>ab[cd]ef</li></ul>",
         stepFunction: insertLineBreak,

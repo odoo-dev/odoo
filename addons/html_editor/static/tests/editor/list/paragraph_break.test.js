@@ -677,7 +677,7 @@ describe("Selection collapsed", () => {
     });
 });
 describe("Selection not collapsed", () => {
-    test.todo("should delete part of a list item, then split it", async () => {
+    test("should delete part of a list item, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
@@ -692,7 +692,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete all contents of a list item, then split it", async () => {
+    test("should delete all contents of a list item, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
@@ -709,7 +709,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete across two list items, then split what's left", async () => {
+    test("should delete across two list items, then split what's left", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd</li><li>ef]gh</li></ul>",
@@ -724,7 +724,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete part of a checklist item, then split it", async () => {
+    test("should delete part of a checklist item, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
@@ -739,7 +739,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete all contents of a checklist item, then split it", async () => {
+    test("should delete all contents of a checklist item, then split it", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
