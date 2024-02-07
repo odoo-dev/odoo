@@ -83,7 +83,7 @@ test.todo("should make a selection ending with italic text fully italic", async 
     });
 });
 
-test.todo("should get ready to type in italic", async () => {
+test("should get ready to type in italic", async () => {
     await testEditor({
         contentBefore: `<p>ab[]cd</p>`,
         stepFunction: italic,

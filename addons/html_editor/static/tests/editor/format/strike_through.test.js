@@ -145,7 +145,7 @@ test.todo(
     }
 );
 
-test.todo("should get ready to type in strikeThrough", async () => {
+test("should get ready to type in strikeThrough", async () => {
     await testEditor({
         contentBefore: `<p>ab[]cd</p>`,
         stepFunction: strikeThrough,
