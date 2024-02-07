@@ -3,10 +3,10 @@
     <t t-name="html_editor.FontSelector">
         <Dropdown togglerClass="'btn btn-light'">
             <t t-set-slot="toggler">
-                <t t-esc="fontName"/>
+                <t t-esc="displayName"/>
             </t>
             <t t-foreach="items" t-as="item" t-key="item_index">
-                <DropdownItem onSelected="() => this.dispatch('SET_TAG', item)">
+                <DropdownItem onSelected="() => this.onSelected(item)">
                     <div class="user-select-none" t-esc="item.name"/>
                 </DropdownItem>
             </t>

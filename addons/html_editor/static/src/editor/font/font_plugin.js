@@ -1,11 +1,12 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { FontSelector } from "./font_selector";
-import { _t } from "@web/core/l10n/translation";
-import { setCursorEnd, setCursorStart } from "../utils/selection";
 import { fillEmpty, setTagName } from "../utils/dom";
-import { closestElement, descendants } from "../utils/dom_traversal";
 import { isVisibleTextNode } from "../utils/dom_info";
+import { closestElement, descendants } from "../utils/dom_traversal";
+import { convertNumericToUnit, getCSSVariableValue, getHtmlStyle } from "../utils/formatting";
+import { setCursorEnd, setCursorStart } from "../utils/selection";
+import { FontSelector } from "./font_selector";
 
 const fontItems = [
     {
@@ -57,6 +58,24 @@ const fontItems = [
     { name: _t("Quote"), tagName: "blockquote" },
 ];
 
+const fontSizeItems = [
+    {
+        variableName: "display-1-font-size",
+        className: "display-1-fs",
+    },
+    { variableName: "display-2-font-size", className: "display-2-fs" },
+    { variableName: "display-3-font-size", className: "display-3-fs" },
+    { variableName: "display-4-font-size", className: "display-4-fs" },
+    { variableName: "h1-font-size", className: "h1-fs" },
+    { variableName: "h2-font-size", className: "h2-fs" },
+    { variableName: "h3-font-size", className: "h3-fs" },
+    { variableName: "h4-font-size", className: "h4-fs" },
+    { variableName: "h5-font-size", className: "h5-fs" },
+    { variableName: "h6-font-size", className: "h6-fs" },
+    { variableName: "font-size-base", className: "base-fs" },
+    { variableName: "small-font-size", className: "o_small-fs" },
+];
+
 export class FontPlugin extends Plugin {
     static name = "font";
     static dependencies = ["split_block"];
@@ -65,20 +84,59 @@ export class FontPlugin extends Plugin {
             { callback: p.handleSplitBlockPRE.bind(p) },
             { callback: p.handleSplitBlockHeading.bind(p) },
         ],
-        toolbarGroup: {
-            id: "style",
-            sequence: 10,
-            buttons: [
-                {
-                    id: "font",
-                    Component: FontSelector,
-                    props: {
-                        getItems: () => fontItems,
+        toolbarGroup: [
+            {
+                id: "font",
+                sequence: 10,
+                buttons: [
+                    {
+                        id: "font",
+                        Component: FontSelector,
+                        props: {
+                            getItems: () => fontItems,
+                            command: "SET_TAG",
+                        },
                     },
-                },
-            ],
-        },
+                ],
+            },
+            {
+                id: "font-size",
+                sequence: 29,
+                buttons: [
+                    {
+                        id: "font-size",
+                        Component: FontSelector,
+                        props: {
+                            getItems: () => p.fontSizeItems,
+                            isFontSize: true,
+                            command: "FORMAT_FONT_SIZE_CLASSNAME",
+                            document: p.document,
+                        },
+                    },
+                ],
+            },
+        ],
     });
+
+    get fontSizeItems() {
+        const style = getHtmlStyle(this.document);
+        const nameAlreadyUsed = new Set();
+        return fontSizeItems.flatMap((item) => {
+            const strValue = getCSSVariableValue(item.variableName, style);
+            if (!strValue) {
+                return [];
+            }
+            const remValue = parseFloat(strValue);
+            const pxValue = convertNumericToUnit(remValue, "rem", "px", style);
+            const roundedValue = Math.round(pxValue);
+            if (nameAlreadyUsed.has(roundedValue)) {
+                return [];
+            }
+            nameAlreadyUsed.add(roundedValue);
+
+            return [{ ...item, tagName: "span", name: roundedValue }];
+        });
+    }
 
     // @todo @phoenix: Move this to a specific Pre/CodeBlock plugin?
     /**
