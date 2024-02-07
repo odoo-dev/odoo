@@ -55,7 +55,7 @@ test.todo("should get ready to type with a different background color", async ()
     });
 });
 
-test.todo("should apply a color on empty selection", async () => {
+test("should apply a color on empty selection", async () => {
     await testEditor({
         contentBefore: "<p>[<br></p><p><br></p><p>]<br></p>",
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -67,7 +67,7 @@ test.todo("should apply a color on empty selection", async () => {
     });
 });
 
-test.todo("should apply a background color on empty selection", async () => {
+test("should apply a background color on empty selection", async () => {
     await testEditor({
         contentBefore: "<p>[<br></p><p><br></p><p>]<br></p>",
         stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),

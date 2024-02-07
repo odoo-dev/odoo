@@ -1,5 +1,5 @@
 import { closestBlock, isBlock } from "./blocks";
-import { ancestors, closestElement, lastLeaf } from "./dom_traversal";
+import { ancestors, closestElement, firstLeaf, lastLeaf } from "./dom_traversal";
 import { DIRECTIONS, nodeSize } from "./position";
 
 export function isEmpty(el) {
@@ -437,6 +437,24 @@ export function previousLeaf(node, editable, skipInvisible = false) {
                 return previousLeaf(last, editable, skipInvisible);
             } else {
                 return last;
+            }
+        }
+    }
+}
+export function nextLeaf(node, editable, skipInvisible = false) {
+    let ancestor = node;
+    while (ancestor && !ancestor.nextSibling && ancestor !== editable) {
+        ancestor = ancestor.parentElement;
+    }
+    if (ancestor && ancestor !== editable) {
+        if (skipInvisible && ancestor.nextSibling && !isVisible(ancestor.nextSibling)) {
+            return nextLeaf(ancestor.nextSibling, editable, skipInvisible);
+        } else {
+            const first = firstLeaf(ancestor.nextSibling);
+            if (skipInvisible && !isVisible(first)) {
+                return nextLeaf(first, editable, skipInvisible);
+            } else {
+                return first;
             }
         }
     }
