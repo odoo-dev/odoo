@@ -115,7 +115,7 @@ export function strikeThrough(editor) {
 }
 
 export function setFontSize(size) {
-    return (editor) => editor.dispatch("FORMAT_FONT_SIZE", size);
+    return (editor) => editor.dispatch("FORMAT_FONT_SIZE", { size });
 }
 
 export function switchDirection(editor) {
