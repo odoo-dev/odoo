@@ -226,7 +226,7 @@ describe("parse/render", () => {
 describe("deleteForward", () => {
     describe("Selection collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome", async () => {
+            test.todo("should delete a fontawesome (deleteForward, collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
                     contentBeforeEdit:
@@ -323,14 +323,14 @@ describe("deleteForward", () => {
 
     describe("Selection not collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome", async () => {
-                // Forward selection
+            test("should delete a fontawesome (forward selection, deleteForward, !collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab[<i class="fa fa-pastafarianism"></i>]cd</p>',
                     stepFunction: deleteForward,
                     contentAfter: "<p>ab[]cd</p>",
                 });
-                // Backward selection
+            });
+            test("should delete a fontawesome (backward selection, deleteForward, !collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab]<i class="fa fa-pastafarianism"></i>[cd</p>',
                     stepFunction: deleteForward,
@@ -344,7 +344,7 @@ describe("deleteForward", () => {
 describe("deleteBackward", () => {
     describe("Selection collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome", async () => {
+            test.todo("should delete a fontawesome (deleteBackward, collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>[]cd</p>',
                     contentBeforeEdit:
@@ -436,13 +436,15 @@ describe("deleteBackward", () => {
     });
     describe("Selection not collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome", async () => {
+            test("should delete a fontawesome (forward selection, deleteBackward, !collapsed)", async () => {
                 // Forward selection
                 await testEditor({
                     contentBefore: '<p>ab[<i class="fa fa-pastafarianism"></i>]cd</p>',
                     stepFunction: deleteBackward,
                     contentAfter: "<p>ab[]cd</p>",
                 });
+            });
+            test("should delete a fontawesome (backward selection, deleteBackward, !collapsed)", async () => {
                 // Backward selection
                 await testEditor({
                     contentBefore: '<p>ab]<i class="fa fa-pastafarianism"></i>[cd</p>',

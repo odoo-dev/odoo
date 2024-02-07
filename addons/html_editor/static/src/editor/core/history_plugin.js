@@ -4,7 +4,8 @@ import { setSelection } from "../utils/selection";
 
 export class HistoryPlugin extends Plugin {
     static name = "history";
-    static dependencies = ["selection"];
+    static dependencies = ["dom", "selection"];
+    static shared = ["getCurrentMutations", "revertCurrentMutationsUntil", "handleObserverRecords"];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },
@@ -66,7 +67,7 @@ export class HistoryPlugin extends Plugin {
                 focusOffset: undefined,
             },
             mutations: [],
-            id: undefined,
+            id: this.generateId(),
             clientId: undefined,
         };
         this.stepsStates = new Map();
@@ -316,6 +317,9 @@ export class HistoryPlugin extends Plugin {
             }
         }
     }
+    getCurrentMutations() {
+        return [...this.currentStep.mutations];
+    }
 
     setNodeId(node) {
         let id = this.nodeToIdMap.get(node);
@@ -363,7 +367,6 @@ export class HistoryPlugin extends Plugin {
             return false;
         }
 
-        currentStep.id = this.generateId();
         // @todo @phoenix add this in the collaboration plugin.
         // currentStep.clientId = this._collabClientId;
         currentStep.previousStepId = this.steps.at(-1)?.id;
@@ -372,6 +375,7 @@ export class HistoryPlugin extends Plugin {
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();
         this.currentStep = {
+            id: this.generateId(),
             selection: {},
             mutations: [],
         };
@@ -563,6 +567,10 @@ export class HistoryPlugin extends Plugin {
                 }
             }
         }
+    }
+    revertCurrentMutationsUntil(index) {
+        const mutationToRevert = this.currentStep.mutations.splice(index);
+        this.revertMutations(mutationToRevert);
     }
 
     getSelection() {

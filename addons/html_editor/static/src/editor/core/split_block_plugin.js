@@ -33,8 +33,10 @@ export class SplitBlockPlugin extends Plugin {
         if (!selection) {
             return;
         }
-        collapseIfZWS(this.editable, selection);
-        this.dispatch("DELETE_RANGE");
+        if (!selection.isCollapsed) {
+            collapseIfZWS(this.editable, selection);
+            this.dispatch("DELETE_RANGE");
+        }
         selection = this.shared.getEditableSelection();
 
         this.splitBlockNode({
