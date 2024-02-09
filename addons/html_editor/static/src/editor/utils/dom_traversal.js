@@ -261,3 +261,28 @@ export function getFurthestUneditableParent(node, parentLimit) {
     }
     return nonEditableElement;
 }
+
+/**
+ * Returns the deepest common ancestor element of the given nodes within the
+ * specified root element. If no root element is provided, the entire document
+ * is considered as the root.
+ *
+ * @param {Node[]} nodes - The nodes for which to find the common ancestor.
+ * @param {Element} [root] - The root element within which to search for the common ancestor.
+ * @returns {Element|null} - The common ancestor element, or null if no common ancestor is found.
+ */
+export function getCommonAncestor(nodes, root = undefined) {
+    const pathsToRoot = nodes.map((node) => [node, ...ancestors(node, root)]);
+
+    let candidate = pathsToRoot[0]?.at(-1);
+    if (root && candidate !== root) {
+        return null;
+    }
+    let commonAncestor = null;
+    while (candidate && pathsToRoot.every((path) => path.at(-1) === candidate)) {
+        commonAncestor = candidate;
+        pathsToRoot.forEach((path) => path.pop());
+        candidate = pathsToRoot[0].at(-1);
+    }
+    return commonAncestor;
+}
