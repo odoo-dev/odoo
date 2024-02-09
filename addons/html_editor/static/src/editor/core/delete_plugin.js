@@ -609,6 +609,7 @@ export class DeletePlugin extends Plugin {
     deleteElementForwardToBackward(firstRightLeafNode, targetNode, targetOffset) {
         const rightLeaf = createDOMPathGenerator(DIRECTIONS.RIGHT, {
             leafOnly: true,
+            stopFunction: (node) => !this.editable.contains(node),
         });
         const rightFirstOutNode = findNode(
             rightLeaf(
@@ -616,9 +617,8 @@ export class DeletePlugin extends Plugin {
             ),
             filterFunc
         );
-        const [leftNode, leftOffset] = leftPos(rightFirstOutNode);
-
         if (rightFirstOutNode) {
+            const [leftNode, leftOffset] = leftPos(rightFirstOutNode);
             this.deleteElementBackward({
                 targetNode: leftNode,
                 targetOffset: leftOffset,
