@@ -8,9 +8,11 @@ import {
     getAdjacentPreviousSiblings,
     getAdjacents,
     lastLeaf,
+    getCommonAncestor,
 } from "@html_editor/editor/utils/dom_traversal";
 import { describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../test_helpers/editor";
+import { unformat } from "../test_helpers/format";
 
 describe("closestElement", () => {
     test("should find the closest element to a text node", () => {
@@ -237,5 +239,75 @@ describe("getAdjacents", () => {
         const a = p.querySelector("a");
         const result = getAdjacents(a, (node) => node.nodeType === Node.TEXT_NODE);
         expect(result).toEqual([]);
+    });
+});
+describe("getCommonAncestor", () => {
+    const [root] = insertTestHtml(
+        unformat(`
+            <div>
+                <p> paragraph 1 </p>
+                <p>
+                    paragraph 2
+                    <span> span1 </span>
+                    <span> span2 </span>
+                <p/>
+                <ul>
+                    <li> list item 1 </li>
+                    <li id="li2" class="oe-nested">
+                        <ol>
+                            <li> list item 3 </li>
+                            <li> list item 4 </li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+        `)
+    );
+    const [p1, p2] = root.querySelectorAll("p");
+    const [span1, span2] = root.querySelectorAll("span");
+    const [ul] = root.querySelectorAll("ul");
+    const [li1, li2, li3, li4] = root.querySelectorAll("li");
+    const [ol] = root.querySelectorAll("ol");
+
+    test("should return null if no nodes are provided", () => {
+        const result = getCommonAncestor([]);
+        expect(result).toBe(null);
+    });
+
+    test("should return the node itself if only one node is provided", () => {
+        const result = getCommonAncestor([p1]);
+        expect(result).toBe(p1);
+    });
+
+    test("should return the node itself if the same node is provided twice", () => {
+        const result = getCommonAncestor([p1, p1]);
+        expect(result).toBe(p1);
+    });
+
+    test("should return null if there's no common ancestor within the root", () => {
+        let result = getCommonAncestor([span1, span2], p1);
+        expect(result).toBe(null);
+
+        result = getCommonAncestor([ol], li1);
+        expect(result).toBe(null);
+    });
+
+    test("should return the common ancestor element of two nodes", () => {
+        let result = getCommonAncestor([span1, span2]);
+        expect(result).toBe(p2);
+
+        result = getCommonAncestor([li1, li3]);
+        expect(result).toBe(ul);
+    });
+
+    test("should return the common ancestor element of multiple nodes", () => {
+        let result = getCommonAncestor([li1, li2, li3, li4], root);
+        expect(result).toBe(ul);
+
+        result = getCommonAncestor([p2, span1, span2], root);
+        expect(result).toBe(p2);
+
+        result = getCommonAncestor([span1, li1, ol], root);
+        expect(result).toBe(root);
     });
 });
