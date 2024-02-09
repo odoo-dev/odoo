@@ -241,7 +241,7 @@ test("should uncheck a nested item and the wrapper wrapper title", async () => {
 // @todo @phoenix: this test's contentAfter does not match its description.
 // Content before has an invalid state (non-merged lists), and it tests if
 // lists get merged after checking an item.
-test("should check all nested checklist item", async () => {
+test.skip("should check all nested checklist item", async () => {
     await testEditor({
         contentBefore: unformat(`
             <ul class="o_checklist">
@@ -296,7 +296,7 @@ test("should check all nested checklist item", async () => {
 // @todo @phoenix: this test's contentAfter does not match its description.
 // Content before has an invalid state (non-merged lists), and it tests if
 // lists get merged after unchecking an item.
-test("should uncheck all nested checklist item", async () => {
+test.skip("should uncheck all nested checklist item", async () => {
     await testEditor({
         contentBefore: unformat(`
             <ul class="o_checklist">

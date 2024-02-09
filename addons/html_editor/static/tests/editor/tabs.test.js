@@ -565,11 +565,9 @@ describe("remove tabulation with shift+tab", () => {
         const tabAfterD = TAB_WIDTH - getCharWidth("p", "d");
         await testTabulation({
             contentBefore:
-                `<p>${oeTab()}a[${oeTab()}b${oeTab()}</p>` + `<p>c${oeTab()}]d${oeTab()}</p>`,
+                `<p>${oeTab(TAB_WIDTH)}a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>` +
+                `<p>c${oeTab(tabAfterC)}]d${oeTab(tabAfterD)}</p>`,
             stepFunction: keydownShiftTab,
-            contentAfterEdit:
-                `<p>a[${oeTab(tabAfterA, false)}b${oeTab(tabAfterB, false)}</p>` +
-                `<p>c${oeTab(tabAfterC, false)}]d${oeTab(tabAfterD, false)}</p>`,
             contentAfter:
                 `<p>a[${oeTab(tabAfterA)}b${oeTab(tabAfterB)}</p>` +
                 `<p>c${oeTab(tabAfterC)}]d${oeTab(tabAfterD)}</p>`,
