@@ -1,6 +1,7 @@
 import { Component, useState } from "@odoo/owl";
 import { Colorpicker } from "@web/core/colorpicker/colorpicker";
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 
 // These colors are already normalized as per normalizeCSSColor in @web/legacy/js/widgets/colorpicker
 const DEFAULT_COLORS = [
@@ -25,6 +26,7 @@ export class FontColorSelector extends Component {
 
     setup() {
         this.DEFAULT_COLORS = DEFAULT_COLORS;
+        this.dropdown = useDropdownState();
         this.state = useState({ activeTab: "solid" });
     }
 
@@ -39,10 +41,7 @@ export class FontColorSelector extends Component {
         const color = ev.target.dataset.color;
         const mode = this.props.type === "foreground" ? "color" : "background";
         this.props.dispatch("APPLY_COLOR", { color, mode });
-
-        // hack: click on window to close dropdown, because we use a dropdown
-        // without dropdownitem...
-        document.body.click();
+        this.dropdown.close();
     }
 
     onColorSelect() {}

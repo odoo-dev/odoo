@@ -85,14 +85,10 @@ describe("Wysiwyg Component", () => {
     });
 
     test("Wysiwyg component can be instantiated with a permanent toolbar", async () => {
+        expect(".o-we-toolbar").toHaveCount(0);
         await setupWysiwyg({ toolbar: true });
         expect(".o-wysiwyg").toHaveCount(1);
         expect(".odoo-editor-editable").toHaveCount(1);
-        // no toolbar yet, since toolbar needs editor to be ready => wait for
-        // dom to be mounted first before adding the toolbar
-        expect(".o-we-toolbar").toHaveCount(0);
-        await animationFrame();
-        // toolbar should be ready now
         expect(".o-we-toolbar").toHaveCount(1);
     });
 
