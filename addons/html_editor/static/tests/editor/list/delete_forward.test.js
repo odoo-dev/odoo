@@ -5,7 +5,7 @@ import { deleteForward } from "../../test_helpers/user_actions";
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test.todo("should do nothing", async () => {
+        test("should do nothing", async () => {
             await testEditor({
                 contentBefore: "<ul><li>[]<br></li></ul>",
                 stepFunction: deleteForward,
@@ -17,13 +17,11 @@ describe("Selection collapsed", () => {
                 contentAfter: '<ul><li class="oe-nested"><ul><li>abc[]</li></ul></li></ul>',
             });
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: '<ul class="o_checklist"><li>[]<br></li></ul>',
                 stepFunction: deleteForward,
                 contentAfter: '<ul class="o_checklist"><li>[]<br></li></ul>',
             });
             await testEditor({
-                removeCheckIds: true,
                 contentBefore:
                     '<ul class="o_checklist"><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">abc[]</li></ul></li></ul>',
                 stepFunction: deleteForward,

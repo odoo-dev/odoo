@@ -14,7 +14,7 @@ async function twoDeleteForward(editor) {
 
 describe("Selection collapsed", () => {
     describe("Basic", () => {
-        test.todo("should do nothing", async () => {
+        test("should do nothing", async () => {
             // TODO the addition of <br/> "correction" part was judged
             // unnecessary to enforce, the rest of the test still makes
             // sense: not removing the unique <p/> and keeping the
@@ -865,34 +865,29 @@ describe("Selection collapsed", () => {
     });
 
     describe("Nested editable zone (inside contenteditable=false element)", () => {
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is empty",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is empty", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
                             </div>
                         </div>
                     `),
-                    stepFunction: deleteForward,
-                    contentAfter: unformat(`
+                stepFunction: deleteForward,
+                contentAfter: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>[]<br></p>
                             </div>
                         </div>
                     `),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone even if there is a paragraph before",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone even if there is a paragraph before", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <p>content</p>
                         <div contenteditable="false">
                             <div contenteditable="true">
@@ -900,8 +895,8 @@ describe("Selection collapsed", () => {
                             </div>
                         </div>
                     `),
-                    stepFunction: deleteForward,
-                    contentAfter: unformat(`
+                stepFunction: deleteForward,
+                contentAfter: unformat(`
                         <p>content</p>
                         <div contenteditable="false">
                             <div contenteditable="true">
@@ -909,32 +904,28 @@ describe("Selection collapsed", () => {
                             </div>
                         </div>
                     `),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is not empty",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
+        test("should not remove the uneditable nesting zone nor the editable nested zone if the last element of the nested zone is not empty", async () => {
+            await testEditor({
+                contentBefore: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>content[]</p>
                             </div>
                         </div>
                     `),
-                    stepFunction: deleteForward,
-                    contentAfter: unformat(`
+                stepFunction: deleteForward,
+                contentAfter: unformat(`
                         <div contenteditable="false">
                             <div contenteditable="true">
                                 <p>content[]</p>
                             </div>
                         </div>
                     `),
-                });
-            }
-        );
+            });
+        });
 
         test.todo("should remove the uneditable nesting zone from the outside", async () => {
             await testEditor({
