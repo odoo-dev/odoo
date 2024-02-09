@@ -119,7 +119,7 @@ test("toolbar works: can select font", async () => {
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
     await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
-    await contains(".o-we-toolbar [name='font'] .dropdown-item:contains('Header 2')").click();
+    await contains(".o_font_selector_menu .dropdown-item:contains('Header 2')").click();
     expect(getContent(el)).toBe("<h2>[test]</h2>");
 });
 
@@ -133,7 +133,7 @@ test("toolbar works: can select font size", async () => {
     await waitFor(".o-we-toolbar");
     await contains(".o-we-toolbar [name='font-size'] .dropdown-toggle").click();
     const items = ["80", "72", "64", "56", "28", "21", "18", "17", "15", "14"];
-    expect(queryAllTexts(".o-we-toolbar [name='font-size'] .dropdown-item")).toEqual(items);
-    await contains(".o-we-toolbar [name='font-size'] .dropdown-item:contains('28')").click();
+    expect(queryAllTexts(".o_font_selector_menu .dropdown-item")).toEqual(items);
+    await contains(".o_font_selector_menu .dropdown-item:contains('28')").click();
     expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
 });
