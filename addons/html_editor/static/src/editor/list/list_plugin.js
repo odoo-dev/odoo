@@ -349,20 +349,20 @@ export class ListPlugin extends Plugin {
     }
 
     separateListItems() {
-        const listItems = [];
+        const listItems = new Set();
         const nonListItems = [];
         for (const block of getTraversedBlocks(this.editable)) {
             const closestLI = block.closest("li");
             if (closestLI) {
                 // Keep deepest list items only.
                 if (!closestLI.querySelector("li")) {
-                    listItems.push(closestLI);
+                    listItems.add(closestLI);
                 }
             } else if (!["UL", "OL"].includes(block.tagName)) {
                 nonListItems.push(block);
             }
         }
-        return { listItems, nonListItems };
+        return { listItems: [...listItems], nonListItems };
     }
 
     // --------------------------------------------------------------------------
