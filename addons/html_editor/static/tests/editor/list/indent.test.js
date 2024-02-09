@@ -636,30 +636,6 @@ describe("with selection collapsed", () => {
                     `),
         });
     });
-
-    test("should indent list item containing a block", async () => {
-        await testEditor({
-            contentBefore: unformat(`
-                <ul>
-                    <li>
-                        <h1>[abc]</h1>
-                    </li>
-                </ul>
-            `),
-            stepFunction: async (editor) => keydownTab(editor),
-            contentAfter: unformat(`
-                <ul>
-                    <li class="oe-nested">
-                        <ul>
-                            <li>
-                                <h1>[abc]</h1>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            `),
-        });
-    });
 });
 
 describe("with selection", () => {
@@ -706,6 +682,56 @@ describe("with selection", () => {
                         c
                     </li>
                 </ul>`),
+        });
+    });
+
+    test("should indent list item containing a block", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>
+                        <h1>[abc]</h1>
+                    </li>
+                </ul>
+            `),
+            stepFunction: async (editor) => keydownTab(editor),
+            contentAfter: unformat(`
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>
+                                <h1>[abc]</h1>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            `),
+        });
+    });
+
+    test("should indent three list items, one of them containing a block", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>[a</li>
+                    <li><h1>b</h1></li>
+                    <li>c]</li>
+                </ul>
+            `),
+            stepFunction: async (editor) => keydownTab(editor),
+            contentAfter: unformat(`
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>[a</li>
+                            <li>
+                                <h1>b</h1>
+                            </li>
+                            <li>c]</li>
+                        </ul>
+                    </li>
+                </ul>
+            `),
         });
     });
 
