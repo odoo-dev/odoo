@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { setSelection } from "../utils/selection";
+import { getCommonAncestor } from "../utils/dom_traversal";
 
 export class HistoryPlugin extends Plugin {
     static name = "history";
@@ -124,6 +125,7 @@ export class HistoryPlugin extends Plugin {
             return;
         }
         this.stageRecords(records);
+        // @todo @phoenix remove this?
         this.dispatch("CONTENT_UPDATED", this.editable);
     }
 
@@ -361,6 +363,8 @@ export class HistoryPlugin extends Plugin {
         if (!currentStep.mutations.length) {
             return false;
         }
+        this.dispatch("NORMALIZE", this.getMutationsRoot(currentStep.mutations));
+        this.handleObserverRecords();
 
         // @todo @phoenix add this in the collaboration plugin.
         // currentStep.clientId = this._collabClientId;
@@ -592,6 +596,21 @@ export class HistoryPlugin extends Plugin {
                 focusOffset: undefined,
             };
         }
+    }
+    /**
+     * Returns the deepest common ancestor element of the given mutations.
+     * @param {[]} mutations - The array of mutations.
+     * @returns {HTMLElement|null} - The common ancestor element.
+     */
+    getMutationsRoot(mutations) {
+        const nodes = mutations
+            .map((m) => this.idToNodeMap.get(m.parentId || m.id))
+            .filter((node) => this.editable.contains(node));
+        let commonAncestor = getCommonAncestor(nodes, this.editable);
+        if (commonAncestor?.nodeType === Node.TEXT_NODE) {
+            commonAncestor = commonAncestor.parentElement;
+        }
+        return commonAncestor;
     }
 }
 

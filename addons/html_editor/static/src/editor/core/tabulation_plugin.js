@@ -51,9 +51,8 @@ export class TabulationPlugin extends Plugin {
             case "SHIFT_TAB":
                 this.handleShiftTab();
                 break;
-            case "CONTENT_UPDATED": {
+            case "NORMALIZE": {
                 const root = payload;
-                // @todo obs: this triggers a new CONTENT_UPDATED with the current historyPlugin.
                 this.alignTabs(root);
                 break;
             }
