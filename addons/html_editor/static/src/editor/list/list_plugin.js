@@ -68,9 +68,9 @@ export class ListPlugin extends Plugin {
             case "TOGGLE_LIST":
                 this.toggleList(payload.mode);
                 break;
-            case "CONTENT_UPDATED": {
-                const root = payload || this.editable;
-                applyToTree(root, mergeSimilarLists);
+            case "NORMALIZE": {
+                const root = payload;
+                this.mergeLists(root);
                 break;
             }
         }
@@ -137,6 +137,14 @@ export class ListPlugin extends Plugin {
         }
 
         this.dispatch("ADD_STEP");
+    }
+
+    mergeLists(root = this.editable) {
+        const closestNestedLI = closestElement(root, "li.oe-nested");
+        if (closestNestedLI) {
+            root = closestNestedLI;
+        }
+        applyToTree(root, mergeSimilarLists);
     }
 
     // --------------------------------------------------------------------------
@@ -374,6 +382,7 @@ export class ListPlugin extends Plugin {
         if (listItems.length) {
             this.indentListNodes(listItems);
             this.shared.indentBlocks(nonListItems);
+            this.dispatch("ADD_STEP");
             return true;
         }
     }
@@ -383,6 +392,7 @@ export class ListPlugin extends Plugin {
         if (listItems.length) {
             this.outdentListNodes(listItems);
             this.shared.outdentBlocks(nonListItems);
+            this.dispatch("ADD_STEP");
             return true;
         }
     }
