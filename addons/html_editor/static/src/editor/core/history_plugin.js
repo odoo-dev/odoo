@@ -73,12 +73,6 @@ export class HistoryPlugin extends Plugin {
         this.stepsStates = new Map();
         this.nodeToIdMap = new WeakMap();
         this.idToNodeMap = new Map();
-        this.latestSelection = {
-            anchorNode: this.editable,
-            anchorOffset: 0,
-            focusNode: this.editable,
-            focusOffset: 0,
-        };
         // @todo @phoenix add in collaboration plugin? previously _historyIds
         this.branchStepIds = [];
         this.setNodeId(this.editable);
@@ -232,7 +226,8 @@ export class HistoryPlugin extends Plugin {
         return filteredRecords;
     }
     stageSelection() {
-        this.currentStep.selection = this.serializeSelection(this.getSelection(), this.nodeToIdMap);
+        const selection = this.shared.getEditableSelection();
+        this.currentStep.selection = this.serializeSelection(selection, this.nodeToIdMap);
     }
     stageRecords(records) {
         // @todo @phoenix test this feature.
@@ -573,18 +568,6 @@ export class HistoryPlugin extends Plugin {
         this.revertMutations(mutationToRevert);
     }
 
-    getSelection() {
-        const selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return this.latestSelection;
-        }
-        return {
-            anchorNode: selection.anchorNode,
-            anchorOffset: selection.anchorOffset,
-            focusNode: selection.focusNode,
-            focusOffset: selection.focusOffset,
-        };
-    }
     serializeSelection(selection, nodeToIdMap) {
         if (
             selection &&
