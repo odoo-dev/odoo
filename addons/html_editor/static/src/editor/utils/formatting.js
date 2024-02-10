@@ -126,8 +126,8 @@ function removeStyle(node, styleName, item) {
  * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'
  * @returns {boolean}
  */
-export function isSelectionFormat(editable, format) {
-    const selectedNodes = getTraversedNodes(editable).filter(
+export function isSelectionFormat(editable, format, selection) {
+    const selectedNodes = getTraversedNodes(editable, selection).filter(
         (n) => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length
     );
     const isFormatted = formatsSpecs[format].isFormatted;
@@ -405,7 +405,7 @@ export function getHtmlStyle(document) {
 export function getFontSizeDisplayValue(sel, document) {
     const tagNameRelatedToFontSize = ["h1", "h2", "h3", "h4", "h5", "h6"];
     const styleClassesRelatedToFontSize = ["display-1", "display-2", "display-3", "display-4"];
-    const closestStartContainerEl = closestElement(sel.getRangeAt(0).startContainer);
+    const closestStartContainerEl = closestElement(sel.startContainer);
     const closestFontSizedEl = closestStartContainerEl.closest(`
         [style*='font-size'],
         ${FONT_SIZE_CLASSES.map((className) => `.${className}`)},

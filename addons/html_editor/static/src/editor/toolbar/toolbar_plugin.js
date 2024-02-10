@@ -45,33 +45,36 @@ export class ToolbarPlugin extends Plugin {
 
     handleSelectionChange() {
         const sel = this.shared.getEditableSelection();
-        const range = sel ? sel.getRangeAt(0) : false;
-        this.updateToolbarVisibility(range);
-        if (sel && (this.overlay.isOpen || this.config.disableFloatingToolbar)) {
+        this.updateToolbarVisibility(sel);
+        if (this.overlay.isOpen || this.config.disableFloatingToolbar) {
             this.updateButtonsActiveState();
         }
     }
 
-    updateToolbarVisibility(range) {
+    updateToolbarVisibility(sel) {
         if (this.config.disableFloatingToolbar) {
             return;
         }
-        const inEditor = range && this.editable.contains(range.commonAncestorContainer);
+        const inEditor = sel.inEditor;
         if (this.overlay.isOpen) {
-            if (!inEditor || range.collapsed) {
+            if (!inEditor || sel.isCollapsed) {
                 this.overlay.close();
             } else {
                 this.overlay.open(); // will update position
             }
-        } else if (inEditor && !range.collapsed) {
+        } else if (inEditor && !sel.isCollapsed) {
             this.overlay.open();
         }
     }
 
     updateButtonsActiveState() {
+        const selection = this.shared.getEditableSelection();
         for (const buttonGroup of this.buttonGroups) {
             for (const button of buttonGroup.buttons) {
-                this.buttonsActiveState[button.id] = button.isFormatApplied?.(this.editable);
+                this.buttonsActiveState[button.id] = button.isFormatApplied?.(
+                    this.editable,
+                    selection
+                );
             }
         }
     }
