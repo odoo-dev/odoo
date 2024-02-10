@@ -5,7 +5,7 @@ import { formatSelection, isSelectionFormat } from "../utils/formatting";
 import { getTraversedNodes } from "../utils/selection";
 
 function isFormatted(format) {
-    return (el) => isSelectionFormat(el, format);
+    return (el, selection) => isSelectionFormat(el, format, selection);
 }
 
 export class FormatPlugin extends Plugin {
