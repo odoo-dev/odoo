@@ -883,7 +883,7 @@ export class DeletePlugin extends Plugin {
             // this.observerFlush();
             this.shared.handleObserverRecords();
             const mutationsLength = this.shared.getCurrentMutations().length;
-            const backupSelection = this.shared.getEditableSelectionStatic();
+            const backupSelection = this.shared.getEditableSelection();
             this.deleteElementBackward({
                 targetNode: next,
                 targetOffset: 0,
