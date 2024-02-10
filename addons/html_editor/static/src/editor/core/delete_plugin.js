@@ -79,9 +79,6 @@ export class DeletePlugin extends Plugin {
 
     deleteBackward() {
         let selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return;
-        }
         if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
             this.deleteRange();
             return;
@@ -647,7 +644,7 @@ export class DeletePlugin extends Plugin {
         // }
         // fixEmptyEditable();
 
-        const [selection, extractRange] = this.deleteRangeGetSelectionAndRange();
+        let [selection, extractRange] = this.deleteRangeGetSelectionAndRange();
 
         const insertedZws = this.deleteRangeProtectForExtractContents(selection, extractRange);
 
@@ -664,6 +661,7 @@ export class DeletePlugin extends Plugin {
         extractRange.extractContents();
 
         setSelection(startContainer, nodeSize(startContainer));
+        selection = this.shared.getEditableSelection();
         const documentRange = getDeepRange(this.editable, { sel: selection });
 
         // ---------------------------------------------------------------------
@@ -705,9 +703,9 @@ export class DeletePlugin extends Plugin {
     }
     deleteRangeGetSelectionAndRange() {
         const selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return;
-        }
+        // if (!selection) {
+        //     return;
+        // }
         // @todo @phoenix is it still needed?
         // let range = getDeepRange(this.editable, {
         //     sel,
@@ -718,12 +716,12 @@ export class DeletePlugin extends Plugin {
         // if (!range) {
         //     return;
         // }
-        const range = selection.getRangeAt(0);
-
+        // const range = selection.getRangeAt(0);
+        const range = new Range();
+        range.setStart(selection.startContainer, selection.startOffset);
+        range.setEnd(selection.endContainer, selection.endOffset);
         // Expand the range to fully include all contentEditable=False elements.
-        const commonAncestorContainer = this.editable.contains(range.commonAncestorContainer)
-            ? range.commonAncestorContainer
-            : this.editable;
+        const commonAncestorContainer = range.commonAncestorContainer;
         const startUneditable = getFurthestUneditableParent(
             range.startContainer,
             commonAncestorContainer
@@ -737,7 +735,7 @@ export class DeletePlugin extends Plugin {
             }
         }
         const endUneditable = getFurthestUneditableParent(
-            range.endContainer,
+            selection.endContainer,
             commonAncestorContainer
         );
         if (endUneditable) {

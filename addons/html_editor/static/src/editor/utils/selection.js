@@ -259,10 +259,16 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
     if (sel && sel.isCollapsed && sel.anchorNode && sel.anchorNode.nodeName === "BR") {
         setCursorStart(sel.anchorNode.parentElement, false);
     }
-    range = range ? range.cloneRange() : sel && sel.rangeCount && sel.getRangeAt(0).cloneRange();
     if (!range) {
-        return;
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0).cloneRange();
+        } else {
+            range = new Range();
+            range.setStart(sel.startContainer, sel.startOffset);
+            range.setEnd(sel.endContainer, sel.endOffset);
+        }
     }
+
     let start = range.startContainer;
     let startOffset = range.startOffset;
     let end = range.endContainer;
