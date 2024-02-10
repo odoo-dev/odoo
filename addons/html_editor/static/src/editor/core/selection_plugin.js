@@ -3,7 +3,7 @@ import { Plugin } from "../plugin";
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
-    static shared = ["getEditableSelection", "getEditableSelectionStatic"];
+    static shared = ["getEditableSelection"];
 
     setup() {
         this.activeSelection = this.makeSelection(false, false);
@@ -72,16 +72,6 @@ export class SelectionPlugin extends Plugin {
             this.activeSelection = this.makeSelection(selection, true);
         }
         return this.activeSelection;
-    }
-
-    getEditableSelectionStatic() {
-        const selection = this.document.getSelection();
-        return {
-            anchorNode: selection.anchorNode,
-            anchorOffset: selection.anchorOffset,
-            focusNode: selection.focusNode,
-            focusOffset: selection.focusOffset,
-        };
     }
 }
 
