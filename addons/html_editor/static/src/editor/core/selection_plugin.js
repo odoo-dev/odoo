@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { DIRECTIONS } from "../utils/position";
+import { DIRECTIONS, endPos, startPos } from "../utils/position";
+import { getNormalizedCursorPosition } from "../utils/selection";
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
@@ -74,6 +75,31 @@ export class SelectionPlugin extends Plugin {
             this.activeSelection = this.makeSelection(selection, true);
         }
         return this.activeSelection;
+    }
+
+    setSelection(anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset) {
+        // normalize selection
+        const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
+        [anchorNode, anchorOffset] = getNormalizedCursorPosition(anchorNode, anchorOffset);
+        [focusNode, focusOffset] = isCollapsed
+            ? [anchorNode, anchorOffset]
+            : getNormalizedCursorPosition(focusNode, focusOffset);
+
+        const selection = this.document.getSelection();
+        selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+
+        this.activeSelection = this.makeSelection(selection, true);
+        return this.activeSelection;
+    }
+
+    setCursorStart(node) {
+        const pos = startPos(node);
+        return this.setSelection(...pos, ...pos);
+    }
+
+    setCursorEnd(node) {
+        const pos = endPos(node);
+        return this.setSelection(...pos, ...pos);
     }
 }
 
