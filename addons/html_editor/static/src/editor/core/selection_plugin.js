@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
+import { DIRECTIONS } from "../utils/position";
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
@@ -30,12 +31,12 @@ export class SelectionPlugin extends Plugin {
         this.lastAnchorOffset = anchorOffset;
         this.lastFocusOffset = focusOffset;
 
-        let isStartContainer = anchorNode === range.startContainer;
+        let direction = anchorNode === range.startContainer ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
         if (anchorNode === focusNode && focusOffset <= anchorOffset) {
-            isStartContainer = false;
+            direction = !direction;
         }
 
-        if (isStartContainer) {
+        if (direction) {
             [startContainer, startOffset] = [anchorNode, anchorOffset];
             [endContainer, endOffset] = [focusNode, focusOffset];
         } else {
@@ -54,6 +55,7 @@ export class SelectionPlugin extends Plugin {
             endOffset,
             commonAncestorContainer: range.commonAncestorContainer,
             isCollapsed,
+            direction,
             inEditor,
         };
 
