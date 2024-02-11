@@ -5,7 +5,7 @@ import { getNormalizedCursorPosition } from "../utils/selection";
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
-    static shared = ["getEditableSelection", "setCursorStart", "setCursorEnd"];
+    static shared = ["getEditableSelection", "setSelection", "setCursorStart", "setCursorEnd"];
 
     setup() {
         this.activeSelection = this.makeSelection(false, false);
@@ -77,13 +77,21 @@ export class SelectionPlugin extends Plugin {
         return this.activeSelection;
     }
 
-    setSelection(anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset) {
-        // normalize selection
-        const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
-        [anchorNode, anchorOffset] = getNormalizedCursorPosition(anchorNode, anchorOffset);
-        [focusNode, focusOffset] = isCollapsed
-            ? [anchorNode, anchorOffset]
-            : getNormalizedCursorPosition(focusNode, focusOffset);
+    setSelection(
+        anchorNode,
+        anchorOffset,
+        focusNode = anchorNode,
+        focusOffset = anchorOffset,
+        normalize = true
+    ) {
+        if (normalize) {
+            // normalize selection
+            const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
+            [anchorNode, anchorOffset] = getNormalizedCursorPosition(anchorNode, anchorOffset);
+            [focusNode, focusOffset] = isCollapsed
+                ? [anchorNode, anchorOffset]
+                : getNormalizedCursorPosition(focusNode, focusOffset);
+        }
 
         const selection = this.document.getSelection();
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
