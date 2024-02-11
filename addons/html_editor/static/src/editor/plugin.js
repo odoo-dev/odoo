@@ -38,7 +38,7 @@ export class Plugin {
     addDomListener(target, eventName, fn, capture) {
         const handler = fn.bind(this);
         target.addEventListener(eventName, handler, capture);
-        this._cleanups.push(() => target.removeEventListener(handler, capture));
+        this._cleanups.push(() => target.removeEventListener(eventName, handler, capture));
     }
 
     destroy() {
