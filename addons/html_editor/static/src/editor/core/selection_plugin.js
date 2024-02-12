@@ -5,7 +5,7 @@ import { getNormalizedCursorPosition } from "../utils/selection";
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
-    static shared = ["getEditableSelection"];
+    static shared = ["getEditableSelection", "setCursorStart", "setCursorEnd"];
 
     setup() {
         this.activeSelection = this.makeSelection(false, false);
