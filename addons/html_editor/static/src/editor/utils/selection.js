@@ -41,22 +41,18 @@ export function getCursorDirection(anchorNode, anchorOffset, focusNode, focusOff
         : DIRECTIONS.LEFT;
 }
 
-export function getInSelection(document, selector) {
-    const selection = document.getSelection();
-    const range = selection && !!selection.rangeCount && selection.getRangeAt(0);
-    if (range) {
-        const selectorInStartAncestors = closestElement(range.startContainer, selector);
-        if (selectorInStartAncestors) {
-            return selectorInStartAncestors;
-        } else {
-            const commonElementAncestor = closestElement(range.commonAncestorContainer);
-            return (
-                commonElementAncestor &&
-                [...commonElementAncestor.querySelectorAll(selector)].find((node) =>
-                    range.intersectsNode(node)
-                )
-            );
-        }
+export function findInSelection(selection, selector) {
+    const selectorInStartAncestors = closestElement(selection.startContainer, selector);
+    if (selectorInStartAncestors) {
+        return selectorInStartAncestors;
+    } else {
+        const commonElementAncestor = closestElement(selection.commonAncestorContainer);
+        return (
+            commonElementAncestor &&
+            [...commonElementAncestor.querySelectorAll(selector)].find((node) =>
+                selection.commonAncestorContainer.contains(node)
+            )
+        );
     }
 }
 
