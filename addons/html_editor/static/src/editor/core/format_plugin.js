@@ -130,6 +130,7 @@ export class FormatPlugin extends Plugin {
                 zws = selection.anchorNode;
                 this.shared.setSelection(zws, 0, zws, 1);
             } else {
+                // @todo phoenix: move it to selection plugin ?
                 zws = insertAndSelectZws(this.document.getSelection());
             }
             getDeepRange(this.editable, {

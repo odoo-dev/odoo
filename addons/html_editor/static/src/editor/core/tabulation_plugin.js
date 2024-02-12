@@ -70,7 +70,7 @@ export class TabulationPlugin extends Plugin {
             }
         }
 
-        const selection = this.document.getSelection();
+        const selection = this.shared.getEditableSelection();
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
@@ -115,7 +115,7 @@ export class TabulationPlugin extends Plugin {
     }
 
     removeTrailingZWS(tab) {
-        const selection = this.document.getSelection();
+        const selection = this.shared.getEditableSelection();
         const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
         const updateAnchor = anchorNode === tab.nextSibling;
         const updateFocus = focusNode === tab.nextSibling;

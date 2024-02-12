@@ -221,7 +221,7 @@ export class ColorPlugin extends Plugin {
         }
         restoreCursor();
         // if (wasCollapsed) {
-        //     const newSelection = editor.document.getSelection();
+        //     const newSelection = this.shared.getEditableSelection();
         //     const range = new Range();
         //     range.setStart(newSelection.anchorNode, newSelection.anchorOffset);
         //     range.collapse(true);
