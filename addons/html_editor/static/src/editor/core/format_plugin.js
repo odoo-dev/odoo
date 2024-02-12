@@ -198,7 +198,7 @@ export class FormatPlugin extends Plugin {
                 formatSpec.addNeutralStyle &&
                     formatSpec.addNeutralStyle(getOrCreateSpan(selectedTextNode, inlineAncestors));
             } else if (!firstBlockOrClassHasFormat && applyStyle) {
-                const tag = formatSpec.tagName && document.createElement(formatSpec.tagName);
+                const tag = formatSpec.tagName && this.document.createElement(formatSpec.tagName);
                 if (tag) {
                     selectedTextNode.after(tag);
                     tag.append(selectedTextNode);
@@ -237,7 +237,7 @@ export class FormatPlugin extends Plugin {
             ) {
                 zws.parentElement.setAttribute("data-oe-zws-empty-inline", "");
             } else {
-                const span = document.createElement("span");
+                const span = this.document.createElement("span");
                 span.setAttribute("data-oe-zws-empty-inline", "");
                 zws.before(span);
                 span.append(zws);
@@ -284,7 +284,7 @@ function removeFormat(node, formatSpec) {
         });
         if (attributesNames.length) {
             // Change tag name
-            const newNode = document.createElement("span");
+            const newNode = this.document.createElement("span");
             while (node.firstChild) {
                 newNode.appendChild(node.firstChild);
             }
