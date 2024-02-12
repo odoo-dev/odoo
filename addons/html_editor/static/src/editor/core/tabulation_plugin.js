@@ -1,11 +1,11 @@
-import { Plugin } from "../plugin";
 import { registry } from "@web/core/registry";
-import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
+import { Plugin } from "../plugin";
 import { isEditorTab, isZWS } from "../utils/dom_info";
 import { splitTextNode } from "../utils/dom_split";
-import { DIRECTIONS } from "../utils/position";
-import { getTraversedBlocks, preserveCursor, setSelection } from "../utils/selection";
+import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
+import { DIRECTIONS } from "../utils/position";
+import { getTraversedBlocks, preserveCursor } from "../utils/selection";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
 const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
@@ -26,7 +26,7 @@ function isIndentationTab(tab) {
 
 export class TabulationPlugin extends Plugin {
     static name = "tabulation";
-    static dependencies = ["dom"];
+    static dependencies = ["dom", "selection"];
     static shared = ["indentBlocks", "outdentBlocks"];
     static resources = () => ({
         shortcuts: [
@@ -130,7 +130,7 @@ export class TabulationPlugin extends Plugin {
             zwsRemoved++;
         }
         if (updateAnchor || updateFocus) {
-            setSelection(
+            this.shared.setSelection(
                 updateAnchor ? tab.nextSibling : anchorNode,
                 updateAnchor ? Math.max(0, anchorOffset - zwsRemoved) : anchorOffset,
                 updateFocus ? tab.nextSibling : focusNode,
