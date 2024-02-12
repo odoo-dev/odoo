@@ -58,7 +58,7 @@ export class TablePlugin extends Plugin {
     }
 
     handleTab() {
-        const selection = this.document.getSelection();
+        const selection = this.shared.getEditableSelection();
         const inTable = closestElement(selection.anchorNode, "table");
         if (inTable) {
             // Move cursor to next cell.
@@ -72,7 +72,7 @@ export class TablePlugin extends Plugin {
     }
 
     handleShiftTab() {
-        const selection = this.document.getSelection();
+        const selection = this.shared.getEditableSelection();
         const inTable = closestElement(selection.anchorNode, "table");
         if (inTable) {
             // Move cursor to previous cell.
@@ -283,7 +283,7 @@ export class TablePlugin extends Plugin {
      * @returns {boolean} - True if the cursor was successfully moved, false otherwise.
      */
     shiftCursorToTableCell(shiftIndex) {
-        const sel = this.document.getSelection();
+        const sel = this.shared.getEditableSelection();
         const currentTd = closestElement(sel.anchorNode, "td");
         const closestTable = closestElement(currentTd, "table");
         if (!currentTd || !closestTable) {

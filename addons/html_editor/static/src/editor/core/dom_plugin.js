@@ -17,6 +17,7 @@ import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
+    static dependencies = ["selection"];
     static shared = ["dom_insert"];
 
     handleCommand(command, payload) {
@@ -45,17 +46,16 @@ export class DomPlugin extends Plugin {
         if (!content) {
             return;
         }
-        const selection = this.document.getSelection();
+        const selection = this.shared.getEditableSelection();
         let startNode;
         let insertBefore = false;
         if (!selection.isCollapsed) {
             this.dispatch("DELETE_RANGE", { selection });
         }
-        const range = selection.getRangeAt(0);
-        if (range.startContainer.nodeType === Node.TEXT_NODE) {
-            insertBefore = !range.startOffset;
-            splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
-            startNode = range.startContainer;
+        if (selection.startContainer.nodeType === Node.TEXT_NODE) {
+            insertBefore = !selection.startOffset;
+            splitTextNode(selection.startContainer, selection.startOffset, DIRECTIONS.LEFT);
+            startNode = selection.startContainer;
         }
 
         const container = document.createElement("fake-element");
@@ -77,7 +77,7 @@ export class DomPlugin extends Plugin {
             container.replaceChildren(...container.firstChild.childNodes);
         }
 
-        startNode = startNode || this.document.getSelection().anchorNode;
+        startNode = startNode || this.shared.getEditableSelection().anchorNode;
         // If the selection anchorNode is the editable itself, the content
         // should not be unwrapped.
         if (selection.anchorNode.oid !== "root") {
@@ -206,16 +206,12 @@ export class DomPlugin extends Plugin {
             currentNode = nodeToInsert;
         }
         currentNode = lastChildNode || currentNode;
-        selection.removeAllRanges();
-        const newRange = new Range();
         let lastPosition = rightPos(currentNode);
         if (lastPosition[0] === this.editable) {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
-        newRange.setStart(lastPosition[0], lastPosition[1]);
-        newRange.setEnd(lastPosition[0], lastPosition[1]);
-        selection.addRange(newRange);
+        this.shared.setSelection(lastPosition[0], lastPosition[1]);
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
     }
 
@@ -296,10 +292,9 @@ export class DomPlugin extends Plugin {
     }
 
     insertSeparator() {
-        const selection = this.document.getSelection();
-        const range = selection.getRangeAt(0);
+        const selection = this.shared.getEditableSelection();
         const sep = this.document.createElement("hr");
-        const target = range.commonAncestorContainer;
+        const target = selection.commonAncestorContainer;
         target.parentElement.before(sep);
     }
 }
