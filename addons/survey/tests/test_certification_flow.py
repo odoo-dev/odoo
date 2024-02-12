@@ -115,7 +115,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
             self._answer_question(q04, q04.suggested_answer_ids.ids[0], answer_token, csrf_token,
                                   submit_query_count=43, access_page_query_count=23)
             self._answer_question(q05, [q05.suggested_answer_ids.ids[0], q05.suggested_answer_ids.ids[1], q05.suggested_answer_ids.ids[3]], answer_token, csrf_token,
-                                  submit_query_count=32, access_page_query_count=23)
+                                  submit_query_count=27, access_page_query_count=23)
             self._answer_question(q06, q06.suggested_answer_ids.ids[0], answer_token, csrf_token,
                                   submit_query_count=93, access_page_query_count=23)
 
