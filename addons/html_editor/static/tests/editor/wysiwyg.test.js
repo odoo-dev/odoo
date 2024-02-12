@@ -133,4 +133,30 @@ describe("Wysiwyg Component", () => {
         expect(getContent(el)).toBe("<p>test <strong>some</strong> text</p>");
         expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
     });
+
+    test("wysiwyg with toolbar: remember last active selection", async () => {
+        const { el } = await setupWysiwyg({
+            toolbar: true,
+            content: "<p>test [some] text</p>",
+        });
+        // this animation frame is necessary to let the editor first react to the
+        // selection change from setupwysiwyg so it can save current selection
+        await animationFrame();
+        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+
+        click(document.body);
+        setSelection({
+            anchorNode: document.body,
+            anchorOffset: 0,
+            focusNode: document.body,
+            focusOffset: 0,
+        });
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>test some text</p>");
+        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+        click(".o-we-toolbar .btn[name='bold']");
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>test <strong>[some]</strong> text</p>");
+        expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
+    });
 });
