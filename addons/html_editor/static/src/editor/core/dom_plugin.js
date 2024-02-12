@@ -58,9 +58,9 @@ export class DomPlugin extends Plugin {
             startNode = selection.startContainer;
         }
 
-        const container = document.createElement("fake-element");
-        const containerFirstChild = document.createElement("fake-element-fc");
-        const containerLastChild = document.createElement("fake-element-lc");
+        const container = this.document.createElement("fake-element");
+        const containerFirstChild = this.document.createElement("fake-element-fc");
+        const containerLastChild = this.document.createElement("fake-element-lc");
 
         if (typeof content === "string") {
             container.textContent = content;

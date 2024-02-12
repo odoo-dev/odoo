@@ -42,7 +42,7 @@ export class LineBreakPlugin extends Plugin {
 
         const restore = prepareUpdate(anchorNode, anchorOffset);
 
-        const brEl = document.createElement("br");
+        const brEl = this.document.createElement("br");
         const brEls = [brEl];
         if (anchorOffset >= anchorNode.childNodes.length) {
             anchorNode.appendChild(brEl);
@@ -53,7 +53,7 @@ export class LineBreakPlugin extends Plugin {
             isFakeLineBreak(brEl) &&
             getState(...leftPos(brEl), DIRECTIONS.LEFT).cType !== CTYPES.BR
         ) {
-            const brEl2 = document.createElement("br");
+            const brEl2 = this.document.createElement("br");
             brEl.before(brEl2);
             brEls.unshift(brEl2);
         }
