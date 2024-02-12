@@ -1,0 +1,632 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_cz
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.1alpha1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-02-12 13:03+0000\n"
+"PO-Revision-Date: 2024-02-12 13:03+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__scheme_code__0
+msgid "0 - Standard VAT regime"
+msgstr "0 – běžné plnění"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__scheme_code__1
+msgid "1 - Section 89 of VAT Act special scheme for a travel service"
+msgstr "1 - § 89 – zvláštní režim pro cestovní službu"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__scheme_code__2
+msgid "2 - Section 90 of VAT Act margin scheme"
+msgstr "2 - § 90 – zvláštní režim pro použité zboží"
+
+#. module: l10n_cz
+#: model_terms:ir.ui.view,arch_db:l10n_cz.report_invoice_document
+msgid "<strong>Taxable Supply:</strong>"
+msgstr "<strong>DUZP:</strong>"
+
+#. module: l10n_cz
+#: model_terms:ir.ui.view,arch_db:l10n_cz.report_invoice_document
+msgid "<strong>Trade registry: </strong>"
+msgstr "<strong>Zápis v obchodním rejstříku: </strong>"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_52_abatement
+msgid "Abatement"
+msgstr "Snížení"
+
+#. module: l10n_cz
+#: model:ir.model,name:l10n_cz.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Šablona schématu účtu"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_60
+msgid ""
+"Adjustment of tax abatement (Section 78 to 78c) + deduction adjustment "
+"according to section 78 and equalisation according to section 79 of the VAT "
+"Act in force until the end of the year 2010"
+msgstr ""
+"Úprava snížení daně (§ 78 až 78c) + úprava odpočtu podle § 78 a vyrovnání "
+"podle § 79 zákona o DPH platného do konce roku 2010"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_1
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_10
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_12
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_3
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_40
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_43
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_5
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_7
+msgid "Base"
+msgstr "Základna"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__12
+msgid "Cereals and technical crops"
+msgstr "Obiloviny a technické plodiny"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_53_change_abatement
+msgid "Change of tax abatement"
+msgstr "Změna snížení daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_66
+msgid ""
+"Change of tax liability upon submission of additional declaration (62-63)"
+msgstr "Změna daňové povinnosti při podání dodatečného přiznání (62-63)"
+
+#. module: l10n_cz
+#: model:ir.model.fields,help:l10n_cz.field_account_bank_statement_line__scheme_code
+#: model:ir.model.fields,help:l10n_cz.field_account_move__scheme_code
+#: model:ir.model.fields,help:l10n_cz.field_account_payment__scheme_code
+msgid "Code indicating special scheme, needed for VAT control report."
+msgstr "Kód označující zvláštní režim, potřebný pro kontrolní hlášení DPH."
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_account_bank_statement_line__supplies_code_reverse_charge
+#: model:ir.model.fields,field_description:l10n_cz.field_account_move__supplies_code_reverse_charge
+#: model:ir.model.fields,field_description:l10n_cz.field_account_payment__supplies_code_reverse_charge
+msgid "Code of Supply"
+msgstr "kód předmětu plnění"
+
+#. module: l10n_cz
+#: model:ir.model.fields,help:l10n_cz.field_account_bank_statement_line__supplies_code_reverse_charge
+#: model:ir.model.fields,help:l10n_cz.field_account_move__supplies_code_reverse_charge
+#: model:ir.model.fields,help:l10n_cz.field_account_payment__supplies_code_reverse_charge
+msgid "Code of subject of supply in the domestic reverse charge regime."
+msgstr "Kód předmětu plnění v tuzemském režimu přenesení daňové povinnosti."
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_52_coefficient
+msgid "Coefficient (percent)"
+msgstr "Koeficient (procenta)"
+
+#. module: l10n_cz
+#: model:ir.model,name:l10n_cz.model_res_company
+msgid "Companies"
+msgstr "Společnosti"
+
+#. module: l10n_cz
+#: model:ir.model,name:l10n_cz.model_base_document_layout
+msgid "Company Document Layout"
+msgstr "Vzhled firemního dokumentu"
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_base_document_layout__company_registry
+msgid "Company ID"
+msgstr "IČO společnosti"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__4
+msgid "Construction and assembly work"
+msgstr "Stavební a montážní práce"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__4a
+msgid "Construction and assembly work - provision of workers"
+msgstr "Stavební a montážní práce – poskytnutí pracovníků"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_23
+msgid ""
+"Delivery of a new vehicle to an entity not registered for tax in another "
+"member state (Section 19 (4))"
+msgstr ""
+"Dodání nového vozidla subjektu neregistrovanému k dani v jiném členském "
+"státě (§ 19 odst. 4)"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__18
+msgid "Delivery of electricity certificates"
+msgstr "Dodání certifikátů elektřiny"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__20
+msgid "Delivery of gas through systems or networks to the trader"
+msgstr "Dodání plynu soustavami nebo sítěmi obchodníkov"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_31
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_34
+msgid "Delivery of goods"
+msgstr "Dodávka zboží"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__7
+msgid "Delivery of goods after transfer of retention of title"
+msgstr "Dodání zboží po postoupení výhrady vlastnictví "
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_1
+msgid ""
+"Delivery of goods or provision of service with a domestic delivery place "
+"(e.g. Sections 13, 14, 18)"
+msgstr ""
+"Dodání zboží nebo poskytnutí služby s místem dodání v tuzemsku (např. § 13, "
+"14, 18)"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__6
+msgid "Delivery of goods originally provided as a guarantee"
+msgstr "Dodání zboží poskytnutého původně jako záruka"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_20
+msgid "Delivery of goods to another member state (Section 64)"
+msgstr "Dodání zboží do jiného členského státu (§ 64)"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__3a
+msgid "Delivery of immovable property in forced sale"
+msgstr "Dodání nemovité věci v nuceném prodeji"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__3
+msgid "Delivery of immovable property, if tax is applied to this delivery"
+msgstr "Dodání nemovité věci, je-li na toto dodání uplatněna daň"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_65
+msgid "Excess abatement (63-62)"
+msgstr "Nadměrné snížení (63–62)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_32
+msgid "Exempted import of goods according to section 71g"
+msgstr "Osvobozený dovoz zboží podle paragrafu 71g"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_22
+msgid "Export of goods (Section 66)"
+msgstr "Vývoz zboží (§ 66)"
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_base_document_layout__account_fiscal_country_id
+msgid "Fiscal Country"
+msgstr "Daňová země"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_4_part_1
+msgid "From received taxable supplies from taxpayers"
+msgstr "Z přijatých zdanitelných plnění od plátců daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_4_part_2
+msgid "From taxable supplies recorded on lines 3 to 13"
+msgstr "Ze zdanitelných plnění zaznamenaných na řádcích 3 až 13"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__1
+msgid "Gold"
+msgstr "Zlato"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__1a
+msgid "Gold - brokering the delivery of investment gold"
+msgstr "Zlato - zprostředkování dodání investičního zlata"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__5
+msgid "Goods listed in Appendix No. 5"
+msgstr "Zboží uvedené v příloze č. 5"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_taxable_supplies
+msgid "I. Taxable supplies"
+msgstr "I. Zdanitelná plnění"
+
+#. module: l10n_cz
+#: model_terms:ir.ui.view,arch_db:l10n_cz.l10n_cz_external_layout_bold
+#: model_terms:ir.ui.view,arch_db:l10n_cz.l10n_cz_external_layout_boxed
+#: model_terms:ir.ui.view,arch_db:l10n_cz.l10n_cz_external_layout_standard
+#: model_terms:ir.ui.view,arch_db:l10n_cz.l10n_cz_external_layout_striped
+#: model_terms:ir.ui.view,arch_db:l10n_cz.report_invoice_document
+msgid "ID:"
+msgstr "IČO:"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_supplies_exempt
+msgid ""
+"II. Supplies exempt from tax and with a foreign delivery place and a tax "
+"abatement claim"
+msgstr ""
+"II. Dodávky osvobozené od daně a se zahraničním místem dodání a nárok na "
+"slevu"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_additional_data
+msgid "III. Additional data"
+msgstr "III. Další údaje"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_tax_abatement
+msgid "IV. Claim for tax abatement"
+msgstr "IV. Nárok na snížení daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_4
+msgid "Import of goods (Section 23 (3-5))"
+msgstr "Dovoz zboží (článek 23 (3-5))"
+
+#. module: l10n_cz
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_4_in_full_amount
+msgid "In full amount"
+msgstr "V plné výši"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__15
+msgid "Integrated circuits"
+msgstr "Integrované obvody"
+
+#. module: l10n_cz
+#: model:ir.model,name:l10n_cz.model_account_move
+msgid "Journal Entry"
+msgstr "Položka deníku"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__13
+msgid "Metals"
+msgstr "Kovy"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__14
+msgid "Mobile Phones"
+msgstr "Mobilní telefony"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_51_no_tax
+msgid "No tax abatement claim"
+msgstr "Žádný nárok na snížení daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_26
+msgid ""
+"Other performed supplies with a tax abatement claim (e.g. Sections 24a, 67, "
+"68, 69, 70, 89, 90, 92)"
+msgstr ""
+"Ostatní uskutečněná plnění s nárokem na snížení daně (např. § 24a, 67, 68, "
+"69, 70, 89, 90, 92)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_7
+msgid ""
+"Other taxable supplies where the tax is to be declared by the taxpayer upon "
+"receipt (Section 108)"
+msgstr ""
+"Ostatní zdanitelná plnění, u kterých má plátce přiznat daň při jejich "
+"přijetí (§ 108)"
+
+#. module: l10n_cz
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_1_tax
+msgid "Output Tax"
+msgstr "Daň na výstupu"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_62
+msgid ""
+"Output tax (1+2+3+4+5+6+7+8+9+10+11+12+13-61+ tax according to Section 108 "
+"(1k))"
+msgstr ""
+"Daň na výstupu (1+2+3+4+5+6+7+8+9+10+11+12+13-61+ daň podle § 108 odst. 1k)"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__11
+msgid "Permits for emissions according to Section 92f of the VAT Act"
+msgstr "Povolenky na emise skleníkových plynů"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__16
+msgid "Portable devices for automated data processing"
+msgstr "Přenosná zařízení pro automatizované zpracování dat"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__21
+msgid "Provision of defined electronic communications services"
+msgstr "Poskytnutí vymezených služeb elektronických komunikací"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_21
+msgid ""
+"Provision of services with a delivery place in other member state specified "
+"in section 102 clause 1 letter d"
+msgstr ""
+"Poskytování služeb s místem dodání v jiném členském státě uvedeném v § 102 "
+"odst. 1 písm. d"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_30
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_33
+msgid "Purchase of goods"
+msgstr "Nákup zboží"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_2
+msgid ""
+"Purchase of goods from another member state (Section 16; Section 17 (6) (e);"
+" Section 19 (3))"
+msgstr ""
+"Nákup zboží z jiného členského státu (§ 16; § 17 odst. 6 písm. e); § 19 "
+"odst. 3)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_9
+msgid "Purchase of new transport vehicle (Section 19 (4))"
+msgstr "Nákup nového dopravního prostředku (§ 19 odst. 4)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_64
+msgid "Real tax liability (62-63)"
+msgstr "Skutečná daňová povinnost (62–63)"
+
+#. module: l10n_cz
+#: model:ir.model.fields,help:l10n_cz.field_account_bank_statement_line__reverse_charge
+#: model:ir.model.fields,help:l10n_cz.field_account_move__reverse_charge
+#: model:ir.model.fields,help:l10n_cz.field_account_payment__reverse_charge
+msgid ""
+"Received or realized taxable supplies in the domestic reverse charge regime"
+msgstr ""
+"Přijatá nebo uskutečněná zdanitelná plnění v režimu přenesení daňové "
+"povinnosti v tuzemsku"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_3
+msgid ""
+"Receiving services with place of supply according to section 9 (1) from an "
+"entity registered for tax in another member state"
+msgstr ""
+"Přijímání služeb s místem plnění podle § 9 odst. 1 od subjektu "
+"registrovaného k dani v jiném členském státě"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_11
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_13
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_2
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_4
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_41
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_44
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_6
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_8
+msgid "Reduced"
+msgstr "Snížené"
+
+#. module: l10n_cz
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_4_reduced_claim
+msgid "Reduced claim"
+msgstr "Snížený nárok"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_5_part_2
+msgid "Reduced tax deduction proportion"
+msgstr "Snížený poměr odpočtu daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_1_part_6
+msgid ""
+"Regime of tax liability transfer (Section 92a) - goods supplier or service "
+"provider"
+msgstr ""
+"Režim přenesení daňové povinnosti (§ 92a) - dodavatel zboží nebo "
+"poskytovatel služby"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_25
+msgid ""
+"Regime of tax liability transfer (section 92a) - goods supplier or service "
+"provider"
+msgstr ""
+"Režim přenesení daňové povinnosti (§ 92a) - dodavatel zboží nebo "
+"poskytovatel služby"
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_account_bank_statement_line__reverse_charge
+#: model:ir.model.fields,field_description:l10n_cz.field_account_move__reverse_charge
+#: model:ir.model.fields,field_description:l10n_cz.field_account_payment__reverse_charge
+msgid "Reverse Charge"
+msgstr "Režim přenesení daňové povinnosti"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_1
+msgid "Section I"
+msgstr "Oddíl I"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_2
+msgid "Section II"
+msgstr "Oddíl II"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_3
+msgid "Section III"
+msgstr "Oddíl III"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_4
+msgid "Section IV"
+msgstr "Oddíl IV"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_5
+msgid "Section V"
+msgstr "Oddíl V"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report_section_6
+msgid "Section VI"
+msgstr "Oddíl VI"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_53_settlement_coefficient
+msgid "Settlement coefficient (percent)"
+msgstr "Koeficient vypořádání (procenta)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_5_part_3
+msgid "Settlement of tax abatement (Section 76 (7) to (10))"
+msgstr "Vypořádání zkrácení daně (§ 76 odst. 7 až 10)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_24
+msgid "Shipment of goods to another member state (Section 18)"
+msgstr "Zaslání zboží do jiného členského státu (§ 18)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_3_part_1
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_3_part_2
+msgid ""
+"Simplified procedure for delivery of goods in the form of a trilateral "
+"business (Section 17) by an intermediary"
+msgstr ""
+"Zjednodušený postup dodání zboží formou třístranného obchodu (§ 17) "
+"zprostředkovatelem"
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_account_bank_statement_line__scheme_code
+#: model:ir.model.fields,field_description:l10n_cz.field_account_move__scheme_code
+#: model:ir.model.fields,field_description:l10n_cz.field_account_payment__scheme_code
+msgid "Special scheme code"
+msgstr "Kód režimu plnění - Zvláštní režim"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_50
+msgid "Supplies exempt from tax without a tax abatement claim"
+msgstr "Dodávky osvobozené od daně bez nároku na snížení daně"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__19
+msgid "Supply of electricity through systems or networks to a trader"
+msgstr "Dodání elektřiny soustavami nebo sítěmi obchodníkovi"
+
+#. module: l10n_cz
+#: model:account.report,name:l10n_cz.l10n_cz_tax_report
+msgid "Tax Report"
+msgstr "Daňová zpráva"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_63
+msgid ""
+"Tax abatement (46 in full amount + 52 abatement + 53 change of abatement + "
+"60)"
+msgstr "Sleva na dani (46 v plné výši + 52 srážka + 53 změna slevy + 60)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_51_tax
+msgid "Tax abatement claim"
+msgstr "Nárok na snížení daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_46
+msgid "Tax abatement total"
+msgstr "Celková úleva na dani"
+
+#. module: l10n_cz
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_1_base
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_4_tax_base
+msgid "Tax base"
+msgstr "Základ daně"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_45
+msgid "Tax deduction correction according to section 75 (4) 77 and 79"
+msgstr "Oprava odpočtu daně podle § 75 odst. 4 77 a 79"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_61
+msgid "Tax return (Section 84)"
+msgstr "Daňové přiznání (§ 84)"
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_account_bank_statement_line__taxable_supply_date
+#: model:ir.model.fields,field_description:l10n_cz.field_account_move__taxable_supply_date
+#: model:ir.model.fields,field_description:l10n_cz.field_account_payment__taxable_supply_date
+msgid "Taxable Supply Date"
+msgstr "Datum uskutečnění zdanitelného plnění/"
+
+#. module: l10n_cz
+#: model:ir.model.fields,help:l10n_cz.field_base_document_layout__account_fiscal_country_id
+msgid "The country to use the tax reports from for this company"
+msgstr "Země, jejíž daňové výkazy se použijí pro tuto společnost"
+
+#. module: l10n_cz
+#: model:ir.model.fields,help:l10n_cz.field_base_document_layout__company_registry
+msgid ""
+"The registry number of the company. Use it if it is different from the Tax "
+"ID. It must be unique across all partners of a same country"
+msgstr ""
+"IČO společnosti.Musí být unikátní v rámci všech kontaktů pod danou zemí."
+
+#. module: l10n_cz
+#: model:ir.model.fields,field_description:l10n_cz.field_res_company__trade_registry
+msgid "Trade Registry"
+msgstr "Zápis v obchodním rejstříku"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_42
+msgid ""
+"Upon import of goods when the tax administrator is the customs duty office"
+msgstr "Při dovozu zboží, kdy správcem daně je celní úřad"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_reduction_tax_abatement
+msgid "V. Reduction of tax abatement"
+msgstr "V. Snížení úlevy na dani"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_tax_liability
+msgid "VI. Calculation of tax liability"
+msgstr "VI. Výpočet daňové povinnosti"
+
+#. module: l10n_cz
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_2_value
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_3_value
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_5_value
+#: model:account.report.column,name:l10n_cz.l10n_cz_tax_report_section_6_value
+msgid "Value"
+msgstr "Hodnota"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_line_47
+msgid "Value of purchased assets specified in Section 4 (3d and 3e)"
+msgstr "Hodnota nakoupených aktiv uvedená v § 4 (3d a 3e)"
+
+#. module: l10n_cz
+#: model:account.report.line,name:l10n_cz.l10n_cz_tax_report_section_5_part_1
+msgid "Value of supplies not included in the calculation of Section 76 (4)"
+msgstr "Hodnota plnění nezahrnutá do výpočtu podle § 76 odst. 4"
+
+#. module: l10n_cz
+#: model:ir.model.fields.selection,name:l10n_cz.selection__account_move__supplies_code_reverse_charge__17
+msgid "Video game console"
+msgstr "Videoherní konzole"
