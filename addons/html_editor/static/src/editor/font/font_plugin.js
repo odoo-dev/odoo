@@ -145,11 +145,11 @@ export class FontPlugin extends Plugin {
     handleSplitBlockPRE({ targetNode, targetOffset }) {
         if (targetNode.tagName === "PRE") {
             if (targetOffset < targetNode.childNodes.length) {
-                const lineBreak = document.createElement("br");
+                const lineBreak = this.document.createElement("br");
                 targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
                 this.shared.setCursorEnd(lineBreak);
             } else {
-                const node = document.createElement("p");
+                const node = this.document.createElement("p");
                 targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
                 fillEmpty(node);
                 this.shared.setCursorStart(node);
