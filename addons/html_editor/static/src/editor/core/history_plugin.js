@@ -1,6 +1,5 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { setSelection } from "../utils/selection";
 import { getCommonAncestor } from "../utils/dom_traversal";
 
 export class HistoryPlugin extends Plugin {
@@ -429,7 +428,7 @@ export class HistoryPlugin extends Plugin {
         if (!anchorNode) {
             return;
         }
-        setSelection(
+        this.shared.setSelection(
             anchorNode,
             selection.anchorOffset,
             focusNode,
