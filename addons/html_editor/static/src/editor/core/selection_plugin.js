@@ -9,6 +9,19 @@ export class SelectionPlugin extends Plugin {
 
     setup() {
         this.activeSelection = this.makeSelection(false, false);
+        this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
+    }
+
+    updateActiveSelection() {
+        const selection = this.document.getSelection();
+        if (selection.rangeCount === 0) {
+            return;
+        }
+        const range = selection.getRangeAt(0);
+        if (this.editable.contains(range.commonAncestorContainer)) {
+            // selection is in editor, need to update local copy
+            this.activeSelection = this.makeSelection(selection, true);
+        }
     }
 
     makeSelection(selection, inEditor) {
