@@ -4,7 +4,6 @@ import { CTYPES } from "../utils/content_types";
 import { splitTextNode } from "../utils/dom_split";
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
-import { setSelection } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 
 export class LineBreakPlugin extends Plugin {
@@ -66,14 +65,14 @@ export class LineBreakPlugin extends Plugin {
         // @todo @phoenix Don't we want this for all spans ?
         if (anchor.nodeName === "A" && brEls.includes(anchor.firstChild)) {
             brEls.forEach((br) => anchor.before(br));
-            setSelection(...rightPos(brEls[brEls.length - 1]));
+            this.shared.setSelection(...rightPos(brEls[brEls.length - 1]));
         } else if (anchor.nodeName === "A" && brEls.includes(anchor.lastChild)) {
             brEls.forEach((br) => anchor.after(br));
-            setSelection(...rightPos(brEls[0]));
+            this.shared.setSelection(...rightPos(brEls[0]));
         } else {
             for (const el of brEls) {
                 if (el.parentNode) {
-                    setSelection(...rightPos(el));
+                    this.shared.setSelection(...rightPos(el));
                     break;
                 }
             }

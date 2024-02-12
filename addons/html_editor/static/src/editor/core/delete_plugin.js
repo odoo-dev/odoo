@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
+import { CTGROUPS, CTYPES } from "../utils/content_types";
 import { fillEmpty, moveNodes } from "../utils/dom";
 import {
     isEditorTab,
@@ -20,6 +21,7 @@ import {
     paragraphRelatedElements,
     previousLeaf,
 } from "../utils/dom_info";
+import { splitTextNode } from "../utils/dom_split";
 import { getState, prepareUpdate } from "../utils/dom_state";
 import {
     closestElement,
@@ -38,8 +40,6 @@ import {
     rightPos,
 } from "../utils/position";
 import { getDeepRange, preserveCursor, setSelection } from "../utils/selection";
-import { CTGROUPS, CTYPES } from "../utils/content_types";
-import { splitTextNode } from "../utils/dom_split";
 import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
@@ -143,7 +143,7 @@ export class DeletePlugin extends Plugin {
                 params.alreadyMoved,
                 params.offsetLimit
             );
-        setSelection(cursorNode, cursorOffset);
+        this.shared.setSelection(cursorNode, cursorOffset);
 
         // Propagate if this is still a block on the left of where the nodes
         // were moved.
@@ -262,7 +262,7 @@ export class DeletePlugin extends Plugin {
                     // TODO this handle BR/IMG/etc removals../ to see if we
                     // prefer to have a dedicated handler for every possible
                     // HTML element or if we let this generic code handle it.
-                    setSelection(parentElement, parentOffset);
+                    this.shared.setSelection(parentElement, parentOffset);
                     return true;
                 }
             }
@@ -291,7 +291,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(targetNode.nodeName)
         ) {
             previousElementSiblingClosestBlock.remove();
-            setSelection(targetNode, 0);
+            this.shared.setSelection(targetNode, 0);
             return true;
         }
     }
@@ -312,7 +312,7 @@ export class DeletePlugin extends Plugin {
             const p = document.createElement("p");
             p.replaceChildren(...targetNode.childNodes);
             targetNode.replaceWith(p);
-            setSelection(p, targetOffset);
+            this.shared.setSelection(p, targetOffset);
             return true;
         }
     }
@@ -600,7 +600,7 @@ export class DeletePlugin extends Plugin {
         //     const restore = prepareUpdate(...boundariesOut(targetNode));
         //     targetNode.remove();
         //     restore();
-        //     setSelection(firstOutNode, 0);
+        //     this.shared.setSelection(firstOutNode, 0);
         //     return;
         // }
     }
@@ -639,7 +639,7 @@ export class DeletePlugin extends Plugin {
         //     //     const p = document.createElement("p");
         //     //     p.append(document.createElement("br"));
         //     //     this.editable.append(p);
-        //     //     setSelection(p, 0);
+        //     //     this.shared.setSelection(p, 0);
         //     //     return;
         //     // }
         // }
@@ -661,7 +661,7 @@ export class DeletePlugin extends Plugin {
         // Let the DOM split and delete the range.
         extractRange.extractContents();
 
-        setSelection(startContainer, nodeSize(startContainer));
+        this.shared.setSelection(startContainer, nodeSize(startContainer));
         selection = this.shared.getEditableSelection();
         const documentRange = getDeepRange(this.editable, { sel: selection });
 
@@ -892,7 +892,7 @@ export class DeletePlugin extends Plugin {
             if (!this.editable.contains(joinWith)) {
                 this.shared.handleObserverRecords();
                 this.shared.revertCurrentMutationsUntil(mutationsLength);
-                setSelection(
+                this.shared.setSelection(
                     backupSelection.anchorNode,
                     backupSelection.anchorOffset,
                     backupSelection.focusNode,
@@ -929,7 +929,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(endBlock.nodeName)
         ) {
             startBlock.remove();
-            setSelection(endBlock, 0);
+            this.shared.setSelection(endBlock, 0);
             fillEmpty(endBlock);
         }
     }
@@ -942,7 +942,9 @@ export class DeletePlugin extends Plugin {
             const next = insertedZws.nextSibling;
             insertedZws.remove();
             el && fillEmpty(el);
-            setSelection(next, 0);
+            if (next) {
+                this.shared.setSelection(next, 0);
+            }
         }
     }
 
