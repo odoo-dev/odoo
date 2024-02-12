@@ -459,7 +459,7 @@ export class ProductScreen extends Component {
     }
 
     async addProductToOrder(product) {
-        await reactive(this.pos).addLineToCurrentOrder({ product_id: product });
+        await reactive(this.pos).addLineToCurrentOrder({ product_id: product }, {});
     }
 
     async onProductInfoClick(product) {

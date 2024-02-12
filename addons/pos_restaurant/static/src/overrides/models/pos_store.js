@@ -303,7 +303,12 @@ patch(PosStore.prototype, {
     updateTables(...tables) {
         this.data.call("restaurant.table", "update_tables", [
             tables.map((t) => t.id),
-            Object.fromEntries(tables.map((t) => [t.id, t.serialize(true)])),
+            Object.fromEntries(
+                tables.map((t) => [
+                    t.id,
+                    { ...t.serialize({ orm: true }), parent_id: t.parent_id?.id || false },
+                ])
+            ),
         ]);
     },
     getCustomerCount(tableId) {

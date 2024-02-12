@@ -346,7 +346,10 @@ export class PosStore extends Reactive {
         if (line) {
             line.set_unit_price(tip);
         } else {
-            line = await this.addLineToCurrentOrder({ product_id: tipProduct, price_unit: tip });
+            line = await this.addLineToCurrentOrder(
+                { product_id: tipProduct, price_unit: tip },
+                {}
+            );
         }
 
         currentOrder.is_tipped = true;
@@ -589,7 +592,13 @@ export class PosStore extends Reactive {
         }
 
         this.numberBuffer.reset();
+
+        // FIXME: Put this in an effect so that we don't have to call it manually.
         order.recomputeOrderData();
+
+        this.numberBuffer.reset();
+
+        // FIXME: If merged with another line, this returned object is useless.
         return line;
     }
 
@@ -855,7 +864,7 @@ export class PosStore extends Reactive {
             const { localOrders, serializedOrder } = orders.reduce(
                 (acc, curr) => {
                     acc.localOrders.push(curr);
-                    acc.serializedOrder.push(curr.serialize(true));
+                    acc.serializedOrder.push(curr.serialize({ orm: true }));
                     return acc;
                 },
                 { localOrders: [], serializedOrder: [] }

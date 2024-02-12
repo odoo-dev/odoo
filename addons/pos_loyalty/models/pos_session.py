@@ -39,7 +39,7 @@ class PosSession(models.Model):
                 'fields': ['partner_id', 'code', 'points', 'program_id', 'expiration_date'],
             },
         })
-        params['pos.order.line']['fields'] += ['is_reward_line', 'reward_id', 'reward_identifier_code', 'points_cost']
+        params['pos.order.line']['fields'] += ['is_reward_line', 'reward_id', 'reward_identifier_code', 'points_cost', 'coupon_id']
         return params
 
     def _replace_ilike_with_in(self, domain_str):

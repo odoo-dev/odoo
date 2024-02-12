@@ -146,8 +146,14 @@ export class Base {
     delete() {
         this.model.delete(this);
     }
-    serialize(orm = false) {
-        const serializedData = this.model.serialize(this);
+    /**
+     * @param {object} options
+     * @param {boolean} options.orm - [true] if result is to be sent to the server
+     */
+    serialize(options = {}) {
+        const orm = options.orm ?? false;
+
+        const serializedData = this.model.serialize(this, { excludeLocal: orm });
 
         if (orm) {
             const fields = this.model.modelFields;
@@ -156,6 +162,9 @@ export class Base {
             // We only care about the fields present in python model
             for (const [name, params] of Object.entries(fields)) {
                 if (name.startsWith("__") && name.endsWith("__")) {
+                    continue;
+                }
+                if (orm && params.local) {
                     continue;
                 }
 
@@ -176,7 +185,7 @@ export class Base {
                         }
 
                         if (params.relation !== params.model) {
-                            data = this.records[params.relation][id].serialize(true);
+                            data = this.records[params.relation][id].serialize(options);
                             data.id = typeof id === "number" ? id : parseInt(id.split("_")[1]);
                         } else {
                             return typeof id === "number" ? id : parseInt(id.split("_")[1]);
@@ -609,10 +618,18 @@ export function createRelatedModels(modelDefs, modelClasses = {}, indexes = {}) 
                 }
                 return ids.map((id) => records[model][id]);
             },
-            serialize(record) {
+            /**
+             * @param {object} options
+             * @param {boolean} options.excludeLocal - Exclude local fields from the serialization
+             */
+            serialize(record, options = {}) {
+                const excludeLocal = options.excludeLocal ?? false;
                 const result = {};
                 for (const name in fields) {
                     const field = fields[name];
+                    if (excludeLocal && field.local) {
+                        continue;
+                    }
                     const raw = record.raw[name];
                     const rawVal = typeof raw === "object" ? raw.id : raw;
 

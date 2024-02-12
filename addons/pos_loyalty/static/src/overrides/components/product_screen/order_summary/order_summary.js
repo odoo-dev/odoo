@@ -14,7 +14,7 @@ patch(OrderSummary.prototype, {
     async updateSelectedOrderline({ buffer, key }) {
         const selectedLine = this.currentOrder.get_selected_orderline();
         if (key === "-") {
-            if (selectedLine && selectedLine.eWalletGiftCardProgram) {
+            if (selectedLine && selectedLine.e_wallet_program_id) {
                 // Do not allow negative quantity or price in a gift card or ewallet orderline.
                 // Refunding gift card or ewallet is not supported.
                 this.notification.add(
@@ -62,33 +62,26 @@ patch(OrderSummary.prototype, {
      */
     _setValue(val) {
         const selectedLine = this.currentOrder.get_selected_orderline();
+        if (!selectedLine) {
+            return;
+        }
+        if (selectedLine.is_reward_line && val === "remove") {
+            this.currentOrder.uiState.disabledRewards.add(selectedLine.reward_id.id);
+            const coupon = selectedLine.coupon_id;
+            if (
+                coupon &&
+                coupon.id > 0 &&
+                this.currentOrder.code_activated_coupon_ids.find((c) => c.code === coupon.code)
+            ) {
+                coupon.delete();
+            }
+        }
         if (
             !selectedLine ||
             !selectedLine.is_reward_line ||
             (selectedLine.is_reward_line && ["", "remove"].includes(val))
         ) {
             super._setValue(val);
-        }
-        if (!selectedLine) {
-            return;
-        }
-        if (selectedLine.is_reward_line && val === "remove") {
-            this.currentOrder.uiState.disabledRewards.add(selectedLine.reward_id);
-            const { couponCache } = this.pos;
-            const coupon = couponCache[selectedLine.coupon_id];
-            if (
-                coupon &&
-                coupon.id > 0 &&
-                this.currentOrder.uiState.codeActivatedCoupons.find((c) => c.code === coupon.code)
-            ) {
-                delete couponCache[selectedLine.coupon_id];
-                this.currentOrder.uiState.codeActivatedCoupons.splice(
-                    this.currentOrder.uiState.codeActivatedCoupons.findIndex((coupon) => {
-                        return coupon.id === selectedLine.coupon_id;
-                    }),
-                    1
-                );
-            }
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {
             this.currentOrder._updateRewards();

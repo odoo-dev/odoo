@@ -86,7 +86,7 @@ patch(TicketScreen.prototype, {
             order.state = "paid";
             order.uiState.screen_data.value = { name: "", props: {} };
 
-            const serializedTipLine = order.get_selected_orderline().serialize(true);
+            const serializedTipLine = order.get_selected_orderline().serialize({ orm: true });
             order.get_selected_orderline().delete();
 
             promises.push(

@@ -8,7 +8,6 @@ import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
     test: true,
-    url: "/pos/web",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -137,7 +136,6 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour", {
 
 registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
     test: true,
-    url: "/pos/web",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -156,7 +154,6 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
 
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountTour", {
     test: true,
-    url: "/pos/web",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -175,7 +172,6 @@ registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountTour", {
 
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithFreeProductTour", {
     test: true,
-    url: "/pos/web",
     steps: () =>
         [
             Dialog.confirm("Open session"),
@@ -192,7 +188,6 @@ registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithFreeProdu
 
 registry.category("web_tour.tours").add("PosLoyaltySpecificDiscountWithRewardProductDomainTour", {
     test: true,
-    url: "/pos/web",
     steps: () =>
         [
             Dialog.confirm("Open session"),

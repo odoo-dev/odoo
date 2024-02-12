@@ -71,7 +71,7 @@ export class FloorScreen extends Component {
         for (const tableId of this.state.selectedTableIds) {
             const table = this.pos.models["restaurant.table"].get(tableId);
             this.pos.data.write("restaurant.table", [tableId], {
-                ...table.serialize(true),
+                ...table.serialize({ orm: true }),
             });
         }
         this.state.selectedTableIds = this.getTablesSelectedByDefault();
@@ -100,7 +100,7 @@ export class FloorScreen extends Component {
         const existingTable = this.activeFloor.table_ids;
         let newTableData;
         if (copyTable) {
-            newTableData = copyTable.serialize(true);
+            newTableData = copyTable.serialize({ orm: true });
             if (!duplicateFloor) {
                 newTableData.position_h += 10;
                 newTableData.position_v += 10;
@@ -361,7 +361,7 @@ export class FloorScreen extends Component {
 
             const tableToCreate = [];
             for (const table of tables) {
-                const tableSerialized = table.serialize(true);
+                const tableSerialized = table.serialize({ orm: true });
                 tableSerialized.floor_id = copyFloor[0].id;
                 tableToCreate.push(tableSerialized);
             }

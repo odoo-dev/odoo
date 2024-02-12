@@ -178,7 +178,14 @@ export class PosData extends Reactive {
         }
 
         for (const posModel of registry.category("pos_available_models").getAll()) {
-            modelClasses[posModel.pythonModel] = posModel;
+            const pythonModel = posModel.pythonModel;
+            const extraFields = posModel.extraFields || {};
+
+            modelClasses[pythonModel] = posModel;
+            response.relations[pythonModel] = {
+                ...response.relations[pythonModel],
+                ...extraFields,
+            };
         }
 
         response.relations["pos.store"] = {};
