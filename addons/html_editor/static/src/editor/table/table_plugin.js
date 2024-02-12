@@ -6,7 +6,7 @@ import { splitElement, splitTextNode } from "../utils/dom_split";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, endPos, rightPos, startPos } from "../utils/position";
-import { getDeepRange, getInSelection } from "../utils/selection";
+import { getDeepRange, findInSelection } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
 
@@ -114,7 +114,7 @@ export class TablePlugin extends Plugin {
     addColumn({ position, reference } = {}) {
         if (!reference) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            reference = getInSelection(this.document, "td");
+            reference = findInSelection(this.shared.getEditableSelection(), "td");
             if (!reference) {
                 return;
             }
@@ -168,7 +168,7 @@ export class TablePlugin extends Plugin {
     addRow({ position, reference } = {}) {
         if (!reference) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            reference = getInSelection(this.document, "tr");
+            reference = findInSelection(this.shared.getEditableSelection(), "tr");
             if (!reference) {
                 return;
             }
@@ -206,7 +206,7 @@ export class TablePlugin extends Plugin {
     removeColumn(cell) {
         if (!cell) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            cell = getInSelection(this.document, "td");
+            cell = findInSelection(this.shared.getEditableSelection(), "td");
             if (!cell) {
                 return;
             }
@@ -224,7 +224,7 @@ export class TablePlugin extends Plugin {
     removeRow(row) {
         if (!row) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            row = getInSelection(this.document, "tr");
+            row = findInSelection(this.shared.getEditableSelection(), "tr");
             if (!row) {
                 return;
             }
@@ -241,7 +241,7 @@ export class TablePlugin extends Plugin {
     resetSize(table) {
         if (!table) {
             getDeepRange(this.editable, { select: true });
-            table = getInSelection(this.document, "table");
+            table = findInSelection(this.shared.getEditableSelection(), "table");
         }
         table.removeAttribute("style");
         const cells = [...table.querySelectorAll("tr, td")];
@@ -255,7 +255,7 @@ export class TablePlugin extends Plugin {
         });
     }
     deleteTable(table) {
-        table = table || getInSelection(this.document, "table");
+        table = table || findInSelection(this.shared.getEditableSelection(), "table");
         if (!table) {
             return;
         }
