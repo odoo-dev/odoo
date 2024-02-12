@@ -6,13 +6,13 @@ import { isRow } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, endPos, rightPos, startPos } from "../utils/position";
-import { getDeepRange, getInSelection, setCursorStart, setSelection } from "../utils/selection";
+import { getDeepRange, getInSelection, setSelection } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
 
 export class TablePlugin extends Plugin {
     static name = "table";
-    static dependencies = ["dom", "history", "overlay"];
+    static dependencies = ["dom", "history", "overlay", "selection"];
     static resources = (p) => ({
         delete_element_backward_before: { callback: p.deleteBackwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
@@ -108,7 +108,7 @@ export class TablePlugin extends Plugin {
             setSelection(...newPosition, ...newPosition, false);
         }
         const [table] = this.shared.dom_insert(parseHTML(this.document, tableHtml));
-        setCursorStart(table.querySelector("p"));
+        this.shared.setCursorStart(table.querySelector("p"));
     }
     addColumn({ position, reference } = {}) {
         if (!reference) {
