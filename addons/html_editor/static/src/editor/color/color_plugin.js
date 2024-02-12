@@ -133,7 +133,7 @@ export class ColorPlugin extends Plugin {
         //         .map(n => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
         //         .filter(Boolean));
 
-        function getFonts(selectedNodes) {
+        const getFonts = (selectedNodes) => {
             return selectedNodes.flatMap((node) => {
                 let font = closestElement(node, "font") || closestElement(node, "span");
                 const children = font && descendants(font);
@@ -176,7 +176,7 @@ export class ColorPlugin extends Plugin {
                         font = previous;
                     } else {
                         // No <font> found: insert a new one.
-                        font = document.createElement("font");
+                        font = this.document.createElement("font");
                         node.after(font);
                     }
                     if (node.textContent) {
@@ -189,7 +189,7 @@ export class ColorPlugin extends Plugin {
                 }
                 return font;
             });
-        }
+        };
 
         // for (const fieldNode of selectedFieldNodes) {
         //     colorElement(fieldNode, color, mode);

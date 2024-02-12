@@ -309,7 +309,7 @@ export class DeletePlugin extends Plugin {
             ["BLOCKQUOTE", "H1", "H2", "H3", "PRE"].includes(targetNode.nodeName) &&
             !closestLi
         ) {
-            const p = document.createElement("p");
+            const p = this.document.createElement("p");
             p.replaceChildren(...targetNode.childNodes);
             targetNode.replaceWith(p);
             this.shared.setSelection(p, targetOffset);
@@ -636,7 +636,7 @@ export class DeletePlugin extends Plugin {
         // function fixEmptyEditable() {
         //     // if (!this.editable.childElementCount) {
         //     //     // Ensure the editable has content.
-        //     //     const p = document.createElement("p");
+        //     //     const p = this.document.createElement("p");
         //     //     p.append(document.createElement("br"));
         //     //     this.editable.append(p);
         //     //     this.shared.setSelection(p, 0);
@@ -763,7 +763,7 @@ export class DeletePlugin extends Plugin {
             // Eg, <h1><font>[...]</font></h1> will preserve the styles of the
             // <font> node. If it remains empty, it will be cleaned up later by
             // the sanitizer.
-            const zws = document.createTextNode("\u200B");
+            const zws = this.document.createTextNode("\u200B");
             range.startContainer.before(zws);
             return zws;
         }
