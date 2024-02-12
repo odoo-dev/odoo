@@ -5,7 +5,6 @@ import { fillEmpty, setTagName } from "../utils/dom";
 import { isVisibleTextNode } from "../utils/dom_info";
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { convertNumericToUnit, getCSSVariableValue, getHtmlStyle } from "../utils/formatting";
-import { setCursorEnd, setCursorStart } from "../utils/selection";
 import { FontSelector } from "./font_selector";
 
 const fontItems = [
@@ -78,7 +77,7 @@ const fontSizeItems = [
 
 export class FontPlugin extends Plugin {
     static name = "font";
-    static dependencies = ["split_block"];
+    static dependencies = ["split_block", "selection"];
     static resources = (p) => ({
         split_element_block: [
             { callback: p.handleSplitBlockPRE.bind(p) },
@@ -148,12 +147,12 @@ export class FontPlugin extends Plugin {
             if (targetOffset < targetNode.childNodes.length) {
                 const lineBreak = document.createElement("br");
                 targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
-                setCursorEnd(lineBreak);
+                this.shared.setCursorEnd(lineBreak);
             } else {
                 const node = document.createElement("p");
                 targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
                 fillEmpty(node);
-                setCursorStart(node);
+                this.shared.setCursorStart(node);
             }
             return true;
         }
@@ -181,7 +180,7 @@ export class FontPlugin extends Plugin {
             ) {
                 const p = setTagName(newElement, "P");
                 p.replaceChildren(this.document.createElement("br"));
-                setCursorStart(p);
+                this.shared.setCursorStart(p);
             }
             return true;
         }

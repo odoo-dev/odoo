@@ -5,7 +5,6 @@ import { fillEmpty } from "../utils/dom";
 import { isVisible } from "../utils/dom_info";
 import { splitElementUntil, splitTextNode } from "../utils/dom_split";
 import { closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
-import { setCursorStart } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 import { prepareUpdate } from "../utils/dom_state";
 
@@ -85,7 +84,7 @@ export class SplitBlockPlugin extends Plugin {
         removeEmptyAndFill(lastLeaf(beforeElement));
         removeEmptyAndFill(firstLeaf(afterElement));
 
-        setCursorStart(afterElement);
+        this.shared.setCursorStart(afterElement);
 
         return afterElement;
     }
