@@ -15,10 +15,11 @@ function filterMutationRecords(records) {
 
 export class HintPlugin extends Plugin {
     static name = "hint";
-    static dependencies = ["history"];
-    static resources = () => ({
+    static dependencies = ["history", "selection"];
+    static resources = (p) => ({
         history_rendering_classes: ["o-we-hint"],
         filter_mutation_record: filterMutationRecords,
+        onSelectionChange: p.updateTempHints.bind(p),
     });
 
     setup() {
@@ -41,7 +42,6 @@ export class HintPlugin extends Plugin {
             // this is already used to display the checkbox.
             "CL LI": _t("To-do"),
         };
-        this.addDomListener(this.document, "selectionchange", this.updateTempHints);
         this.updateHints();
     }
 
@@ -53,7 +53,7 @@ export class HintPlugin extends Plugin {
         switch (command) {
             case "CONTENT_UPDATED":
                 this.updateHints();
-                this.updateTempHints();
+                this.updateTempHints(this.shared.getEditableSelection());
                 break;
             case "CREATE_HINT":
                 this.createTempHint(payload.el, payload.text);
@@ -100,18 +100,12 @@ export class HintPlugin extends Plugin {
         }
     }
 
-    updateTempHints() {
+    updateTempHints(selection) {
         for (const el of this.tempHints) {
             this.removeHint(el);
         }
         this.tempHints.clear();
-        const selection = window.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
-        if (
-            selection.isCollapsed &&
-            range &&
-            this.editable.contains(range.commonAncestorContainer)
-        ) {
+        if (selection.isCollapsed && this.editable.contains(selection.commonAncestorContainer)) {
             for (const hint of this.resources["temp_hints"]) {
                 const target = hint.target(selection);
                 if (target) {

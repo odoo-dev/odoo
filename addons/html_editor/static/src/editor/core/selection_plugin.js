@@ -21,6 +21,9 @@ export class SelectionPlugin extends Plugin {
         if (this.editable.contains(range.commonAncestorContainer)) {
             // selection is in editor, need to update local copy
             this.activeSelection = this.makeSelection(selection, true);
+            for (const handler of this.resources.onSelectionChange) {
+                handler(this.activeSelection);
+            }
         }
     }
 
