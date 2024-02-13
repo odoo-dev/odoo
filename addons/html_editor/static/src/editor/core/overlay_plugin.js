@@ -1,8 +1,8 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
-function getCurrentRect() {
-    const range = getSelection().getRangeAt(0);
+function getCurrentRect(selection) {
+    const range = selection.getRangeAt(0);
     let rect = range.getBoundingClientRect();
     if (rect.x === 0 && rect.width === 0 && rect.height === 0) {
         const clonedRange = range.cloneRange();
@@ -96,7 +96,7 @@ export class Overlay {
         const Y_OFFSET = 6;
 
         // autoclose if overlay target is out of view
-        const rect = getCurrentRect();
+        const rect = getCurrentRect(this.plugin.document.getSelection());
         if (rect.bottom < elRect.top - 10 || rect.top > elRect.bottom + Y_OFFSET) {
             // position below
             this.close();

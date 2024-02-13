@@ -7,7 +7,7 @@ export async function insertText(editor, text) {
     // events will be flagged `isTrusted: false` by the browser, requiring
     // the editor to detect them since they would not trigger the default
     // browser behavior otherwise.
-    const sel = window.getSelection();
+    const sel = editor.document.getSelection();
     let range = sel.getRangeAt(0);
     if (!range.collapsed) {
         throw new Error("need to implement something... maybe");

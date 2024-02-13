@@ -8,12 +8,18 @@ export function wysiwyg(el, env, config = {}) {
     return editor;
 }
 
-export function useWysiwyg(refName, config = {}) {
+/**
+ * @param {string | Function} target
+ * @param {Object} config
+ * @returns Editor
+ */
+export function useWysiwyg(target, config = {}) {
     const env = useEnv();
-    const ref = useRef(refName);
+    const ref = typeof target === "string" ? useRef(target) : null;
     const editor = new Editor(config, env.services);
     onMounted(() => {
-        editor.attachTo(ref.el);
+        const el = ref ? ref.el : target();
+        editor.attachTo(el);
     });
     onWillDestroy(() => editor.destroy());
     return editor;

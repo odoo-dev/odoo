@@ -1,7 +1,7 @@
 import { Component, onMounted, onPatched, useExternalListener, useRef } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { fuzzyLookup } from "@web/core/utils/search";
 import { rotate } from "@web/core/utils/arrays";
+import { fuzzyLookup } from "@web/core/utils/search";
 
 const categories = registry.category("powerbox_categories");
 const commands = registry.category("phoenix_commands");
@@ -12,7 +12,9 @@ export class Powerbox extends Component {
         onMounted: Function,
         close: Function,
         dispatch: Function,
-        el: HTMLElement,
+        el: {
+            validate: (el) => el.nodeType === Node.ELEMENT_NODE,
+        },
         offset: Function,
     };
 
@@ -24,7 +26,8 @@ export class Powerbox extends Component {
         this.offset = this.props.offset();
         this.commands = null;
         this.categories = null;
-        const range = window.getSelection().getRangeAt(0);
+        const selection = this.props.el.ownerDocument.getSelection();
+        const range = selection.getRangeAt(0);
         this.endOffset = range.endOffset;
         this.node = range.startContainer;
         if (!range.collapsed) {
