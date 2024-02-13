@@ -46,6 +46,42 @@ registry
             dispatch("INSERT_SEPARATOR");
         },
     })
+    .add("columns_2", {
+        name: _t("2 columns"),
+        description: _t("Convert into 2 columns"),
+        category: "structure",
+        fontawesome: "fa-columns",
+        action(dispatch) {
+            dispatch("COLUMNIZE", { numberOfColumns: 2 });
+        },
+    })
+    .add("columns_3", {
+        name: _t("3 columns"),
+        description: _t("Convert into 3 columns"),
+        category: "structure",
+        fontawesome: "fa-columns",
+        action(dispatch) {
+            dispatch("COLUMNIZE", { numberOfColumns: 3 });
+        },
+    })
+    .add("columns_4", {
+        name: _t("4 columns"),
+        description: _t("Convert into 4 columns"),
+        category: "structure",
+        fontawesome: "fa-columns",
+        action(dispatch) {
+            dispatch("COLUMNIZE", { numberOfColumns: 4 });
+        },
+    })
+    .add("columns_remove", {
+        name: _t("Remove columns"),
+        description: _t("Back to one column"),
+        category: "structure",
+        fontawesome: "fa-columns",
+        action(dispatch) {
+            dispatch("COLUMNIZE", { numberOfColumns: 0 });
+        },
+    })
     // 'format' commands
     .add("heading_1", {
         name: _t("Heading 1"),
