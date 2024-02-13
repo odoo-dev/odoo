@@ -187,23 +187,19 @@ export function resetSize(editor) {
 }
 
 export function justifyLeft(editor) {
-    throw new Error("Not implemented command: justifyLeft");
-    // editor.dispatch('xxx');
+    editor.dispatch("JUSTIFY_LEFT");
 }
 
 export function justifyCenter(editor) {
-    throw new Error("Not implemented command: justifyCenter");
-    // editor.dispatch('xxx');
+    editor.dispatch("JUSTIFY_CENTER");
 }
 
 export function justifyRight(editor) {
-    throw new Error("Not implemented command: justifyRight");
-    // editor.dispatch('xxx');
+    editor.dispatch("JUSTIFY_RIGHT");
 }
 
 export function justifyFull(editor) {
-    throw new Error("Not implemented command: justifyFull");
-    // editor.dispatch('xxx');
+    editor.dispatch("JUSTIFY_FULL");
 }
 
 export function setColor(color, mode) {
