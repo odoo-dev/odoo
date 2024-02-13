@@ -2,6 +2,14 @@ import { registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
+/**
+ * @typedef { Object } EditorConfig
+ * @property { string } [innerHTML]
+ * @property { boolean } [allowInlineAtRoot]
+ * @property { PluginConstructor[] } [Plugins]
+ * @property { boolean } [disableFloatingToolbar]
+ */
+
 export const defaultConfig = {};
 
 function getPlugins() {
@@ -35,11 +43,12 @@ function getPlugins() {
 
 export class Editor {
     /**
-     * @param {PluginConstructor[]} Plugins
-     * @param {*} config
+     * @param { PluginConstructor[] } Plugins
+     * @param { EditorConfig } config
      * @param {*} services
      */
     constructor(config, services) {
+        /** @type { EditorConfig } **/
         this.config = config;
         this.services = services;
         this.plugins = [];

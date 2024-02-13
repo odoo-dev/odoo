@@ -13,7 +13,6 @@ export class ToolbarPlugin extends Plugin {
         this.buttonsActiveState = reactive(
             this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
         );
-        /** @type {import("../core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Toolbar, "top", {
             toolbar: this.getToolbarInfo(),
             floating: true,
