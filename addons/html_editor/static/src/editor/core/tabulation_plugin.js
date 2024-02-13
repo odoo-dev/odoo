@@ -5,7 +5,7 @@ import { splitTextNode } from "../utils/dom_split";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS } from "../utils/position";
-import { getTraversedBlocks, preserveCursor } from "../utils/selection";
+import { getTraversedBlocks } from "../utils/selection";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
 const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
@@ -96,12 +96,18 @@ export class TabulationPlugin extends Plugin {
     }
 
     indentBlocks(blocks) {
-        const restore = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         const tab = parseHTML(this.document, tabHtml);
         for (const block of blocks) {
             block.prepend(tab.cloneNode(true));
         }
-        restore();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
     }
 
     outdentBlocks(blocks) {

@@ -1,10 +1,10 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { isEmptyBlock, isWhitespace } from "../utils/dom_info";
-import { closestElement, descendants } from "../utils/dom_traversal";
-import { getDeepRange, getSelectedNodes, preserveCursor } from "../utils/selection";
-import { splitAroundUntil } from "../utils/dom_split";
 import { fillEmpty } from "../utils/dom";
+import { isEmptyBlock, isWhitespace } from "../utils/dom_info";
+import { splitAroundUntil } from "../utils/dom_split";
+import { closestElement, descendants } from "../utils/dom_traversal";
+import { getDeepRange, getSelectedNodes } from "../utils/selection";
 import { FontColorSelector } from "./font_color_selector";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
@@ -117,7 +117,7 @@ export class ColorPlugin extends Plugin {
         if (!range) {
             return;
         }
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         // Get the <font> nodes to color
         const selectionNodes = getSelectedNodes(this.editable).filter(
             (node) => closestElement(node).isContentEditable
@@ -219,7 +219,13 @@ export class ColorPlugin extends Plugin {
                 fontsSet.delete(font);
             }
         }
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         // if (wasCollapsed) {
         //     const newSelection = this.shared.getEditableSelection();
         //     const range = new Range();
