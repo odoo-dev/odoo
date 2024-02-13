@@ -101,13 +101,7 @@ export class TabulationPlugin extends Plugin {
         for (const block of blocks) {
             block.prepend(tab.cloneNode(true));
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
     }
 
     outdentBlocks(blocks) {
@@ -136,12 +130,12 @@ export class TabulationPlugin extends Plugin {
             zwsRemoved++;
         }
         if (updateAnchor || updateFocus) {
-            this.shared.setSelection(
-                updateAnchor ? tab.nextSibling : anchorNode,
-                updateAnchor ? Math.max(0, anchorOffset - zwsRemoved) : anchorOffset,
-                updateFocus ? tab.nextSibling : focusNode,
-                updateFocus ? Math.max(0, focusOffset - zwsRemoved) : focusOffset
-            );
+            this.shared.setSelection({
+                anchorNode: updateAnchor ? tab.nextSibling : anchorNode,
+                anchorOffset: updateAnchor ? Math.max(0, anchorOffset - zwsRemoved) : anchorOffset,
+                focusNode: updateFocus ? tab.nextSibling : focusNode,
+                focusOffset: updateFocus ? Math.max(0, focusOffset - zwsRemoved) : focusOffset,
+            });
         }
     }
 

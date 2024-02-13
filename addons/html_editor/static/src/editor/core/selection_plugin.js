@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { DIRECTIONS, endPos, startPos } from "../utils/position";
+import { DIRECTIONS, nodeSize } from "../utils/position";
 import { getNormalizedCursorPosition } from "../utils/selection";
 
 export class SelectionPlugin extends Plugin {
@@ -94,10 +94,7 @@ export class SelectionPlugin extends Plugin {
     }
 
     setSelection(
-        anchorNode,
-        anchorOffset,
-        focusNode = anchorNode,
-        focusOffset = anchorOffset,
+        { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
         normalize = true
     ) {
         if (normalize) {
@@ -117,13 +114,11 @@ export class SelectionPlugin extends Plugin {
     }
 
     setCursorStart(node) {
-        const pos = startPos(node);
-        return this.setSelection(...pos, ...pos);
+        return this.setSelection({ anchorNode: node, anchorOffset: 0 });
     }
 
     setCursorEnd(node) {
-        const pos = endPos(node);
-        return this.setSelection(...pos, ...pos);
+        return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
     }
 }
 

@@ -65,14 +65,18 @@ export class LineBreakPlugin extends Plugin {
         // @todo @phoenix Don't we want this for all spans ?
         if (anchor.nodeName === "A" && brEls.includes(anchor.firstChild)) {
             brEls.forEach((br) => anchor.before(br));
-            this.shared.setSelection(...rightPos(brEls[brEls.length - 1]));
+            const pos = rightPos(brEls[brEls.length - 1]);
+            this.shared.setSelection({ anchorNode: pos[0], anchorOffset: pos[1] });
         } else if (anchor.nodeName === "A" && brEls.includes(anchor.lastChild)) {
             brEls.forEach((br) => anchor.after(br));
-            this.shared.setSelection(...rightPos(brEls[0]));
+            const pos = rightPos(brEls[0]);
+            this.shared.setSelection({ anchorNode: pos[0], anchorOffset: pos[1] });
         } else {
             for (const el of brEls) {
+                // @todo @phoenix we don t want to setSelection multiple times
                 if (el.parentNode) {
-                    this.shared.setSelection(...rightPos(el));
+                    const pos = rightPos(el);
+                    this.shared.setSelection({ anchorNode: pos[0], anchorOffset: pos[1] });
                     break;
                 }
             }
