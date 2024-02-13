@@ -39,7 +39,7 @@ import {
     nodeSize,
     rightPos,
 } from "../utils/position";
-import { getDeepRange, preserveCursor, setSelection } from "../utils/selection";
+import { getDeepRange, setSelection } from "../utils/selection";
 import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
@@ -698,9 +698,15 @@ export class DeletePlugin extends Plugin {
         this.deleteRangeRemoveZws(insertedZws);
         this.deleteRangeFillJoined(joinWith);
 
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         restoreUpdate();
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
     }
     deleteRangeGetSelectionAndRange() {
         const selection = this.shared.getEditableSelection();

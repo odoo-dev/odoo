@@ -1,11 +1,11 @@
-import { Plugin } from "../plugin";
-import { closestElement, getAdjacents } from "../utils/dom_traversal";
-import { isShrunkBlock, isVisible } from "../utils/dom_info";
-import { closestBlock, isBlock } from "../utils/blocks";
-import { getListMode, createList, insertListAfter, mergeSimilarLists, applyToTree } from "./utils";
-import { preserveCursor, getTraversedBlocks } from "../utils/selection";
-import { setTagName, copyAttributes, removeClass, toggleClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
+import { Plugin } from "../plugin";
+import { closestBlock, isBlock } from "../utils/blocks";
+import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/dom";
+import { isShrunkBlock, isVisible } from "../utils/dom_info";
+import { closestElement, getAdjacents } from "../utils/dom_traversal";
+import { getTraversedBlocks } from "../utils/selection";
+import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -20,7 +20,7 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split_block"];
+    static dependencies = ["tabulation", "split_block", "selection"];
     static resources = (p) => ({
         delete_element_backward_before: { callback: p.deleteElementBackwardBefore.bind(p) },
         delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
@@ -163,7 +163,7 @@ export class ListPlugin extends Plugin {
             return;
         }
         const newTag = newMode === "CL" ? "UL" : newMode;
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         const newList = setTagName(list, newTag);
         // Clear list style (@todo @phoenix - why??)
         for (const li of newList.children) {
@@ -178,7 +178,13 @@ export class ListPlugin extends Plugin {
         if (newMode === "CL") {
             newList.classList.add("o_checklist");
         }
-        restoreCursor(new Map([[list, newList]]));
+        this.shared.setSelection(
+            selectionToRestore.anchorNode === list ? newList : selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode === list ? newList : selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         return newList;
     }
 
@@ -191,18 +197,29 @@ export class ListPlugin extends Plugin {
             return this.pToList(element, mode);
         }
         let list;
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = { ...this.shared.getEditableSelection() };
         if (element === this.editable) {
             // @todo @phoenix: check if this is needed
             const callingNode = element.firstChild;
             const group = getAdjacents(callingNode, (n) => !isBlock(n));
             list = insertListAfter(callingNode, mode, [group]);
-            restoreCursor();
         } else {
             list = insertListAfter(element, mode, [element]);
             copyAttributes(element, list);
-            restoreCursor(new Map([[element, list.firstElementChild]]));
+            if (selectionToRestore.anchorNode === element) {
+                selectionToRestore.anchorNode = list.firstElementChild;
+            }
+            if (selectionToRestore.focusNode === element) {
+                selectionToRestore.focusNode = list.firstElementChild;
+            }
         }
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         return list;
     }
 
@@ -219,12 +236,18 @@ export class ListPlugin extends Plugin {
             p.append(this.document.createElement("BR"));
         }
 
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         const list = insertListAfter(p, mode, [[...p.childNodes]]);
         copyAttributes(p, list);
         p.remove();
 
-        restoreCursor(new Map([[p, list.firstChild]]));
+        this.shared.setSelection(
+            selectionToRestore.anchorNode === p ? list.firstChild : selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode === p ? list.firstChild : selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         return list;
     }
 
@@ -234,11 +257,17 @@ export class ListPlugin extends Plugin {
      * @param {HTMLLIElement} li
      */
     liToP(li) {
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         while (li) {
             li = this.outdentLI(li);
         }
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -259,11 +288,17 @@ export class ListPlugin extends Plugin {
         const ul = createList(getListMode(destul));
         lip.append(ul);
 
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         lip.classList.add("oe-nested");
         li.before(lip);
         ul.append(li);
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
     }
 
     // @temp comment: former oShiftTab
@@ -288,22 +323,44 @@ export class ListPlugin extends Plugin {
             }
         }
 
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         if (li.parentNode.parentNode.tagName === "LI") {
             const ul = li.parentNode;
             const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
             const toremove = shouldRemoveParentLi ? ul.parentNode : null;
             ul.parentNode.after(li);
+            let shouldRestore = true;
             if (toremove) {
                 if (toremove.classList.contains("oe-nested")) {
+                    if (
+                        toremove === selectionToRestore.anchorNode ||
+                        toremove === selectionToRestore.focusNode
+                    ) {
+                        shouldRestore = false;
+                    }
                     // <li>content<ul>...</ul></li>
                     toremove.remove();
                 } else {
+                    if (
+                        ul === selectionToRestore.anchorNode ||
+                        ul === selectionToRestore.focusNode
+                    ) {
+                        shouldRestore = false;
+                    }
                     // <li class="oe-nested"><ul>...</ul></li>
                     ul.remove();
                 }
             }
-            restoreCursor();
+            if (shouldRestore) {
+                this.shared.setSelection(
+                    selectionToRestore.anchorNode,
+                    selectionToRestore.anchorOffset,
+                    selectionToRestore.focusNode,
+                    selectionToRestore.focusOffset,
+                    false
+                );
+            }
+
             return li;
         } else {
             const ul = li.parentNode;
@@ -328,8 +385,15 @@ export class ListPlugin extends Plugin {
             if (p && isVisible(p)) {
                 ul.after(p);
             }
-
-            restoreCursor(new Map([[li, ul.nextSibling]]));
+            this.shared.setSelection(
+                selectionToRestore.anchorNode === li
+                    ? ul.nextSibling
+                    : selectionToRestore.anchorNode,
+                selectionToRestore.anchorOffset,
+                selectionToRestore.focusNode === li ? ul.nextSibling : selectionToRestore.focusNode,
+                selectionToRestore.focusOffset,
+                false
+            );
             li.remove();
             if (!ul.firstElementChild) {
                 ul.remove();
@@ -339,20 +403,32 @@ export class ListPlugin extends Plugin {
     }
 
     indentListNodes(listNodes) {
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         for (const li of listNodes) {
             this.indentLI(li);
         }
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         this.dispatch("ADD_STEP");
     }
 
     outdentListNodes(listNodes) {
-        const restoreCursor = preserveCursor(this.document);
+        const selectionToRestore = this.shared.getEditableSelection();
         for (const li of listNodes) {
             this.outdentLI(li);
         }
-        restoreCursor();
+        this.shared.setSelection(
+            selectionToRestore.anchorNode,
+            selectionToRestore.anchorOffset,
+            selectionToRestore.focusNode,
+            selectionToRestore.focusOffset,
+            false
+        );
         this.dispatch("ADD_STEP");
     }
 
