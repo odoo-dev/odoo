@@ -163,7 +163,7 @@ export class ListPlugin extends Plugin {
             return;
         }
         const newTag = newMode === "CL" ? "UL" : newMode;
-        const selectionToRestore = this.shared.getEditableSelection();
+        const selectionToRestore = { ...this.shared.getEditableSelection() };
         const newList = setTagName(list, newTag);
         // Clear list style (@todo @phoenix - why??)
         for (const li of newList.children) {
@@ -178,13 +178,13 @@ export class ListPlugin extends Plugin {
         if (newMode === "CL") {
             newList.classList.add("o_checklist");
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode === list ? newList : selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode === list ? newList : selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        if (selectionToRestore.anchorNode === list) {
+            selectionToRestore.anchorNode = newList;
+        }
+        if (selectionToRestore.focusNode === list) {
+            selectionToRestore.focusNode = newList;
+        }
+        this.shared.setSelection(selectionToRestore, false);
         return newList;
     }
 
@@ -213,13 +213,7 @@ export class ListPlugin extends Plugin {
                 selectionToRestore.focusNode = list.firstElementChild;
             }
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
         return list;
     }
 
@@ -236,18 +230,18 @@ export class ListPlugin extends Plugin {
             p.append(this.document.createElement("BR"));
         }
 
-        const selectionToRestore = this.shared.getEditableSelection();
+        const selectionToRestore = { ...this.shared.getEditableSelection() };
         const list = insertListAfter(p, mode, [[...p.childNodes]]);
         copyAttributes(p, list);
         p.remove();
 
-        this.shared.setSelection(
-            selectionToRestore.anchorNode === p ? list.firstChild : selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode === p ? list.firstChild : selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        if (selectionToRestore.anchorNode === p) {
+            selectionToRestore.anchorNode = list.firstChild;
+        }
+        if (selectionToRestore.focusNode === p) {
+            selectionToRestore.focusNode = list.firstChild;
+        }
+        this.shared.setSelection(selectionToRestore, false);
         return list;
     }
 
@@ -261,13 +255,7 @@ export class ListPlugin extends Plugin {
         while (li) {
             li = this.outdentLI(li);
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
     }
 
     // --------------------------------------------------------------------------
@@ -292,13 +280,7 @@ export class ListPlugin extends Plugin {
         lip.classList.add("oe-nested");
         li.before(lip);
         ul.append(li);
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
     }
 
     // @temp comment: former oShiftTab
@@ -323,7 +305,7 @@ export class ListPlugin extends Plugin {
             }
         }
 
-        const selectionToRestore = this.shared.getEditableSelection();
+        const selectionToRestore = { ...this.shared.getEditableSelection() };
         if (li.parentNode.parentNode.tagName === "LI") {
             const ul = li.parentNode;
             const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
@@ -352,13 +334,7 @@ export class ListPlugin extends Plugin {
                 }
             }
             if (shouldRestore) {
-                this.shared.setSelection(
-                    selectionToRestore.anchorNode,
-                    selectionToRestore.anchorOffset,
-                    selectionToRestore.focusNode,
-                    selectionToRestore.focusOffset,
-                    false
-                );
+                this.shared.setSelection(selectionToRestore, false);
             }
 
             return li;
@@ -385,15 +361,14 @@ export class ListPlugin extends Plugin {
             if (p && isVisible(p)) {
                 ul.after(p);
             }
-            this.shared.setSelection(
-                selectionToRestore.anchorNode === li
-                    ? ul.nextSibling
-                    : selectionToRestore.anchorNode,
-                selectionToRestore.anchorOffset,
-                selectionToRestore.focusNode === li ? ul.nextSibling : selectionToRestore.focusNode,
-                selectionToRestore.focusOffset,
-                false
-            );
+
+            if (selectionToRestore.anchorNode === li) {
+                selectionToRestore.anchorNode = ul.nextSibling;
+            }
+            if (selectionToRestore.focusNode === li) {
+                selectionToRestore.focusNode = ul.nextSibling;
+            }
+            this.shared.setSelection(selectionToRestore, false);
             li.remove();
             if (!ul.firstElementChild) {
                 ul.remove();
@@ -407,13 +382,7 @@ export class ListPlugin extends Plugin {
         for (const li of listNodes) {
             this.indentLI(li);
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
         this.dispatch("ADD_STEP");
     }
 
@@ -422,13 +391,7 @@ export class ListPlugin extends Plugin {
         for (const li of listNodes) {
             this.outdentLI(li);
         }
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
         this.dispatch("ADD_STEP");
     }
 

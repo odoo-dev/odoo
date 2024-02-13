@@ -143,7 +143,7 @@ export class DeletePlugin extends Plugin {
                 params.alreadyMoved,
                 params.offsetLimit
             );
-        this.shared.setSelection(cursorNode, cursorOffset);
+        this.shared.setSelection({ anchorNode: cursorNode, anchorOffset: cursorOffset });
 
         // Propagate if this is still a block on the left of where the nodes
         // were moved.
@@ -262,7 +262,10 @@ export class DeletePlugin extends Plugin {
                     // TODO this handle BR/IMG/etc removals../ to see if we
                     // prefer to have a dedicated handler for every possible
                     // HTML element or if we let this generic code handle it.
-                    this.shared.setSelection(parentElement, parentOffset);
+                    this.shared.setSelection({
+                        anchorNode: parentElement,
+                        anchorOffset: parentOffset,
+                    });
                     return true;
                 }
             }
@@ -291,7 +294,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(targetNode.nodeName)
         ) {
             previousElementSiblingClosestBlock.remove();
-            this.shared.setSelection(targetNode, 0);
+            this.shared.setSelection({ anchorNode: targetNode, anchorOffset: 0 });
             return true;
         }
     }
@@ -312,7 +315,7 @@ export class DeletePlugin extends Plugin {
             const p = this.document.createElement("p");
             p.replaceChildren(...targetNode.childNodes);
             targetNode.replaceWith(p);
-            this.shared.setSelection(p, targetOffset);
+            this.shared.setSelection({ anchorNode: p, anchorOffset: targetOffset });
             return true;
         }
     }
@@ -661,7 +664,10 @@ export class DeletePlugin extends Plugin {
         // Let the DOM split and delete the range.
         extractRange.extractContents();
 
-        this.shared.setSelection(startContainer, nodeSize(startContainer));
+        this.shared.setSelection({
+            anchorNode: startContainer,
+            anchorOffset: nodeSize(startContainer),
+        });
         selection = this.shared.getEditableSelection();
         const documentRange = getDeepRange(this.editable, { sel: selection });
 
@@ -700,13 +706,7 @@ export class DeletePlugin extends Plugin {
 
         const selectionToRestore = this.shared.getEditableSelection();
         restoreUpdate();
-        this.shared.setSelection(
-            selectionToRestore.anchorNode,
-            selectionToRestore.anchorOffset,
-            selectionToRestore.focusNode,
-            selectionToRestore.focusOffset,
-            false
-        );
+        this.shared.setSelection(selectionToRestore, false);
     }
     deleteRangeGetSelectionAndRange() {
         const selection = this.shared.getEditableSelection();
@@ -898,12 +898,7 @@ export class DeletePlugin extends Plugin {
             if (!this.editable.contains(joinWith)) {
                 this.shared.handleObserverRecords();
                 this.shared.revertCurrentMutationsUntil(mutationsLength);
-                this.shared.setSelection(
-                    backupSelection.anchorNode,
-                    backupSelection.anchorOffset,
-                    backupSelection.focusNode,
-                    backupSelection.focusOffset
-                );
+                this.shared.setSelection(backupSelection);
                 break;
             }
             next = firstLeaf(next);
@@ -935,7 +930,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(endBlock.nodeName)
         ) {
             startBlock.remove();
-            this.shared.setSelection(endBlock, 0);
+            this.shared.setSelection({ anchorNode: endBlock, anchorOffset: 0 });
             fillEmpty(endBlock);
         }
     }
@@ -949,7 +944,7 @@ export class DeletePlugin extends Plugin {
             insertedZws.remove();
             el && fillEmpty(el);
             if (next) {
-                this.shared.setSelection(next, 0);
+                this.shared.setSelection({ anchorNode: next, anchorOffset: 0 });
             }
         }
     }

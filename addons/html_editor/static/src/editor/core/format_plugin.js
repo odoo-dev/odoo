@@ -110,10 +110,12 @@ export class FormatPlugin extends Plugin {
         });
         // note: does it work if selection is in opposite direction?
         selection = this.shared.setSelection(
-            range.startContainer,
-            range.startOffset,
-            range.endContainer,
-            range.endOffset,
+            {
+                anchorNode: range.startContainer,
+                anchorOffset: range.startOffset,
+                focusNode: range.endContainer,
+                focusOffset: range.endOffset,
+            },
             false
         );
 
@@ -128,7 +130,12 @@ export class FormatPlugin extends Plugin {
                 selection.anchorNode.textContent === "\u200b"
             ) {
                 zws = selection.anchorNode;
-                this.shared.setSelection(zws, 0, zws, 1);
+                this.shared.setSelection({
+                    anchorNode: zws,
+                    anchorOffset: 0,
+                    focusNode: zws,
+                    focusOffset: 1,
+                });
             } else {
                 // @todo phoenix: move it to selection plugin ?
                 zws = insertAndSelectZws(this.document.getSelection());
@@ -245,15 +252,27 @@ export class FormatPlugin extends Plugin {
         }
 
         if (selectedTextNodes[0] && selectedTextNodes[0].textContent === "\u200B") {
-            this.shared.setSelection(selectedTextNodes[0], 0);
+            this.shared.setSelection({ anchorNode: selectedTextNodes[0], anchorOffset: 0 });
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
+            let newSelection;
             if (direction === DIRECTIONS.RIGHT) {
-                this.shared.setSelection(firstNode, 0, lastNode, lastNode.length, false);
+                newSelection = {
+                    anchorNode: firstNode,
+                    anchorOffset: 0,
+                    focusNode: lastNode,
+                    focusOffset: lastNode.length,
+                };
             } else {
-                this.shared.setSelection(lastNode, lastNode.length, firstNode, 0, false);
+                newSelection = {
+                    anchorNode: lastNode,
+                    anchorOffset: lastNode.length,
+                    focusNode: firstNode,
+                    focusOffset: 0,
+                };
             }
+            this.shared.setSelection(newSelection, false);
         }
     }
 }

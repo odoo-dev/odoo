@@ -5,7 +5,7 @@ import { isRow } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { DIRECTIONS, endPos, rightPos, startPos } from "../utils/position";
+import { DIRECTIONS, nodeSize, rightPos } from "../utils/position";
 import { getDeepRange, findInSelection } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
@@ -105,8 +105,10 @@ export class TablePlugin extends Plugin {
                 ? splitTextNode(anchorNode, sel.anchorOffset, DIRECTIONS.LEFT) + 1 && anchorNode
                 : splitElement(anchorNode, sel.anchorOffset).shift();
             const newPosition = rightPos(newAnchorNode);
-            // @todo phoenix: use the selection object
-            sel = this.shared.setSelection(...newPosition, ...newPosition, false);
+            sel = this.shared.setSelection(
+                { anchorNode: newPosition[0], anchorOffset: newPosition[1] },
+                false
+            );
         }
         const [table] = this.shared.dom_insert(parseHTML(this.document, tableHtml));
         this.shared.setCursorStart(table.querySelector("p"));
@@ -218,7 +220,7 @@ export class TablePlugin extends Plugin {
         table.querySelectorAll(`tr td:nth-of-type(${index + 1})`).forEach((td) => td.remove());
         // @todo @phoenix should I call dispatch('DELETE_TABLE', table) or this.deleteTable?
         siblingCell
-            ? this.shared.setSelection(...startPos(siblingCell))
+            ? this.shared.setSelection({ anchorNode: siblingCell, anchorOffset: 0 })
             : this.dispatch("DELETE_TABLE", table);
     }
     removeRow(row) {
@@ -235,7 +237,7 @@ export class TablePlugin extends Plugin {
         const siblingRow = rows[rowIndex - 1] || rows[rowIndex + 1];
         row.remove();
         siblingRow
-            ? this.shared.setSelection(...startPos(siblingRow))
+            ? this.shared.setCursorStart({ anchorNode: siblingRow, anchorOffset: 0 })
             : this.dispatch("DELETE_TABLE", table);
     }
     resetSize(table) {
@@ -263,7 +265,7 @@ export class TablePlugin extends Plugin {
         p.appendChild(this.document.createElement("br"));
         table.before(p);
         table.remove();
-        this.shared.setSelection(p, 0);
+        this.shared.setSelection({ anchorNode: p, anchorOffset: 0 });
     }
     deleteBackwardBefore({ targetNode, targetOffset }) {
         // If the cursor is at the beginning of a row, prevent deletion.
@@ -294,7 +296,12 @@ export class TablePlugin extends Plugin {
         if (!cursorDestination) {
             return false;
         }
-        this.shared.setSelection(...startPos(cursorDestination), ...endPos(cursorDestination));
+        this.shared.setSelection({
+            anchorNode: cursorDestination,
+            anchorOffset: 0,
+            focusNode: cursorDestination,
+            focusOffset: nodeSize(cursorDestination),
+        });
         return true;
     }
 }
