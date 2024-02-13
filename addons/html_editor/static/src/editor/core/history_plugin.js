@@ -424,17 +424,19 @@ export class HistoryPlugin extends Plugin {
             return;
         }
         const anchorNode = this.idToNodeMap.get(selection.anchorNodeOid);
-        const focusNode = this.idToNodeMap.get(selection.focusNodeOid) || anchorNode;
         if (!anchorNode) {
             return;
         }
-        this.shared.setSelection(
+        const newSelection = {
             anchorNode,
-            selection.anchorOffset,
-            focusNode,
-            selection.focusOffset !== undefined ? selection.focusOffset : selection.anchorOffset,
-            false
-        );
+            anchorOffset: selection.anchorOffset,
+        };
+        const focusNode = this.idToNodeMap.get(selection.focusNodeOid);
+        if (focusNode) {
+            newSelection.focusNode = focusNode;
+            newSelection.focusOffset = selection.focusOffset;
+        }
+        this.shared.setSelection(newSelection, false);
         // @todo @phoenix add this in the selection or table plugin.
         // // If a table must be selected, ensure it's in the same tick.
         // this._handleSelectionInTable();
