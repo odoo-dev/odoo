@@ -60,7 +60,7 @@ test("should filter the Powerbox contents with term", async () => {
     const { el, editor } = await setupEditor("<p>ab[]</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(commandNames(el).length).toBe(8);
+    expect(commandNames(el).length).toBe(12);
     await insertText(editor, "head");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
@@ -70,7 +70,7 @@ test("should filter the Powerbox contents with term, even after delete backward"
     const { el, editor } = await setupEditor("<p>ab[]</p>");
     await insertText(editor, "/");
     await animationFrame();
-    expect(commandNames(el).length).toBe(8);
+    expect(commandNames(el).length).toBe(12);
     await insertText(editor, "head");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
