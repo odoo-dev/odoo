@@ -11,12 +11,12 @@ function column(size, contents) {
 
 function columnize(numberOfColumns) {
     return (editor) => {
-        throw new Error("Not implemented command: columnize");
+        editor.dispatch("COLUMNIZE", { numberOfColumns });
     };
 }
 
 describe("2 columns", () => {
-    test.todo("should do nothing", async () => {
+    test("should do nothing", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(6, "<p>abcd</p>") + column(6, "<h1>[]ef</h1><ul><li>gh</li></ul>")
@@ -28,7 +28,7 @@ describe("2 columns", () => {
         });
     });
 
-    test.todo("should turn text into 2 columns", async () => {
+    test("should turn text into 2 columns", async () => {
         await testEditor({
             contentBefore: "<p>[]abcd</p>",
             stepFunction: columnize(2),
@@ -38,7 +38,7 @@ describe("2 columns", () => {
         });
     });
 
-    test.todo("should turn 3 columns into 2 columns", async () => {
+    test("should turn 3 columns into 2 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(4, "<p>abcd</p>") +
@@ -52,7 +52,7 @@ describe("2 columns", () => {
         });
     });
 
-    test.todo("should turn 4 columns into 2 columns", async () => {
+    test("should turn 4 columns into 2 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(3, "<p>abcd</p>") +
@@ -68,7 +68,7 @@ describe("2 columns", () => {
     });
 });
 describe("3 columns", () => {
-    test.todo("should do nothing", async () => {
+    test("should do nothing", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(4, "<p>abcd</p>") + column(4, "<p><br></p>") + column(4, "<p>[]<br></p>")
@@ -80,7 +80,7 @@ describe("3 columns", () => {
         });
     });
 
-    test.todo("should turn text into 3 columns", async () => {
+    test("should turn text into 3 columns", async () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
             stepFunction: columnize(3),
@@ -91,7 +91,7 @@ describe("3 columns", () => {
         });
     });
 
-    test.todo("should turn 2 columns into 3 columns", async () => {
+    test("should turn 2 columns into 3 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(6, "<p>abcd</p>") + column(6, "<h1>ef</h1><ul><li>g[]h</li></ul>")
@@ -105,7 +105,7 @@ describe("3 columns", () => {
         });
     });
 
-    test.todo("should turn 4 columns into 3 columns", async () => {
+    test("should turn 4 columns into 3 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(3, "<p>abcd</p>") +
@@ -124,7 +124,7 @@ describe("3 columns", () => {
 });
 
 describe("4 columns", () => {
-    test.todo("should do nothing", async () => {
+    test("should do nothing", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(3, "<p>abcd</p>") +
@@ -142,7 +142,7 @@ describe("4 columns", () => {
         });
     });
 
-    test.todo("should turn text into 4 columns", async () => {
+    test("should turn text into 4 columns", async () => {
         await testEditor({
             contentBefore: "<p>abcd[]</p>",
             stepFunction: columnize(4),
@@ -156,7 +156,7 @@ describe("4 columns", () => {
         });
     });
 
-    test.todo("should turn 2 columns into 4 columns", async () => {
+    test("should turn 2 columns into 4 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(6, "<p>abcd</p>") + column(6, "<h1>[]ef</h1><ul><li>gh</li></ul>")
@@ -171,7 +171,7 @@ describe("4 columns", () => {
         });
     });
 
-    test.todo("should turn 3 columns into 4 columns", async () => {
+    test("should turn 3 columns into 4 columns", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(4, "<p>abcd</p>") +
@@ -190,7 +190,7 @@ describe("4 columns", () => {
 });
 
 describe("remove columns", () => {
-    test.todo("should do nothing", async () => {
+    test("should do nothing", async () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
             stepFunction: columnize(0),
@@ -198,7 +198,7 @@ describe("remove columns", () => {
         });
     });
 
-    test.todo("should turn 2 columns into text", async () => {
+    test("should turn 2 columns into text", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(6, "<p>abcd</p>") + column(6, "<h1>[]ef</h1><ul><li>gh</li></ul>")
@@ -208,7 +208,7 @@ describe("remove columns", () => {
         });
     });
 
-    test.todo("should turn 3 columns into text", async () => {
+    test("should turn 3 columns into text", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(4, "<p>abcd</p>") +
@@ -220,7 +220,7 @@ describe("remove columns", () => {
         });
     });
 
-    test.todo("should turn 4 columns into text", async () => {
+    test("should turn 4 columns into text", async () => {
         await testEditor({
             contentBefore: columnsContainer(
                 column(3, "<p>abcd</p>") +
@@ -235,16 +235,16 @@ describe("remove columns", () => {
 });
 
 describe("complex", () => {
-    test.todo("should turn text into 2 columns, then 3, 4, 3, 2 and text again", async () => {
+    test("should turn text into 2 columns, then 3, 4, 3, 2 and text again", async () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
             stepFunction: (editor) => {
-                editor.execCommand("columnize", 2);
-                editor.execCommand("columnize", 3);
-                editor.execCommand("columnize", 4);
-                editor.execCommand("columnize", 3);
-                editor.execCommand("columnize", 2);
-                editor.execCommand("columnize", 0);
+                columnize(2)(editor);
+                columnize(3)(editor);
+                columnize(4)(editor);
+                columnize(3)(editor);
+                columnize(2)(editor);
+                columnize(0)(editor);
             },
             // A paragraph was created for each column + after them and
             // they were all kept.
@@ -252,7 +252,7 @@ describe("complex", () => {
         });
     });
 
-    test.todo("should not add a container when one already exists", async () => {
+    test("should not add a container when one already exists", async () => {
         await testEditor({
             contentBefore:
                 '<div class="container"><div class="row"><div class="col">' +
