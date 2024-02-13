@@ -220,7 +220,7 @@ export class TablePlugin extends Plugin {
         table.querySelectorAll(`tr td:nth-of-type(${index + 1})`).forEach((td) => td.remove());
         // @todo @phoenix should I call dispatch('DELETE_TABLE', table) or this.deleteTable?
         siblingCell
-            ? this.shared.setSelection({ anchorNode: siblingCell, anchorOffset: 0 })
+            ? this.shared.setCursorStart(siblingCell)
             : this.dispatch("DELETE_TABLE", table);
     }
     removeRow(row) {
@@ -265,7 +265,7 @@ export class TablePlugin extends Plugin {
         p.appendChild(this.document.createElement("br"));
         table.before(p);
         table.remove();
-        this.shared.setSelection({ anchorNode: p, anchorOffset: 0 });
+        this.shared.setCursorStart(p);
     }
     deleteBackwardBefore({ targetNode, targetOffset }) {
         // If the cursor is at the beginning of a row, prevent deletion.
