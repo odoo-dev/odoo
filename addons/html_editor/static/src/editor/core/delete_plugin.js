@@ -294,7 +294,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(targetNode.nodeName)
         ) {
             previousElementSiblingClosestBlock.remove();
-            this.shared.setSelection({ anchorNode: targetNode, anchorOffset: 0 });
+            this.shared.setCursorStart(targetNode);
             return true;
         }
     }
@@ -664,10 +664,7 @@ export class DeletePlugin extends Plugin {
         // Let the DOM split and delete the range.
         extractRange.extractContents();
 
-        this.shared.setSelection({
-            anchorNode: startContainer,
-            anchorOffset: nodeSize(startContainer),
-        });
+        this.shared.setCursorEnd(startContainer);
         selection = this.shared.getEditableSelection();
         const documentRange = getDeepRange(this.editable, { sel: selection });
 
@@ -930,7 +927,7 @@ export class DeletePlugin extends Plugin {
             paragraphRelatedElements.includes(endBlock.nodeName)
         ) {
             startBlock.remove();
-            this.shared.setSelection({ anchorNode: endBlock, anchorOffset: 0 });
+            this.shared.setCursorStart(endBlock);
             fillEmpty(endBlock);
         }
     }
@@ -944,7 +941,7 @@ export class DeletePlugin extends Plugin {
             insertedZws.remove();
             el && fillEmpty(el);
             if (next) {
-                this.shared.setSelection({ anchorNode: next, anchorOffset: 0 });
+                this.shared.setCursorStart(next);
             }
         }
     }
