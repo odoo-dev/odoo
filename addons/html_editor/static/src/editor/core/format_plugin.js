@@ -252,7 +252,7 @@ export class FormatPlugin extends Plugin {
         }
 
         if (selectedTextNodes[0] && selectedTextNodes[0].textContent === "\u200B") {
-            this.shared.setSelection({ anchorNode: selectedTextNodes[0], anchorOffset: 0 });
+            this.shared.setCursorStart(selectedTextNodes[0]);
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
