@@ -11,25 +11,40 @@ export const Direction = {
 };
 
 class TestEditor extends Component {
-    static template = xml`<div t-ref="target"/>`;
-    static props = ["content", "config"];
+    static template = xml`
+        <t t-if="props.inIFrame">
+            <iframe t-ref="target"/>
+        </t>
+        <t t-else="">
+            <div t-ref="target"/>
+        </t>`;
+    static props = ["content", "config", "inIFrame"];
 
     setup() {
         this.ref = useRef("target");
-        if (this.props.content) {
-            onMounted(() => {
-                setContent(this.ref.el, this.props.content);
-            });
-        }
-        this.editor = useWysiwyg("target", { ...defaultConfig, ...this.props.config });
+        const target = this.props.inIFrame
+            ? () => this.ref.el.contentDocument.body.firstChild
+            : "target";
+        onMounted(() => {
+            let el = this.ref.el;
+            if (this.props.inIFrame) {
+                var html = `<div>${this.props.content || ""}</div>`;
+                this.ref.el.contentWindow.document.body.innerHTML = html;
+                el = target();
+            }
+            if (this.props.content) {
+                setContent(el, this.props.content);
+            }
+        });
+        this.editor = useWysiwyg(target, { ...defaultConfig, ...this.props.config });
     }
 }
 
-export async function setupEditor(content, config = {}) {
-    const testEditor = await mountWithCleanup(TestEditor, { props: { content, config } });
+export async function setupEditor(content, config = {}, inIFrame = false) {
+    const testEditor = await mountWithCleanup(TestEditor, { props: { content, config, inIFrame } });
 
     return {
-        el: testEditor.ref.el,
+        el: testEditor.editor.editable,
         editor: testEditor.editor,
     };
 }

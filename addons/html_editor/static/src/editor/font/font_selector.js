@@ -9,7 +9,7 @@ export class FontSelector extends Component {
     static props = {
         dispatch: Function,
         getSelection: Function,
-        document: { type: Object, optional: true },
+        document: { optional: true },
         getItems: Function,
         command: String,
         isFontSize: { type: Boolean, optional: true },
