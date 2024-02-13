@@ -10,7 +10,7 @@ import {
     lastLeaf,
     getCommonAncestor,
 } from "@html_editor/editor/utils/dom_traversal";
-import { describe, expect, test } from "@odoo/hoot";
+import { before, describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../test_helpers/editor";
 import { unformat } from "../test_helpers/format";
 
@@ -242,8 +242,10 @@ describe("getAdjacents", () => {
     });
 });
 describe("getCommonAncestor", () => {
-    const [root] = insertTestHtml(
-        unformat(`
+    let root, p1, p2, span1, span2, ul, li1, li2, li3, li4, ol;
+    before(() => {
+        [root] = insertTestHtml(
+            unformat(`
             <div>
                 <p> paragraph 1 </p>
                 <p>
@@ -262,12 +264,13 @@ describe("getCommonAncestor", () => {
                 </ul>
             </div>
         `)
-    );
-    const [p1, p2] = root.querySelectorAll("p");
-    const [span1, span2] = root.querySelectorAll("span");
-    const [ul] = root.querySelectorAll("ul");
-    const [li1, li2, li3, li4] = root.querySelectorAll("li");
-    const [ol] = root.querySelectorAll("ol");
+        );
+        [p1, p2] = root.querySelectorAll("p");
+        [span1, span2] = root.querySelectorAll("span");
+        [ul] = root.querySelectorAll("ul");
+        [li1, li2, li3, li4] = root.querySelectorAll("li");
+        [ol] = root.querySelectorAll("ol");
+    });
 
     test("should return null if no nodes are provided", () => {
         const result = getCommonAncestor([]);
