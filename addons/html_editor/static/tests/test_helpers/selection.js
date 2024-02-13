@@ -1,5 +1,5 @@
 export function getContent(node) {
-    const selection = window.getSelection();
+    const selection = node.ownerDocument.getSelection();
     return [...node.childNodes].map((childNode) => _getContent(childNode, selection)).join("");
 }
 
@@ -68,7 +68,7 @@ export function setContent(el, content) {
 }
 
 export function setSelection({ anchorNode, anchorOffset, focusNode, focusOffset }) {
-    const selection = document.getSelection();
+    const selection = anchorNode.ownerDocument.getSelection();
     selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 }
 

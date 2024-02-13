@@ -36,7 +36,7 @@ export class PowerboxPlugin extends Plugin {
     }
 
     openPowerbox() {
-        const selection = window.getSelection();
+        const selection = this.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         this.offset = range && range.startOffset;
         this.powerbox.open();
