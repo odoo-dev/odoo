@@ -25,7 +25,7 @@ export class ToolbarPlugin extends Plugin {
         switch (command) {
             case "CONTENT_UPDATED":
                 if (this.overlay.isOpen) {
-                    const range = getSelection().getRangeAt(0);
+                    const range = this.document.getSelection().getRangeAt(0);
                     if (range.collapsed) {
                         this.overlay.close();
                     }
