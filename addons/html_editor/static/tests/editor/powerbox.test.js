@@ -35,6 +35,15 @@ test("should open the Powerbox on type `/`", async () => {
     expect(".o-we-powerbox").toHaveCount(1);
 });
 
+test`iframe`("in iframe: should open the Powerbox on type `/`", async () => {
+    const { el, editor } = await setupEditor("<p>ab[]</p>", {}, true);
+    expect(".o-we-powerbox").toHaveCount(0);
+    expect(getContent(el)).toBe("<p>ab[]</p>");
+    insertText(editor, "/");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+});
+
 test("should open the Powerbox on type `/`, but in an empty paragraph", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
     expect(".o-we-powerbox").toHaveCount(0);

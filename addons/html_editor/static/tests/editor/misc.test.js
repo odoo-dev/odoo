@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../test_helpers/editor";
 import { getContent, setContent } from "../test_helpers/selection";
 import { Plugin } from "../../src/editor/plugin";
@@ -6,6 +6,16 @@ import { click } from "@odoo/hoot-dom";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
+    expect(el.innerHTML).toBe(`<p>hello world</p>`);
+    expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
+    setContent(el, "<div>a[dddb]</div>");
+    editor.dispatch("FORMAT_BOLD");
+    expect(getContent(el)).toBe(`<div>a<strong>[dddb]</strong></div>`);
+});
+
+test`iframe`("can instantiate a Editor in an iframe", async () => {
+    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {}, true);
+    expect(getFixture()).toContain("iframe");
     expect(el.innerHTML).toBe(`<p>hello world</p>`);
     expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
     setContent(el, "<div>a[dddb]</div>");
