@@ -58,6 +58,9 @@ export class HintPlugin extends Plugin {
             case "CREATE_HINT":
                 this.createTempHint(payload.el, payload.text);
                 break;
+            case "CLEAN_BEFORE_SPLIT_BLOCK": // @todo @phoenix: maybe use the NORMALIZE command for this?
+                this.clearTempHints();
+                break;
             case "CLEAN":
                 this.removeHints();
                 break;
@@ -100,11 +103,15 @@ export class HintPlugin extends Plugin {
         }
     }
 
-    updateTempHints(selection) {
+    clearTempHints() {
         for (const el of this.tempHints) {
             this.removeHint(el);
         }
         this.tempHints.clear();
+    }
+
+    updateTempHints(selection) {
+        this.clearTempHints();
         if (selection.isCollapsed && this.editable.contains(selection.commonAncestorContainer)) {
             for (const hint of this.resources["temp_hints"]) {
                 const target = hint.target(selection);
