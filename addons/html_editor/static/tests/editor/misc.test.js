@@ -13,7 +13,7 @@ test("can instantiate a Editor", async () => {
     expect(getContent(el)).toBe(`<div>a<strong>[dddb]</strong></div>`);
 });
 
-test.tags("iframe")("can instantiate a Editor in an iframe", async () => {
+test("can instantiate a Editor in an iframe", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {}, true);
     expect(getFixture()).toContain("iframe");
     expect(el.innerHTML).toBe(`<p>hello world</p>`);
