@@ -61,6 +61,8 @@ export class SplitBlockPlugin extends Plugin {
     }
 
     splitElementBlock({ targetNode, targetOffset, blockToSplit }) {
+        this.dispatch("CLEAN_BEFORE_SPLIT_BLOCK", blockToSplit);
+
         const restore = prepareUpdate(targetNode, targetOffset);
 
         const [beforeElement, afterElement] = splitElementUntil(
