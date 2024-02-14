@@ -4,7 +4,7 @@ import { testEditor } from "../test_helpers/editor";
 test("should remove empty class attribute", async () => {
     // content after is compared after cleaning up DOM
     await testEditor({
-        contentBefore: "<div class=''></div>",
+        contentBefore: '<div class=""></div>',
         contentAfter: "<div></div>",
     });
 });

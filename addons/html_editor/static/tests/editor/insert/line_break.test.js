@@ -252,7 +252,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should insert a line break (2 <br>) at the end of a format node", async () => {
+        test("should insert a line break (2 <br>) at the end of a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>abc</b>[]</p>",
                 stepFunction: insertLineBreak,

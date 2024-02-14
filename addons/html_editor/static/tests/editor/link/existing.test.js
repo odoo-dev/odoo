@@ -96,7 +96,7 @@ test("should add a character after the link if range just after link", async () 
     });
 });
 
-test.todo("should add a character in the link after a br tag", async () => {
+test("should add a character in the link after a br tag", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b<br>[]</a>d</p>',
         stepFunction: async (editor) => {

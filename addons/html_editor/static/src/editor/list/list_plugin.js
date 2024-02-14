@@ -256,7 +256,12 @@ export class ListPlugin extends Plugin {
         while (li) {
             li = this.outdentLI(li);
         }
-        this.shared.setSelection(selectionToRestore, false);
+        const isValid =
+            selectionToRestore.anchorNode.parentElement &&
+            selectionToRestore.focusNode.parentElement;
+        if (isValid) {
+            this.shared.setSelection(selectionToRestore, false);
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -335,7 +340,7 @@ export class ListPlugin extends Plugin {
                 }
             }
             if (shouldRestore) {
-                this.shared.setSelection(selectionToRestore, false);
+                this.shared.setSelection(selectionToRestore);
             }
 
             return li;
@@ -369,7 +374,7 @@ export class ListPlugin extends Plugin {
             if (selectionToRestore.focusNode === li) {
                 selectionToRestore.focusNode = ul.nextSibling;
             }
-            this.shared.setSelection(selectionToRestore, false);
+            this.shared.setSelection(selectionToRestore);
             li.remove();
             if (!ul.firstElementChild) {
                 ul.remove();
