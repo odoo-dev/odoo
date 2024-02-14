@@ -60,7 +60,8 @@ export class ListPlugin extends Plugin {
     });
 
     setup() {
-        this.addDomListener(this.editable, "mousedown", this.onMousedown);
+        this.addDomListener(this.editable, "touchstart", this.onPointerdown);
+        this.addDomListener(this.editable, "mousedown", this.onPointerdown);
     }
 
     handleCommand(command, payload) {
@@ -498,10 +499,24 @@ export class ListPlugin extends Plugin {
     // Event handlers
     // --------------------------------------------------------------------------
 
-    onMousedown(ev) {
+    /**
+     * @param {MouseEvent | TouchEvent} ev
+     */
+    onPointerdown(ev) {
         const node = ev.target;
         const isChecklistItem = node.tagName == "LI" && getListMode(node.parentElement) == "CL";
-        if (isChecklistItem && this.isPointerInsideCheckbox(node, ev.offsetX, ev.offsetY)) {
+        if (!isChecklistItem) {
+            return;
+        }
+        let offsetX = ev.offsetX;
+        let offsetY = ev.offsetY;
+        if (ev.type === "touchstart") {
+            const rect = node.getBoundingClientRect();
+            offsetX = ev.touches[0].clientX - rect.x;
+            offsetY = ev.touches[0].clientY - rect.y;
+        }
+
+        if (isChecklistItem && this.isPointerInsideCheckbox(node, offsetX, offsetY)) {
             toggleClass(node, "o_checked");
             ev.preventDefault();
             this.dispatch("ADD_STEP");
