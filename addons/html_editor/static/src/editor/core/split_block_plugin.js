@@ -49,27 +49,24 @@ export class SplitBlockPlugin extends Plugin {
             targetOffset = splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
+        const blockToSplit = closestElement(targetNode, isBlock);
 
         for (const { callback } of this.resources["split_element_block"]) {
-            if (callback({ targetNode, targetOffset })) {
+            if (callback({ targetNode, targetOffset, blockToSplit })) {
                 return;
             }
         }
 
-        this.splitElementBlock({ targetNode, targetOffset });
+        this.splitElementBlock({ targetNode, targetOffset, blockToSplit });
     }
 
-    splitElementBlock({ targetNode, targetOffset }) {
+    splitElementBlock({ targetNode, targetOffset, blockToSplit }) {
         const restore = prepareUpdate(targetNode, targetOffset);
-
-        // @todo @phoenix: list stuff, review this.
-        const listElement = targetNode.nodeName !== "LI" && targetNode.closest("LI > *");
-        const elementToSplit = listElement || closestElement(targetNode, (el) => isBlock(el));
 
         const [beforeElement, afterElement] = splitElementUntil(
             targetNode,
             targetOffset,
-            elementToSplit.parentElement
+            blockToSplit.parentElement
         );
         restore();
         const removeEmptyAndFill = (node) => {
