@@ -9,6 +9,8 @@ function _getContent(node, selection) {
             return getTextContent(node, selection);
         case Node.ELEMENT_NODE:
             return getElemContent(node, selection);
+        case Node.COMMENT_NODE:
+            return `<!--${node.textContent}-->`;
         default:
             throw new Error("boom");
     }
