@@ -26,6 +26,24 @@ describe("Selection collapsed", () => {
                 });
             });
 
+            test("should split a list item containing an inline element in two", async () => {
+                await testEditor({
+                    contentBefore: "<ol><li><strong>ab[]cd</strong></li></ol>",
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        "<ol><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ol>",
+                });
+            });
+
+            test("should split a list item containing a block in two", async () => {
+                await testEditor({
+                    contentBefore: "<ol><li><h1>ab[]cd</h1></li></ol>",
+                    stepFunction: insertParagraphBreak,
+                    // Obs: normalization does not enter block elements.
+                    contentAfter: "<ol><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ol>",
+                });
+            });
+
             test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc[]</li></ol>",
@@ -224,6 +242,24 @@ describe("Selection collapsed", () => {
                 });
             });
 
+            test("should split a list item containing an inline element in two", async () => {
+                await testEditor({
+                    contentBefore: "<ul><li><strong>ab[]cd</strong></li></ul>",
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        "<ul><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>",
+                });
+            });
+
+            test("should split a list item containing a block in two", async () => {
+                await testEditor({
+                    contentBefore: "<ul><li><h1>ab[]cd</h1></li></ul>",
+                    stepFunction: insertParagraphBreak,
+                    // Obs: normalization does not enter block elements.
+                    contentAfter: "<ul><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>",
+                });
+            });
+
             test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc[]</li></ul>",
@@ -380,6 +416,46 @@ describe("Selection collapsed", () => {
                     stepFunction: insertParagraphBreak,
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">ab</li><li>[]cd</li></ul>',
+                });
+            });
+
+            test("should split a cheklist item containing an inline element in two (unchecked)", async () => {
+                await testEditor({
+                    contentBefore: '<ul class="o_checklist"><li><strong>ab[]cd</strong></li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        '<ul class="o_checklist"><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>',
+                });
+            });
+
+            test("should split a checklist item containing a block in two (unchecked)", async () => {
+                await testEditor({
+                    contentBefore: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    // Obs: normalization does not enter block elements.
+                    contentAfter:
+                        '<ul class="o_checklist"><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
+                });
+            });
+
+            test("should split a cheklist item containing an inline element in two (checked)", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked"><strong>ab[]cd</strong></li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked"><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>',
+                });
+            });
+
+            test("should split a checklist item containing a block in two (checked)", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<ul class="o_checklist"><li class="o_checked"><h1>ab[]cd</h1></li></ul>',
+                    stepFunction: insertParagraphBreak,
+                    // Obs: normalization does not enter block elements.
+                    contentAfter:
+                        '<ul class="o_checklist"><li class="o_checked"><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
                 });
             });
 
