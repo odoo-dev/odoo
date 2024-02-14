@@ -46,7 +46,7 @@ describe("getTraversedNodes", () => {
     });
 
     test("should return an image in a parent selection", async () => {
-        const { el, editor } = await setupEditor(`<div id="parent-element-to-select"><img/></div>`);
+        const { el, editor } = await setupEditor(`<div id="parent-element-to-select"><img></div>`);
         const sel = editor.document.getSelection();
         const range = editor.document.createRange();
         const parent = editor.document.querySelector("div#parent-element-to-select");
