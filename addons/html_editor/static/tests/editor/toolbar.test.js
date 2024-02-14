@@ -34,7 +34,7 @@ test("toolbar works: can format bold", async () => {
     expect(getContent(el)).toBe("<p><strong>[test]</strong></p>");
 });
 
-test`iframe`("toolbar in an iframe works: can format bold", async () => {
+test.tags("iframe")("toolbar in an iframe works: can format bold", async () => {
     const { el } = await setupEditor("<p>test</p>", {}, true);
     expect(getFixture()).toContain("iframe");
     expect(getContent(el)).toBe("<p>test</p>");
