@@ -274,7 +274,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should split a paragraph at the end of a format node", async () => {
+        test("should split a paragraph at the end of a format node", async () => {
             await testEditor({
                 contentBefore: "<p><b>abc</b>[]</p>",
                 stepFunction: insertParagraphBreak,

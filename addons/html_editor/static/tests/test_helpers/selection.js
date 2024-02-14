@@ -1,6 +1,6 @@
 export function getContent(node) {
     const selection = node.ownerDocument.getSelection();
-    return [...node.childNodes].map((childNode) => _getContent(childNode, selection)).join("");
+    return _getElemContent(node, selection);
 }
 
 function _getContent(node, selection) {
@@ -20,22 +20,19 @@ function getTextContent(node, selection) {
         text = text.slice(0, selection.focusOffset) + "]" + text.slice(selection.focusOffset);
     }
     if (selection.anchorNode === node) {
-        text = text.slice(0, selection.anchorOffset) + "[" + text.slice(selection.anchorOffset);
+        const isAfterFocus =
+            selection.focusNode === selection.anchorNode &&
+            selection.focusOffset < selection.anchorOffset;
+        const idx = selection.anchorOffset + (isAfterFocus ? 1 : 0);
+        text = text.slice(0, idx) + "[" + text.slice(idx);
     }
     return text;
 }
 
 const VOID_ELEMS = new Set(["BR", "IMG", "INPUT"]);
 
-function getElemContent(el, selection) {
-    const tag = el.tagName.toLowerCase();
-    const attrs = [];
-    for (const attr of el.attributes) {
-        attrs.push(`${attr.name}="${attr.value}"`);
-    }
-    const attrStr = (attrs.length ? " " : "") + attrs.join(" ");
-    let result = `<${tag + attrStr}>`;
-
+function _getElemContent(el, selection) {
+    let result = "";
     function addTextSelection() {
         if (selection.anchorNode === el && index === selection.anchorOffset) {
             result += "[";
@@ -51,10 +48,19 @@ function getElemContent(el, selection) {
         index++;
     }
     addTextSelection();
-    if (!VOID_ELEMS.has(el.tagName)) {
-        result += `</${tag}>`;
-    }
     return result;
+}
+
+function getElemContent(el, selection) {
+    const tag = el.tagName.toLowerCase();
+    const attrs = [];
+    for (const attr of el.attributes) {
+        attrs.push(`${attr.name}="${attr.value}"`);
+    }
+    const attrStr = (attrs.length ? " " : "") + attrs.join(" ");
+    return VOID_ELEMS.has(el.tagName)
+        ? `<${tag + attrStr}>`
+        : `<${tag + attrStr}>${_getElemContent(el, selection)}</${tag}>`;
 }
 
 export function setContent(el, content) {
@@ -64,6 +70,9 @@ export function setContent(el, content) {
     const configSelection = getSelection(el, content);
     if (configSelection) {
         setSelection(configSelection);
+    }
+    if (getContent(el) !== content) {
+        throw new Error("error in setContent/getContent helpers");
     }
 }
 
@@ -116,31 +125,43 @@ export function setRange(el, content) {
 }
 
 function visitAndSetRange(target, ref, configSelection) {
-    function applyRange() {
+    function applyRange(target, ref, idx) {
         const text = ref.textContent;
         if (text.includes("[")) {
-            const index = text.replace("]", "").indexOf("[");
+            const index = idx === undefined ? text.replace("]", "").indexOf("[") : idx;
             configSelection.anchorNode = target;
             configSelection.anchorOffset = index;
         }
         if (text.includes("]")) {
-            const index = text.replace("[", "").indexOf("]");
+            const index = idx === undefined ? text.replace("[", "").indexOf("]") : idx;
             configSelection.focusNode = target;
             configSelection.focusOffset = index;
         }
     }
 
     if (target.nodeType === Node.TEXT_NODE) {
-        applyRange();
+        applyRange(target, ref);
     } else {
         const targetChildren = [...target.childNodes];
         const refChildren = [...ref.childNodes];
-        if (targetChildren.length !== refChildren.length) {
-            applyRange();
-            return;
-        }
-        for (let i = 0; i < targetChildren.length; i++) {
-            visitAndSetRange(targetChildren[i], refChildren[i], configSelection);
+        let i = 0;
+        let j = 0;
+        while (i !== targetChildren.length || j !== refChildren.length) {
+            const targetChild = targetChildren[i] || targetChildren[i - 1];
+            const refChild = refChildren[j];
+            if (!targetChild) {
+                applyRange(target, refChild, 0);
+                return;
+            }
+            if (refChild.nodeType === targetChild.nodeType) {
+                visitAndSetRange(targetChild, refChild, configSelection);
+                i++;
+                j++;
+            } else {
+                // refchild is a textnode reduced to "[" or "]"
+                j++;
+                applyRange(target, refChild, i);
+            }
         }
     }
 }
