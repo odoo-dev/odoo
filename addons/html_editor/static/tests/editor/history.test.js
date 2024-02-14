@@ -206,7 +206,7 @@ describe("prevent renderingClasses to be set from history", () => {
                     undo(editor);
                     redo(editor);
                 },
-                contentAfter: `<p class="y">a</p>`,
+                contentAfter: `[]<p class="y">a</p>`,
             },
             {
                 Plugins: [TestRenderingClassesPlugin],

@@ -598,7 +598,7 @@ X[]
                 });
             });
 
-            test.todo("should delete a line break (1)", async () => {
+            test("should delete a line break (1)", async () => {
                 // 2-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br>[]<br><br><br></p><p>cd</p>",
@@ -607,22 +607,19 @@ X[]
                 });
             });
 
-            test.todo(
-                "should delete a line break, then merge a paragraph with 3 <br> into a paragraph with text",
-                async () => {
-                    // 2-2
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br>[]<br><br><br></p><p>cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab[]<br><br><br></p><p>cd</p>",
-                    });
-                }
-            );
+            test("should delete a line break, then merge a paragraph with 3 <br> into a paragraph with text", async () => {
+                // 2-2
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br>[]<br><br><br></p><p>cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab[]<br><br><br></p><p>cd</p>",
+                });
+            });
 
-            test.todo("should delete a line break (2)", async () => {
+            test("should delete a line break (2)", async () => {
                 // 3-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br>[]<br><br></p><p>cd</p>",
@@ -631,7 +628,7 @@ X[]
                 });
             });
 
-            test.todo("should delete two line breaks (3)", async () => {
+            test("should delete two line breaks (3)", async () => {
                 // 3-2
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br>[]<br><br></p><p>cd</p>",
@@ -643,23 +640,20 @@ X[]
                 });
             });
 
-            test.todo(
-                "should delete two line breaks, then merge a paragraph with 3 <br> into a paragraph with text",
-                async () => {
-                    // 3-3
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br>[]<br><br></p><p>cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab[]<br><br></p><p>cd</p>",
-                    });
-                }
-            );
+            test("should delete two line breaks, then merge a paragraph with 3 <br> into a paragraph with text", async () => {
+                // 3-3
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br>[]<br><br></p><p>cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab[]<br><br></p><p>cd</p>",
+                });
+            });
 
-            test.todo("should delete a line break when several", async () => {
+            test("should delete a line break when several", async () => {
                 // 4-1
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -676,7 +670,7 @@ X[]
                 });
             });
 
-            test.todo("should delete two line breaks", async () => {
+            test("should delete two line breaks", async () => {
                 // 4-2
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -699,7 +693,7 @@ X[]
                 });
             });
 
-            test.todo("should delete three line breaks (emptying a paragraph)", async () => {
+            test("should delete three line breaks (emptying a paragraph)", async () => {
                 // 4-3
                 await testEditor({
                     contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
@@ -723,34 +717,31 @@ X[]
                 });
             });
 
-            test.todo(
-                "should delete three line breaks, then merge an empty parargaph into a paragraph with text",
-                async () => {
-                    // 4-4
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        // This should be identical to 4-4
-                        contentAfter: "<p>ab[]</p><p>cd</p>",
-                    });
-                    // 5-4
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfter: "<p>ab[]</p><p>cd</p>",
-                    });
-                }
-            );
+            test("should delete three line breaks, then merge an empty parargaph into a paragraph with text", async () => {
+                // 4-4
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br>[]<br></p><p>cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    // This should be identical to 4-4
+                    contentAfter: "<p>ab[]</p><p>cd</p>",
+                });
+                // 5-4
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br><br><br><br>[]</p><p>cd</p>",
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfter: "<p>ab[]</p><p>cd</p>",
+                });
+            });
 
             test("should merge a paragraph into a paragraph with 4 <br>", async () => {
                 // 6-1
@@ -1283,7 +1274,7 @@ X[]
                 contentAfter: "<table><tbody><tr><td><p>a[]</p></td></tr></tbody></table>",
             }));
 
-        test.todo("should fill empty block with a <br>", async () => {
+        test("should fill empty block with a <br>", async () => {
             await testEditor({
                 contentBefore: "<p>a[]</p>",
                 stepFunction: deleteBackward,
@@ -1378,7 +1369,7 @@ X[]
             });
         });
 
-        test.todo("should remove only one br between contents", async () => {
+        test("should remove only one br between contents", async () => {
             await testEditor({
                 contentBefore: "<p>abc<br>[]<br>def</p>",
                 stepFunction: deleteBackward,
