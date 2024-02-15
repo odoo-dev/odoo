@@ -5,7 +5,12 @@ import { getCommonAncestor } from "../utils/dom_traversal";
 export class HistoryPlugin extends Plugin {
     static name = "history";
     static dependencies = ["dom", "selection"];
-    static shared = ["getCurrentMutations", "revertCurrentMutationsUntil", "handleObserverRecords"];
+    static shared = [
+        "getCurrentMutations",
+        "revertCurrentMutationsUntil",
+        "handleObserverRecords",
+        "makeSavePoint",
+    ];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },
@@ -612,6 +617,44 @@ export class HistoryPlugin extends Plugin {
             commonAncestor = commonAncestor.parentElement;
         }
         return commonAncestor;
+    }
+    /**
+     * Returns a function that can be later called to revert history to the
+     * current state.
+     * @returns {Function}
+     */
+    makeSavePoint() {
+        const savePointIndex = this.steps.length - 1;
+        return () => this.revertStepsUntil(savePointIndex);
+    }
+    /**
+     * Reverts the history steps until the specified step index.
+     * @param {number} stepIndex
+     */
+    revertStepsUntil(stepIndex) {
+        // Discard current step's mutations
+        this.revertMutations(this.currentStep.mutations);
+        this.currentStep.mutations = [];
+
+        // Revert each step that is not "consumed" until stepIndex (not inclusive).
+        const stepsToRevert = this.steps
+            .slice(stepIndex + 1)
+            .filter((step) => this.stepsStates.get(step.id) !== "consumed");
+
+        for (const step of stepsToRevert.toReversed()) {
+            this.revertMutations(step.mutations);
+            this.stepsStates.set(step.id, "consumed");
+        }
+
+        // Restore selection to last reverted step's selection.
+        const lastRevertedStep = stepsToRevert[0] || this.currentStep;
+        this.setSerializedSelection(lastRevertedStep.selection);
+
+        // Register resulting mutations as a new step.
+        const addedStep = this.addStep();
+        if (addedStep) {
+            this.stepsStates.set(addedStep.id, "consumed");
+        }
     }
 }
 

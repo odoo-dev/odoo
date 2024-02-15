@@ -12,7 +12,7 @@ function target(selection) {
 
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
-    static dependencies = ["overlay", "selection"];
+    static dependencies = ["overlay", "selection", "history"];
     static resources = () => ({
         temp_hints: {
             text: 'Type "/" for commands',
@@ -24,6 +24,7 @@ export class PowerboxPlugin extends Plugin {
     setup() {
         this.offset = 0;
         this.groups = this.getGroups();
+        this.historySavePointRestore = null;
 
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
@@ -31,7 +32,9 @@ export class PowerboxPlugin extends Plugin {
             el: this.editable,
             offset: () => this.offset,
             groups: this.groups,
+            onApplyCommand: () => this.historySavePointRestore(),
         });
+        // @todo @phoenix: consider using keydown or beforeinput instead
         this.addDomListener(this.editable, "keypress", (ev) => {
             if (ev.key === "/") {
                 this.openPowerbox();
@@ -43,6 +46,7 @@ export class PowerboxPlugin extends Plugin {
         const selection = this.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         this.offset = range && range.startOffset;
+        this.historySavePointRestore = this.shared.makeSavePoint();
         this.powerbox.open();
     }
 

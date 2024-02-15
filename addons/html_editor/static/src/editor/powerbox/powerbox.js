@@ -13,6 +13,7 @@ export class Powerbox extends Component {
         },
         offset: Function,
         groups: Array,
+        onApplyCommand: Function,
     };
 
     setup() {
@@ -132,11 +133,9 @@ export class Powerbox extends Component {
     }
 
     applyCommand(command) {
-        const selection = window.getSelection();
-        const nodeValue = this.node.nodeValue;
-        const newValue = nodeValue.slice(0, this.offset) + nodeValue.slice(this.endOffset);
-        this.node.nodeValue = newValue;
-        selection.setPosition(this.node, this.offset);
+        // Restore state before insertion of "/"
+        this.props.onApplyCommand();
+
         command.action(this.props.dispatch);
         this.props.close();
     }
