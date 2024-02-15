@@ -1,8 +1,8 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { makeContentsInline, setTagName } from "../utils/dom";
-import { splitElement, splitTextNode } from "../utils/dom_split";
 import {
     allowsParagraphRelatedElements,
     getDeepestPosition,
@@ -10,15 +10,27 @@ import {
     isShrunkBlock,
     isUnbreakable,
 } from "../utils/dom_info";
+import { splitElement, splitTextNode } from "../utils/dom_split";
 import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
+import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
 import { getDeepRange, getTraversedNodes } from "../utils/selection";
-import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
     static dependencies = ["selection"];
     static shared = ["dom_insert"];
+    static resources = () => ({
+        powerboxCommands: {
+            name: _t("Separator"),
+            description: _t("Insert a horizontal rule separator"),
+            category: "structure",
+            fontawesome: "fa-minus",
+            action(dispatch) {
+                dispatch("INSERT_SEPARATOR");
+            },
+        },
+    });
 
     handleCommand(command, payload) {
         switch (command) {

@@ -1,7 +1,8 @@
-import { isEmpty } from "../utils/dom_info";
-import { Plugin } from "../plugin";
-import { Powerbox } from "./powerbox";
 import { registry } from "@web/core/registry";
+import { Plugin } from "../plugin";
+import { isEmpty } from "../utils/dom_info";
+import { Powerbox } from "./powerbox";
+import { _t } from "@web/core/l10n/translation";
 
 function target(selection) {
     const node = selection.anchorNode;
@@ -11,22 +12,25 @@ function target(selection) {
 
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
-    static dependencies = ["overlay"];
+    static dependencies = ["overlay", "selection"];
     static resources = () => ({
         temp_hints: {
             text: 'Type "/" for commands',
             target,
         },
+        powerboxCategory: { id: "structure", name: _t("Structure"), sequence: 10 },
     });
 
     setup() {
         this.offset = 0;
+        this.groups = this.getGroups();
 
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
             dispatch: this.dispatch,
             el: this.editable,
             offset: () => this.offset,
+            groups: this.groups,
         });
         this.addDomListener(this.editable, "keypress", (ev) => {
             if (ev.key === "/") {
@@ -40,6 +44,22 @@ export class PowerboxPlugin extends Plugin {
         const range = selection.rangeCount && selection.getRangeAt(0);
         this.offset = range && range.startOffset;
         this.powerbox.open();
+    }
+
+    getGroups() {
+        const groups = [];
+        for (const category of this.resources.powerboxCategory.sort(
+            (a, b) => a.sequence - b.sequence
+        )) {
+            groups.push({
+                id: category.id,
+                name: category.name,
+                commands: this.resources.powerboxCommands.filter(
+                    (cmd) => cmd.category === category.id
+                ),
+            });
+        }
+        return groups;
     }
 }
 
