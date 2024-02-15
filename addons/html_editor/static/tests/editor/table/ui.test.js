@@ -1,10 +1,10 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
-import { dispatch } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 
 async function tableUiMenuTest(editor) {
     const column = editor.editable.querySelector("td");
-    await dispatch(column, "mousemove", {});
+    await manuallyDispatchProgrammaticEvent(column, "mousemove", {});
     if (editor._rowUi.style.visibility === "visible") {
         const paragraph = editor.editable.querySelector("p");
         const text = document.createTextNode("table ui");
@@ -14,7 +14,7 @@ async function tableUiMenuTest(editor) {
 
 async function resizeTest(editor) {
     const column = editor.editable.querySelector("td");
-    await dispatch(column, "mousemove", {});
+    await manuallyDispatchProgrammaticEvent(column, "mousemove", {});
     if (
         ["o_row_resize", "o_col_resize"].filter((resize) =>
             editor.editable.classList.contains(resize)

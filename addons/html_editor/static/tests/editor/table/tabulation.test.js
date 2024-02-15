@@ -1,5 +1,5 @@
 import { describe, test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
 
@@ -19,7 +19,7 @@ describe("move selection with tab/shift+tab", () => {
                     </table>
                 `),
                 stepFunction: async (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab" }),
+                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" }),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -50,7 +50,7 @@ describe("move selection with tab/shift+tab", () => {
                     </table>
                 `),
                 stepFunction: async (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab" }),
+                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" }),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -83,7 +83,10 @@ describe("move selection with tab/shift+tab", () => {
                     </table>
                 `),
                 stepFunction: async (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                        key: "Tab",
+                        shiftKey: true,
+                    }),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -114,7 +117,10 @@ describe("move selection with tab/shift+tab", () => {
                     </table>
                 `),
                 stepFunction: async (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                        key: "Tab",
+                        shiftKey: true,
+                    }),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -145,7 +151,10 @@ describe("move selection with tab/shift+tab", () => {
                     </table>
                 `),
                 stepFunction: async (editor) =>
-                    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true }),
+                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                        key: "Tab",
+                        shiftKey: true,
+                    }),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
