@@ -77,7 +77,8 @@ test.todo("should make a selection with underline text in the middle fully under
 
 test.todo("should make a selection ending with underline text fully underline", async () => {
     await testEditor({
-        contentBefore: `<p>[ab</h1><p>${u(`c]d`)}</p>`,
+        // @phoenix content adapted to make it valid html
+        contentBefore: `<p>[ab</p><p>${u(`c]d`)}</p>`,
         stepFunction: underline,
         contentAfter: `<p>${u(`[ab`)}</p><p>${u(`c]d`)}</p>`,
     });

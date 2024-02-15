@@ -48,7 +48,8 @@ describe("parse/render", () => {
 
     test.todo("should parse a solid fontawesome", async () => {
         await testEditor({
-            contentBefore: '<p><i class="fa fa-pastafarianism"></i></span></p>',
+            // @phoenix content adapted to make it valid html
+            contentBefore: '<p><i class="fa fa-pastafarianism"></i></p>',
             contentBeforeEdit:
                 '<p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i></p>',
             contentAfter: '<p><i class="fa fa-pastafarianism"></i></p>',
@@ -72,13 +73,15 @@ describe("parse/render", () => {
 
     test.todo("should parse a fontawesome in a <i>", async () => {
         await testEditor({
-            contentBefore: '<p><i class="fa fa-pastafarianism"></i></i></p>',
+            // @phoenix content adapted to make it valid html
+            contentBefore: '<p><i class="fa fa-pastafarianism"></i></p>',
             contentBeforeEdit:
                 '<p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i></p>',
             contentAfter: '<p><i class="fa fa-pastafarianism"></i></p>',
         });
         await testEditor({
-            contentBefore: '<p><i class="oi oi-pastafarianism"></i></i></p>',
+            // @phoenix content adapted to make it valid html
+            contentBefore: '<p><i class="oi oi-pastafarianism"></i></p>',
             contentBeforeEdit:
                 '<p><i class="oi oi-pastafarianism" contenteditable="false">\u200b</i></p>',
             contentAfter: '<p><i class="oi oi-pastafarianism"></i></p>',

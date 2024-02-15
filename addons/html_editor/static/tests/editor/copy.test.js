@@ -102,7 +102,8 @@ describe("range not collapsed", () => {
 
     test.todo("should copy the selection as a single list item", async () => {
         await testEditor({
-            contentBefore: "<ul><li>[First]</li><li>Second</li>",
+            // @phoenix content adapted to be valid html
+            contentBefore: "<ul><li>[First]</li><li>Second</li></ul>",
             stepFunction: async (editor) => {
                 const clipboardData = new DataTransfer();
                 dispatch(editor.editable, "copy", { clipboardData });
@@ -140,7 +141,8 @@ describe("range not collapsed", () => {
 
     test.todo("should copy the selection as a list with multiple list items", async () => {
         await testEditor({
-            contentBefore: "<ul><li>[First</li><li>Second]</li>",
+            // @phoenix content adapted to make it valid html
+            contentBefore: "<ul><li>[First</li><li>Second]</li></ul>",
             stepFunction: async (editor) => {
                 const clipboardData = new DataTransfer();
                 dispatch(editor.editable, "copy", { clipboardData });
