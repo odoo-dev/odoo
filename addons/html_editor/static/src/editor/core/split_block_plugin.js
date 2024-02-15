@@ -42,6 +42,7 @@ export class SplitBlockPlugin extends Plugin {
             targetNode: selection.anchorNode,
             targetOffset: selection.anchorOffset,
         });
+        this.dispatch("ADD_STEP");
     }
 
     splitBlockNode({ targetNode, targetOffset }) {

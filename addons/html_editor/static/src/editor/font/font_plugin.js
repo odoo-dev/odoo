@@ -3,9 +3,11 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty, setTagName } from "../utils/dom";
 import { isVisibleTextNode } from "../utils/dom_info";
-import { closestElement, descendants } from "../utils/dom_traversal";
+import { closestElement, createDOMPathGenerator, descendants } from "../utils/dom_traversal";
 import { convertNumericToUnit, getCSSVariableValue, getHtmlStyle } from "../utils/formatting";
 import { FontSelector } from "./font_selector";
+import { DIRECTIONS } from "../utils/position";
+import { isBlock } from "../utils/blocks";
 
 const fontItems = [
     {
@@ -75,6 +77,12 @@ const fontSizeItems = [
     { variableName: "small-font-size", className: "o_small-fs" },
 ];
 
+const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
+    leafOnly: true,
+    stopTraverseFunction: isBlock,
+    stopFunction: isBlock,
+});
+
 export class FontPlugin extends Plugin {
     static name = "font";
     static dependencies = ["split_block", "selection"];
@@ -143,19 +151,27 @@ export class FontPlugin extends Plugin {
      * end.
      */
     handleSplitBlockPRE({ targetNode, targetOffset }) {
-        if (targetNode.tagName === "PRE") {
-            if (targetOffset < targetNode.childNodes.length) {
-                const lineBreak = this.document.createElement("br");
-                targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
-                this.shared.setCursorEnd(lineBreak);
-            } else {
-                const node = this.document.createElement("p");
-                targetNode.parentNode.insertBefore(node, targetNode.nextSibling);
-                fillEmpty(node);
-                this.shared.setCursorStart(node);
-            }
-            return true;
+        const closestPre = closestElement(targetNode, "pre");
+        if (!closestPre) {
+            return;
         }
+
+        // Nodes to the right of the split position.
+        const nodesAfterTarget = [...rightLeafOnlyNotBlockPath(targetNode, targetOffset)];
+        if (
+            !nodesAfterTarget.length ||
+            (nodesAfterTarget.length === 1 && nodesAfterTarget[0].nodeName === "BR")
+        ) {
+            const p = this.document.createElement("p");
+            closestPre.after(p);
+            fillEmpty(p);
+            this.shared.setCursorStart(p);
+        } else {
+            const lineBreak = this.document.createElement("br");
+            targetNode.insertBefore(lineBreak, targetNode.childNodes[targetOffset]);
+            this.shared.setCursorEnd(lineBreak);
+        }
+        return true;
     }
 
     // @todo @phoenix: Move this to a specific Heading plugin?
