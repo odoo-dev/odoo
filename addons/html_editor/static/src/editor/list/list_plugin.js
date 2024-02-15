@@ -1,3 +1,4 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
@@ -57,6 +58,36 @@ export class ListPlugin extends Plugin {
                 },
             ],
         },
+        powerboxCommands: [
+            {
+                name: _t("Bulleted list"),
+                description: _t("Create a simple bulleted list"),
+                category: "structure",
+                fontawesome: "fa-list-ul",
+                action(dispatch) {
+                    dispatch("TOGGLE_LIST", { mode: "UL" });
+                },
+            },
+            {
+                name: _t("Numbered list"),
+                description: _t("Create a list with numbering"),
+                category: "structure",
+                fontawesome: "fa-list-ol",
+                action(dispatch) {
+                    dispatch("TOGGLE_LIST", { mode: "OL" });
+                },
+            },
+            {
+                name: _t("Checklist"),
+                description: _t("Track tasks with a checklist"),
+                category: "structure",
+
+                fontawesome: "fa-check-square-o",
+                action(dispatch) {
+                    dispatch("TOGGLE_LIST", { mode: "CL" });
+                },
+            },
+        ],
     });
 
     setup() {

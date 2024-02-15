@@ -1,10 +1,6 @@
 import { Component, onMounted, onPatched, useExternalListener, useRef } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { rotate } from "@web/core/utils/arrays";
 import { fuzzyLookup } from "@web/core/utils/search";
-
-const categories = registry.category("powerbox_categories");
-const commands = registry.category("phoenix_commands");
 
 export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
@@ -16,6 +12,7 @@ export class Powerbox extends Component {
             validate: (el) => el.nodeType === Node.ELEMENT_NODE,
         },
         offset: Function,
+        groups: Array,
     };
 
     setup() {
@@ -105,19 +102,19 @@ export class Powerbox extends Component {
     computeCommands(search = "") {
         this.commands = [];
         this.categories = [];
-        for (const [id, category] of categories.getEntries()) {
-            let cmds = commands.getAll().filter((cmd) => cmd.category === id);
-            if (search) {
-                cmds = fuzzyLookup(search.toLowerCase(), cmds, (cmd) =>
-                    (cmd.name + cmd.description + category.name).toLowerCase()
-                );
-            }
-            this.commands.push(...cmds);
-            if (cmds.length) {
-                this.categories.push({
-                    name: category.name,
-                    commands: cmds,
-                });
+        for (const group of this.props.groups) {
+            const category = {
+                id: group.id,
+                name: group.name,
+            };
+            category.commands = search
+                ? fuzzyLookup(search.toLowerCase(), group.commands, (cmd) =>
+                      (cmd.name + cmd.description + category.name).toLowerCase()
+                  )
+                : group.commands;
+            if (category.commands.length) {
+                this.commands = [...this.commands, ...category.commands];
+                this.categories.push(category);
             }
         }
         this.cmdIndex = 0;

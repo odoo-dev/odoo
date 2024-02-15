@@ -1,9 +1,10 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { closestElement } from "../utils/dom_traversal";
-import { unwrapContents } from "../utils/dom";
 import { closestBlock } from "../utils/blocks";
+import { unwrapContents } from "../utils/dom";
 import { isEmpty } from "../utils/dom_info";
+import { closestElement } from "../utils/dom_traversal";
 
 const REGEX_BOOTSTRAP_COLUMN = /(?:^| )col(-[a-zA-Z]+)?(-\d+)?(?:$| )/;
 
@@ -25,6 +26,44 @@ export class ColumnPlugin extends Plugin {
             text: "New column...",
             target: targetForHint,
         },
+        powerboxCommands: [
+            {
+                name: _t("2 columns"),
+                description: _t("Convert into 2 columns"),
+                category: "structure",
+                fontawesome: "fa-columns",
+                action(dispatch) {
+                    dispatch("COLUMNIZE", { numberOfColumns: 2 });
+                },
+            },
+            {
+                name: _t("3 columns"),
+                description: _t("Convert into 3 columns"),
+                category: "structure",
+                fontawesome: "fa-columns",
+                action(dispatch) {
+                    dispatch("COLUMNIZE", { numberOfColumns: 3 });
+                },
+            },
+            {
+                name: _t("4 columns"),
+                description: _t("Convert into 4 columns"),
+                category: "structure",
+                fontawesome: "fa-columns",
+                action(dispatch) {
+                    dispatch("COLUMNIZE", { numberOfColumns: 4 });
+                },
+            },
+            {
+                name: _t("Remove columns"),
+                description: _t("Back to one column"),
+                category: "structure",
+                fontawesome: "fa-columns",
+                action(dispatch) {
+                    dispatch("COLUMNIZE", { numberOfColumns: 0 });
+                },
+            },
+        ],
     });
 
     handleCommand(command, payload) {
