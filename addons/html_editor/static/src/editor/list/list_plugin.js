@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/dom";
-import { isShrunkBlock, isVisible } from "../utils/dom_info";
+import { isVisible } from "../utils/dom_info";
 import { closestElement, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
@@ -254,14 +254,6 @@ export class ListPlugin extends Plugin {
      * @param {"UL"|"OL"|"CL"} mode
      */
     pToList(p, mode) {
-        // @todo
-        // Powerbox commands for lists on a empty paragraph do not work because
-        // the BR is not properly restored after the "/command" is removed (see applyCommand powerbox.js),
-        // and the remaining empty text node is removed. This is a temp fix.
-        if (isShrunkBlock(p)) {
-            p.append(this.document.createElement("BR"));
-        }
-
         const selectionToRestore = { ...this.shared.getEditableSelection() };
         const list = insertListAfter(p, mode, [[...p.childNodes]]);
         copyAttributes(p, list);
