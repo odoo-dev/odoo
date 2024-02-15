@@ -83,12 +83,48 @@ describe("Selection collapsed", () => {
                 contentAfter: "<pre>ab<br>[]cd</pre>",
             });
         });
+        test("should insert a line break within the pre containing inline element", async () => {
+            await testEditor({
+                contentBefore: "<pre>a<strong>b[]c</strong>d</pre>",
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<pre>a<strong>b<br>[]c</strong>d</pre>",
+            });
+        });
+        test("should insert a line break within the pre containing inline elementd", async () => {
+            await testEditor({
+                contentBefore: "<pre><em>a<strong>b[]c</strong>d</em></pre>",
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<pre><em>a<strong>b<br>[]c</strong>d</em></pre>",
+            });
+        });
 
         test("should insert a new paragraph after the pre", async () => {
             await testEditor({
                 contentBefore: "<pre>abc[]</pre>",
                 stepFunction: insertParagraphBreak,
                 contentAfter: "<pre>abc</pre><p>[]<br></p>",
+            });
+        });
+        test("should insert a new paragraph after the pre containing inline element", async () => {
+            await testEditor({
+                contentBefore: "<pre>ab<strong>c[]</strong></pre>",
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<pre>ab<strong>c</strong></pre><p>[]<br></p>",
+            });
+        });
+        test("should insert a new paragraph after the pre containing inline elements", async () => {
+            await testEditor({
+                contentBefore: "<pre><em>ab<strong>c[]</strong></em></pre>",
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<pre><em>ab<strong>c</strong></em></pre><p>[]<br></p>",
+            });
+        });
+
+        test("should be able to break out of an empty pre", async () => {
+            await testEditor({
+                contentBefore: "<pre>[]<br></pre>",
+                stepFunction: insertParagraphBreak,
+                contentAfter: "<pre><br></pre><p>[]<br></p>",
             });
         });
     });
