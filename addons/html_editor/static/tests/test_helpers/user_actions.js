@@ -1,4 +1,4 @@
-import { click, dispatch } from "@odoo/hoot-dom";
+import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { setSelection } from "./selection";
 import { childNodeIndex } from "@html_editor/editor/utils/position";
 
@@ -30,17 +30,17 @@ export async function insertText(editor, text) {
     };
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.
-        dispatch(editor.editable, "keydown", { key: char });
+        manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: char });
         // KeyPressEvent is not required but is triggered like in the browser.
-        dispatch(editor.editable, "keypress", { key: char });
+        manuallyDispatchProgrammaticEvent(editor.editable, "keypress", { key: char });
         // InputEvent is required to simulate the insert text.
         insertChar(char);
-        dispatch(editor.editable, "input", {
+        manuallyDispatchProgrammaticEvent(editor.editable, "input", {
             inputType: "insertText",
             data: char,
         });
         // KeyUpEvent is not required but is triggered like the browser would.
-        dispatch(editor.editable, "keyup", { key: char });
+        manuallyDispatchProgrammaticEvent(editor.editable, "keyup", { key: char });
     }
 }
 
@@ -139,7 +139,7 @@ export async function simulateArrowKeyPress(editor, key) {
     const index =
         key === "ArrowRight" ? childNodeIndex(editableChild) + 1 : childNodeIndex(editableChild);
     const pos = [editor.editable, index];
-    dispatch(editor.editable, "keydown", { key });
+    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key });
     selection.setBaseAndExtent(...pos, ...pos);
     // TODO @phoenix to check if we need the nextTick
     // await nextTick();
@@ -153,7 +153,7 @@ export async function simulateMouseClick(editor, node, after = false) {
     }
     const index = after ? childNodeIndex(editableChild) + 1 : childNodeIndex(editableChild);
     const pos = [editor.editable, index];
-    dispatch(editor.editable, "mousedown");
+    manuallyDispatchProgrammaticEvent(editor.editable, "mousedown");
     const selection = editor.document.getSelection();
     selection.setBaseAndExtent(...pos, ...pos);
 
@@ -169,11 +169,11 @@ export function unlink(editor) {
 }
 
 export function keydownTab(editor) {
-    dispatch(editor.editable, "keydown", { key: "Tab" });
+    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" });
 }
 
 export function keydownShiftTab(editor) {
-    dispatch(editor.editable, "keydown", { key: "Tab", shiftKey: true });
+    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab", shiftKey: true });
 }
 
 export function applyColor(color, mode, element) {
