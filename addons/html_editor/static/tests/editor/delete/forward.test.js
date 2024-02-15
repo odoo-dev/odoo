@@ -58,7 +58,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete the last character in a paragraph", async () => {
+        test("should delete the last character in a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]c</p>",
                 stepFunction: deleteForward,

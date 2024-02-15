@@ -138,7 +138,8 @@ test.todo(
     "should make a selection ending with strikeThrough text fully strikeThrough",
     async () => {
         await testEditor({
-            contentBefore: `<p>[ab</h1><p>${s(`c]d`)}</p>`,
+            // @phoenix content adapted to make it valid html
+            contentBefore: `<p>[ab</p><p>${s(`c]d`)}</p>`,
             stepFunction: strikeThrough,
             contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]d`)}</p>`,
         });

@@ -17,7 +17,7 @@ function _getContent(node, selection) {
 }
 
 function getTextContent(node, selection) {
-    let text = node.textContent.replace(/\u00a0/g, "&nbsp;");
+    let text = node.textContent;
     if (selection.focusNode === node) {
         text = text.slice(0, selection.focusOffset) + "]" + text.slice(selection.focusOffset);
     }
@@ -28,10 +28,10 @@ function getTextContent(node, selection) {
         const idx = selection.anchorOffset + (isAfterFocus ? 1 : 0);
         text = text.slice(0, idx) + "[" + text.slice(idx);
     }
-    return text;
+    return text.replace(/\u00a0/g, "&nbsp;");
 }
 
-const VOID_ELEMS = new Set(["BR", "IMG", "INPUT"]);
+const VOID_ELEMS = new Set(["BR", "IMG", "INPUT", "HR"]);
 
 function _getElemContent(el, selection) {
     let result = "";
@@ -65,9 +65,27 @@ function getElemContent(el, selection) {
         : `<${tag + attrStr}>${_getElemContent(el, selection)}</${tag}>`;
 }
 
+function getTextNodesIterator(el) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    walker[Symbol.iterator] = () => ({
+        next() {
+            const value = walker.nextNode();
+            return { value, done: !value };
+        },
+    });
+    return walker;
+}
+
 export function setContent(el, content) {
-    const rawContent = content.replace("[", "").replace("]", "");
-    el.innerHTML = rawContent;
+    // const rawContent = content.replaceAll("[", "").replace("]", "");
+    // build a temp div element to first remove all [] characters in text nodes
+    const div = document.createElement("div");
+    div.innerHTML = content;
+    for (const textNode of getTextNodesIterator(div)) {
+        textNode.textContent = textNode.textContent.replace("[", "").replace("]", "");
+    }
+    // remove extra empty text nodes
+    el.innerHTML = div.innerHTML;
 
     const configSelection = getSelection(el, content);
     if (configSelection) {
@@ -83,15 +101,9 @@ export function setSelection({ anchorNode, anchorOffset, focusNode, focusOffset 
     selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 }
 
-export function getSelection(el, content) {
+function getSelection(el, content) {
     if (content.indexOf("[") === -1 || content.indexOf("]") === -1) {
         return;
-    }
-
-    // sanity check
-    const rawContent = content.replace("[", "").replace("]", "");
-    if (el.innerHTML !== rawContent) {
-        throw new Error("setRange requires the same html content");
     }
 
     const elRef = document.createElement(el.tagName);
