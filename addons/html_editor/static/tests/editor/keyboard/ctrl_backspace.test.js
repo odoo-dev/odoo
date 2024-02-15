@@ -1,5 +1,5 @@
 import { test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
 
@@ -15,7 +15,10 @@ test.todo("should not remove the last p with ctrl+backspace", async () => {
                     sel.anchorNode.remove();
                 }
             });
-            await dispatch(editor.editable, "keydown", { key: "Backspace", ctrlKey: true });
+            await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                key: "Backspace",
+                ctrlKey: true,
+            });
         },
         contentAfter: unformat(`<p>[]<br></p>`),
     });
@@ -38,7 +41,10 @@ test.todo(
                         sel.anchorNode.remove();
                     }
                 });
-                await dispatch(editor.editable, "keydown", { key: "Backspace", ctrlKey: true });
+                await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                    key: "Backspace",
+                    ctrlKey: true,
+                });
             },
             contentAfter: unformat(`
                 <p>text</p>
@@ -58,7 +64,10 @@ test.todo(
                     []<br>
                 </blockquote>`),
             stepFunction: async (editor) => {
-                await dispatch(editor.editable, "keydown", { key: "Backspace", ctrlKey: true });
+                await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                    key: "Backspace",
+                    ctrlKey: true,
+                });
             },
             contentAfter: unformat(`<p>[]<br></p>`),
         });
@@ -76,7 +85,10 @@ test.todo(
                     </blockquote>
                 </div></div>`),
             stepFunction: async (editor) => {
-                await dispatch(editor.editable, "keydown", { key: "Backspace", ctrlKey: true });
+                await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                    key: "Backspace",
+                    ctrlKey: true,
+                });
             },
             contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
@@ -95,7 +107,10 @@ test("should correctly rollback a CTRL+BACKSPACE if the element should not have 
                     </blockquote>
                 </div></div>`),
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "Backspace", ctrlKey: true });
+            await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                key: "Backspace",
+                ctrlKey: true,
+            });
         },
         contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">

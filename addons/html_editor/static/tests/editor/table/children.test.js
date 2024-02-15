@@ -1,6 +1,6 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
-import { dispatch } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 
 // TODO use the right commands (ADD_ROW, ADD_COLUMN)
 function addRow(position) {
@@ -285,7 +285,8 @@ describe("tab", () => {
         await testEditor({
             contentBefore:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
-            stepFunction: async (editor) => dispatch(editor.editable, "keydown", { key: "Tab" }),
+            stepFunction: async (editor) =>
+                manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" }),
             contentAfter:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef</td></tr><tr style="height: 20px;"><td>[<p><br></p>]</td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
         });
