@@ -54,7 +54,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete the last character in a paragraph", async () => {
+        test("should delete the last character in a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: deleteBackward,
@@ -548,7 +548,7 @@ X[]
                 });
             });
 
-            test.todo("should delete a trailing line break", async () => {
+            test("should delete a trailing line break", async () => {
                 await testEditor({
                     contentBefore: "<p>abc<br><br>[]</p>",
                     stepFunction: deleteBackward,
@@ -1250,21 +1250,18 @@ X[]
             });
         });
 
-        test.todo(
-            "should delete a one letter word preceded by visible space (end of block)",
-            async () => {
-                await testEditor({
-                    contentBefore: "<p>a b[]</p>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>a&nbsp;[]</p>",
-                });
-                await testEditor({
-                    contentBefore: "<p>a [b]</p>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>a&nbsp;[]</p>",
-                });
-            }
-        );
+        test("should delete a one letter word preceded by visible space (end of block)", async () => {
+            await testEditor({
+                contentBefore: "<p>a b[]</p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p>a&nbsp;[]</p>",
+            });
+            await testEditor({
+                contentBefore: "<p>a [b]</p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p>a&nbsp;[]</p>",
+            });
+        });
 
         test("should delete an empty paragraph in a table cell", async () =>
             await testEditor({
@@ -1429,9 +1426,10 @@ X[]
             });
         });
 
-        test.todo("should delete an image that is displayed as a block", async () => {
+        test("should delete an image that is displayed as a block", async () => {
             await testEditor({
-                contentBefore: unformat(`<div>a[b<img style="display: block;"/>c]d</div>`),
+                // @phoenix content adapted to make it valid html
+                contentBefore: unformat(`<div>a[b<img style="display: block;">c]d</div>`),
                 stepFunction: deleteBackward,
                 contentAfter: unformat(`<div>a[]d</div>`),
             });
@@ -1956,18 +1954,15 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should transform the last space of a container to an &nbsp; after removing the last word through deleteRange",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>a [b]</p>`,
-                stepFunction: async (editor) => {
-                    await deleteBackward(editor);
-                },
-                contentAfter: `<p>a&nbsp;[]</p>`,
-            });
-        }
-    );
+    test("should transform the last space of a container to an &nbsp; after removing the last word through deleteRange", async () => {
+        await testEditor({
+            contentBefore: `<p>a [b]</p>`,
+            stepFunction: async (editor) => {
+                await deleteBackward(editor);
+            },
+            contentAfter: `<p>a&nbsp;[]</p>`,
+        });
+    });
 
     describe("Nested editable zone (inside contenteditable=false element)", () => {
         test("should extend the range to fully include contenteditable=false that are partially selected at the end of the range", async () => {

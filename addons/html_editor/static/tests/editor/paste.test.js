@@ -216,7 +216,8 @@ describe("Simple text", () => {
         // instead of linebreaks but that would be an opinionated choice.
         test.todo("should paste text and understand \\n newlines", async () => {
             await testEditor({
-                contentBefore: "<p>[]<br/></p>",
+                // @phoenix content adapted to make it valid html
+                contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "a\nb\nc\nd");
                 },
@@ -230,7 +231,8 @@ describe("Simple text", () => {
 
         test.todo("should paste text and understand \\r\\n newlines", async () => {
             await testEditor({
-                contentBefore: "<p>[]<br/></p>",
+                // @phoenix content adapted to make it valid html
+                contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "a\r\nb\r\nc\r\nd");
                 },

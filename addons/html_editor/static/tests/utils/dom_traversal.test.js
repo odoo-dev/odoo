@@ -10,7 +10,7 @@ import {
     lastLeaf,
     getCommonAncestor,
 } from "@html_editor/editor/utils/dom_traversal";
-import { before, describe, expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../test_helpers/editor";
 import { unformat } from "../test_helpers/format";
 
@@ -243,7 +243,7 @@ describe("getAdjacents", () => {
 });
 describe("getCommonAncestor", () => {
     let root, p1, p2, span1, span2, ul, li1, li2, li3, li4, ol;
-    before(() => {
+    const prepareHtml = () => {
         [root] = insertTestHtml(
             unformat(`
             <div>
@@ -270,24 +270,28 @@ describe("getCommonAncestor", () => {
         [ul] = root.querySelectorAll("ul");
         [li1, li2, li3, li4] = root.querySelectorAll("li");
         [ol] = root.querySelectorAll("ol");
-    });
+    };
 
     test("should return null if no nodes are provided", () => {
+        prepareHtml();
         const result = getCommonAncestor([]);
         expect(result).toBe(null);
     });
 
     test("should return the node itself if only one node is provided", () => {
+        prepareHtml();
         const result = getCommonAncestor([p1]);
         expect(result).toBe(p1);
     });
 
     test("should return the node itself if the same node is provided twice", () => {
+        prepareHtml();
         const result = getCommonAncestor([p1, p1]);
         expect(result).toBe(p1);
     });
 
     test("should return null if there's no common ancestor within the root", () => {
+        prepareHtml();
         let result = getCommonAncestor([span1, span2], p1);
         expect(result).toBe(null);
 
@@ -296,6 +300,7 @@ describe("getCommonAncestor", () => {
     });
 
     test("should return the common ancestor element of two nodes", () => {
+        prepareHtml();
         let result = getCommonAncestor([span1, span2]);
         expect(result).toBe(p2);
 
@@ -304,6 +309,7 @@ describe("getCommonAncestor", () => {
     });
 
     test("should return the common ancestor element of multiple nodes", () => {
+        prepareHtml();
         let result = getCommonAncestor([li1, li2, li3, li4], root);
         expect(result).toBe(ul);
 
