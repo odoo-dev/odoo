@@ -1,3 +1,4 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
@@ -6,7 +7,7 @@ import { splitElement, splitTextNode } from "../utils/dom_split";
 import { closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, nodeSize, rightPos } from "../utils/position";
-import { getDeepRange, findInSelection } from "../utils/selection";
+import { findInSelection, getDeepRange } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
 
@@ -18,6 +19,17 @@ export class TablePlugin extends Plugin {
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
         delete_range_before: { callback: p.deleteRangeBefore.bind(p) },
+        powerboxCommands: [
+            {
+                name: _t("Table"),
+                description: _t("Insert a table"),
+                category: "structure",
+                fontawesome: "fa-table",
+                action(dispatch) {
+                    dispatch("OPEN_TABLE_PICKER");
+                },
+            },
+        ],
     });
 
     setup() {

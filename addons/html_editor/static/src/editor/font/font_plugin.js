@@ -115,6 +115,37 @@ export class FontPlugin extends Plugin {
                 ],
             },
         ],
+        powerboxCategory: { id: "format", name: _t("Format"), sequence: 20 },
+        powerboxCommands: [
+            {
+                name: _t("Heading 1"),
+                description: _t("Big section heading"),
+                category: "format",
+                fontawesome: "fa-header",
+                action(dispatch) {
+                    dispatch("SET_TAG", { tagName: "H1" });
+                },
+            },
+            {
+                name: _t("Heading 2"),
+                description: _t("Medium section heading"),
+                category: "format",
+                fontawesome: "fa-header",
+                action(dispatch) {
+                    dispatch("SET_TAG", { tagName: "H2" });
+                },
+            },
+            {
+                name: _t("Heading 3"),
+                description: _t("Small section heading"),
+                category: "format",
+
+                fontawesome: "fa-header",
+                action(dispatch) {
+                    dispatch("SET_TAG", { tagName: "H3" });
+                },
+            },
+        ],
     });
 
     get fontSizeItems() {
