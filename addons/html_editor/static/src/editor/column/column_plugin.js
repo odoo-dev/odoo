@@ -3,29 +3,14 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
-import { isEmpty } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 
 const REGEX_BOOTSTRAP_COLUMN = /(?:^| )col(-[a-zA-Z]+)?(-\d+)?(?:$| )/;
-
-// @todo @phoenix: the powerbox plugin puts a hint first on the empty paragraph,
-// this currently has no effect
-function targetForHint(selection) {
-    let node = selection.anchorNode;
-    if (node.nodeType === Node.TEXT_NODE) {
-        node = node.parentElement;
-    }
-    return node.matches(".o_text_columns p") && isEmpty(node) && node;
-}
 
 export class ColumnPlugin extends Plugin {
     static name = "column";
     static dependencies = ["selection"];
     static resources = () => ({
-        temp_hints: {
-            text: "New column...",
-            target: targetForHint,
-        },
         powerboxCommands: [
             {
                 name: _t("2 columns"),
@@ -62,6 +47,12 @@ export class ColumnPlugin extends Plugin {
                 action(dispatch) {
                     dispatch("COLUMNIZE", { numberOfColumns: 0 });
                 },
+            },
+        ],
+        emptyBlockHints: [
+            {
+                selector: ".odoo-editor-editable .o_text_columns p:first-child",
+                hint: _t("Empty column"),
             },
         ],
     });
@@ -130,9 +121,6 @@ export class ColumnPlugin extends Plugin {
         for (const column of columns) {
             const p = this.document.createElement("p");
             p.append(this.document.createElement("br"));
-            // @todo @phoenix: move this to hint plugin
-            // p.classList.add("oe-hint");
-            // p.setAttribute("placeholder", "New column...");
             column.append(p);
         }
         if (addParagraphAfter) {
@@ -164,9 +152,6 @@ export class ColumnPlugin extends Plugin {
                 column.classList.add(`col-${columnSize}`);
                 const p = this.document.createElement("p");
                 p.append(this.document.createElement("br"));
-                // @todo @phoenix: move this to hint plugin
-                // p.classList.add("oe-hint");
-                // p.setAttribute("placeholder", "New column...");
                 column.append(p);
                 lastColumn.after(column);
                 lastColumn = column;

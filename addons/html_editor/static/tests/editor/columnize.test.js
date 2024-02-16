@@ -16,6 +16,23 @@ function columnize(numberOfColumns) {
 }
 
 describe("2 columns", () => {
+    test("should display hint for empty columns", async () => {
+        await testEditor({
+            /* eslint-disable prettier/prettier */
+            contentBefore:
+                columnsContainer(
+                    column(6, "<p>[]<br></p>") +
+                    column(6, "<p><br></p>")
+                ),
+            contentAfterEdit:
+                columnsContainer(
+                    column(6, `<p placeholder="Empty column" class="o-we-hint">[]<br></p>`) +
+                    column(6, `<p placeholder="Empty column" class="o-we-hint"><br></p>`)
+                ),
+            /* eslint-enable prettier/prettier */
+        });
+    });
+
     test("should do nothing", async () => {
         await testEditor({
             contentBefore: columnsContainer(
@@ -32,9 +49,20 @@ describe("2 columns", () => {
         await testEditor({
             contentBefore: "<p>[]abcd</p>",
             stepFunction: columnize(2),
-            contentAfter:
-                columnsContainer(column(6, "<p>[]abcd</p>") + column(6, "<p><br></p>")) +
+            contentAfterEdit:
+            /* eslint-disable prettier/prettier */
+                columnsContainer(
+                    column(6, "<p>[]abcd</p>") +
+                    column(6, `<p placeholder="Empty column" class="o-we-hint"><br></p>`)
+                ) +
                 "<p><br></p>",
+            contentAfter:
+                columnsContainer(
+                    column(6, "<p>[]abcd</p>") +
+                    column(6, "<p><br></p>")
+                ) +
+                "<p><br></p>",
+            /* eslint-enable prettier/prettier */
         });
     });
 
@@ -73,6 +101,14 @@ describe("3 columns", () => {
             contentBefore: columnsContainer(
                 column(4, "<p>abcd</p>") + column(4, "<p><br></p>") + column(4, "<p>[]<br></p>")
             ),
+            /* eslint-disable prettier/prettier */
+            contentBeforeEdit:
+                columnsContainer(
+                    column(4, "<p>abcd</p>") +
+                    column(4, `<p placeholder="Empty column" class="o-we-hint"><br></p>`) +
+                    column(4, `<p placeholder="Empty column" class="o-we-hint">[]<br></p>`)
+                ),
+            /* eslint-enable prettier/prettier */
             stepFunction: columnize(3),
             contentAfter: columnsContainer(
                 column(4, "<p>abcd</p>") + column(4, "<p><br></p>") + column(4, "<p>[]<br></p>")
@@ -84,10 +120,20 @@ describe("3 columns", () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
             stepFunction: columnize(3),
+            /* eslint-disable prettier/prettier */
+            contentAfterEdit:
+                columnsContainer(
+                    column(4, "<p>ab[]cd</p>") +
+                    column(4, `<p placeholder="Empty column" class="o-we-hint"><br></p>`) +
+                    column(4, `<p placeholder="Empty column" class="o-we-hint"><br></p>`)
+                ) + "<p><br></p>",
             contentAfter:
                 columnsContainer(
-                    column(4, "<p>ab[]cd</p>") + column(4, "<p><br></p>") + column(4, "<p><br></p>")
+                    column(4, "<p>ab[]cd</p>") +
+                    column(4, "<p><br></p>") +
+                    column(4, "<p><br></p>")
                 ) + "<p><br></p>",
+            /* eslint-enable prettier/prettier */
         });
     });
 
