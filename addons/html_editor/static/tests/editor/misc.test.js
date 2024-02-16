@@ -76,7 +76,9 @@ test("event handlers are properly cleaned up after destruction", async () => {
         }
     }
 
-    const { editor } = await setupEditor("<p></p>", { Plugins: [TestHandlerPlugin] });
+    const { editor } = await setupEditor("<p></p>", {
+        config: { Plugins: [TestHandlerPlugin] },
+    });
     expect(count).toBe(0);
 
     click(document.body);
