@@ -40,8 +40,23 @@ class TestEditor extends Component {
     }
 }
 
-export async function setupEditor(content, config = {}, inIFrame = false) {
-    const testEditor = await mountWithCleanup(TestEditor, { props: { content, config, inIFrame } });
+/**
+ * @typedef { Object } TestConfig
+ * @property { import("../../src/editor/editor").EditorConfig } [config]
+ * @property { boolean } [inIFrame]
+ */
+
+/**
+ * @param { string } content
+ * @param {TestConfig} [options]
+ * @returns { Promise<{el: HTMLElement; editor: Editor; }> }
+ */
+export async function setupEditor(content, options = {}) {
+    const config = options.config || {};
+    const inIFrame = "inIFrame" in options ? options.inIFrame : false;
+    const testEditor = await mountWithCleanup(TestEditor, {
+        props: { content, config, inIFrame },
+    });
 
     return {
         el: testEditor.editor.editable,
@@ -49,18 +64,29 @@ export async function setupEditor(content, config = {}, inIFrame = false) {
     };
 }
 
-// TODO maybe we should add "removeCheckIds" and "styleContent" or use setupEditor directly
-export async function testEditor(
-    {
+/**
+ * @typedef { Object } TestEditorConfig
+ * @property { string } contentBefore
+ * @property { string } [contentBeforeEdit]
+ * @property { Function } stepFunction
+ * @property { string } [contentAfter]
+ * @property { string } [contentAfterEdit]
+ * @property { string } [compareFunction]
+ */
+
+/**
+ * TODO maybe we should add "removeCheckIds" and "styleContent" or use setupEditor directly
+ * @param {TestEditorConfig & TestConfig} config
+ */
+export async function testEditor(config) {
+    let {
         contentBefore,
         contentBeforeEdit,
         stepFunction,
         contentAfter,
         contentAfterEdit,
         compareFunction,
-    },
-    config = {}
-) {
+    } = config;
     if (!compareFunction) {
         compareFunction = (content, expected, phase) => {
             expect(content).toBe(expected, {
