@@ -157,7 +157,7 @@ class NoOpPlugin extends Plugin {
 
 test("should restore state before /command insertion when command is executed", async () => {
     const { el, editor } = await setupEditor("<p>abc[]</p>", {
-        Plugins: [NoOpPlugin],
+        config: { Plugins: [NoOpPlugin] },
     });
     await insertText(editor, "/no-op");
     expect(getContent(el)).toBe("<p>abc/no-op[]</p>");
@@ -170,7 +170,7 @@ test("should restore state before /command insertion when command is executed", 
 
 test("should restore state before /command insertion when command is executed (2)", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>", {
-        Plugins: [NoOpPlugin],
+        config: { Plugins: [NoOpPlugin] },
     });
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
