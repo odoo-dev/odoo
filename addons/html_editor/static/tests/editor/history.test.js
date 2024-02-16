@@ -178,83 +178,67 @@ describe("prevent renderingClasses to be set from history", () => {
         });
     }
     test("should prevent renderingClasses to be added", async () => {
-        await testEditor(
-            {
-                contentBefore: `<p>a</p>`,
-                stepFunction: async (editor) => {
-                    const p = editor.editable.querySelector("p");
-                    p.className = "x";
-                    editor.dispatch("ADD_STEP");
-                    const history = editor.plugins.find((p) => p.constructor.name === "history");
-                    expect(history.steps.length).toBe(1);
-                },
+        await testEditor({
+            contentBefore: `<p>a</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                p.className = "x";
+                editor.dispatch("ADD_STEP");
+                const history = editor.plugins.find((p) => p.constructor.name === "history");
+                expect(history.steps.length).toBe(1);
             },
-            {
-                Plugins: [TestRenderingClassesPlugin],
-            }
-        );
+            config: { Plugins: [TestRenderingClassesPlugin] },
+        });
     });
 
     test("should prevent renderingClasses to be added when adding 2 classes", async () => {
-        await testEditor(
-            {
-                contentBefore: `<p>a</p>`,
-                stepFunction: async (editor) => {
-                    const p = editor.editable.querySelector("p");
-                    p.className = "x y";
-                    addStep(editor);
-                    undo(editor);
-                    redo(editor);
-                },
-                contentAfter: `[]<p class="y">a</p>`,
+        await testEditor({
+            contentBefore: `<p>a</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                p.className = "x y";
+                addStep(editor);
+                undo(editor);
+                redo(editor);
             },
-            {
-                Plugins: [TestRenderingClassesPlugin],
-            }
-        );
+            contentAfter: `[]<p class="y">a</p>`,
+            config: { Plugins: [TestRenderingClassesPlugin] },
+        });
     });
 
     test.todo("should prevent renderingClasses to be added in historyApply", async () => {
-        await testEditor(
-            {
-                contentBefore: `<p>a</p>`,
-                stepFunction: async (editor) => {
-                    const p = editor.editable.querySelector("p");
-                    editor.historyApply([
-                        {
-                            attributeName: "class",
-                            id: p.oid,
-                            oldValue: null,
-                            type: "attributes",
-                            value: "x y",
-                        },
-                    ]);
-                },
-                contentAfter: `<p class="y">a</p>`,
+        await testEditor({
+            contentBefore: `<p>a</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                editor.historyApply([
+                    {
+                        attributeName: "class",
+                        id: p.oid,
+                        oldValue: null,
+                        type: "attributes",
+                        value: "x y",
+                    },
+                ]);
             },
-            {
-                Plugins: [TestRenderingClassesPlugin],
-            }
-        );
+            contentAfter: `<p class="y">a</p>`,
+            config: { Plugins: [TestRenderingClassesPlugin] },
+        });
     });
 
     test.todo("should skip the mutations if no changes in state", async () => {
-        await testEditor(
-            {
-                contentBefore: `<p class="x">a</p>`,
-                stepFunction: async (editor) => {
-                    const p = editor.editable.querySelector("p");
-                    editor.historyPauseSteps();
-                    p.className = ""; // remove class 'x'
-                    p.className = "x"; // apply class 'x' again
-                    editor.historyUnpauseSteps();
-                    editor.historyRevertCurrentStep(); // back to the initial state
-                },
-                contentAfter: `<p class="x">a</p>`,
+        await testEditor({
+            contentBefore: `<p class="x">a</p>`,
+            stepFunction: async (editor) => {
+                const p = editor.editable.querySelector("p");
+                editor.historyPauseSteps();
+                p.className = ""; // remove class 'x'
+                p.className = "x"; // apply class 'x' again
+                editor.historyUnpauseSteps();
+                editor.historyRevertCurrentStep(); // back to the initial state
             },
-            {
-                Plugins: [TestRenderingClassesPlugin],
-            }
-        );
+            contentAfter: `<p class="x">a</p>`,
+            config: { Plugins: [TestRenderingClassesPlugin] },
+        });
     });
 });

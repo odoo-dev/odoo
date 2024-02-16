@@ -101,13 +101,11 @@ describe("allowInlineAtRoot options", () => {
     });
 
     test("should keep inline nodes unchanged if value is true", async () => {
-        await testEditor(
-            {
-                contentBefore: "abc",
-                contentAfter: "abc",
-            },
-            { allowInlineAtRoot: true }
-        );
+        await testEditor({
+            contentBefore: "abc",
+            contentAfter: "abc",
+            config: { allowInlineAtRoot: true },
+        });
     });
 });
 
