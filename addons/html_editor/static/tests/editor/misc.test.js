@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../test_helpers/editor";
 import { getContent, setContent } from "../test_helpers/selection";
 import { Plugin } from "../../src/editor/plugin";
@@ -13,9 +13,9 @@ test("can instantiate a Editor", async () => {
     expect(getContent(el)).toBe(`<div>a<strong>[dddb]</strong></div>`);
 });
 
-test("can instantiate a Editor in an iframe", async () => {
-    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {}, true);
-    expect(getFixture()).toContain("iframe");
+test.tags("iframe")("can instantiate a Editor in an iframe", async () => {
+    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", { inIFrame: true });
+    expect("iframe").toHaveCount(1);
     expect(el.innerHTML).toBe(`<p>hello world</p>`);
     expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
     setContent(el, "<div>a[dddb]</div>");
