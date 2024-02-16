@@ -4,7 +4,7 @@ import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { useService } from "@web/core/utils/hooks";
 import { defaultConfig } from "../../src/editor/editor";
 import { useWysiwyg } from "../../src/editor/wysiwyg";
-import { getContent, setContent } from "./selection";
+import { getContent, getSelection, setContent } from "./selection";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -35,7 +35,12 @@ class TestEditor extends Component {
                 el = target();
                 hotkeyService.registerIframe(this.ref.el);
             }
+            el.setAttribute("contenteditable", true); // so we can focus it if needed
             if (this.props.content) {
+                const configSelection = getSelection(el, this.props.content);
+                if (configSelection) {
+                    el.focus();
+                }
                 setContent(el, this.props.content);
             }
         });

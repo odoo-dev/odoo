@@ -77,7 +77,6 @@ function getTextNodesIterator(el) {
 }
 
 export function setContent(el, content) {
-    // const rawContent = content.replaceAll("[", "").replace("]", "");
     // build a temp div element to first remove all [] characters in text nodes
     const div = document.createElement("div");
     div.innerHTML = content;
@@ -101,7 +100,7 @@ export function setSelection({ anchorNode, anchorOffset, focusNode, focusOffset 
     selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 }
 
-function getSelection(el, content) {
+export function getSelection(el, content) {
     if (content.indexOf("[") === -1 || content.indexOf("]") === -1) {
         return;
     }
