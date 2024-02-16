@@ -40,3 +40,31 @@ test("should not lose track of temporary hints on split block", async () => {
         `)
     );
 });
+
+test("temporary hint should not be displayed where there's a permanent one", async () => {
+    const { el, editor } = await setupEditor("<p>[]<br></p>", {});
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
+    editor.dispatch("SET_TAG", { tagName: "H1" });
+    await animationFrame();
+    // @todo @phoenix: getContent does not place the selection when anchor is BR
+    expect(el.innerHTML).toBe(`<h1 placeholder="Heading 1" class="o-we-hint"><br></h1>`);
+    editor.dispatch("SPLIT_BLOCK");
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        unformat(`
+            <h1 placeholder="Heading 1" class="o-we-hint"><br></h1>
+            <p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>
+        `)
+    );
+    const h1 = el.firstElementChild;
+    setSelection({ anchorNode: h1, anchorOffset: 0, focusNode: h1, focusOffset: 0 });
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        unformat(`
+            <h1 placeholder="Heading 1" class="o-we-hint">[]<br></h1>
+            <p><br></p>
+        `)
+    );
+});
