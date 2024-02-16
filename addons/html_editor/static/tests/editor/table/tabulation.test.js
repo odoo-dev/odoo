@@ -33,6 +33,40 @@ describe("move selection with tab/shift+tab", () => {
                 `),
             });
         });
+        test.tags("iframe")(
+            "should move cursor to next cell and select its content in an iframe",
+            async () => {
+                await testEditor({
+                    inIFrame: true,
+                    contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td>
+                                <td>cd</td>
+                                <td>ef</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                    stepFunction: async (editor) =>
+                        manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
+                            key: "Tab",
+                        }),
+                    contentAfter: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>ab</td>
+                                <td>[cd]</td>
+                                <td>ef</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                });
+            }
+        );
         test("should move cursor to next cell in the row below and select its content", async () => {
             await testEditor({
                 contentBefore: unformat(`

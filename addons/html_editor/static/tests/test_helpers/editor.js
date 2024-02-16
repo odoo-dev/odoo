@@ -1,6 +1,7 @@
 import { expect, getFixture } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
+import { useService } from "@web/core/utils/hooks";
 import { defaultConfig } from "../../src/editor/editor";
 import { useWysiwyg } from "../../src/editor/wysiwyg";
 import { getContent, setContent } from "./selection";
@@ -25,12 +26,14 @@ class TestEditor extends Component {
         const target = this.props.inIFrame
             ? () => this.ref.el.contentDocument.body.firstChild
             : "target";
+        const hotkeyService = useService("hotkey");
         onMounted(() => {
             let el = this.ref.el;
             if (this.props.inIFrame) {
                 var html = `<div>${this.props.content || ""}</div>`;
                 this.ref.el.contentWindow.document.body.innerHTML = html;
                 el = target();
+                hotkeyService.registerIframe(this.ref.el);
             }
             if (this.props.content) {
                 setContent(el, this.props.content);
@@ -86,6 +89,7 @@ export async function testEditor(config) {
         contentAfter,
         contentAfterEdit,
         compareFunction,
+        inIFrame,
     } = config;
     if (!compareFunction) {
         compareFunction = (content, expected, phase) => {
@@ -96,6 +100,10 @@ export async function testEditor(config) {
     }
     const { el, editor } = await setupEditor(contentBefore, config);
     editor.dispatch("HISTORY_STAGE_SELECTION");
+    if (inIFrame) {
+        expect("iframe").toHaveCount(1);
+    }
+
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
         compareFunction(getContent(el), contentBeforeEdit, "contentBeforeEdit");
