@@ -166,7 +166,6 @@ export function moveNodes(
         if (posRightNode) {
             destinationEl.insertBefore(fragment, posRightNode);
         } else {
-            console.log(`destinationEl:`, destinationEl);
             destinationEl.appendChild(fragment);
         }
         restoreDestination();
