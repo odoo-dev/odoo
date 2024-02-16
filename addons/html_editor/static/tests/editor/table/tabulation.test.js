@@ -1,5 +1,5 @@
 import { describe, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { press } from "@odoo/hoot-dom";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
 
@@ -18,8 +18,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                stepFunction: async (editor) =>
-                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" }),
+                stepFunction: async () => press("Tab"),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -49,10 +48,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                    stepFunction: async (editor) =>
-                        manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
-                            key: "Tab",
-                        }),
+                    stepFunction: async () => press("Tab"),
                     contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -83,8 +79,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                stepFunction: async (editor) =>
-                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" }),
+                stepFunction: async () => press("Tab"),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -116,11 +111,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                stepFunction: async (editor) =>
-                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
-                        key: "Tab",
-                        shiftKey: true,
-                    }),
+                stepFunction: async () => press(["Shift", "Tab"]),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -150,11 +141,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                stepFunction: async (editor) =>
-                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
-                        key: "Tab",
-                        shiftKey: true,
-                    }),
+                stepFunction: async () => press(["Shift", "Tab"]),
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -184,11 +171,7 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                stepFunction: async (editor) =>
-                    manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
-                        key: "Tab",
-                        shiftKey: true,
-                    }),
+                stepFunction: async () => press(["Shift", "Tab"]),
                 contentAfter: unformat(`
                     <table>
                         <tbody>

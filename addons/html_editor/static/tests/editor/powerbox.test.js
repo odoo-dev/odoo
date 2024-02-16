@@ -2,7 +2,7 @@ import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "../test_helpers/editor";
 import { setSelection } from "@html_editor/editor/utils/selection";
-import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { press } from "@odoo/hoot-dom";
 import { getContent } from "../test_helpers/selection";
 import { insertText } from "../test_helpers/user_actions";
 import { Plugin } from "../../src/editor/plugin";
@@ -52,7 +52,7 @@ test("should open the Powerbox on type `/`, but in an empty paragraph", async ()
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
     );
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keypress", { key: "/" });
+    await press("/");
     insertText(editor, "/");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
@@ -100,7 +100,7 @@ test("should execute command and remove term and hot character on Enter", async 
     await animationFrame();
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
     expect(".o-we-powerbox").toHaveCount(1);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    await press("Enter");
     expect(getContent(el)).toBe("<h1>ab[]</h1>");
     expect(".o-we-powerbox").toHaveCount(1);
     // need 1 animation frame to close
@@ -109,11 +109,12 @@ test("should execute command and remove term and hot character on Enter", async 
 });
 
 test.todo("should close the powerbox if keyup event is called on other block", async () => {
+    // ged: not sure i understand the goal of this test
     const { editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
     await insertText(editor, "/");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keyup");
+    // await dispatch(editor.editable, "keyup");
     expect(".o-we-powerbox").toHaveCount(1);
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
@@ -128,7 +129,7 @@ test("should toggle list on empty paragraph", async () => {
     await animationFrame();
     expect(commandNames(el)).toEqual(["Checklist"]);
     expect(".o-we-powerbox").toHaveCount(1);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    await press("Enter");
     expect(getContent(el)).toBe(
         `<ul class="o_checklist"><li placeholder="List" class="o-we-hint">[]<br></li></ul>`
     );
@@ -164,7 +165,7 @@ test("should restore state before /command insertion when command is executed", 
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
     expect(commandNames(el)).toEqual(["No-op"]);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    await press("Enter");
     expect(getContent(el)).toBe("<p>abc[]</p>");
 });
 
@@ -183,7 +184,7 @@ test("should restore state before /command insertion when command is executed (2
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
     expect(commandNames(el)).toEqual(["No-op"]);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    await press("Enter");
     expect(getContent(el)).toBe(
         '<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>'
     );
@@ -202,7 +203,7 @@ test("should discard /command insertion from history when command is executed", 
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
     expect(commandNames(el)).toEqual(["Heading 1"]);
-    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    await press("Enter");
     expect(getContent(el)).toBe("<h1>abc[]</h1>");
     editor.dispatch("HISTORY_UNDO");
     expect(getContent(el)).toBe("<p>abc[]</p>");
