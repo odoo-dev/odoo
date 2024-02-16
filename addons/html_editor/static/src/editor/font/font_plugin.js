@@ -154,6 +154,16 @@ export class FontPlugin extends Plugin {
                 },
             },
         ],
+        emptyBlockHints: [
+            { selector: "H1", hint: _t("Heading 1") },
+            { selector: "H2", hint: _t("Heading 2") },
+            { selector: "H3", hint: _t("Heading 3") },
+            { selector: "H4", hint: _t("Heading 4") },
+            { selector: "H5", hint: _t("Heading 5") },
+            { selector: "H6", hint: _t("Heading 6") },
+            { selector: "PRE", hint: _t("Code") },
+            { selector: "BLOCKQUOTE", hint: _t("Quote") },
+        ],
     });
 
     get fontSizeItems() {
