@@ -35,8 +35,9 @@ test("should open the Powerbox on type `/`", async () => {
     expect(".o-we-powerbox").toHaveCount(1);
 });
 
-test("in iframe: should open the Powerbox on type `/`", async () => {
-    const { el, editor } = await setupEditor("<p>ab[]</p>", {}, true);
+test.tags("iframe")("in iframe: should open the Powerbox on type `/`", async () => {
+    const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
+    expect("iframe").toHaveCount(1);
     expect(".o-we-powerbox").toHaveCount(0);
     expect(getContent(el)).toBe("<p>ab[]</p>");
     insertText(editor, "/");
