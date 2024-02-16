@@ -96,7 +96,9 @@ export class Editor {
                 if (typeof payload === "object") {
                     str = JSON.stringify(payload);
                 }
-                console.log(`[${P.name}] ${command} (payload=${str})`);
+                if (window.debug) {
+                    console.log(`[${P.name}] ${command} (payload=${str})`);
+                }
                 this.dispatch(command, payload);
             };
             const plugin = new P(
