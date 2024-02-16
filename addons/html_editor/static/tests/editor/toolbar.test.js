@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, test } from "@odoo/hoot";
 import { click, queryAllTexts, waitFor, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
@@ -34,9 +34,9 @@ test("toolbar works: can format bold", async () => {
     expect(getContent(el)).toBe("<p><strong>[test]</strong></p>");
 });
 
-test("toolbar in an iframe works: can format bold", async () => {
-    const { el } = await setupEditor("<p>test</p>", {}, true);
-    expect(getFixture()).toContain("iframe");
+test.tags("iframe")("toolbar in an iframe works: can format bold", async () => {
+    const { el } = await setupEditor("<p>test</p>", { inIFrame: true });
+    expect("iframe").toHaveCount(1);
     expect(getContent(el)).toBe("<p>test</p>");
 
     // set selection to open toolbar
