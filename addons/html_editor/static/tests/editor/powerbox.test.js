@@ -5,6 +5,7 @@ import { setSelection } from "@html_editor/editor/utils/selection";
 import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { getContent } from "../test_helpers/selection";
 import { insertText } from "../test_helpers/user_actions";
+import { Plugin } from "../../src/editor/plugin";
 
 function commandNames() {
     return [...document.querySelectorAll(".o-we-command-name")].map((c) => c.innerText);
@@ -133,4 +134,87 @@ test("should toggle list on empty paragraph", async () => {
     // need 1 animation frame to close
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
+});
+
+class NoOpPlugin extends Plugin {
+    static name = "no_op";
+    static resources = () => ({
+        powerboxCategory: { id: "no_op", name: "No-op" },
+        powerboxCommands: [
+            {
+                name: "No-op",
+                description: "No-op",
+                category: "no_op",
+                fontawesome: "fa-header",
+                action(dispatch) {
+                    dispatch("NO_OP");
+                },
+            },
+        ],
+    });
+}
+
+test("should restore state before /command insertion when command is executed", async () => {
+    const { el, editor } = await setupEditor("<p>abc[]</p>", {
+        Plugins: [NoOpPlugin],
+    });
+    await insertText(editor, "/no-op");
+    expect(getContent(el)).toBe("<p>abc/no-op[]</p>");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+    expect(commandNames(el)).toEqual(["No-op"]);
+    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    expect(getContent(el)).toBe("<p>abc[]</p>");
+});
+
+test("should restore state before /command insertion when command is executed (2)", async () => {
+    const { el, editor } = await setupEditor("<p>[]<br></p>", {
+        Plugins: [NoOpPlugin],
+    });
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
+    // @todo @phoenix: remove this once we manage inputs.
+    // Simulate <br> removal by contenteditable when something is inserted
+    el.querySelector("p > br").remove();
+    await insertText(editor, "/no-op");
+    expect(getContent(el)).toBe("<p>/no-op[]</p>");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+    expect(commandNames(el)).toEqual(["No-op"]);
+    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    expect(getContent(el)).toBe(
+        '<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>'
+    );
+});
+
+test("should discard /command insertion from history when command is executed", async () => {
+    const { el, editor } = await setupEditor("<p>[]<br></p>");
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
+    // @todo @phoenix: remove this once we manage inputs.
+    // Simulate <br> removal by contenteditable when something is inserted
+    el.querySelector("p > br").remove();
+    await insertText(editor, "abc/heading1");
+    expect(getContent(el)).toBe("<p>abc/heading1[]</p>");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+    expect(commandNames(el)).toEqual(["Heading 1"]);
+    await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Enter" });
+    expect(getContent(el)).toBe("<h1>abc[]</h1>");
+    editor.dispatch("HISTORY_UNDO");
+    expect(getContent(el)).toBe("<p>abc[]</p>");
+    editor.dispatch("HISTORY_REDO");
+    expect(getContent(el)).toBe("<h1>abc[]</h1>");
+    editor.dispatch("HISTORY_UNDO");
+    expect(getContent(el)).toBe("<p>abc[]</p>");
+    editor.dispatch("HISTORY_UNDO");
+    expect(getContent(el)).toBe("<p>ab[]</p>");
+    editor.dispatch("HISTORY_UNDO");
+    expect(getContent(el)).toBe("<p>a[]</p>");
+    editor.dispatch("HISTORY_UNDO");
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
 });
