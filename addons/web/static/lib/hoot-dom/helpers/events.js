@@ -633,6 +633,9 @@ const _keyDown = (target, eventInit) => {
             switch (key) {
                 case "Backspace": {
                     const { selectionStart, selectionEnd, value } = target;
+                    if (value === undefined) {
+                        break;
+                    }
                     if (fullClear) {
                         // Remove all characters
                         nextValue = "";

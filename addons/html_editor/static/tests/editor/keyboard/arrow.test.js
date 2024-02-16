@@ -1,5 +1,5 @@
 import { test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
+import { press } from "@odoo/hoot-dom";
 import { setSelection, testEditor } from "../../test_helpers/editor";
 import { simulateArrowKeyPress } from "../../test_helpers/user_actions";
 
@@ -7,7 +7,7 @@ test.todo("should move past a zws (collapsed - ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            await press("ArrowRight");
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
@@ -15,7 +15,7 @@ test.todo("should move past a zws (collapsed - ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">[]\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            await press("ArrowRight");
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
@@ -26,14 +26,14 @@ test.todo("should move past a zws (collapsed - ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft" });
+            await press("ArrowLeft");
         },
         contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
     });
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>[]cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft" });
+            await press("ArrowLeft");
         },
         contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
     });
@@ -43,7 +43,7 @@ test.todo("should move past a zws (collapsed at the end of a block)", async () =
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span></p><p>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            await press("ArrowRight");
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span></p><p>[]cd</p>'
@@ -51,7 +51,7 @@ test.todo("should move past a zws (collapsed at the end of a block)", async () =
     await testEditor({
         contentBefore: '<p>ab<span class="a">[]\u200B</span></p><p>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            await press("ArrowRight");
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span></p><p>[]cd</p>'
@@ -62,7 +62,7 @@ test.todo("should select a zws", async () => {
     await testEditor({
         contentBefore: '<p>[ab]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>[ab<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>[ab<span class="a">\u200B</span>c]d</p>'
@@ -70,7 +70,7 @@ test.todo("should select a zws", async () => {
     await testEditor({
         contentBefore: '<p>[ab<span class="a">]\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>[ab<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>[ab<span class="a">\u200B</span>c]d</p>'
@@ -81,7 +81,7 @@ test.todo("should select a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>a[b<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>a[b<span class="a">\u200B</span>c]d</p>'
@@ -89,7 +89,7 @@ test.todo("should select a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b<span class="a">]\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>a[b<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>a[b<span class="a">\u200B</span>c]d</p>'
@@ -100,7 +100,7 @@ test.todo("should select a zws (3)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab[<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>ab[<span class="a">\u200B</span>c]d</p>'
@@ -108,7 +108,7 @@ test.todo("should select a zws (3)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">[]\u200B</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">[\u200B]</span>cd</p>',
         // Final state: '<p>ab<span class="a">[\u200B</span>c]d</p>'
@@ -119,7 +119,7 @@ test.todo("should select a zws backwards (ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B[</span>cd</p>',
         // Final state: '<p>a]b<span class="a">\u200B[</span>cd</p>'
@@ -127,7 +127,7 @@ test.todo("should select a zws backwards (ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>[]cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B[</span>cd</p>',
         // Final state: '<p>a]b<span class="a">\u200B[</span>cd</p>'
@@ -138,7 +138,7 @@ test.todo("should select a zws backwards (ArrowLeft - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>]cd[</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B</span>cd[</p>',
         // Final state: '<p>a]b<span class="a">\u200B</span>cd[</p>'
@@ -146,7 +146,7 @@ test.todo("should select a zws backwards (ArrowLeft - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B]</span>cd[</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B</span>cd[</p>',
         // Final state: '<p>a]b<span class="a">\u200B</span>cd[</p>'
@@ -157,7 +157,7 @@ test.todo("should select a zws backwards (ArrowLeft - 3)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>]c[d</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B</span>c[d</p>',
         // Final state: '<p>a]b<span class="a">\u200B</span>c[d</p>'
@@ -165,7 +165,7 @@ test.todo("should select a zws backwards (ArrowLeft - 3)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B]</span>c[d</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">]\u200B</span>c[d</p>',
         // Final state: '<p>a]b<span class="a">\u200B</span>c[d</p>'
@@ -176,7 +176,7 @@ test.todo("should select a zws backwards (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">]\u200B[</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>[c]d</p>'
@@ -184,7 +184,7 @@ test.todo("should select a zws backwards (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">]\u200B</span>[cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>[c]d</p>'
@@ -192,7 +192,7 @@ test.todo("should select a zws backwards (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab]<span class="a">\u200B</span>[cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>[c]d</p>'
@@ -200,7 +200,7 @@ test.todo("should select a zws backwards (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab]<span class="a">\u200B[</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>[c]d</p>'
@@ -211,7 +211,7 @@ test.todo("should select a zws backwards (ArrowRight - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">]\u200B</span>c[d</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B]</span>c[d</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
@@ -219,7 +219,7 @@ test.todo("should select a zws backwards (ArrowRight - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab]<span class="a">\u200B</span>c[d</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowRight", shiftKey: true });
+            press(["Shift", "ArrowRight"]);
         },
         contentAfter: '<p>ab<span class="a">\u200B]</span>c[d</p>',
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
@@ -230,7 +230,7 @@ test.todo("should deselect a zws", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">[\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
         // Final state: '<p>a]b<span class="a">[\u200B</span>cd</p>'
@@ -238,7 +238,7 @@ test.todo("should deselect a zws", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">[\u200B</span>]cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
         // Final state: '<p>a]b<span class="a">[\u200B</span>cd</p>'
@@ -246,7 +246,7 @@ test.todo("should deselect a zws", async () => {
     await testEditor({
         contentBefore: '<p>ab[<span class="a">\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab[<span class="a">]\u200B</span>cd</p>',
         // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
@@ -254,7 +254,7 @@ test.todo("should deselect a zws", async () => {
     await testEditor({
         contentBefore: '<p>ab[<span class="a">\u200B</span>]cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>ab[<span class="a">]\u200B</span>cd</p>',
         // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
@@ -265,7 +265,7 @@ test.todo("should deselect a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b<span class="a">\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>a[b<span class="a">]\u200B</span>cd</p>',
         // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
@@ -273,7 +273,7 @@ test.todo("should deselect a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b<span class="a">\u200B</span>]cd</p>',
         stepFunction: async (editor) => {
-            await dispatch(editor.editable, "keydown", { key: "ArrowLeft", shiftKey: true });
+            press(["Shift", "ArrowLeft"]);
         },
         contentAfter: '<p>a[b<span class="a">]\u200B</span>cd</p>',
         // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
@@ -294,7 +294,7 @@ test.todo("should move into a link (ArrowRight)", async () => {
             "ef</p>",
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
-            dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            press("ArrowRight");
             // Set the selection to mimick that which keydown would
             // have set, were it not blocked when triggered
             // programmatically.
@@ -335,7 +335,7 @@ test.todo("should move into a link (ArrowLeft)", async () => {
             '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
             "[]ef</p>",
         stepFunction: async (editor) => {
-            dispatch(editor.editable, "keydown", { key: "ArrowLeft" });
+            press("ArrowLeft");
             // Set the selection to mimick that which keydown would
             // have set, were it not blocked when triggered
             // programmatically.
@@ -378,7 +378,7 @@ test.todo("should move out of a link (ArrowRight)", async () => {
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
 
-            dispatch(editor.editable, "keydown", { key: "ArrowRight" });
+            press("ArrowRight");
             // Set the selection to mimick that which keydown would
             // have set, were it not blocked when triggered
             // programmatically.
@@ -421,7 +421,7 @@ test.todo("should move out of a link (ArrowLeft)", async () => {
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
 
-            dispatch(editor.editable, "keydown", { key: "ArrowLeft" });
+            press("ArrowLeft");
             // Set the selection to mimick that which keydown would
             // have set, were it not blocked when triggered
             // programmatically.
