@@ -209,19 +209,11 @@ export function setColor(color, mode) {
 }
 
 // Mock an paste event and send it to the editor.
-export async function pasteData(editor, text, type) {
-    const mockEvent = {
-        dataType: "text/plain",
-        data: text,
-        clipboardData: {
-            getData: (datatype) => (type === datatype ? text : null),
-            files: [],
-            items: [],
-        },
-        preventDefault: () => {},
-    };
-    // TODO @phoenix need to replace _onPaste.
-    await editor._onPaste(mockEvent);
+function pasteData(editor, text, type) {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData(type, text);
+    const pasteEvent = new ClipboardEvent("paste", { clipboardData, bubbles: true });
+    editor.editable.dispatchEvent(pasteEvent);
 }
 
 export function pasteText(editor, text) {

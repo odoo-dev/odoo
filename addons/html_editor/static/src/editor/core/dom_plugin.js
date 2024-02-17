@@ -54,15 +54,19 @@ export class DomPlugin extends Plugin {
 
     // Shared
 
+    /**
+     * @param {string | DocumentFragment | null} content
+     */
     dom_insert(content) {
         if (!content) {
             return;
         }
-        const selection = this.shared.getEditableSelection();
+        let selection = this.shared.getEditableSelection();
         let startNode;
         let insertBefore = false;
         if (!selection.isCollapsed) {
             this.dispatch("DELETE_RANGE", { selection });
+            selection = this.shared.getEditableSelection();
         }
         if (selection.startContainer.nodeType === Node.TEXT_NODE) {
             insertBefore = !selection.startOffset;

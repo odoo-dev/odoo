@@ -1,5 +1,10 @@
 /** @odoo-module **/
 
+/**
+ * @param { Document } document
+ * @param { string } html
+ * @returns { DocumentFragment }
+ */
 export function parseHTML(document, html) {
     const fragment = document.createDocumentFragment();
     const parser = new document.defaultView.DOMParser();
