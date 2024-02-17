@@ -1,4 +1,4 @@
-import { CLIPBOARD_WHITELISTS } from "@html_editor/editor/utils/clipboard";
+import { CLIPBOARD_WHITELISTS } from "@html_editor/editor/core/clipboard_plugin";
 import { setSelection } from "@html_editor/editor/utils/selection";
 import { describe, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
@@ -36,7 +36,7 @@ describe("Html Paste cleaning - whitelist", () => {
         }
     });
 
-    test.todo("should keep whitelisted Tags tag (2)", async () => {
+    test("should keep whitelisted Tags tag (2)", async () => {
         const tagsToKeep = [
             'a<img src="http://www.imgurl.com/img.jpg">d', // img tag
             "a<br>b", // br tags
@@ -169,7 +169,7 @@ describe("Html Paste cleaning - whitelist", () => {
 
 describe("Simple text", () => {
     describe("range collapsed", () => {
-        test.todo("should paste a text at the beginning of a p", async () => {
+        test("should paste a text at the beginning of a p", async () => {
             await testEditor({
                 contentBefore: "<p>[]abcd</p>",
                 stepFunction: async (editor) => {
@@ -179,7 +179,7 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo("should paste a text in a p", async () => {
+        test("should paste a text in a p", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -203,7 +203,7 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo("should paste a text in a span", async () => {
+        test("should paste a text in a span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
@@ -314,7 +314,7 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -488,7 +488,7 @@ describe("Simple html p", () => {
     const simpleHtmlCharX = "<p>x</p>";
 
     describe("range collapsed", () => {
-        test.todo("should paste a text at the beginning of a p", async () => {
+        test("should paste a text at the beginning of a p", async () => {
             await testEditor({
                 contentBefore: "<p>[]abcd</p>",
                 stepFunction: async (editor) => {
@@ -498,7 +498,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test.todo("should paste a text in a p", async () => {
+        test("should paste a text in a p", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -508,7 +508,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test.todo("should paste a text in a span", async () => {
+        test("should paste a text in a span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
@@ -574,7 +574,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span", async () => {
+        test("should paste a text when selection leave a span", async () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -913,7 +913,7 @@ describe("Complex html 3 p", () => {
     const complexHtmlData = "<p>1<i>X</i>2</p><p>3<i>X</i>4</p><p>5<i>X</i>6</p>";
 
     describe("range collapsed", () => {
-        test.todo("should paste a text at the beginning of a p", async () => {
+        test("should paste a text at the beginning of a p", async () => {
             await testEditor({
                 contentBefore: "<p>[]abcd</p>",
                 stepFunction: async (editor) => {
@@ -923,7 +923,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text in a p", async () => {
+        test("should paste a text in a p", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -933,7 +933,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text in a span", async () => {
+        test("should paste a text in a span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
@@ -1008,7 +1008,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (1)", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1027,7 +1027,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (2)", async () => {
+        test("should paste a text when selection leave a span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>1ab<span class="a">c[d</span>e]f</p>',
                 stepFunction: async (editor) => {
@@ -1226,7 +1226,7 @@ describe("Complex html 3p+b", () => {
     const complexHtmlData = "<p>1<b>23</b></p><p>zzz</p><p>45<b>6</b>7</p>";
 
     describe("range collapsed", () => {
-        test.todo("should paste a text at the beginning of a p", async () => {
+        test("should paste a text at the beginning of a p", async () => {
             await testEditor({
                 contentBefore: "<p>[]abcd</p>",
                 stepFunction: async (editor) => {
@@ -1236,7 +1236,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test.todo("should paste a text in a p", async () => {
+        test("should paste a text in a p", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -1246,7 +1246,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test.todo("should paste a text in a span", async () => {
+        test("should paste a text in a span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
@@ -1316,7 +1316,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (1)", async () => {
+        test("should paste a text when selection leave a span (1)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1361,7 +1361,7 @@ describe("Complex html 3p+b", () => {
 
 describe("Special cases", () => {
     describe("lists", () => {
-        test.todo("should paste a list in a p", async () => {
+        test("should paste a list in a p", async () => {
             await testEditor({
                 contentBefore: "<p>12[]34</p>",
                 stepFunction: async (editor) => {
@@ -1371,7 +1371,7 @@ describe("Special cases", () => {
             });
         });
 
-        test.todo("should paste the text of an li into another li", async () => {
+        test("should paste the text of an li into another li", async () => {
             await testEditor({
                 contentBefore: "<ul><li>abc</li><li>de[]f</li><li>ghi</li></ul>",
                 stepFunction: async (editor) => {
@@ -1394,19 +1394,16 @@ describe("Special cases", () => {
             }
         );
 
-        test.todo(
-            "should paste the text of an li into another li, insert a new li, and paste the text of a third li into the next li",
-            async () => {
-                await testEditor({
-                    contentBefore: "<ul><li>abc</li><li>de[]f</li><li>ghi</li></ul>",
-                    stepFunction: async (editor) => {
-                        await pasteHtml(editor, "<ul><li>123</li><li>456</li><li>789</li></ul>");
-                    },
-                    contentAfter:
-                        "<ul><li>abc</li><li>de123</li><li>456</li><li>789[]f</li><li>ghi</li></ul>",
-                });
-            }
-        );
+        test("should paste the text of an li into another li, insert a new li, and paste the text of a third li into the next li", async () => {
+            await testEditor({
+                contentBefore: "<ul><li>abc</li><li>de[]f</li><li>ghi</li></ul>",
+                stepFunction: async (editor) => {
+                    await pasteHtml(editor, "<ul><li>123</li><li>456</li><li>789</li></ul>");
+                },
+                contentAfter:
+                    "<ul><li>abc</li><li>de123</li><li>456</li><li>789[]f</li><li>ghi</li></ul>",
+            });
+        });
 
         test.todo(
             "should paste the text of an li into another li and insert a new li at the end of a list",
@@ -1459,7 +1456,7 @@ describe("link", () => {
             });
         });
 
-        test.todo("should paste and not transform an URL in a existing link", async () => {
+        test("should paste and not transform an URL in a existing link", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
@@ -2304,7 +2301,7 @@ describe("Odoo editor own html", () => {
         });
     });
 
-    test.todo("should not paste unsafe content", async () => {
+    test("should not paste unsafe content", async () => {
         await testEditor({
             contentBefore: "<p>a[]b</p>",
             stepFunction: async (editor) => {
