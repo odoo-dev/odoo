@@ -166,25 +166,22 @@ describe("backward", () => {
             });
 
             describe("anchor between", () => {
-                test.todo(
-                    "should remove sandwitched unbreakable (anchor between, focus between) (backward)",
-                    async () => {
-                        await testEditor({
-                            contentBefore: unformat(`
+                test("should remove sandwitched unbreakable (anchor between, focus between) (backward)", async () => {
+                    await testEditor({
+                        contentBefore: unformat(`
                             <div>
                                 <div>a[b</div>
                                 <div>cd</div>
                                 <div>e]f</div>
                             </div>`),
-                            stepFunction: deleteBackward,
-                            contentAfter: unformat(`
+                        stepFunction: deleteBackward,
+                        contentAfter: unformat(`
                             <div>
                                 <div>a[]</div>
                                 <div>f</div>
                             </div>`),
-                        });
-                    }
-                );
+                    });
+                });
                 test("should remove sandwitched unbreakable (anchor between, focus end) (backward)", async () => {
                     await testEditor({
                         contentBefore: unformat(`
@@ -233,11 +230,9 @@ describe("backward", () => {
                 );
             });
             describe("anchor between", () => {
-                test.todo(
-                    "should remove sandwitched unbreakable (multilevel, anchor between, focus between) (backward)",
-                    async () => {
-                        await testEditor({
-                            contentBefore: unformat(`
+                test("should remove sandwitched unbreakable (multilevel, anchor between, focus between) (backward)", async () => {
+                    await testEditor({
+                        contentBefore: unformat(`
                             <div>
                                 <div>a[b</div>
                                 <div>cd</div>
@@ -248,17 +243,16 @@ describe("backward", () => {
                                 <div>ij</div>
                                 <div>k]l</div>
                             </div>`),
-                            stepFunction: deleteBackward,
-                            contentAfter: unformat(`
+                        stepFunction: deleteBackward,
+                        contentAfter: unformat(`
                             <div>
                                 <div>a[]</div>
                             </div>
                             <div>
                                 <div>l</div>
                             </div>`),
-                        });
-                    }
-                );
+                    });
+                });
                 test("should remove sandwitched unbreakable (multilevel, anchor between, focus end) (backward)", async () => {
                     await testEditor({
                         contentBefore: unformat(`
@@ -306,16 +300,13 @@ describe("backward", () => {
             });
         });
         // @todo @phoenix: unskip when doing unbreakable
-        test.todo(
-            "should delete first character of unbreakable, ignoring selected paragraph break (backward)",
-            async () => {
-                await testEditor({
-                    contentBefore: `<p>abc[</p><p class="oe_unbreakable">d]ef</p>`,
-                    stepFunction: deleteBackward,
-                    contentAfter: `<p>abc[]</p><p class="oe_unbreakable">ef</p>`,
-                });
-            }
-        );
+        test("should delete first character of unbreakable, ignoring selected paragraph break (backward)", async () => {
+            await testEditor({
+                contentBefore: `<p>abc[</p><p class="oe_unbreakable">d]ef</p>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<p>abc[]</p><p class="oe_unbreakable">ef</p>`,
+            });
+        });
     });
 });
 describe("forward", () => {
@@ -442,7 +433,7 @@ describe("forward", () => {
     // Only few tests are made with the selection not collapsed it should use the
     // same logic as for the backward (deleteRange).
     describe("selection not collapsed", () => {
-        test.todo("should not break unbreakables (delete forward) (1)", async () => {
+        test("should not break unbreakables (delete forward) (1)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <div>
@@ -458,7 +449,7 @@ describe("forward", () => {
             });
         });
 
-        test.todo("should not break unbreakables (delete forward) (2)", async () => {
+        test("should not break unbreakables (delete forward) (2)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <p class="oe_unbreakable">a[b</p>
@@ -484,6 +475,7 @@ describe("forward", () => {
         });
 
         // @todo @phoenix: unskip when doing unbreakable
+        // This test is wrong... It seems to have forgotten the "oe_unbreakable" class on the second paragraph.
         test.todo(
             "should delete first character of unbreakable, ignoring selected paragraph break (forward)",
             async () => {

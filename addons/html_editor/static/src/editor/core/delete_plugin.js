@@ -26,8 +26,10 @@ import { getState, prepareUpdate } from "../utils/dom_state";
 import {
     closestElement,
     createDOMPathGenerator,
+    descendants,
     findNode,
     firstLeaf,
+    getCommonAncestor,
     getFurthestUneditableParent,
 } from "../utils/dom_traversal";
 import {
@@ -40,7 +42,6 @@ import {
     rightPos,
 } from "../utils/position";
 import { getDeepRange, setSelection } from "../utils/selection";
-import { collapseIfZWS } from "../utils/zws";
 
 export class DeletePlugin extends Plugin {
     static dependencies = ["dom", "history", "selection"];
@@ -68,6 +69,7 @@ export class DeletePlugin extends Plugin {
                 this.deleteElementForward(payload);
                 break;
             case "DELETE_RANGE":
+                // this.deleteRange();
                 this.deleteRange();
                 break;
         }
@@ -77,10 +79,436 @@ export class DeletePlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
+    deleteRange() {
+        let selection = this.shared.getEditableSelection();
+        if (selection.isCollapsed) {
+            return;
+        }
+
+        selection = this.deleteRangeAjustSelection(selection);
+        this.deleteSelection(selection);
+    }
+
+    /**
+     *
+     * @param {import("./selection_plugin").EditorSelection} selection
+     */
+    deleteSelection(selection) {
+        // Split text nodes in order to have elements as start/end containers.
+        const { startElement, startOffset, endElement, endOffset, commonAncestor } =
+            this.splitTextNodes(selection);
+
+        const restore = prepareUpdate(startElement, startOffset, endElement, endOffset);
+
+        // Remove nodes.
+        const { startRemoveIndex, adjustedEndRemoveIndex } = this.removeNodes({
+            startElement,
+            startOffset,
+            endElement,
+            endOffset,
+            commonAncestor,
+        });
+
+        // Set cursor.
+        this.setCursorAfterRemoveNodes({
+            commonAncestor,
+            startElement,
+            endElement,
+            startRemoveIndex,
+            adjustedEndRemoveIndex,
+            direction: selection.direction,
+        });
+
+        // Join fragments if they are part of direct sibling sub-trees under
+        // commonAncestor. If start or end element is commonAncestor, it means
+        // there's no fragment to be joined.
+        if (
+            startRemoveIndex === adjustedEndRemoveIndex &&
+            startElement !== commonAncestor &&
+            endElement !== commonAncestor
+        ) {
+            this.joinFragments(startElement, endElement, commonAncestor);
+        }
+
+        // Fill empty blocks, remove empty inlines.
+        this.handleEmptyElements(commonAncestor);
+
+        // Restore spaces state.
+        const preserveCursor = this.shared.getEditableSelection();
+        restore();
+        this.shared.setSelection(preserveCursor);
+
+        this.dispatch("ADD_STEP");
+    }
+
+    /**
+     * Splits text nodes and returns the updated container elements and offset values.
+     *
+     * @param {import("./selection_plugin").EditorSelection} params
+     * @returns {Object} start, end and common ancestor elements and offsets
+     */
+    splitTextNodes({
+        startContainer,
+        startOffset,
+        endContainer,
+        endOffset,
+        commonAncestorContainer,
+    }) {
+        if (endContainer.nodeType === Node.TEXT_NODE) {
+            const newNode = endContainer.splitText(endOffset);
+            [endContainer, endOffset] = [newNode.parentElement, childNodeIndex(newNode)];
+        }
+        if (startContainer.nodeType === Node.TEXT_NODE) {
+            const newNode = startContainer.splitText(startOffset);
+            [startContainer, startOffset] = [newNode.parentElement, childNodeIndex(newNode)];
+            if (startContainer === endContainer) {
+                endOffset += 1;
+            }
+        }
+        if (commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+            commonAncestorContainer = commonAncestorContainer.parentElement;
+        }
+
+        return {
+            startElement: startContainer,
+            startOffset,
+            endElement: endContainer,
+            endOffset,
+            commonAncestor: commonAncestorContainer,
+        };
+    }
+
+    removeNodes({ startElement, startOffset, endElement, endOffset, commonAncestor }) {
+        // Remove child nodes to the right, propagate until commonAncestor (non-inclusive)
+        let node = startElement;
+        let startRemoveIndex = startOffset;
+        while (node !== commonAncestor) {
+            // @phoenix @todo: handle unremovable nodes
+            [...node.childNodes].slice(startRemoveIndex).forEach((child) => child.remove());
+            startRemoveIndex = childNodeIndex(node) + 1;
+            node = node.parentElement;
+        }
+
+        // Remove child nodes to the left, propagate until commonAncestor (non-inclusive)
+        node = endElement;
+        let endRemoveIndex = endOffset;
+        while (node !== commonAncestor) {
+            // @phoenix @todo: handle unremovable nodes
+            [...node.childNodes].slice(0, endRemoveIndex).forEach((child) => child.remove());
+            endRemoveIndex = childNodeIndex(node);
+            node = node.parentElement;
+        }
+
+        // Remove nodes in between subtrees
+        let nRemovedNodes = 0;
+        for (const node of [...commonAncestor.childNodes].slice(startRemoveIndex, endRemoveIndex)) {
+            nRemovedNodes += Number(this.removeNode(node));
+        }
+        const adjustedEndRemoveIndex = endRemoveIndex - nRemovedNodes;
+        return { startRemoveIndex, adjustedEndRemoveIndex };
+    }
+
+    // Returns true if node was removed, false otherwise.
+    removeNode(node) {
+        // @todo @phoenix: get list of callbacks from resources
+        const handleUnremovable = [
+            {
+                callback: (node) => {
+                    // @todo @phoenix: break unremovable into the concerned plugins
+                    // @todo @phoenix: handle contains unremovable
+                    if (isUnremovable(node)) {
+                        node.replaceChildren();
+                        // @todo: not sure about this.
+                        fillEmpty(node);
+                        return true;
+                    }
+                },
+            },
+        ];
+
+        for (const { callback } of handleUnremovable) {
+            if (callback(node)) {
+                return false;
+            }
+        }
+        node.remove();
+        return true;
+    }
+
+    setCursorAfterRemoveNodes({
+        commonAncestor,
+        startElement,
+        startRemoveIndex,
+        endElement,
+        adjustedEndRemoveIndex,
+        direction,
+    }) {
+        if (direction === DIRECTIONS.RIGHT) {
+            if (startElement === commonAncestor) {
+                this.shared.setSelection({
+                    anchorNode: commonAncestor,
+                    anchorOffset: startRemoveIndex,
+                });
+            } else {
+                this.shared.setCursorEnd(startElement);
+            }
+        } else {
+            if (endElement === commonAncestor) {
+                this.shared.setSelection({
+                    anchorNode: commonAncestor,
+                    anchorOffset: adjustedEndRemoveIndex,
+                });
+            } else {
+                this.shared.setCursorStart(endElement);
+            }
+        }
+    }
+
+    joinFragments(left, right, commonAncestor) {
+        // Returns closest block whithin ancestor or ancestor's child inline element.
+        const getJoinableElement = (node) => {
+            let last;
+            while (node !== commonAncestor) {
+                if (isBlock(node)) {
+                    return { element: node, isBlock: true };
+                }
+                last = node;
+                node = node.parentElement;
+            }
+            return { element: last, isBlock: false };
+        };
+
+        const joinableLeft = getJoinableElement(left);
+        const joinableRight = getJoinableElement(right);
+
+        if (joinableLeft.isBlock && joinableRight.isBlock) {
+            this.mergeBlocks(joinableLeft.element, joinableRight.element, commonAncestor);
+            return;
+        }
+
+        if (joinableLeft.isBlock) {
+            this.joinInlineIntoBlock(joinableLeft.element, joinableRight.element);
+            return;
+        }
+
+        if (joinableRight.isBlock) {
+            this.joinBlockIntoInline(joinableLeft.element, joinableRight.element);
+            return;
+        }
+
+        // @todo @phoenix: consider merging inline elements if they are similar.
+        // Otherwise, do it on normalize.
+    }
+
+    canBeMerged(left, right) {
+        return closestElement(left, isUnbreakable) === closestElement(right, isUnbreakable);
+    }
+
+    mergeBlocks(left, right, commonAncestor) {
+        const clearEmpty = (node) => {
+            // @todo @phoenix: consider using a more robust test (like !isVisible)
+            while (node !== commonAncestor && !node.childNodes.length) {
+                const toRemove = node;
+                node = node.parentElement;
+                toRemove.remove();
+            }
+        };
+
+        // Unmergeable blocks can be removed if left empty.
+        if (!isVisible(right)) {
+            const parent = right.parentElement;
+            right.remove();
+            this.shared.setCursorEnd(left);
+            clearEmpty(parent);
+            return;
+        }
+
+        if (!isVisible(left)) {
+            const parent = left.parentElement;
+            left.remove();
+            this.shared.setCursorStart(right);
+            clearEmpty(parent);
+            return;
+        }
+
+        if (!this.canBeMerged(left, right)) {
+            return;
+        }
+
+        this.shared.setCursorEnd(left);
+        left.append(...right.childNodes);
+        const rightParent = right.parentElement;
+        right.remove();
+        clearEmpty(rightParent);
+    }
+
+    joinInlineIntoBlock(leftBlock, right) {
+        if (!this.canBeMerged(leftBlock, right)) {
+            return;
+        }
+
+        while (right && !isBlock(right)) {
+            // @todo @phoenix: what if right is a BR?
+            const toAppend = right;
+            right = right.nextSibling;
+            leftBlock.append(toAppend);
+        }
+    }
+
+    joinBlockIntoInline(left, rightBlock) {
+        if (!this.canBeMerged(left, rightBlock)) {
+            return;
+        }
+
+        left.after(...rightBlock.childNodes);
+        const rightSibling = rightBlock.nextSibling;
+        rightBlock.remove();
+        if (rightSibling && !isBlock(rightSibling)) {
+            rightSibling.before(this.document.createElement("br"));
+        }
+        // @todo @phoenix: clear empty parent blocks.
+    }
+
+    // Fill empty blocks
+    // Remove empty inline elements, unless cursor is inside it
+    handleEmptyElements(commonAncestor) {
+        const selection = this.shared.getEditableSelection();
+        for (const node of [commonAncestor, ...descendants(commonAncestor)].toReversed()) {
+            if (node.nodeType !== Node.ELEMENT_NODE) {
+                continue;
+            }
+            if (isBlock(node)) {
+                fillEmpty(node);
+            } else if (!isVisible(node)) {
+                if (node.contains(selection.anchorNode)) {
+                    // Add zws to empty inline element
+                    // @todo @phoenix: this sets the selection via setSelection (it should not)
+                    // @todo @phoenix: shouldn't this be done by a method by the zws plugin?
+                    fillEmpty(node);
+                } else {
+                    node.remove();
+                }
+            }
+        }
+        // In case common ancestor is not a block (fillEmpty looks for closest block)
+        fillEmpty(commonAncestor);
+    }
+
+    deleteRangeAjustSelection(selection) {
+        // Normalize selection (@todo @phoenix: should be offered by selection plugin)
+        // Why? To make deleting more predictable and reproduceable.
+        // @todo @phoenix: IMO a selection coming from a triple click should not be normalized
+        selection = this.shared.setSelection(selection);
+
+        // Expand selection to fully include non-editable nodes.
+        selection = this.expandSelectionToIncludeNonEditables(selection);
+
+        // @todo @phoenix: move this responsability to the selection plugin
+        // Correct triple click
+        selection = this.correctTripleClick(selection);
+
+        return selection;
+    }
+
+    // @phoenix @todo: move this to the selection plugin
+    // Consider detecting the triple click and changing the selection to
+    // standard triple click behavior between browsers.
+    // This correction makes no distinction between an actual selection willing
+    // to remove a line break and a triple click.
+    correctTripleClick(selection) {
+        let { startContainer, startOffset, endContainer, endOffset, commonAncestorContainer } =
+            selection;
+        const endLeaf = firstLeaf(endContainer);
+        const beforeEnd = endLeaf.previousSibling;
+        if (
+            !endOffset &&
+            (startContainer !== endContainer || startOffset !== endOffset) &&
+            (!beforeEnd ||
+                (beforeEnd.nodeType === Node.TEXT_NODE &&
+                    !isVisibleTextNode(beforeEnd) &&
+                    !isZWS(beforeEnd)))
+        ) {
+            const previous = previousLeaf(endLeaf, this.editable, true);
+            if (previous && closestElement(previous).isContentEditable) {
+                [endContainer, endOffset] = [previous, nodeSize(previous)];
+                commonAncestorContainer = getCommonAncestor(
+                    [startContainer, endContainer],
+                    this.editable
+                );
+            }
+        }
+        return { ...selection, endContainer, endOffset, commonAncestorContainer };
+    }
+
+    // Expand the range to fully include all contentEditable=False elements.
+    expandSelectionToIncludeNonEditables(selection) {
+        let { startContainer, startOffset, endContainer, endOffset, commonAncestorContainer } =
+            selection;
+        const startUneditable = getFurthestUneditableParent(
+            startContainer,
+            commonAncestorContainer
+        );
+        if (startUneditable) {
+            // @todo @phoenix: Review this spec. I suggest this instead (no block merge after removing):
+            // startContainer = startUneditable.parentElement;
+            // startOffset = childNodeIndex(startUneditable);
+            const leaf = previousLeaf(startUneditable);
+            if (leaf) {
+                [startContainer, startOffset] = [leaf, nodeSize(leaf)];
+            } else {
+                [startContainer, startOffset] = [commonAncestorContainer, 0];
+            }
+        }
+        const endUneditable = getFurthestUneditableParent(endContainer, commonAncestorContainer);
+        if (endUneditable) {
+            // @todo @phoenix: Review this spec. I suggest this instead (no block merge after removing):
+            // endContainer = endUneditable.parentElement;
+            // endOffset = childNodeIndex(endUneditable) + 1;
+            const leaf = nextLeaf(endUneditable);
+            if (leaf) {
+                [endContainer, endOffset] = [leaf, 0];
+            } else {
+                [endContainer, endOffset] = [
+                    commonAncestorContainer,
+                    nodeSize(commonAncestorContainer),
+                ];
+            }
+        }
+        // @todo: this assumes the common ancestor does not change. Double check this.
+        return { ...selection, startContainer, startOffset, endContainer, endOffset };
+    }
+
     deleteBackward() {
         let selection = this.shared.getEditableSelection();
-        if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+        // @todo @phoenix try to use the newDeleteRange instead
+        // if (selection.isCollapsed) {
+        //     const [node, offset] = getDeepestPosition(selection.anchorNode, selection.anchorOffset);
+        //     if (offset) {
+        //         this.shared.setSelection({
+        //             anchorNode: node,
+        //             anchorOffset: offset - 1,
+        //             focusNode: node,
+        //             focusOffset: offset,
+        //         });
+        //     } else {
+        //         const prevLeaf = previousLeaf(node, this.editable, true);
+        //         if (!prevLeaf) {
+        //             return;
+        //         }
+        //         const blockSwitch = closestBlock(node) !== closestBlock(prevLeaf);
+        //         this.shared.setSelection({
+        //             anchorNode: prevLeaf,
+        //             anchorOffset: nodeSize(prevLeaf) - (blockSwitch ? 0 : 1),
+        //             focusNode: node,
+        //             focusOffset: offset,
+        //         });
+        //     }
+        // }
+        // this.newDeleteRange();
+        // if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+        if (!selection.isCollapsed) {
             this.deleteRange();
+            // this.deleteRange();
             return;
         }
         selection = this.shared.getEditableSelection();
@@ -93,7 +521,9 @@ export class DeletePlugin extends Plugin {
     }
     deleteForward() {
         let selection = this.shared.getEditableSelection();
-        if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+        if (!selection.isCollapsed) {
+            // if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
+            // this.deleteRange();
             this.deleteRange();
             return;
         }
@@ -626,7 +1056,8 @@ export class DeletePlugin extends Plugin {
         }
     }
 
-    deleteRange() {
+    // @phoenix @todo: delete me and my helper methods! (leaving it for now for reference)
+    _deleteRange() {
         for (const { callback } of this.resources["delete_range_before"]) {
             if (callback()) {
                 return;

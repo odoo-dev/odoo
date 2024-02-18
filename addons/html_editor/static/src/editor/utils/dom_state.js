@@ -39,7 +39,8 @@ const prepareUpdateLockedEditables = new Set();
  */
 export function prepareUpdate(...args) {
     const closestRoot =
-        args.length && ancestors(args[0]).find((ancestor) => ancestor.oid === "root");
+        args.length &&
+        ancestors(args[0]).find((ancestor) => ancestor.classList.contains("odoo-editor-editable"));
     const isPrepareUpdateLocked = closestRoot && prepareUpdateLockedEditables.has(closestRoot);
     const hash = (Math.random() + 1).toString(36).substring(7);
     const options = {
