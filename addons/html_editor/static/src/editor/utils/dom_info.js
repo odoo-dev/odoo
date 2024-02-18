@@ -285,6 +285,7 @@ export function isUnbreakable(node) {
     );
 }
 
+// @todo @phoenix: adapt .oid parts
 export function isUnremovable(node) {
     return (
         (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
