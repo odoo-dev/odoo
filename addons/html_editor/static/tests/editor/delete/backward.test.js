@@ -1320,26 +1320,20 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should delete part of the text across two paragraphs (backward, forward selection)",
-        async () => {
-            await testEditor({
-                contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
-                stepFunction: deleteBackward,
-                contentAfter: "<div>a<p>b[]e</p>f</div>",
-            });
-        }
-    );
-    test.todo(
-        "should delete part of the text across two paragraphs (backward, backward selection)",
-        async () => {
-            await testEditor({
-                contentBefore: "<div>a<p>b]c</p><p>d[e</p>f</div>",
-                stepFunction: deleteBackward,
-                contentAfter: "<div>a<p>b[]e</p>f</div>",
-            });
-        }
-    );
+    test("should delete part of the text across two paragraphs (backward, forward selection)", async () => {
+        await testEditor({
+            contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
+            stepFunction: deleteBackward,
+            contentAfter: "<div>a<p>b[]e</p>f</div>",
+        });
+    });
+    test("should delete part of the text across two paragraphs (backward, backward selection)", async () => {
+        await testEditor({
+            contentBefore: "<div>a<p>b]c</p><p>d[e</p>f</div>",
+            stepFunction: deleteBackward,
+            contentAfter: "<div>a<p>b[]e</p>f</div>",
+        });
+    });
 
     test("should delete all the text in a paragraph", async () => {
         // Forward selection
@@ -1398,7 +1392,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete a selection accross a heading1 and a paragraph", async () => {
+    test("should delete a selection accross a heading1 and a paragraph", async () => {
         // Forward selection
         await testEditor({
             contentBefore: "<h1>ab [cd</h1><p>ef]gh</p>",
@@ -1734,6 +1728,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
+        // @todo @phoenix: review this spec. It should not merge, like the test above.
         test("should extend the range to fully include contenteditable=false that are partially selected at the start of the range", async () => {
             await testEditor({
                 contentBefore: unformat(`
