@@ -1,6 +1,5 @@
 import { expect, test } from "@odoo/hoot";
 import { click, queryAllTexts, waitFor, waitUntil } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
 import { getContent, setContent } from "../test_helpers/selection";
@@ -83,12 +82,13 @@ test("toolbar buttons react to selection change (2)", async () => {
 
     // extends selection to include non-bold text
     setContent(el, "<p><strong>test [some</strong> some] text</p>");
-    await animationFrame();
+    // @todo @phoenix: investigate why waiting for animation frame is (sometimes) not enough
+    await waitFor(".btn[name='bold']:not(.active)");
     expect(".btn[name='bold']").not.toHaveClass("active");
 
     // change selection to come back into bold text
     setContent(el, "<p><strong>test [so]me</strong> some text</p>");
-    await animationFrame();
+    await waitFor(".btn[name='bold'].active");
     expect(".btn[name='bold']").toHaveClass("active");
 });
 
