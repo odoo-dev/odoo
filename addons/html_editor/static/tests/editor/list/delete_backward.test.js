@@ -286,50 +286,6 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should not outdent while nested within a list item if the list is unbreakable",
-                async () => {
-                    // Only one LI.
-                    await testEditor({
-                        contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                        stepFunction: deleteBackward,
-                        contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
-                    });
-                    // First LI.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol t="1"><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                    // });
-                    // // In the middle.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol><li><div>abc</div></li><li t="1"><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                    // });
-                    // // Last LI.
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<ol><li>abc</li><li t="1"><div><div>[]def</div></div></li></ol>',
-                    // });
-                    // // With a div before the list:
-                    // await testEditor({
-                    //     contentBefore:
-                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                    //     stepFunction: deleteBackward,
-                    //     contentAfter:
-                    //         '<div>abc</div><ol><li>def</li><li t="1"><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                    // });
-                }
-            );
-
             test("should outdent an empty list item within a list", async () => {
                 await testEditor({
                     contentBefore:
@@ -2555,43 +2511,6 @@ test("shoud merge list item in the previous breakable sibling", async () => {
                 <custom-block style="display: block;">
                     <p>a[]ef</p>
                 </custom-block>
-                <ol>
-                    <li>ghi</li>
-                </ol>`),
-    });
-});
-
-test.todo("shoud not merge list item in the previous unbreakable sibling", async () => {
-    await testEditor({
-        contentBefore: unformat(`
-                <p class="oe_unbreakable">a[bc</p>
-                <ol>
-                    <li>d]ef</li>
-                    <li>ghi</li>
-                </ol>`),
-        stepFunction: deleteBackward,
-        contentAfter: unformat(`
-                <p class="oe_unbreakable">a[]</p>
-                <p>ef</p>
-                <ol>
-                    <li>ghi</li>
-                </ol>`),
-    });
-    await testEditor({
-        contentBefore: unformat(`
-                <div class="oe_unbreakable">
-                    <p>a[bc</p>
-                </div>
-                <ol>
-                    <li>d]ef</li>
-                    <li>ghi</li>
-                </ol>`),
-        stepFunction: deleteBackward,
-        contentAfter: unformat(`
-                <div class="oe_unbreakable">
-                    <p>a[]</p>
-                </div>
-                <p>ef</p>
                 <ol>
                     <li>ghi</li>
                 </ol>`),
