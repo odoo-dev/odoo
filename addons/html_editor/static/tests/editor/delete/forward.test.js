@@ -197,51 +197,6 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not break unbreakables", async () => {
-            await testEditor({
-                contentBefore:
-                    `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                    `<div class="oe_unbreakable"><div class="oe_unbreakable">[]<br></div>` +
-                    `<div class="oe_unbreakable">abc</div></div></div></div>`,
-                stepFunction: deleteForward,
-                contentAfter:
-                    `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                    `<div class="oe_unbreakable">` +
-                    `<div class="oe_unbreakable">[]abc</div></div></div></div>`,
-            });
-        });
-
-        test("should not merge p with an unbreakable.", async () => {
-            await testEditor({
-                contentBefore: `<p>ab[]</p><table><tbody><tr><td>cd</td></tr></tbody></table>`,
-                stepFunction: deleteForward,
-                contentAfter: `<p>ab[]</p><table><tbody><tr><td>cd</td></tr></tbody></table>`,
-            });
-            await testEditor({
-                contentBefore: `<p>ab[]</p><div class="oe_unbreakable">cd</div>`,
-                stepFunction: deleteForward,
-                contentAfter: `<p>ab[]</p><div class="oe_unbreakable">cd</div>`,
-            });
-        });
-
-        test.todo("should delete empty p just before an unbreakable.", async () => {
-            await testEditor({
-                contentBefore: `<p>[]</p><table><tbody><tr><td>cd</td></tr></tbody></table>`,
-                stepFunction: deleteForward,
-                contentAfter: `<table><tbody><tr><td>[]cd</td></tr></tbody></table>`,
-            });
-            await testEditor({
-                contentBefore: `<p>[]</p><div class="oe_unbreakable">cd</div>`,
-                stepFunction: deleteForward,
-                contentAfter: `<div class="oe_unbreakable">[]cd</div>`,
-            });
-            await testEditor({
-                contentBefore: `<p class="oe_unbreakable no-class">[]<br></p><div class="oe_unbreakable class-name">cd</div>`,
-                stepFunction: deleteForward,
-                contentAfter: `<div class="oe_unbreakable class-name">[]cd</div>`,
-            });
-        });
-
         test('should remove contenteditable="false"', async () => {
             await testEditor({
                 contentBefore: `<div>[]<span contenteditable="false">abc</span>def</div>`,
@@ -1285,26 +1240,6 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    // @todo @phoenix: unskip when doing unbreakable
-    test.skip("should not break unbreakables (delete forward, not collapsed)", async () => {
-        await testEditor({
-            contentBefore:
-                `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                `<div class="oe_unbreakable"><div class="oe_unbreakable">a[bc</div>` +
-                `<div class="oe_unbreakable">de]f</div></div></div></div>`,
-            stepFunction: deleteForward,
-            contentAfter:
-                `<div class="oe_unbreakable"><div class="oe_unbreakable">` +
-                `<div class="oe_unbreakable"><div class="oe_unbreakable">a[]</div>` +
-                `<div class="oe_unbreakable">f</div></div></div></div>`,
-        });
-        await testEditor({
-            contentBefore: '<p class="oe_unbreakable">a[bc</p><p class="oe_unbreakable">de]f</p>',
-            stepFunction: deleteForward,
-            contentAfter: '<p class="oe_unbreakable">a[]</p><p class="oe_unbreakable">f</p>', // JW without oe_breakable classes of course
-        });
-    });
-
     test("should delete a heading (triple click delete)", async () => {
         await testEditor({
             contentBefore: "<h1>[abc</h1><p>]def</p>",
@@ -1335,26 +1270,6 @@ describe("Selection not collapsed", () => {
             contentBefore: "<p>abc[</p><p>d]ef</p>",
             stepFunction: deleteForward,
             contentAfter: "<p>abc[]ef</p>",
-        });
-    });
-
-    test("should delete last character of paragraph, ignoring the selected paragraph break leading to an unbreakable", async () => {
-        await testEditor({
-            contentBefore: '<p>ab[c</p><p t="unbreak">]def</p>',
-            // This type of selection (typically done with a triple
-            // click) is "corrected" before remove so triple clicking
-            // doesn't remove a paragraph break.
-            stepFunction: deleteForward,
-            contentAfter: '<p>ab[]</p><p t="unbreak">def</p>',
-        });
-    });
-
-    // @todo @phoenix: unskip when doing unbreakable
-    test.skip("should delete first character of unbreakable, ignoring selected paragraph break", async () => {
-        await testEditor({
-            contentBefore: '<p>abc[</p><p t="unbreak">d]ef</p>',
-            stepFunction: deleteForward,
-            contentAfter: '<p>abc[]</p><p t="unbreak">ef</p>',
         });
     });
 
