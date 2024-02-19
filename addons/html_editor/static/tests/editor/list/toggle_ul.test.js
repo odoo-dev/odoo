@@ -348,6 +348,40 @@ describe("Range not collapsed", () => {
                     '<ul><li>[ab</li></ul><p contenteditable="false">cd</p><ul><li>ef]</li></ul>',
             });
         });
+
+        test("should turn only the deepest blocks into lists", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <div class="container o_text_columns">
+                        <div class="row">
+                            <div class="col-6">
+                                <p>[<br></p>
+                            </div>
+                            <div class="col-6">
+                                <p><br>]</p>
+                            </div>
+                        </div>
+                    </div>
+                `),
+                stepFunction: toggleUnorderedList,
+                contentAfter: unformat(`
+                    <div class="container o_text_columns">
+                        <div class="row">
+                            <div class="col-6">
+                                <ul>
+                                    <li>[<br></li>
+                                </ul>
+                            </div>
+                            <div class="col-6">
+                                <ul>
+                                    <li>]<br></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `),
+            });
+        });
     });
     describe("Remove", () => {
         test("should turn a list into a paragraph", async () => {
