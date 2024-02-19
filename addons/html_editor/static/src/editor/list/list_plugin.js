@@ -4,7 +4,7 @@ import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/dom";
 import { isVisible } from "../utils/dom_info";
-import { closestElement, getAdjacents } from "../utils/dom_traversal";
+import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
 
@@ -158,6 +158,13 @@ export class ListPlugin extends Plugin {
                 }
             } else {
                 nonListBlocks.add(block);
+            }
+        }
+
+        // Keep deepest blocks only.
+        for (const block of nonListBlocks) {
+            if (descendants(block).some((descendant) => nonListBlocks.has(descendant))) {
+                nonListBlocks.delete(block);
             }
         }
 
