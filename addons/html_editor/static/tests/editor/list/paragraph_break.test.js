@@ -1,7 +1,7 @@
 import { test, describe } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { insertParagraphBreak } from "../../test_helpers/user_actions";
+import { splitBlock } from "../../test_helpers/user_actions";
 
 function insertText() {
     throw new Error("need a proper implementation");
@@ -13,7 +13,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item before a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>[]abc</li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ol><li><br></li><li>[]abc</li></ol>",
                 });
             });
@@ -21,7 +21,7 @@ describe("Selection collapsed", () => {
             test("should split a list item in two", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>ab[]cd</li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ol><li>ab</li><li>[]cd</li></ol>",
                 });
             });
@@ -29,7 +29,7 @@ describe("Selection collapsed", () => {
             test("should split a list item containing an inline element in two", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><strong>ab[]cd</strong></li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         "<ol><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ol>",
                 });
@@ -38,7 +38,7 @@ describe("Selection collapsed", () => {
             test("should split a list item containing a block in two", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><h1>ab[]cd</h1></li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     // Obs: normalization does not enter block elements.
                     contentAfter: "<ol><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ol>",
                 });
@@ -47,7 +47,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc[]</li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ol><li>abc</li><li>[]<br></li></ol>",
                 });
             });
@@ -95,8 +95,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc[]</li></ol>",
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter: "<ol><li>abc</li></ol><p>[]<br></p>",
                 });
@@ -107,8 +107,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>def[]</li></ol></li><li>ghi</li></ol>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>def</li></ol></li><li>[]<br></li><li>ghi</li></ol>',
@@ -118,7 +118,7 @@ describe("Selection collapsed", () => {
             test("should remove a list with p", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><p>[]<br></p></li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -126,7 +126,7 @@ describe("Selection collapsed", () => {
             test.todo("should remove a list set to bold", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><p><b>[]<br></b></p></li></ol>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -136,9 +136,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ol class="a"><li>abc[]</li></ol>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter: '<ol class="a"><li>abc</li><li>b</li><li>[]<br></li></ol>',
                 });
@@ -148,9 +148,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ol><li class="a">abc[]</li></ol>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li class="a">abc</li><li class="a">b</li><li class="a">[]<br></li></ol>',
@@ -162,9 +162,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ol>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -175,9 +175,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ol>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -203,9 +203,9 @@ describe("Selection collapsed", () => {
                                 <li>ef</li>
                             </ul>`),
                         stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                             await insertText(editor, "b");
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                         },
                         contentAfter: unformat(`
                             <ul>
@@ -229,7 +229,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item before a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>[]abc</li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ul><li><br></li><li>[]abc</li></ul>",
                 });
             });
@@ -237,7 +237,7 @@ describe("Selection collapsed", () => {
             test("should split a list item in two", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>ab[]cd</li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ul><li>ab</li><li>[]cd</li></ul>",
                 });
             });
@@ -245,7 +245,7 @@ describe("Selection collapsed", () => {
             test("should split a list item containing an inline element in two", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><strong>ab[]cd</strong></li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         "<ul><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>",
                 });
@@ -254,7 +254,7 @@ describe("Selection collapsed", () => {
             test("should split a list item containing a block in two", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><h1>ab[]cd</h1></li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     // Obs: normalization does not enter block elements.
                     contentAfter: "<ul><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>",
                 });
@@ -263,7 +263,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item after a list item", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc[]</li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<ul><li>abc</li><li>[]<br></li></ul>",
                 });
             });
@@ -273,8 +273,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc[]</li></ul>",
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter: "<ul><li>abc</li></ul><p>[]<br></p>",
                 });
@@ -285,8 +285,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>def[]</li></ul></li><li>ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>def</li></ul></li><li>[]<br></li><li>ghi</li></ul>',
@@ -296,7 +296,7 @@ describe("Selection collapsed", () => {
             test("should remove a list", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><p>[]<br></p></li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -304,7 +304,7 @@ describe("Selection collapsed", () => {
             test.todo("should remove a list set to bold", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><p><b>[]<br></b></p></li></ul>",
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -314,9 +314,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul class="a"><li>abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter: '<ul class="a"><li>abc</li><li>b</li><li>[]<br></li></ul>',
                 });
@@ -326,9 +326,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul><li class="a">abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li class="a">abc</li><li class="a">b</li><li class="a">[]<br></li></ul>',
@@ -340,9 +340,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -353,9 +353,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                         await insertText(editor, "b");
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -370,7 +370,7 @@ describe("Selection collapsed", () => {
                             <ul>
                                 <li style="list-style: cambodian;">a[]</li>
                             </ul>`),
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: unformat(`
                         <ul>
                             <li style="list-style: cambodian;">a</li>
@@ -386,7 +386,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
                 });
             });
@@ -395,7 +395,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
                 });
             });
@@ -404,7 +404,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li>ab</li><li>[]cd</li></ul>',
                 });
             });
@@ -413,7 +413,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">ab[]cd</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">ab</li><li>[]cd</li></ul>',
                 });
@@ -422,7 +422,7 @@ describe("Selection collapsed", () => {
             test("should split a cheklist item containing an inline element in two (unchecked)", async () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li><strong>ab[]cd</strong></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         '<ul class="o_checklist"><li><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>',
                 });
@@ -431,7 +431,7 @@ describe("Selection collapsed", () => {
             test("should split a checklist item containing a block in two (unchecked)", async () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     // Obs: normalization does not enter block elements.
                     contentAfter:
                         '<ul class="o_checklist"><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
@@ -442,7 +442,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><strong>ab[]cd</strong></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked"><strong>ab</strong></li><li><strong>[]cd</strong></li></ul>',
                 });
@@ -452,7 +452,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><h1>ab[]cd</h1></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     // Obs: normalization does not enter block elements.
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked"><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
@@ -462,7 +462,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item after a checklist item (unchecked)", async () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
                 });
@@ -471,7 +471,7 @@ describe("Selection collapsed", () => {
             test("should add an empty list item after a checklist item (checked)", async () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li>[]<br></li></ul>',
                 });
@@ -482,8 +482,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p>',
@@ -495,8 +495,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
@@ -508,8 +508,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await insertParagraphBreak(editor);
-                        await insertParagraphBreak(editor);
+                        await splitBlock(editor);
+                        await splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
@@ -520,7 +520,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p>[]<br></p></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -529,7 +529,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p><b>[]<br></b></p></li></ul>',
-                    stepFunction: insertParagraphBreak,
+                    stepFunction: splitBlock,
                     contentAfter: "<p>[]<br></p>",
                 });
             });
@@ -542,9 +542,9 @@ describe("Selection collapsed", () => {
                         await testEditor({
                             contentBefore: '<ul class="checklist a"><li>abc[]</li></ul>',
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "d");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter:
                                 '<ul class="checklist a"><li>abc</li><li>d</li><li>[]<br></li></ul>',
@@ -559,9 +559,9 @@ describe("Selection collapsed", () => {
                             removeCheckIds: true,
                             contentBefore: '<ul class="o_checklist"><li class="a">abc[]</li></ul>',
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "d");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter:
                                 '<ul class="o_checklist"><li class="a">abc</li><li class="a">d</li><li class="a">[]<br></li></ul>',
@@ -575,9 +575,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                             await insertText(editor, "d");
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -589,9 +589,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                             await insertText(editor, "d");
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -618,9 +618,9 @@ describe("Selection collapsed", () => {
                                 <li class="o_checked">ef</li>
                             </ul>`),
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "0");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter: unformat(`
                             <ul class="o_checklist">
@@ -651,9 +651,9 @@ describe("Selection collapsed", () => {
                             contentBefore:
                                 '<ul class="checklist a"><li class="o_checked">abc[]</li></ul>',
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "d");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter:
                                 '<ul class="checklist a"><li class="o_checked">abc</li><li>d</li><li>[]<br></li></ul>',
@@ -669,9 +669,9 @@ describe("Selection collapsed", () => {
                             contentBefore:
                                 '<ul class="o_checklist"><li class="a o_checked">abc[]</li></ul>',
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "d");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter:
                                 '<ul class="o_checklist"><li class="a o_checked">abc</li><li class="a">d</li><li class="a">[]<br></li></ul>',
@@ -684,9 +684,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="a o_checked"><div>abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                             await insertText(editor, "d");
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a o_checked"><div>abc</div></li><li class="a"><div>d</div></li><li class="a"><div>[]<br></div></li></ul>',
@@ -698,9 +698,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked"><div class="a">abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                             await insertText(editor, "d");
-                            await insertParagraphBreak(editor);
+                            await splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="o_checked"><div class="a">abc</div></li><li><div class="a">d</div></li><li><div class="a">[]<br></div></li></ul>',
@@ -725,9 +725,9 @@ describe("Selection collapsed", () => {
                                 <li class="o_checked">ef</li>
                             </ul>`),
                             stepFunction: async (editor) => {
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                                 await insertText(editor, "0");
-                                await insertParagraphBreak(editor);
+                                await splitBlock(editor);
                             },
                             contentAfter: unformat(`
                             <ul class="o_checklist">
@@ -757,13 +757,13 @@ describe("Selection not collapsed", () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd[ef</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
     });
@@ -772,14 +772,14 @@ describe("Selection not collapsed", () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
             contentAfter: "<p>[]<br></p>",
         });
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>]abc[</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<p>[]<br></p>",
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
         });
@@ -789,13 +789,13 @@ describe("Selection not collapsed", () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd</li><li>ef]gh</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]gh</li></ul>",
         });
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd</li><li>ef[gh</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]gh</li></ul>",
         });
     });
@@ -804,13 +804,13 @@ describe("Selection not collapsed", () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>ab[cd]ef</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>ab]cd[ef</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             contentAfter: "<ul><li>ab</li><li>[]ef</li></ul>",
         });
     });
@@ -819,14 +819,14 @@ describe("Selection not collapsed", () => {
         // Forward selection
         await testEditor({
             contentBefore: "<ul><li>[abc]</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
             contentAfter: "<p>[]<br></p>",
         });
         // Backward selection
         await testEditor({
             contentBefore: "<ul><li>]abc[</li></ul>",
-            stepFunction: insertParagraphBreak,
+            stepFunction: splitBlock,
             // JW cAfter: '<ul><li><br></li><li>[]<br></li></ul>',
             contentAfter: "<p>[]<br></p>",
         });

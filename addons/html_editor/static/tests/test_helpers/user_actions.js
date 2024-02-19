@@ -123,7 +123,7 @@ export function switchDirection(editor) {
     //editor.execCommand('switchDirection')}
 }
 
-export async function insertParagraphBreak(editor) {
+export async function splitBlock(editor) {
     editor.dispatch("SPLIT_BLOCK");
 }
 
