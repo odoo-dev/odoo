@@ -1,7 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { insertParagraphBreak, keydownTab } from "../../test_helpers/user_actions";
+import { splitBlock, keydownTab } from "../../test_helpers/user_actions";
 
 describe("Checklist", () => {
     test("should indent a checklist", async () => {
@@ -281,7 +281,7 @@ describe("Regular list", () => {
         });
     });
 
-    test("should indent a regular list empty item after an insertParagraphBreak", async () => {
+    test("should indent a regular list empty item after an splitBlock", async () => {
         await testEditor({
             contentBefore: unformat(`
                     <ul>
@@ -289,7 +289,7 @@ describe("Regular list", () => {
                     </ul>
                     <p>def</p>`),
             stepFunction: async (editor) => {
-                insertParagraphBreak(editor);
+                splitBlock(editor);
                 keydownTab(editor);
             },
             contentAfter: unformat(`
