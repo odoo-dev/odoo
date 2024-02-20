@@ -9,6 +9,7 @@ import { collapseIfZWS } from "../utils/zws";
 export class LineBreakPlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "line_break";
+    static shared = ["insertLineBreakElement"];
 
     setup() {
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
@@ -32,22 +33,25 @@ export class LineBreakPlugin extends Plugin {
         }
         selection = this.shared.getEditableSelection();
 
-        let anchorNode = selection.anchorNode;
-        let anchorOffset = selection.anchorOffset;
+        let targetNode = selection.anchorNode;
+        let targetOffset = selection.anchorOffset;
 
-        if (anchorNode.nodeType === Node.TEXT_NODE) {
-            anchorOffset = splitTextNode(anchorNode, anchorOffset);
-            anchorNode = anchorNode.parentElement;
+        if (targetNode.nodeType === Node.TEXT_NODE) {
+            targetOffset = splitTextNode(targetNode, targetOffset);
+            targetNode = targetNode.parentElement;
         }
+        this.insertLineBreakElement({ targetNode, targetOffset });
+    }
 
-        const restore = prepareUpdate(anchorNode, anchorOffset);
+    insertLineBreakElement({ targetNode, targetOffset }) {
+        const restore = prepareUpdate(targetNode, targetOffset);
 
         const brEl = this.document.createElement("br");
         const brEls = [brEl];
-        if (anchorOffset >= anchorNode.childNodes.length) {
-            anchorNode.appendChild(brEl);
+        if (targetOffset >= targetNode.childNodes.length) {
+            targetNode.appendChild(brEl);
         } else {
-            anchorNode.insertBefore(brEl, anchorNode.childNodes[anchorOffset]);
+            targetNode.insertBefore(brEl, targetNode.childNodes[targetOffset]);
         }
         if (
             isFakeLineBreak(brEl) &&
