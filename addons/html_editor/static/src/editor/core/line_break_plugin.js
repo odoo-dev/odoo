@@ -24,14 +24,11 @@ export class LineBreakPlugin extends Plugin {
 
     insertLineBreak() {
         let selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return;
-        }
         if (!selection.isCollapsed) {
             collapseIfZWS(this.editable, selection);
             this.dispatch("DELETE_RANGE");
+            selection = this.shared.getEditableSelection();
         }
-        selection = this.shared.getEditableSelection();
 
         let targetNode = selection.anchorNode;
         let targetOffset = selection.anchorOffset;
