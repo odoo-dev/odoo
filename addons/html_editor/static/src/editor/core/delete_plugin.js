@@ -152,12 +152,12 @@ export class DeletePlugin extends Plugin {
             alreadyMoved
         );
     }
-    deleteElementBackwardTextNode(taget, offset) {
-        if (taget.nodeType === Node.TEXT_NODE) {
+    deleteElementBackwardTextNode(target, offset) {
+        if (target.nodeType === Node.TEXT_NODE) {
             if (offset) {
-                const charSize = [...taget.nodeValue.slice(0, offset)].pop().length;
+                const charSize = [...target.nodeValue.slice(0, offset)].pop().length;
                 deleteText(
-                    taget,
+                    target,
                     charSize,
                     offset - charSize,
                     DIRECTIONS.LEFT,
@@ -165,8 +165,8 @@ export class DeletePlugin extends Plugin {
                 );
             } else {
                 this.deleteElementBackward({
-                    targetNode: taget.parentElement,
-                    targetOffset: childNodeIndex(taget),
+                    targetNode: target.parentElement,
+                    targetOffset: childNodeIndex(target),
                 });
             }
             return true;
