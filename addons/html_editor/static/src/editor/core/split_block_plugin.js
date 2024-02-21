@@ -29,14 +29,11 @@ export class SplitBlockPlugin extends Plugin {
     // --------------------------------------------------------------------------
     splitBlock() {
         let selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return;
-        }
         if (!selection.isCollapsed) {
             collapseIfZWS(this.editable, selection);
             this.dispatch("DELETE_RANGE");
+            selection = this.shared.getEditableSelection();
         }
-        selection = this.shared.getEditableSelection();
 
         this.splitBlockNode({
             targetNode: selection.anchorNode,
