@@ -10,7 +10,7 @@
  * @property { SelectionPlugin.prototype.setSelection } setSelection
  * @property { SelectionPlugin.prototype.setCursorStart } setCursorStart
  * @property { SelectionPlugin.prototype.setCursorEnd } setCursorEnd
- * @property { DomPlugin.prototype.dom_insert } dom_insert
+ * @property { DomPlugin.prototype.domInsert } domInsert
  * @property { SplitBlockPlugin.prototype.splitElementBlock } splitElementBlock
  * @property { OverlayPlugin.prototype.createOverlay } createOverlay
  */

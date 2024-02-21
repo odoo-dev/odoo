@@ -19,7 +19,7 @@ import { getDeepRange, getTraversedNodes } from "../utils/selection";
 export class DomPlugin extends Plugin {
     static name = "dom";
     static dependencies = ["selection"];
-    static shared = ["dom_insert"];
+    static shared = ["domInsert"];
     static resources = () => ({
         powerboxCommands: {
             name: _t("Separator"),
@@ -57,7 +57,7 @@ export class DomPlugin extends Plugin {
     /**
      * @param {string | DocumentFragment | null} content
      */
-    dom_insert(content) {
+    domInsert(content) {
         if (!content) {
             return;
         }

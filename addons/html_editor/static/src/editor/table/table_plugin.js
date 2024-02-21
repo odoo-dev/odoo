@@ -122,7 +122,7 @@ export class TablePlugin extends Plugin {
                 false
             );
         }
-        const [table] = this.shared.dom_insert(parseHTML(this.document, tableHtml));
+        const [table] = this.shared.domInsert(parseHTML(this.document, tableHtml));
         this.shared.setCursorStart(table.querySelector("p"));
     }
     addColumn({ position, reference } = {}) {
