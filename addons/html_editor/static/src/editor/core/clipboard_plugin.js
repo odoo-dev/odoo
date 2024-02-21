@@ -103,12 +103,12 @@ export class ClipboardPlugin extends Plugin {
                 return replaceContent;
             });
         });
-        this.shared.dom_insert(modifiedText);
+        this.shared.domInsert(modifiedText);
     }
 
     pasteHtml(html) {
         const fragment = parseHTML(this.document, html);
-        this.shared.dom_insert(fragment);
+        this.shared.domInsert(fragment);
     }
 }
 
