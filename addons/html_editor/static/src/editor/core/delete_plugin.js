@@ -93,9 +93,6 @@ export class DeletePlugin extends Plugin {
     }
     deleteForward() {
         let selection = this.shared.getEditableSelection();
-        if (!selection) {
-            return;
-        }
         if (!selection.isCollapsed && !collapseIfZWS(this.editable, selection)) {
             this.deleteRange();
             return;
@@ -707,9 +704,6 @@ export class DeletePlugin extends Plugin {
     }
     deleteRangeGetSelectionAndRange() {
         const selection = this.shared.getEditableSelection();
-        // if (!selection) {
-        //     return;
-        // }
         // @todo @phoenix is it still needed?
         // let range = getDeepRange(this.editable, {
         //     sel,
