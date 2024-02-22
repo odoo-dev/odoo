@@ -3,7 +3,7 @@ import { testEditor } from "../test_helpers/editor";
 import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
 
 describe("parse/render", () => {
-    test.todo("should parse an old-school fontawesome", async () => {
+    test("should parse an old-school fontawesome", async () => {
         await testEditor({
             contentBefore: '<p><i class="fa fa-star"></i></p>',
             contentBeforeEdit: '<p><i class="fa fa-star" contenteditable="false">\u200b</i></p>',
@@ -11,7 +11,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a brand fontawesome", async () => {
+    test("should parse a brand fontawesome", async () => {
         await testEditor({
             contentBefore: '<p><i class="fab fa-opera"></i></p>',
             contentBeforeEdit: '<p><i class="fab fa-opera" contenteditable="false">\u200b</i></p>',
@@ -19,7 +19,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a duotone fontawesome", async () => {
+    test("should parse a duotone fontawesome", async () => {
         await testEditor({
             contentBefore: '<p><i class="fad fa-bus-alt"></i></p>',
             contentBeforeEdit:
@@ -28,7 +28,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a light fontawesome", async () => {
+    test("should parse a light fontawesome", async () => {
         await testEditor({
             contentBefore: '<p><i class="fab fa-accessible-icon"></i></p>',
             contentBeforeEdit:
@@ -37,7 +37,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a regular fontawesome", async () => {
+    test("should parse a regular fontawesome", async () => {
         await testEditor({
             contentBefore: '<p><i class="far fa-money-bill-alt"></i></p>',
             contentBeforeEdit:
@@ -46,7 +46,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a solid fontawesome", async () => {
+    test("should parse a solid fontawesome", async () => {
         await testEditor({
             // @phoenix content adapted to make it valid html
             contentBefore: '<p><i class="fa fa-pastafarianism"></i></p>',
@@ -56,7 +56,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome in a <span>", async () => {
+    test("should parse a fontawesome in a <span>", async () => {
         await testEditor({
             contentBefore: '<p><span class="fa fa-pastafarianism"></span></p>',
             contentBeforeEdit:
@@ -71,7 +71,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome in a <i>", async () => {
+    test("should parse a fontawesome in a <i>", async () => {
         await testEditor({
             // @phoenix content adapted to make it valid html
             contentBefore: '<p><i class="fa fa-pastafarianism"></i></p>',
@@ -88,7 +88,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome with more classes", async () => {
+    test("should parse a fontawesome with more classes", async () => {
         await testEditor({
             contentBefore: '<p><i class="red fa bordered fa-pastafarianism big"></i></p>',
             contentBeforeEdit:
@@ -97,7 +97,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome with multi-line classes", async () => {
+    test("should parse a fontawesome with multi-line classes", async () => {
         await testEditor({
             contentBefore: `<p><i class="fa
                                 fa-pastafarianism"></i></p>`,
@@ -108,7 +108,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome with more multi-line classes", async () => {
+    test("should parse a fontawesome with more multi-line classes", async () => {
         await testEditor({
             contentBefore: `<p><i class="red fa bordered
                                 big fa-pastafarianism scary"></i></p>`,
@@ -119,7 +119,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome at the beginning of a paragraph", async () => {
+    test("should parse a fontawesome at the beginning of a paragraph", async () => {
         await testEditor({
             contentBefore: '<p><i class="fa fa-pastafarianism"></i>a[b]c</p>',
             contentBeforeEdit:
@@ -128,7 +128,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome in the middle of a paragraph", async () => {
+    test("should parse a fontawesome in the middle of a paragraph", async () => {
         await testEditor({
             contentBefore: '<p>a[b]c<i class="fa fa-pastafarianism"></i>def</p>',
             contentBeforeEdit:
@@ -137,7 +137,7 @@ describe("parse/render", () => {
         });
     });
 
-    test.todo("should parse a fontawesome at the end of a paragraph", async () => {
+    test("should parse a fontawesome at the end of a paragraph", async () => {
         await testEditor({
             contentBefore: '<p>a[b]c<i class="fa fa-pastafarianism"></i></p>',
             contentBeforeEdit:
@@ -146,7 +146,7 @@ describe("parse/render", () => {
         });
     });
     /** not sure this is necessary, keep for now in case it is
-        test.todo('should insert navigation helpers when before a fontawesome, in an editable', async () => {
+        test('should insert navigation helpers when before a fontawesome, in an editable', async () => {
             await testEditor({
                 contentBefore: '<p>abc[]<i class="fa fa-pastafarianism"></i></p>',
                 contentAfter:
@@ -158,7 +158,7 @@ describe("parse/render", () => {
                     '<p>\u200B[]<i class="fa fa-pastafarianism" contenteditable="false"></i>\u200B</p>',
             });
         });
-        test.todo('should insert navigation helpers when after a fontawesome, in an editable', async () => {
+        test('should insert navigation helpers when after a fontawesome, in an editable', async () => {
             await testEditor({
                 contentBefore: '<p><i class="fa fa-pastafarianism"></i>[]abc</p>',
                 contentAfter:
@@ -170,7 +170,7 @@ describe("parse/render", () => {
                     '<p>\u200B<i class="fa fa-pastafarianism" contenteditable="false"></i>\u200B[]</p>',
             });
         });
-        test.todo('should not insert navigation helpers when not adjacent to a fontawesome, in an editable', async () => {
+        test('should not insert navigation helpers when not adjacent to a fontawesome, in an editable', async () => {
             await testEditor({
                 contentBefore: '<p>ab[]c<i class="fa fa-pastafarianism"></i></p>',
                 contentAfter:
@@ -182,7 +182,7 @@ describe("parse/render", () => {
                     '<p><i class="fa fa-pastafarianism" contenteditable="false"></i>a[]bc</p>',
             });
         });
-        test.todo('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false container', async () => {
+        test('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false container', async () => {
             await testEditor({
                 contentBefore:
                     '<p contenteditable="false">abc[]<i class="fa fa-pastafarianism"></i></p>',
@@ -196,7 +196,7 @@ describe("parse/render", () => {
                     '<p contenteditable="false"><i class="fa fa-pastafarianism" contenteditable="false"></i>abc</p>',
             });
         });
-        test.todo('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false format', async () => {
+        test('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false format', async () => {
             await testEditor({
                 contentBefore:
                     '<p contenteditable="true"><b contenteditable="false">abc[]<i class="fa fa-pastafarianism"></i></b></p>',
@@ -210,7 +210,7 @@ describe("parse/render", () => {
                     '<p contenteditable="true"><b contenteditable="false"><i class="fa fa-pastafarianism" contenteditable="false"></i>abc</b></p>',
             });
         });
-        test.todo('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false format (oe-nested)', async () => {
+        test('should not insert navigation helpers when adjacent to a fontawesome in contenteditable=false format (oe-nested)', async () => {
             await testEditor({
                 contentBefore:
                     '<p contenteditable="true"><a contenteditable="true"><b contenteditable="false">abc[]<i class="fa fa-pastafarianism"></i></b></a></p>',
@@ -229,7 +229,7 @@ describe("parse/render", () => {
 describe("deleteForward", () => {
     describe("Selection collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome (deleteForward, collapsed)", async () => {
+            test("should delete a fontawesome (deleteForward, collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
                     contentBeforeEdit:
@@ -239,7 +239,7 @@ describe("deleteForward", () => {
                 });
             });
 
-            test.todo("should not delete a fontawesome", async () => {
+            test("should not delete a fontawesome", async () => {
                 await testEditor({
                     contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>[]cd</p>',
                     contentBeforeEdit:
@@ -267,22 +267,19 @@ describe("deleteForward", () => {
                 });
             });
 
-            test.todo(
-                "should not delete a fontawesome after one deleteForward with spaces",
-                async () => {
-                    await testEditor({
-                        contentBefore: '<p>ab[] <i class="fa fa-pastafarianism"></i> cd</p>',
-                        contentBeforeEdit:
-                            '<p>ab[] <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
-                        stepFunction: async (editor) => {
-                            await deleteForward(editor);
-                        },
-                        contentAfterEdit:
-                            '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
-                        contentAfter: '<p>ab[]<i class="fa fa-pastafarianism"></i> cd</p>',
-                    });
-                }
-            );
+            test("should not delete a fontawesome after one deleteForward with spaces", async () => {
+                await testEditor({
+                    contentBefore: '<p>ab[] <i class="fa fa-pastafarianism"></i> cd</p>',
+                    contentBeforeEdit:
+                        '<p>ab[] <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
+                    stepFunction: async (editor) => {
+                        await deleteForward(editor);
+                    },
+                    contentAfterEdit:
+                        '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
+                    contentAfter: '<p>ab[]<i class="fa fa-pastafarianism"></i> cd</p>',
+                });
+            });
 
             test.todo(
                 "should not delete a fontawesome after multiple deleteForward with spaces",
@@ -347,7 +344,7 @@ describe("deleteForward", () => {
 describe("deleteBackward", () => {
     describe("Selection collapsed", () => {
         describe("Basic", () => {
-            test.todo("should delete a fontawesome (deleteBackward, collapsed)", async () => {
+            test("should delete a fontawesome (deleteBackward, collapsed)", async () => {
                 await testEditor({
                     contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>[]cd</p>',
                     contentBeforeEdit:
@@ -364,7 +361,7 @@ describe("deleteBackward", () => {
                 });
             });
 
-            test.todo("should delete a fontawesome before a span", async () => {
+            test("should delete a fontawesome before a span", async () => {
                 await testEditor({
                     contentBefore:
                         '<p>ab<i class="fa fa-pastafarianism"></i><span class="a">[]cd</span></p>',
@@ -375,7 +372,7 @@ describe("deleteBackward", () => {
                 });
             });
 
-            test.todo("should not delete a fontawesome before a span", async () => {
+            test("should not delete a fontawesome before a span", async () => {
                 await testEditor({
                     contentBefore:
                         '<p>ab<i class="fa fa-pastafarianism"></i><span class="a">c[]d</span></p>',
@@ -389,7 +386,7 @@ describe("deleteBackward", () => {
                 });
             });
 
-            test.todo("should not delete a fontawesome", async () => {
+            test("should not delete a fontawesome", async () => {
                 await testEditor({
                     contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
                     contentBeforeEdit:
@@ -401,7 +398,7 @@ describe("deleteBackward", () => {
                 });
             });
 
-            test.todo("should not delete a fontawesome after multiple deleteBackward", async () => {
+            test("should not delete a fontawesome after multiple deleteBackward", async () => {
                 await testEditor({
                     contentBefore: '<p>abcde<i class="fa fa-pastafarianism"></i>fgh[]ij</p>',
                     contentBeforeEdit:
@@ -417,24 +414,21 @@ describe("deleteBackward", () => {
                 });
             });
 
-            test.todo(
-                "should not delete a fontawesome after multiple deleteBackward with spaces",
-                async () => {
-                    await testEditor({
-                        contentBefore: '<p>abcde <i class="fa fa-pastafarianism"></i> fg[]hij</p>',
-                        contentBeforeEdit:
-                            '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> fg[]hij</p>',
-                        stepFunction: async (editor) => {
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                            await deleteBackward(editor);
-                        },
-                        contentAfterEdit:
-                            '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]hij</p>',
-                        contentAfter: '<p>abcde <i class="fa fa-pastafarianism"></i>[]hij</p>',
-                    });
-                }
-            );
+            test("should not delete a fontawesome after multiple deleteBackward with spaces", async () => {
+                await testEditor({
+                    contentBefore: '<p>abcde <i class="fa fa-pastafarianism"></i> fg[]hij</p>',
+                    contentBeforeEdit:
+                        '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> fg[]hij</p>',
+                    stepFunction: async (editor) => {
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                        await deleteBackward(editor);
+                    },
+                    contentAfterEdit:
+                        '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]hij</p>',
+                    contentAfter: '<p>abcde <i class="fa fa-pastafarianism"></i>[]hij</p>',
+                });
+            });
         });
     });
     describe("Selection not collapsed", () => {
@@ -535,7 +529,7 @@ describe("FontAwesome insertion", () => {
 });
 
 describe("Text insertion", () => {
-    test.todo("should insert a character before", async () => {
+    test("should insert a character before", async () => {
         await testEditor({
             contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
             contentBeforeEdit:
@@ -549,7 +543,7 @@ describe("Text insertion", () => {
         });
     });
 
-    test.todo("should insert a character after", async () => {
+    test("should insert a character after", async () => {
         await testEditor({
             contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>[]cd</p>',
             contentBeforeEdit:
