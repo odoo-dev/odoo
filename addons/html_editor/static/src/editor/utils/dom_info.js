@@ -307,6 +307,17 @@ export function isUnremovable(node) {
 const iconTags = ["I", "SPAN"];
 // @todo @phoenix: move the specific part in a proper plugin.
 const iconClasses = ["fa", "fab", "fad", "far", "oi"];
+
+export const ICON_SELECTOR = iconTags
+    .map((tag) => {
+        return iconClasses
+            .map((cls) => {
+                return `${tag}.${cls}`;
+            })
+            .join(", ");
+    })
+    .join(", ");
+
 /**
  * Indicates if the given node is an icon element.
  *
