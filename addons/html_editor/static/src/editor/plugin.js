@@ -1,18 +1,18 @@
 /**
- * @type { import("./editor").Editor } Editor
- * @type { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
- * @type { import("./core/dom_plugin").DomPlugin } DomPlugin
- * @type { import("./core/split_block_plugin").SplitBlockPlugin } SplitBlockPlugin
- * @type { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
+ * @typedef { import("./editor").Editor } Editor
+ * @typedef { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
+ * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
+ * @typedef { import("./core/split_block_plugin").SplitBlockPlugin } SplitBlockPlugin
+ * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
  *
  * @typedef { Object } SharedMethods
- * @property { SelectionPlugin.prototype.getEditableSelection } getEditableSelection
- * @property { SelectionPlugin.prototype.setSelection } setSelection
- * @property { SelectionPlugin.prototype.setCursorStart } setCursorStart
- * @property { SelectionPlugin.prototype.setCursorEnd } setCursorEnd
- * @property { DomPlugin.prototype.domInsert } domInsert
- * @property { SplitBlockPlugin.prototype.splitElementBlock } splitElementBlock
- * @property { OverlayPlugin.prototype.createOverlay } createOverlay
+ * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
+ * @property { SelectionPlugin['setSelection'] } setSelection
+ * @property { SelectionPlugin['setCursorStart'] } setCursorStart
+ * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
+ * @property { DomPlugin['domInsert'] } domInsert
+ * @property { SplitBlockPlugin['splitElementBlock'] } splitElementBlock
+ * @property { OverlayPlugin['createOverlay'] } createOverlay
  */
 
 export class Plugin {

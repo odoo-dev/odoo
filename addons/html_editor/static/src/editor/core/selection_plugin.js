@@ -3,6 +3,22 @@ import { Plugin } from "../plugin";
 import { DIRECTIONS, nodeSize } from "../utils/position";
 import { getNormalizedCursorPosition } from "../utils/selection";
 
+/**
+ * @typedef { Object } EditorSelection
+ * @property { Node } anchorNode
+ * @property { number } anchorOffset
+ * @property { Node } focusNode
+ * @property { number } focusOffset
+ * @property { Node } startContainer
+ * @property { number } startOffset
+ * @property { Node } endContainer
+ * @property { number } endOffset
+ * @property { Node } commonAncestorContainer
+ * @property { boolean } isCollapsed
+ * @property { boolean } direction
+ * @property { () => boolean } isDomSelectionInEditable
+ */
+
 export class SelectionPlugin extends Plugin {
     static name = "selection";
     static shared = ["getEditableSelection", "setSelection", "setCursorStart", "setCursorEnd"];
@@ -12,6 +28,9 @@ export class SelectionPlugin extends Plugin {
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
     }
 
+    /**
+     * Update the active selection to the current selection in the editor.
+     */
     updateActiveSelection() {
         const selection = this.document.getSelection();
         if (selection.rangeCount === 0) {
@@ -27,6 +46,10 @@ export class SelectionPlugin extends Plugin {
         }
     }
 
+    /**
+     * @param { Selection } selection The DOM selection
+     * @return { EditorSelection }
+     */
     makeSelection(selection) {
         let range;
         if (!selection || !selection.rangeCount) {
@@ -86,6 +109,9 @@ export class SelectionPlugin extends Plugin {
         return activeSelection;
     }
 
+    /**
+     * @return { EditorSelection }
+     */
     getEditableSelection() {
         const selection = this.document.getSelection();
         if (
@@ -99,6 +125,17 @@ export class SelectionPlugin extends Plugin {
         return this.activeSelection;
     }
 
+    /**
+     * Set the selection in the editor.
+     *
+     * @param { Object } selection
+     * @param { Node } selection.anchorNode
+     * @param { number } selection.anchorOffset
+     * @param { Node } selection.focusNode
+     * @param { number } selection.focusOffset
+     * @param { boolean } normalize
+     * @return { EditorSelection }
+     */
     setSelection(
         { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
         normalize = true
@@ -125,10 +162,18 @@ export class SelectionPlugin extends Plugin {
         return this.activeSelection;
     }
 
+    /**
+     * Set the cursor at the start of the given node.
+     * @param { Node } node
+     */
     setCursorStart(node) {
         return this.setSelection({ anchorNode: node, anchorOffset: 0 });
     }
 
+    /**
+     * Set the cursor at the end of the given node.
+     * @param { Node } node
+     */
     setCursorEnd(node) {
         return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
     }
