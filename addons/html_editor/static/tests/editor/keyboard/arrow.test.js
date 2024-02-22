@@ -1,9 +1,10 @@
 import { test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
-import { setSelection, testEditor } from "../../test_helpers/editor";
+import { testEditor } from "../../test_helpers/editor";
+import { setSelection } from "../../test_helpers/selection";
 import { simulateArrowKeyPress } from "../../test_helpers/user_actions";
 
-test.todo("should move past a zws (collapsed - ArrowRight)", async () => {
+test("should move past a zws (collapsed - ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
@@ -22,7 +23,7 @@ test.todo("should move past a zws (collapsed - ArrowRight)", async () => {
     });
 });
 
-test.todo("should move past a zws (collapsed - ArrowLeft)", async () => {
+test("should move past a zws (collapsed - ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         stepFunction: async (editor) => {
@@ -39,7 +40,7 @@ test.todo("should move past a zws (collapsed - ArrowLeft)", async () => {
     });
 });
 
-test.todo("should move past a zws (collapsed at the end of a block)", async () => {
+test("should move past a zws (collapsed at the end of a block)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span></p><p>cd</p>',
         stepFunction: async (editor) => {
@@ -58,7 +59,7 @@ test.todo("should move past a zws (collapsed at the end of a block)", async () =
     });
 });
 
-test.todo("should select a zws", async () => {
+test("should select a zws", async () => {
     await testEditor({
         contentBefore: '<p>[ab]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
@@ -77,7 +78,7 @@ test.todo("should select a zws", async () => {
     });
 });
 
-test.todo("should select a zws (2)", async () => {
+test("should select a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
@@ -96,7 +97,7 @@ test.todo("should select a zws (2)", async () => {
     });
 });
 
-test.todo("should select a zws (3)", async () => {
+test("should select a zws (3)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<span class="a">\u200B</span>cd</p>',
         stepFunction: async (editor) => {
@@ -115,7 +116,7 @@ test.todo("should select a zws (3)", async () => {
     });
 });
 
-test.todo("should select a zws backwards (ArrowLeft)", async () => {
+test("should select a zws backwards (ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B[]</span>cd</p>',
         stepFunction: async (editor) => {
@@ -134,7 +135,7 @@ test.todo("should select a zws backwards (ArrowLeft)", async () => {
     });
 });
 
-test.todo("should select a zws backwards (ArrowLeft - 2)", async () => {
+test("should select a zws backwards (ArrowLeft - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>]cd[</p>',
         stepFunction: async (editor) => {
@@ -153,7 +154,7 @@ test.todo("should select a zws backwards (ArrowLeft - 2)", async () => {
     });
 });
 
-test.todo("should select a zws backwards (ArrowLeft - 3)", async () => {
+test("should select a zws backwards (ArrowLeft - 3)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>]c[d</p>',
         stepFunction: async (editor) => {
@@ -172,7 +173,7 @@ test.todo("should select a zws backwards (ArrowLeft - 3)", async () => {
     });
 });
 
-test.todo("should select a zws backwards (ArrowRight)", async () => {
+test("should select a zws backwards (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">]\u200B[</span>cd</p>',
         stepFunction: async (editor) => {
@@ -207,7 +208,7 @@ test.todo("should select a zws backwards (ArrowRight)", async () => {
     });
 });
 
-test.todo("should select a zws backwards (ArrowRight - 2)", async () => {
+test("should select a zws backwards (ArrowRight - 2)", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">]\u200B</span>c[d</p>',
         stepFunction: async (editor) => {
@@ -226,7 +227,7 @@ test.todo("should select a zws backwards (ArrowRight - 2)", async () => {
     });
 });
 
-test.todo("should deselect a zws", async () => {
+test("should deselect a zws", async () => {
     await testEditor({
         contentBefore: '<p>ab<span class="a">[\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
@@ -261,7 +262,7 @@ test.todo("should deselect a zws", async () => {
     });
 });
 
-test.todo("should deselect a zws (2)", async () => {
+test("should deselect a zws (2)", async () => {
     await testEditor({
         contentBefore: '<p>a[b<span class="a">\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
@@ -477,7 +478,7 @@ test.todo("should place cursor in the paragraph below", async () => {
     await testEditor({
         contentBefore:
             "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>" + "<p><br></p>",
-        stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
+        // stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
         contentAfter:
             "<table><tbody><tr><td><p>a</p><p>b</p></td></tr></tbody></table>" + "<p>[]<br></p>",
     });
