@@ -109,6 +109,8 @@ export async function testEditor(config) {
         expect("iframe").toHaveCount(1);
     }
 
+    editor.dispatch("NORMALIZE", el);
+
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
         compareFunction(getContent(el), contentBeforeEdit, "contentBeforeEdit");
