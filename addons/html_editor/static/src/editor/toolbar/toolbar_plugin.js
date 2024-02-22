@@ -54,14 +54,14 @@ export class ToolbarPlugin extends Plugin {
         if (this.config.disableFloatingToolbar) {
             return;
         }
-        const inEditor = sel.inEditor;
+        const inEditable = sel.isDomSelectionInEditable();
         if (this.overlay.isOpen) {
-            if (!inEditor || sel.isCollapsed) {
+            if (!inEditable || sel.isCollapsed) {
                 this.overlay.close();
             } else {
                 this.overlay.open(); // will update position
             }
-        } else if (inEditor && !sel.isCollapsed) {
+        } else if (inEditable && !sel.isCollapsed) {
             this.overlay.open();
         }
     }

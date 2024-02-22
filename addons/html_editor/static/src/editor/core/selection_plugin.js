@@ -8,7 +8,7 @@ export class SelectionPlugin extends Plugin {
     static shared = ["getEditableSelection", "setSelection", "setCursorStart", "setCursorEnd"];
 
     setup() {
-        this.activeSelection = this.makeSelection(false, false);
+        this.activeSelection = this.makeSelection(false);
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
     }
 
@@ -20,14 +20,14 @@ export class SelectionPlugin extends Plugin {
         const range = selection.getRangeAt(0);
         if (this.editable.contains(range.commonAncestorContainer)) {
             // selection is in editor, need to update local copy
-            this.activeSelection = this.makeSelection(selection, true);
+            this.activeSelection = this.makeSelection(selection);
             for (const handler of this.resources.onSelectionChange) {
                 handler(this.activeSelection);
             }
         }
     }
 
-    makeSelection(selection, inEditor) {
+    makeSelection(selection) {
         let range;
         if (!selection || !selection.rangeCount) {
             selection = false;
@@ -73,7 +73,13 @@ export class SelectionPlugin extends Plugin {
             commonAncestorContainer: range.commonAncestorContainer,
             isCollapsed,
             direction,
-            inEditor,
+            isDomSelectionInEditable: () => {
+                const selection = this.document.getSelection();
+                return (
+                    selection.rangeCount > 0 &&
+                    this.editable.contains(selection.getRangeAt(0).commonAncestorContainer)
+                );
+            },
         };
 
         Object.freeze(activeSelection);
@@ -97,6 +103,12 @@ export class SelectionPlugin extends Plugin {
         { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
         normalize = true
     ) {
+        if (
+            !this.editable.contains(anchorNode) ||
+            !(anchorNode === focusNode || this.editable.contains(focusNode))
+        ) {
+            throw new Error("Selection is not in editor");
+        }
         if (normalize) {
             // normalize selection
             const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
@@ -109,7 +121,7 @@ export class SelectionPlugin extends Plugin {
         const selection = this.document.getSelection();
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 
-        this.activeSelection = this.makeSelection(selection, true);
+        this.activeSelection = this.makeSelection(selection);
         return this.activeSelection;
     }
 
