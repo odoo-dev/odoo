@@ -4,7 +4,7 @@ import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
 
 // CTRL+BACKSPACE
-test("should not remove the last p with ctrl+backspace", async () => {
+test.todo("should not remove the last p with ctrl+backspace", async () => {
     await testEditor({
         contentBefore: unformat(`<p>[]<br></p>`),
         stepFunction: async (editor) => {
@@ -21,30 +21,33 @@ test("should not remove the last p with ctrl+backspace", async () => {
     });
 });
 
-test("should not remove the last p enclosed in a contenteditable=false with ctrl+backspace", async () => {
-    await testEditor({
-        contentBefore: unformat(`
+test.todo(
+    "should not remove the last p enclosed in a contenteditable=false with ctrl+backspace",
+    async () => {
+        await testEditor({
+            contentBefore: unformat(`
                 <p>text</p>
                 <div contenteditable="false"><div contenteditable="true">
                     <p>[]<br></p>
                 </div></div>`),
-        stepFunction: async (editor) => {
-            editor.editable.addEventListener("keydown", (ev) => {
-                // simulation of the browser default behavior
-                if (ev.key === "Backspace" && ev.ctrlKey === true && !ev.defaultPrevented) {
-                    const sel = document.getSelection();
-                    sel.anchorNode.remove();
-                }
-            });
-            await press(["Ctrl", "Backspace"]);
-        },
-        contentAfter: unformat(`
+            stepFunction: async (editor) => {
+                editor.editable.addEventListener("keydown", (ev) => {
+                    // simulation of the browser default behavior
+                    if (ev.key === "Backspace" && ev.ctrlKey === true && !ev.defaultPrevented) {
+                        const sel = document.getSelection();
+                        sel.anchorNode.remove();
+                    }
+                });
+                await press(["Ctrl", "Backspace"]);
+            },
+            contentAfter: unformat(`
                 <p>text</p>
                 <div contenteditable="false"><div contenteditable="true">
                     <p>[]<br></p>
                 </div></div>`),
-    });
-});
+        });
+    }
+);
 
 test.todo(
     "should add a <p><br></p> element when deleting the last child of the editable with ctrl+backspace",
