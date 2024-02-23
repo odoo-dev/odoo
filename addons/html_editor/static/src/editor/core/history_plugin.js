@@ -369,7 +369,7 @@ export class HistoryPlugin extends Plugin {
         if (!currentStep.mutations.length) {
             return false;
         }
-        this.dispatch("NORMALIZE", this.getMutationsRoot(currentStep.mutations));
+        this.dispatch("NORMALIZE", { node: this.getMutationsRoot(currentStep.mutations) });
         this.handleObserverRecords();
 
         // @todo @phoenix add this in the collaboration plugin.
