@@ -108,8 +108,7 @@ export class ListPlugin extends Plugin {
                 this.toggleList(payload.mode);
                 break;
             case "NORMALIZE": {
-                const root = payload;
-                this.mergeLists(root);
+                this.mergeLists(payload.node);
                 break;
             }
         }
