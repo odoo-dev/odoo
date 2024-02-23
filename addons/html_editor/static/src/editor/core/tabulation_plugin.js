@@ -52,8 +52,7 @@ export class TabulationPlugin extends Plugin {
                 this.handleShiftTab();
                 break;
             case "NORMALIZE": {
-                const root = payload;
-                this.alignTabs(root);
+                this.alignTabs(payload.node);
                 break;
             }
             case "CLEAN":

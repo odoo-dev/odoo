@@ -9,7 +9,7 @@ class MediaPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "NORMALIZE":
-                this.normalizeMedia(payload);
+                this.normalizeMedia(payload.node);
                 break;
             case "CLEAN":
                 this.clean();
