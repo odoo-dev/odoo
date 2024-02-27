@@ -57,3 +57,16 @@ export function rgbToHex(rgb = "", node = null) {
         );
     }
 }
+
+/**
+ * Colors of the default palette, used for substitution in shapes/illustrations.
+ * key: number of the color in the palette (ie, o-color-<1-5>)
+ * value: color hex code
+ */
+export const DEFAULT_PALETTE = {
+    1: "#3AADAA",
+    2: "#7C6576",
+    3: "#F6F6F6",
+    4: "#FFFFFF",
+    5: "#383E45",
+};
