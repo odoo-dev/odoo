@@ -1,8 +1,8 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";
 import { Powerbox } from "./powerbox";
-import { _t } from "@web/core/l10n/translation";
 
 function target(selection) {
     const node = selection.anchorNode;
@@ -15,7 +15,7 @@ export class PowerboxPlugin extends Plugin {
     static dependencies = ["overlay", "selection", "history"];
     static resources = () => ({
         temp_hints: {
-            text: 'Type "/" for commands',
+            text: _t('Type "/" for commands'),
             target,
         },
         powerboxCategory: { id: "structure", name: _t("Structure"), sequence: 10 },
