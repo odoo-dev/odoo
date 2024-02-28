@@ -342,25 +342,25 @@ export class DeletePlugin extends Plugin {
         clearEmpty(rightParent);
     }
 
-    joinInlineIntoBlock(leftBlock, right) {
-        if (!this.canBeMerged(leftBlock, right)) {
+    joinInlineIntoBlock(leftBlock, rightInline) {
+        if (!this.canBeMerged(leftBlock, rightInline)) {
             return;
         }
 
-        while (right && !isBlock(right)) {
+        while (rightInline && !isBlock(rightInline)) {
             // @todo @phoenix: what if right is a BR?
-            const toAppend = right;
-            right = right.nextSibling;
+            const toAppend = rightInline;
+            rightInline = rightInline.nextSibling;
             leftBlock.append(toAppend);
         }
     }
 
-    joinBlockIntoInline(left, rightBlock) {
-        if (!this.canBeMerged(left, rightBlock)) {
+    joinBlockIntoInline(leftInline, rightBlock) {
+        if (!this.canBeMerged(leftInline, rightBlock)) {
             return;
         }
 
-        left.after(...rightBlock.childNodes);
+        leftInline.after(...rightBlock.childNodes);
         const rightSibling = rightBlock.nextSibling;
         rightBlock.remove();
         if (rightSibling && !isBlock(rightSibling)) {
