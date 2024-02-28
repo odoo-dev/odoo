@@ -342,6 +342,25 @@ export function isMediaElement(node) {
     );
 }
 
+/**
+ * A "protected" node will have its mutations filtered and not be registered
+ * in an history step. Some editor features like selection handling, command
+ * hint, toolbar, tooltip, etc. are also disabled. Protected roots have their
+ * data-oe-protected attribute set to either "" or "true". If the closest parent
+ * with a data-oe-protected attribute has the value "false", it is not
+ * protected. Unknown values are ignored.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isProtected(node) {
+    const closestProtectedElement = closestElement(node, "[data-oe-protected]");
+    if (closestProtectedElement) {
+        return ["", "true"].includes(closestProtectedElement.dataset.oeProtected);
+    }
+    return false;
+}
+
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
 export const paragraphRelatedElements = [
