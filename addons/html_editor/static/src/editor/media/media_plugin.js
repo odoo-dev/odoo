@@ -89,13 +89,12 @@ class MediaPlugin extends Plugin {
             } else {
                 node.replaceWith(element);
             }
-            this.dispatch("ADD_STEP");
         } else {
             const selection = this.shared.getEditableSelection();
-            // TODO @phoenix to discuss what we should do when we add a element ? Best practice ? (remove <br)
             selection.anchorNode.prepend(element);
             this.shared.setCursorEnd(selection.anchorNode);
         }
+        this.dispatch("ADD_STEP");
     }
 
     openMediaDialog(params = {}) {
