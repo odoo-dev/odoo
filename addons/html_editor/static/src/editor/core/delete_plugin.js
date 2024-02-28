@@ -69,7 +69,6 @@ export class DeletePlugin extends Plugin {
                 this.deleteElementForward(payload);
                 break;
             case "DELETE_RANGE":
-                // this.deleteRange();
                 this.deleteRange();
                 break;
         }
@@ -109,16 +108,6 @@ export class DeletePlugin extends Plugin {
             commonAncestor,
         });
 
-        // Set cursor.
-        this.setCursorAfterRemoveNodes({
-            commonAncestor,
-            startElement,
-            endElement,
-            startRemoveIndex,
-            adjustedEndRemoveIndex,
-            direction: selection.direction,
-        });
-
         // Join fragments if they are part of direct sibling sub-trees under
         // commonAncestor. If start or end element is commonAncestor, it means
         // there's no fragment to be joined.
@@ -130,13 +119,23 @@ export class DeletePlugin extends Plugin {
             this.joinFragments(startElement, endElement, commonAncestor);
         }
 
+        // Define cursor position: place it on startElement, unless it has been
+        // removed by the join.
+        let cursorPos;
+        if (startElement.isConnected) {
+            cursorPos = { anchorNode: startElement, anchorOffset: startOffset };
+        } else if (endElement === commonAncestor) {
+            cursorPos = { anchorNode: commonAncestor, anchorOffset: adjustedEndRemoveIndex };
+        } else {
+            cursorPos = { anchorNode: endElement, anchorOffset: 0 };
+        }
+
         // Fill empty blocks, remove empty inlines.
-        this.handleEmptyElements(commonAncestor);
+        this.handleEmptyElements(commonAncestor, cursorPos);
 
         // Restore spaces state.
-        const preserveCursor = this.shared.getEditableSelection();
         restore();
-        this.shared.setSelection(preserveCursor);
+        this.shared.setSelection(cursorPos);
 
         this.dispatch("ADD_STEP");
     }
@@ -235,35 +234,6 @@ export class DeletePlugin extends Plugin {
         return true;
     }
 
-    setCursorAfterRemoveNodes({
-        commonAncestor,
-        startElement,
-        startRemoveIndex,
-        endElement,
-        adjustedEndRemoveIndex,
-        direction,
-    }) {
-        if (direction === DIRECTIONS.RIGHT) {
-            if (startElement === commonAncestor) {
-                this.shared.setSelection({
-                    anchorNode: commonAncestor,
-                    anchorOffset: startRemoveIndex,
-                });
-            } else {
-                this.shared.setCursorEnd(startElement);
-            }
-        } else {
-            if (endElement === commonAncestor) {
-                this.shared.setSelection({
-                    anchorNode: commonAncestor,
-                    anchorOffset: adjustedEndRemoveIndex,
-                });
-            } else {
-                this.shared.setCursorStart(endElement);
-            }
-        }
-    }
-
     joinFragments(left, right, commonAncestor) {
         // Returns closest block whithin ancestor or ancestor's child inline element.
         const getJoinableElement = (node) => {
@@ -318,7 +288,6 @@ export class DeletePlugin extends Plugin {
         if (!isVisible(right)) {
             const parent = right.parentElement;
             right.remove();
-            this.shared.setCursorEnd(left);
             clearEmpty(parent);
             return;
         }
@@ -326,7 +295,6 @@ export class DeletePlugin extends Plugin {
         if (!isVisible(left)) {
             const parent = left.parentElement;
             left.remove();
-            this.shared.setCursorStart(right);
             clearEmpty(parent);
             return;
         }
@@ -335,7 +303,6 @@ export class DeletePlugin extends Plugin {
             return;
         }
 
-        this.shared.setCursorEnd(left);
         left.append(...right.childNodes);
         const rightParent = right.parentElement;
         right.remove();
@@ -371,8 +338,7 @@ export class DeletePlugin extends Plugin {
 
     // Fill empty blocks
     // Remove empty inline elements, unless cursor is inside it
-    handleEmptyElements(commonAncestor) {
-        const selection = this.shared.getEditableSelection();
+    handleEmptyElements(commonAncestor, cursorPos) {
         for (const node of [commonAncestor, ...descendants(commonAncestor)].toReversed()) {
             if (node.nodeType !== Node.ELEMENT_NODE) {
                 continue;
@@ -380,7 +346,7 @@ export class DeletePlugin extends Plugin {
             if (isBlock(node)) {
                 fillEmpty(node);
             } else if (!isVisible(node)) {
-                if (node.contains(selection.anchorNode)) {
+                if (node === cursorPos.anchorNode) {
                     // Add zws to empty inline element
                     // @todo @phoenix: this sets the selection via setSelection (it should not)
                     // @todo @phoenix: shouldn't this be done by a method by the zws plugin?
