@@ -2,12 +2,12 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
-import { isRow } from "../utils/dom_info";
+import { isProtected, isRow } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
-import { closestElement } from "../utils/dom_traversal";
+import { ancestors, closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, nodeSize, rightPos } from "../utils/position";
-import { findInSelection, getDeepRange } from "../utils/selection";
+import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
 
@@ -19,6 +19,7 @@ export class TablePlugin extends Plugin {
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
         delete_range_before: { callback: p.deleteRangeBefore.bind(p) },
+        onSelectionChange: p.updateSelectionTable.bind(p),
         powerboxCommands: [
             {
                 name: _t("Table"),
@@ -315,6 +316,32 @@ export class TablePlugin extends Plugin {
             focusOffset: nodeSize(cursorDestination),
         });
         return true;
+    }
+
+    updateSelectionTable(selection) {
+        const traversedNodes = getTraversedNodes(this.editable);
+        if (
+            !traversedNodes.every(
+                (node) => node.parentElement && closestElement(node.parentElement, "table")
+            )
+        ) {
+            const traversedTables = new Set(
+                traversedNodes
+                    .map((node) => closestElement(node, "table"))
+                    .filter((node) => node && !isProtected(node))
+            );
+            for (const table of traversedTables) {
+                // Don't apply several nested levels of selection.
+                if (!ancestors(table, this.editable).some((node) => traversedTables.has(node))) {
+                    table.classList.toggle("o_selected_table", true);
+                    for (const td of [...table.querySelectorAll("td")].filter(
+                        (td) => closestElement(td, "table") === table
+                    )) {
+                        td.classList.toggle("o_selected_td", true);
+                    }
+                }
+            }
+        }
     }
 }
 
