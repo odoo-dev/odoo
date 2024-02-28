@@ -5,7 +5,7 @@ import { applyColor, bold, resetSize } from "../../test_helpers/user_actions";
 
 describe("select a full table on cross over", () => {
     describe("select", () => {
-        test.todo("should select some characters and a table", async () => {
+        test("should select some characters and a table", async () => {
             await testEditor({
                 contentBefore:
                     "<p>a[bc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>",
@@ -19,7 +19,7 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo("should select a table and some characters", async () => {
+        test("should select a table and some characters", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr><td>ab</td><td>cd</td><td>e[f</td></tr></tbody></table><p>a]bc</p>",
@@ -31,7 +31,7 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo("should select some characters, a table and some more characters", async () => {
+        test("should select some characters, a table and some more characters", async () => {
             await testEditor({
                 contentBefore:
                     "<p>a[bc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>a]bc</p>",
@@ -43,43 +43,37 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo(
-            "should select some characters, a table, some more characters and another table",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>abc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>",
-                    contentAfterEdit:
-                        '<p>a[bc</p><table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td">ab</td>' +
-                        '<td class="o_selected_td">cd</td>' +
-                        '<td class="o_selected_td">ef</td></tr></tbody></table>' +
-                        '<p>abc</p><table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td">a]b</td>' +
-                        '<td class="o_selected_td">cd</td>' +
-                        '<td class="o_selected_td">ef</td></tr></tbody></table>',
-                });
-            }
-        );
+        test("should select some characters, a table, some more characters and another table", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>abc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>",
+                contentAfterEdit:
+                    '<p>a[bc</p><table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td">ab</td>' +
+                    '<td class="o_selected_td">cd</td>' +
+                    '<td class="o_selected_td">ef</td></tr></tbody></table>' +
+                    '<p>abc</p><table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td">a]b</td>' +
+                    '<td class="o_selected_td">cd</td>' +
+                    '<td class="o_selected_td">ef</td></tr></tbody></table>',
+            });
+        });
 
-        test.todo(
-            "should select some characters, a table, some more characters, another table and some more characters",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>abc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>a]bc</p>",
-                    contentAfterEdit:
-                        '<p>a[bc</p><table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td">ab</td>' +
-                        '<td class="o_selected_td">cd</td>' +
-                        '<td class="o_selected_td">ef</td></tr></tbody></table>' +
-                        '<p>abc</p><table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td">ab</td>' +
-                        '<td class="o_selected_td">cd</td>' +
-                        '<td class="o_selected_td">ef</td></tr></tbody></table><p>a]bc</p>',
-                });
-            }
-        );
+        test("should select some characters, a table, some more characters, another table and some more characters", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>abc</p><table><tbody><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table><p>a]bc</p>",
+                contentAfterEdit:
+                    '<p>a[bc</p><table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td">ab</td>' +
+                    '<td class="o_selected_td">cd</td>' +
+                    '<td class="o_selected_td">ef</td></tr></tbody></table>' +
+                    '<p>abc</p><table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td">ab</td>' +
+                    '<td class="o_selected_td">cd</td>' +
+                    '<td class="o_selected_td">ef</td></tr></tbody></table><p>a]bc</p>',
+            });
+        });
     });
 
     describe("toggleFormat", () => {
@@ -121,30 +115,27 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo(
-            "should apply bold to some characters, a table and some more characters",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>a]bc</p>",
-                    stepFunction: bold,
-                    contentAfterEdit:
-                        "<p>a<strong>[bc</strong></p>" +
-                        '<table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td"><strong>ab</strong></td>' +
-                        '<td class="o_selected_td"><strong>cd</strong></td>' +
-                        '<td class="o_selected_td"><strong>ef</strong></td>' +
-                        "</tr></tbody></table>" +
-                        "<p><strong>a]</strong>bc</p>",
-                });
-            }
-        );
+        test("should apply bold to some characters, a table and some more characters", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>a]bc</p>",
+                stepFunction: bold,
+                contentAfterEdit:
+                    "<p>a<strong>[bc</strong></p>" +
+                    '<table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                    '<td class="o_selected_td"><strong>ef</strong></td>' +
+                    "</tr></tbody></table>" +
+                    "<p><strong>a]</strong>bc</p>",
+            });
+        });
 
         test.todo(
             "should apply bold to some characters, a table, some more characters and another table",
@@ -181,42 +172,39 @@ describe("select a full table on cross over", () => {
             }
         );
 
-        test.todo(
-            "should apply bold to some characters, a table, some more characters, another table and some more characters",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>abc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>a]bc</p>",
-                    stepFunction: bold,
-                    contentAfterEdit:
-                        "<p>a<strong>[bc</strong></p>" +
-                        '<table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td"><strong>ab</strong></td>' +
-                        '<td class="o_selected_td"><strong>cd</strong></td>' +
-                        '<td class="o_selected_td"><strong>ef</strong></td>' +
-                        "</tr></tbody></table>" +
-                        "<p><strong>abc</strong></p>" +
-                        '<table class="o_selected_table"><tbody><tr>' +
-                        '<td class="o_selected_td"><strong>ab</strong></td>' +
-                        '<td class="o_selected_td"><strong>cd</strong></td>' +
-                        '<td class="o_selected_td"><strong>ef</strong></td>' +
-                        "</tr></tbody></table>" +
-                        "<p><strong>a]</strong>bc</p>",
-                });
-            }
-        );
+        test("should apply bold to some characters, a table, some more characters, another table and some more characters", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>abc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>a]bc</p>",
+                stepFunction: bold,
+                contentAfterEdit:
+                    "<p>a<strong>[bc</strong></p>" +
+                    '<table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                    '<td class="o_selected_td"><strong>ef</strong></td>' +
+                    "</tr></tbody></table>" +
+                    "<p><strong>abc</strong></p>" +
+                    '<table class="o_selected_table"><tbody><tr>' +
+                    '<td class="o_selected_td"><strong>ab</strong></td>' +
+                    '<td class="o_selected_td"><strong>cd</strong></td>' +
+                    '<td class="o_selected_td"><strong>ef</strong></td>' +
+                    "</tr></tbody></table>" +
+                    "<p><strong>a]</strong>bc</p>",
+            });
+        });
     });
 
     describe("color", () => {

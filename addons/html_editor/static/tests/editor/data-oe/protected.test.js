@@ -115,7 +115,7 @@ test("should not handle table selection in protected elements children (true)", 
     });
 });
 
-test.todo("should handle table selection in unprotected elements children (false)", async () => {
+test("should handle table selection in unprotected elements children (false)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div data-oe-protected="true">
@@ -139,7 +139,7 @@ test.todo("should handle table selection in unprotected elements children (false
     });
 });
 
-test.todo("should not select a protected table (true)", async () => {
+test("should not select a protected table (true)", async () => {
     // Individually protected cells are not yet supported for simplicity
     // since there is no need for that currently.
     await testEditor({
