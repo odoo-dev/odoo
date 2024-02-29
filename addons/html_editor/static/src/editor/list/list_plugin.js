@@ -7,6 +7,7 @@ import { isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
+import { childNodeIndex } from "../utils/position";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -23,6 +24,7 @@ export class ListPlugin extends Plugin {
     static name = "list";
     static dependencies = ["tabulation", "split_block", "selection"];
     static resources = (p) => ({
+        handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
         delete_element_backward_before: { callback: p.deleteElementBackwardBefore.bind(p) },
         delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
@@ -491,6 +493,24 @@ export class ListPlugin extends Plugin {
         if (closestLI.classList.contains("o_checked")) {
             removeClass(newLI, "o_checked");
         }
+        return true;
+    }
+
+    handleDeleteBackward({ targetNode, targetOffset }) {
+        const closestLI = closestElement(targetNode, "LI");
+        if (!closestLI) {
+            return;
+        }
+        // Detect if cursor is at beginning of LI.
+        // @todo @phoenix: handle ZWS
+        while (targetNode !== closestLI && targetOffset === 0) {
+            targetOffset = childNodeIndex(targetNode);
+            targetNode = targetNode.parentElement;
+        }
+        if (targetOffset) {
+            return;
+        }
+        this.liToP(closestLI);
         return true;
     }
 

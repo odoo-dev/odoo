@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty, setTagName } from "../utils/dom";
-import { isVisibleTextNode } from "../utils/dom_info";
+import { isVisibleTextNode, previousLeaf } from "../utils/dom_info";
 import { closestElement, createDOMPathGenerator, descendants } from "../utils/dom_traversal";
 import { convertNumericToUnit, getCSSVariableValue, getHtmlStyle } from "../utils/formatting";
 import { FontSelector } from "./font_selector";
@@ -83,6 +83,8 @@ const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
     stopFunction: isBlock,
 });
 
+const headingTags = ["H1", "H2", "H3", "H4", "H5", "H6"];
+
 export class FontPlugin extends Plugin {
     static name = "font";
     static dependencies = ["split_block", "selection"];
@@ -91,6 +93,7 @@ export class FontPlugin extends Plugin {
             { callback: p.handleSplitBlockPRE.bind(p) },
             { callback: p.handleSplitBlockHeading.bind(p) },
         ],
+        handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
         toolbarGroup: [
             {
                 id: "font",
@@ -223,7 +226,6 @@ export class FontPlugin extends Plugin {
      * Cursor in the line: <h1>tit[]le</h1> + ENTER <=> <h1>tit</h1><h1>[]le</h1>
      */
     handleSplitBlockHeading(params) {
-        const headingTags = ["H1", "H2", "H3", "H4", "H5", "H6"];
         const closestHeading = closestElement(params.targetNode, (element) =>
             headingTags.includes(element.tagName)
         );
@@ -241,6 +243,26 @@ export class FontPlugin extends Plugin {
             }
             return true;
         }
+    }
+
+    handleDeleteBackward({ targetNode, targetOffset }) {
+        const handledTags = [...headingTags, "PRE", "BLOCKQUOTE"];
+        const selector = handledTags.join(", ");
+        const closestHandledElement = closestElement(targetNode, selector);
+        if (!closestHandledElement) {
+            return;
+        }
+        // Detect if cursor is at the start of the editable.
+        // @todo: handle ZWS.
+        if (targetOffset || previousLeaf(targetNode, this.editable)) {
+            return;
+        }
+        const p = this.document.createElement("p");
+        p.append(...closestHandledElement.childNodes);
+        closestHandledElement.after(p);
+        closestHandledElement.remove();
+        this.shared.setCursorStart(p);
+        return true;
     }
 }
 
