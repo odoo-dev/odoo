@@ -10,6 +10,7 @@ import { DIRECTIONS, nodeSize, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
+import { removeClass } from "../utils/dom";
 
 export class TablePlugin extends Plugin {
     static name = "table";
@@ -66,6 +67,9 @@ export class TablePlugin extends Plugin {
                 break;
             case "DELETE_TABLE":
                 this.deleteTable(payload);
+                break;
+            case "CLEAN":
+                this.deselectTable();
                 break;
         }
     }
@@ -319,12 +323,25 @@ export class TablePlugin extends Plugin {
     }
 
     updateSelectionTable(selection) {
+        this.deselectTable();
+
+        const startTd = closestElement(selection.startContainer, "td");
+        const endTd = closestElement(selection.endContainer, "td");
+        const startTable = ancestors(selection.startContainer, this.editable)
+            .filter((node) => node.nodeName === "TABLE")
+            .pop();
+        const endTable = ancestors(selection.endContainer, this.editable)
+            .filter((node) => node.nodeName === "TABLE")
+            .pop();
+
         const traversedNodes = getTraversedNodes(this.editable);
-        if (
-            !traversedNodes.every(
-                (node) => node.parentElement && closestElement(node.parentElement, "table")
-            )
-        ) {
+        if (startTd !== endTd && startTable === endTable) {
+            if (!isProtected(startTable)) {
+                // The selection goes through at least two different cells ->
+                // select cells.
+                this.selectTableCells(selection);
+            }
+        } else if (!traversedNodes.every((node) => closestElement(node.parentElement, "table"))) {
             const traversedTables = new Set(
                 traversedNodes
                     .map((node) => closestElement(node, "table"))
@@ -342,6 +359,61 @@ export class TablePlugin extends Plugin {
                 }
             }
         }
+    }
+
+    selectTableCells(selection) {
+        const table = closestElement(selection.commonAncestorContainer, "table");
+        table.classList.toggle("o_selected_table", true);
+        const columns = [...table.querySelectorAll("td")].filter(
+            (td) => closestElement(td, "table") === table
+        );
+        const startCol =
+            [selection.startContainer, ...ancestors(selection.startContainer, this.editable)].find(
+                (node) => node.nodeName === "TD" && closestElement(node, "table") === table
+            ) || columns[0];
+        const endCol =
+            [selection.endContainer, ...ancestors(selection.endContainer, this.editable)].find(
+                (node) => node.nodeName === "TD" && closestElement(node, "table") === table
+            ) || columns[columns.length - 1];
+        const [startRow, endRow] = [closestElement(startCol, "tr"), closestElement(endCol, "tr")];
+        const [startColIndex, endColIndex] = [getColumnIndex(startCol), getColumnIndex(endCol)];
+        const [startRowIndex, endRowIndex] = [getRowIndex(startRow), getRowIndex(endRow)];
+        const [minRowIndex, maxRowIndex] = [
+            Math.min(startRowIndex, endRowIndex),
+            Math.max(startRowIndex, endRowIndex),
+        ];
+        const [minColIndex, maxColIndex] = [
+            Math.min(startColIndex, endColIndex),
+            Math.max(startColIndex, endColIndex),
+        ];
+        // Create an array of arrays of tds (each of which is a row).
+        const grid = [...table.querySelectorAll("tr")]
+            .filter((tr) => closestElement(tr, "table") === table)
+            .map((tr) => [...tr.children].filter((child) => child.nodeName === "TD"));
+        for (const tds of grid.filter((_, index) => index >= minRowIndex && index <= maxRowIndex)) {
+            for (const td of tds.filter(
+                (_, index) => index >= minColIndex && index <= maxColIndex
+            )) {
+                td.classList.toggle("o_selected_td", true);
+            }
+        }
+    }
+
+    /**
+     * Remove any custom table selection from the editor.
+     *
+     * @returns {boolean} true if a table was deselected
+     */
+    deselectTable() {
+        let didDeselectTable = false;
+        for (const table of this.editable.querySelectorAll(".o_selected_table")) {
+            removeClass(table, "o_selected_table");
+            for (const td of table.querySelectorAll(".o_selected_td")) {
+                removeClass(td, "o_selected_td");
+            }
+            didDeselectTable = true;
+        }
+        return didDeselectTable;
     }
 }
 
