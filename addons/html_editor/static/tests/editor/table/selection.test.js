@@ -424,7 +424,7 @@ describe("select a full table on cross over", () => {
 
 describe("select columns on cross over", () => {
     describe("select", () => {
-        test.todo("should select two columns", async () => {
+        test("should select two columns", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr><td>a[b</td><td>c]d</td><td>ef</td></tr></tbody></table>",
@@ -437,7 +437,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should select a whole row", async () => {
+        test("should select a whole row", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr><td>a[b</td><td>cd</td><td>e]f</td></tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
@@ -450,7 +450,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should select a whole column", async () => {
+        test("should select a whole column", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
@@ -479,7 +479,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should select from (0,0) to (1,1) in a 3x3 table", async () => {
+        test("should select from (0,0) to (1,1) in a 3x3 table", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
@@ -508,7 +508,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should select a whole table", async () => {
+        test("should select a whole table", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
