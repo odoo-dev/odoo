@@ -38,6 +38,7 @@ export class LineBreakPlugin extends Plugin {
             targetNode = targetNode.parentElement;
         }
         this.insertLineBreakElement({ targetNode, targetOffset });
+        this.dispatch("ADD_STEP");
     }
 
     insertLineBreakElement({ targetNode, targetOffset }) {
