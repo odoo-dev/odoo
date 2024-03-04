@@ -255,7 +255,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should delete starting white space and merge paragraphs", async () => {
+        test("should delete starting white space and merge paragraphs", async () => {
             await testEditor({
                 contentBefore: `<p>mollis.</p><p>\n <i>[]Pe</i><i>lentesque</i></p>`,
                 stepFunction: deleteBackward,
@@ -841,7 +841,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge two paragraphs with spans of same classes", async () => {
+        test("should merge two paragraphs with spans of same classes", async () => {
             await testEditor({
                 contentBefore: '<p><span class="a">ab</span></p><p><span class="a">[]cd</span></p>',
                 stepFunction: deleteBackward,
@@ -857,17 +857,14 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge two paragraphs of different classes, each containing spans of the same class",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p class="a"><span class="b">ab</span></p><p class="c"><span class="b">[]cd</span></p>',
-                    stepFunction: deleteBackward,
-                    contentAfter: '<p class="a"><span class="b">ab[]cd</span></p>',
-                });
-            }
-        );
+        test("should merge two paragraphs of different classes, each containing spans of the same class", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p class="a"><span class="b">ab</span></p><p class="c"><span class="b">[]cd</span></p>',
+                stepFunction: deleteBackward,
+                contentAfter: '<p class="a"><span class="b">ab[]cd</span></p>',
+            });
+        });
 
         test("should merge two paragraphs of different classes, each containing spans of different classes without merging the spans", async () => {
             await testEditor({
@@ -879,32 +876,26 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should delete a line break between two spans with bold and merge these formats",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p><span class="a"><b>ab</b></span><br><span class="a"><b>[]cd</b></span></p>',
-                    stepFunction: deleteBackward,
-                    contentAfter: '<p><span class="a"><b>ab[]cd</b></span></p>',
-                });
-            }
-        );
+        test("should delete a line break between two spans with bold and merge these formats", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p><span class="a"><b>ab</b></span><br><span class="a"><b>[]cd</b></span></p>',
+                stepFunction: deleteBackward,
+                contentAfter: '<p><span class="a"><b>ab[]cd</b></span></p>',
+            });
+        });
 
-        test.todo(
-            "should delete a character in a span with bold, then a line break between two spans with bold and merge these formats",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p><span class="a"><b>ab<br></b></span><br><span class="a"><b>c[]de</b></span></p>',
-                    stepFunction: async (editor) => {
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
-                    },
-                    contentAfter: '<p><span class="a"><b>ab<br>[]de</b></span></p>',
-                });
-            }
-        );
+        test("should delete a character in a span with bold, then a line break between two spans with bold and merge these formats", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p><span class="a"><b>ab<br></b></span><br><span class="a"><b>c[]de</b></span></p>',
+                stepFunction: async (editor) => {
+                    await deleteBackward(editor);
+                    await deleteBackward(editor);
+                },
+                contentAfter: '<p><span class="a"><b>ab<br>[]de</b></span></p>',
+            });
+        });
     });
 
     describe("Nested editable zone (inside contenteditable=false element)", () => {

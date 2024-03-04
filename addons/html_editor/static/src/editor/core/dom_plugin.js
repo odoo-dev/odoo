@@ -2,10 +2,12 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { makeContentsInline, setTagName } from "../utils/dom";
+import { makeContentsInline, moveNodes, setTagName } from "../utils/dom";
 import {
     allowsParagraphRelatedElements,
+    areSimilarElements,
     getDeepestPosition,
+    isEditorTab,
     isSelfClosingElement,
     isShrunkBlock,
     isUnbreakable,
@@ -13,7 +15,7 @@ import {
 import { splitElement, splitTextNode } from "../utils/dom_split";
 import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
-import { DIRECTIONS, childNodeIndex, rightPos } from "../utils/position";
+import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
 import { getDeepRange, getTraversedNodes } from "../utils/selection";
 
 export class DomPlugin extends Plugin {
@@ -47,6 +49,10 @@ export class DomPlugin extends Plugin {
                         node.removeAttribute("class");
                     }
                 }
+                break;
+            }
+            case "NORMALIZE": {
+                this.mergeAdjacentNodes(payload.node);
                 break;
             }
         }
@@ -312,6 +318,39 @@ export class DomPlugin extends Plugin {
         const sep = this.document.createElement("hr");
         const target = selection.commonAncestorContainer;
         target.parentElement.before(sep);
+    }
+
+    mergeAdjacentNodes(node) {
+        this.mergeAdjacentNode(node);
+        for (const child of node.childNodes) {
+            this.mergeAdjacentNodes(child);
+        }
+    }
+
+    mergeAdjacentNode(node) {
+        if (
+            areSimilarElements(node, node.previousSibling) &&
+            !isUnbreakable(node) &&
+            !isEditorTab(node) &&
+            !(
+                node.attributes?.length === 1 &&
+                node.hasAttribute("data-oe-zws-empty-inline") &&
+                (node.textContent === "\u200B" || node.previousSibling.textContent === "\u200B")
+            )
+        ) {
+            const selection = this.shared.getEditableSelection();
+            const [anchorNode, anchorOffset] = getDeepestPosition(
+                selection.anchorNode,
+                selection.anchorOffset
+            );
+            const [focusNode, focusOffset] = getDeepestPosition(
+                selection.focusNode,
+                selection.focusOffset
+            );
+            // Merge identical elements together.
+            moveNodes(...startPos(node), node.previousSibling);
+            this.shared.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+        }
     }
 }
 
