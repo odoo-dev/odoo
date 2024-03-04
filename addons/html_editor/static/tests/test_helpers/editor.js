@@ -124,7 +124,7 @@ export async function testEditor(config) {
         compareFunction(getContent(el), contentAfterEdit, "contentAfterEdit");
     }
     editor.dispatch("CLEAN", el);
-    editor.dispatch("NORMALIZE", { node: el, clean: true });
+    editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
     if (contentAfter) {
         compareFunction(getContent(el), contentAfter, "contentAfter");
     }
