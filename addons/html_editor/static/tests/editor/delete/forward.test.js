@@ -751,7 +751,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge two paragraphs with spans of same classes", async () => {
+        test("should merge two paragraphs with spans of same classes", async () => {
             await testEditor({
                 contentBefore:
                     '<p><span class="a">dom to[]</span></p><p><span class="a">edit</span></p>',
@@ -769,17 +769,14 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge two paragraphs of different classes, each containing spans of the same class",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p class="a"><span class="b">ab[]</span></p><p class="c"><span class="b">cd</span></p>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<p class="a"><span class="b">ab[]cd</span></p>',
-                });
-            }
-        );
+        test("should merge two paragraphs of different classes, each containing spans of the same class", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p class="a"><span class="b">ab[]</span></p><p class="c"><span class="b">cd</span></p>',
+                stepFunction: deleteForward,
+                contentAfter: '<p class="a"><span class="b">ab[]cd</span></p>',
+            });
+        });
 
         test("should merge two paragraphs of different classes, each containing spans of different classes without merging the spans", async () => {
             await testEditor({

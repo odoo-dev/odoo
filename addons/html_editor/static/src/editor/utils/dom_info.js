@@ -490,3 +490,50 @@ export function nextLeaf(node, editable, skipInvisible = false) {
         }
     }
 }
+
+function hasPseudoElementContent(node, pseudoSelector) {
+    const content = getComputedStyle(node, pseudoSelector).getPropertyValue("content");
+    return content && content !== "none";
+}
+
+const NOT_A_NUMBER = /[^\d]/g;
+
+export function areSimilarElements(node, node2) {
+    if (![node, node2].every((n) => n?.nodeType === Node.ELEMENT_NODE)) {
+        return false; // The nodes don't both exist or aren't both elements.
+    }
+    if (node.nodeName !== node2.nodeName) {
+        return false; // The nodes aren't the same type of element.
+    }
+    const nodeName = node.nodeName;
+
+    for (const name of new Set([...node.getAttributeNames(), ...node2.getAttributeNames()])) {
+        if (node.getAttribute(name) !== node2.getAttribute(name)) {
+            return false; // The nodes don't have the same attributes.
+        }
+    }
+    if (
+        [node, node2].some(
+            (n) => hasPseudoElementContent(n, ":before") || hasPseudoElementContent(n, ":after")
+        )
+    ) {
+        return false; // The nodes have pseudo elements with content.
+    }
+    if (isIconElement(node) || isIconElement(node2)) {
+        return false;
+    }
+    if (["UL", "OL"].includes(nodeName)) {
+        return !isSelfClosingElement(node) && !isSelfClosingElement(node2); // The nodes are non-empty lists. TODO: this doesn't check that and it will always be true!
+    }
+    if (isBlock(node) || isSelfClosingElement(node) || isSelfClosingElement(node2)) {
+        return false; // The nodes are blocks or are empty but visible. TODO: Not sure this was what we wanted to check (see just above).
+    }
+    const nodeStyle = getComputedStyle(node);
+    const node2Style = getComputedStyle(node2);
+    return (
+        !+nodeStyle.padding.replace(NOT_A_NUMBER, "") &&
+        !+node2Style.padding.replace(NOT_A_NUMBER, "") &&
+        !+nodeStyle.margin.replace(NOT_A_NUMBER, "") &&
+        !+node2Style.margin.replace(NOT_A_NUMBER, "")
+    );
+}

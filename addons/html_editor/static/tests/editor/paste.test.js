@@ -280,7 +280,7 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -540,7 +540,7 @@ describe("Simple html p", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -967,7 +967,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two span (1)", async () => {
+        test("should paste a text when selection across two span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>1a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -978,7 +978,7 @@ describe("Complex html 3 p", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two span (2)", async () => {
+        test("should paste a text when selection across two span (2)", async () => {
             await testEditor({
                 contentBefore: '<p>2a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
@@ -1280,7 +1280,7 @@ describe("Complex html 3p+b", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two span", async () => {
+        test("should paste a text when selection across two span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
