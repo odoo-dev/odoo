@@ -67,7 +67,7 @@ test("should make a selection starting with italic text fully italic", async () 
     });
 });
 
-test.todo("should make a selection with italic text in the middle fully italic", async () => {
+test("should make a selection with italic text in the middle fully italic", async () => {
     await testEditor({
         contentBefore: `<p>[a${em(`b`)}</p><p>${em(`c`)}d]e</p>`,
         stepFunction: italic,
@@ -75,7 +75,7 @@ test.todo("should make a selection with italic text in the middle fully italic",
     });
 });
 
-test.todo("should make a selection ending with italic text fully italic", async () => {
+test("should make a selection ending with italic text fully italic", async () => {
     await testEditor({
         contentBefore: `<p>[ab</p><p>${em(`c]d`)}</p>`,
         stepFunction: italic,
@@ -92,7 +92,7 @@ test("should get ready to type in italic", async () => {
     });
 });
 
-test.todo("should get ready to type in not italic", async () => {
+test("should get ready to type in not italic", async () => {
     await testEditor({
         contentBefore: `<p>${em(`ab[]cd`)}</p>`,
         stepFunction: italic,

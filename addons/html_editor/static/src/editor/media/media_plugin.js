@@ -40,7 +40,7 @@ class MediaPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "NORMALIZE":
-                this.normalizeMedia(payload.node);
+                this.normalizeMedia(payload.node, payload.clean);
                 break;
             case "CLEAN":
                 this.clean();
@@ -48,7 +48,10 @@ class MediaPlugin extends Plugin {
         }
     }
 
-    normalizeMedia(node) {
+    normalizeMedia(node, clean) {
+        if (clean) {
+            return;
+        }
         for (const el of node.querySelectorAll(MEDIA_SELECTOR)) {
             el.setAttribute("contenteditable", "false");
             if (isIconElement(el)) {

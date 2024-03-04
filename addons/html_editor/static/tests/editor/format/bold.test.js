@@ -85,7 +85,7 @@ test("should make a selection starting with bold text fully bold", async () => {
     });
 });
 
-test.todo("should make a selection with bold text in the middle fully bold", async () => {
+test("should make a selection with bold text in the middle fully bold", async () => {
     await testEditor({
         contentBefore: `<p>[a${strong(`b`)}</p><p>${strong(`c`)}d]e</p>`,
         stepFunction: bold,
@@ -110,7 +110,7 @@ test("should get ready to type in bold", async () => {
     });
 });
 
-test.todo("should get ready to type in not bold", async () => {
+test("should get ready to type in not bold", async () => {
     await testEditor({
         contentBefore: `<p>${strong(`ab[]cd`)}</p>`,
         stepFunction: bold,
