@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.map">
+        <div class="d-flex flex-column h-100 w-100">
+            <div class="o_locationSelector_map_container w-100 flex-grow-1" t-ref="mapContainer"/>
+
+            <!-- Desktop infos -->
+            <div class="d-none d-md-flex justify-content-between flex-column flex-lg-row gap-3 gap-lg-0 p-4">
+                <t t-if="selectedLocation">
+                    <div class="col-lg-5 d-flex flex-column justify-content-between">
+                        <div class="d-flex gap-2">
+                            <strong
+                                class="o_locationSelector_number flex-shrink-0 h5 fw-bold text-center"
+                                t-out="this.props.locations.indexOf(selectedLocation) + 1"
+                            />
+                            <div class="d-flex flex-column flex-grow-1">
+                                <strong class="h5 fw-bold" t-out="selectedLocation.name"/>
+                                <small t-out="selectedLocation.street"/>
+                                <small t-out="this.getCityAndPostalCode(selectedLocation)"/>
+                            </div>
+                        </div>
+                        <!-- large screen and + -->
+                        <button
+                            type="button"
+                            class="btn btn-primary d-none d-lg-block mt-3"
+                            t-att-disabled="!this.props.selectedLocationId"
+                            t-on-click="this.props.validateSelection">
+                                Choose this location
+                        </button>
+                    </div>
+
+                    <!-- Schedule -->
+                    <LocationSchedule
+                        openingHours="selectedLocation.opening_hours"
+                        wrapClass="'col-lg-7 flex-grow-1 flex-lg-grow-0 ps-lg-4'"
+                    />
+
+                    <!-- medium size screen like Tablets, etc. -->
+                    <button
+                        type="button"
+                        class="btn btn-primary d-block d-lg-none align-self-stretch ms-lg-4"
+                        t-att-disabled="!this.props.selectedLocationId"
+                        t-on-click="this.props.validateSelection">
+                            Choose this location
+                    </button>
+                </t>
+
+                <!-- Skeleton screen -->
+                <t t-else="">
+                    <div class="col-lg-5 d-flex flex-column justify-content-between">
+                        <div class="d-flex gap-2">
+                            <span class="o_locationSelector_number o_locationSelector_skeleton_title flex-shrink-0 bg-200 h5"/>
+                            <div class="d-flex flex-column flex-grow-1">
+                                <span class="o_locationSelector_skeleton_title mb-2 bg-200"/>
+                                <span class="o_locationSelector_skeleton_content w-75 bg-200"/>
+                                <span class="o_locationSelector_skeleton_content w-25 bg-200"/>
+                            </div>
+                        </div>
+                        <span class="o_locationSelector_skeleton_btn d-none d-lg-block mt-3 rounded bg-200"/>
+                    </div>
+                    <div class="o_locationSelector_schedule d-grid gap-1 col-lg-7 flex-grow-1 flex-lg-grow-0 ps-lg-4">
+                        <t t-foreach="Array(7).keys()" t-as="i" t-key="i">
+                            <span class="d-contents">
+                                <span class="o_locationSelector_skeleton_day o_locationSelector_skeleton_content me-4 bg-200"/>
+                                <span class="o_locationSelector_schedule_hours d-flex">
+                                    <span class="o_locationSelector_skeleton_content d-block flex-grow-1 bg-200"/>
+                                    <span class="o_locationSelector_skeleton_content d-block flex-grow-1 bg-200"/>
+                                </span>
+                            </span>
+                        </t>
+                    </div>
+                    <span class="o_locationSelector_skeleton_btn d-block d-lg-none align-self-stretch ms-lg-4 rounded bg-200"/>
+                </t>
+            </div>
+
+            <!-- Mobile infos -->
+            <button
+                t-if="selectedLocation"
+                class="btn collapsed d-flex d-md-none gap-2 gap-lg-3 w-100 border-0 p-3 bg-transparent text-start"
+                type="button"
+                data-bs-target="#map_collapseHours"
+                aria-expanded="false"
+                aria-controls="map_collapseHours"
+                data-bs-toggle="collapse"
+            >
+                <strong
+                    t-out="this.props.locations.indexOf(selectedLocation) + 1"
+                    class="o_locationSelector_number fw-bold text-center"
+                />
+                <span class="d-flex flex-column gap-1 w-100">
+                    <span class="d-flex flex-column">
+                        <strong class="fw-bold" t-out="selectedLocation.name"/>
+                        <small class="text-muted">
+                            <span t-out="selectedLocation.street"/>
+                            <span class="d-block" t-out="this.getCityAndPostalCode(selectedLocation)"/>
+                        </small>
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small fw-bold">
+                        <i class="fa fa-clock-o" role="img"/>
+                        Opening hours
+                        <i class="o_locationSelector_hours_caret fa fa-caret-up ms-auto transition-base"/>
+                    </span>
+
+                    <!-- Schedule -->
+                    <span class="collapse" id="map_collapseHours">
+                        <LocationSchedule openingHours="selectedLocation.opening_hours"/>
+                    </span>
+                </span>
+            </button>
+        </div>
+    </t>
+
+    <t t-name="website_sale.locationSelector.map.marker">
+        <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="15" cy="38" rx="12" ry="2" fill="#000" fill-opacity="0.25"/>
+            <path
+                d="M15 39.2507C14.9216 39.1623 14.8316 39.0606 14.731 38.9461C14.323 38.482 13.7395 37.8091 13.0391 36.9752C11.6379 35.3068 9.77066 32.9967 7.90454 30.4276C6.03711 27.8567 4.17807 25.0364 2.78794 22.3465C1.38981 19.6411 0.5 17.1309 0.5 15.1621C0.5 7.06077 6.9955 0.5 14.9995 0.5C23.0004 0.5 29.5 7.06089 29.5 15.1621C29.5 17.1309 28.6102 19.6411 27.2121 22.3465C25.8219 25.0364 23.9629 27.8567 22.0955 30.4276C20.2293 32.9967 18.3621 35.3068 16.9609 36.9752C16.2605 37.8091 15.677 38.482 15.269 38.9461C15.1684 39.0606 15.0784 39.1623 15 39.2507Z"
+                fill="var(--LocationSelectorMarker-background)"
+                stroke="var(--LocationSelectorMarker-border-color)"
+            />
+            <text
+                x="50%"
+                y="50%"
+                text-anchor="middle"
+                t-out="number"
+                fill="var(--LocationSelectorMarker-color)"
+            />
+        </svg>
+    </t>
+</templates>

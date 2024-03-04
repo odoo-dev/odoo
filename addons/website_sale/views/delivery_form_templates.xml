@@ -64,23 +64,41 @@
             </div>
         </div>
         <!-- === Pick up location === -->
-        <div class="position-relative d-flex flex-column gap-2 mt-2">
-            <div class="o_pickup_location d-none ms-2">
+        <div t-if="is_pickup_needed" class="position-relative d-flex flex-column gap-2 mt-2">
+            <t t-set="pickup_location" t-value="order.access_point_address or {}"/>
+            <t
+                t-set="show_pickup_location_details"
+                t-value="not is_selected or not order.access_point_address"
+            />
+            <div t-attf-class="o_pickup_location ms-2 {{'d-none' if show_pickup_location_details else ''}}">
                 <span>
-                    <b name="o_pickup_location_name"/>
+                    <b name="o_pickup_location_name" t-out="pickup_location.get('name','')"/>
                     <br/>
-                    <i name="o_pickup_location_address"/>
+                    <i
+                        name="o_pickup_location_address"
+                        t-out="pickup_location.get('street','') + ' ' + pickup_location.get('postal_code','') + ' ' + pickup_location.get('city','')"
+                    />
                 </span>
                 <span
-                    name="o_remove_pickup_location"
-                    class="fa fa-times ms-2"
-                    title="Remove this location"
-                    aria-label="Remove this location"
+                    name="o_delivery_location_selector"
+                    class="fa fa-pencil ms-2"
+                    aria-label="Change location"
+                    title="Change location"
+                    t-att-data-carrier-id="dm.id"
+                    t-att-data-location-id="pickup_location.get('id')"
+                    t-att-data-zip-code="pickup_location.get('postal_code')"
                 />
             </div>
-            <t t-if="is_pickup_needed">
-                <div name="o_list_pickup_locations"/>
-            </t>
+            <button
+                t-if="show_pickup_location_details"
+                name="o_delivery_location_selector"
+                type="button"
+                class="btn btn-primary btn-sm"
+                t-att-data-carrier-id="dm.id"
+                t-att-data-zip-code="order.partner_shipping_id.zip"
+            >
+                Select a location
+            </button>
         </div>
         <t t-if="dm.website_description">
             <div t-field="dm.website_description" class="text-muted mt-1"/>

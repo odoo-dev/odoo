@@ -18,7 +18,7 @@ export const assets = {
 
 const cacheMap = new Map();
 
-class AssetsLoadingError extends Error {}
+export class AssetsLoadingError extends Error {}
 
 /**
  * Loads the given url inside a script tag.

@@ -1,0 +1,33 @@
+.o_location_selector_marker_icon {
+    --LocationSelectorMarker-border-color: #{mix($body-bg, $body-color)};
+    --LocationSelectorMarker-background: #{$body-bg};
+    --LocationSelectorMarker-color: #{$body-color};
+}
+
+.o_location_selector_marker_icon_selected {
+    --LocationSelectorMarker-border-color: #{mix(map-get($theme-colors, 'primary'), color-contrast(map-get($theme-colors, 'primary')))};
+    --LocationSelectorMarker-background: #{map-get($theme-colors, 'primary')};
+    --LocationSelectorMarker-color: #{color-contrast(map-get($theme-colors, 'primary'))};
+}
+
+.o_locationSelector_map_container {
+    min-height: 25vh;
+}
+
+.o_locationSelector_skeleton_title {
+    height: $h5-font-size * $headings-line-height;
+}
+
+.o_locationSelector_skeleton_content {
+    height: $small-font-size;
+    margin-bottom: ($line-height-base * $small-font-size) - $small-font-size;
+}
+
+.o_locationSelector_skeleton_day {
+    width: 9ch;
+}
+
+.o_locationSelector_skeleton_btn {
+    height: $btn-font-size * $btn-line-height + $btn-padding-y * 2;
+    margin: $btn-border-width 0;
+}
