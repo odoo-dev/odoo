@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.dialog">
+        <Dialog title="title" footer="false">
+            <div class="container">
+                <!-- Address -->
+                <input t-model.lazy="this.state.zipCode"/>
+                <!-- Tabs -->
+                <ul class="d-md-none mb-2" role="">
+                    <li>
+                        <button t-on-click="() => this.state.viewMode = 'list'">
+                            List view
+                        </button>
+                    </li>
+                    <li >
+                        <button
+                            t-if="this.state.loadMap"
+                            t-on-click="() => this.state.viewMode = 'map'"
+                        >
+                            Map view
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <t t-if="this.state.error">
+                    <t t-out="this.state.error"/>
+                </t>
+                <div t-else="" class="d-none d-md-flex">
+                    <div
+                        id="o_location_selector_list_view"
+                        class="d-md-flex flex-md-shrink-1 justify-content-md-center"
+                    >
+                        <div class="d-flex flex-column align-items-center">
+                            <t t-if="this.state.locations.length">
+                                <LocationList
+                                    locations="this.state.locations"
+                                    selectedLocationId="this.state.selectedLocationId.toString()"
+                                    setSelectedLocation.bind="setSelectedLocation"
+                                    validateSelection.bind="validateSelection"
+                                />
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    name="o_location_selector_validate_selection"
+                                    t-att-disabled="!this.state.selectedLocationId"
+                                    t-on-click="validateSelection"
+                                >
+                                    Choose this location
+                                </button>
+                            </t>
+                            <t t-else="">
+                                SPINNER
+                            </t>
+                        </div>
+                    </div>
+                    <div
+                        id="o_location_selector_map_view"
+                        class="d-md-flex flex-md-grow-1 justify-content-md-center"
+                    >
+                        <Map
+                            t-if="this.state.loadMap"
+                            locations="this.state.locations"
+                            selectedLocationId="this.state.selectedLocationId.toString()"
+                            setSelectedLocation.bind="setSelectedLocation"
+                        />
+                    </div>
+                </div>
+
+                <div class="d-md-none h-100">
+                    <t
+                        t-component="mobileComponent"
+                        locations="this.state.locations"
+                        selectedLocationId="this.state.selectedLocationId.toString()"
+                        setSelectedLocation.bind="setSelectedLocation"
+                        validateSelection.bind="validateSelection"
+                    />
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

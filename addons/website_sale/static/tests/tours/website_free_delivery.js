@@ -19,8 +19,8 @@ registry.category("web_tour.tours").add('check_free_delivery', {
         // Part 2: check multiple delivery & price loaded asynchronously
         {
             content: "Ensure price was loaded asynchronously",
-            extra_trigger: '#delivery_carrier input[name="delivery_type"]:checked',
-            trigger: '#delivery_method .o_delivery_carrier_select:contains("20.0"):contains("The Poste")',
+            extra_trigger: '#delivery_carrier input[name="o_delivery_carrier"]:checked',
+            trigger: '#o_delivery_form .o_delivery_carrier_select:contains("20.0"):contains("The Poste")',
             run: function () {}, // it's a check
         },
         {

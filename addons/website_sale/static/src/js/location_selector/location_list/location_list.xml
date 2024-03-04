@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.locationList">
+        <div class="d-flex flex-grow-1 h-100 h-md-auto overflow-x-auto">
+            <div class="list-group list-group-flush flex-grow-1">
+                <t
+                    t-foreach="this.props.locations"
+                    t-as="location"
+                    t-key="location.id"
+                >
+                    <Location
+                        id="location.id.toString()"
+                        name="location.pick_up_point_name"
+                        address="location.pick_up_point_address"
+                        number="location_index + 1"
+                        openingHours="location.opening_hours"
+                        isSelected="this.props.selectedLocationId === location.id.toString()"
+                        setSelectedLocation="this.props.setSelectedLocation"
+                    />
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

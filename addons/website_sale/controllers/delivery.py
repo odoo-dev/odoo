@@ -132,23 +132,59 @@ class WebsiteSaleDelivery(WebsiteSale):
             return {}
         address = order_location['address']
         name = order_location['pick_up_point_name']
-        return {order.carrier_id.delivery_type + '_access_point': address, 'name': name, 'delivery_name': order.carrier_id.display_name}
+        location_id = order_location['id']
+        return {
+            order.carrier_id.delivery_type + '_access_point': address,  # TODO VCR Remove this method and load the pickup location when loading the page
+            'name': name,
+            'id': location_id,
+            'zip': order_location['pick_up_point_postal_code'],
+            'delivery_name': order.carrier_id.display_name
+        }
 
-    @route('/shop/access_point/close_locations', type='json', auth='public', website=True, sitemap=False)
-    def get_close_locations(self):
-        order = request.website.sale_get_order()
+    @route(
+        '/shop/access_point/close_locations',
+        type='json',
+        auth='public',
+        website=True,
+    )
+    def get_close_locations(self, carrier_id=None, zip_code=None):
+        """ TODO VCR
+
+        :param int carrier_id: _description_, defaults to None
+        :param int zip_code: _description_, defaults to None
+        :return: _description_
+        :rtype: _type_
+        """
+        order_sudo = request.website.sale_get_order()
+        if carrier_id:
+            carrier_sudo = request.env['delivery.carrier'].sudo().browse(int(carrier_id))
+        else:
+            carrier_sudo = order_sudo.carrier_id
+        if zip_code:
+            country = request.env['res.country'].search(
+                [('code', '=', request.geoip.country_code)],
+                limit=1,
+            ) if request.geoip.country_code else order_sudo.partner_shipping_id.country_id  # TODO VCR Ask PAJU what is the best for the country (geoip or shipping partner?)
+            partner_address = order_sudo.env['res.partner'].create({
+                    'name': '',
+                    'active': False,
+                    'country_id': country.id,
+                    'zip': zip_code,
+                })
+        else:
+            partner_address = order_sudo.partner_shipping_id
         try:
             error = {'error': _('No pick-up point available for that shipping address')}
-            if not hasattr(order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations'):
+            if not hasattr(carrier_sudo, '_' + carrier_sudo.delivery_type + '_get_close_locations'):
                 return error
-            close_locations = getattr(order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations')(order.partner_shipping_id)
-            partner_address = order.partner_shipping_id
-            inline_partner_address = ' '.join((part or '') for part in [partner_address.street, partner_address.street2, partner_address.zip, partner_address.country_id.code])
+            close_locations = getattr(
+                carrier_sudo, '_' + carrier_sudo.delivery_type + '_get_close_locations'
+            )(partner_address)
             if len(close_locations) < 0:
                 return error
             for location in close_locations:
                 location['address_stringified'] = json.dumps(location)
-            return {'close_locations': close_locations, 'partner_address': inline_partner_address}
+            return {'locations': close_locations}
         except UserError as e:
             return {'error': str(e)}
 

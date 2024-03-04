@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.schedule">
+        <span>
+            <t t-foreach="this.props.openingHours" t-as="openingHour" t-key="openingHour_index">
+                <t t-call="website_sale.locationSelector.dailySchedule">
+                    <t t-set="weekday" t-value="openingHour_index"/>
+                    <t t-set="openingPeriods" t-value="openingHour_value"/>
+                </t>
+            </t>
+        </span>
+    </t>
+
+    <t t-name="website_sale.locationSelector.dailySchedule">
+        <!-- TODO VCR document variables -->
+        <span>
+            <small t-out="getWeekDay(weekday)"/>
+            <span>
+                <t t-if="openingPeriods.length">
+                    <t t-foreach="openingPeriods" t-as="openingPeriod" t-key="openingPeriod_index">
+                        <small t-out="openingPeriod"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <small class="text-danger">Closed</small>
+                </t>
+            </span>
+        </span>
+    </t>
+</templates>

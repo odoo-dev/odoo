@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="website_sale.locationSelector.location">
+        <div
+            t-att-id="'location-'+this.props.id"
+            class="border border-light"
+            t-att-class="{'o_location_selector_location_selected': props.isSelected}"
+            t-on-click="() => props.setSelectedLocation(props.id)"
+        >
+            <span t-out="props.number"/>
+            <span t-out="props.name"/>
+            <span t-out="props.address"/>
+        </div>
+    </t>
+</templates>

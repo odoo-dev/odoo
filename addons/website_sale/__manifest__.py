@@ -95,6 +95,7 @@
             'website_sale/static/src/js/website_sale_reorder.js',
             'website_sale/static/src/js/website_sale_delivery.js',
             'website_sale/static/src/scss/product_configurator.scss',
+            'website_sale/static/src/js/location_selector/**/*',
             'website_sale/static/src/js/notification/add_to_cart_notification/add_to_cart_notification.js',
             'website_sale/static/src/js/notification/add_to_cart_notification/add_to_cart_notification.xml',
             'website_sale/static/src/js/notification/cart_notification/cart_notification.js',
