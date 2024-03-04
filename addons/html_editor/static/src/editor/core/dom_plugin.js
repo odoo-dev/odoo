@@ -55,6 +55,10 @@ export class DomPlugin extends Plugin {
                 this.mergeAdjacentNodes(payload.node);
                 break;
             }
+            case "MERGE_ADJACENT_NODE": {
+                this.mergeAdjacentNodes(payload.node);
+                break;
+            }
         }
     }
 
