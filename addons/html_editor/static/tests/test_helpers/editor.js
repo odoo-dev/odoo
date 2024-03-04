@@ -124,7 +124,7 @@ export async function testEditor(config) {
         compareFunction(getContent(el), contentAfterEdit, "contentAfterEdit");
     }
     editor.dispatch("CLEAN", el);
-    // we should clean the editor here
+    editor.dispatch("NORMALIZE", { node: el, clean: true });
     if (contentAfter) {
         compareFunction(getContent(el), contentAfter, "contentAfter");
     }

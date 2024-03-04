@@ -67,7 +67,7 @@ test("should make a selection starting with underline text fully underline", asy
     });
 });
 
-test.todo("should make a selection with underline text in the middle fully underline", async () => {
+test("should make a selection with underline text in the middle fully underline", async () => {
     await testEditor({
         contentBefore: `<p>[a${u(`b`)}</p><p>${u(`c`)}d]e</p>`,
         stepFunction: underline,
@@ -75,7 +75,7 @@ test.todo("should make a selection with underline text in the middle fully under
     });
 });
 
-test.todo("should make a selection ending with underline text fully underline", async () => {
+test("should make a selection ending with underline text fully underline", async () => {
     await testEditor({
         // @phoenix content adapted to make it valid html
         contentBefore: `<p>[ab</p><p>${u(`c]d`)}</p>`,
@@ -93,7 +93,7 @@ test("should get ready to type in underline", async () => {
     });
 });
 
-test.todo("should get ready to type in not underline", async () => {
+test("should get ready to type in not underline", async () => {
     await testEditor({
         contentBefore: `<p>${u(`ab[]cd`)}</p>`,
         stepFunction: underline,
@@ -111,19 +111,16 @@ test("should not format non-editable text (underline)", async () => {
 });
 
 describe("with strikeThrough", () => {
-    test.todo(
-        "should get ready to write in strikeThrough without underline (underline was first)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`[]\u200b`, "last")}${u(s(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(s(`cd[]ef`))}</p>`,
-            });
-        }
-    );
+    test("should get ready to write in strikeThrough without underline (underline was first)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`[]\u200b`, "last")}${u(s(`ef`))}</p>`,
+            contentAfter: `<p>ab${u(s(`cd[]ef`))}</p>`,
+        });
+    });
 
-    test.todo("should restore underline after removing it (collapsed, strikeThrough)", async () => {
+    test("should restore underline after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
             contentBefore: `<p>ab${u(s(`cd`))}${s(`\u200b[]`, "first")}${u(s(`ef`))}</p>`,
             stepFunction: underline,
@@ -134,17 +131,14 @@ describe("with strikeThrough", () => {
         });
     });
 
-    test.todo(
-        "should remove underline after restoring it after removing it (collapsed, strikeThrough)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(s(`cd`))}${s(u(`[]\u200b`, "first"))}${u(s(`ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`[]\u200b`, "last")}${u(s(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(s(`cd[]ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline after restoring it after removing it (collapsed, strikeThrough)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(s(`cd`))}${s(u(`[]\u200b`, "first"))}${u(s(`ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(s(`cd`))}${s(`[]\u200b`, "last")}${u(s(`ef`))}</p>`,
+            contentAfter: `<p>ab${u(s(`cd[]ef`))}</p>`,
+        });
+    });
 
     test("should remove underline after restoring it and writing after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
@@ -240,17 +234,14 @@ describe("with italic", () => {
         });
     });
 
-    test.todo(
-        "should get ready to write in italic without underline (underline was first)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(em(`cd`))}${em(`[]\u200b`, "last")}${u(em(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(em(`cd[]ef`))}</p>`,
-            });
-        }
-    );
+    test("should get ready to write in italic without underline (underline was first)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(em(`cd`))}${em(`[]\u200b`, "last")}${u(em(`ef`))}</p>`,
+            contentAfter: `<p>ab${u(em(`cd[]ef`))}</p>`,
+        });
+    });
 
     test("should restore underline after removing it (collapsed, italic)", async () => {
         await testEditor({
@@ -261,17 +252,14 @@ describe("with italic", () => {
         });
     });
 
-    test.todo(
-        "should remove underline after restoring it after removing it (collapsed, italic)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(em(`cd`))}${em(u(`[]\u200b`))}${u(em(`ef`))}</p>`,
-                stepFunction: underline,
-                contentAfterEdit: `<p>ab${u(em(`cd`))}${em(`[]\u200b`, "last")}${u(em(`ef`))}</p>`,
-                contentAfter: `<p>ab${u(em(`cd[]ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline after restoring it after removing it (collapsed, italic)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(em(`cd`))}${em(u(`[]\u200b`))}${u(em(`ef`))}</p>`,
+            stepFunction: underline,
+            contentAfterEdit: `<p>ab${u(em(`cd`))}${em(`[]\u200b`, "last")}${u(em(`ef`))}</p>`,
+            contentAfter: `<p>ab${u(em(`cd[]ef`))}</p>`,
+        });
+    });
 
     test("should remove underline after restoring it and writing after removing it (collapsed, italic)", async () => {
         await testEditor({
