@@ -123,28 +123,22 @@ test("should make a selection starting with strikeThrough text fully strikeThrou
     });
 });
 
-test.todo(
-    "should make a selection with strikeThrough text in the middle fully strikeThrough",
-    async () => {
-        await testEditor({
-            contentBefore: `<p>[a${s(`b`)}</p><p>${s(`c`)}d]e</p>`,
-            stepFunction: strikeThrough,
-            contentAfter: `<p>${s(`[ab`)}</p><p>${s(`cd]`)}e</p>`,
-        });
-    }
-);
+test("should make a selection with strikeThrough text in the middle fully strikeThrough", async () => {
+    await testEditor({
+        contentBefore: `<p>[a${s(`b`)}</p><p>${s(`c`)}d]e</p>`,
+        stepFunction: strikeThrough,
+        contentAfter: `<p>${s(`[ab`)}</p><p>${s(`cd]`)}e</p>`,
+    });
+});
 
-test.todo(
-    "should make a selection ending with strikeThrough text fully strikeThrough",
-    async () => {
-        await testEditor({
-            // @phoenix content adapted to make it valid html
-            contentBefore: `<p>[ab</p><p>${s(`c]d`)}</p>`,
-            stepFunction: strikeThrough,
-            contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]d`)}</p>`,
-        });
-    }
-);
+test("should make a selection ending with strikeThrough text fully strikeThrough", async () => {
+    await testEditor({
+        // @phoenix content adapted to make it valid html
+        contentBefore: `<p>[ab</p><p>${s(`c]d`)}</p>`,
+        stepFunction: strikeThrough,
+        contentAfter: `<p>${s(`[ab`)}</p><p>${s(`c]d`)}</p>`,
+    });
+});
 
 test("should get ready to type in strikeThrough", async () => {
     await testEditor({
@@ -155,7 +149,7 @@ test("should get ready to type in strikeThrough", async () => {
     });
 });
 
-test.todo("should get ready to type in not underline", async () => {
+test("should get ready to type in not underline", async () => {
     await testEditor({
         contentBefore: `<p>${s(`ab[]cd`)}</p>`,
         stepFunction: strikeThrough,
