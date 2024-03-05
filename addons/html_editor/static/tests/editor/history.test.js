@@ -157,13 +157,13 @@ describe("revertCurrentStep", () => {
 });
 
 describe("step", () => {
-    test.todo('should allow insertion of nested contenteditable="true"', async () => {
+    test('should allow insertion of nested contenteditable="true"', async () => {
         await testEditor({
             contentBefore: `<div contenteditable="false"></div>`,
             stepFunction: async (editor) => {
                 const editable = '<div contenteditable="true">abc</div>';
                 editor.editable.querySelector("div").innerHTML = editable;
-                editor.historyStep();
+                editor.dispatch("ADD_STEP");
             },
             contentAfter: `<div contenteditable="false"><div contenteditable="true">abc</div></div>`,
         });

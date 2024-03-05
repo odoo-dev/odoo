@@ -1677,12 +1677,12 @@ describe("link", () => {
             });
         });
 
-        test.todo("should restore selection when pasting plain text followed by UNDO", async () => {
+        test("should restore selection when pasting plain text followed by UNDO", async () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "def");
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -1690,7 +1690,7 @@ describe("link", () => {
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "www.odoo.com");
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -1698,13 +1698,13 @@ describe("link", () => {
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "def www.odoo.com xyz");
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
         });
 
-        test.todo("should restore selection after pasting HTML followed by UNDO", async () => {
+        test("should restore selection after pasting HTML followed by UNDO", async () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
@@ -1712,7 +1712,7 @@ describe("link", () => {
                         editor,
                         '<a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>'
                     );
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -2058,7 +2058,7 @@ describe("images", () => {
                     // Undo
                     // TODO @phoenix: still need nexTick here?
                     // await nextTick();
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -2072,7 +2072,7 @@ describe("images", () => {
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                     // Undo
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -2268,7 +2268,7 @@ describe("youtube video", () => {
                     // Pick first command (Embed video)
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                     // Undo
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
@@ -2282,7 +2282,7 @@ describe("youtube video", () => {
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                     // Undo
-                    editor.historyUndo();
+                    editor.dispatch("HISTORY_UNDO");
                 },
                 contentAfter: "<p>[abc]</p>",
             });
