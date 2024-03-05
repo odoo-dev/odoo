@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, nodeSize } from "../utils/position";
-import { getNormalizedCursorPosition } from "../utils/selection";
+import { getNormalizedCursorPosition, normalizeSelfClosingElement } from "../utils/selection";
 
 /**
  * @typedef { Object } EditorSelection
@@ -146,9 +146,14 @@ export class SelectionPlugin extends Plugin {
         ) {
             throw new Error("Selection is not in editor");
         }
+
+        const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
+        [anchorNode, anchorOffset] = normalizeSelfClosingElement(anchorNode, anchorOffset);
+        [focusNode, focusOffset] = isCollapsed
+            ? [anchorNode, anchorOffset]
+            : normalizeSelfClosingElement(focusNode, focusOffset);
         if (normalize) {
             // normalize selection
-            const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
             [anchorNode, anchorOffset] = getNormalizedCursorPosition(anchorNode, anchorOffset);
             [focusNode, focusOffset] = isCollapsed
                 ? [anchorNode, anchorOffset]
