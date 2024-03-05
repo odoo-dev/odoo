@@ -16,8 +16,8 @@ test.todo("should ignore protected elements children mutations (true)", async ()
                 '[data-oe-protected="true"] > p'
             );
             protectedParagraph.append(document.createTextNode("b"));
-            editor.historyStep();
-            editor.historyUndo();
+            editor.dispatch("ADD_STEP");
+            editor.dispatch("HISTORY_UNDO");
         },
         contentAfterEdit: unformat(`
                 <div><p>ab[]</p></div>
@@ -26,7 +26,7 @@ test.todo("should ignore protected elements children mutations (true)", async ()
     });
 });
 
-test.todo("should not ignore unprotected elements children mutations (false)", async () => {
+test("should not ignore unprotected elements children mutations (false)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div><p>a[]</p></div>
@@ -39,7 +39,7 @@ test.todo("should not ignore unprotected elements children mutations (false)", a
             );
             setSelection(unProtectedParagraph, 1);
             await insertText(editor, "bc");
-            editor.historyUndo();
+            editor.dispatch("HISTORY_UNDO");
         },
         contentAfterEdit: unformat(`
                 <div><p>abc</p></div>
@@ -48,7 +48,7 @@ test.todo("should not ignore unprotected elements children mutations (false)", a
     });
 });
 
-test.todo("should not sanitize (sanitize.js) protected elements children (true)", async () => {
+test.todo("should not normalize protected elements children (true)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div>
@@ -60,7 +60,7 @@ test.todo("should not sanitize (sanitize.js) protected elements children (true)"
                     <ul><li><p><br></p></li></ul>
                 </div>
                 `),
-        stepFunction: async (editor) => editor.sanitize(),
+        stepFunction: async (editor) => editor.dispatch("NORMALIZE", { node: editor.editable }),
         contentAfterEdit: unformat(`
                 <div>
                     <p><i class="fa" contenteditable="false">\u200B</i></p>
@@ -74,7 +74,7 @@ test.todo("should not sanitize (sanitize.js) protected elements children (true)"
     });
 });
 
-test.todo("should sanitize (sanitize.js) unprotected elements children (false)", async () => {
+test.todo("should normalize unprotected elements children (false)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div data-oe-protected="true">
@@ -86,7 +86,7 @@ test.todo("should sanitize (sanitize.js) unprotected elements children (false)",
                     </div>
                 </div>
                 `),
-        stepFunction: async (editor) => editor.sanitize(),
+        stepFunction: async (editor) => editor.dispatch("NORMALIZE", { node: editor.editable }),
         contentAfterEdit: unformat(`
                 <div data-oe-protected="true">
                     <p><i class="fa"></i></p>
