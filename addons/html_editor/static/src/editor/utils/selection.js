@@ -70,6 +70,14 @@ const rightLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIO
     stopFunction: (node) => isNotEditableNode(node) || isBlock(node),
 });
 
+export function normalizeSelfClosingElement(node, offset) {
+    if (isSelfClosingElement(node)) {
+        // Cannot put cursor inside those elements, put it after instead.
+        [node, offset] = rightPos(node);
+    }
+    return [node, offset];
+}
+
 /**
  * From a given position, returns the normalized version.
  *
@@ -83,11 +91,7 @@ const rightLeafOnlyInScopeNotBlockEditablePath = createDOMPathGenerator(DIRECTIO
 export function getNormalizedCursorPosition(node, offset, full = true) {
     const editable = closestElement(node, ".odoo-editor-editable");
     let closest = closestElement(node);
-    while (
-        closest &&
-        closest !== editable &&
-        (isSelfClosingElement(node) || !closest.isContentEditable)
-    ) {
+    while (closest && closest !== editable && !closest.isContentEditable) {
         // Cannot put the cursor inside those elements, put it before if the
         // offset is 0 and the node is not empty, else after instead.
         [node, offset] = offset || !nodeSize(node) ? rightPos(node) : leftPos(node);

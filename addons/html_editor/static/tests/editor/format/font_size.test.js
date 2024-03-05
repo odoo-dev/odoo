@@ -114,13 +114,13 @@ test("should not format non-editable text (setFontSize)", async () => {
     });
 });
 
-test.todo("should add font size in selected table cells", async () => {
+test("should add font size in selected table cells", async () => {
     await testEditor({
         contentBefore:
             '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p><br></p>]</td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
         stepFunction: setFontSize("48px"),
         contentAfter:
-            '<table><tbody><tr><td><p><span style="font-size: 48px;">[]<br></span></p></td><td><p><span style="font-size: 48px;"><br></span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
+            '<table><tbody><tr><td><p><span style="font-size: 48px;"><br>[</span></p></td><td><p><span style="font-size: 48px;"><br>]</span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
     });
 });
 
