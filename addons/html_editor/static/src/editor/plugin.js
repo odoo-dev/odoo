@@ -1,11 +1,17 @@
 /**
  * @typedef { import("./editor").Editor } Editor
+ * @typedef { import("./core/history_plugin").HistoryPlugin } HistoryPlugin
  * @typedef { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
  * @typedef { import("./core/split_block_plugin").SplitBlockPlugin } SplitBlockPlugin
  * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
  *
  * @typedef { Object } SharedMethods
+ *
+ * @property { HistoryPlugin['getCurrentMutations'] } getCurrentMutations
+ * @property { HistoryPlugin['revertCurrentMutationsUntil'] } revertCurrentMutationsUntil
+ * @property { HistoryPlugin['handleObserverRecords'] } handleObserverRecords
+ * @property { HistoryPlugin['makeSavePoint'] } makeSavePoint
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
@@ -21,11 +27,11 @@ export class Plugin {
     static shared = [];
 
     /**
-     * @param {Document} document
-     * @param {HTMLElement} editable
+     * @param {Editor['document']} document
+     * @param {Editor['editable']} editable
      * @param {SharedMethods} shared
-     * @param { Editor.prototype.dispatch } dispatch
-     * @param {*} config
+     * @param {Editor['dispatch']} dispatch
+     * @param {import("./editor").EditorConfig} config
      * @param {*} services
      */
     constructor(document, editable, shared, dispatch, config, services) {
