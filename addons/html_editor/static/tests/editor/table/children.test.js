@@ -13,7 +13,7 @@ function addColumn(position) {
 
 describe("row", () => {
     describe("above", () => {
-        test.todo("should add a row above the top row", async () => {
+        test("should add a row above the top row", async () => {
             await testEditor({
                 contentBefore:
                     '<table><tbody><tr style="height: 20px;">' +

@@ -222,7 +222,7 @@ export class TablePlugin extends Plugin {
             }
         }
     }
-    removeColumn(cell) {
+    removeColumn({ cell }) {
         if (!cell) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
             cell = findInSelection(this.shared.getEditableSelection(), "td");
@@ -238,9 +238,9 @@ export class TablePlugin extends Plugin {
         // @todo @phoenix should I call dispatch('DELETE_TABLE', table) or this.deleteTable?
         siblingCell
             ? this.shared.setCursorStart(siblingCell)
-            : this.dispatch("DELETE_TABLE", table);
+            : this.dispatch("DELETE_TABLE", { table });
     }
-    removeRow(row) {
+    removeRow({ row }) {
         if (!row) {
             getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
             row = findInSelection(this.shared.getEditableSelection(), "tr");
@@ -255,9 +255,9 @@ export class TablePlugin extends Plugin {
         row.remove();
         siblingRow
             ? this.shared.setCursorStart({ anchorNode: siblingRow, anchorOffset: 0 })
-            : this.dispatch("DELETE_TABLE", table);
+            : this.dispatch("DELETE_TABLE", { table });
     }
-    resetSize(table) {
+    resetSize({ table }) {
         if (!table) {
             getDeepRange(this.editable, { select: true });
             table = findInSelection(this.shared.getEditableSelection(), "table");
@@ -273,7 +273,7 @@ export class TablePlugin extends Plugin {
             }
         });
     }
-    deleteTable(table) {
+    deleteTable({ table }) {
         table = table || findInSelection(this.shared.getEditableSelection(), "table");
         if (!table) {
             return;

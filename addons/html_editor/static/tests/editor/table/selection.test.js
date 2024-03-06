@@ -694,11 +694,9 @@ describe("select columns on cross over", () => {
     });
 
     describe("reset size", () => {
-        test.todo(
-            "should remove any height or width of the table and bring it back to it original form",
-            async () => {
-                await testEditor({
-                    contentBefore: `<table class="table table-bordered o_table" style="height: 980.5px; width: 736px;"><tbody>
+        test("should remove any height or width of the table and bring it back to it original form", async () => {
+            await testEditor({
+                contentBefore: `<table class="table table-bordered o_table" style="height: 980.5px; width: 736px;"><tbody>
                                     <tr style="height: 306.5px;">
                                         <td style="width: 356px;"><p>[]<br></p></td>
                                         <td style="width: 108.5px;"><p><br></p></td>
@@ -718,8 +716,8 @@ describe("select columns on cross over", () => {
                                         <td style="width: 232.25px;"><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                    stepFunction: resetSize,
-                    contentAfter: `<table class="table table-bordered o_table"><tbody>
+                stepFunction: resetSize,
+                contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td><p>[]<br></p></td>
                                         <td><p><br></p></td>
@@ -739,15 +737,12 @@ describe("select columns on cross over", () => {
                                         <td><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should remove any height or width of the table without loosing the style of the element inside it.",
-            async () => {
-                await testEditor({
-                    contentBefore: `<table class="table table-bordered o_table" style="width: 472.182px; height: 465.403px;"><tbody>
+        test("should remove any height or width of the table without loosing the style of the element inside it.", async () => {
+            await testEditor({
+                contentBefore: `<table class="table table-bordered o_table" style="width: 472.182px; height: 465.403px;"><tbody>
                                     <tr style="height: 104.872px;">
                                         <td style="width: 191.273px;"><h1>[]TESTTEXT</h1></td>
                                         <td style="width: 154.009px;"><p><br></p></td>
@@ -777,8 +772,8 @@ describe("select columns on cross over", () => {
                                             </ol>
                                             </td>
                                     </tr></tbody></table>`,
-                    stepFunction: resetSize,
-                    contentAfter: `<table class="table table-bordered o_table"><tbody>
+                stepFunction: resetSize,
+                contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td><h1>[]TESTTEXT</h1></td>
                                         <td><p><br></p></td>
@@ -808,15 +803,12 @@ describe("select columns on cross over", () => {
                                             </ol>
                                             </td>
                                     </tr></tbody></table>`,
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should remove any height or width of the table without removig the style of the table.",
-            async () => {
-                await testEditor({
-                    contentBefore: `<table class="table table-bordered o_table" style="height: 594.5px; width: 807px;"><tbody>
+        test("should remove any height or width of the table without removig the style of the table.", async () => {
+            await testEditor({
+                contentBefore: `<table class="table table-bordered o_table" style="height: 594.5px; width: 807px;"><tbody>
                                     <tr style="height: 229.5px;">
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255); width: 500px;"><p>[]<br></p></td>
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255); width: 119.328px;"><p><br></p></td>
@@ -833,8 +825,8 @@ describe("select columns on cross over", () => {
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255); width: 309.672px;"><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                    stepFunction: resetSize,
-                    contentAfter: `<table class="table table-bordered o_table"><tbody>
+                stepFunction: resetSize,
+                contentAfter: `<table class="table table-bordered o_table"><tbody>
                                     <tr>
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255);"><p>[]<br></p></td>
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255);"><p><br></p></td>
@@ -851,9 +843,8 @@ describe("select columns on cross over", () => {
                                         <td style="background-color: rgb(206, 231, 247); color: rgb(0, 0, 255);"><p><br></p></td>
                                     </tr>
                                 </tbody></table>`,
-                });
-            }
-        );
+            });
+        });
     });
 
     describe("color", () => {
