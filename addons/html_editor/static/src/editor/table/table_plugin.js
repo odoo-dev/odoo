@@ -124,7 +124,7 @@ export class TablePlugin extends Plugin {
             const newPosition = rightPos(newAnchorNode);
             sel = this.shared.setSelection(
                 { anchorNode: newPosition[0], anchorOffset: newPosition[1] },
-                false
+                { normalize: false }
             );
         }
         const [table] = this.shared.domInsert(parseHTML(this.document, tableHtml));

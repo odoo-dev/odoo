@@ -116,7 +116,7 @@ export class FormatPlugin extends Plugin {
                 focusNode: range.endContainer,
                 focusOffset: range.endOffset,
             },
-            false
+            { normalize: false }
         );
 
         if (typeof applyStyle === "undefined") {
@@ -272,7 +272,7 @@ export class FormatPlugin extends Plugin {
                     focusOffset: 0,
                 };
             }
-            this.shared.setSelection(newSelection, false);
+            this.shared.setSelection(newSelection, { normalize: false });
         }
     }
 }

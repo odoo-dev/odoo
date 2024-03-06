@@ -100,7 +100,7 @@ export class TabulationPlugin extends Plugin {
         for (const block of blocks) {
             block.prepend(tab.cloneNode(true));
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
     }
 
     outdentBlocks(blocks) {
