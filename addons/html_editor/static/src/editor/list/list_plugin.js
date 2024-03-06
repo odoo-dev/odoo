@@ -247,9 +247,9 @@ export class ListPlugin extends Plugin {
             // @todo @phoenix: check if this is needed
             const callingNode = element.firstChild;
             const group = getAdjacents(callingNode, (n) => !isBlock(n));
-            list = insertListAfter(callingNode, mode, [group]);
+            list = insertListAfter(this.document, callingNode, mode, [group]);
         } else {
-            list = insertListAfter(element, mode, [element]);
+            list = insertListAfter(this.document, element, mode, [element]);
             copyAttributes(element, list);
             if (selectionToRestore.anchorNode === element) {
                 selectionToRestore.anchorNode = list.firstElementChild;
@@ -268,7 +268,7 @@ export class ListPlugin extends Plugin {
      */
     pToList(p, mode) {
         const selectionToRestore = { ...this.shared.getEditableSelection() };
-        const list = insertListAfter(p, mode, [[...p.childNodes]]);
+        const list = insertListAfter(this.document, p, mode, [[...p.childNodes]]);
         copyAttributes(p, list);
         p.remove();
 
@@ -315,7 +315,7 @@ export class ListPlugin extends Plugin {
             li.nextElementSibling?.querySelector("ol, ul") ||
             li.closest("ol, ul");
 
-        const ul = createList(getListMode(destul));
+        const ul = createList(this.document, getListMode(destul));
         lip.append(ul);
 
         const selectionToRestore = this.shared.getEditableSelection();

@@ -278,6 +278,7 @@ export class FormatPlugin extends Plugin {
 }
 
 function getOrCreateSpan(node, ancestors) {
+    const document = node.ownerDocument;
     const span = ancestors.find((element) => element.tagName === "SPAN" && element.isConnected);
     if (span) {
         return span;

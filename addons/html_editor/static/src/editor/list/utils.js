@@ -8,7 +8,7 @@ export function getListMode(pnode) {
     return pnode.classList.contains("o_checklist") ? "CL" : "UL";
 }
 
-export function createList(mode) {
+export function createList(document, mode) {
     const node = document.createElement(mode == "OL" ? "OL" : "UL");
     if (mode == "CL") {
         node.classList.add("o_checklist");
@@ -17,8 +17,8 @@ export function createList(mode) {
 }
 
 // @todo use the correct document
-export function insertListAfter(afterNode, mode, content = []) {
-    const list = createList(mode);
+export function insertListAfter(document, afterNode, mode, content = []) {
+    const list = createList(document, mode);
     afterNode.after(list);
     list.append(
         ...content.map((c) => {

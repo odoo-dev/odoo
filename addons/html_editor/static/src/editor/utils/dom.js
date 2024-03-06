@@ -17,6 +17,7 @@ import { setSelection } from "./selection";
  * @param {Node} node
  */
 export function makeContentsInline(node) {
+    const document = node.ownerDocument;
     let childIndex = 0;
     for (const child of node.childNodes) {
         if (isBlock(child)) {
@@ -47,6 +48,7 @@ export function unwrapContents(node) {
 // If only relevant to the list plugin, a specific util should be created
 // that plugin instead.
 export function setTagName(el, newTagName) {
+    const document = el.ownerDocument;
     if (el.tagName === newTagName) {
         return el;
     }
@@ -100,6 +102,7 @@ export function removeClass(element, ...classNames) {
  *                     zws: the inserted zero-width space if any }
  */
 export function fillEmpty(el) {
+    const document = el.ownerDocument;
     const fillers = {};
     const blockEl = closestBlock(el);
     if (isShrunkBlock(blockEl)) {

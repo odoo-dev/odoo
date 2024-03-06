@@ -18,6 +18,7 @@ import { childNodeIndex, DIRECTIONS } from "./position";
  */
 
 export function splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RIGHT) {
+    const document = textNode.ownerDocument;
     let parentOffset = childNodeIndex(textNode);
 
     if (offset > 0) {

@@ -8,6 +8,7 @@ export function insertText(sel, content) {
         const pos = [sel.anchorNode.parentElement, splitTextNode(sel.anchorNode, sel.anchorOffset)];
         setSelection(...pos, ...pos, false);
     }
+    const document = sel.anchorNode.ownerDocument;
     const txt = document.createTextNode(content || "#");
     const restore = prepareUpdate(sel.anchorNode, sel.anchorOffset);
     sel.getRangeAt(0).insertNode(txt);
