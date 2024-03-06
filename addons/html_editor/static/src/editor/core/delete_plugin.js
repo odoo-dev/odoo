@@ -1097,7 +1097,7 @@ export class DeletePlugin extends Plugin {
 
         const selectionToRestore = this.shared.getEditableSelection();
         restoreUpdate();
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
     }
     deleteRangeGetSelectionAndRange() {
         const selection = this.shared.getEditableSelection();
