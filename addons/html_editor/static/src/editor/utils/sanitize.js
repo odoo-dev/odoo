@@ -1,6 +1,7 @@
 import { isBlock } from "./blocks";
 
 export function initElementForEdition(element, options = {}) {
+    const document = element.ownerDocument;
     // Detect if the editable base element contain orphan inline nodes. If
     // so we transform the base element HTML to put those orphans inside
     // `<p>` containers.

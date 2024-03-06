@@ -474,6 +474,7 @@ export function isFakeLineBreak(brEl) {
  * @param {boolean} [rule.brVisibility]
  */
 export function enforceWhitespace(el, offset, direction, rule) {
+    const document = el.ownerDocument;
     let domPath, whitespaceAtEdgeRegex;
     if (direction === DIRECTIONS.LEFT) {
         domPath = leftLeafOnlyNotBlockPath(el, offset);
