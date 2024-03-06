@@ -219,7 +219,7 @@ export class ColorPlugin extends Plugin {
                 fontsSet.delete(font);
             }
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         // if (wasCollapsed) {
         //     const newSelection = this.shared.getEditableSelection();
         //     const range = new Range();

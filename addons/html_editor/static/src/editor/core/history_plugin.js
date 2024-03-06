@@ -443,7 +443,7 @@ export class HistoryPlugin extends Plugin {
             newSelection.focusNode = focusNode;
             newSelection.focusOffset = selection.focusOffset;
         }
-        this.shared.setSelection(newSelection, false);
+        this.shared.setSelection(newSelection, { normalize: false });
         // @todo @phoenix add this in the selection or table plugin.
         // // If a table must be selected, ensure it's in the same tick.
         // this._handleSelectionInTable();

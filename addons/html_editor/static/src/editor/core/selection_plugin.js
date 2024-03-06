@@ -131,14 +131,15 @@ export class SelectionPlugin extends Plugin {
      * @param { Object } selection
      * @param { Node } selection.anchorNode
      * @param { number } selection.anchorOffset
-     * @param { Node } selection.focusNode
-     * @param { number } selection.focusOffset
-     * @param { boolean } normalize
+     * @param { Node } [selection.focusNode=selection.anchorNode]
+     * @param { number } [selection.focusOffset=selection.anchorOffset]
+     * @param { Object } [options]
+     * @param { boolean } [normalize=true] Normalize the selection
      * @return { EditorSelection }
      */
     setSelection(
         { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
-        normalize = true
+        { normalize = true } = {}
     ) {
         if (
             !this.editable.contains(anchorNode) ||
