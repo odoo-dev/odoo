@@ -176,13 +176,8 @@ export function keydownShiftTab(editor) {
     manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab", shiftKey: true });
 }
 
-export function applyColor(color, mode, element) {
-    throw new Error("applyColor Not implemented");
-    // return (editor) => editor.dispatch("APPLY_COLOR", color, mode, element);
-}
-
 export function resetSize(editor) {
-    throw new Error("applyColor Not implemented");
+    throw new Error("resetSize Not implemented");
     // return editor.execCommand("RESET_SIZE");
 }
 
