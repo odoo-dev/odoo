@@ -1,7 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { applyColor, bold, resetSize } from "../../test_helpers/user_actions";
+import { bold, resetSize, setColor } from "../../test_helpers/user_actions";
 
 describe("select a full table on cross over", () => {
     describe("select", () => {
@@ -208,7 +208,7 @@ describe("select a full table on cross over", () => {
     });
 
     describe("color", () => {
-        test.todo("should apply a color to some characters and a table", async () => {
+        test("should apply a color to some characters and a table", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <p>a[bc</p>
@@ -221,7 +221,7 @@ describe("select a full table on cross over", () => {
                             </tr>
                         </tbody>
                     </table>`),
-                stepFunction: applyColor("aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
@@ -244,7 +244,7 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo("should apply a color to a table and some characters", async () => {
+        test("should apply a color to a table and some characters", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr>" +
@@ -252,7 +252,7 @@ describe("select a full table on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e[f</td>" +
                     "</tr></tbody></table><p>a]bc</p>",
-                stepFunction: applyColor("aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -273,20 +273,18 @@ describe("select a full table on cross over", () => {
             });
         });
 
-        test.todo(
-            "should apply a color to some characters, a table and some more characters",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>a]bc</p>",
-                    stepFunction: applyColor("aquamarine", "color"),
-                    contentAfterEdit: unformat(`
+        test("should apply a color to some characters, a table and some more characters", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>a]bc</p>",
+                stepFunction: setColor("aquamarine", "color"),
+                contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
                     </p>
@@ -306,29 +304,26 @@ describe("select a full table on cross over", () => {
                     <p>
                         <font style="color: aquamarine;">a]</font>bc
                     </p>`),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should apply a color to some characters, a table, some more characters and another table",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>abc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>a]b</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>",
-                    stepFunction: applyColor("aquamarine", "color"),
-                    contentAfterEdit: unformat(`
+        test("should apply a color to some characters, a table, some more characters and another table", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>abc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>a]b</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>",
+                stepFunction: setColor("aquamarine", "color"),
+                contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
                     </p>
@@ -361,30 +356,27 @@ describe("select a full table on cross over", () => {
                             </td>
                         </tr></tbody>
                     </table>`),
-                });
-            }
-        );
+            });
+        });
 
-        test.todo(
-            "should apply a color to some characters, a table, some more characters, another table and some more characters",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        "<p>a[bc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>abc</p>" +
-                        "<table><tbody><tr>" +
-                        "<td>ab</td>" +
-                        "<td>cd</td>" +
-                        "<td>ef</td>" +
-                        "</tr></tbody></table>" +
-                        "<p>a]bc</p>",
-                    stepFunction: applyColor("aquamarine", "color"),
-                    contentAfterEdit: unformat(`
+        test("should apply a color to some characters, a table, some more characters, another table and some more characters", async () => {
+            await testEditor({
+                contentBefore:
+                    "<p>a[bc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>abc</p>" +
+                    "<table><tbody><tr>" +
+                    "<td>ab</td>" +
+                    "<td>cd</td>" +
+                    "<td>ef</td>" +
+                    "</tr></tbody></table>" +
+                    "<p>a]bc</p>",
+                stepFunction: setColor("aquamarine", "color"),
+                contentAfterEdit: unformat(`
                     <p>
                         a<font style="color: aquamarine;">[bc</font>
                     </p>
@@ -416,9 +408,8 @@ describe("select a full table on cross over", () => {
                         </tr></tbody>
                     </table>
                     <p><font style="color: aquamarine;">a]</font>bc</p>`),
-                });
-            }
-        );
+            });
+        });
     });
 });
 
@@ -866,7 +857,7 @@ describe("select columns on cross over", () => {
     });
 
     describe("color", () => {
-        test.todo("should apply a color to two columns", async () => {
+        test("should apply a color to two columns", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr>" +
@@ -874,7 +865,7 @@ describe("select columns on cross over", () => {
                     "<td>c]d</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
-                stepFunction: applyColor("aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -890,7 +881,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should apply a color to a whole row", async () => {
+        test("should apply a color to a whole row", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr>" +
@@ -898,7 +889,7 @@ describe("select columns on cross over", () => {
                     "<td>cd</td>" +
                     "<td>e]f</td>" +
                     "</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>",
-                stepFunction: applyColor("applyColor", "aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -921,7 +912,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should apply a color to a whole column", async () => {
+        test("should apply a color to a whole column", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
@@ -941,7 +932,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: applyColor("applyColor", "aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -969,7 +960,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should apply a color from (0,0) to (1,1) in a 3x3 table", async () => {
+        test("should apply a color from (0,0) to (1,1) in a 3x3 table", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
@@ -989,7 +980,7 @@ describe("select columns on cross over", () => {
                     "<td>ef</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: applyColor("aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
@@ -1019,7 +1010,7 @@ describe("select columns on cross over", () => {
             });
         });
 
-        test.todo("should apply a color to a whole table", async () => {
+        test("should apply a color to a whole table", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody>" +
@@ -1039,7 +1030,7 @@ describe("select columns on cross over", () => {
                     "<td>e]f</td>" +
                     "</tr>" +
                     "</tbody></table>",
-                stepFunction: applyColor("aquamarine", "color"),
+                stepFunction: setColor("aquamarine", "color"),
                 contentAfterEdit: unformat(`
                     <table class="o_selected_table">
                         <tbody><tr>
