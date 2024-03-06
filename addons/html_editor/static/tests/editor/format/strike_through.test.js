@@ -39,7 +39,7 @@ test("should make a few characters strikeThrough then remove style inside", asyn
     });
 });
 
-test.todo("should make strikeThrough then more then remove", async () => {
+test("should make strikeThrough then more then remove", async () => {
     await testEditor({
         contentBefore: `<p>abc[ ]def</p>`,
         stepFunction: async (editor) => {
