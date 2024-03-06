@@ -229,7 +229,7 @@ export class ListPlugin extends Plugin {
         if (selectionToRestore.focusNode === list) {
             selectionToRestore.focusNode = newList;
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         return newList;
     }
 
@@ -258,7 +258,7 @@ export class ListPlugin extends Plugin {
                 selectionToRestore.focusNode = list.firstElementChild;
             }
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         return list;
     }
 
@@ -278,7 +278,7 @@ export class ListPlugin extends Plugin {
         if (selectionToRestore.focusNode === p) {
             selectionToRestore.focusNode = list.firstChild;
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         return list;
     }
 
@@ -296,7 +296,7 @@ export class ListPlugin extends Plugin {
             selectionToRestore.anchorNode.parentElement &&
             selectionToRestore.focusNode.parentElement;
         if (isValid) {
-            this.shared.setSelection(selectionToRestore, false);
+            this.shared.setSelection(selectionToRestore, { normalize: false });
         }
     }
 
@@ -322,7 +322,7 @@ export class ListPlugin extends Plugin {
         lip.classList.add("oe-nested");
         li.before(lip);
         ul.append(li);
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
     }
 
     // @temp comment: former oShiftTab
@@ -424,7 +424,7 @@ export class ListPlugin extends Plugin {
         for (const li of listNodes) {
             this.indentLI(li);
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         this.dispatch("ADD_STEP");
     }
 
@@ -433,7 +433,7 @@ export class ListPlugin extends Plugin {
         for (const li of listNodes) {
             this.outdentLI(li);
         }
-        this.shared.setSelection(selectionToRestore, false);
+        this.shared.setSelection(selectionToRestore, { normalize: false });
         this.dispatch("ADD_STEP");
     }
 
