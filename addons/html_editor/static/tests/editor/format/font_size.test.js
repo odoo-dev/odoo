@@ -124,23 +124,23 @@ test("should add font size in selected table cells", async () => {
     });
 });
 
-test.todo("should add font size in all table cells", async () => {
+test("should add font size in all table cells", async () => {
     await testEditor({
         contentBefore:
             '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p><br></p></td></tr><tr><td class="o_selected_td"><p><br></p></td><td class="o_selected_td"><p><br>]</p></td></tr></tbody></table>',
         stepFunction: setFontSize("36px"),
         contentAfter:
-            '<table><tbody><tr><td><p><span style="font-size: 36px;">[]<br></span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr><tr><td><p><span style="font-size: 36px;"><br></span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr></tbody></table>',
+            '<table><tbody><tr><td><p><span style="font-size: 36px;"><br>[</span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr><tr><td><p><span style="font-size: 36px;"><br></span></p></td><td><p><span style="font-size: 36px;"><br>]</span></p></td></tr></tbody></table>',
     });
 });
 
-test.todo("should add font size in selected table cells with h1 as first child", async () => {
+test("should add font size in selected table cells with h1 as first child", async () => {
     await testEditor({
         contentBefore:
             '<table><tbody><tr><td class="o_selected_td"><h1>[<br></h1></td><td class="o_selected_td"><h1><br>]</h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
         stepFunction: setFontSize("18px"),
         contentAfter:
-            '<table><tbody><tr><td><h1><span style="font-size: 18px;">[]<br></span></h1></td><td><h1><span style="font-size: 18px;"><br></span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
+            '<table><tbody><tr><td><h1><span style="font-size: 18px;"><br>[</span></h1></td><td><h1><span style="font-size: 18px;"><br>]</span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
     });
 });
 
