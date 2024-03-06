@@ -273,6 +273,7 @@ export class FormatPlugin extends Plugin {
                 };
             }
             this.shared.setSelection(newSelection, { normalize: false });
+            this.dispatch("ADD_STEP");
         }
     }
 }
