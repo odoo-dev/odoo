@@ -48,6 +48,9 @@ export class DomPlugin extends Plugin {
                     if (node.classList && !node.classList.length) {
                         node.removeAttribute("class");
                     }
+                    if (node.style && !node.style.length) {
+                        node.removeAttribute("style");
+                    }
                 }
                 break;
             }

@@ -177,8 +177,7 @@ export function keydownShiftTab(editor) {
 }
 
 export function resetSize(editor) {
-    throw new Error("resetSize Not implemented");
-    // return editor.execCommand("RESET_SIZE");
+    editor.dispatch("RESET_SIZE");
 }
 
 export function justifyLeft(editor) {
