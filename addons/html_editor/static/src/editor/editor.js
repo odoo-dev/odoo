@@ -3,6 +3,8 @@ import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
 
 /**
+ * @typedef { import("./plugin").SharedMethods } SharedMethods
+ *
  * @typedef { Object } EditorConfig
  * @property { string } [innerHTML]
  * @property { boolean } [allowInlineAtRoot]
@@ -52,8 +54,11 @@ export class Editor {
         this.config = config;
         this.services = services;
         this.plugins = [];
+        /** @type { HTMLElement } **/
         this.editable = null;
+        /** @type { Document } **/
         this.document = null;
+        /** @type { SharedMethods } **/
         this.shared = {};
     }
 
