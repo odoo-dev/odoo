@@ -78,6 +78,35 @@ export function normalizeSelfClosingElement(node, offset) {
     return [node, offset];
 }
 
+export function normalizeNotEditableNode(node, offset, position = "right") {
+    const editable = closestElement(node, ".odoo-editor-editable");
+    let closest = closestElement(node);
+    while (closest && closest !== editable && !closest.isContentEditable) {
+        [node, offset] = position === "right" ? rightPos(node) : leftPos(node);
+        closest = closestElement(node);
+    }
+    return [node, offset];
+}
+
+export function normalizeCursorPosition(node, offset, position = "right") {
+    [node, offset] = normalizeSelfClosingElement(node, offset);
+    [node, offset] = normalizeNotEditableNode(node, offset, position);
+    // todo @phoenix: we should maybe remove it
+    // // Be permissive about the received offset.
+    // offset = Math.min(Math.max(offset, 0), nodeSize(node));
+    return [node, offset];
+}
+
+export function normalizeFakeBR(node, offset) {
+    const prevNode = node.nodeType === Node.ELEMENT_NODE && node.childNodes[offset - 1];
+    if (prevNode && prevNode.nodeName === "BR" && isFakeLineBreak(prevNode)) {
+        // If trying to put the cursor on the right of a fake line break, put
+        // it before instead.
+        offset--;
+    }
+    return [node, offset];
+}
+
 /**
  * From a given position, returns the normalized version.
  *
@@ -85,78 +114,58 @@ export function normalizeSelfClosingElement(node, offset) {
  *
  * @param {Node} node
  * @param {number} offset
- * @param {boolean} [full=true] (if not full, it means we only normalize
- *     positions which are not possible, like the cursor inside an image).
  */
-export function getNormalizedCursorPosition(node, offset, full = true) {
-    const editable = closestElement(node, ".odoo-editor-editable");
-    let closest = closestElement(node);
-    while (closest && closest !== editable && !closest.isContentEditable) {
-        // Cannot put the cursor inside those elements, put it before if the
-        // offset is 0 and the node is not empty, else after instead.
-        [node, offset] = offset || !nodeSize(node) ? rightPos(node) : leftPos(node);
-        closest = closestElement(node);
-    }
-
-    // Be permissive about the received offset.
-    offset = Math.min(Math.max(offset, 0), nodeSize(node));
-
-    if (full) {
-        // Put the cursor in deepest inline node around the given position if
-        // possible.
-        let el;
-        let elOffset;
-        if (node.nodeType === Node.ELEMENT_NODE) {
-            el = node;
-            elOffset = offset;
-        } else if (node.nodeType === Node.TEXT_NODE) {
-            if (offset === 0) {
-                el = node.parentNode;
-                elOffset = childNodeIndex(node);
-            } else if (offset === node.length) {
-                el = node.parentNode;
-                elOffset = childNodeIndex(node) + 1;
-            }
+export function normalizeDeepCursorPosition(node, offset) {
+    // Put the cursor in deepest inline node around the given position if
+    // possible.
+    let el;
+    let elOffset;
+    if (node.nodeType === Node.ELEMENT_NODE) {
+        el = node;
+        elOffset = offset;
+    } else if (node.nodeType === Node.TEXT_NODE) {
+        if (offset === 0) {
+            el = node.parentNode;
+            elOffset = childNodeIndex(node);
+        } else if (offset === node.length) {
+            el = node.parentNode;
+            elOffset = childNodeIndex(node) + 1;
         }
-        if (el) {
-            const leftInlineNode = leftLeafOnlyInScopeNotBlockEditablePath(el, elOffset).next()
+    }
+    if (el) {
+        const leftInlineNode = leftLeafOnlyInScopeNotBlockEditablePath(el, elOffset).next().value;
+        let leftVisibleEmpty = false;
+        if (leftInlineNode) {
+            leftVisibleEmpty =
+                isSelfClosingElement(leftInlineNode) ||
+                !closestElement(leftInlineNode).isContentEditable;
+            [node, offset] = leftVisibleEmpty ? rightPos(leftInlineNode) : endPos(leftInlineNode);
+        }
+        if (!leftInlineNode || leftVisibleEmpty) {
+            const rightInlineNode = rightLeafOnlyInScopeNotBlockEditablePath(el, elOffset).next()
                 .value;
-            let leftVisibleEmpty = false;
-            if (leftInlineNode) {
-                leftVisibleEmpty =
-                    isSelfClosingElement(leftInlineNode) ||
-                    !closestElement(leftInlineNode).isContentEditable;
-                [node, offset] = leftVisibleEmpty
-                    ? rightPos(leftInlineNode)
-                    : endPos(leftInlineNode);
-            }
-            if (!leftInlineNode || leftVisibleEmpty) {
-                const rightInlineNode = rightLeafOnlyInScopeNotBlockEditablePath(
-                    el,
-                    elOffset
-                ).next().value;
-                if (rightInlineNode) {
-                    const closest = closestElement(rightInlineNode);
-                    const rightVisibleEmpty =
-                        isSelfClosingElement(rightInlineNode) ||
-                        !closest ||
-                        !closest.isContentEditable;
-                    if (!(leftVisibleEmpty && rightVisibleEmpty)) {
-                        [node, offset] = rightVisibleEmpty
-                            ? leftPos(rightInlineNode)
-                            : startPos(rightInlineNode);
-                    }
+            if (rightInlineNode) {
+                const closest = closestElement(rightInlineNode);
+                const rightVisibleEmpty =
+                    isSelfClosingElement(rightInlineNode) || !closest || !closest.isContentEditable;
+                if (!(leftVisibleEmpty && rightVisibleEmpty)) {
+                    [node, offset] = rightVisibleEmpty
+                        ? leftPos(rightInlineNode)
+                        : startPos(rightInlineNode);
                 }
             }
         }
     }
-    const prevNode = node.nodeType === Node.ELEMENT_NODE && node.childNodes[offset - 1];
-    if (prevNode && prevNode.nodeName === "BR" && isFakeLineBreak(prevNode)) {
-        // If trying to put the cursor on the right of a fake line break, put
-        // it before instead.
-        offset--;
-    }
+    return [node, offset];
+}
 
+// todo @phoenix: remove with legacy setSelection
+export function getNormalizedCursorPosition(node, offset, deep = true) {
+    [node, offset] = normalizeCursorPosition(node, offset, "left");
+    if (deep) {
+        [node, offset] = normalizeDeepCursorPosition(node, offset);
+    }
+    [node, offset] = normalizeFakeBR(node, offset);
     return [node, offset];
 }
 
