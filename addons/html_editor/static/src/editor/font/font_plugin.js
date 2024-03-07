@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty, setTagName } from "../utils/dom";
-import { isVisibleTextNode, previousLeaf } from "../utils/dom_info";
+import { isVisibleTextNode } from "../utils/dom_info";
 import { closestElement, createDOMPathGenerator, descendants } from "../utils/dom_traversal";
 import { convertNumericToUnit, getCSSVariableValue, getHtmlStyle } from "../utils/formatting";
 import { FontSelector } from "./font_selector";
@@ -245,24 +245,22 @@ export class FontPlugin extends Plugin {
         }
     }
 
-    handleDeleteBackward({ targetNode, targetOffset }) {
+    handleDeleteBackward({ startContainer, endContainer }) {
         const handledTags = [...headingTags, "PRE", "BLOCKQUOTE"];
         const selector = handledTags.join(", ");
-        const closestHandledElement = closestElement(targetNode, selector);
+        const closestHandledElement = closestElement(endContainer, selector);
         if (!closestHandledElement) {
             return;
         }
         // Detect if cursor is at the start of the editable.
-        // @todo: handle ZWS.
-        if (targetOffset || previousLeaf(targetNode, this.editable)) {
-            return;
+        if (!startContainer) {
+            const p = this.document.createElement("p");
+            p.append(...closestHandledElement.childNodes);
+            closestHandledElement.after(p);
+            closestHandledElement.remove();
+            this.shared.setCursorStart(p);
+            return true;
         }
-        const p = this.document.createElement("p");
-        p.append(...closestHandledElement.childNodes);
-        closestHandledElement.after(p);
-        closestHandledElement.remove();
-        this.shared.setCursorStart(p);
-        return true;
     }
 }
 
