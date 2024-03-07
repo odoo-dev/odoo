@@ -35,7 +35,7 @@ test.todo("add star elements", async () => {
     });
 });
 
-test.todo("should delete star rating elements when delete is pressed twice", async () => {
+test("should delete star rating elements when delete is pressed twice", async () => {
     await testEditor({
         contentBefore: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars"><i class="fa fa-star-o" id="checkId-1" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-2" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-3" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
         stepFunction: async (editor) => {

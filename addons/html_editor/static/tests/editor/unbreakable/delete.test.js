@@ -36,28 +36,25 @@ describe("backward", () => {
                     </div>`),
                 });
             });
-            test.todo(
-                "should not delete an empty unbreakable when there is no elements to delete before (backward)",
-                async () => {
-                    await testEditor({
-                        contentBefore: unformat(`
+            test("should not delete an empty unbreakable when there is no elements to delete before (backward)", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
                         <div>
                             <div>[]<br></div>
                             <div>a</div>
                         </div>`),
-                        stepFunction: deleteBackward,
-                        contentAfter: unformat(`
+                    stepFunction: deleteBackward,
+                    contentAfter: unformat(`
                         <div>
                             <div>[]<br></div>
                             <div>a</div>
                         </div>`),
-                    });
-                }
-            );
+                });
+            });
         });
 
         describe("start text", () => {
-            test.todo("should not merge p with an unbreakable (backward)", async () => {
+            test("should not merge p with an unbreakable (backward)", async () => {
                 await testEditor({
                     contentBefore: `<div>b</div><p>[]a</p>`,
                     stepFunction: deleteBackward,
@@ -313,21 +310,21 @@ describe("backward", () => {
 describe("forward", () => {
     describe("selection collapsed", () => {
         describe("start empty", () => {
-            test.todo("should delete empty p just before an unbreakable (forward)", async () => {
+            test("should delete empty p just before an unbreakable (forward)", async () => {
                 await testEditor({
                     contentBefore: `<p>[]</p><div>a</div>`,
                     stepFunction: deleteForward,
                     contentAfter: `<div>[]a</div>`,
                 });
             });
-            test.todo("should delete empty p/br just before an unbreakable (forward)", async () => {
+            test("should delete empty p/br just before an unbreakable (forward)", async () => {
                 await testEditor({
                     contentBefore: `<p><br>[]</p><div>a</div>`,
                     stepFunction: deleteForward,
                     contentAfter: `<div>[]a</div>`,
                 });
             });
-            test.todo("should delete empty unbreakables (forward)", async () => {
+            test("should delete empty unbreakables (forward)", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                     <div>
@@ -381,7 +378,7 @@ describe("forward", () => {
                         </div>`),
                 });
             });
-            test.todo("should not merge unbreakable after a p (forward)", async () => {
+            test("should not merge unbreakable after a p (forward)", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                         <div>
@@ -396,24 +393,21 @@ describe("forward", () => {
                         </div>`),
                 });
             });
-            test.todo(
-                "should not merge unbreakable after an empty unbreakable (forward)",
-                async () => {
-                    await testEditor({
-                        contentBefore: unformat(`
+            test("should not merge unbreakable after an empty unbreakable (forward)", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
                         <div>
                             <div>b[]</div>
                             <div><br></div>
                         </div>`),
-                        stepFunction: deleteForward,
-                        contentAfter: unformat(`
+                    stepFunction: deleteForward,
+                    contentAfter: unformat(`
                         <div>
                             <div>b[]</div>
                             <div><br></div>
                         </div>`),
-                    });
-                }
-            );
+                });
+            });
             test.todo("should not merge unbreakable after an empty p (forward)", async () => {
                 await testEditor({
                     contentBefore: unformat(`
