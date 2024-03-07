@@ -14,7 +14,7 @@ test("should apply a color to a slice of text in a span in a font", async () => 
     });
 });
 
-test.todo("should apply a color to the qweb tag", async () => {
+test("should apply a color to the qweb tag", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
