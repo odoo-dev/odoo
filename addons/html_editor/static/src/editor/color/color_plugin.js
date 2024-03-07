@@ -129,9 +129,11 @@ export class ColorPlugin extends Plugin {
             mode === "backgroundColor"
                 ? selectionNodes.filter((node) => !closestElement(node, "table.o_selected_table"))
                 : selectionNodes;
-        // const selectedFieldNodes = new Set(getSelectedNodes(editor.editable)
-        //         .map(n => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
-        //         .filter(Boolean));
+        const selectedFieldNodes = new Set(
+            getSelectedNodes(this.editable)
+                .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
+                .filter(Boolean)
+        );
 
         const getFonts = (selectedNodes) => {
             return selectedNodes.flatMap((node) => {
@@ -191,9 +193,9 @@ export class ColorPlugin extends Plugin {
             });
         };
 
-        // for (const fieldNode of selectedFieldNodes) {
-        //     colorElement(fieldNode, color, mode);
-        // }
+        for (const fieldNode of selectedFieldNodes) {
+            this.colorElement(fieldNode, color, mode);
+        }
 
         let fonts = getFonts(selectedNodes);
         // Dirty fix as the previous call could have unconnected elements
