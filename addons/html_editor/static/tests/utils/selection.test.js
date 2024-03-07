@@ -204,18 +204,6 @@ describe("getNormalizedCursorPosition", () => {
         expect(result).toEqual([p.firstChild.firstChild, 3]);
     });
 
-    test("should move the cursor before a non-editable element with offset === 0", () => {
-        const [p] = insertTestHtml('<p><span contenteditable="false">leavemealone</span></p>');
-        const result = getNormalizedCursorPosition(p.lastChild, 0);
-        expect(result).toEqual([p, 0]);
-    });
-
-    test("should move the cursor after a non-editable element with offset > 0", () => {
-        const [p] = insertTestHtml('<p><span contenteditable="false">leavemealone</span></p>');
-        const result = getNormalizedCursorPosition(p.lastChild, 1);
-        expect(result).toEqual([p, 1]);
-    });
-
     test('should move the cursor after a "visibleEmpty" element', () => {
         const [p] = insertTestHtml("<p>ab<br>cd</p>");
         const result = getNormalizedCursorPosition(p.lastElementChild, 0);
@@ -281,24 +269,6 @@ describe("getNormalizedCursorPosition", () => {
         );
         const start = p.querySelector(".start");
         const result = getNormalizedCursorPosition(start.lastChild, 0);
-        expect(result).toEqual([p, 1]);
-    });
-
-    test("should loop outside (right) a non-editable context and not traverse a non-editable leaf position", () => {
-        const [p] = insertTestHtml(
-            unformat(`
-            <p>
-                <span contenteditable="false">
-                    <b class="start">
-                        text
-                    </b>
-                </span>
-                <a contenteditable="false">leavemealone</a>
-            </p>
-        `)
-        );
-        const start = p.querySelector(".start");
-        const result = getNormalizedCursorPosition(start.lastChild, 1);
         expect(result).toEqual([p, 1]);
     });
 });

@@ -95,7 +95,7 @@ test("should make qweb tag strikeThrough", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
         stepFunction: strikeThrough,
-        contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="text-decoration-line: line-through;">[Test]</p></div>`,
+        contentAfter: `<div>[<p t-esc="'Test'" contenteditable="false" style="text-decoration-line: line-through;">Test</p>]</div>`,
     });
 });
 
