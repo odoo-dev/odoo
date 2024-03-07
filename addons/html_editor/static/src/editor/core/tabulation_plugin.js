@@ -4,7 +4,7 @@ import { isEditorTab, isZWS } from "../utils/dom_info";
 import { splitTextNode } from "../utils/dom_split";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { DIRECTIONS } from "../utils/position";
+import { DIRECTIONS, childNodeIndex } from "../utils/position";
 import { getTraversedBlocks } from "../utils/selection";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
@@ -28,7 +28,8 @@ export class TabulationPlugin extends Plugin {
     static name = "tabulation";
     static dependencies = ["dom", "selection"];
     static shared = ["indentBlocks", "outdentBlocks"];
-    static resources = () => ({
+    static resources = (p) => ({
+        handle_delete_forward: { callback: p.handleDeleteForward.bind(p) },
         shortcuts: [
             { hotkey: "tab", command: "TAB" },
             { hotkey: "shift+tab", command: "SHIFT_TAB" },
@@ -174,6 +175,39 @@ export class TabulationPlugin extends Plugin {
     alignTabs(root = this.editable) {
         for (const tab of root.querySelectorAll("span.oe-tabs")) {
             this.adjustTabWidth(tab);
+        }
+    }
+
+    // When deleting an editor tab, we need to ensure it's related
+    // ZWS will deleted as well.
+    // @todo @phoenix: for some reason, there might be more than one ZWS.
+    // Investigate why.
+    expandRangeToIncludeZWS(tabElement) {
+        let previous = tabElement;
+        let node = tabElement.nextSibling;
+        while (node?.nodeType === Node.TEXT_NODE) {
+            for (let i = 0; i < node.textContent.length; i++) {
+                if (node.textContent[i] !== "\u200B") {
+                    return [node, i];
+                }
+            }
+            previous = node;
+            node = node.nextSibling;
+        }
+        return [previous.parentElement, childNodeIndex(previous) + 1];
+    }
+
+    handleDeleteForward({ range, deleteRange }) {
+        let { endContainer, endOffset } = range;
+        if (!(endContainer?.nodeType === Node.ELEMENT_NODE) || !endOffset) {
+            return;
+        }
+        const nodeToDelete = endContainer.childNodes[endOffset - 1];
+        if (isEditorTab(nodeToDelete)) {
+            [endContainer, endOffset] = this.expandRangeToIncludeZWS(nodeToDelete);
+            const { cursorPos } = deleteRange({ ...range, endContainer, endOffset });
+            this.shared.setSelection(cursorPos);
+            return true;
         }
     }
 }
