@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
+import { descendants } from "../utils/dom_traversal";
 
 class CommentPlugin extends Plugin {
     static name = "comment";
@@ -13,12 +14,11 @@ class CommentPlugin extends Plugin {
     }
 
     removeComment(node) {
-        if (node.nodeType === Node.COMMENT_NODE) {
-            node.remove();
-            return;
-        }
-        for (const child of node.childNodes) {
-            this.removeComment(child);
+        for (const el of [node, ...descendants(node)]) {
+            if (el.nodeType === Node.COMMENT_NODE) {
+                el.remove();
+                return;
+            }
         }
     }
 }
