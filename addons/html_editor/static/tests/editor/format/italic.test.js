@@ -39,7 +39,7 @@ test("should make qweb tag italic", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
         stepFunction: italic,
-        contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="font-style: italic;">[Test]</p></div>`,
+        contentAfter: `<div>[<p t-esc="'Test'" contenteditable="false" style="font-style: italic;">Test</p>]</div>`,
     });
 });
 

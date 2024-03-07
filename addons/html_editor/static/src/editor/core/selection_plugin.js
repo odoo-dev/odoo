@@ -1,7 +1,11 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, nodeSize } from "../utils/position";
-import { getNormalizedCursorPosition, normalizeSelfClosingElement } from "../utils/selection";
+import {
+    normalizeDeepCursorPosition,
+    normalizeCursorPosition,
+    normalizeFakeBR,
+} from "../utils/selection";
 
 /**
  * @typedef { Object } EditorSelection
@@ -134,7 +138,7 @@ export class SelectionPlugin extends Plugin {
      * @param { Node } [selection.focusNode=selection.anchorNode]
      * @param { number } [selection.focusOffset=selection.anchorOffset]
      * @param { Object } [options]
-     * @param { boolean } [normalize=true] Normalize the selection
+     * @param { boolean } [normalize=true] Normalize deep the selection
      * @return { EditorSelection }
      */
     setSelection(
@@ -147,20 +151,19 @@ export class SelectionPlugin extends Plugin {
         ) {
             throw new Error("Selection is not in editor");
         }
-
         const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
-        [anchorNode, anchorOffset] = normalizeSelfClosingElement(anchorNode, anchorOffset);
-        [focusNode, focusOffset] = isCollapsed
-            ? [anchorNode, anchorOffset]
-            : normalizeSelfClosingElement(focusNode, focusOffset);
+        [anchorNode, anchorOffset] = normalizeCursorPosition(anchorNode, anchorOffset, "left");
+        [focusNode, focusOffset] = normalizeCursorPosition(focusNode, focusOffset, "right");
         if (normalize) {
             // normalize selection
-            [anchorNode, anchorOffset] = getNormalizedCursorPosition(anchorNode, anchorOffset);
+            [anchorNode, anchorOffset] = normalizeDeepCursorPosition(anchorNode, anchorOffset);
             [focusNode, focusOffset] = isCollapsed
                 ? [anchorNode, anchorOffset]
-                : getNormalizedCursorPosition(focusNode, focusOffset);
+                : normalizeDeepCursorPosition(focusNode, focusOffset);
         }
 
+        [anchorNode, anchorOffset] = normalizeFakeBR(anchorNode, anchorOffset);
+        [focusNode, focusOffset] = normalizeFakeBR(focusNode, focusOffset);
         const selection = this.document.getSelection();
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 
