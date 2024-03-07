@@ -3,9 +3,10 @@ import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { fillEmpty } from "../utils/dom";
 import {
-    isEditorTab,
+    isEmpty,
     isEmptyBlock,
     isIconElement,
+    isInPre,
     isNotEditableNode,
     isSelfClosingElement,
     isShrunkBlock,
@@ -21,21 +22,21 @@ import {
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
 import {
     closestElement,
-    createDOMPathGenerator,
     descendants,
     firstLeaf,
     getCommonAncestor,
     getFurthestUneditableParent,
     lastLeaf,
 } from "../utils/dom_traversal";
-import { DIRECTIONS, childNodeIndex, leftPos, nodeSize } from "../utils/position";
+import { DIRECTIONS, childNodeIndex, leftPos, nodeSize, rightPos } from "../utils/position";
 import { CTYPES } from "../utils/content_types";
 
 export class DeletePlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "delete";
-    static resources = () => ({
+    static resources = (p) => ({
         shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],
+        handle_delete_backward: { callback: p.deleteBackwardContentEditableFalse.bind(p) },
     });
 
     setup() {
@@ -51,7 +52,8 @@ export class DeletePlugin extends Plugin {
                 this.deleteForward();
                 break;
             case "DELETE_RANGE":
-                this.deleteRange();
+                // @todo @phoenix: consider renaming the command name
+                this.deleteSelection();
                 break;
         }
     }
@@ -60,31 +62,90 @@ export class DeletePlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
-    deleteRange() {
-        let selection = this.shared.getEditableSelection();
+    deleteSelection() {
+        const selection = this.shared.getEditableSelection();
         // @todo @phoenix: handle non-collapsed selection around a ZWS
         // see collapseIfZWS
         if (selection.isCollapsed) {
             return;
         }
 
-        selection = this.deleteRangeAjustSelection(selection);
+        const range = this.adjustRangeForDeletion(selection);
 
-        const { cursorPos } = this.deleteSelection(selection);
+        const { cursorPos } = this.deleteRange(range);
 
         this.shared.setSelection(cursorPos);
+    }
+
+    deleteBackward() {
+        let selection = this.shared.getEditableSelection();
+        // Normalize selection
+        selection = this.shared.setSelection(selection);
+
+        if (!selection.isCollapsed) {
+            return this.deleteSelection();
+        }
+
+        const { endContainer, endOffset } = selection;
+        const [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
+        const range = { startContainer, startOffset, endContainer, endOffset };
+
+        for (const { callback } of this.resources["handle_delete_backward"]) {
+            if (callback(range)) {
+                this.dispatch("ADD_STEP");
+                return;
+            }
+        }
+        if (!startContainer) {
+            return;
+        }
+        const { cursorPos, joined, nRemovedNodes, commonAncestor } = this.deleteRange(range);
+
+        if (nRemovedNodes || joined) {
+            this.shared.setSelection(cursorPos);
+        }
+
+        this.cleanTrailingBRs(commonAncestor);
+
         this.dispatch("ADD_STEP");
     }
 
-    /**
-     * @todo @phoenix: rename deleteRange and deleteSelection (invert them?)
-     */
-    deleteSelection(selection) {
-        // Split text nodes in order to have elements as start/end containers.
-        const { startElement, startOffset, endElement, endOffset, commonAncestor } =
-            this.splitTextNodes(selection);
+    deleteForward() {
+        let selection = this.shared.getEditableSelection();
+        // Normalize selection
+        selection = this.shared.setSelection(selection);
 
-        const restore = prepareUpdate(startElement, startOffset, endElement, endOffset);
+        if (!selection.isCollapsed) {
+            return this.deleteSelection();
+        }
+
+        const { startContainer, startOffset } = selection;
+        const [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
+        if (!endContainer) {
+            return;
+        }
+        const range = { startContainer, startOffset, endContainer, endOffset };
+
+        for (const { callback } of this.resources["handle_delete_forward"]) {
+            if (callback({ range, deleteRange: this.deleteRange.bind(this) })) {
+                this.dispatch("ADD_STEP");
+                return;
+            }
+        }
+
+        const { cursorPos } = this.deleteRange(range);
+
+        this.shared.setSelection(cursorPos);
+
+        this.dispatch("ADD_STEP");
+    }
+
+    deleteRange(range) {
+        // Split text nodes in order to have elements as start/end containers.
+        const { startElement, startOffset, endElement, endOffset } = this.splitTextNodes(range);
+        const commonAncestor = getCommonAncestor([startElement, endElement], this.editable);
+
+        const restoreSpaces = prepareUpdate(startElement, startOffset, endElement, endOffset);
 
         // Remove nodes.
         const { startRemoveIndex, allNodesRemoved, nRemovedNodes } = this.removeNodes({
@@ -116,38 +177,32 @@ export class DeletePlugin extends Plugin {
         // Fill empty blocks, remove empty inlines.
         this.handleEmptyElements(commonAncestor, cursorPos);
 
-        // Preserve cursor
-        // @todo: do this properly
+        const restoreCursor = this.preserveCursor(cursorPos);
+        restoreSpaces();
+        cursorPos = restoreCursor();
+
+        return { cursorPos, nRemovedNodes, joined, commonAncestor };
+    }
+
+    // @phoenix @todo: do this properly
+    preserveCursor({ anchorNode, anchorOffset }) {
         let cursorNode;
-        if (cursorPos.anchorOffset < cursorPos.anchorNode.childNodes.length) {
-            cursorNode = cursorPos.anchorNode.childNodes[cursorPos.anchorOffset];
+        if (anchorOffset < nodeSize(anchorNode)) {
+            cursorNode = anchorNode.childNodes[anchorOffset];
         }
-
-        // Restore spaces state.
-        restore();
-
-        // Restore cursor
-        if (cursorNode?.isConnected) {
-            cursorPos = {
+        return () => {
+            if (!cursorNode?.isConnected) {
+                // Fallback to original position
+                return { anchorNode, anchorOffset };
+            }
+            return {
                 anchorNode: cursorNode.parentElement,
                 anchorOffset: childNodeIndex(cursorNode),
             };
-        }
-        return { cursorPos, allNodesRemoved, nRemovedNodes, joined };
+        };
     }
 
-    /**
-     * Splits text nodes and returns the updated container elements and offset values.
-     *
-     * @returns {Object} start, end and common ancestor elements and offsets
-     */
-    splitTextNodes({
-        startContainer,
-        startOffset,
-        endContainer,
-        endOffset,
-        commonAncestorContainer,
-    }) {
+    splitTextNodes({ startContainer, startOffset, endContainer, endOffset }) {
         // Splits text nodes only if necessary.
         const split = (textNode, offset) => {
             let didSplit = false;
@@ -173,16 +228,12 @@ export class DeletePlugin extends Plugin {
                 endOffset += 1;
             }
         }
-        if (commonAncestorContainer.nodeType === Node.TEXT_NODE) {
-            commonAncestorContainer = commonAncestorContainer.parentElement;
-        }
 
         return {
             startElement: startContainer,
             startOffset,
             endElement: endContainer,
             endOffset,
-            commonAncestor: commonAncestorContainer,
         };
     }
 
@@ -192,10 +243,9 @@ export class DeletePlugin extends Plugin {
         let startRemoveIndex = startOffset;
         const nodesToRemove = [];
         while (node !== commonAncestor) {
-            // @phoenix @todo: handle unremovable nodes
-            [...node.childNodes]
-                .slice(startRemoveIndex)
-                .forEach((child) => nodesToRemove.push(child));
+            for (const child of [...node.childNodes].slice(startRemoveIndex)) {
+                nodesToRemove.push(child);
+            }
             startRemoveIndex = childNodeIndex(node) + 1;
             node = node.parentElement;
         }
@@ -204,10 +254,9 @@ export class DeletePlugin extends Plugin {
         node = endElement;
         let endRemoveIndex = endOffset;
         while (node !== commonAncestor) {
-            // @phoenix @todo: handle unremovable nodes
-            [...node.childNodes]
-                .slice(0, endRemoveIndex)
-                .forEach((child) => nodesToRemove.push(child));
+            for (const child of [...node.childNodes].slice(0, endRemoveIndex)) {
+                nodesToRemove.push(child);
+            }
             endRemoveIndex = childNodeIndex(node);
             node = node.parentElement;
         }
@@ -254,48 +303,51 @@ export class DeletePlugin extends Plugin {
         return true;
     }
 
+    // @todo @phoenix: document this, factor out inner functions
     joinFragments(left, right, commonAncestor, offset) {
         // Returns closest block whithin ancestor or ancestor's child inline element.
-        const getJoinableElement = (node) => {
+        const getJoinableElement = (element) => {
             let last;
-            while (node !== commonAncestor) {
-                if (isBlock(node)) {
-                    return { element: node, isBlock: true };
+            while (element !== commonAncestor) {
+                if (isBlock(element)) {
+                    return { node: element, isBlock: true };
                 }
-                last = node;
-                node = node.parentElement;
+                last = element;
+                element = element.parentElement;
             }
-            return { element: last, isBlock: false };
+            return { node: last, isBlock: false };
         };
 
-        const getJoinableLeft = (node) => {
-            if (node === commonAncestor) {
+        const getJoinableLeft = (element) => {
+            if (element === commonAncestor) {
                 if (!offset) {
                     return null;
                 }
-                // @todo: rename this key, as it could be a text node
-                const element = commonAncestor.childNodes[offset - 1];
-                // Only join blocks when they are fragments.
-                if (isBlock(element)) {
+                const node = commonAncestor.childNodes[offset - 1];
+                // Only join blocks when they are fragments. A direct child of
+                // the common ancestor is not a fragment.
+                if (isBlock(node)) {
                     return null;
                 }
-                return { element, isBlock: false };
+                return { node, isBlock: false };
             }
-            return getJoinableElement(node);
+            return getJoinableElement(element);
         };
 
-        const getJoinableRight = (node) => {
-            if (node === commonAncestor) {
+        const getJoinableRight = (element) => {
+            if (element === commonAncestor) {
                 if (offset === nodeSize(commonAncestor)) {
                     return null;
                 }
-                const element = commonAncestor.childNodes[offset];
-                if (isBlock(element)) {
+                const node = commonAncestor.childNodes[offset];
+                // Only join blocks when they are fragments. A direct child of
+                // the common ancestor is not a fragment.
+                if (isBlock(node)) {
                     return null;
                 }
-                return { element, isBlock: false };
+                return { node, isBlock: false };
             }
-            return getJoinableElement(node);
+            return getJoinableElement(element);
         };
 
         const joinableLeft = getJoinableLeft(left);
@@ -306,19 +358,16 @@ export class DeletePlugin extends Plugin {
         }
 
         if (joinableLeft.isBlock && joinableRight.isBlock) {
-            return this.mergeBlocks(joinableLeft.element, joinableRight.element, commonAncestor);
+            return this.mergeBlocks(joinableLeft.node, joinableRight.node, commonAncestor);
         }
 
         if (joinableLeft.isBlock) {
-            return this.joinInlineIntoBlock(joinableLeft.element, joinableRight.element);
+            return this.joinInlineIntoBlock(joinableLeft.node, joinableRight.node);
         }
 
         if (joinableRight.isBlock) {
-            return this.joinBlockIntoInline(joinableLeft.element, joinableRight.element);
+            return this.joinBlockIntoInline(joinableLeft.node, joinableRight.node);
         }
-
-        // @todo @phoenix: consider merging inline elements if they are similar.
-        // Otherwise, do it on normalize.
     }
 
     canBeMerged(left, right) {
@@ -432,20 +481,19 @@ export class DeletePlugin extends Plugin {
         }
     }
 
-    deleteRangeAjustSelection(selection) {
+    adjustRangeForDeletion(selection) {
         // Normalize selection (@todo @phoenix: should be offered by selection plugin)
         // Why? To make deleting more predictable and reproduceable.
         // @todo @phoenix: IMO a selection coming from a triple click should not be normalized
         selection = this.shared.setSelection(selection);
 
-        // Expand selection to fully include non-editable nodes.
-        selection = this.expandSelectionToIncludeNonEditables(selection);
+        let range = this.expandSelectionToIncludeNonEditables(selection);
 
         // @todo @phoenix: move this responsability to the selection plugin
         // Correct triple click
-        selection = this.correctTripleClick(selection);
+        range = this.correctTripleClick(range);
 
-        return selection;
+        return range;
     }
 
     // @phoenix @todo: move this to the selection plugin
@@ -453,9 +501,8 @@ export class DeletePlugin extends Plugin {
     // standard triple click behavior between browsers.
     // This correction makes no distinction between an actual selection willing
     // to remove a line break and a triple click.
-    correctTripleClick(selection) {
-        let { startContainer, startOffset, endContainer, endOffset, commonAncestorContainer } =
-            selection;
+    correctTripleClick(range) {
+        let { startContainer, startOffset, endContainer, endOffset } = range;
         const endLeaf = firstLeaf(endContainer);
         const beforeEnd = endLeaf.previousSibling;
         if (
@@ -469,13 +516,9 @@ export class DeletePlugin extends Plugin {
             const previous = previousLeaf(endLeaf, this.editable, true);
             if (previous && closestElement(previous).isContentEditable) {
                 [endContainer, endOffset] = [previous, nodeSize(previous)];
-                commonAncestorContainer = getCommonAncestor(
-                    [startContainer, endContainer],
-                    this.editable
-                );
             }
         }
-        return { ...selection, endContainer, endOffset, commonAncestorContainer };
+        return { ...range, endContainer, endOffset };
     }
 
     // Expand the range to fully include all contentEditable=False elements.
@@ -513,299 +556,168 @@ export class DeletePlugin extends Plugin {
             }
         }
         // @todo: this assumes the common ancestor does not change. Double check this.
-        return { ...selection, startContainer, startOffset, endContainer, endOffset };
+        return { startContainer, startOffset, endContainer, endOffset };
     }
 
-    // @todo @phoenix: improve this, use cType and all that crazy stuff.
-    // This should probably take the char size as parameter.
-    isVisibleChar(textNode, offset) {
-        const char = String.fromCodePoint(textNode.textContent.codePointAt(offset));
+    // @todo @phoenix: there are not enough tests for visibility of characters
+    // (invisible whitespace, separate nodes, etc.)
+    isVisibleChar(char, textNode, offset) {
+        // ZWS is invisible.
         if (char === "\u200B") {
             return false;
         }
-        // @todo @phoenix: for the 2nd condition, consider using `isInPre` instead
-        if (!isWhitespace(char) || closestElement(textNode, "PRE")) {
+        if (!isWhitespace(char) || isInPre(textNode)) {
             return true;
         }
-        // // if preceded by a whitespace, it's not visible
-        if (offset && isWhitespace(textNode.textContent[offset - 1])) {
+
+        // Assess visibility of whitespace.
+        // Whitespace is visible if it's immediately preceded by content, and
+        // followed by content before a BR or block start/end.
+
+        // If not preceded by content, it is invisible.
+        if (offset) {
+            if (isWhitespace(textNode.textContent[offset - char.length])) {
+                return false;
+            }
+        } else if (!(getState(...leftPos(textNode), DIRECTIONS.LEFT).cType & CTYPES.CONTENT)) {
             return false;
         }
-        // if at the beginning of a block, it's not visible
-        const leftLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.LEFT, {
-            leafOnly: true,
-            stopTraverseFunction: isBlock,
-            stopFunction: isBlock,
-        });
-        const previousLeafInBlock = leftLeafOnlyNotBlockPath(textNode).next().value;
-        if (offset === 0 && !previousLeafInBlock) {
-            return false;
+
+        // Space is only visible if it's followed by content (with an optional
+        // sequence of invisible spaces in between), before a BR or block
+        // end/start.
+        const charsToTheRight = textNode.textContent.slice(offset + char.length);
+        for (char of charsToTheRight) {
+            if (!isWhitespace(char)) {
+                return true;
+            }
         }
-        // if at the end of a block, it's not visible
-        const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
-            leafOnly: true,
-            stopTraverseFunction: isBlock,
-            stopFunction: isBlock,
-        });
-        const nextLeafInBlock = rightLeafOnlyNotBlockPath(textNode).next().value;
-        if (offset === nodeSize(textNode) - 1 && !nextLeafInBlock) {
-            return false;
+        // No content found in text node, look to the right of it
+        if (getState(...rightPos(textNode), DIRECTIONS.RIGHT).cType & CTYPES.CONTENT) {
+            return true;
         }
-        return true;
+
+        return false;
     }
 
-    findStartPos(endNode, endOffset) {
-        // search starts from the char before offset
-        const searchInTextNode = (node, offset) => {
-            // Mind the surrogate pairs.
+    shouldSkip(leaf, blockSwitch) {
+        if (leaf.nodeType === Node.TEXT_NODE) {
+            return false;
+        }
+        // @todo Maybe skip anything that is not an element (e.g. comment nodes)
+        if (blockSwitch) {
+            return false;
+        }
+        if (leaf.nodeName === "BR" && isFakeLineBreak(leaf)) {
+            return true;
+        }
+        if (isSelfClosingElement(leaf)) {
+            return false;
+        }
+        if (isEmpty(leaf) || isZWS(leaf)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Returns the previous visible position (ex: a previous character, the end
+    // of the previous block, etc.).
+    findPreviousPosition(node, offset, blockSwitch = false) {
+        // Look for a visible character in text node.
+        if (node.nodeType === Node.TEXT_NODE) {
             // @todo @phoenix: write tests for chars with size > 1 (emoji, etc.)
-            const chars = [...node.textContent.slice(0, offset)].reverse();
-            for (const char of chars) {
-                offset -= char.length;
-                if (this.isVisibleChar(node, offset)) {
-                    return offset;
+            // Use the string iterator to handle surrogate pairs.
+            let index = offset;
+            const chars = node.textContent.slice(0, index);
+            for (const char of [...chars].reverse()) {
+                index -= char.length;
+                if (this.isVisibleChar(char, node, index)) {
+                    index += blockSwitch ? char.length : 0;
+                    return [node, index];
                 }
-            }
-            return null;
-        };
-
-        if (endNode.nodeType === Node.TEXT_NODE) {
-            const offset = searchInTextNode(endNode, endOffset);
-            if (offset !== null) {
-                return [endNode, offset];
             }
         }
 
-        const endNodeClosestBlock = closestBlock(endNode);
-        // let node = previousLeaf(endNode, this.editable, true);
-        // getDeepest position returns [p, index] for a BR (thus, not a leaf)
-        // make sure endNode is a leaf
-        let node;
-        if (endNode.hasChildNodes() && endOffset) {
-            node = lastLeaf(endNode.childNodes[endOffset - 1]);
+        // Get previous leaf
+        let leaf;
+        if (node.hasChildNodes() && offset) {
+            leaf = lastLeaf(node.childNodes[offset - 1]);
         } else {
-            node = previousLeaf(endNode, this.editable);
+            leaf = previousLeaf(node, this.editable);
         }
-        while (node) {
-            // contenteditable=false
-            const closestUneditable = closestElement(node, isNotEditableNode);
-            if (closestUneditable) {
-                return [closestUneditable.parentElement, childNodeIndex(closestUneditable)];
-            }
-            // skip invisible text nodes
-            //(this is here because of a weird test case in which a text node
-            // with whitespaces is between 2 paragraphs... but should it?)
-            if (node.nodeType === Node.TEXT_NODE && !isVisibleTextNode(node)) {
-                node = previousLeaf(node, this.editable);
-                continue;
-            }
-
-            // Detect block switch: merge blocks without deleting text.
-            if (closestBlock(node) !== endNodeClosestBlock) {
-                return [node.parentElement, childNodeIndex(node) + 1];
-            }
-
-            // BR, IMG
-            if (isSelfClosingElement(node)) {
-                if (node.nodeName === "BR" && isFakeLineBreak(node)) {
-                    node = previousLeaf(node, this.editable);
-                    continue;
-                }
-                return [node.parentElement, childNodeIndex(node)];
-            }
-            // font-awesome icons. Already handled as contentEditable=false.
-            // const closestEl = closestElement(node);
-            // if (isIconElement(closestEl)) {
-            //     return [closestEl.parentElement, childNodeIndex(closestEl)];
-            // }
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                const offset = searchInTextNode(node, nodeSize(node));
-                if (offset !== null) {
-                    return [node, offset];
-                }
-            }
-            node = previousLeaf(node, this.editable);
+        if (!leaf) {
+            return [null, null];
         }
-        return [null, null];
+        // Skip invisible leafs, keeping track whether a block switch occurred.
+        const endNodeClosestBlock = closestBlock(node);
+        blockSwitch ||= closestBlock(leaf) !== endNodeClosestBlock;
+        while (this.shouldSkip(leaf, blockSwitch)) {
+            leaf = previousLeaf(leaf, this.editable);
+            if (!leaf) {
+                return [null, null];
+            }
+            blockSwitch ||= closestBlock(leaf) !== endNodeClosestBlock;
+        }
+
+        // If part of a contenteditable=false tree, expand selection to delete the root.
+        const closestUneditable = closestElement(leaf, isNotEditableNode);
+        if (closestUneditable) {
+            return [closestUneditable.parentElement, childNodeIndex(closestUneditable)];
+        }
+
+        if (leaf.nodeType === Node.ELEMENT_NODE) {
+            return [leaf.parentElement, childNodeIndex(leaf) + (blockSwitch ? 1 : 0)];
+        }
+
+        return this.findPreviousPosition(leaf, nodeSize(leaf), blockSwitch);
     }
 
-    deleteBackward() {
-        let selection = this.shared.getEditableSelection();
-        // Normalize selection
-        selection = this.shared.setSelection(selection);
-
-        if (!selection.isCollapsed) {
-            return this.deleteRange();
-        }
-
-        for (const { callback } of this.resources["handle_delete_backward"]) {
-            if (
-                callback({ targetNode: selection.anchorNode, targetOffset: selection.anchorOffset })
-            ) {
-                this.dispatch("ADD_STEP");
-                return;
-            }
-        }
-
-        const { endContainer, endOffset } = selection;
-        const [startContainer, startOffset] = this.findStartPos(endContainer, endOffset);
-        if (!startContainer) {
-            return;
-        }
-        const commonAncestorContainer = getCommonAncestor(
-            [startContainer, endContainer],
-            this.editable
-        );
-        const rangeToDelete = {
-            startContainer,
-            startOffset,
-            endContainer,
-            endOffset,
-            commonAncestorContainer,
-        };
-        const { cursorPos, joined, nRemovedNodes } = this.deleteSelection(rangeToDelete);
-        if (nRemovedNodes || joined) {
-            this.shared.setSelection(cursorPos);
-        }
-        // @todo @phoenix: check if also needed for deleteForward and deleteRange.
-        this.normalize(commonAncestorContainer);
-
-        this.dispatch("ADD_STEP");
-    }
-
-    findEndPos(startNode, startOffset) {
-        const searchInTextNode = (node, offset) => {
-            // Mind the surrogate pairs.
-            for (const char of node.textContent.slice(offset)) {
-                if (this.isVisibleChar(node, offset)) {
-                    return offset + char.length;
+    findNextPosition(node, offset, blockSwitch = false) {
+        // Look for a visible character in text node.
+        if (node.nodeType === Node.TEXT_NODE) {
+            // Use the string iterator to handle surrogate pairs.
+            let index = offset;
+            for (const char of node.textContent.slice(index)) {
+                if (this.isVisibleChar(char, node, index)) {
+                    index += blockSwitch ? 0 : char.length;
+                    return [node, index];
                 }
-                offset += char.length;
+                index += char.length;
             }
-            return null;
-        };
+        }
 
-        let node;
-        if (startNode.nodeType === Node.TEXT_NODE) {
-            const offset = searchInTextNode(startNode, startOffset);
-            if (offset !== null) {
-                return [startNode, offset];
-            }
-            node = nextLeaf(startNode, this.editable);
+        // Get next leaf
+        let leaf;
+        if (node.hasChildNodes() && offset < nodeSize(node)) {
+            leaf = firstLeaf(node.childNodes[offset]);
         } else {
-            if (startNode.hasChildNodes() && startOffset < nodeSize(startNode)) {
-                node = startNode.childNodes[startOffset];
-            } else {
-                node = nextLeaf(startNode, this.editable);
+            leaf = nextLeaf(node, this.editable);
+        }
+        if (!leaf) {
+            return [null, null];
+        }
+        // Skip invisible leafs, keeping track whether a block switch occurred.
+        const startNodeClosestBlock = closestBlock(node);
+        blockSwitch ||= closestBlock(leaf) !== startNodeClosestBlock;
+        while (this.shouldSkip(leaf, blockSwitch)) {
+            leaf = nextLeaf(leaf, this.editable);
+            if (!leaf) {
+                return [null, null];
             }
+            blockSwitch ||= closestBlock(leaf) !== startNodeClosestBlock;
         }
 
-        const startNodeClosestBlock = closestBlock(startNode);
-
-        while (node) {
-            // contenteditable=false
-            const closestUneditable = closestElement(node, isNotEditableNode);
-            if (closestUneditable) {
-                node = closestUneditable;
-
-                // @todo @phoenix: move this logic to the tab plugin
-                if (isEditorTab(node)) {
-                    // When deleting an editor tab, we need to ensure it's related
-                    // ZWS will deleted as well.
-                    // @todo @phoenix: for some reason, there might be more than one ZWS.
-                    // Investigate this.
-                    let nextSibling = node.nextSibling;
-                    while (nextSibling?.nodeType === Node.TEXT_NODE) {
-                        node = nextSibling;
-                        let index = 0;
-                        while (index < nodeSize(node)) {
-                            if (node.textContent[index] !== "\u200B") {
-                                return [node, index];
-                            }
-                            index++;
-                        }
-                        nextSibling = node.nextSibling;
-                    }
-                }
-
-                return [node.parentElement, childNodeIndex(node) + 1];
-            }
-            // skip invisible text nodes
-            if (node.nodeType === Node.TEXT_NODE && !isVisibleTextNode(node)) {
-                node = nextLeaf(node, this.editable);
-                continue;
-            }
-
-            // Detect block switch: merge blocks without deleting text.
-            if (closestBlock(node) !== startNodeClosestBlock) {
-                return [node.parentElement, childNodeIndex(node)];
-            }
-
-            // BR, IMG
-            if (isSelfClosingElement(node)) {
-                if (node.nodeName === "BR" && isFakeLineBreak(node)) {
-                    node = nextLeaf(node, this.editable);
-                    continue;
-                }
-                return [node.parentElement, childNodeIndex(node) + 1];
-            }
-            // font-awesome icons. Already handled as contentEditable=false.
-            // const closestEl = closestElement(node);
-            // if (isIconElement(closestEl)) {
-            //     return [closestEl.parentElement, childNodeIndex(closestEl)];
-            // }
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                const offset = searchInTextNode(node, 0);
-                if (offset !== null) {
-                    return [node, offset];
-                }
-            }
-            node = nextLeaf(node, this.editable);
-        }
-        return [null, null];
-    }
-
-    deleteForward() {
-        let selection = this.shared.getEditableSelection();
-        // Normalize selection
-        selection = this.shared.setSelection(selection);
-
-        if (!selection.isCollapsed) {
-            return this.deleteRange();
+        // If part of a contenteditable=false tree, expand selection to delete the root.
+        const closestUneditable = closestElement(leaf, isNotEditableNode);
+        if (closestUneditable) {
+            return [closestUneditable.parentElement, childNodeIndex(closestUneditable) + 1];
         }
 
-        // for (const { callback } of this.resources["handle_delete_forward"]) {
-        //     if (
-        //         callback({ targetNode: selection.anchorNode, targetOffset: selection.anchorOffset })
-        //     ) {
-        //         this.dispatch("ADD_STEP");
-        //         return;
-        //     }
-        // }
-
-        const { startContainer, startOffset } = selection;
-        const [endContainer, endOffset] = this.findEndPos(startContainer, startOffset);
-        if (!endContainer) {
-            return;
-        }
-        const rangeToDelete = {
-            startContainer,
-            startOffset,
-            endContainer,
-            endOffset,
-            commonAncestorContainer: getCommonAncestor(
-                [startContainer, endContainer],
-                this.editable
-            ),
-        };
-        const { cursorPos, joined, nRemovedNodes } = this.deleteSelection(rangeToDelete);
-        if (nRemovedNodes || joined) {
-            this.shared.setSelection(cursorPos);
+        if (leaf.nodeType === Node.ELEMENT_NODE) {
+            return [leaf.parentElement, childNodeIndex(leaf) + (blockSwitch ? 0 : 1)];
         }
 
-        this.dispatch("ADD_STEP");
+        return this.findNextPosition(leaf, 0, blockSwitch);
     }
 
     onBeforeInput(e) {
@@ -818,23 +730,53 @@ export class DeletePlugin extends Plugin {
         }
     }
 
-    // @todo @phoenix: try to merge this with handleEmptyElements
-    normalize(root) {
-        const nonEmptyBlocks = [root, ...descendants(root)].filter(
-            (node) => isBlock(node) && !isEmptyBlock(node)
-        );
-        for (const block of nonEmptyBlocks) {
-            const last = lastLeaf(block);
-            if (!(last?.nodeName === "BR")) {
-                continue;
-            }
-            // @todo double-check this
-            if (getState(...leftPos(last), DIRECTIONS.LEFT).cType === CTYPES.CONTENT) {
-                last.remove();
+    // ======== AD-HOC STUFF ========
+
+    // This is only needed because of one test case in which an invisible
+    // trailing BR would be left otherwise:
+    // "should delete an empty paragraph in a table cell"
+    // Reconsider this. Maybe this should be done on NORMALIZE, but a few tests would
+    // need to be adapted.
+    /**
+     * Removes BRs that have no visible effect: <p>content<br></p> -> <p>content</p>
+     *
+     * @param {Element} root
+     */
+    cleanTrailingBRs(root) {
+        for (const br of root.querySelectorAll("br")) {
+            if (
+                getState(...leftPos(br), DIRECTIONS.LEFT).cType & CTYPES.CONTENT &&
+                getState(...rightPos(br), DIRECTIONS.RIGHT).cType & CTYPES.BLOCK_INSIDE &&
+                // @todo @phoenix: the condition below is only here because of this test case:
+                // "should delete star rating elements when delete is pressed twice"
+                // as a ZWS matches CTYPES.CONTENT
+                !isEmptyBlock(closestBlock(br))
+            ) {
+                br.remove();
             }
         }
     }
+
+    // This a satisfies a weird spec in which the cursor should not move after
+    // the deletion of contenteditable=false elements. This might not be
+    // necessary if the selection normalization is improved.
+    deleteBackwardContentEditableFalse(range) {
+        const { startContainer, startOffset } = range;
+        if (!(startContainer?.nodeType === Node.ELEMENT_NODE)) {
+            return false;
+        }
+        const node = startContainer.childNodes[startOffset];
+        if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+            return false;
+        }
+        if (isNotEditableNode(node)) {
+            this.deleteRange(range);
+            // The only difference: do not change the selection
+            return true;
+        }
+    }
 }
+
 // @todo @phoenix: handle bootstrap columns
 // Empty unbreakable blocks should be removed with backspace, with the
 // notable exception of Bootstrap columns.
@@ -843,53 +785,5 @@ export class DeletePlugin extends Plugin {
 // The first child element of a contenteditable="true" zone which
 // itself is contained in a contenteditable="false" zone can not be
 // removed if it is paragraph-like.
-
-// @todo @phoenix: handle this:
-// When deleting an editor tab, we need to ensure it's related
-// ZWS will deleted as well.
-
-/**
- * @todo @phoenix Delete me! (leaving it now for reference)
- * Handle text node deletion for Text.oDeleteForward and Text.oDeleteBackward.
- *
- * @param {string} element
- * @param {int} charSize
- * @param {int} offset
- * @param {DIRECTIONS} direction
- * @param {boolean} alreadyMoved
- */
-// function deleteText(element, charSize, offset, direction, propagate) {
-//     const parentElement = element.parentElement;
-//     // Split around the character where the deletion occurs.
-//     const firstSplitOffset = splitTextNode(element, offset);
-//     const secondSplitOffset = splitTextNode(parentElement.childNodes[firstSplitOffset], charSize);
-//     const middleNode = parentElement.childNodes[firstSplitOffset];
-
-//     // Do remove the character, then restore the state of the surrounding parts.
-//     const restore = prepareUpdate(
-//         parentElement,
-//         firstSplitOffset,
-//         parentElement,
-//         secondSplitOffset
-//     );
-//     const isSpace = isWhitespace(middleNode) && !isInPre(middleNode);
-//     const isZWS = middleNode.nodeValue === "\u200B";
-//     middleNode.remove();
-//     restore();
-
-//     // If the removed element was not visible content, propagate the deletion.
-//     if (
-//         isZWS ||
-//         (isSpace && getState(parentElement, firstSplitOffset, direction).cType !== CTYPES.CONTENT)
-//     ) {
-//         propagate({ targetNode: parentElement, targetOffset: firstSplitOffset });
-//         if (isZWS) {
-//             fillEmpty(parentElement);
-//         }
-//         return;
-//     }
-//     fillEmpty(parentElement);
-//     setSelection(parentElement, firstSplitOffset);
-// }
 
 registry.category("phoenix_plugins").add(DeletePlugin.name, DeletePlugin);

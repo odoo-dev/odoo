@@ -7,7 +7,6 @@ import { isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
-import { childNodeIndex } from "../utils/position";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -25,8 +24,6 @@ export class ListPlugin extends Plugin {
     static dependencies = ["tabulation", "split_block", "selection"];
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
-        delete_element_backward_before: { callback: p.deleteElementBackwardBefore.bind(p) },
-        delete_element_forward_before: { callback: p.deleteElementForwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
@@ -496,62 +493,15 @@ export class ListPlugin extends Plugin {
         return true;
     }
 
-    handleDeleteBackward({ targetNode, targetOffset }) {
-        const closestLI = closestElement(targetNode, "LI");
-        if (!closestLI) {
+    handleDeleteBackward(range) {
+        const { startContainer, endContainer } = range;
+        const closestLIendContainer = closestElement(endContainer, "LI");
+        if (!closestLIendContainer) {
             return;
         }
         // Detect if cursor is at beginning of LI.
-        // @todo @phoenix: handle ZWS
-        while (targetNode !== closestLI && targetOffset === 0) {
-            targetOffset = childNodeIndex(targetNode);
-            targetNode = targetNode.parentElement;
-        }
-        if (targetOffset) {
-            return;
-        }
-        this.liToP(closestLI);
-        return true;
-    }
-
-    deleteElementBackwardBefore({ targetNode, targetOffset, outdentList = true, fromForward }) {
-        if (!fromForward && outdentList && targetNode.tagName === "LI" && targetOffset === 0) {
-            this.liToP(targetNode);
-            return true;
-        }
-    }
-
-    deleteElementForwardBefore({ targetNode, targetOffset }) {
-        const parentElement = targetNode.parentElement;
-        const nextSibling = targetNode.nextSibling;
-        if (
-            parentElement &&
-            nextSibling &&
-            ["LI", "UL", "OL"].includes(nextSibling.tagName) &&
-            (targetOffset === targetNode.childNodes.length ||
-                (targetNode.childNodes.length === 1 && targetNode.childNodes[0].tagName === "BR"))
-        ) {
-            const nextSiblingNestedLi = nextSibling.querySelector("li:first-child");
-            if (nextSiblingNestedLi) {
-                // Add the first LI from the next sibbling list to the current list.
-                targetNode.after(nextSiblingNestedLi);
-                // Remove the next sibbling list if it's empty.
-                if (!isVisible(nextSibling, false) || nextSibling.textContent === "") {
-                    nextSibling.remove();
-                }
-                this.dispatch("DELETE_ELEMENT_BACKWARD", {
-                    targetNode: nextSiblingNestedLi,
-                    targetOffset: 0,
-                    alreadyMoved: true,
-                    outdentList: false,
-                });
-            } else {
-                this.dispatch("DELETE_ELEMENT_BACKWARD", {
-                    targetNode: nextSibling,
-                    targetOffset: 0,
-                    outdentList: false,
-                });
-            }
+        if (closestElement(startContainer, "LI") !== closestLIendContainer) {
+            this.liToP(closestLIendContainer);
             return true;
         }
     }

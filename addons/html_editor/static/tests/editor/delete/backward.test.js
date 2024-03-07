@@ -1678,7 +1678,7 @@ describe("Selection not collapsed", () => {
                 await deleteBackward(editor);
                 await deleteBackward(editor);
             },
-            contentAfter: "<p>ab[]&nbsp;ef</p>",
+            contentAfter: "<p>ab[] ef</p>",
         });
     });
     test("should delete styling nodes when delete if empty (backward)", async () => {
