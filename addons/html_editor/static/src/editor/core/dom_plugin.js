@@ -328,9 +328,8 @@ export class DomPlugin extends Plugin {
     }
 
     mergeAdjacentNodes(node) {
-        this.mergeAdjacentNode(node);
-        for (const child of node.childNodes) {
-            this.mergeAdjacentNodes(child);
+        for (const el of [node, ...descendants(node)]) {
+            this.mergeAdjacentNode(el);
         }
     }
 
