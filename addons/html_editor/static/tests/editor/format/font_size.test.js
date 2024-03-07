@@ -16,7 +16,7 @@ test("should change the font size the qweb tag", async () => {
     await testEditor({
         contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
         stepFunction: setFontSize("36px"),
-        contentAfter: `<div><p t-esc="'Test'" contenteditable="false" style="font-size: 36px;">[Test]</p></div>`,
+        contentAfter: `<div>[<p t-esc="'Test'" contenteditable="false" style="font-size: 36px;">Test</p>]</div>`,
     });
 });
 
@@ -120,7 +120,7 @@ test("should add font size in selected table cells", async () => {
             '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p><br></p>]</td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
         stepFunction: setFontSize("48px"),
         contentAfter:
-            '<table><tbody><tr><td><p><span style="font-size: 48px;"><br>[</span></p></td><td><p><span style="font-size: 48px;"><br>]</span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
+            '<table><tbody><tr><td><p><span style="font-size: 48px;">[<br></span></p></td><td><p><span style="font-size: 48px;">]<br></span></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
     });
 });
 
@@ -130,7 +130,7 @@ test("should add font size in all table cells", async () => {
             '<table><tbody><tr><td class="o_selected_td"><p>[<br></p></td><td class="o_selected_td"><p><br></p></td></tr><tr><td class="o_selected_td"><p><br></p></td><td class="o_selected_td"><p><br>]</p></td></tr></tbody></table>',
         stepFunction: setFontSize("36px"),
         contentAfter:
-            '<table><tbody><tr><td><p><span style="font-size: 36px;"><br>[</span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr><tr><td><p><span style="font-size: 36px;"><br></span></p></td><td><p><span style="font-size: 36px;"><br>]</span></p></td></tr></tbody></table>',
+            '<table><tbody><tr><td><p><span style="font-size: 36px;">[<br></span></p></td><td><p><span style="font-size: 36px;"><br></span></p></td></tr><tr><td><p><span style="font-size: 36px;"><br></span></p></td><td><p><span style="font-size: 36px;">]<br></span></p></td></tr></tbody></table>',
     });
 });
 
@@ -140,7 +140,7 @@ test("should add font size in selected table cells with h1 as first child", asyn
             '<table><tbody><tr><td class="o_selected_td"><h1>[<br></h1></td><td class="o_selected_td"><h1><br>]</h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
         stepFunction: setFontSize("18px"),
         contentAfter:
-            '<table><tbody><tr><td><h1><span style="font-size: 18px;"><br>[</span></h1></td><td><h1><span style="font-size: 18px;"><br>]</span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
+            '<table><tbody><tr><td><h1><span style="font-size: 18px;">[<br></span></h1></td><td><h1><span style="font-size: 18px;">]<br></span></h1></td></tr><tr><td><h1><br></h1></td><td><h1><br></h1></td></tr></tbody></table>',
     });
 });
 
