@@ -70,19 +70,16 @@ describe("to paragraph", () => {
         });
     });
 
-    test.todo(
-        "should turn three table cells with heading 1 to table cells with paragraph",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    "<table><tbody><tr><td><h1>[a</h1></td><td><h1>b</h1></td><td><h1>c]</h1></td></tr></tbody></table>",
-                stepFunction: setTag("p"),
-                // The custom table selection is removed in cleanForSave and the selection is collapsed.
-                contentAfter:
-                    "<table><tbody><tr><td><p>[]a</p></td><td><p>b</p></td><td><p>c</p></td></tr></tbody></table>",
-            });
-        }
-    );
+    test("should turn three table cells with heading 1 to table cells with paragraph", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td><h1>[a</h1></td><td><h1>b</h1></td><td><h1>c]</h1></td></tr></tbody></table>",
+            stepFunction: setTag("p"),
+            // The custom table selection is removed in cleanForSave and the selection is collapsed.
+            contentAfter:
+                "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
+        });
+    });
 
     test("should not set the tag of non-editable elements", async () => {
         await testEditor({
@@ -135,19 +132,16 @@ describe("to heading 1", () => {
         });
     });
 
-    test.todo(
-        "should turn three table cells with paragraph to table cells with heading 1",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
-                stepFunction: setTag("h1"),
-                // The custom table selection is removed in cleanForSave and the selection is collapsed.
-                contentAfter:
-                    "<table><tbody><tr><td><h1>[]a</h1></td><td><h1>b</h1></td><td><h1>c</h1></td></tr></tbody></table>",
-            });
-        }
-    );
+    test("should turn three table cells with paragraph to table cells with heading 1", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
+            stepFunction: setTag("h1"),
+            // The custom table selection is removed in cleanForSave and the selection is collapsed.
+            contentAfter:
+                "<table><tbody><tr><td><h1>[a</h1></td><td><h1>b</h1></td><td><h1>c]</h1></td></tr></tbody></table>",
+        });
+    });
 });
 
 describe("to heading 2", () => {
@@ -191,19 +185,16 @@ describe("to heading 2", () => {
         });
     });
 
-    test.todo(
-        "should turn three table cells with paragraph to table cells with heading 2",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
-                stepFunction: setTag("h2"),
-                // The custom table selection is removed in cleanForSave and the selection is collapsed.
-                contentAfter:
-                    "<table><tbody><tr><td><h2>[]a</h2></td><td><h2>b</h2></td><td><h2>c</h2></td></tr></tbody></table>",
-            });
-        }
-    );
+    test("should turn three table cells with paragraph to table cells with heading 2", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
+            stepFunction: setTag("h2"),
+            // The custom table selection is removed in cleanForSave and the selection is collapsed.
+            contentAfter:
+                "<table><tbody><tr><td><h2>[a</h2></td><td><h2>b</h2></td><td><h2>c]</h2></td></tr></tbody></table>",
+        });
+    });
 });
 
 describe("to heading 3", () => {
@@ -247,19 +238,16 @@ describe("to heading 3", () => {
         });
     });
 
-    test.todo(
-        "should turn three table cells with paragraph to table cells with heading 3",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
-                stepFunction: setTag("h3"),
-                // The custom table selection is removed in cleanForSave and the selection is collapsed.
-                contentAfter:
-                    "<table><tbody><tr><td><h3>[]a</h3></td><td><h3>b</h3></td><td><h3>c</h3></td></tr></tbody></table>",
-            });
-        }
-    );
+    test("should turn three table cells with paragraph to table cells with heading 3", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
+            stepFunction: setTag("h3"),
+            // The custom table selection is removed in cleanForSave and the selection is collapsed.
+            contentAfter:
+                "<table><tbody><tr><td><h3>[a</h3></td><td><h3>b</h3></td><td><h3>c]</h3></td></tr></tbody></table>",
+        });
+    });
 });
 
 describe("to pre", () => {
@@ -287,14 +275,14 @@ describe("to pre", () => {
         });
     });
 
-    test.todo("should turn three table cells with paragraph to table cells with pre", async () => {
+    test("should turn three table cells with paragraph to table cells with pre", async () => {
         await testEditor({
             contentBefore:
                 "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
             stepFunction: setTag("pre"),
             // The custom table selection is removed in cleanForSave and the selection is collapsed.
             contentAfter:
-                "<table><tbody><tr><td><pre>[]a</pre></td><td><pre>b</pre></td><td><pre>c</pre></td></tr></tbody></table>",
+                "<table><tbody><tr><td><pre>[a</pre></td><td><pre>b</pre></td><td><pre>c]</pre></td></tr></tbody></table>",
         });
     });
 });
@@ -341,17 +329,14 @@ describe("to blockquote", () => {
         });
     });
 
-    test.todo(
-        "should turn three table cells with paragraph to table cells with blockquote",
-        async () => {
-            await testEditor({
-                contentBefore:
-                    "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
-                stepFunction: setTag("blockquote"),
-                // The custom table selection is removed in cleanForSave and the selection is collapsed.
-                contentAfter:
-                    "<table><tbody><tr><td><blockquote>[]a</blockquote></td><td><blockquote>b</blockquote></td><td><blockquote>c</blockquote></td></tr></tbody></table>",
-            });
-        }
-    );
+    test("should turn three table cells with paragraph to table cells with blockquote", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td><p>[a</p></td><td><p>b</p></td><td><p>c]</p></td></tr></tbody></table>",
+            stepFunction: setTag("blockquote"),
+            // The custom table selection is removed in cleanForSave and the selection is collapsed.
+            contentAfter:
+                "<table><tbody><tr><td><blockquote>[a</blockquote></td><td><blockquote>b</blockquote></td><td><blockquote>c]</blockquote></td></tr></tbody></table>",
+        });
+    });
 });
