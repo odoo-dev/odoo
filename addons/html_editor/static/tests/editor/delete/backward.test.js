@@ -196,7 +196,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should ignore ZWS and merge (2)", async () => {
+        test("should ignore ZWS and merge (2)", async () => {
             await testEditor({
                 contentBefore: '<div><p>ab</p><span class="a">[]\u200B</span></div>',
                 stepFunction: deleteBackward,
@@ -212,7 +212,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not remove empty Bootstrap column", async () => {
+        test("should not remove empty Bootstrap column", async () => {
             await testEditor({
                 contentBefore: '<div><div><p>ABC</p></div><div class="col">X[]</div></div>',
                 stepFunction: async (editor) => {
@@ -1162,7 +1162,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should not remove a table without selecting it", async () => {
+        test("should not remove a table without selecting it", async () => {
             await testEditor({
                 contentBefore: unformat(
                     `<p>ab</p>
