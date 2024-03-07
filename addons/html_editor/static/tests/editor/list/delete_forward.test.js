@@ -442,30 +442,27 @@ describe("Selection collapsed", () => {
         });
     });
     describe("Indented", () => {
-        test.todo(
-            "should merge an indented list item into a non-indented list item 1",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<ol><li>abc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
-                    stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                    },
-                    contentAfter:
-                        '<ol><li>abc[]def</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
-                });
-                await testEditor({
-                    contentBefore:
-                        '<ol><li>2bc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
-                    stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                        await deleteForward(editor);
-                    },
-                    contentAfter:
-                        '<ol><li>2bc[]ef</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
-                });
-            }
-        );
+        test("should merge an indented list item into a non-indented list item 1", async () => {
+            await testEditor({
+                contentBefore:
+                    '<ol><li>abc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                },
+                contentAfter:
+                    '<ol><li>abc[]def</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
+            });
+            await testEditor({
+                contentBefore:
+                    '<ol><li>2bc[]</li><li class="oe-nested"><ol><li>def</li><li>ghi</li></ol></li></ol>',
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                    await deleteForward(editor);
+                },
+                contentAfter:
+                    '<ol><li>2bc[]ef</li><li class="oe-nested"><ol><li>ghi</li></ol></li></ol>',
+            });
+        });
 
         test("should merge a non-indented list item into an indented list item", async () => {
             await testEditor({
@@ -476,20 +473,17 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should merge the only item in an indented list into a non-indented list item and remove the now empty indented list",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<ul><li>abc[]</li><li class="oe-nested"><ul><li>def</li></ul></li></ul>',
-                    stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                        await deleteForward(editor);
-                    },
-                    contentAfter: "<ul><li>abc[]ef</li></ul>",
-                });
-            }
-        );
+        test("should merge the only item in an indented list into a non-indented list item and remove the now empty indented list", async () => {
+            await testEditor({
+                contentBefore:
+                    '<ul><li>abc[]</li><li class="oe-nested"><ul><li>def</li></ul></li></ul>',
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                    await deleteForward(editor);
+                },
+                contentAfter: "<ul><li>abc[]ef</li></ul>",
+            });
+        });
 
         test("should merge an indented list item into a non-indented list item", async () => {
             await testEditor({
@@ -517,7 +511,7 @@ describe("Selection collapsed", () => {
         });
     });
     describe("Complex merges", () => {
-        test.todo("should merge a list item into a paragraph", async () => {
+        test("should merge a list item into a paragraph", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p><ul><li>ef</li><li>gh</li></ul>",
                 stepFunction: async (editor) => {
@@ -563,7 +557,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a checklist item into a paragraph", async () => {
+        test("should merge a checklist item into a paragraph", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:

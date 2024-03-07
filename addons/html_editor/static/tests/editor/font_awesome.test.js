@@ -251,7 +251,7 @@ describe("deleteForward", () => {
                 });
             });
 
-            test.todo("should not delete a fontawesome after multiple deleteForward", async () => {
+            test("should not delete a fontawesome after multiple deleteForward", async () => {
                 await testEditor({
                     contentBefore: '<p>ab[]cde<i class="fa fa-pastafarianism"></i>fghij</p>',
                     contentBeforeEdit:
@@ -281,43 +281,37 @@ describe("deleteForward", () => {
                 });
             });
 
-            test.todo(
-                "should not delete a fontawesome after multiple deleteForward with spaces",
-                async () => {
-                    await testEditor({
-                        contentBefore: '<p>a[]b <i class="fa fa-pastafarianism"></i> cd</p>',
-                        contentBeforeEdit:
-                            '<p>a[]b <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
-                        stepFunction: async (editor) => {
-                            await deleteForward(editor);
-                            await deleteForward(editor);
-                        },
-                        contentAfterEdit:
-                            '<p>a[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
-                        contentAfter: '<p>a[]<i class="fa fa-pastafarianism"></i> cd</p>',
-                    });
-                }
-            );
+            test("should not delete a fontawesome after multiple deleteForward with spaces", async () => {
+                await testEditor({
+                    contentBefore: '<p>a[]b <i class="fa fa-pastafarianism"></i> cd</p>',
+                    contentBeforeEdit:
+                        '<p>a[]b <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
+                    stepFunction: async (editor) => {
+                        await deleteForward(editor);
+                        await deleteForward(editor);
+                    },
+                    contentAfterEdit:
+                        '<p>a[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
+                    contentAfter: '<p>a[]<i class="fa fa-pastafarianism"></i> cd</p>',
+                });
+            });
 
-            test.todo(
-                "should not delete a fontawesome after multiple deleteForward with spaces inside a <span>",
-                async () => {
-                    await testEditor({
-                        contentBefore:
-                            '<div><span class="a">ab[]c </span><i class="fa fa-star"></i> def</div>',
-                        contentBeforeEdit:
-                            '<div><span class="a">ab[]c </span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
-                        stepFunction: async (editor) => {
-                            await deleteForward(editor);
-                            await deleteForward(editor);
-                        },
-                        contentAfterEdit:
-                            '<div><span class="a">ab[]</span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
-                        contentAfter:
-                            '<div><span class="a">ab[]</span><i class="fa fa-star"></i> def</div>',
-                    });
-                }
-            );
+            test("should not delete a fontawesome after multiple deleteForward with spaces inside a <span>", async () => {
+                await testEditor({
+                    contentBefore:
+                        '<div><span class="a">ab[]c </span><i class="fa fa-star"></i> def</div>',
+                    contentBeforeEdit:
+                        '<div><span class="a">ab[]c </span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
+                    stepFunction: async (editor) => {
+                        await deleteForward(editor);
+                        await deleteForward(editor);
+                    },
+                    contentAfterEdit:
+                        '<div><span class="a">ab[]</span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
+                    contentAfter:
+                        '<div><span class="a">ab[]</span><i class="fa fa-star"></i> def</div>',
+                });
+            });
         });
     });
 
