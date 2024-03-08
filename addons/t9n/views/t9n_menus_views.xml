@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<odoo>
+    <menuitem id="t9n.project_menu" name="Projects" action="t9n.project_action" parent="t9n.menu_root"/>
+</odoo>

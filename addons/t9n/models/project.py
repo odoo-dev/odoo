@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import fields, models, api, _
+from odoo.exceptions import ValidationError
 
 
 class Project(models.Model):
@@ -8,6 +9,7 @@ class Project(models.Model):
     _name = "t9n.project"
     _description = "Translation project"
 
+    name = fields.Char('Project', required=True)
     src_lang_id = fields.Many2one(
         comodel_name="t9n.language",
         string="Source Language",
@@ -23,3 +25,10 @@ class Project(models.Model):
         string="Languages",
         help="The list of languages into which the project can be translated.",
     )
+
+    @api.constrains('src_lang_id', 'target_lang_ids')
+    def _check_source_and_target_languages(self):
+        for record in self:
+            if record.src_lang_id in record.target_lang_ids:
+                raise ValidationError(
+                    _("The source language can not be one of the target languages."))
