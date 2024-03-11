@@ -34,8 +34,7 @@ export class PowerboxPlugin extends Plugin {
             groups: this.groups,
             onApplyCommand: () => this.historySavePointRestore(),
         });
-        // @todo @phoenix: consider using keydown or beforeinput instead
-        this.addDomListener(this.editable, "keypress", (ev) => {
+        this.addDomListener(this.editable, "keydown", (ev) => {
             if (ev.key === "/") {
                 this.openPowerbox();
             }
