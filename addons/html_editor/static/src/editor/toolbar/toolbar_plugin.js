@@ -7,6 +7,9 @@ export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
     static dependencies = ["overlay", "selection"];
     static shared = ["getToolbarInfo"];
+    static resources = (p) => ({
+        onSelectionChange: p.handleSelectionChange.bind(p),
+    });
 
     setup() {
         this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
@@ -17,7 +20,6 @@ export class ToolbarPlugin extends Plugin {
             toolbar: this.getToolbarInfo(),
             floating: true,
         });
-        this.addDomListener(this.document, "selectionchange", this.handleSelectionChange);
     }
 
     handleCommand(command, payload) {

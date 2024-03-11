@@ -5,7 +5,7 @@ import { Component, xml } from "@odoo/owl";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { animationFrame } from "@odoo/hoot-mock";
 import { getContent, setContent, setSelection } from "../test_helpers/selection";
-import { click, queryOne } from "@odoo/hoot-dom";
+import { click, queryOne, waitFor } from "@odoo/hoot-dom";
 
 describe("wysiwig function", () => {
     test("can edit a element with wysiwyg function", async () => {
@@ -97,20 +97,17 @@ describe("Wysiwyg Component", () => {
         expect(el.innerHTML).toBe(`<p>test some text</p>`);
 
         setContent(el, "<p>test [some] text</p>");
-        await animationFrame();
-        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 
         await contains(".btn[name='bold']").click();
         expect(getContent(el)).toBe("<p>test <strong>[some]</strong> text</p>");
-        expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold'].active");
 
         setContent(el, "<p>test <strong>some</strong> text[]</p>");
-        await animationFrame();
-        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 
         setContent(el, "<p>test <strong>some[]</strong> text</p>");
-        await animationFrame();
-        expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold'].active");
     });
 
     test("wysiwyg with toolbar: properly behave when selection leaves editable", async () => {
@@ -139,10 +136,7 @@ describe("Wysiwyg Component", () => {
             toolbar: true,
             content: "<p>test [some] text</p>",
         });
-        // this animation frame is necessary to let the editor first react to the
-        // selection change from setupwysiwyg so it can save current selection
-        await animationFrame();
-        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 
         click(document.body);
         setSelection({
@@ -153,10 +147,9 @@ describe("Wysiwyg Component", () => {
         });
         await animationFrame();
         expect(getContent(el)).toBe("<p>test some text</p>");
-        expect(".o-we-toolbar .btn[name='bold']").not.toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
         click(".o-we-toolbar .btn[name='bold']");
-        await animationFrame();
         expect(getContent(el)).toBe("<p>test <strong>[some]</strong> text</p>");
-        expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
+        await waitFor(".o-we-toolbar .btn[name='bold'].active");
     });
 });
