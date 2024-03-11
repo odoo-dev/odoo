@@ -31,8 +31,6 @@ export async function insertText(editor, text) {
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.
         manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: char });
-        // KeyPressEvent is not required but is triggered like in the browser.
-        manuallyDispatchProgrammaticEvent(editor.editable, "keypress", { key: char });
         // InputEvent is required to simulate the insert text.
         insertChar(char);
         manuallyDispatchProgrammaticEvent(editor.editable, "input", {
