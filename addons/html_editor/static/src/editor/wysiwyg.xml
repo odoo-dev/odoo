@@ -5,7 +5,12 @@
             <t t-if="props.toolbar and state.showToolbar">
                 <Toolbar toolbar="editor.shared.getToolbarInfo()" />
             </t>
-            <div class="p-1" t-ref="content"/>
+            <t t-if="props.iframe">
+                <iframe t-ref="content" class="w-100 h-100"/>
+            </t>
+            <t t-else="">
+                <div class="p-1" t-ref="content"/>
+            </t>
         </div>
     </t>
 </templates>
