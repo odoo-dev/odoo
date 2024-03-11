@@ -662,11 +662,11 @@ export class DeletePlugin extends Plugin {
         // If part of a contenteditable=false tree, expand selection to delete the root.
         const closestUneditable = closestElement(leaf, isNotEditableNode);
         if (closestUneditable) {
-            return [closestUneditable.parentElement, childNodeIndex(closestUneditable)];
+            return leftPos(closestUneditable);
         }
 
         if (leaf.nodeType === Node.ELEMENT_NODE) {
-            return [leaf.parentElement, childNodeIndex(leaf) + (blockSwitch ? 1 : 0)];
+            return blockSwitch ? rightPos(leaf) : leftPos(leaf);
         }
 
         return this.findPreviousPosition(leaf, nodeSize(leaf), blockSwitch);
@@ -710,11 +710,11 @@ export class DeletePlugin extends Plugin {
         // If part of a contenteditable=false tree, expand selection to delete the root.
         const closestUneditable = closestElement(leaf, isNotEditableNode);
         if (closestUneditable) {
-            return [closestUneditable.parentElement, childNodeIndex(closestUneditable) + 1];
+            return rightPos(closestUneditable);
         }
 
         if (leaf.nodeType === Node.ELEMENT_NODE) {
-            return [leaf.parentElement, childNodeIndex(leaf) + (blockSwitch ? 0 : 1)];
+            return blockSwitch ? leftPos(leaf) : rightPos(leaf);
         }
 
         return this.findNextPosition(leaf, 0, blockSwitch);
