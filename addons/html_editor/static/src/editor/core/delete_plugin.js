@@ -156,10 +156,9 @@ export class DeletePlugin extends Plugin {
             commonAncestor,
         });
 
-        // Join fragments if they are part of direct sibling sub-trees under
-        // commonAncestor. At least one of the sides must be a fragment.
+        // Join fragments.
         let joined;
-        if (allNodesRemoved && (startElement !== commonAncestor || endElement !== commonAncestor)) {
+        if (allNodesRemoved) {
             joined = this.joinFragments(startElement, endElement, commonAncestor, startRemoveIndex);
         }
 
@@ -303,9 +302,10 @@ export class DeletePlugin extends Plugin {
         return true;
     }
 
-    // @todo @phoenix: document this, factor out inner functions
-    joinFragments(left, right, commonAncestor, offset) {
-        // Returns closest block whithin ancestor or ancestor's child inline element.
+    getJoinableFragments(startElement, endElement, commonAncestor, offset) {
+        // Starting from `element`, returns the closest block up to
+        // (not-inclusive) the common ancestor. If not found, returns the
+        // ancestor's child inline element.
         const getJoinableElement = (element) => {
             let last;
             while (element !== commonAncestor) {
@@ -318,40 +318,47 @@ export class DeletePlugin extends Plugin {
             return { node: last, isBlock: false };
         };
 
-        const getJoinableLeft = (element) => {
-            if (element === commonAncestor) {
-                if (!offset) {
-                    return null;
-                }
-                const node = commonAncestor.childNodes[offset - 1];
-                // Only join blocks when they are fragments. A direct child of
-                // the common ancestor is not a fragment.
-                if (isBlock(node)) {
-                    return null;
-                }
-                return { node, isBlock: false };
+        // Get joinable left
+        let joinableLeft;
+        if (startElement === commonAncestor) {
+            // This means the element was removed from the ancestor's child list.
+            // The joinable in this case is its previous sibling, but only if it's not a block.
+            const previousSibling = offset ? commonAncestor.childNodes[offset - 1] : null;
+            if (previousSibling && !isBlock(previousSibling)) {
+                // If it's a block, as it was not involved in the deleted range, its paragraph break
+                // was not affected, and it should not be joined with other elements.
+                joinableLeft = { node: previousSibling, isBlock: false };
             }
-            return getJoinableElement(element);
-        };
+        } else {
+            joinableLeft = getJoinableElement(startElement);
+        }
 
-        const getJoinableRight = (element) => {
-            if (element === commonAncestor) {
-                if (offset === nodeSize(commonAncestor)) {
-                    return null;
-                }
-                const node = commonAncestor.childNodes[offset];
-                // Only join blocks when they are fragments. A direct child of
-                // the common ancestor is not a fragment.
-                if (isBlock(node)) {
-                    return null;
-                }
-                return { node, isBlock: false };
+        // Get joinable right
+        let joinableRight;
+        if (endElement === commonAncestor) {
+            // The same applies here. The joinable in this case is the sibling
+            // following the last removed node, but only if it's not a block.
+            const nextSibling =
+                offset < nodeSize(commonAncestor) ? commonAncestor.childNodes[offset] : null;
+            if (nextSibling && !isBlock(nextSibling)) {
+                joinableRight = { node: nextSibling, isBlock: false };
             }
-            return getJoinableElement(element);
-        };
+        } else {
+            joinableRight = getJoinableElement(endElement);
+        }
 
-        const joinableLeft = getJoinableLeft(left);
-        const joinableRight = getJoinableRight(right);
+        return { joinableLeft, joinableRight };
+    }
+
+    // @todo @phoenix: document this
+    // Returns whether a join was performed.
+    joinFragments(startElement, endElement, commonAncestor, startRemoveIndex) {
+        const { joinableLeft, joinableRight } = this.getJoinableFragments(
+            startElement,
+            endElement,
+            commonAncestor,
+            startRemoveIndex
+        );
 
         if (!joinableLeft || !joinableRight) {
             return false;
@@ -368,6 +375,8 @@ export class DeletePlugin extends Plugin {
         if (joinableRight.isBlock) {
             return this.joinBlockIntoInline(joinableLeft.node, joinableRight.node);
         }
+
+        return false;
     }
 
     canBeMerged(left, right) {
