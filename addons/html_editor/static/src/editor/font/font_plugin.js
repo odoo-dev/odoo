@@ -84,6 +84,7 @@ const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
 });
 
 const headingTags = ["H1", "H2", "H3", "H4", "H5", "H6"];
+const handledElemSelector = [...headingTags, "PRE", "BLOCKQUOTE"].join(", ");
 
 export class FontPlugin extends Plugin {
     static name = "font";
@@ -246,9 +247,7 @@ export class FontPlugin extends Plugin {
     }
 
     handleDeleteBackward({ startContainer, endContainer }) {
-        const handledTags = [...headingTags, "PRE", "BLOCKQUOTE"];
-        const selector = handledTags.join(", ");
-        const closestHandledElement = closestElement(endContainer, selector);
+        const closestHandledElement = closestElement(endContainer, handledElemSelector);
         if (!closestHandledElement) {
             return;
         }
