@@ -18,7 +18,11 @@ export function useWysiwyg(target, config = {}) {
     const ref = typeof target === "string" ? useRef(target) : null;
     const editor = new Editor(config, env.services);
     onMounted(() => {
-        const el = ref ? ref.el : target();
+        let el = ref ? ref.el : target();
+        if (el.tagName === "IFRAME") {
+            // grab the inner body instead
+            el = ref.el.contentDocument.body;
+        }
         editor.attachTo(el);
     });
     onWillDestroy(() => editor.destroy());
@@ -33,6 +37,7 @@ export class Wysiwyg extends Component {
         class: { type: String, optional: true },
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
+        iframe: { type: Boolean, optional: true },
     };
 
     setup() {
