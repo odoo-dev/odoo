@@ -21,6 +21,7 @@ export class Playground extends Component {
         this.state = useState({ showWysiwyg: false });
         this.config = useState({
             showToolbar: false,
+            inIframe: false,
         });
         this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
             "@web_editor/js/wysiwyg/wysiwyg"
