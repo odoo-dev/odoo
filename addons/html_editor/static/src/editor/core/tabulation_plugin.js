@@ -26,7 +26,7 @@ function isIndentationTab(tab) {
 
 export class TabulationPlugin extends Plugin {
     static name = "tabulation";
-    static dependencies = ["dom", "selection"];
+    static dependencies = ["dom", "selection", "delete"];
     static shared = ["indentBlocks", "outdentBlocks"];
     static resources = (p) => ({
         handle_delete_forward: { callback: p.handleDeleteForward.bind(p) },
@@ -197,7 +197,7 @@ export class TabulationPlugin extends Plugin {
         return [previous.parentElement, childNodeIndex(previous) + 1];
     }
 
-    handleDeleteForward({ range, deleteRange }) {
+    handleDeleteForward(range) {
         let { endContainer, endOffset } = range;
         if (!(endContainer?.nodeType === Node.ELEMENT_NODE) || !endOffset) {
             return;
@@ -205,7 +205,7 @@ export class TabulationPlugin extends Plugin {
         const nodeToDelete = endContainer.childNodes[endOffset - 1];
         if (isEditorTab(nodeToDelete)) {
             [endContainer, endOffset] = this.expandRangeToIncludeZWS(nodeToDelete);
-            const { cursorPos } = deleteRange({ ...range, endContainer, endOffset });
+            const { cursorPos } = this.shared.deleteRange({ ...range, endContainer, endOffset });
             this.shared.setSelection(cursorPos);
             return true;
         }

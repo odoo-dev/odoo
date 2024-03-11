@@ -34,6 +34,7 @@ import { CTYPES } from "../utils/content_types";
 export class DeletePlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "delete";
+    static shared = ["deleteRange"];
     static resources = (p) => ({
         shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],
         handle_delete_backward: { callback: p.deleteBackwardContentEditableFalse.bind(p) },
@@ -62,8 +63,7 @@ export class DeletePlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
-    deleteSelection() {
-        const selection = this.shared.getEditableSelection();
+    deleteSelection(selection = this.shared.getEditableSelection()) {
         // @todo @phoenix: handle non-collapsed selection around a ZWS
         // see collapseIfZWS
         if (selection.isCollapsed) {
@@ -79,12 +79,13 @@ export class DeletePlugin extends Plugin {
 
     deleteBackward() {
         let selection = this.shared.getEditableSelection();
-        // Normalize selection
-        selection = this.shared.setSelection(selection);
 
         if (!selection.isCollapsed) {
-            return this.deleteSelection();
+            return this.deleteSelection(selection);
         }
+
+        // Normalize selection
+        selection = this.shared.setSelection(selection);
 
         const { endContainer, endOffset } = selection;
         const [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
@@ -112,12 +113,13 @@ export class DeletePlugin extends Plugin {
 
     deleteForward() {
         let selection = this.shared.getEditableSelection();
-        // Normalize selection
-        selection = this.shared.setSelection(selection);
 
         if (!selection.isCollapsed) {
-            return this.deleteSelection();
+            return this.deleteSelection(selection);
         }
+
+        // Normalize selection
+        selection = this.shared.setSelection(selection);
 
         const { startContainer, startOffset } = selection;
         const [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
@@ -127,7 +129,7 @@ export class DeletePlugin extends Plugin {
         const range = { startContainer, startOffset, endContainer, endOffset };
 
         for (const { callback } of this.resources["handle_delete_forward"]) {
-            if (callback({ range, deleteRange: this.deleteRange.bind(this) })) {
+            if (callback(range)) {
                 this.dispatch("ADD_STEP");
                 return;
             }
@@ -242,8 +244,8 @@ export class DeletePlugin extends Plugin {
         let startRemoveIndex = startOffset;
         const nodesToRemove = [];
         while (node !== commonAncestor) {
-            for (const child of [...node.childNodes].slice(startRemoveIndex)) {
-                nodesToRemove.push(child);
+            for (let i = startRemoveIndex; i < node.childNodes.length; i++) {
+                nodesToRemove.push(node.childNodes[i]);
             }
             startRemoveIndex = childNodeIndex(node) + 1;
             node = node.parentElement;
@@ -253,15 +255,16 @@ export class DeletePlugin extends Plugin {
         node = endElement;
         let endRemoveIndex = endOffset;
         while (node !== commonAncestor) {
-            for (const child of [...node.childNodes].slice(0, endRemoveIndex)) {
-                nodesToRemove.push(child);
+            for (let i = 0; i < endRemoveIndex; i++) {
+                nodesToRemove.push(node.childNodes[i]);
             }
             endRemoveIndex = childNodeIndex(node);
             node = node.parentElement;
         }
+
         // Remove nodes in between subtrees
-        for (const node of [...commonAncestor.childNodes].slice(startRemoveIndex, endRemoveIndex)) {
-            nodesToRemove.push(node);
+        for (let i = startRemoveIndex; i < endRemoveIndex; i++) {
+            nodesToRemove.push(commonAncestor.childNodes[i]);
         }
 
         // Remove nodes
@@ -496,7 +499,7 @@ export class DeletePlugin extends Plugin {
         // @todo @phoenix: IMO a selection coming from a triple click should not be normalized
         selection = this.shared.setSelection(selection);
 
-        let range = this.expandSelectionToIncludeNonEditables(selection);
+        let range = this.expandRangeToIncludeNonEditables(selection);
 
         // @todo @phoenix: move this responsability to the selection plugin
         // Correct triple click
@@ -531,9 +534,9 @@ export class DeletePlugin extends Plugin {
     }
 
     // Expand the range to fully include all contentEditable=False elements.
-    expandSelectionToIncludeNonEditables(selection) {
+    expandRangeToIncludeNonEditables(range) {
         let { startContainer, startOffset, endContainer, endOffset, commonAncestorContainer } =
-            selection;
+            range;
         const startUneditable = getFurthestUneditableParent(
             startContainer,
             commonAncestorContainer
@@ -564,7 +567,6 @@ export class DeletePlugin extends Plugin {
                 ];
             }
         }
-        // @todo: this assumes the common ancestor does not change. Double check this.
         return { startContainer, startOffset, endContainer, endOffset };
     }
 
@@ -637,13 +639,14 @@ export class DeletePlugin extends Plugin {
             // @todo @phoenix: write tests for chars with size > 1 (emoji, etc.)
             // Use the string iterator to handle surrogate pairs.
             let index = offset;
-            const chars = node.textContent.slice(0, index);
-            for (const char of [...chars].reverse()) {
+            const chars = [...node.textContent.slice(0, index)];
+            let char = chars.pop();
+            while (char) {
                 index -= char.length;
                 if (this.isVisibleChar(char, node, index)) {
-                    index += blockSwitch ? char.length : 0;
-                    return [node, index];
+                    return blockSwitch ? [node, index + char.length] : [node, index];
                 }
+                char = chars.pop();
             }
         }
 
