@@ -17,9 +17,12 @@ class TestEditor extends Component {
             <iframe t-ref="target"/>
         </t>
         <t t-else="">
+            <t t-if="props.styleContent">
+                <style t-esc="props.styleContent"></style>
+            </t>
             <div t-ref="target"/>
         </t>`;
-    static props = ["content", "config", "inIFrame"];
+    static props = ["content", "config", "inIFrame", "styleContent?"];
 
     setup() {
         this.ref = useRef("target");
@@ -30,7 +33,9 @@ class TestEditor extends Component {
         onMounted(() => {
             let el = this.ref.el;
             if (this.props.inIFrame) {
-                var html = `<div>${this.props.content || ""}</div>`;
+                var html = `<div>${this.props.content || ""}</div><style>${
+                    this.props.styleContent
+                }</style>`;
                 this.ref.el.contentWindow.document.body.innerHTML = html;
                 el = target();
                 hotkeyService.registerIframe(this.ref.el);
@@ -62,8 +67,9 @@ class TestEditor extends Component {
 export async function setupEditor(content, options = {}) {
     const config = options.config || {};
     const inIFrame = "inIFrame" in options ? options.inIFrame : false;
+    const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
-        props: { content, config, inIFrame },
+        props: { content, config, inIFrame, styleContent },
     });
 
     return {
