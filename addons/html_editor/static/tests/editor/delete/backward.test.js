@@ -1,8 +1,8 @@
 import { describe, test } from "@odoo/hoot";
-import { press } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
+import { press } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import { deleteBackward, insertText } from "../../test_helpers/user_actions";
 
 /**

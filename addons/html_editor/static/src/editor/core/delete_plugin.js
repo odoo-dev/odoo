@@ -36,7 +36,10 @@ export class DeletePlugin extends Plugin {
     static name = "delete";
     static shared = ["deleteRange"];
     static resources = (p) => ({
-        shortcuts: [{ hotkey: "backspace", command: "DELETE_BACKWARD" }],
+        shortcuts: [
+            { hotkey: "backspace", command: "DELETE_BACKWARD" },
+            { hotkey: "delete", command: "DELETE_FORWARD" },
+        ],
         handle_delete_backward: { callback: p.deleteBackwardContentEditableFalse.bind(p) },
     });
 
@@ -78,12 +81,31 @@ export class DeletePlugin extends Plugin {
     }
 
     deleteBackward() {
-        let selection = this.shared.getEditableSelection();
+        const selection = this.shared.getEditableSelection();
 
-        if (!selection.isCollapsed) {
-            return this.deleteSelection(selection);
+        if (selection.isCollapsed) {
+            this.deleteBackwardChar(selection);
+        } else {
+            this.deleteSelection(selection);
         }
 
+        this.dispatch("ADD_STEP");
+    }
+
+    deleteForward() {
+        const selection = this.shared.getEditableSelection();
+
+        if (selection.isCollapsed) {
+            this.deleteForwardChar(selection);
+        } else {
+            this.deleteSelection(selection);
+        }
+
+        this.dispatch("ADD_STEP");
+    }
+
+    // Big @todo @phoenix: delete backward word (ctrl + delete)
+    deleteBackwardChar(selection) {
         // Normalize selection
         selection = this.shared.setSelection(selection);
 
@@ -93,7 +115,6 @@ export class DeletePlugin extends Plugin {
 
         for (const { callback } of this.resources["handle_delete_backward"]) {
             if (callback(range)) {
-                this.dispatch("ADD_STEP");
                 return;
             }
         }
@@ -107,17 +128,9 @@ export class DeletePlugin extends Plugin {
         }
 
         this.cleanTrailingBRs(commonAncestor);
-
-        this.dispatch("ADD_STEP");
     }
 
-    deleteForward() {
-        let selection = this.shared.getEditableSelection();
-
-        if (!selection.isCollapsed) {
-            return this.deleteSelection(selection);
-        }
-
+    deleteForwardChar(selection) {
         // Normalize selection
         selection = this.shared.setSelection(selection);
 
@@ -130,7 +143,6 @@ export class DeletePlugin extends Plugin {
 
         for (const { callback } of this.resources["handle_delete_forward"]) {
             if (callback(range)) {
-                this.dispatch("ADD_STEP");
                 return;
             }
         }
@@ -138,8 +150,6 @@ export class DeletePlugin extends Plugin {
         const { cursorPos } = this.deleteRange(range);
 
         this.shared.setSelection(cursorPos);
-
-        this.dispatch("ADD_STEP");
     }
 
     deleteRange(range) {
