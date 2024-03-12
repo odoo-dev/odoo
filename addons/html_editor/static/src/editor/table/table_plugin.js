@@ -2,11 +2,11 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
-import { isProtected, isRow } from "../utils/dom_info";
+import { getDeepestPosition, isProtected } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
 import { ancestors, closestElement, lastLeaf } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { DIRECTIONS, rightPos } from "../utils/position";
+import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
@@ -14,12 +14,11 @@ import { removeClass } from "../utils/dom";
 
 export class TablePlugin extends Plugin {
     static name = "table";
-    static dependencies = ["dom", "history", "overlay", "selection"];
+    static dependencies = ["dom", "history", "overlay", "selection", "delete"];
     static resources = (p) => ({
-        delete_element_backward_before: { callback: p.deleteBackwardBefore.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
-        delete_range_before: { callback: p.deleteRangeBefore.bind(p) },
+        handle_delete_range: { callback: p.handleDeleteRange.bind(p) },
         onSelectionChange: p.updateSelectionTable.bind(p),
         powerboxCommands: [
             {
@@ -284,15 +283,112 @@ export class TablePlugin extends Plugin {
         table.remove();
         this.shared.setCursorStart(p);
     }
-    deleteBackwardBefore({ targetNode, targetOffset }) {
-        // If the cursor is at the beginning of a row, prevent deletion.
-        if (targetNode.nodeType === Node.ELEMENT_NODE && isRow(targetNode) && !targetOffset) {
-            return true;
+
+    // @todo @phoenix: handle deleteBackward on table cells
+    // deleteBackwardBefore({ targetNode, targetOffset }) {
+    //     // If the cursor is at the beginning of a row, prevent deletion.
+    //     if (targetNode.nodeType === Node.ELEMENT_NODE && isRow(targetNode) && !targetOffset) {
+    //         return true;
+    //     }
+    // }
+
+    /**
+     * Removes fully selected rows or columns, clears the content of selected
+     * cells otherwise.
+     *
+     * @param {NodeListOf<HTMLTableCellElement>} selectedTds - Non-empty
+     * NodeList of selected table cells.
+     */
+    deleteTableCells(selectedTds) {
+        const rows = [...closestElement(selectedTds[0], "tr").parentElement.children].filter(
+            (child) => child.nodeName === "TR"
+        );
+        const firstRowCells = [...rows[0].children].filter(
+            (child) => child.nodeName === "TD" || child.nodeName === "TH"
+        );
+        const firstCellRowIndex = getRowIndex(selectedTds[0]);
+        const firstCellColumnIndex = getColumnIndex(selectedTds[0]);
+        const lastCellRowIndex = getRowIndex(selectedTds[selectedTds.length - 1]);
+        const lastCellColumnIndex = getColumnIndex(selectedTds[selectedTds.length - 1]);
+
+        const areFullColumnsSelected =
+            firstCellRowIndex === 0 && lastCellRowIndex === rows.length - 1;
+        const areFullRowsSelected =
+            firstCellColumnIndex === 0 && lastCellColumnIndex === firstRowCells.length - 1;
+
+        if (areFullColumnsSelected) {
+            for (let index = firstCellColumnIndex; index <= lastCellColumnIndex; index++) {
+                this.removeColumn({ cell: firstRowCells[index] });
+            }
+            return;
         }
+
+        if (areFullRowsSelected) {
+            for (let index = firstCellRowIndex; index <= lastCellRowIndex; index++) {
+                this.removeRow({ row: rows[index] });
+            }
+            return;
+        }
+
+        for (const td of selectedTds) {
+            // @todo @phoenix this replaces paragraphs by inline content. Is this intended?
+            td.replaceChildren(this.document.createElement("br"));
+        }
+        this.shared.setCursorStart(selectedTds[0]);
     }
 
-    // @todo @phoenix to implement
-    deleteRangeBefore() {}
+    /**
+     * @param {Object} range - Range-like object.
+     * @param {Array} fullySelectedTables - Non-empty array of table elements.
+     */
+    deleteRangeWithFullySelectedTables(range, fullySelectedTables) {
+        let { startContainer, startOffset, endContainer, endOffset } = range;
+
+        // Expand range to fully include tables.
+        const firstTable = fullySelectedTables[0];
+        if (firstTable.contains(startContainer)) {
+            [startContainer, startOffset] = leftPos(firstTable);
+        }
+        const lastTable = fullySelectedTables.at(-1);
+        if (lastTable.contains(endContainer)) {
+            [endContainer, endOffset] = rightPos(lastTable);
+        }
+        range = { startContainer, startOffset, endContainer, endOffset };
+
+        let { cursorPos } = this.shared.deleteRange(range);
+
+        // Normalize deep.
+        // @todo @phoenix: Use something from the selection plugin (normalize deep?)
+        let { anchorNode, anchorOffset } = cursorPos;
+        [anchorNode, anchorOffset] = getDeepestPosition(anchorNode, anchorOffset);
+        cursorPos = { anchorNode, anchorOffset };
+
+        this.shared.setSelection(cursorPos);
+    }
+
+    handleDeleteRange(range) {
+        // @todo @phoenix: this does not depend on the range. This should be
+        // optimized by keeping in memory the state of selected cells/tables.
+        const fullySelectedTables = [...this.editable.querySelectorAll(".o_selected_table")].filter(
+            (table) =>
+                [...table.querySelectorAll("td")].every((td) =>
+                    td.classList.contains("o_selected_td")
+                )
+        );
+        if (fullySelectedTables.length) {
+            this.deleteRangeWithFullySelectedTables(range, fullySelectedTables);
+            return true;
+        }
+
+        const selectedTds = this.editable.querySelectorAll(".o_selected_td");
+        if (selectedTds.length) {
+            this.deleteTableCells(selectedTds);
+            // this._toggleTableUi();
+            return true;
+        }
+
+        return false;
+    }
 
     // @todo @phoenix This could be usefull for handling arrow up and down in tables (spec change?).
     /**

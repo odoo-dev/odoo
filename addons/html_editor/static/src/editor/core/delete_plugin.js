@@ -75,6 +75,12 @@ export class DeletePlugin extends Plugin {
 
         const range = this.adjustRangeForDeletion(selection);
 
+        for (const { callback } of this.resources["handle_delete_range"]) {
+            if (callback(range)) {
+                return;
+            }
+        }
+
         const { cursorPos } = this.deleteRange(range);
 
         this.shared.setSelection(cursorPos);
@@ -473,13 +479,23 @@ export class DeletePlugin extends Plugin {
     // Fill empty blocks
     // Remove empty inline elements, unless cursor is inside it
     handleEmptyElements(commonAncestor, cursorPos) {
+        const handleShrunkBlock = (block) => {
+            if (block === this.editable) {
+                const p = this.document.createElement("p");
+                p.appendChild(this.document.createElement("br"));
+                this.editable.appendChild(p);
+            } else {
+                block.appendChild(this.document.createElement("br"));
+            }
+        };
+
         for (const node of [commonAncestor, ...descendants(commonAncestor)].toReversed()) {
             if (node.nodeType !== Node.ELEMENT_NODE) {
                 continue;
             }
             if (isBlock(node)) {
                 if (isShrunkBlock(node)) {
-                    node.appendChild(this.document.createElement("br"));
+                    handleShrunkBlock(node);
                 }
             } else {
                 if (isVisible(node) || isIconElement(node)) {
@@ -497,9 +513,11 @@ export class DeletePlugin extends Plugin {
                 }
             }
         }
-        const commomAncestorBlock = closestBlock(commonAncestor);
-        if (isShrunkBlock(commomAncestorBlock)) {
-            commomAncestorBlock.appendChild(this.document.createElement("br"));
+        if (!isBlock(commonAncestor)) {
+            const closestBlockElement = closestBlock(commonAncestor);
+            if (isShrunkBlock(closestBlockElement)) {
+                handleShrunkBlock(closestBlockElement);
+            }
         }
     }
 
