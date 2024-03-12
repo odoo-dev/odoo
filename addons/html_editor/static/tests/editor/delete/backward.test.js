@@ -1486,70 +1486,61 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo(
-        "should only remove the text content of cells in a partly selected table",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<table><tbody>
+    test("should only remove the text content of cells in a partly selected table", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<table><tbody>
                         <tr><td>cd</td><td class="o_selected_td">e[f</td><td>gh</td></tr>
                         <tr><td>ij</td><td class="o_selected_td">k]l</td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
-                ),
-                stepFunction: deleteBackward,
-                contentAfter: unformat(
-                    `<table><tbody>
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<table><tbody>
                         <tr><td>cd</td><td>[]<br></td><td>gh</td></tr>
                         <tr><td>ij</td><td><br></td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
-    test.todo(
-        "should remove some text and a table (even if the table is partly selected)",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<p>a[b</p>
+    test("should remove some text and a table (even if the table is partly selected)", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<p>a[b</p>
                     <table><tbody>
                         <tr><td>cd</td><td>ef</td></tr>
                         <tr><td>g]h</td><td>ij</td></tr>
                     </tbody></table>
                     <p>kl</p>`
-                ),
-                stepFunction: deleteBackward,
-                contentAfter: unformat(
-                    `<p>a[]</p>
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<p>a[]</p>
                     <p>kl</p>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
-    test.todo(
-        "should remove a table and some text (even if the table is partly selected)",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<p>ab</p>
+    test("should remove a table and some text (even if the table is partly selected)", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<p>ab</p>
                     <table><tbody>
                         <tr><td>cd</td><td>ef</td></tr>
                         <tr><td>gh</td><td>i[j</td></tr>
                     </tbody></table>
                     <p>k]l</p>`
-                ),
-                stepFunction: deleteBackward,
-                contentAfter: unformat(
-                    `<p>ab</p>
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<p>ab</p>
                     <p>[]l</p>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
     test("should remove some text, a table and some more text", async () => {
         await testEditor({
@@ -1566,7 +1557,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should remove a selection of several tables", async () => {
+    test("should remove a selection of several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<table><tbody>
