@@ -6,6 +6,9 @@ from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import format_list
 
+from odoo import _, api, Command, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import format_list
 
 class Resource(models.Model):
     _name = "t9n.resource"

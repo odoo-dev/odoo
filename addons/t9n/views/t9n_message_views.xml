@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="t9n.message_view_tree" model="ir.ui.view">
-        <field name="name">t9n.message.tree</field>
+    <record id="t9n.message_view_list" model="ir.ui.view">
+        <field name="name">t9n.message.list</field>
         <field name="model">t9n.message</field>
         <field name="arch" type="xml">
             <tree create="false">

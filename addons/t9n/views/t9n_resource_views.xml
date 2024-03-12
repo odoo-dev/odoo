@@ -20,8 +20,8 @@
         </field>
     </record>
 
-    <record id="t9n.resource_view_tree" model="ir.ui.view">
-        <field name="name">t9n.resource.tree</field>
+    <record id="t9n.resource_view_list" model="ir.ui.view">
+        <field name="name">t9n.resource.list</field>
         <field name="model">t9n.resource</field>
         <field name="arch" type="xml">
             <tree>
