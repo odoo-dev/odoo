@@ -22,6 +22,7 @@ export async function insertText(editor, text) {
     const node = range.startContainer;
     let offset = range.startOffset;
     const insertChar = (char) => {
+        const range = editor.document.getSelection().getRangeAt(0);
         node.textContent =
             node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
         offset++;
