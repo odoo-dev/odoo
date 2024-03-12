@@ -8,9 +8,6 @@
  *
  * @typedef { Object } SharedMethods
  *
- * @property { HistoryPlugin['getCurrentMutations'] } getCurrentMutations
- * @property { HistoryPlugin['revertCurrentMutationsUntil'] } revertCurrentMutationsUntil
- * @property { HistoryPlugin['handleObserverRecords'] } handleObserverRecords
  * @property { HistoryPlugin['makeSavePoint'] } makeSavePoint
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
  * @property { SelectionPlugin['setSelection'] } setSelection

@@ -5,12 +5,7 @@ import { getCommonAncestor } from "../utils/dom_traversal";
 export class HistoryPlugin extends Plugin {
     static name = "history";
     static dependencies = ["dom", "selection"];
-    static shared = [
-        "getCurrentMutations",
-        "revertCurrentMutationsUntil",
-        "handleObserverRecords",
-        "makeSavePoint",
-    ];
+    static shared = ["makeSavePoint"];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },
@@ -320,9 +315,6 @@ export class HistoryPlugin extends Plugin {
             }
         }
     }
-    getCurrentMutations() {
-        return [...this.currentStep.mutations];
-    }
 
     setNodeId(node) {
         let id = this.nodeToIdMap.get(node);
@@ -574,10 +566,6 @@ export class HistoryPlugin extends Plugin {
                 }
             }
         }
-    }
-    revertCurrentMutationsUntil(index) {
-        const mutationToRevert = this.currentStep.mutations.splice(index);
-        this.revertMutations(mutationToRevert);
     }
 
     serializeSelection(selection, nodeToIdMap) {
