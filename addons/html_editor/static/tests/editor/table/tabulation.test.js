@@ -5,7 +5,7 @@ import { unformat } from "../../test_helpers/format";
 
 describe("move selection with tab/shift+tab", () => {
     describe("tab", () => {
-        test("should move cursor to next cell and select its content", async () => {
+        test("should move cursor to the end of next cell", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <table>
@@ -24,7 +24,7 @@ describe("move selection with tab/shift+tab", () => {
                         <tbody>
                             <tr>
                                 <td>ab</td>
-                                <td>[cd]</td>
+                                <td>cd[]</td>
                                 <td>ef</td>
                             </tr>
                         </tbody>
@@ -32,12 +32,10 @@ describe("move selection with tab/shift+tab", () => {
                 `),
             });
         });
-        test.tags("iframe")(
-            "should move cursor to next cell and select its content in an iframe",
-            async () => {
-                await testEditor({
-                    inIFrame: true,
-                    contentBefore: unformat(`
+        test.tags("iframe")("should move cursor to the end of next cell in an iframe", async () => {
+            await testEditor({
+                inIFrame: true,
+                contentBefore: unformat(`
                     <table>
                         <tbody>
                             <tr>
@@ -48,22 +46,21 @@ describe("move selection with tab/shift+tab", () => {
                         </tbody>
                     </table>
                 `),
-                    stepFunction: async () => press("Tab"),
-                    contentAfter: unformat(`
+                stepFunction: async () => press("Tab"),
+                contentAfter: unformat(`
                     <table>
                         <tbody>
                             <tr>
                                 <td>ab</td>
-                                <td>[cd]</td>
+                                <td>cd[]</td>
                                 <td>ef</td>
                             </tr>
                         </tbody>
                     </table>
                 `),
-                });
-            }
-        );
-        test("should move cursor to next cell in the row below and select its content", async () => {
+            });
+        });
+        test("should move cursor to the end of next cell in the row below", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <table>
@@ -88,7 +85,7 @@ describe("move selection with tab/shift+tab", () => {
                                 <td>cd</td>
                             </tr>
                             <tr>
-                                <td>[ef]</td>
+                                <td>ef[]</td>
                                 <td>gh</td>
                             </tr>
                         </tbody>
@@ -98,7 +95,7 @@ describe("move selection with tab/shift+tab", () => {
         });
     });
     describe("shift+tab", () => {
-        test("should move cursor to previous cell and select its content", async () => {
+        test("should move cursor to the end of previous cell", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <table>
@@ -116,7 +113,7 @@ describe("move selection with tab/shift+tab", () => {
                     <table>
                         <tbody>
                             <tr>
-                                <td>[ab]</td>
+                                <td>ab[]</td>
                                 <td>cd</td>
                                 <td>ef</td>
                             </tr>
@@ -125,7 +122,7 @@ describe("move selection with tab/shift+tab", () => {
                 `),
             });
         });
-        test("should move cursor to previous cell in the row above and select its content", async () => {
+        test("should move cursor to the end of previous cell in the row above", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <table>
@@ -147,7 +144,7 @@ describe("move selection with tab/shift+tab", () => {
                         <tbody>
                             <tr>
                                 <td>ab</td>
-                                <td>[cd]</td>
+                                <td>cd[]</td>
                             </tr>
                             <tr>
                                 <td>ef</td>
@@ -158,7 +155,7 @@ describe("move selection with tab/shift+tab", () => {
                 `),
             });
         });
-        test("should not cursor if there is not previous cell", async () => {
+        test("should not cursor if there is no previous cell", async () => {
             await testEditor({
                 contentBefore: unformat(`
                     <table>
