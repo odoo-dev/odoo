@@ -11,9 +11,10 @@ import {
     isSelfClosingElement,
     isShrunkBlock,
     isUnbreakable,
+    paragraphRelatedElements,
 } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
-import { closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
+import { ancestors, closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
 import { getDeepRange, getTraversedNodes } from "../utils/selection";
@@ -34,6 +35,12 @@ export class DomPlugin extends Plugin {
         },
     });
 
+    setup() {
+        for (const separator of this.editable.querySelectorAll("hr")) {
+            separator.setAttribute("contenteditable", "false");
+        }
+    }
+
     handleCommand(command, payload) {
         switch (command) {
             case "SET_TAG":
@@ -50,6 +57,9 @@ export class DomPlugin extends Plugin {
                     }
                     if (node.style && !node.style.length) {
                         node.removeAttribute("style");
+                    }
+                    if (node.tagName === "HR") {
+                        node.removeAttribute("contenteditable");
                     }
                 }
                 break;
@@ -323,8 +333,15 @@ export class DomPlugin extends Plugin {
     insertSeparator() {
         const selection = this.shared.getEditableSelection();
         const sep = this.document.createElement("hr");
-        const target = selection.commonAncestorContainer;
-        target.parentElement.before(sep);
+        sep.setAttribute("contenteditable", false);
+        const element = closestElement(
+            selection.startContainer,
+            (el) => paragraphRelatedElements.includes(el.tagName)
+        );
+
+        if (element && element !== this.editable) {
+            element.before(sep);
+        }
     }
 
     mergeAdjacentNodes(node) {
