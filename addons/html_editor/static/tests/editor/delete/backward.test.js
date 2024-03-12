@@ -1,7 +1,8 @@
 import { describe, test } from "@odoo/hoot";
+import { press } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
-import { dispatch } from "@odoo/hoot-dom";
 import { deleteBackward, insertText } from "../../test_helpers/user_actions";
 
 /**
@@ -707,16 +708,15 @@ describe("Selection collapsed", () => {
     });
 
     describe("Nested Elements", () => {
-        test.todo("should delete a h1 inside a td immediately after insertion", async () => {
+        test("should delete a h1 inside a td immediately after insertion", async () => {
             await testEditor({
                 contentBefore:
                     "<table><tbody><tr><td>[]<br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>",
                 stepFunction: async (editor) => {
                     await insertText(editor, "/");
                     await insertText(editor, "Heading");
-                    dispatch(editor.editable, "keyup");
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
-                    // TODO @phoenix we may be need a tick or microtick here to replace the previous nextTick
+                    await animationFrame();
+                    press("Enter");
                     await deleteBackward(editor);
                 },
                 contentAfter:
@@ -724,24 +724,21 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo(
-            "should delete a h1 inside a nested list immediately after insertion",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<ul><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li></ul>',
-                    stepFunction: async (editor) => {
-                        await insertText(editor, "/");
-                        await insertText(editor, "Heading");
-                        dispatch(editor.editable, "keyup");
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
-                    },
-                    contentAfter: "<ul><li>abc[]</li></ul>",
-                });
-            }
-        );
+        test("should delete a h1 inside a nested list immediately after insertion", async () => {
+            await testEditor({
+                contentBefore:
+                    '<ul><li>abc</li><li class="oe-nested"><ul><li>[]<br></li></ul></li></ul>',
+                stepFunction: async (editor) => {
+                    await insertText(editor, "/");
+                    await insertText(editor, "Heading");
+                    await animationFrame();
+                    press("Enter");
+                    await deleteBackward(editor);
+                    await deleteBackward(editor);
+                },
+                contentAfter: "<ul><li>abc[]</li></ul>",
+            });
+        });
     });
 
     describe("Merging different types of elements", () => {
