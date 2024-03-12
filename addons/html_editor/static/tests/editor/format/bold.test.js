@@ -5,6 +5,8 @@ import { unformat } from "../../test_helpers/format";
 import { BOLD_TAGS, notStrong, span, strong } from "../../test_helpers/tags";
 import { bold } from "../../test_helpers/user_actions";
 
+const styleH1Bold = `h1 { font-weight: bold; }`;
+
 test("should make a few characters bold", async () => {
     await testEditor({
         contentBefore: "<p>ab[cde]fg</p>",
@@ -58,24 +60,23 @@ test("should make qweb tag bold even with partial selection", async () => {
     });
 });
 
-test.todo("should make a whole heading bold after a triple click", async () => {
+test("should make a whole heading bold after a triple click", async () => {
     await testEditor({
+        styleContent: styleH1Bold,
         contentBefore: `<h1>${notStrong(`[ab`)}</h1><p>]cd</p>`,
         stepFunction: bold,
         contentAfter: `<h1>[ab]</h1><p>cd</p>`,
     });
 });
 
-test.todo(
-    "should make a whole heading not bold after a triple click (heading is considered bold)",
-    async () => {
-        await testEditor({
-            contentBefore: "<h1>[ab</h1><p>]cd</p>",
-            stepFunction: bold,
-            contentAfter: `<h1>${notStrong(`[ab]`)}</h1><p>cd</p>`,
-        });
-    }
-);
+test("should make a whole heading not bold after a triple click (heading is considered bold)", async () => {
+    await testEditor({
+        styleContent: styleH1Bold,
+        contentBefore: "<h1>[ab</h1><p>]cd</p>",
+        stepFunction: bold,
+        contentAfter: `<h1>${notStrong(`[ab]`)}</h1><p>cd</p>`,
+    });
+});
 
 test("should make a selection starting with bold text fully bold", async () => {
     await testEditor({
@@ -93,8 +94,9 @@ test("should make a selection with bold text in the middle fully bold", async ()
     });
 });
 
-test.todo("should make a selection ending with bold text fully bold", async () => {
+test("should make a selection ending with bold text fully bold", async () => {
     await testEditor({
+        styleContent: styleH1Bold,
         contentBefore: `<h1>${notStrong(`[ab`)}</h1><p>${strong(`c]d`)}</p>`,
         stepFunction: bold,
         contentAfter: `<h1>[ab</h1><p>${strong(`c]d`)}</p>`,
@@ -175,47 +177,47 @@ test("should insert a span zws when toggling a formatting command twice", () => 
     });
 });
 
+const styleContentBold = `.boldClass { font-weight: bold; }`;
 describe("inside container or inline with class already bold", () => {
-    test.todo("should force the font-weight to normal with an inline with class", async () => {
+    test("should force the font-weight to normal with an inline with class", async () => {
         await testEditor({
-            styleContent: `.boldClass { font-weight: bold; }`,
+            styleContent: styleContentBold,
             contentBefore: `<div>a<span class="boldClass">[b]</span>c</div>`,
             stepFunction: bold,
             contentAfter: `<div>a<span class="boldClass"><span style="font-weight: normal;">[b]</span></span>c</div>`,
         });
     });
 
-    test.todo("should force the font-weight to normal", async () => {
+    test("should force the font-weight to normal", async () => {
         await testEditor({
-            contentBefore: `<h1>a[b]c</h1>`,
+            styleContent: styleContentBold,
+            contentBefore: `<div class="boldClass">a[b]c</div>`,
             stepFunction: bold,
-            contentAfter: `<h1>a<span style="font-weight: normal;">[b]</span>c</h1>`,
+            contentAfter: `<div class="boldClass">a<span style="font-weight: normal;">[b]</span>c</div>`,
         });
     });
 
-    test.todo("should force the font-weight to normal while removing redundant tag", async () => {
+    test("should force the font-weight to normal while removing redundant tag", async () => {
         for (const tag of BOLD_TAGS) {
             await testEditor({
-                contentBefore: `<h1>a${tag("[b]")}c</h1>`,
+                styleContent: styleContentBold,
+                contentBefore: `<div class="boldClass">a${tag("[b]")}c</div>`,
                 stepFunction: bold,
-                contentAfter: `<h1>a<span style="font-weight: normal;">[b]</span>c</h1>`,
+                contentAfter: `<div class="boldClass">a<span style="font-weight: normal;">[b]</span>c</div>`,
             });
         }
     });
 });
 
 describe("inside container font-weight: 500 and strong being strong-weight: 500", () => {
-    test.todo(
-        "should remove the redundant strong style and add span with a bolder font-weight",
-        async () => {
-            await testEditor({
-                styleContent: `h1, strong {font-weight: 500;}`,
-                contentBefore: `<h1>a${strong(`[b]`)}c</h1>`,
-                stepFunction: bold,
-                contentAfter: `<h1>a<span style="font-weight: bolder;">[b]</span>c</h1>`,
-            });
-        }
-    );
+    test("should remove the redundant strong style and add span with a bolder font-weight", async () => {
+        await testEditor({
+            styleContent: `h1, strong {font-weight: 500;}`,
+            contentBefore: `<h1>a${strong(`[b]`)}c</h1>`,
+            stepFunction: bold,
+            contentAfter: `<h1>a<span style="font-weight: bolder;">[b]</span>c</h1>`,
+        });
+    });
 });
 
 describe("isSelectionFormat", () => {
