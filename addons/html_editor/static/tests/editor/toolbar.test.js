@@ -1,8 +1,10 @@
 import { expect, test } from "@odoo/hoot";
-import { click, queryAllTexts, waitFor, waitUntil } from "@odoo/hoot-dom";
+import { click, press, queryAllTexts, waitFor, waitForNone, waitUntil } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
 import { getContent, setContent } from "../test_helpers/selection";
+import { unformat } from "../test_helpers/format";
+import { animationFrame } from "@odoo/hoot-mock";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
@@ -151,4 +153,63 @@ test("toolbar works: can select font size", async () => {
     expect(queryAllTexts(".o_font_selector_menu .dropdown-item")).toEqual(items);
     await contains(".o_font_selector_menu .dropdown-item:contains('28')").click();
     expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
+});
+
+test("toolbar should not open on keypress tab inside table", async () => {
+    const contentBefore = unformat(`
+        <table>
+            <tbody>
+                <tr>
+                    <td><p>[]ab</p></td>
+                    <td><p>cd</p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+    const contentAfter = unformat(`
+        <table>
+            <tbody>
+                <tr>
+                    <td><p>ab</p></td>
+                    <td><p>cd[]</p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+
+    const { el } = await setupEditor(contentBefore);
+    press("Tab");
+    expect(getContent(el)).toBe(contentAfter);
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test("toolbar should close on keypress tab inside table", async () => {
+    const contentBefore = unformat(`
+        <table>
+            <tbody>
+                <tr>
+                    <td><p>[ab]</p></td>
+                    <td><p>cd</p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+    const contentAfter = unformat(`
+        <table>
+            <tbody>
+                <tr>
+                    <td><p>ab</p></td>
+                    <td><p>cd[]</p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+
+    const { el } = await setupEditor(contentBefore);
+    await waitFor(".o-we-toolbar");
+    press("Tab");
+    expect(getContent(el)).toBe(contentAfter);
+    await waitForNone(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(0);
 });

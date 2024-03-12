@@ -4,9 +4,9 @@ import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { isProtected, isRow } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
-import { ancestors, closestElement } from "../utils/dom_traversal";
+import { ancestors, closestElement, lastLeaf } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
-import { DIRECTIONS, nodeSize, rightPos } from "../utils/position";
+import { DIRECTIONS, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
@@ -313,12 +313,7 @@ export class TablePlugin extends Plugin {
         if (!cursorDestination) {
             return false;
         }
-        this.shared.setSelection({
-            anchorNode: cursorDestination,
-            anchorOffset: 0,
-            focusNode: cursorDestination,
-            focusOffset: nodeSize(cursorDestination),
-        });
+        this.shared.setCursorEnd(lastLeaf(cursorDestination));
         return true;
     }
 
