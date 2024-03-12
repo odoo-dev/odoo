@@ -1637,6 +1637,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    // test fails because ZWS plugin removes an unremovable node
     test.todo("should empty an inline unremovable but remain in it", async () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
@@ -1658,6 +1659,8 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    // contentAfterEdit is correct. And empty inlines get removed on cleanup.
+    // Shouldn't they?
     test.todo("should not delete styling nodes if not selected", async () => {
         // deleteBackward selection
         await testEditor({
