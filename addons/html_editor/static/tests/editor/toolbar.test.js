@@ -1,10 +1,10 @@
 import { expect, test } from "@odoo/hoot";
-import { click, press, queryAllTexts, waitFor, waitForNone, waitUntil } from "@odoo/hoot-dom";
+import { click, press, queryAll, queryAllTexts, waitFor, waitForNone, waitUntil } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
-import { getContent, setContent } from "../test_helpers/selection";
 import { unformat } from "../test_helpers/format";
-import { animationFrame } from "@odoo/hoot-mock";
+import { getContent, setContent } from "../test_helpers/selection";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
@@ -212,4 +212,10 @@ test("toolbar should close on keypress tab inside table", async () => {
     expect(getContent(el)).toBe(contentAfter);
     await waitForNone(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test("toolbar buttons shouldn't be active without text node in the selection", async () => {
+    await setupEditor("<div>[<p><br></p>]</div>");
+    await waitFor(".o-we-toolbar");
+    expect(queryAll(".o-we-toolbar .btn.active").length).toBe(0);
 });
