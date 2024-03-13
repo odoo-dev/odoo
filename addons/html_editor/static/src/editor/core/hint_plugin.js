@@ -17,7 +17,7 @@ export class HintPlugin extends Plugin {
     static dependencies = ["history", "selection"];
     static resources = (p) => ({
         history_rendering_classes: ["o-we-hint"],
-        filter_mutation_record: filterMutationRecords,
+        filter_mutation_records: filterMutationRecords,
         onSelectionChange: p.updateTempHint.bind(p),
     });
 
