@@ -106,8 +106,7 @@ describe("backward", () => {
                         </div>`),
                 });
             });
-            // what's wrong with "<div><div>[]b</div></div>" ?
-            test.todo("should not merge unbreakable before an empty p (backward)", async () => {
+            test("should not merge unbreakable before an empty p (backward)", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                         <div>
@@ -408,7 +407,7 @@ describe("forward", () => {
                         </div>`),
                 });
             });
-            test.todo("should not merge unbreakable after an empty p (forward)", async () => {
+            test("should not merge unbreakable after an empty p (forward)", async () => {
                 await testEditor({
                     contentBefore: unformat(`
                         <div>
