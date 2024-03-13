@@ -1,22 +1,40 @@
 import { Component, onMounted, onWillDestroy, useEnv, useRef, useState } from "@odoo/owl";
 import { Editor } from "./editor";
 import { Toolbar } from "./toolbar/toolbar";
+import { registry } from "@web/core/registry";
 
+/**
+ * @param {HTMLElement} el
+ * @param {any} env
+ * @param {import("./editor").EditorConfig} [config]
+ */
 export function wysiwyg(el, env, config = {}) {
-    const editor = new Editor(config, env.services);
+    const editor = new Editor(
+        {
+            Plugins: registry.category("phoenix_plugins").getAll(),
+            ...config,
+        },
+        env.services
+    );
     editor.attachTo(el);
     return editor;
 }
 
 /**
  * @param {string | Function} target
- * @param {Object} config
+ * @param {import("./editor").EditorConfig} config
  * @returns Editor
  */
 export function useWysiwyg(target, config = {}) {
     const env = useEnv();
     const ref = typeof target === "string" ? useRef(target) : null;
-    const editor = new Editor(config, env.services);
+    const editor = new Editor(
+        {
+            Plugins: registry.category("phoenix_plugins").getAll(),
+            ...config,
+        },
+        env.services
+    );
     onMounted(() => {
         let el = ref ? ref.el : target();
         if (el.tagName === "IFRAME") {

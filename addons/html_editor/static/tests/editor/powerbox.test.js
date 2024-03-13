@@ -6,6 +6,7 @@ import { press } from "@odoo/hoot-dom";
 import { getContent } from "../test_helpers/selection";
 import { insertText } from "../test_helpers/user_actions";
 import { Plugin } from "../../src/editor/plugin";
+import { registry } from "@web/core/registry";
 
 function commandNames() {
     return [...document.querySelectorAll(".o-we-command-name")].map((c) => c.innerText);
@@ -186,7 +187,7 @@ class NoOpPlugin extends Plugin {
 
 test("should restore state before /command insertion when command is executed", async () => {
     const { el, editor } = await setupEditor("<p>abc[]</p>", {
-        config: { Plugins: [NoOpPlugin] },
+        config: { Plugins: [...registry.category("phoenix_plugins").getAll(), NoOpPlugin] },
     });
     insertText(editor, "/no-op");
     expect(getContent(el)).toBe("<p>abc/no-op[]</p>");
@@ -199,7 +200,7 @@ test("should restore state before /command insertion when command is executed", 
 
 test("should restore state before /command insertion when command is executed (2)", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>", {
-        config: { Plugins: [NoOpPlugin] },
+        config: { Plugins: [...registry.category("phoenix_plugins").getAll(), NoOpPlugin] },
     });
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
