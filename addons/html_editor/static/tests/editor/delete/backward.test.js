@@ -1486,7 +1486,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should delete nothing when in an empty paragraph in a table cell", async () => {
+    test("should delete nothing when in an empty paragraph in a table cell", async () => {
         await testEditor({
             contentBefore:
                 "<table><tbody><tr><td>abc</td><td><p>[]<br></p></td></tr></tbody></table>",

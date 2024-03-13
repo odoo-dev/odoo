@@ -7,10 +7,26 @@ import { closestElement } from "../utils/dom_traversal";
 
 const REGEX_BOOTSTRAP_COLUMN = /(?:^| )col(-[a-zA-Z]+)?(-\d+)?(?:$| )/;
 
+function isUnremovableColumn(element, root) {
+    const isColumnInnerStructure =
+        element.tagName === "DIV" &&
+        [...element.classList].some((cls) => /^row$|^col$|^col-/.test(cls));
+
+    if (!isColumnInnerStructure) {
+        return false;
+    }
+    if (!root) {
+        return true;
+    }
+    const closestColumnContainer = closestElement(element, "div.o_text_columns");
+    return !root.contains(closestColumnContainer);
+}
+
 export class ColumnPlugin extends Plugin {
     static name = "column";
     static dependencies = ["selection"];
     static resources = () => ({
+        unremovables: isUnremovableColumn,
         powerboxCommands: [
             {
                 name: _t("2 columns"),
