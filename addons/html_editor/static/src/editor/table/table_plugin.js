@@ -9,6 +9,18 @@ import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 
+const tableInnerComponents = new Set(["THEAD", "TBODY", "TFOOT", "TR", "TH", "TD"]);
+function isUnremovableTableComponent(element, root) {
+    if (!tableInnerComponents.has(element.tagName)) {
+        return false;
+    }
+    if (!root) {
+        return true;
+    }
+    const closestTable = closestElement(element, "table");
+    return !root.contains(closestTable);
+}
+
 /**
  * This plugin only contains the table manipulation and selection features. All UI overlay
  * code is located in the table_ui plugin
@@ -20,6 +32,7 @@ export class TablePlugin extends Plugin {
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
         handle_delete_range: { callback: p.handleDeleteRange.bind(p) },
+        unremovables: isUnremovableTableComponent,
         onSelectionChange: p.updateSelectionTable.bind(p),
     });
 

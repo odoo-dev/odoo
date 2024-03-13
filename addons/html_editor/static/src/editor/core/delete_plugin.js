@@ -1,7 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { fillEmpty } from "../utils/dom";
 import {
     isEmpty,
     isEmptyBlock,
@@ -11,7 +10,6 @@ import {
     isSelfClosingElement,
     isShrunkBlock,
     isUnbreakable,
-    isUnremovable,
     isVisible,
     isVisibleTextNode,
     isWhitespace,
@@ -40,7 +38,23 @@ export class DeletePlugin extends Plugin {
             { hotkey: "backspace", command: "DELETE_BACKWARD" },
             { hotkey: "delete", command: "DELETE_FORWARD" },
         ],
-        handle_delete_backward: { callback: p.deleteBackwardContentEditableFalse.bind(p) },
+        handle_delete_backward: [
+            { callback: p.deleteBackwardContentEditableFalse.bind(p) },
+            { callback: p.deleteBackwardUnmergeable.bind(p) },
+        ],
+        handle_delete_forward: { callback: p.deleteForwardUnmergeable.bind(p) },
+        // @todo @phoenix: move these predicates to different plugins
+        unremovables: [
+            // The root editable (@todo @phoenix: I don't think this is necessary)
+            (element) => element.classList.contains("odoo-editor-editable"),
+            // Website stuff?
+            (element) => element.classList.contains("o_editable"),
+            (element) => element.classList.contains("oe_unremovable"),
+            // QWeb directives
+            (element) => element.getAttribute("t-set") || element.getAttribute("t-call"),
+            // Monetary field
+            (element) => element.matches("[data-oe-type='monetary'] > span"),
+        ],
     });
 
     setup() {
@@ -127,9 +141,11 @@ export class DeletePlugin extends Plugin {
         if (!startContainer) {
             return;
         }
-        const { cursorPos, joined, nRemovedNodes, commonAncestor } = this.deleteRange(range);
+        const { cursorPos, joined, anyNodesRemoved, commonAncestor } = this.deleteRange(range);
 
-        if (nRemovedNodes || joined) {
+        // @todo @phoenix: consider improving handling deleteBackward involving
+        // unbreakables so that this is not necessary.
+        if (anyNodesRemoved || joined) {
             this.shared.setSelection(cursorPos);
         }
 
@@ -166,7 +182,7 @@ export class DeletePlugin extends Plugin {
         const restoreSpaces = prepareUpdate(startElement, startOffset, endElement, endOffset);
 
         // Remove nodes.
-        const { startRemoveIndex, allNodesRemoved, nRemovedNodes } = this.removeNodes({
+        const { startRemoveIndex, allNodesRemoved, anyNodesRemoved } = this.removeNodes({
             startElement,
             startOffset,
             endElement,
@@ -198,7 +214,7 @@ export class DeletePlugin extends Plugin {
         restoreSpaces();
         cursorPos = restoreCursor();
 
-        return { cursorPos, nRemovedNodes, joined, commonAncestor };
+        return { cursorPos, anyNodesRemoved, joined, commonAncestor };
     }
 
     // @phoenix @todo: do this properly
@@ -285,40 +301,51 @@ export class DeletePlugin extends Plugin {
 
         // Remove nodes
         let allNodesRemoved = true;
-        let nRemovedNodes = 0;
+        let anyNodesRemoved = false;
         for (const node of nodesToRemove) {
             const didRemove = this.removeNode(node);
             allNodesRemoved &&= didRemove;
-            nRemovedNodes += Number(didRemove);
+            anyNodesRemoved ||= didRemove;
         }
-        return { startRemoveIndex, allNodesRemoved, nRemovedNodes };
+        return { startRemoveIndex, allNodesRemoved, anyNodesRemoved };
     }
 
-    // Returns true if node was removed, false otherwise.
-    removeNode(node) {
-        // @todo @phoenix: get list of callbacks from resources
-        const handleUnremovable = [
-            {
-                callback: (node) => {
-                    // @todo @phoenix: break unremovable into the concerned plugins
-                    // @todo @phoenix: handle contains unremovable
-                    if (isUnremovable(node)) {
-                        node.replaceChildren();
-                        // @todo: not sure about this.
-                        fillEmpty(node);
-                        return true;
-                    }
-                },
-            },
-        ];
+    // The root argument is used by some predicates in which a node is
+    // conditionally unremovable (e.g. a table cell is only removable if its
+    // ancestor table is also being removed).
+    isUnremovable(node, root = undefined) {
+        // For now, there's no use case of unremovable text nodes.
+        // Should this change, the predicates must be adapted to take a Node
+        // instead of an Element as argument.
+        if (node.nodeType === Node.TEXT_NODE) {
+            return false;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return true;
+        }
+        return this.resources.unremovables.some((predicate) => predicate(node, root));
+    }
 
-        for (const { callback } of handleUnremovable) {
-            if (callback(node)) {
+    // Returns true if the entire subtree rooted at node was removed.
+    // Unremovable nodes take the place of removable ancestors.
+    removeNode(node) {
+        const root = node;
+        const remove = (node) => {
+            for (const child of [...node.childNodes]) {
+                remove(child);
+            }
+            if (this.isUnremovable(node, root)) {
                 return false;
             }
-        }
-        node.remove();
-        return true;
+            if (node.hasChildNodes()) {
+                node.before(...node.childNodes);
+                node.remove();
+                return false;
+            }
+            node.remove();
+            return true;
+        };
+        return remove(node);
     }
 
     getJoinableFragments(startElement, endElement, commonAncestor, offset) {
@@ -384,76 +411,88 @@ export class DeletePlugin extends Plugin {
         }
 
         if (joinableLeft.isBlock && joinableRight.isBlock) {
+            // <h1></h1> + <p></p> -> <h1></h1>
+            if (isEmptyBlock(joinableRight.node)) {
+                return this.removeEmptyBlock(joinableRight.node, commonAncestor);
+            }
+            // <h1></h1> + <p>a</p> -> <p>a</p>
+            if (isEmptyBlock(joinableLeft.node)) {
+                return this.removeEmptyBlock(joinableLeft.node, commonAncestor);
+            }
             return this.mergeBlocks(joinableLeft.node, joinableRight.node, commonAncestor);
         }
 
         if (joinableLeft.isBlock) {
-            return this.joinInlineIntoBlock(joinableLeft.node, joinableRight.node);
+            return this.joinInlineIntoBlock(joinableLeft.node, joinableRight.node, commonAncestor);
         }
 
         if (joinableRight.isBlock) {
-            return this.joinBlockIntoInline(joinableLeft.node, joinableRight.node);
+            return this.joinBlockIntoInline(joinableLeft.node, joinableRight.node, commonAncestor);
         }
 
         return false;
     }
 
-    canBeMerged(left, right) {
-        return closestElement(left, isUnbreakable) === closestElement(right, isUnbreakable);
+    isUnmergeable(node) {
+        if (this.isUnremovable(node)) {
+            return true;
+        }
+        // @todo @phoenix: get rules as resources
+        return isUnbreakable(node);
+    }
+
+    canBeMerged(left, right, commonAncestor) {
+        for (let node of [left, right]) {
+            while (node !== commonAncestor) {
+                if (this.isUnmergeable(node)) {
+                    return false;
+                }
+                node = node.parentElement;
+            }
+        }
+        return true;
+    }
+
+    // @todo @phoenix: called only once, consider inlining
+    clearEmptyUntil(node, limitAncestor) {
+        // @todo @phoenix: consider using a more robust test (like isEmpty or !isVisible)
+        while (node !== limitAncestor && !node.childNodes.length) {
+            const parent = node.parentElement;
+            this.removeNode(node);
+            node = parent;
+        }
+    }
+
+    removeEmptyBlock(block, commonAncestor) {
+        const parent = block.parentElement;
+        const didRemove = this.removeNode(block);
+        this.clearEmptyUntil(parent, commonAncestor);
+        return didRemove;
     }
 
     mergeBlocks(left, right, commonAncestor) {
-        const clearEmpty = (node) => {
-            // @todo @phoenix: consider using a more robust test (like !isVisible)
-            while (node !== commonAncestor && !node.childNodes.length) {
-                const toRemove = node;
-                node = node.parentElement;
-                toRemove.remove();
-            }
-        };
-
-        const removeBlock = (block) => {
-            const parent = block.parentElement;
-            // @todo @phoenix: mind the unremovables
-            block.remove();
-            clearEmpty(parent);
-            return true;
-        };
-
-        // Unmergeable blocks can be removed if left empty.
-        if (!isVisible(right)) {
-            return removeBlock(right);
-        }
-        if (!isVisible(left)) {
-            return removeBlock(left);
-        }
-
-        // Empty blocks can be removed, unless unbreakable/unremovable.
-        if (isEmptyBlock(left) && !isUnbreakable(left)) {
-            return removeBlock(left);
-        }
-        if (isEmptyBlock(right) && !isUnbreakable(right)) {
-            return removeBlock(right);
-        }
-
-        if (!this.canBeMerged(left, right)) {
+        if (!this.canBeMerged(left, right, commonAncestor)) {
             return false;
         }
 
         left.append(...right.childNodes);
-        const rightParent = right.parentElement;
-        right.remove();
-        clearEmpty(rightParent);
+        let toRemove = right;
+        let parent = right.parentElement;
+        // Propagate until commonAncestor, removing empty blocks
+        while (parent !== commonAncestor && parent.childNodes.length === 1) {
+            toRemove = parent;
+            parent = parent.parentElement;
+        }
+        toRemove.remove();
         return true;
     }
 
-    joinInlineIntoBlock(leftBlock, rightInline) {
-        if (!this.canBeMerged(leftBlock, rightInline)) {
+    joinInlineIntoBlock(leftBlock, rightInline, commonAncestor) {
+        if (!this.canBeMerged(leftBlock, rightInline, commonAncestor)) {
             return false;
         }
 
         while (rightInline && !isBlock(rightInline)) {
-            // @todo @phoenix: what if right is a BR?
             const toAppend = rightInline;
             rightInline = rightInline.nextSibling;
             leftBlock.append(toAppend);
@@ -461,19 +500,28 @@ export class DeletePlugin extends Plugin {
         return true;
     }
 
-    joinBlockIntoInline(leftInline, rightBlock) {
-        if (!this.canBeMerged(leftInline, rightBlock)) {
+    joinBlockIntoInline(leftInline, rightBlock, commonAncestor) {
+        if (!this.canBeMerged(leftInline, rightBlock, commonAncestor)) {
             return false;
         }
 
         leftInline.after(...rightBlock.childNodes);
-        const rightSibling = rightBlock.nextSibling;
-        rightBlock.remove();
-        if (rightSibling && !isBlock(rightSibling)) {
-            rightSibling.before(this.document.createElement("br"));
+        let toRemove = rightBlock;
+        let parent = rightBlock.parentElement;
+        // Propagate until commonAncestor, removing empty blocks
+        while (parent !== commonAncestor && parent.childNodes.length === 1) {
+            toRemove = parent;
+            parent = parent.parentElement;
         }
+        // Restore line break between removed block and inline content after it.
+        if (parent === commonAncestor) {
+            const rightSibling = toRemove.nextSibling;
+            if (rightSibling && !isBlock(rightSibling)) {
+                rightSibling.before(this.document.createElement("br"));
+            }
+        }
+        toRemove.remove();
         return true;
-        // @todo @phoenix: clear empty parent blocks.
     }
 
     // Fill empty blocks
@@ -508,8 +556,7 @@ export class DeletePlugin extends Plugin {
                         node.setAttribute("data-oe-zws-empty-inline", "");
                     }
                 } else {
-                    // @todo handle unremovable
-                    node.remove();
+                    this.removeNode(node);
                 }
             }
         }
@@ -815,11 +862,46 @@ export class DeletePlugin extends Plugin {
             return true;
         }
     }
-}
 
-// @todo @phoenix: handle bootstrap columns
-// Empty unbreakable blocks should be removed with backspace, with the
-// notable exception of Bootstrap columns.
+    deleteBackwardUnmergeable(range) {
+        const { startContainer, startOffset, endContainer } = range;
+        return this.deleteCharUnmergeable(endContainer, startContainer, startOffset);
+    }
+
+    // @todo @phoenix: write tests for this
+    deleteForwardUnmergeable(range) {
+        const { startContainer, endContainer, endOffset } = range;
+        return this.deleteCharUnmergeable(startContainer, endContainer, endOffset);
+    }
+
+    // Trap cursor inside unmergeable element. Remove it if empty.
+    deleteCharUnmergeable(sourceContainer, destContainer, destOffset) {
+        if (!destContainer) {
+            return;
+        }
+        const commonAncestor = getCommonAncestor([sourceContainer, destContainer], this.editable);
+        const closestUnbreakable = this.getClosestUnmergeable(sourceContainer, commonAncestor);
+        if (!closestUnbreakable) {
+            return;
+        }
+
+        if (isEmpty(closestUnbreakable) && !this.isUnremovable(closestUnbreakable)) {
+            closestUnbreakable.remove();
+            this.shared.setSelection({ anchorNode: destContainer, anchorOffset: destOffset });
+        }
+        return true;
+    }
+
+    getClosestUnmergeable(node, limitAncestor) {
+        while (node !== limitAncestor) {
+            if (this.isUnmergeable(node)) {
+                return node;
+            }
+            node = node.parentElement;
+        }
+        return null;
+    }
+}
 
 // @todo @phoenix: handle this:
 // The first child element of a contenteditable="true" zone which
