@@ -32,6 +32,8 @@ import { YoutubePlugin } from "./main/youtube_plugin";
 import { ImagePlugin } from "./main/image_plugin";
 import { LinkPastePlugin } from "./main/link/link_paste_plugin";
 import { EmbeddedElementPlugin } from "./others/embedded_element_plugin";
+import { MoveNodePlugin } from "./main/movenode_plugin";
+import { ContainerNodePlugin } from "./main/container_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -70,6 +72,8 @@ export const MAIN_PLUGINS = [
     ImagePlugin,
     LinkPlugin,
     LinkPastePlugin,
+    MoveNodePlugin,
+    ContainerNodePlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, EmbeddedElementPlugin];

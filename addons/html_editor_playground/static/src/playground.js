@@ -48,17 +48,22 @@ const PluginSets = {
 
 class WysiwygLoader extends Component {
     static template = xml`
-        <CurrentWysiwyg options="{value: testHtml}" startWysiwyg="startWysiwyg" />
+        <CurrentWysiwyg options="this.wysiwygOptions" startWysiwyg="startWysiwyg" />
     `;
     static components = { CurrentWysiwyg: null };
 
     setup() {
-        this.testHtml = testHtml;
+        this.wysiwygOptions = {
+            value: testHtml,
+            editorPlugins: [],
+        };
         onWillStart(async () => {
             await loadBundle("web_editor.backend_assets_wysiwyg");
             this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
                 "@web_editor/js/wysiwyg/wysiwyg"
             ).Wysiwyg;
+            const MoveNodePlugin = odoo.loader.modules.get('@web_editor/js/wysiwyg/MoveNodePlugin').MoveNodePlugin;
+            this.wysiwygOptions.editorPlugins = [MoveNodePlugin];
         });
     }
 }
