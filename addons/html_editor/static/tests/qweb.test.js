@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { click, queryAll, queryAllTexts, queryFirst, queryOne, select } from "@odoo/hoot-dom";
+import { click, queryAll, queryAllTexts, queryOne, select } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
@@ -145,7 +145,7 @@ describe("qweb picker", () => {
         expect(".o-we-qweb-picker").toHaveCount(1);
 
         // Click outside to close the picker
-        click(queryFirst("div"));
+        click(el.querySelector("div"));
         await animationFrame();
         expect(".o-we-qweb-picker").toHaveCount(0);
     });
