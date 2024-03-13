@@ -9,6 +9,12 @@
  * @typedef { Object } SharedMethods
  *
  * @property { HistoryPlugin['makeSavePoint'] } makeSavePoint
+ * @property { HistoryPlugin['makeSnapshotStep'] } makeSnapshotStep
+ * @property { HistoryPlugin['disableObserver'] } disableObserver
+ * @property { HistoryPlugin['enableObserver'] } enableObserver
+ * @property { HistoryPlugin['addExternalStep'] } addExternalStep
+ * @property { HistoryPlugin['getHistorySteps'] } getHistorySteps
+ * @property { HistoryPlugin['resetFromSteps'] } resetFromSteps
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart

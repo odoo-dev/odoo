@@ -14,17 +14,17 @@ import { initElementForEdition } from "./utils/sanitize";
 
 export const defaultConfig = {};
 
-function getPlugins() {
-    const plugins = new Set(registry.category("phoenix_plugins").getAll());
+function getPlugins(plugins) {
+    const initialPlugins = new Set(plugins);
     const inResult = new Set();
     // need to sort them
     const result = [];
     let P;
 
     function findPlugin() {
-        for (const P of plugins) {
+        for (const P of initialPlugins) {
             if (P.dependencies.every((dep) => inResult.has(dep))) {
-                plugins.delete(P);
+                initialPlugins.delete(P);
                 return P;
             }
         }
@@ -33,7 +33,7 @@ function getPlugins() {
         inResult.add(P.name);
         result.push(P);
     }
-    if (plugins.size) {
+    if (initialPlugins.size) {
         throw new Error("missing dependency");
     }
     return result;
@@ -75,7 +75,8 @@ export class Editor {
     }
 
     startPlugins() {
-        const Plugins = [getPlugins(), this.config.Plugins || []].flat(); // todo: take config into account
+        const defaultPlugins = registry.category("phoenix_plugins").getAll();
+        const Plugins = getPlugins(this.config.Plugins || defaultPlugins);
         const plugins = new Map();
         for (const P of Plugins) {
             if (P.name === "") {

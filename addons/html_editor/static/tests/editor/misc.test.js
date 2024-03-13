@@ -3,6 +3,7 @@ import { setupEditor, testEditor } from "../test_helpers/editor";
 import { getContent, setContent } from "../test_helpers/selection";
 import { Plugin } from "../../src/editor/plugin";
 import { click } from "@odoo/hoot-dom";
+import { registry } from "@web/core/registry";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -77,7 +78,7 @@ test("event handlers are properly cleaned up after destruction", async () => {
     }
 
     const { editor } = await setupEditor("<p></p>", {
-        config: { Plugins: [TestHandlerPlugin] },
+        config: { Plugins: [...registry.category("phoenix_plugins").getAll(), TestHandlerPlugin] },
     });
     expect(count).toBe(0);
 

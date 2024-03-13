@@ -22,7 +22,7 @@ class TestEditor extends Component {
             </t>
             <div t-ref="target"/>
         </t>`;
-    static props = ["content", "config", "inIFrame", "styleContent?"];
+    static props = ["content", "config", "inIFrame", "styleContent?", "onMounted?"];
 
     setup() {
         this.ref = useRef("target");
@@ -46,7 +46,11 @@ class TestEditor extends Component {
                 if (configSelection) {
                     el.focus();
                 }
-                setContent(el, this.props.content);
+                if (this.props.onMounted) {
+                    this.props.onMounted?.(el);
+                } else {
+                    setContent(el, this.props.content);
+                }
             }
         });
         this.editor = useWysiwyg(target, { ...defaultConfig, ...this.props.config });
@@ -56,6 +60,8 @@ class TestEditor extends Component {
 /**
  * @typedef { Object } TestConfig
  * @property { import("../../src/editor/editor").EditorConfig } [config]
+ * @property { string } [styleContent]
+ * @property { Function } [onMounted]
  * @property { boolean } [inIFrame]
  */
 
@@ -69,7 +75,7 @@ export async function setupEditor(content, options = {}) {
     const inIFrame = "inIFrame" in options ? options.inIFrame : false;
     const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
-        props: { content, config, inIFrame, styleContent },
+        props: { content, config, inIFrame, styleContent, onMounted: options.onMounted },
     });
 
     return {

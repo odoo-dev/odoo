@@ -4,7 +4,7 @@ import { testEditor } from "../../test_helpers/editor";
 import { unformat } from "../../test_helpers/format";
 import { insertText } from "../../test_helpers/user_actions";
 
-test.todo("should ignore protected elements children mutations (true)", async () => {
+test("should ignore protected elements children mutations (true)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div><p>a[]</p></div>

@@ -1,11 +1,90 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { getCommonAncestor } from "../utils/dom_traversal";
+import { descendants, getCommonAncestor } from "../utils/dom_traversal";
+
+/**
+ * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
+ *
+ * @typedef { Object } SerializedSelection
+ * @property { string } anchorNodeId
+ * @property { number } anchorOffset
+ * @property { string } focusNodeId
+ * @property { number } focusOffset
+ *
+ * @typedef { Object } SerializedNode
+ * @property { number } nodeType
+ * @property { string } nodeId
+ * @property { string } textValue
+ * @property { string } tagName
+ * @property { SerializedNode[] } children
+ * @property { Record<string, string> } attributes
+ *
+ * @typedef { Object } HistoryStep
+ * @property { string } id
+ * @property { SerializedSelection } selection
+ * @property { HistoryMutation[] } mutations
+ * @property { string } previousStepId
+ *
+ * @typedef { Object } HistoryMutationCharacterData
+ * @property { "characterData" } type
+ * // todo change id to nodeId
+ * @property { string } id
+ * // todo change text to textValue
+ * @property { string } text
+ * // todo change text to textOldValue
+ * @property { string } oldValue
+ *
+ * @typedef { Object } HistoryMutationAttributes
+ * @property { "attributes" } type
+ * // todo change id to nodeId
+ * @property { string } id
+ * @property { string } attributeName
+ * // todo change value to attributeValue
+ * @property { string } value
+ * // todo change oldValue to attributeOldValue
+ * @property { string } oldValue
+ *
+ * @typedef { Object } HistoryMutationAdd
+ * @property { "add" } type
+ * // todo change id to nodeId
+ * @property { string } id
+ * @property { string } node
+ * // todo change prepend to prependNodeId
+ * @property { string } prepend
+ * // todo change append to appendNodeId
+ * @property { string } append
+ * // todo change before to beforeNodeId
+ * @property { string } before
+ * // todo change after to afterNodeId
+ * @property { string } after
+ *
+ * @typedef { Object } HistoryMutationRemove
+ * @property { "remove" } type
+ * // todo change id to nodeId
+ * @property { string } id
+ * // todo change parentId to parentNodeId
+ * @property { string } parentId
+ * @property { Node } node
+ * // todo change nextId to nextNodeId
+ * @property { string } nextId
+ * // todo change previousId to previousNodeId
+ * @property { string } previousId
+ *
+ * @typedef { HistoryMutationCharacterData | HistoryMutationAttributes | HistoryMutationAdd | HistoryMutationRemove } HistoryMutation
+ */
 
 export class HistoryPlugin extends Plugin {
     static name = "history";
     static dependencies = ["dom", "selection"];
-    static shared = ["makeSavePoint"];
+    static shared = [
+        "makeSavePoint",
+        "makeSnapshotStep",
+        "disableObserver",
+        "enableObserver",
+        "addExternalStep",
+        "getHistorySteps",
+        "resetFromSteps",
+    ];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },
@@ -13,11 +92,8 @@ export class HistoryPlugin extends Plugin {
         ],
     });
 
-    // @todo @phoenix usefull for the collaboration plugin. See if we still want
-    // to handle the serialization through that property later.
-    isSerializable = false;
-
     setup() {
+        this.renderingClasses = new Set(this.resources["history_rendering_classes"]);
         this.addDomListener(this.editable, "input", this.addStep);
         this.addDomListener(this.editable, "keydown", this.stageSelection);
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
@@ -25,20 +101,6 @@ export class HistoryPlugin extends Plugin {
         this._cleanups.push(() => this.observer.disconnect());
         this.enableObserver();
         this.reset();
-
-        const firstStep = this.makeSnapshotStep();
-        // @todo @phoenix add this in the collaboration plugin.
-        // this.historySnapshots = [{ step: firstStep }];
-        this.steps.push(firstStep);
-        // @todo @phoenix add in collaboration plugin?
-        // The historyIds carry the ids of the steps that were dropped when
-        // doing a snapshot.
-        // Those historyIds are used to compare if the last step saved in the
-        // server is present in the current historySteps or historyIds to
-        // ensure it is the same history branch.
-        // this.branchStepIds = [];
-
-        this.renderingClasses = new Set(this.resources["history_rendering_classes"]);
     }
     handleCommand(command, payload) {
         switch (command) {
@@ -57,27 +119,51 @@ export class HistoryPlugin extends Plugin {
         }
     }
 
-    reset() {
+    clean() {
+        /** @type { HistoryStep[] } */
         this.steps = [];
-        this.currentStep = {
+        /** @type { HistoryStep } */
+        this.currentStep = this.processHistoryStep({
             selection: {
-                anchorNodeOid: undefined,
+                anchorNodeId: undefined,
                 anchorOffset: undefined,
-                focusNodeOid: undefined,
+                focusNodeId: undefined,
                 focusOffset: undefined,
             },
             mutations: [],
             id: this.generateId(),
-            clientId: undefined,
-        };
+        });
         this.stepsStates = new Map();
         this.nodeToIdMap = new WeakMap();
         this.idToNodeMap = new Map();
-        // @todo @phoenix add in collaboration plugin? previously _historyIds
-        this.branchStepIds = [];
         this.setNodeId(this.editable);
+        this.dispatch("HISTORY_CLEAN");
     }
+    /**
+     * Reset the history.
+     */
+    reset() {
+        this.clean();
+        this.steps.push(this.makeSnapshotStep());
+        this.dispatch("HISTORY_RESET");
+    }
+    /**
+     * @param { HistoryStep[] } steps
+     */
+    resetFromSteps(steps) {
+        this.disableObserver();
+        for (const node of this.editable.childNodes) {
+            node.remove();
+        }
+        this.clean();
+        for (const step of steps) {
+            this.applyMutations(step.mutations);
+        }
+        this.snapshots = [{ step: steps[0] }];
+        this.steps = steps;
 
+        this.enableObserver();
+    }
     makeSnapshotStep() {
         return {
             selection: {
@@ -88,14 +174,26 @@ export class HistoryPlugin extends Plugin {
             },
             mutations: Array.from(this.editable.childNodes).map((node) => ({
                 type: "add",
-                append: 1,
+                append: "root",
                 id: this.nodeToIdMap.get(node),
                 node: this.serializeNode(node),
             })),
-            id: this.generateId(),
-            clientId: this.clientId,
+            id: this.steps[this.steps.length - 1]?.id || this.generateId(),
             previousStepId: undefined,
         };
+    }
+
+    getHistorySteps() {
+        return this.steps;
+    }
+    /**
+     * @param { HistoryStep } step
+     */
+    processHistoryStep(step) {
+        for (const fn of this.resources["process_history_step"] || []) {
+            step = fn(step);
+        }
+        return step;
     }
 
     enableObserver() {
@@ -117,6 +215,9 @@ export class HistoryPlugin extends Plugin {
     handleObserverRecords() {
         this.handleNewRecords(this.observer.takeRecords());
     }
+    /**
+     * @param { MutationRecord[] } records
+     */
     handleNewRecords(records) {
         this.setIdOnRecords(records);
         records = this.filterMutationRecords(records);
@@ -132,6 +233,9 @@ export class HistoryPlugin extends Plugin {
         });
     }
 
+    /**
+     * @param { MutationRecord[] } records
+     */
     setIdOnRecords(records) {
         for (const record of records) {
             if (record.type === "childList") {
@@ -139,8 +243,11 @@ export class HistoryPlugin extends Plugin {
             }
         }
     }
+    /**
+     * @param { MutationRecord[] } records
+     */
     filterMutationRecords(records) {
-        for (const callback of this.resources["filter_mutation_record"]) {
+        for (const callback of this.resources["filter_mutation_records"]) {
             records = callback(records);
         }
 
@@ -198,32 +305,6 @@ export class HistoryPlugin extends Plugin {
                     continue;
                 }
             }
-            // @todo @phoenix add this in a "protected" plugin ?
-            // const closestProtectedCandidate = closestElement(record.target, "[data-oe-protected]");
-            // if (closestProtectedCandidate) {
-            //     const protectedValue = closestProtectedCandidate.dataset.oeProtected;
-            //     switch (protectedValue) {
-            //         case "true":
-            //         case "":
-            //             if (
-            //                 record.type !== "attributes" ||
-            //                 record.target !== closestProtectedCandidate ||
-            //                 isProtected(closestProtectedCandidate.parentElement)
-            //             ) {
-            //                 continue;
-            //             }
-            //             break;
-            //         case "false":
-            //             if (
-            //                 record.type === "attributes" &&
-            //                 record.target === closestProtectedCandidate &&
-            //                 isProtected(closestProtectedCandidate.parentElement)
-            //             ) {
-            //                 continue;
-            //             }
-            //             break;
-            //     }
-            // }
             filteredRecords.push(record);
         }
         // @todo @phoenix allow an option to filter mutation records.
@@ -232,8 +313,11 @@ export class HistoryPlugin extends Plugin {
     }
     stageSelection() {
         const selection = this.shared.getEditableSelection();
-        this.currentStep.selection = this.serializeSelection(selection, this.nodeToIdMap);
+        this.currentStep.selection = this.serializeSelection(selection);
     }
+    /**
+     * @param { MutationRecord[] } records
+     */
     stageRecords(records) {
         // @todo @phoenix test this feature.
         // There is a case where node A is added and node B is a descendant of
@@ -318,10 +402,13 @@ export class HistoryPlugin extends Plugin {
         }
     }
 
+    /**
+     * @param { Node } node
+     */
     setNodeId(node) {
         let id = this.nodeToIdMap.get(node);
         if (!id) {
-            id = this.generateId();
+            id = node === this.editable ? "root" : this.generateId();
             this.nodeToIdMap.set(node, id);
             this.idToNodeMap.set(id, node);
         }
@@ -333,19 +420,6 @@ export class HistoryPlugin extends Plugin {
     generateId() {
         // No need for secure random number.
         return Math.floor(Math.random() * Math.pow(2, 52)).toString();
-    }
-
-    serializeNode(node, mutatedNodes) {
-        // @todo @phoenix usefull for the collaboration plugin. See if we still want
-        // to handle the serialization through that property later.
-        // return this.isSerializable ? serializeNode(node, mutatedNodes) : node;
-        return node;
-    }
-    unserializeNode(node) {
-        // @todo @phoenix usefull for the collaboration plugin. See if we still want
-        // to handle the serialization through that property later.
-        // return this.isSerializable ? unserializeNode(node) : node;
-        return node;
     }
 
     addStep() {
@@ -366,22 +440,19 @@ export class HistoryPlugin extends Plugin {
         this.dispatch("NORMALIZE", { node: this.getMutationsRoot(currentStep.mutations) });
         this.handleObserverRecords();
 
-        // @todo @phoenix add this in the collaboration plugin.
-        // currentStep.clientId = this._collabClientId;
         currentStep.previousStepId = this.steps.at(-1)?.id;
 
         this.steps.push(currentStep);
+        this.dispatch("STEP_ADDED", currentStep);
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();
-        this.currentStep = {
+        this.currentStep = this.processHistoryStep({
             id: this.generateId(),
             selection: {},
             mutations: [],
-        };
+        });
         this.stageSelection();
         return currentStep;
-        // @todo @phoenix add this in the collaboration plugin.
-        // this.multiselectionRefresh();
     }
     undo() {
         // The last step is considered an uncommited draft so always revert it.
@@ -420,11 +491,14 @@ export class HistoryPlugin extends Plugin {
             this.stepsStates.set(step.id, "redo");
         }
     }
+    /**
+     * @param { SerializedSelection } selection
+     */
     setSerializedSelection(selection) {
-        if (!selection.anchorNodeOid) {
+        if (!selection.anchorNodeId) {
             return;
         }
-        const anchorNode = this.idToNodeMap.get(selection.anchorNodeOid);
+        const anchorNode = this.idToNodeMap.get(selection.anchorNodeId);
         if (!anchorNode) {
             return;
         }
@@ -432,7 +506,7 @@ export class HistoryPlugin extends Plugin {
             anchorNode,
             anchorOffset: selection.anchorOffset,
         };
-        const focusNode = this.idToNodeMap.get(selection.focusNodeOid);
+        const focusNode = this.idToNodeMap.get(selection.focusNodeId);
         if (focusNode) {
             newSelection.focusNode = focusNode;
             newSelection.focusOffset = selection.focusOffset;
@@ -449,11 +523,7 @@ export class HistoryPlugin extends Plugin {
     getNextUndoIndex() {
         // Go back to first step that can be undone ("redo" or undefined).
         for (let index = this.steps.length - 1; index >= 0; index--) {
-            if (
-                this.steps[index]
-                // @todo @phoenix add this in the collaboration plugin.
-                // && this.steps[index].clientId === this._collabClientId
-            ) {
+            if (this.isRevertableStep(index)) {
                 const state = this.stepsStates.get(this.steps[index].id);
                 if (state === "redo" || !state) {
                     return index;
@@ -465,6 +535,20 @@ export class HistoryPlugin extends Plugin {
         return -1;
     }
     /**
+     * Meant to be overriden.
+     *
+     * @param { number } index
+     */
+    isRevertableStep(index) {
+        for (const cb of this.resources["is_revertable_step"] || []) {
+            const result = cb(index);
+            if (typeof result !== "undefined") {
+                return result;
+            }
+        }
+        return Boolean(this.steps[index]);
+    }
+    /**
      * Get the step index in the history to redo.
      * Return -1 if no redo index can be found.
      */
@@ -474,11 +558,7 @@ export class HistoryPlugin extends Plugin {
         // "undo"
         let totalConsumed = 0;
         for (let index = this.steps.length - 1; index >= 0; index--) {
-            if (
-                this.steps[index] &&
-                // @todo @phoenix add this in the collaboration plugin.
-                this.steps[index].clientId === this._collabClientId
-            ) {
+            if (this.isRevertableStep(index)) {
                 const state = this.stepsStates.get(this.steps[index].id);
                 switch (state) {
                     case "undo":
@@ -496,6 +576,81 @@ export class HistoryPlugin extends Plugin {
         }
         return -1;
     }
+    /**
+     * Insert a step in the history.
+     *
+     * @param { HistoryStep } newStep
+     * @param { number } index
+     */
+    addExternalStep(newStep, index) {
+        const stepsAfterNewStep = this.steps.slice(index);
+
+        for (const stepToRevert of stepsAfterNewStep.slice().reverse()) {
+            this.revertMutations(stepToRevert.mutations);
+        }
+        this.applyMutations(newStep.mutations);
+        this.steps.splice(index, 0, newStep);
+        for (const stepToApply of stepsAfterNewStep) {
+            this.applyMutations(stepToApply.mutations);
+        }
+    }
+    /**
+     * @param { HistoryMutation[] } mutations
+     */
+    applyMutations(mutations) {
+        for (const mutation of mutations) {
+            switch (mutation.type) {
+                case "characterData": {
+                    const node = this.idToNodeMap.get(mutation.id);
+                    if (node) {
+                        node.textContent = mutation.text;
+                    }
+                    break;
+                }
+                case "attributes": {
+                    const node = this.idToNodeMap.get(mutation.id);
+                    if (node) {
+                        const value = this.getAttributeValue(
+                            mutation.attributeName,
+                            mutation.value
+                        );
+                        this.setAttribute(node, mutation.attributeName, value);
+                    }
+                    break;
+                }
+                case "remove": {
+                    const toremove = this.idToNodeMap.get(mutation.id);
+                    if (toremove) {
+                        toremove.remove();
+                    }
+                    break;
+                }
+                case "add": {
+                    const node =
+                        this.idToNodeMap.get(mutation.id) || this.unserializeNode(mutation.node);
+                    if (!node) {
+                        continue;
+                    }
+
+                    this.setNodeId(node);
+
+                    if (mutation.append && this.idToNodeMap.get(mutation.append)) {
+                        this.idToNodeMap.get(mutation.append).append(node);
+                    } else if (mutation.before && this.idToNodeMap.get(mutation.before)) {
+                        this.idToNodeMap.get(mutation.before).before(node);
+                    } else if (mutation.after && this.idToNodeMap.get(mutation.after)) {
+                        this.idToNodeMap.get(mutation.after).after(node);
+                    } else {
+                        continue;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    /**
+     * @param { HistoryMutation[] } mutations
+     */
     revertMutations(mutations) {
         for (const mutation of mutations.toReversed()) {
             switch (mutation.type) {
@@ -509,23 +664,11 @@ export class HistoryPlugin extends Plugin {
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        if (mutation.oldValue) {
-                            let value = mutation.oldValue;
-                            if (typeof value === "string" && mutation.attributeName === "class") {
-                                value = value
-                                    .split(" ")
-                                    .filter((c) => !this.renderingClasses.has(c))
-                                    .join(" ");
-                            }
-                            // @todo @phoenix add this in the collaboration plugin.
-                            // if (this._collabClientId) {
-                            //     this._safeSetAttribute(node, mutation.attributeName, value);
-                            // } else {
-                            node.setAttribute(mutation.attributeName, value);
-                            // }
-                        } else {
-                            node.removeAttribute(mutation.attributeName);
-                        }
+                        const value = this.getAttributeValue(
+                            mutation.attributeName,
+                            mutation.oldValue
+                        );
+                        this.setAttribute(node, mutation.attributeName, value);
                     }
                     break;
                 }
@@ -533,17 +676,9 @@ export class HistoryPlugin extends Plugin {
                     let nodeToRemove = this.idToNodeMap.get(mutation.id);
                     if (!nodeToRemove) {
                         nodeToRemove = this.unserializeNode(mutation.node);
-
-                        // @todo @phoenix add this in the collaboration plugin.
-                        // const fakeNode = document.createElement("fake-el");
-                        // fakeNode.appendChild(nodeToRemove);
-                        // DOMPurify.sanitize(fakeNode, { IN_PLACE: true });
-                        // nodeToRemove = fakeNode.childNodes[0];
-                        // if (!nodeToRemove) {
-                        //     continue;
-                        // }
-
-                        this.setNodeId(nodeToRemove);
+                        if (!nodeToRemove) {
+                            continue;
+                        }
                     }
                     if (mutation.nextId && this.idToNodeMap.get(mutation.nextId)?.isConnected) {
                         const node = this.idToNodeMap.get(mutation.nextId);
@@ -570,34 +705,22 @@ export class HistoryPlugin extends Plugin {
         }
     }
 
-    serializeSelection(selection, nodeToIdMap) {
-        if (
-            selection &&
-            selection.anchorNode &&
-            nodeToIdMap.get(selection.anchorNode) &&
-            typeof selection.anchorOffset !== "undefined" &&
-            selection.focusNode &&
-            nodeToIdMap.get(selection.anchorNode) &&
-            typeof selection.focusOffset !== "undefined"
-        ) {
-            return {
-                anchorNodeOid: nodeToIdMap.get(selection.anchorNode),
-                anchorOffset: selection.anchorOffset,
-                focusNodeOid: nodeToIdMap.get(selection.focusNode),
-                focusOffset: selection.focusOffset,
-            };
-        } else {
-            return {
-                anchorNodeOid: undefined,
-                anchorOffset: undefined,
-                focusNodeOid: undefined,
-                focusOffset: undefined,
-            };
-        }
+    /**
+     * Serialize an editor selection.
+     * @param { EditorSelection } selection
+     * @returns { SerializedSelection }
+     */
+    serializeSelection(selection) {
+        return {
+            anchorNodeId: this.nodeToIdMap.get(selection.anchorNode),
+            anchorOffset: selection.anchorOffset,
+            focusNodeId: this.nodeToIdMap.get(selection.focusNode),
+            focusOffset: selection.focusOffset,
+        };
     }
     /**
      * Returns the deepest common ancestor element of the given mutations.
-     * @param {[]} mutations - The array of mutations.
+     * @param {HistoryMutation[]} - The array of mutations.
      * @returns {HTMLElement|null} - The common ancestor element.
      */
     getMutationsRoot(mutations) {
@@ -647,6 +770,139 @@ export class HistoryPlugin extends Plugin {
         if (addedStep) {
             this.stepsStates.set(addedStep.id, "consumed");
         }
+    }
+
+    /**
+     * @param { string } attributeName
+     * @param { string } value
+     */
+    getAttributeValue(attributeName, value) {
+        if (typeof value === "string" && attributeName === "class") {
+            value = value
+                .split(" ")
+                .filter((c) => !this.renderingClasses.has(c))
+                .join(" ");
+        }
+        return value;
+    }
+    /**
+     * @param { Node } node
+     * @param { string } attributeName
+     * @param { string } attributeValue
+     */
+    setAttribute(node, attributeName, attributeValue) {
+        for (const cb of this.resources["set_attribute"] || []) {
+            const result = cb(node, attributeName, attributeValue);
+            if (result) {
+                return;
+            }
+        }
+        if (attributeValue) {
+            node.setAttribute(attributeName, attributeValue);
+        } else {
+            node.removeAttribute(attributeName);
+        }
+    }
+    /**
+     * Serialize a node and its children if the collaboration is true.
+     * @param { Node } node
+     * @param { Set<Node> } nodesToStripFromChildren
+     */
+    serializeNode(node, mutatedNodes) {
+        return this._serializeNode(node, mutatedNodes, this.nodeToIdMap);
+    }
+    /**
+     * Unserialize a node and its children if the collaboration is true.
+     * @param { SerializedNode } node
+     * @returns { Node }
+     */
+    unserializeNode(node) {
+        let [unserializedNode, nodeMap] = this._unserializeNode(node);
+
+        for (const cb of this.resources["unserialize_node"]) {
+            unserializedNode = cb(unserializedNode);
+        }
+
+        if (unserializedNode) {
+            // Only assing id to the remaining nodes, otherwise the removed
+            // nodes will still be accessible through the idToNodeMap and could
+            // lead to security issues.
+            for (const node of [unserializedNode, ...descendants(unserializedNode)]) {
+                const id = nodeMap.get(node);
+                this.nodeToIdMap.set(node, id);
+                this.idToNodeMap.set(id, node);
+            }
+            this.setNodeId(unserializedNode);
+            return unserializedNode;
+        }
+    }
+    /**
+     * Serialize a node and its children.
+     * @param { Node } node
+     * @param { [Set<Node>] } nodesToStripFromChildren
+     * @returns { SerializedNode }
+     */
+    _serializeNode(node, nodesToStripFromChildren = new Set()) {
+        const nodeId = this.nodeToIdMap.get(node);
+        if (!nodeId) {
+            return;
+        }
+        const result = {
+            nodeType: node.nodeType,
+            nodeId: nodeId,
+        };
+        if (node.nodeType === Node.TEXT_NODE) {
+            result.textValue = node.nodeValue;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            result.tagName = node.tagName;
+            result.children = [];
+            result.attributes = {};
+            for (let i = 0; i < node.attributes.length; i++) {
+                result.attributes[node.attributes[i].name] = node.attributes[i].value;
+            }
+            let child = node.firstChild;
+            // Don't serialize transient nodes
+            // @todo @phoenix move logic into it's own transient plugin ?
+            if (!["true", ""].includes(node.dataset.oeTransientContent)) {
+                while (child) {
+                    if (!nodesToStripFromChildren.has(child.nodeId)) {
+                        const serializedChild = this._serializeNode(
+                            child,
+                            nodesToStripFromChildren
+                        );
+                        if (serializedChild) {
+                            result.children.push(serializedChild);
+                        }
+                    }
+                    child = child.nextSibling;
+                }
+            }
+        }
+        return result;
+    }
+    /**
+     * Unserialize a node and its children.
+     * @param { SerializedNode } serializedNode
+     * @param { Map<Node, number> } _map
+     * @returns { Node, Map<Node, number> }
+     */
+    _unserializeNode(serializedNode, _map = new Map()) {
+        let node = undefined;
+        if (serializedNode.nodeType === Node.TEXT_NODE) {
+            node = this.document.createTextNode(serializedNode.textValue);
+        } else if (serializedNode.nodeType === Node.ELEMENT_NODE) {
+            node = this.document.createElement(serializedNode.tagName);
+            for (const key in serializedNode.attributes) {
+                node.setAttribute(key, serializedNode.attributes[key]);
+            }
+            serializedNode.children.forEach((child) =>
+                node.append(this._unserializeNode(child, _map)[0])
+            );
+        } else {
+            console.warn("unknown node type");
+        }
+        _map.set(node, serializedNode.nodeId);
+        return [node, _map];
     }
 }
 
