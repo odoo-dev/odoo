@@ -1,15 +1,22 @@
-import { describe, test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
+import { describe, expect, test } from "@odoo/hoot";
+import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { testEditor } from "../test_helpers/editor";
 import { undo } from "../test_helpers/user_actions";
 
+// @todo @phoenix: should be replaced by press(["ctrl", "v"]) when hoot will support it
+function cut(editor) {
+    const clipboardData = new DataTransfer();
+    const cutEvent = new ClipboardEvent("cut", { clipboardData });
+    editor.editable.dispatchEvent(cutEvent);
+    return clipboardData;
+}
+
 describe("range collapsed", () => {
-    test.todo("should ignore cutting an empty selection", async () => {
+    test("should ignore cutting an empty selection", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
-                const clipboardData = new DataTransfer();
-                dispatch(editor.editable, "cut", { clipboardData });
+                const clipboardData = cut(editor);
                 // Check that nothing was set as clipboard content
                 expect(clipboardData.types.length).toBe(0);
             },
@@ -19,7 +26,8 @@ describe("range collapsed", () => {
             stepFunction: async (editor) => {
                 const clipboardData = new DataTransfer();
                 clipboardData.setData("text/plain", "should stay");
-                dispatch(editor.editable, "cut", { clipboardData });
+                const cutEvent = new ClipboardEvent("cut", { clipboardData });
+                editor.editable.dispatchEvent(cutEvent);
                 // Check that clipboard data was not overwritten
                 expect(clipboardData.getData("text/plain")).toBe("should stay");
             },
@@ -28,12 +36,11 @@ describe("range collapsed", () => {
 });
 
 describe("range not collapsed", () => {
-    test.todo("should cut a selection as text/plain, text/html and text/odoo-editor", async () => {
+    test("should cut a selection as text/plain, text/html and text/odoo-editor", async () => {
         await testEditor({
             contentBefore: "<p>a[bcd]e</p>",
             stepFunction: async (editor) => {
-                const clipboardData = new DataTransfer();
-                dispatch(editor.editable, "cut", { clipboardData });
+                const clipboardData = cut(editor);
                 expect(clipboardData.getData("text/plain")).toBe("bcd");
                 expect(clipboardData.getData("text/html")).toBe("<p>bcd</p>");
                 expect(clipboardData.getData("text/odoo-editor")).toBe("<p>bcd</p>");
@@ -43,8 +50,7 @@ describe("range not collapsed", () => {
         await testEditor({
             contentBefore: "<p>[abc<br>efg]</p>",
             stepFunction: async (editor) => {
-                const clipboardData = new DataTransfer();
-                dispatch(editor.editable, "cut", { clipboardData });
+                const clipboardData = cut(editor);
                 expect(clipboardData.getData("text/plain")).toBe("abc\nefg");
                 expect(clipboardData.getData("text/html")).toBe("<p>abc<br>efg</p>");
                 expect(clipboardData.getData("text/odoo-editor")).toBe("<p>abc<br>efg</p>");
@@ -53,13 +59,14 @@ describe("range not collapsed", () => {
         });
     });
 
-    test.todo("should cut selection and register it as a history step", async () => {
+    test("should cut selection and register it as a history step", async () => {
         await testEditor({
             contentBefore: "<p>a[bcd]e</p>",
             stepFunction: async (editor) => {
-                const historyStepsCount = editor._historySteps.length;
-                dispatch(editor.editable, "cut", { clipboardData: new DataTransfer() });
-                expect(editor._historySteps.length).toBe(historyStepsCount + 1);
+                const history = editor.plugins.find((p) => p.constructor.name === "history");
+                const historyStepsCount = history.steps.length;
+                cut(editor);
+                expect(history.steps.length).toBe(historyStepsCount + 1);
                 undo(editor);
             },
             contentAfter: "<p>a[bcd]e</p>",
@@ -73,8 +80,9 @@ describe("range not collapsed", () => {
                 // Set selection to a[bcd]e.
                 const selection = editor.document.getSelection();
                 selection.extend(selection.anchorNode, 4);
-                dispatch(editor.editable, "cut", { clipboardData: new DataTransfer() });
-                dispatch(editor.editable, "input", {
+                cut(editor);
+                // @todo @phoenix need fix in hoot to handle constructor beforeinput event
+                manuallyDispatchProgrammaticEvent(editor.editable, "beforeinput", {
                     inputType: "deleteContentForward",
                 });
             },
