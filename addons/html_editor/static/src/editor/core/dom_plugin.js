@@ -14,7 +14,7 @@ import {
     paragraphRelatedElements,
 } from "../utils/dom_info";
 import { splitElement, splitTextNode } from "../utils/dom_split";
-import { ancestors, closestElement, descendants, firstLeaf, lastLeaf } from "../utils/dom_traversal";
+import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
 import { getDeepRange, getTraversedNodes } from "../utils/selection";
@@ -269,12 +269,9 @@ export class DomPlugin extends Plugin {
                 !descendants(block).some((descendant) => selectedBlocks.includes(descendant)) &&
                 block.isContentEditable
         );
-        const [startContainer, startOffset, endContainer, endOffset] = [
-            firstLeaf(range.startContainer),
-            range.startOffset,
-            lastLeaf(range.endContainer),
-            range.endOffset,
-        ];
+        let { startContainer, startOffset, endContainer, endOffset } = range;
+        const startContainerChild = startContainer.firstChild;
+        const endContainerChild = endContainer.lastChild;
         for (const block of deepestSelectedBlocks) {
             if (
                 ["P", "PRE", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BLOCKQUOTE"].includes(
@@ -323,6 +320,13 @@ export class DomPlugin extends Plugin {
                 children.forEach((child) => newBlock.appendChild(child));
             }
         }
+        const isContextBlock = (container) => ["TD", "DIV", "LI"].includes(container.nodeName);
+        if (!startContainer.isConnected || isContextBlock(startContainer)) {
+            startContainer = startContainerChild.parentNode;
+        }
+        if (!endContainer.isConnected || isContextBlock(endContainer)) {
+            endContainer = endContainerChild.parentNode;
+        }
         const newRange = new Range();
         newRange.setStart(startContainer, startOffset);
         newRange.setEnd(endContainer, endOffset);
@@ -334,9 +338,8 @@ export class DomPlugin extends Plugin {
         const selection = this.shared.getEditableSelection();
         const sep = this.document.createElement("hr");
         sep.setAttribute("contenteditable", false);
-        const element = closestElement(
-            selection.startContainer,
-            (el) => paragraphRelatedElements.includes(el.tagName)
+        const element = closestElement(selection.startContainer, (el) =>
+            paragraphRelatedElements.includes(el.tagName)
         );
 
         if (element && element !== this.editable) {

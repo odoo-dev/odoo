@@ -339,6 +339,137 @@ describe("with selection collapsed", () => {
                 `),
         });
     });
+
+    test.todo("should outdent a list inside a nav-item list", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <ul>
+                            <li>a[]b</li>
+                        </ul>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <p>a[]b</p>
+                    </li>
+                </ul>
+            `),
+        });
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <ol>
+                            <li>a[]b</li>
+                        </ol>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <p>a[]b</p>
+                    </li>
+                </ul>
+            `),
+        });
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <ul class="o_checklist">
+                            <li>a[]b</li>
+                        </ul>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <p>a[]b</p>
+                    </li>
+                </ul>
+            `),
+        });
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <ul>
+                                <li>a[]b</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <p>a[]b</p>
+                        </div>
+                    </li>
+                </ul>
+            `),
+        });
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <ol>
+                                <li>
+                                    <h1>a[]b</h1>
+                                </li>
+                            </ol>
+                        </div>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <h1>a[]b</h1>
+                        </div>
+                    </li>
+                </ul>
+            `),
+        });
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <ul class="o_checklist">
+                                <li>a[]b</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            `),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li class="nav-item">
+                        <div>
+                            <p>a[]b</p>
+                        </div>
+                    </li>
+                </ul>
+            `),
+        });
+    });
 });
 
 describe("with selection", () => {

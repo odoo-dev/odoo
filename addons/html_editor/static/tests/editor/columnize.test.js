@@ -1,5 +1,6 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../test_helpers/editor";
+import { insertText, redo, undo } from "../test_helpers/user_actions";
 
 function columnsContainer(contents) {
     return `<div class="container o_text_columns"><div class="row">${contents}</div></div>`;
@@ -315,6 +316,35 @@ describe("complex", () => {
                 "</div></div>" +
                 "<p><br></p>" +
                 "</div></div></div>",
+        });
+    });
+});
+
+describe("undo", () => {
+    test.todo("should be able to write after undo", async () => {
+        await testEditor({
+            contentBefore: "<p>[]</p>",
+            stepFunction: async (editor) => {
+                columnize(2)(editor);
+                undo(editor);
+                await insertText(editor, "x");
+            },
+            contentAfter: "<p>x[]</p>",
+        });
+    });
+
+    test("should work properly after undo and then redo", async () => {
+        await testEditor({
+            contentBefore: "<p>[]</p>",
+            stepFunction: async (editor) => {
+                columnize(2)(editor);
+                undo(editor);
+                redo(editor);
+                await insertText(editor, "x");
+            },
+            contentAfter:
+                columnsContainer(column(6, "<p>x[]</p>") + column(6, "<p><br></p>")) +
+                "<p><br></p>",
         });
     });
 });

@@ -142,6 +142,14 @@ describe("to heading 1", () => {
                 "<table><tbody><tr><td><h1>[a</h1></td><td><h1>b</h1></td><td><h1>c]</h1></td></tr></tbody></table>",
         });
     });
+
+    test.todo("should not transfer attributes of list to heading 1", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
+            stepFunction: setTag("h1"),
+            contentAfter: '<ul><li class="nav-item"><h1>[abcd]</h1></li></ul>',
+        });
+    });
 });
 
 describe("to heading 2", () => {
@@ -193,6 +201,14 @@ describe("to heading 2", () => {
             // The custom table selection is removed in cleanForSave and the selection is collapsed.
             contentAfter:
                 "<table><tbody><tr><td><h2>[a</h2></td><td><h2>b</h2></td><td><h2>c]</h2></td></tr></tbody></table>",
+        });
+    });
+
+    test.todo("should not transfer attributes of list to heading 2", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
+            stepFunction: setTag("h2"),
+            contentAfter: '<ul><li class="nav-item"><h2>[abcd]</h2></li></ul>',
         });
     });
 });
@@ -248,6 +264,14 @@ describe("to heading 3", () => {
                 "<table><tbody><tr><td><h3>[a</h3></td><td><h3>b</h3></td><td><h3>c]</h3></td></tr></tbody></table>",
         });
     });
+
+    test.todo("should not transfer attributes of list to heading 3", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
+            stepFunction: setTag("h3"),
+            contentAfter: '<ul><li class="nav-item"><h3>[abcd]</h3></li></ul>',
+        });
+    });
 });
 
 describe("to pre", () => {
@@ -283,6 +307,22 @@ describe("to pre", () => {
             // The custom table selection is removed in cleanForSave and the selection is collapsed.
             contentAfter:
                 "<table><tbody><tr><td><pre>[a</pre></td><td><pre>b</pre></td><td><pre>c]</pre></td></tr></tbody></table>",
+        });
+    });
+
+    test("should turn a paragraph into pre preserving the cursor position", async () => {
+        await testEditor({
+            contentBefore: "<p>abcd<br>[]<br></p>",
+            stepFunction: setTag("pre"),
+            contentAfter: "<pre>abcd<br>[]<br></pre>",
+        });
+    });
+
+    test.todo("should not transfer attributes of list to pre", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item" id="test">[abcd]</li></ul>',
+            stepFunction: setTag("pre"),
+            contentAfter: '<ul><li class="nav-item" id="test"><pre>[abcd]</pre></li></ul>',
         });
     });
 });
@@ -337,6 +377,15 @@ describe("to blockquote", () => {
             // The custom table selection is removed in cleanForSave and the selection is collapsed.
             contentAfter:
                 "<table><tbody><tr><td><blockquote>[a</blockquote></td><td><blockquote>b</blockquote></td><td><blockquote>c]</blockquote></td></tr></tbody></table>",
+        });
+    });
+
+    test.todo("should not transfer attributes of list to blockquote", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item" style="color: red;">[abcd]</li></ul>',
+            stepFunction: setTag("blockquote"),
+            contentAfter:
+                '<ul><li class="nav-item" style="color: red;"><blockquote>[abcd]</blockquote></li></ul>',
         });
     });
 });

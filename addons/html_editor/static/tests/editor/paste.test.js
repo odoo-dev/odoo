@@ -243,6 +243,33 @@ describe("Simple text", () => {
                     "<p>d[]<br></p>",
             });
         });
+
+        test.todo(
+            "should paste text and understand \\n newlines within UNBREAKABLE node",
+            async () => {
+                await testEditor({
+                    contentBefore: "<div>[]<br></div>",
+                    stepFunction: async (editor) => {
+                        await pasteText(editor, "a\nb\nc\nd");
+                    },
+                    contentAfter: "<div>a<br>b<br>c<br>d[]<br></div>",
+                });
+            }
+        );
+
+        test.todo(
+            "should paste text and understand \\n newlines within UNBREAKABLE node(2)",
+            async () => {
+                await testEditor({
+                    contentBefore: '<div><span style="font-size: 9px;">a[]</span></div>',
+                    stepFunction: async (editor) => {
+                        await pasteText(editor, "b\nc\nd");
+                    },
+                    contentAfter:
+                        '<div><span style="font-size: 9px;">ab<br>c<br>d[]<br></span></div>',
+                });
+            }
+        );
     });
 
     describe("range not collapsed", () => {
@@ -2584,7 +2611,7 @@ describe("Paste HTML tables", () => {
     
 
     
-[]</p>`,
+[]<br></p>`,
         });
     });
 
@@ -2696,7 +2723,7 @@ describe("Paste HTML tables", () => {
             </tr>
         </tbody>
     </table><p>
-[]</p>`,
+[]<br></p>`,
         });
     });
 
@@ -2828,7 +2855,7 @@ describe("Paste HTML tables", () => {
     </tbody></table><p>
 
 
-[]</p>`,
+[]<br></p>`,
         });
     });
 });
