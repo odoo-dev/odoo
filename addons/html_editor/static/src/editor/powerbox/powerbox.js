@@ -2,6 +2,10 @@ import { Component, onMounted, onPatched, useExternalListener, useRef } from "@o
 import { rotate } from "@web/core/utils/arrays";
 import { fuzzyLookup } from "@web/core/utils/search";
 
+/**
+ * @todo @phoenix i think that most of the "control" code in this component
+ * should move to the powerbox plugin instead. This would probably be more robust
+ */
 export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
     static props = {
@@ -24,7 +28,8 @@ export class Powerbox extends Component {
         this.offset = this.props.offset();
         this.commands = null;
         this.categories = null;
-        const selection = this.props.el.ownerDocument.getSelection();
+        const ownerDocument = this.props.el.ownerDocument;
+        const selection = ownerDocument.getSelection();
         const range = selection.getRangeAt(0);
         this.endOffset = range.endOffset;
         this.node = range.startContainer;
@@ -77,7 +82,7 @@ export class Powerbox extends Component {
         });
 
         useExternalListener(this.props.el, "input", (ev) => {
-            const range = window.getSelection().getRangeAt(0);
+            const range = ownerDocument.getSelection().getRangeAt(0);
             if (!this.isSearching(range)) {
                 this.props.close();
                 return;
