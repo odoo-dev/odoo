@@ -9,3 +9,34 @@ test.todo("should remove the background image when clear the format", async () =
         contentAfter: "<div><p>[ab]</p></div>",
     });
 });
+
+test.todo(
+    "should remove all the colors for the text separated by Shift+Enter when using removeFormat button",
+    async () => {
+        await testEditor({
+            contentBefore: `<div><h1><font style="color: rgb(255, 0, 0);">[abc</font><br><font style="color: rgb(255, 0, 0);">abc</font><br><font style="color: rgb(255, 0, 0);">abc</font><br><font style="color: rgb(255, 0, 0);">abc]</font></h1></div>`,
+            stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+            contentAfter: `<div><h1>[abc<br>abc<br>abc<br>abc]</h1></div>`,
+        });
+        await testEditor({
+            contentBefore: `<div><h1><font style="background-color: rgb(255, 0, 0);">[abc</font><br><font style="background-color: rgb(255, 0, 0);">abc</font><br><font style="background-color: rgb(255, 0, 0);">abc]</font></h1></div>`,
+            stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+            contentAfter: `<div><h1>[abc<br>abc<br>abc]</h1></div>`,
+        });
+    }
+);
+test.todo(
+    "should remove all the colors for the text separated by Enter when using removeFormat button",
+    async () => {
+        await testEditor({
+            contentBefore: `<div><h1><font style="background-color: rgb(255, 0, 0);">[abc</font></h1><h1><font style="background-color: rgb(255, 0, 0);">abc</font></h1><h1><font style="background-color: rgb(255, 0, 0);">abc]</font></h1></div>`,
+            stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+            contentAfter: `<div><h1>[abc</h1><h1>abc</h1><h1>abc]</h1></div>`,
+        });
+        await testEditor({
+            contentBefore: `<div><h1><font style="color: rgb(255, 0, 0);">[abc</font></h1><h1><font style="color: rgb(255, 0, 0);">abc</font></h1><h1><font style="color: rgb(255, 0, 0);">abc]</font></h1></div>`,
+            stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+            contentAfter: `<div><h1>[abc</h1><h1>abc</h1><h1>abc]</h1></div>`,
+        });
+    }
+);

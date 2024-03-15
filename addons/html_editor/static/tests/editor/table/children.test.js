@@ -446,9 +446,19 @@ describe("tab", () => {
         await testEditor({
             contentBefore:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
-            stepFunction: async () => press("Tab"),
+            stepFunction: () => press("Tab"),
             contentAfter:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef</td></tr><tr style="height: 20px;"><td><p>[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
+        });
+    });
+
+    test("should not select whole text of the next cell", async () => {
+        await testEditor({
+            contentBefore:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>[cd]</td><td>ef</td></tr></tbody></table>',
+            stepFunction: () => press("Tab"),
+            contentAfter:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
         });
     });
 });

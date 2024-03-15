@@ -21,6 +21,24 @@ describe("Range collapsed", () => {
             });
         });
 
+        test("should turn a ordered list into a checklist", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore: "<ol><li>ab[]cd</li></ol>",
+                stepFunction: toggleCheckList,
+                contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+            });
+        });
+
+        test("should turn a unordered list into a checklist", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore: "<ul><li>ab[]cd</li></ul>",
+                stepFunction: toggleCheckList,
+                contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+            });
+        });
+
         test("should turn a heading into a checklist", async () => {
             await testEditor({
                 contentBefore: "<h1>ab[]cd</h1>",
@@ -229,6 +247,54 @@ describe("Range collapsed", () => {
                 });
             }
         );
+
+        test.todo(
+            "should create a new checked list if current node is inside a nav-item list",
+            async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                    stepFunction: toggleCheckList,
+                    contentAfter:
+                        '<ul><li class="nav-item"><ul class="o_checklist"><li>a[]b</li></ul></li></ul>',
+                });
+            }
+        );
+
+        test.todo(
+            "should create a new checked list if closestBlock is inside a nav-item list",
+            async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                    stepFunction: toggleCheckList,
+                    contentAfter:
+                        '<ul><li class="nav-item"><div><ul class="o_checklist"><li>a[]b</li></ul></div></li></ul>',
+                });
+            }
+        );
+
+        test.todo(
+            "should only keep dir attribute when converting a non Paragraph element",
+            async () => {
+                await testEditor({
+                    removeCheckIds: true,
+                    contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                    stepFunction: toggleCheckList,
+                    contentAfter:
+                        '<ul class="o_checklist" dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                });
+            }
+        );
+
+        test("should keep all attributes when converting a Paragraph element", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                stepFunction: toggleCheckList,
+                contentAfter: '<ul class="o_checklist text-uppercase" dir="rtl"><li>a[]b</li></ul>',
+            });
+        });
     });
     describe("Remove", () => {
         test("should turn an empty list into a paragraph", async () => {

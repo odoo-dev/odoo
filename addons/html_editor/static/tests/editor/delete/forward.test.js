@@ -216,6 +216,43 @@ describe("Selection collapsed", () => {
                 contentAfter: `<div>[]def</div>`,
             });
         });
+
+        test("should remove emoji", async () => {
+            await testEditor({
+                contentBefore: `<p>[]\uD83D\uDE0D def</p>`,
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                },
+                contentAfter: `<p>[]&nbsp;def</p>`,
+            });
+        });
+
+        test("should remove invisible empty space at the start", async () => {
+            await testEditor({
+                contentBefore: `<p>[]         def</p>`,
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                },
+                contentAfter: `<p>[]ef</p>`,
+            });
+        });
+
+        test("should remove invisible empty space at the start (2)", async () => {
+            await testEditor({
+                // The first 3 spaces are invisible : considered
+                // formating by the browser.
+                // The &nbsp; is visible (space 1).
+                // The last 3 spaces are consider as 1 visble space and
+                // two formating spaces (space 2).
+                contentBefore: `<p>[]   &nbsp;   def</p>`,
+                stepFunction: async (editor) => {
+                    await deleteForward(editor);
+                },
+                // Space 1 is deleted and space 2 should be transformed
+                // to a &nbsp; to stay visible.
+                contentAfter: `<p>[]&nbsp;def</p>`,
+            });
+        });
     });
 
     describe("white spaces", () => {

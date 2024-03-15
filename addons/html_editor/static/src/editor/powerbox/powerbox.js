@@ -65,7 +65,9 @@ export class Powerbox extends Component {
                     this.props.close();
                     break;
                 case "Enter":
+                case "Tab":
                     ev.preventDefault();
+                    ev.stopImmediatePropagation();
                     this.applyCurrentCommand();
                     break;
                 case "ArrowUp":

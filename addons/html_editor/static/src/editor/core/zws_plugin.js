@@ -51,8 +51,9 @@ export class ZwsPlugin extends Plugin {
         // @todo phoenix: in the original code, they check if it s a code element, and if it is, they add a zws after it.
         // Find next character.
         let nextCharacter = focusNode.textContent[focusOffset];
-        if (!nextCharacter) {
-            focusNode = nextLeaf(focusNode);
+        const nextNode = nextLeaf(focusNode, this.editable);
+        if (!nextCharacter && nextNode && closestBlock(nextNode) === closestBlock(focusNode)) {
+            focusNode = nextNode;
             focusOffset = 0;
             nextCharacter = focusNode.textContent[focusOffset];
         }
@@ -94,8 +95,13 @@ export class ZwsPlugin extends Plugin {
         // @todo phoenix: in the original code, they check if it s a code element, and if it is, they add a zws before it.
         // Find previous character.
         let previousCharacter = focusOffset > 0 && focusNode.textContent[focusOffset - 1];
-        if (!previousCharacter) {
-            focusNode = previousLeaf(focusNode);
+        const previousNode = previousLeaf(focusNode, this.editable);
+        if (
+            !previousCharacter &&
+            previousNode &&
+            closestBlock(previousNode) === closestBlock(focusNode)
+        ) {
+            focusNode = previousNode;
             focusOffset = nodeSize(focusNode);
             previousCharacter = focusNode.textContent[focusOffset - 1];
         }
