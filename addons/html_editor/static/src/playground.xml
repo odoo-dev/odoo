@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.Playground">
       <div class="d-flex">
-        <div class="p-2">
+        <div class="p-2 flex-shrink-0">
             <div>
                 <h3>Editor Config</h3>
                 <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="showToolbar" t-model="config.showToolbar"/><label for="showToolbar" class="form-check-label">Show Toolbar</label></div>
