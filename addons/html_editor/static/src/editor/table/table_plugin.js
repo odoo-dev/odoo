@@ -253,7 +253,7 @@ export class TablePlugin extends Plugin {
         const siblingRow = rows[rowIndex - 1] || rows[rowIndex + 1];
         row.remove();
         siblingRow
-            ? this.shared.setCursorStart({ anchorNode: siblingRow, anchorOffset: 0 })
+            ? this.shared.setCursorStart(siblingRow)
             : this.dispatch("DELETE_TABLE", { table });
     }
     resetSize({ table }) {
