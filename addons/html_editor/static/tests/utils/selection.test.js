@@ -110,9 +110,9 @@ describe("ensureFocus", () => {
                     const sel = document.getSelection();
                     const element = sel.anchorNode;
                     await dispatch(editor.editable, "keydown", { key: "/" });
-                    await insertText(editor, "/");
+                    insertText(editor, "/");
                     await dispatch(editor.editable, "keyup", { key: "/" });
-                    await insertText(editor, "h2");
+                    insertText(editor, "h2");
                     await dispatch(element, "keyup", { key: "2" });
                     await dispatch(editor.editable, "keydown", { key: "Enter" });
                     const activeElement = document.activeElement;
@@ -144,7 +144,7 @@ describe("ensureFocus", () => {
                     // await nextTickFrame();
                     let activeElement = document.activeElement;
                     setCursorStart(activeElement.lastElementChild);
-                    await insertText(editor, "focusWasConserved");
+                    insertText(editor, "focusWasConserved");
                     // Proof that a simple call to Element.focus would change
                     // the focus in this case.
                     editor.editable.focus();

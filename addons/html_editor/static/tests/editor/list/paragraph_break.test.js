@@ -91,8 +91,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ol><li>abc[]</li></ol>",
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter: "<ol><li>abc</li></ol><p>[]<br></p>",
                 });
@@ -103,8 +103,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>def[]</li></ol></li><li>ghi</li></ol>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li>abc</li><li class="oe-nested"><ol><li>def</li></ol></li><li>[]<br></li><li>ghi</li></ol>',
@@ -132,9 +132,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ol class="a"><li>abc[]</li></ol>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter: '<ol class="a"><li>abc</li><li>b</li><li>[]<br></li></ol>',
                 });
@@ -144,9 +144,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ol><li class="a">abc[]</li></ol>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li class="a">abc</li><li class="a">b</li><li class="a">[]<br></li></ol>',
@@ -158,9 +158,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ol>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -171,9 +171,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ol><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ol>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ol><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -197,9 +197,9 @@ describe("Selection collapsed", () => {
                                 <li>ef</li>
                             </ul>`),
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter: unformat(`
                             <ul>
@@ -266,8 +266,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ul><li>abc[]</li></ul>",
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter: "<ul><li>abc</li></ul><p>[]<br></p>",
                 });
@@ -278,8 +278,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>def[]</li></ul></li><li>ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li>abc</li><li class="oe-nested"><ul><li>def</li></ul></li><li>[]<br></li><li>ghi</li></ul>',
@@ -307,9 +307,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul class="a"><li>abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter: '<ul class="a"><li>abc</li><li>b</li><li>[]<br></li></ul>',
                 });
@@ -319,9 +319,9 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul><li class="a">abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li class="a">abc</li><li class="a">b</li><li class="a">[]<br></li></ul>',
@@ -333,9 +333,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -346,9 +346,9 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await insertText(editor, "b");
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        insertText(editor, "b");
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -475,8 +475,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">abc[]</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li></ul><p>[]<br></p>',
@@ -488,8 +488,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li class="o_checked">abc</li><li class="oe-nested"><ul class="o_checklist"><li class="o_checked">def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
@@ -501,8 +501,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def[]</li></ul></li><li class="o_checked">ghi</li></ul>',
                     stepFunction: async (editor) => {
-                        await splitBlock(editor);
-                        await splitBlock(editor);
+                        splitBlock(editor);
+                        splitBlock(editor);
                     },
                     contentAfter:
                         '<ul class="o_checklist"><li>abc</li><li class="oe-nested"><ul class="o_checklist"><li>def</li></ul></li><li>[]<br></li><li class="o_checked">ghi</li></ul>',
@@ -533,9 +533,9 @@ describe("Selection collapsed", () => {
                     await testEditor({
                         contentBefore: '<ul class="checklist a"><li>abc[]</li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="checklist a"><li>abc</li><li>d</li><li>[]<br></li></ul>',
@@ -547,9 +547,9 @@ describe("Selection collapsed", () => {
                         removeCheckIds: true,
                         contentBefore: '<ul class="o_checklist"><li class="a">abc[]</li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a">abc</li><li class="a">d</li><li class="a">[]<br></li></ul>',
@@ -562,9 +562,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc</custom-block></li>' +
@@ -576,9 +576,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc</custom-block></li>' +
@@ -603,9 +603,9 @@ describe("Selection collapsed", () => {
                                 <li class="o_checked">ef</li>
                             </ul>`),
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "0");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "0");
+                            splitBlock(editor);
                         },
                         contentAfter: unformat(`
                             <ul class="o_checklist">
@@ -633,9 +633,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="checklist a"><li class="o_checked">abc[]</li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="checklist a"><li class="o_checked">abc</li><li>d</li><li>[]<br></li></ul>',
@@ -648,9 +648,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="a o_checked">abc[]</li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a o_checked">abc</li><li class="a">d</li><li class="a">[]<br></li></ul>',
@@ -662,9 +662,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="a o_checked"><div>abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="a o_checked"><div>abc</div></li><li class="a"><div>d</div></li><li class="a"><div>[]<br></div></li></ul>',
@@ -676,9 +676,9 @@ describe("Selection collapsed", () => {
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked"><div class="a">abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "d");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "d");
+                            splitBlock(editor);
                         },
                         contentAfter:
                             '<ul class="o_checklist"><li class="o_checked"><div class="a">abc</div></li><li><div class="a">d</div></li><li><div class="a">[]<br></div></li></ul>',
@@ -701,9 +701,9 @@ describe("Selection collapsed", () => {
                                 <li class="o_checked">ef</li>
                             </ul>`),
                         stepFunction: async (editor) => {
-                            await splitBlock(editor);
-                            await insertText(editor, "0");
-                            await splitBlock(editor);
+                            splitBlock(editor);
+                            insertText(editor, "0");
+                            splitBlock(editor);
                         },
                         contentAfter: unformat(`
                             <ul class="o_checklist">

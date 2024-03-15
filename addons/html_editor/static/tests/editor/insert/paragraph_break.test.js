@@ -134,8 +134,8 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p><br></p><p><br></p><p>[]<br></p>",
             });
@@ -145,16 +145,16 @@ describe("Selection collapsed", () => {
             // await testEditor({
             //     contentBefore: '<p>[<br>]</p>',
             //     stepFunction: async (editor) => {
-            //         await splitBlock(editor);
-            //         await splitBlock(editor);
+            //         splitBlock(editor);
+            //         splitBlock(editor);
             //     },
             //     contentAfter: '<p><br></p><p><br></p><p>[]<br></p>',
             // });
             await testEditor({
                 contentBefore: "<p><br>[]</p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p><br></p><p><br></p><p>[]<br></p>",
             });
@@ -164,8 +164,8 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: "<p>[]abc</p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p><br></p><p><br></p><p>[]abc</p>",
             });
@@ -175,8 +175,8 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p>ab</p><p><br></p><p>[]cd</p>",
             });
@@ -186,9 +186,9 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p>ab</p><p><br></p><p><br></p><p>[]cd</p>",
             });
@@ -198,8 +198,8 @@ describe("Selection collapsed", () => {
             await testEditor({
                 contentBefore: "<p>abc[]</p>",
                 stepFunction: async (editor) => {
-                    await splitBlock(editor);
-                    await splitBlock(editor);
+                    splitBlock(editor);
+                    splitBlock(editor);
                 },
                 contentAfter: "<p>abc</p><p><br></p><p>[]<br></p>",
             });

@@ -257,9 +257,9 @@ describe("deleteForward", () => {
                     contentBeforeEdit:
                         '<p>ab[]cde<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>fghij</p>',
                     stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                        await deleteForward(editor);
-                        await deleteForward(editor);
+                        deleteForward(editor);
+                        deleteForward(editor);
+                        deleteForward(editor);
                     },
                     contentAfterEdit:
                         '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>fghij</p>',
@@ -273,7 +273,7 @@ describe("deleteForward", () => {
                     contentBeforeEdit:
                         '<p>ab[] <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
                     stepFunction: async (editor) => {
-                        await deleteForward(editor);
+                        deleteForward(editor);
                     },
                     contentAfterEdit:
                         '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
@@ -287,8 +287,8 @@ describe("deleteForward", () => {
                     contentBeforeEdit:
                         '<p>a[]b <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
                     stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                        await deleteForward(editor);
+                        deleteForward(editor);
+                        deleteForward(editor);
                     },
                     contentAfterEdit:
                         '<p>a[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> cd</p>',
@@ -303,8 +303,8 @@ describe("deleteForward", () => {
                     contentBeforeEdit:
                         '<div><span class="a">ab[]c </span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
                     stepFunction: async (editor) => {
-                        await deleteForward(editor);
-                        await deleteForward(editor);
+                        deleteForward(editor);
+                        deleteForward(editor);
                     },
                     contentAfterEdit:
                         '<div><span class="a">ab[]</span><i class="fa fa-star" contenteditable="false">\u200b</i> def</div>',
@@ -398,9 +398,9 @@ describe("deleteBackward", () => {
                     contentBeforeEdit:
                         '<p>abcde<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>fgh[]ij</p>',
                     stepFunction: async (editor) => {
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
+                        deleteBackward(editor);
+                        deleteBackward(editor);
+                        deleteBackward(editor);
                     },
                     contentAfterEdit:
                         '<p>abcde<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]ij</p>',
@@ -414,9 +414,9 @@ describe("deleteBackward", () => {
                     contentBeforeEdit:
                         '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i> fg[]hij</p>',
                     stepFunction: async (editor) => {
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
-                        await deleteBackward(editor);
+                        deleteBackward(editor);
+                        deleteBackward(editor);
+                        deleteBackward(editor);
                     },
                     contentAfterEdit:
                         '<p>abcde <i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]hij</p>',
@@ -529,7 +529,7 @@ describe("Text insertion", () => {
             contentBeforeEdit:
                 '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
             stepFunction: async (editor) => {
-                await insertText(editor, "s");
+                insertText(editor, "s");
             },
             contentAfterEdit:
                 '<p>abs[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
@@ -543,7 +543,7 @@ describe("Text insertion", () => {
             contentBeforeEdit:
                 '<p>ab<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]cd</p>',
             stepFunction: async (editor) => {
-                await insertText(editor, "s");
+                insertText(editor, "s");
             },
             contentAfterEdit:
                 '<p>ab<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>s[]cd</p>',
@@ -554,7 +554,7 @@ describe("Text insertion", () => {
         await testEditor({
             contentBefore: '<p>ab[<i class="fa fa-pastafarianism"></i>]cd</p>',
             stepFunction: async (editor) => {
-                await insertText(editor, "s");
+                insertText(editor, "s");
             },
             contentAfter: "<p>abs[]cd</p>",
         });

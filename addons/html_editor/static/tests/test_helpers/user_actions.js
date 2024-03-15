@@ -2,7 +2,7 @@ import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-d
 import { setSelection } from "./selection";
 import { childNodeIndex } from "@html_editor/editor/utils/position";
 
-export async function insertText(editor, text) {
+export function insertText(editor, text) {
     // Create and dispatch events to mock text insertion. Unfortunatly, the
     // events will be flagged `isTrusted: false` by the browser, requiring
     // the editor to detect them since they would not trigger the default
@@ -43,11 +43,11 @@ export async function insertText(editor, text) {
     }
 }
 
-export async function deleteForward(editor) {
+export function deleteForward(editor) {
     editor.dispatch("DELETE_FORWARD");
 }
 
-export async function deleteBackward(editor, isMobileTest = false) {
+export function deleteBackward(editor, isMobileTest = false) {
     // TODO phoenix: find a strategy for test mobile and desktop. (check legacy code)
 
     editor.dispatch("DELETE_BACKWARD");
@@ -122,7 +122,7 @@ export function switchDirection(editor) {
     //editor.execCommand('switchDirection')}
 }
 
-export async function splitBlock(editor) {
+export function splitBlock(editor) {
     editor.dispatch("SPLIT_BLOCK");
 }
 
@@ -196,7 +196,7 @@ export function justifyFull(editor) {
 }
 
 export function setColor(color, mode) {
-    return async (editor) => {
+    return (editor) => {
         editor.dispatch("APPLY_COLOR", { color, mode });
     };
 }

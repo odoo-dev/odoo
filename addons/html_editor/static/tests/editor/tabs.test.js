@@ -327,14 +327,14 @@ describe("delete backward tabulation", () => {
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]b</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]b</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]${oeTab(tabAfterA)}b</p>`,
         });
@@ -345,16 +345,16 @@ describe("delete backward tabulation", () => {
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}${oeTab()}[]b</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
-                await deleteBackward(editor);
+                deleteBackward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]b</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}${oeTab()}[]${oeTab()}b</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
-                await deleteBackward(editor);
+                deleteBackward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]${oeTab(tabAfterA)}b</p>`,
         });
@@ -364,9 +364,9 @@ describe("delete backward tabulation", () => {
         await testEditor({
             contentBefore: `<p>a${oeTab()}${oeTab()}${oeTab()}[]b</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
-                await deleteBackward(editor);
-                await deleteBackward(editor);
+                deleteBackward(editor);
+                deleteBackward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]b</p>`,
         });
@@ -379,21 +379,21 @@ describe("delete forward tabulation", () => {
         await testTabulation({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}b1</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]b1</p>`,
         });
         await testTabulation({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b2</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a${oeTab(tabAfterA)}[]b2</p>`,
         });
         await testTabulation({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}${oeTab()}b3</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]${oeTab(tabAfterA)}b3</p>`,
         });
@@ -404,24 +404,24 @@ describe("delete forward tabulation", () => {
         await testEditor({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}${oeTab()}b1</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteForward(editor);
+                deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]b1</p>`,
         });
         await testEditor({
             contentBefore: `<p>a[]${oeTab(tabAfterA)}${oeTab()}${oeTab()}b2</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteForward(editor);
+                deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]${oeTab(tabAfterA)}b2</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}${oeTab()}b3</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteForward(editor);
+                deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a${oeTab(tabAfterA)}[]b3</p>`,
         });
@@ -431,9 +431,9 @@ describe("delete forward tabulation", () => {
         await testEditor({
             contentBefore: `<p>a[]${oeTab()}${oeTab()}${oeTab()}b</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteForward(editor);
-                await deleteForward(editor);
+                deleteForward(editor);
+                deleteForward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]b</p>`,
         });
@@ -446,34 +446,34 @@ describe("delete mixed tabulation", () => {
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b1</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteBackward(editor);
+                deleteForward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]b1</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}b2</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
-                await deleteForward(editor);
+                deleteBackward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]b2</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}${oeTab()}[]${oeTab()}b3</p>`,
             stepFunction: async (editor) => {
-                await deleteBackward(editor);
-                await deleteForward(editor);
-                await deleteBackward(editor);
+                deleteBackward(editor);
+                deleteForward(editor);
+                deleteBackward(editor);
             },
             contentAfter: `<p>a[]b3</p>`,
         });
         await testEditor({
             contentBefore: `<p>a${oeTab(tabAfterA)}[]${oeTab()}${oeTab()}b4</p>`,
             stepFunction: async (editor) => {
-                await deleteForward(editor);
-                await deleteBackward(editor);
-                await deleteForward(editor);
+                deleteForward(editor);
+                deleteBackward(editor);
+                deleteForward(editor);
             },
             contentAfter: `<p>a[]b4</p>`,
         });

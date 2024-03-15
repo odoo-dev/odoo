@@ -327,7 +327,7 @@ describe("undo", () => {
             stepFunction: async (editor) => {
                 columnize(2)(editor);
                 undo(editor);
-                await insertText(editor, "x");
+                insertText(editor, "x");
             },
             contentAfter: "<p>x[]</p>",
         });
@@ -340,7 +340,7 @@ describe("undo", () => {
                 columnize(2)(editor);
                 undo(editor);
                 redo(editor);
-                await insertText(editor, "x");
+                insertText(editor, "x");
             },
             contentAfter:
                 columnsContainer(column(6, "<p>x[]</p>") + column(6, "<p><br></p>")) +

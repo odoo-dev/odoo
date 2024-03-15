@@ -16,7 +16,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
+                editor.dispatch(
                     "INSERT",
                     parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                 );
@@ -33,7 +33,7 @@ describe("collapsed selection", () => {
                 // This scenario is only possible with the allowInlineAtRoot option.
                 contentBefore: "<p><br></p>[]",
                 stepFunction: async (editor) => {
-                    await editor.dispatch(
+                    editor.dispatch(
                         "INSERT",
                         parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                     );
@@ -50,7 +50,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>a[]b<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
+                editor.dispatch(
                     "INSERT",
                     parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                 );
@@ -65,7 +65,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>a[]b<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
+                editor.dispatch(
                     "INSERT",
                     parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                 );
@@ -82,7 +82,7 @@ describe("collapsed selection", () => {
             await testEditor({
                 contentBefore: "<p>a[]e<br></p>",
                 stepFunction: async (editor) => {
-                    await editor.dispatch(
+                    editor.dispatch(
                         "INSERT",
                         parseHTML(editor.document, "<p>b</p><p>c</p><p>d</p>")
                     );
@@ -96,10 +96,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>[]<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
-                    "INSERT",
-                    parseHTML(editor.document, "<div><p>content</p></div>")
-                );
+                editor.dispatch("INSERT", parseHTML(editor.document, "<div><p>content</p></div>"));
             },
             contentAfter: "<div><p>content</p></div><p>[]<br></p>",
         });
@@ -109,7 +106,7 @@ describe("collapsed selection", () => {
         await testEditor({
             contentBefore: "<pre>abc[]<br>ghi</pre>",
             stepFunction: async (editor) => {
-                await editor.dispatch("INSERT", parseHTML(editor.document, "<pre>def</pre>"));
+                editor.dispatch("INSERT", parseHTML(editor.document, "<pre>def</pre>"));
             },
             contentAfter: "<pre>abcdef[]<br>ghi</pre>",
         });
@@ -121,7 +118,7 @@ describe("collapsed selection", () => {
             await testEditor({
                 contentBefore: "<p>content[]</p>",
                 stepFunction: async (editor) => {
-                    await editor.dispatch(
+                    editor.dispatch(
                         "INSERT",
                         parseHTML(
                             editor.document,
@@ -142,7 +139,7 @@ describe("collapsed selection", () => {
                 contentBefore: "<p>content</p>",
                 stepFunction: async (editor) => {
                     setCursorEnd(editor.editable, false);
-                    await editor.dispatch("INSERT", parseHTML(editor.document, "<p>def</p>"));
+                    editor.dispatch("INSERT", parseHTML(editor.document, "<p>def</p>"));
                 },
                 contentAfter: "<p>content</p><p>def[]</p>",
             });
@@ -154,10 +151,7 @@ describe("collapsed selection", () => {
             contentBefore: "<p>content</p>",
             stepFunction: async (editor) => {
                 setCursorEnd(editor.editable, false);
-                await editor.dispatch(
-                    "INSERT",
-                    parseHTML(editor.document, "<div>abc</div><p>def</p>")
-                );
+                editor.dispatch("INSERT", parseHTML(editor.document, "<div>abc</div><p>def</p>"));
             },
             contentAfter: "<p>content</p><div>abc</div><p>def[]</p>",
         });
@@ -169,7 +163,7 @@ describe("not collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>[a]<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
+                editor.dispatch(
                     "INSERT",
                     parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                 );
@@ -184,7 +178,7 @@ describe("not collapsed selection", () => {
         await testEditor({
             contentBefore: "<p>a[b]c<br></p>",
             stepFunction: async (editor) => {
-                await editor.dispatch(
+                editor.dispatch(
                     "INSERT",
                     parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
                 );
