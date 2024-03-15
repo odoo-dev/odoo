@@ -1,14 +1,18 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../../test_helpers/editor";
 import { press } from "@odoo/hoot-dom";
+import { unformat } from "../../test_helpers/format";
 
-// TODO use the right commands (ADD_ROW, ADD_COLUMN)
 function addRow(position) {
     return (editor) => editor.dispatch("ADD_ROW", { position });
 }
 
 function addColumn(position) {
     return (editor) => editor.dispatch("ADD_COLUMN", { position });
+}
+
+function removeRow(row) {
+    return (editor) => editor.dispatch("REMOVE_ROW", { row });
 }
 
 describe("row", () => {
@@ -124,6 +128,79 @@ describe("row", () => {
                     "<td>cd</td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
+            });
+        });
+    });
+    describe("removal", () => {
+        test("should remove a row based on selection", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td> <td>cd</td>
+                            </tr>
+                            <tr>
+                                <td>ef</td> <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: removeRow(),
+                contentAfter: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                []<td>ef</td> <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
+        test("should remove the row passed as argument", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td> <td>cd</td>
+                            </tr>
+                            <tr>
+                                <td>ef</td> <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: (editor) => {
+                    // Select the second row
+                    const row = editor.editable.querySelectorAll("tr")[1];
+                    removeRow(row)(editor);
+                },
+                contentAfter: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                []<td>ab</td> <td>cd</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
+        test("should remove the table upon sole row removal", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td> <td>cd</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: removeRow(),
+                contentAfter: "<p>[]<br></p>",
             });
         });
     });
