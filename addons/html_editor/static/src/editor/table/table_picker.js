@@ -2,7 +2,14 @@ import { Component, onMounted, useRef, useExternalListener, useState } from "@od
 
 export class TablePicker extends Component {
     static template = "html_editor.TablePicker";
-    static props = { onMounted: Function, dispatch: Function, close: Function, el: HTMLElement };
+    static props = {
+        onMounted: Function,
+        dispatch: Function,
+        close: Function,
+        el: {
+            validate: (el) => el.nodeType === Node.ELEMENT_NODE,
+        },
+    };
 
     setup() {
         const ref = useRef("root");
