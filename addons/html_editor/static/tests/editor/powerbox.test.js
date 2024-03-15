@@ -68,6 +68,16 @@ test("should filter the Powerbox contents with term", async () => {
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
 });
 
+test.tags("iframe")("should filter the Powerbox contents with term, in iframe", async () => {
+    const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
+    await insertText(editor, "/");
+    await animationFrame();
+    expect(commandNames(el).length).toBe(14);
+    await insertText(editor, "head");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+});
+
 test("should filter the Powerbox contents with term, even after delete backward", async () => {
     const { el, editor } = await setupEditor("<p>ab[]</p>");
     await insertText(editor, "/");
