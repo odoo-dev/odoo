@@ -1486,6 +1486,16 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    test.todo("should delete nothing when in an empty paragraph in a table cell", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr><td>abc</td><td><p>[]<br></p></td></tr></tbody></table>",
+            stepFunction: deleteBackward,
+            contentAfter:
+                "<table><tbody><tr><td>abc</td><td><p>[]<br></p></td></tr></tbody></table>",
+        });
+    });
+
     test("should only remove the text content of cells in a partly selected table", async () => {
         await testEditor({
             contentBefore: unformat(
@@ -1502,6 +1512,41 @@ describe("Selection not collapsed", () => {
                         <tr><td>ij</td><td><br></td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
+            ),
+        });
+    });
+
+    test("should remove a row in a partly selected table", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<table><tbody>
+                    <tr><td class="o_selected_td">[ab</td><td class="o_selected_td">cd]</td></tr>
+                    <tr><td>ef</td><td>gh</td></tr>
+                </tbody></table>`
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<table><tbody>
+                    <tr>[]<td>ef</td><td>gh</td></tr>
+                </tbody></table>`
+            ),
+        });
+    });
+
+    test("should remove a column in a partly selected table", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<table><tbody>
+                    <tr><td class="o_selected_td">[ab</td> <td>cd</td></tr>
+                    <tr><td class="o_selected_td">ef]</td> <td>gh</td></tr>
+                </tbody></table>`
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<table><tbody>
+                    <tr><td>[]cd</td></tr>
+                    <tr><td>gh</td></tr>
+                </tbody></table>`
             ),
         });
     });
