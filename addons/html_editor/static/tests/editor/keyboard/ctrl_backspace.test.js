@@ -15,7 +15,7 @@ test.todo("should not remove the last p with ctrl+backspace", async () => {
                     sel.anchorNode.remove();
                 }
             });
-            await press(["Ctrl", "Backspace"]);
+            press(["Ctrl", "Backspace"]);
         },
         contentAfter: unformat(`<p>[]<br></p>`),
     });
@@ -37,7 +37,7 @@ test.skip("should not remove the last p enclosed in a contenteditable=false with
                     sel.anchorNode.remove();
                 }
             });
-            await press(["Ctrl", "Backspace"]);
+            press(["Ctrl", "Backspace"]);
         },
         contentAfter: unformat(`
                 <p>text</p>
@@ -56,7 +56,7 @@ test.todo(
                     []<br>
                 </blockquote>`),
             stepFunction: async (editor) => {
-                await press(["Ctrl", "Backspace"]);
+                press(["Ctrl", "Backspace"]);
             },
             contentAfter: unformat(`<p>[]<br></p>`),
         });
@@ -74,7 +74,7 @@ test.todo(
                     </blockquote>
                 </div></div>`),
             stepFunction: async (editor) => {
-                await press(["Ctrl", "Backspace"]);
+                press(["Ctrl", "Backspace"]);
             },
             contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
@@ -93,7 +93,7 @@ test("should correctly rollback a CTRL+BACKSPACE if the element should not have 
                     </blockquote>
                 </div></div>`),
         stepFunction: async (editor) => {
-            await press(["Ctrl", "Backspace"]);
+            press(["Ctrl", "Backspace"]);
         },
         contentAfter: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
