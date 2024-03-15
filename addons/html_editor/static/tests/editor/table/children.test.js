@@ -15,6 +15,10 @@ function removeRow(row) {
     return (editor) => editor.dispatch("REMOVE_ROW", { row });
 }
 
+function removeColumn(cell) {
+    return (editor) => editor.dispatch("REMOVE_COLUMN", { cell });
+}
+
 describe("row", () => {
     describe("above", () => {
         test("should add a row above the top row", async () => {
@@ -147,6 +151,8 @@ describe("row", () => {
                     </table>
                 `),
                 stepFunction: removeRow(),
+                // @todo @phoenix: consider changing the behavior and placing the cursor
+                // inside the td (normalize deep)
                 contentAfter: unformat(`
                     <table>
                         <tbody>
@@ -352,6 +358,84 @@ describe("column", () => {
                     "<td><p><br></p></td>" +
                     "<td>ef</td>" +
                     "</tr></tbody></table>",
+            });
+        });
+    });
+    describe("removal", () => {
+        test("should remove a column based on selection", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td> <td>cd</td>
+                            </tr>
+                            <tr>
+                                <td>ef</td> <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: removeColumn(),
+                contentAfter: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]cd</td>
+                            </tr>
+                            <tr>
+                                <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
+        test("should remove the column passed as argument", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td> <td>cd</td>
+                            </tr>
+                            <tr>
+                                <td>ef</td> <td>gh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: (editor) => {
+                    // Select the second cell
+                    const cell = editor.editable.querySelectorAll("td")[1];
+                    removeColumn(cell)(editor);
+                },
+                contentAfter: unformat(`
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>[]ab</td>
+                            </tr>
+                            <tr>
+                                <td>ef</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
+        test("should remove the table upon sole column removal", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table>
+                        <tbody>
+                            <tr> <td>[]ab</td> </tr>
+                            <tr> <td>cd</td> </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: removeColumn(),
+                contentAfter: "<p>[]<br></p>",
             });
         });
     });
