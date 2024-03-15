@@ -8,7 +8,7 @@ describe("undo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
             },
             contentAfter: "<p>ab []cd</p>",
@@ -19,7 +19,7 @@ describe("undo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 undo(editor); // <p>ab []cd</p> (nothing to undo)
             },
@@ -33,7 +33,7 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 redo(editor); // <p>ab[]cd</p>
             },
@@ -45,7 +45,7 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 redo(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
@@ -58,7 +58,7 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 redo(editor); // <p>ab[]cd</p>
                 redo(editor); // <p>ab[]cd</p> (nothing to redo)
@@ -71,8 +71,8 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
-                await deleteBackward(editor); // <p>a[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>a[]cd</p>
                 undo(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 redo(editor); // <p>ab[]cd</p>
@@ -87,7 +87,7 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>ab []cd</p>",
             stepFunction: async (editor) => {
-                await deleteBackward(editor); // <p>ab[]cd</p>
+                deleteBackward(editor); // <p>ab[]cd</p>
                 undo(editor); // <p>ab []cd</p>
                 undo(editor); // <p>ab []cd</p> (nothing to undo)
                 redo(editor); // <p>ab[]cd</p>
@@ -105,12 +105,12 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
-                await insertText(editor, "a");
-                await insertText(editor, "b");
-                await insertText(editor, "c");
+                insertText(editor, "a");
+                insertText(editor, "b");
+                insertText(editor, "c");
                 undo(editor);
                 undo(editor);
-                await insertText(editor, "d");
+                insertText(editor, "d");
                 undo(editor);
                 undo(editor);
                 redo(editor);
@@ -124,12 +124,12 @@ describe("redo", () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
-                await insertText(editor, "a");
-                await insertText(editor, "b");
-                await insertText(editor, "c");
+                insertText(editor, "a");
+                insertText(editor, "b");
+                insertText(editor, "c");
                 undo(editor);
                 undo(editor);
-                await insertText(editor, "d");
+                insertText(editor, "d");
                 undo(editor);
                 redo(editor);
                 redo(editor);

@@ -17,16 +17,16 @@ test("can add a table using the powerbox and keyboard", async () => {
     expect(".o-we-tablepicker").toHaveCount(0);
 
     // filter to get table command in first position
-    await insertText(editor, "table");
+    insertText(editor, "table");
     await animationFrame();
 
     // press enter to open tablepicker
-    await press("Enter");
+    press("Enter");
     await waitFor(".o-we-tablepicker");
     expect(".o-we-powerbox").toHaveCount(0);
 
     // press enter to validate current dimension (3x3)
-    await press("Enter");
+    press("Enter");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
     expect(".o-we-tablepicker").toHaveCount(0);
@@ -71,16 +71,16 @@ test.tags("iframe")("in iframe, can add a table using the powerbox and keyboard"
     expect(".o-we-tablepicker").toHaveCount(0);
 
     // filter to get table command in first position
-    await insertText(editor, "table");
+    insertText(editor, "table");
     await animationFrame();
 
     // press enter to open tablepicker
-    await press("Enter");
+    press("Enter");
     await waitFor(".o-we-tablepicker");
     expect(".o-we-powerbox").toHaveCount(0);
 
     // press enter to validate current dimension (3x3)
-    await press("Enter");
+    press("Enter");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
     expect(".o-we-tablepicker").toHaveCount(0);

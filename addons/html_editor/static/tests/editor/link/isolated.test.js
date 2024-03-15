@@ -45,7 +45,7 @@ test.todo("should keep isolated link after a delete", async () => {
         contentBefore: '<p>a<a href="#/">b[]</a>c</p>',
         stepFunction: async (editor) => {
             await clickOnLink(editor);
-            await deleteBackward(editor);
+            deleteBackward(editor);
         },
         contentAfterEdit:
             '<p>a<a href="#/" data-oe-zws-empty-inline="" class="o_link_in_selection">' +
@@ -64,10 +64,10 @@ test.todo("should keep isolated link after a delete and typing", async () => {
         contentBefore: '<p>a<a href="#/">b[]</a>c</p>',
         stepFunction: async (editor) => {
             await clickOnLink(editor);
-            await deleteBackward(editor);
-            await insertText(editor, "a");
-            await insertText(editor, "b");
-            await insertText(editor, "c");
+            deleteBackward(editor);
+            insertText(editor, "a");
+            insertText(editor, "b");
+            insertText(editor, "c");
         },
         contentAfter: '<p>a<a href="#/">abc[]</a>c</p>',
     });
@@ -78,10 +78,10 @@ test.todo("should delete the content from the link when popover is active", asyn
         contentBefore: '<p><a href="#/">abc[]abc</a></p>',
         stepFunction: async (editor) => {
             await clickOnLink(editor);
-            await deleteBackward(editor);
-            await deleteBackward(editor);
-            await deleteBackward(editor);
-            await deleteBackward(editor);
+            deleteBackward(editor);
+            deleteBackward(editor);
+            deleteBackward(editor);
+            deleteBackward(editor);
         },
         contentAfter: '<p><a href="#/">[]abc</a></p>',
     });
