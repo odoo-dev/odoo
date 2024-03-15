@@ -118,6 +118,14 @@ test("should execute command and remove term and hot character on Enter", async 
     expect(".o-we-powerbox").toHaveCount(0);
 });
 
+test("should execute command and remove term and hot character on Tab", async () => {
+    const { el, editor } = await setupEditor("<p>ab[]</p>");
+    await insertText(editor, "/head");
+    await animationFrame();
+    press("Tab");
+    expect(getContent(el)).toBe("<h1>ab[]</h1>");
+});
+
 test.todo("should close the powerbox if keyup event is called on other block", async () => {
     // ged: not sure i understand the goal of this test
     const { editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
@@ -128,6 +136,16 @@ test.todo("should close the powerbox if keyup event is called on other block", a
     expect(".o-we-powerbox").toHaveCount(1);
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
+});
+
+test.todo.tags("mobile")("should insert a 3x3 table on type `/table` in mobile view", async () => {
+    const { el, editor } = await setupEditor("<p>[]<br></p>");
+    await insertText(editor, "/table");
+    await animationFrame();
+    press("Enter");
+    expect(getContent(el)).toBe(
+        `<table class="table table-bordered o_table"><tbody><tr><td>[]<p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p><br></p>`
+    );
 });
 
 test("should toggle list on empty paragraph", async () => {

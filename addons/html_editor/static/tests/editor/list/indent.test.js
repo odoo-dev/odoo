@@ -636,6 +636,19 @@ describe("with selection collapsed", () => {
                     `),
         });
     });
+
+    test.todo("should not indent a nav-item list", async () => {
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item">a[]</li></ul>',
+            stepFunction: keydownTab,
+            contentAfter: '<ul><li class="nav-item">a[]</li></ul>',
+        });
+        await testEditor({
+            contentBefore: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+            stepFunction: keydownTab,
+            contentAfter: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+        });
+    });
 });
 
 describe("with selection", () => {

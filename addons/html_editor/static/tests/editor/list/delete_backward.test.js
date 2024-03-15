@@ -2027,6 +2027,14 @@ describe("Selection not collapsed", () => {
                     '<h1>a[]i</h1><custom-block style="display: block;"><ol><li>jk</li></ol></custom-block>',
             });
         });
+
+        test("should not join the next list with the first one on delete range", async () => {
+            await testEditor({
+                contentBefore: "<ol><li>ab</li><li>[cd</li><li>ef]</li><li>gh</li></ol>",
+                stepFunction: deleteBackward,
+                contentAfter: "<ol><li>ab</li><li>[]<br></li><li>gh</li></ol>",
+            });
+        });
     });
     describe("Unordered", () => {
         test("should delete text within a list item", async () => {
@@ -2122,6 +2130,13 @@ describe("Selection not collapsed", () => {
                 stepFunction: deleteBackward,
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display: block;"><ul><li>jk</li></ul></custom-block>',
+            });
+        });
+        test("should not join the next list with the first one on delete range", async () => {
+            await testEditor({
+                contentBefore: "<ul><li>ab</li><li>[cd</li><li>ef]</li><li>gh</li></ul>",
+                stepFunction: deleteBackward,
+                contentAfter: "<ul><li>ab</li><li>[]<br></li><li>gh</li></ul>",
             });
         });
     });
@@ -2271,6 +2286,37 @@ describe("Selection not collapsed", () => {
                 stepFunction: deleteBackward,
                 contentAfter:
                     '<h1>a[]i</h1><custom-block style="display:block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
+            });
+        });
+
+        test.todo("should not join the next list with the first one on delete range", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li>ab</li><li class="o_checked">[cd</li><li>ef]</li><li>gh</li></ul>',
+                stepFunction: deleteBackward,
+                contentAfter: '<ul class="o_checklist"><li>ab</li><li>[]<br></li><li>gh</li></ul>',
+            });
+        });
+
+        test.todo("should remove the o_checked class on delete range", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li>ab</li><li class="o_checked"><a href="#">[cd</a></li><li>ef]</li><li>gh</li></ul>',
+                stepFunction: deleteBackward,
+                contentAfter: '<ul class="o_checklist"><li>ab</li><li>[]<br></li><li>gh</li></ul>',
+            });
+        });
+
+        test.todo("should remove the o_checked class on delete range (2)", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore:
+                    '<ul class="o_checklist"><li>ab</li><li class="o_checked"><h1>[cd</h1></li><li>ef]</li><li>gh</li></ul>',
+                stepFunction: deleteBackward,
+                contentAfter:
+                    '<ul class="o_checklist"><li>ab</li><li><h1>[]<br></h1></li><li>gh</li></ul>',
             });
         });
     });

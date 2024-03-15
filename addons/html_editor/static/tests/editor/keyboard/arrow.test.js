@@ -38,6 +38,24 @@ test("should move past a zws (collapsed - ArrowLeft)", async () => {
         },
         contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
     });
+    await testEditor({
+        contentBefore:
+            '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span>ab</p>',
+        stepFunction: async () => {
+            await press("ArrowLeft");
+        },
+        contentAfter:
+            '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span>ab</p>',
+        // Final state: '<p><span class="a">\u200B[]</span></p><p><span class="b">\u200B</span>ab</p>'
+    });
+    await testEditor({
+        contentBefore: '<p><span class="a">\u200B</span></p><p><span class="b">\u200B[]</span></p>',
+        stepFunction: async () => {
+            await press("ArrowLeft");
+        },
+        contentAfter: '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>',
+        // Final state: '<p><span class="a">\u200B[]</span></p><p><span class="a">\u200B</span></p>'
+    });
 });
 
 test("should move past a zws (collapsed at the end of a block)", async () => {
@@ -56,6 +74,26 @@ test("should move past a zws (collapsed at the end of a block)", async () => {
         },
         contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p>cd</p>',
         // Final state: '<p>ab<span class="a">\u200B</span></p><p>[]cd</p>'
+    });
+    await testEditor({
+        contentBefore:
+            '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+        stepFunction: async () => {
+            await press("ArrowRight");
+        },
+        contentAfter:
+            '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+        // Final state: '<p>ab<span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>'
+    });
+    await testEditor({
+        contentBefore:
+            '<p>ab<span class="a">[]\u200B</span></p><p><span class="b">\u200B</span></p>',
+        stepFunction: async (editor) => {
+            await press("ArrowRight");
+        },
+        contentAfter:
+            '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+        // Final state: '<p>ab<span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>'
     });
 });
 
@@ -94,6 +132,16 @@ test("should select a zws (2)", async () => {
         },
         contentAfter: '<p>a[b<span class="a">\u200B]</span>cd</p>',
         // Final state: '<p>a[b<span class="a">\u200B</span>c]d</p>'
+    });
+    await testEditor({
+        contentBefore:
+            '<p>a[b]<span class="a">\u200B</span></p><p><span class="b">\u200B</span></p>',
+        stepFunction: async () => {
+            press(["Shift", "ArrowRight"]);
+        },
+        contentAfter:
+            '<p>a[b<span class="a">\u200B]</span></p><p><span class="b">\u200B</span></p>',
+        // Final state: '<p>a[b<span class="a">\u200B</span></p><p><span class="b">]\u200B</span></p>'
     });
 });
 

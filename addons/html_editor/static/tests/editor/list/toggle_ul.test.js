@@ -23,6 +23,22 @@ describe("Range collapsed", () => {
             });
         });
 
+        test("should turn a ordered list into a unordered list", async () => {
+            await testEditor({
+                contentBefore: "<ol><li>ab[]cd</li></ol>",
+                stepFunction: toggleUnorderedList,
+                contentAfter: "<ul><li>ab[]cd</li></ul>",
+            });
+        });
+
+        test("should turn a checked list into a unordered list", async () => {
+            await testEditor({
+                contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+                stepFunction: toggleUnorderedList,
+                contentAfter: "<ul><li>ab[]cd</li></ul>",
+            });
+        });
+
         test("should turn a heading into a list", async () => {
             await testEditor({
                 contentBefore: "<h1>ab[]cd</h1>",
@@ -103,6 +119,47 @@ describe("Range collapsed", () => {
                 });
             }
         );
+        test.todo(
+            "should create a new unordered list if current node is inside a nav-item list",
+            async () => {
+                await testEditor({
+                    contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                    stepFunction: toggleUnorderedList,
+                    contentAfter: '<ul><li class="nav-item"><ul><li>a[]b</li></ul></li></ul>',
+                });
+            }
+        );
+
+        test.todo(
+            "should create a new unordered list if closestBlock is inside a nav-item list",
+            async () => {
+                await testEditor({
+                    contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                    stepFunction: toggleUnorderedList,
+                    contentAfter:
+                        '<ul><li class="nav-item"><div><ul><li>a[]b</li></ul></div></li></ul>',
+                });
+            }
+        );
+
+        test.todo(
+            "should only keep dir attribute when converting a non Paragraph element",
+            async () => {
+                await testEditor({
+                    contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                    stepFunction: toggleUnorderedList,
+                    contentAfter: '<ul dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                });
+            }
+        );
+
+        test("should keep all attributes when converting a Paragraph element", async () => {
+            await testEditor({
+                contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                stepFunction: toggleUnorderedList,
+                contentAfter: '<ul dir="rtl" class="text-uppercase"><li>a[]b</li></ul>',
+            });
+        });
     });
     describe("Remove", () => {
         test("should turn an empty list into a paragraph", async () => {
