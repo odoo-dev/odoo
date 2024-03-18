@@ -1,25 +1,23 @@
-import { Component, onMounted, useRef, useExternalListener, useState } from "@odoo/owl";
+import { Component, useExternalListener, useState } from "@odoo/owl";
+import { useOverlay } from "../core/overlay_plugin";
 
 export class TablePicker extends Component {
     static template = "html_editor.TablePicker";
     static props = {
-        onMounted: Function,
         dispatch: Function,
-        close: Function,
         el: {
             validate: (el) => el.nodeType === Node.ELEMENT_NODE,
         },
     };
 
     setup() {
-        const ref = useRef("root");
+        this.overlay = useOverlay("root", "bottom");
         this.state = useState({
             cols: 3,
             rows: 3,
         });
-        onMounted(() => this.props.onMounted(ref.el));
         useExternalListener(document, "mousedown", (ev) => {
-            this.props.close();
+            this.overlay.close();
         });
         useExternalListener(this.props.el, "keydown", (ev) => {
             const key = ev.key;
@@ -62,6 +60,6 @@ export class TablePicker extends Component {
 
     insertTable() {
         this.props.dispatch("INSERT_TABLE", { cols: this.state.cols, rows: this.state.rows });
-        this.props.close();
+        this.overlay.close();
     }
 }

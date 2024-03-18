@@ -1,13 +1,10 @@
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
+import { useOverlay } from "../core/overlay_plugin";
 
 export class Toolbar extends Component {
     static template = "html_editor.Toolbar";
     static props = {
-        // overlay props
-        onMounted: { type: Function, optional: true },
-        close: { type: Function, optional: true },
         floating: { type: Boolean, optional: true },
-        // toolbar props
         toolbar: {
             type: Object,
             shape: {
@@ -21,12 +18,9 @@ export class Toolbar extends Component {
     };
 
     setup() {
-        const ref = useRef("root");
         this.buttonsActiveState = useState(this.props.toolbar.buttonsActiveState);
         if (this.props.floating) {
-            onMounted(() => {
-                this.props.onMounted(ref.el);
-            });
+            this.overlay = useOverlay("root", "top");
         }
     }
 

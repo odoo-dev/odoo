@@ -34,7 +34,7 @@ export class TablePlugin extends Plugin {
 
     setup() {
         /** @type {import("../core/overlay_plugin").Overlay} */
-        this.picker = this.shared.createOverlay(TablePicker, "bottom", {
+        this.picker = this.shared.createOverlay(TablePicker, {
             dispatch: this.dispatch,
             el: this.editable,
         });

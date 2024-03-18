@@ -1,20 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-
-function getCurrentRect(selection) {
-    const range = selection.getRangeAt(0);
-    let rect = range.getBoundingClientRect();
-    if (rect.x === 0 && rect.width === 0 && rect.height === 0) {
-        const clonedRange = range.cloneRange();
-        const shadowCaret = document.createTextNode("|");
-        clonedRange.insertNode(shadowCaret);
-        clonedRange.selectNode(shadowCaret);
-        rect = clonedRange.getBoundingClientRect();
-        shadowCaret.remove();
-        clonedRange.detach();
-    }
-    return rect;
-}
+import { onMounted, useEnv, useRef } from "@odoo/owl";
 
 /**
  * Provide the following feature:
@@ -27,8 +13,11 @@ export class OverlayPlugin extends Plugin {
     overlays = [];
 
     setup() {
-        this.addDomListener(document, "scroll", this.onScroll, true);
-        this.addDomListener(window, "resize", this.updatePositions, true);
+        // @todo @phoenix handle the case where the editable is in an iframe
+        // => need to listen to event in main document/window and in iframe
+        // => need to apply offsets
+        this.addDomListener(this.document, "scroll", this.onScroll, true);
+        this.addDomListener(this.document.defaultView, "resize", this.updatePositions, true);
     }
 
     destroy() {
@@ -37,8 +26,8 @@ export class OverlayPlugin extends Plugin {
         }
     }
 
-    createOverlay(Component, position, props) {
-        const overlay = new Overlay(this, Component, position, props);
+    createOverlay(Component, props) {
+        const overlay = new Overlay(this, Component, props, this.services);
         this.overlays.push(overlay);
         return overlay;
     }
@@ -56,28 +45,42 @@ export class OverlayPlugin extends Plugin {
     }
 }
 
+export function useOverlay(refName, position) {
+    const env = useEnv();
+    const ref = useRef(refName);
+    const overlay = env.overlay;
+    overlay.position = position;
+    onMounted(() => {
+        overlay.el = ref.el;
+        ref.el.style.position = "absolute";
+        overlay.updatePosition();
+    });
+    return overlay;
+}
+
 export class Overlay {
-    constructor(plugin, C, position, props) {
+    constructor(plugin, C, props, services) {
         this.plugin = plugin;
+        this.services = services;
+        this.target = null;
         this.el = null;
         this.isOpen = false;
         this.C = C;
-        this.position = position;
+        this.position = null;
         this.props = props;
         this._remove = null;
     }
-    open() {
+    /**
+     * @param {HTMLElement | null} target for the overlay. If null, current selection will be used instead
+     */
+    open(target = null) {
+        this.target = target;
         if (this.isOpen) {
             this.updatePosition();
         } else {
             this.isOpen = true;
-            this._remove = this.plugin.services.overlay.add(this.C, {
-                close: () => this.close(),
-                onMounted: (el) => {
-                    this.el = el;
-                    this.updatePosition();
-                },
-                ...this.props,
+            this._remove = this.plugin.services.overlay.add(this.C, this.props, {
+                env: { overlay: this, services: this.services },
             });
         }
     }
@@ -86,6 +89,7 @@ export class Overlay {
         if (this._remove) {
             this._remove();
             this.el = null;
+            this.target = null;
         }
     }
     updatePosition() {
@@ -97,7 +101,7 @@ export class Overlay {
         const Y_OFFSET = 6;
 
         // autoclose if overlay target is out of view
-        const rect = getCurrentRect(this.plugin.document.getSelection());
+        const rect = this.target ? this.target.getBoundingClientRect() : this.getCurrentRect();
         if (rect.bottom < elRect.top - 10 || rect.top > elRect.bottom + Y_OFFSET) {
             // position below
             this.close();
@@ -122,6 +126,23 @@ export class Overlay {
         const left = rect.left;
         this.el.style.left = left + "px";
         this.el.style.top = top + "px";
+    }
+
+    getCurrentRect() {
+        const doc = this.plugin.document;
+        const selection = doc.getSelection();
+        const range = selection.getRangeAt(0);
+        let rect = range.getBoundingClientRect();
+        if (rect.x === 0 && rect.width === 0 && rect.height === 0) {
+            const clonedRange = range.cloneRange();
+            const shadowCaret = doc.createTextNode("|");
+            clonedRange.insertNode(shadowCaret);
+            clonedRange.selectNode(shadowCaret);
+            rect = clonedRange.getBoundingClientRect();
+            shadowCaret.remove();
+            clonedRange.detach();
+        }
+        return rect;
     }
 }
 

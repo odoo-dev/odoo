@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.TableMenu">
+        <div t-ref="root" class="o-we-table-menu alert alert-danger">
+            menu... todo
+        </div>
+    </t>
+</templates>

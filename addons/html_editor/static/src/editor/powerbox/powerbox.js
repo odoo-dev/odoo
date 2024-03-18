@@ -1,6 +1,7 @@
 import { Component, onMounted, onPatched, useExternalListener, useRef } from "@odoo/owl";
 import { rotate } from "@web/core/utils/arrays";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { useOverlay } from "../core/overlay_plugin";
 
 /**
  * @todo @phoenix i think that most of the "control" code in this component
@@ -9,8 +10,6 @@ import { fuzzyLookup } from "@web/core/utils/search";
 export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
     static props = {
-        onMounted: Function,
-        close: Function,
         dispatch: Function,
         el: {
             validate: (el) => el.nodeType === Node.ELEMENT_NODE,
@@ -39,16 +38,16 @@ export class Powerbox extends Component {
         const search = this.node.nodeValue?.slice(this.offset + 1, this.endOffset) || "";
         this.computeCommands(search);
 
+        this.overlay = useOverlay("root", "bottom");
         onMounted(() => {
             if (this.node.nodeType !== Node.TEXT_NODE) {
                 // in this case, we have an element, but we want the text node that
                 // was created by the new character "/";
                 this.node = this.node.firstChild;
             }
-            this.props.onMounted(ref.el);
             const prevChar = this.node.nodeValue[this.offset];
             if (prevChar !== "/") {
-                this.props.close();
+                this.overlay.close();
             }
         });
         onPatched(() => {
@@ -62,7 +61,7 @@ export class Powerbox extends Component {
             const key = ev.key;
             switch (key) {
                 case "Escape":
-                    this.props.close();
+                    this.overlay.close();
                     break;
                 case "Enter":
                 case "Tab":
@@ -86,7 +85,7 @@ export class Powerbox extends Component {
         useExternalListener(this.props.el, "input", (ev) => {
             const range = ownerDocument.getSelection().getRangeAt(0);
             if (!this.isSearching(range)) {
-                this.props.close();
+                this.overlay.close();
                 return;
             }
             this.endOffset = range.endOffset;
@@ -95,7 +94,7 @@ export class Powerbox extends Component {
             this.render();
         });
         useExternalListener(document, "mousedown", (ev) => {
-            this.props.close();
+            this.overlay.close();
         });
     }
 
@@ -127,7 +126,7 @@ export class Powerbox extends Component {
         }
         this.cmdIndex = 0;
         if (!this.commands.length) {
-            this.props.close();
+            this.overlay.close();
         }
     }
 
@@ -144,7 +143,7 @@ export class Powerbox extends Component {
         this.props.onApplyCommand();
 
         command.action(this.props.dispatch);
-        this.props.close();
+        this.overlay.close();
     }
 
     applyCurrentCommand() {

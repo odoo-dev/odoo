@@ -16,7 +16,7 @@ export class ToolbarPlugin extends Plugin {
         this.buttonsActiveState = reactive(
             this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
         );
-        this.overlay = this.shared.createOverlay(Toolbar, "top", {
+        this.overlay = this.shared.createOverlay(Toolbar, {
             toolbar: this.getToolbarInfo(),
             floating: true,
         });
