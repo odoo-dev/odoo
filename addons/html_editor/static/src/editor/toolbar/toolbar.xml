@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.Toolbar">
-        <div t-ref="root" class="o-we-toolbar bg-white d-flex align-items-center"
-            t-att-class="{'overlay position-absolute': props.floating}">
+        <div t-ref="root" class="o-we-toolbar bg-white d-flex align-items-center">
             <t t-foreach="props.toolbar?.buttonGroups || []" t-as="buttonGroup" t-key="buttonGroup.id">
                 <div class="btn-group" t-att-name="buttonGroup.id">
                     <t t-foreach="buttonGroup.buttons" t-as="button" t-key="button.id">
