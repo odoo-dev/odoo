@@ -247,8 +247,8 @@ export class HistoryPlugin extends Plugin {
      * @param { MutationRecord[] } records
      */
     filterMutationRecords(records) {
-        for (const callback of this.resources["filter_mutation_records"]) {
-            records = callback(records);
+        for (const callback of this.resources["is_mutation_record_savable"]) {
+            records = records.filter(callback);
         }
 
         // Save the first attribute in a cache to compare only the first
@@ -308,7 +308,6 @@ export class HistoryPlugin extends Plugin {
             filteredRecords.push(record);
         }
         // @todo @phoenix allow an option to filter mutation records.
-        // return this.options.filterMutationRecords(filteredRecords);
         return filteredRecords;
     }
     stageSelection() {

@@ -3,13 +3,11 @@ import { isEmpty } from "../utils/dom_info";
 import { removeClass } from "../utils/dom";
 import { registry } from "@web/core/registry";
 
-function filterMutationRecords(records) {
-    return records.filter((record) => {
-        if (record.type === "attributes" && record.attributeName === "placeholder") {
-            return false;
-        }
-        return true;
-    });
+function isMutationRecordSavable(record) {
+    if (record.type === "attributes" && record.attributeName === "placeholder") {
+        return false;
+    }
+    return true;
 }
 
 export class HintPlugin extends Plugin {
@@ -17,7 +15,7 @@ export class HintPlugin extends Plugin {
     static dependencies = ["history", "selection"];
     static resources = (p) => ({
         history_rendering_classes: ["o-we-hint"],
-        filter_mutation_records: filterMutationRecords,
+        is_mutation_record_savable: isMutationRecordSavable,
         onSelectionChange: p.updateTempHint.bind(p),
     });
 
