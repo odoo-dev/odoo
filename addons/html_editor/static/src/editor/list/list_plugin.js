@@ -268,6 +268,7 @@ export class ListPlugin extends Plugin {
     pToList(p, mode) {
         const selectionToRestore = { ...this.shared.getEditableSelection() };
         const list = insertListAfter(this.document, p, mode, [[...p.childNodes]]);
+        this.dispatch("CLEAN_NODE", { node: p });
         copyAttributes(p, list);
         p.remove();
 

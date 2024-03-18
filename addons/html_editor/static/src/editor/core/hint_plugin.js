@@ -23,7 +23,8 @@ export class HintPlugin extends Plugin {
 
     setup() {
         this.tempHint = null;
-        this.updateHints();
+        this.hintElements = new Set();
+        this.updateHints(this.editable);
     }
 
     destroy() {
@@ -33,12 +34,11 @@ export class HintPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "CONTENT_UPDATED": {
-                const root = payload || this.editable;
-                this.updateHints(root);
+                this.updateHints(payload.root);
                 break;
             }
-            case "CLEAN_BEFORE_SPLIT_BLOCK": // @todo @phoenix: maybe use the NORMALIZE command for this?
-                this.clearHints();
+            case "CLEAN_NODE": // @todo @phoenix: maybe use the NORMALIZE command for this?
+                this.clearHints(payload.root);
                 break;
             case "CLEAN":
                 this.clearHints();
@@ -46,7 +46,7 @@ export class HintPlugin extends Plugin {
         }
     }
 
-    updateHints(root = this.editable) {
+    updateHints(root) {
         this.clearHints(root);
 
         // Add empty block hints.
@@ -82,6 +82,7 @@ export class HintPlugin extends Plugin {
     makeHint(el, text) {
         el.setAttribute("placeholder", text);
         el.classList.add("o-we-hint");
+        this.hintElements.add(el);
     }
 
     removeHint(el) {
@@ -90,10 +91,15 @@ export class HintPlugin extends Plugin {
         if (this.tempHint === el) {
             this.tempHint = null;
         }
+        this.hintElements.delete(el);
     }
 
-    clearHints(root = this.editable) {
-        for (const hint of this.selectElements(root, ".o-we-hint")) {
+    clearHints(root) {
+        const hintElements = root
+            ? [...this.hintElements].filter((el) => root.contains(el))
+            : this.hintElements;
+
+        for (const hint of hintElements) {
             this.removeHint(hint);
         }
     }
