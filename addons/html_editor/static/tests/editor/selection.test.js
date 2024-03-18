@@ -1,39 +1,29 @@
 import { describe, test, expect } from "@odoo/hoot";
-import { testEditor } from "../test_helpers/editor";
+import { setupEditor } from "../test_helpers/editor";
+import { animationFrame } from "@odoo/hoot-mock";
 
-describe("isDomSelectionInEditable", () => {
-    test("isDomSelectionInEditable should be true", async () => {
-        await testEditor({
-            contentBefore: "<p>a[]b</p>",
-            stepFunction: (editor) => {
-                const selection = editor.shared.getEditableSelection();
-                expect(selection.isDomSelectionInEditable()).toBe(true);
-            },
-            contentAfter: "<p>a[]b</p>",
-        });
+describe("inEditable", () => {
+    test("inEditable should be true", async () => {
+        const { editor } = await setupEditor("<p>a[]b</p>");
+        const selection = editor.shared.getEditableSelection();
+        expect(selection.inEditable).toBe(true);
     });
-    test("isDomSelectionInEditable should be false when it is set outside the editable", async () => {
-        await testEditor({
-            contentBefore: "<p>a[]b</p>",
-            stepFunction: (editor) => {
-                const selection = document.getSelection();
-                selection.setPosition(document.body);
-                const editableSelection = editor.shared.getEditableSelection();
-                expect(editableSelection.isDomSelectionInEditable()).toBe(false);
-            },
-            contentAfter: "<p>ab</p>",
-        });
+
+    test("inEditable should be false when it is set outside the editable", async () => {
+        const { editor } = await setupEditor("<p>ab</p>");
+        const selection = editor.shared.getEditableSelection();
+        expect(selection.inEditable).toBe(false);
     });
-    test("isDomSelectionInEditable should be false when it is set outside the editable after retrieving it", async () => {
-        await testEditor({
-            contentBefore: "<p>a[]b</p>",
-            stepFunction: (editor) => {
-                const selection = document.getSelection();
-                const editableSelection = editor.shared.getEditableSelection();
-                selection.setPosition(document.body);
-                expect(editableSelection.isDomSelectionInEditable()).toBe(false);
-            },
-            contentAfter: "<p>ab</p>",
-        });
+
+    test("inEditable should be false when it is set outside the editable after retrieving it", async () => {
+        const { editor } = await setupEditor("<p>ab[]</p>");
+        const selection = document.getSelection();
+        let editableSelection = editor.shared.getEditableSelection();
+        selection.setPosition(document.body);
+        expect(editableSelection.inEditable).toBe(true);
+        // internal value is updated only after selectionchange event
+        await animationFrame();
+        editableSelection = editor.shared.getEditableSelection();
+        expect(editableSelection.inEditable).toBe(false);
     });
 });

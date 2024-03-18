@@ -20,7 +20,7 @@ import {
  * @property { Node } commonAncestorContainer
  * @property { boolean } isCollapsed
  * @property { boolean } direction
- * @property { () => boolean } isDomSelectionInEditable
+ * @property { boolean } inEditable
  */
 
 export class SelectionPlugin extends Plugin {
@@ -28,7 +28,7 @@ export class SelectionPlugin extends Plugin {
     static shared = ["getEditableSelection", "setSelection", "setCursorStart", "setCursorEnd"];
 
     setup() {
-        this.activeSelection = this.makeSelection(false);
+        this.activeSelection = this.makeSelection(false, false);
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
     }
 
@@ -41,12 +41,17 @@ export class SelectionPlugin extends Plugin {
             return;
         }
         const range = selection.getRangeAt(0);
-        if (this.editable.contains(range.commonAncestorContainer)) {
-            // selection is in editor, need to update local copy
-            this.activeSelection = this.makeSelection(selection);
-            for (const handler of this.resources.onSelectionChange) {
-                handler(this.activeSelection);
-            }
+        const inEditable = this.editable.contains(range.commonAncestorContainer);
+        if (inEditable) {
+            this.activeSelection = this.makeSelection(selection, inEditable);
+        } else {
+            const newSelection = { ...this.activeSelection, inEditable: false };
+            Object.freeze(newSelection);
+            this.activeSelection = newSelection;
+        }
+
+        for (const handler of this.resources.onSelectionChange) {
+            handler(this.activeSelection);
         }
     }
 
@@ -54,7 +59,7 @@ export class SelectionPlugin extends Plugin {
      * @param { Selection } selection The DOM selection
      * @return { EditorSelection }
      */
-    makeSelection(selection) {
+    makeSelection(selection, inEditable) {
         let range;
         if (!selection || !selection.rangeCount) {
             selection = false;
@@ -100,13 +105,7 @@ export class SelectionPlugin extends Plugin {
             commonAncestorContainer: range.commonAncestorContainer,
             isCollapsed,
             direction,
-            isDomSelectionInEditable: () => {
-                const selection = this.document.getSelection();
-                return (
-                    selection.rangeCount > 0 &&
-                    this.editable.contains(selection.getRangeAt(0).commonAncestorContainer)
-                );
-            },
+            inEditable,
         };
 
         Object.freeze(activeSelection);
@@ -167,7 +166,7 @@ export class SelectionPlugin extends Plugin {
         const selection = this.document.getSelection();
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 
-        this.activeSelection = this.makeSelection(selection);
+        this.activeSelection = this.makeSelection(selection, true);
         return this.activeSelection;
     }
 

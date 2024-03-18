@@ -56,7 +56,7 @@ export class ToolbarPlugin extends Plugin {
         if (this.config.disableFloatingToolbar) {
             return;
         }
-        const inEditable = sel.isDomSelectionInEditable();
+        const inEditable = sel.inEditable;
         if (this.overlay.isOpen) {
             if (!inEditable || sel.isCollapsed) {
                 this.overlay.close();
@@ -70,12 +70,14 @@ export class ToolbarPlugin extends Plugin {
 
     updateButtonsActiveState() {
         const selection = this.shared.getEditableSelection();
-        for (const buttonGroup of this.buttonGroups) {
-            for (const button of buttonGroup.buttons) {
-                this.buttonsActiveState[button.id] = button.isFormatApplied?.(
-                    this.editable,
-                    selection
-                );
+        if (selection.inEditable) {
+            for (const buttonGroup of this.buttonGroups) {
+                for (const button of buttonGroup.buttons) {
+                    this.buttonsActiveState[button.id] = button.isFormatApplied?.(
+                        this.editable,
+                        selection
+                    );
+                }
             }
         }
     }
