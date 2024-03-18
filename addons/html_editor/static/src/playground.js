@@ -6,8 +6,13 @@ const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
 <p><em>this is another paragraph</em></p>
 <div>this is a div</div>
+<table class="table table-bordered">
+    <tbody>
+        <tr><td>1</td><td>2</td><td></td></tr>
+    </tbody>
+</table>
 <p>this is another paragraph</p>
-            </div>
+
 `;
 
 export class Playground extends Component {

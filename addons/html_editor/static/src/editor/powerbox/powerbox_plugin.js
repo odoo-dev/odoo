@@ -27,7 +27,7 @@ export class PowerboxPlugin extends Plugin {
         this.historySavePointRestore = null;
 
         /** @type {import("../core/overlay_plugin").Overlay} */
-        this.powerbox = this.shared.createOverlay(Powerbox, "bottom", {
+        this.powerbox = this.shared.createOverlay(Powerbox, {
             dispatch: this.dispatch,
             el: this.editable,
             offset: () => this.offset,
