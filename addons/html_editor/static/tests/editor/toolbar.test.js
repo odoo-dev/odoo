@@ -40,7 +40,7 @@ test("toolbar closes when selection leaves editor", async () => {
         focusNode: document.body,
         focusOffset: 0,
     });
-    await animationFrame();
+    await waitForNone(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
