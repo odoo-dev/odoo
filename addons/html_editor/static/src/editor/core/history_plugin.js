@@ -127,7 +127,9 @@ export class HistoryPlugin extends Plugin {
         // @todo @phoenix remove this?
         // @todo @phoenix this includes previous mutations that were already
         // stored in the current step. Ideally, it should only include the new ones.
-        this.dispatch("CONTENT_UPDATED", this.getMutationsRoot(this.currentStep.mutations));
+        this.dispatch("CONTENT_UPDATED", {
+            root: this.getMutationsRoot(this.currentStep.mutations),
+        });
     }
 
     setIdOnRecords(records) {
