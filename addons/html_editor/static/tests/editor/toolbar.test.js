@@ -1,10 +1,18 @@
 import { expect, test } from "@odoo/hoot";
-import { click, press, queryAll, queryAllTexts, waitFor, waitForNone, waitUntil } from "@odoo/hoot-dom";
+import {
+    click,
+    press,
+    queryAll,
+    queryAllTexts,
+    waitFor,
+    waitForNone,
+    waitUntil,
+} from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "../test_helpers/editor";
 import { unformat } from "../test_helpers/format";
-import { getContent, setContent } from "../test_helpers/selection";
+import { getContent, setContent, setSelection } from "../test_helpers/selection";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
@@ -18,6 +26,21 @@ test("toolbar is only visible when selection is not collapsed", async () => {
     // set a collapsed selection to close toolbar
     setContent(el, "<p>test[]</p>");
     await waitUntil(() => !document.querySelector(".o-we-toolbar"));
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test("toolbar closes when selection leaves editor", async () => {
+    await setupEditor("<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+
+    click(document.body);
+    setSelection({
+        anchorNode: document.body,
+        anchorOffset: 0,
+        focusNode: document.body,
+        focusOffset: 0,
+    });
+    await animationFrame();
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
