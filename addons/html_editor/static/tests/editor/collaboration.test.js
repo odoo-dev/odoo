@@ -7,8 +7,12 @@ import { addStep, undo } from "../test_helpers/user_actions";
 import {
     applyConcurrentActions,
     mergePeersSteps,
+    setupMultiEditor,
     testMultiEditor,
-    testSameHistory,
+    validateSameHistory,
+    validateContent,
+    renderTextualSelection,
+    cleanContent,
 } from "../test_helpers/collaboration";
 
 /**
@@ -28,52 +32,57 @@ function deleteBackward(editor) {
 
 describe("Conflict resolution", () => {
     test("all peer steps should be on the same order", async () => {
-        await testMultiEditor({
+        const peerInfos = await setupMultiEditor({
             peerIds: ["c1", "c2", "c3"],
             contentBefore: "<p><x>a[c1}{c1]</x><y>e[c2}{c2]</y><z>i[c3}{c3]</z></p>",
-            afterCreate: (peerInfos) => {
-                applyConcurrentActions(peerInfos, {
-                    c1: (editor) => {
-                        insert(editor, "b");
-                        insert(editor, "c");
-                        insert(editor, "d");
-                    },
-                    c2: (editor) => {
-                        insert(editor, "f");
-                        insert(editor, "g");
-                        insert(editor, "h");
-                    },
-                    c3: (editor) => {
-                        insert(editor, "j");
-                        insert(editor, "k");
-                        insert(editor, "l");
-                    },
-                });
-                mergePeersSteps(peerInfos);
-                testSameHistory(peerInfos);
-            },
-            contentAfter: "<p><x>abcd[c1}{c1]</x><y>efgh[c2}{c2]</y><z>ijkl[c3}{c3]</z></p>",
         });
+        applyConcurrentActions(peerInfos, {
+            c1: (editor) => {
+                insert(editor, "b");
+                insert(editor, "c");
+                insert(editor, "d");
+            },
+            c2: (editor) => {
+                insert(editor, "f");
+                insert(editor, "g");
+                insert(editor, "h");
+            },
+            c3: (editor) => {
+                insert(editor, "j");
+                insert(editor, "k");
+                insert(editor, "l");
+            },
+        });
+        mergePeersSteps(peerInfos);
+        validateSameHistory(peerInfos);
+
+        renderTextualSelection(peerInfos);
+        cleanContent(peerInfos);
+        validateContent(
+            peerInfos,
+            "<p><x>abcd[c1}{c1]</x><y>efgh[c2}{c2]</y><z>ijkl[c3}{c3]</z></p>"
+        );
     });
+
     test("should 2 peer insertText in 2 different paragraph", async () => {
-        await testMultiEditor({
+        const peerInfos = await setupMultiEditor({
             peerIds: ["c1", "c2"],
             contentBefore: "<p>ab[c1}{c1]</p><p>cd[c2}{c2]</p>",
-            afterCreate: (peerInfos) => {
-                applyConcurrentActions(peerInfos, {
-                    c1: (editor) => {
-                        insert(editor, "e");
-                    },
-                    c2: (editor) => {
-                        insert(editor, "f");
-                    },
-                });
-                mergePeersSteps(peerInfos);
-                testSameHistory(peerInfos);
-            },
-            contentAfter: "<p>abe[c1}{c1]</p><p>cdf[c2}{c2]</p>",
         });
+        applyConcurrentActions(peerInfos, {
+            c1: (editor) => {
+                insert(editor, "e");
+            },
+            c2: (editor) => {
+                insert(editor, "f");
+            },
+        });
+        mergePeersSteps(peerInfos);
+        validateSameHistory(peerInfos);
+        renderTextualSelection(peerInfos);
+        validateContent(peerInfos, "<p>abe[c1}{c1]</p><p>cdf[c2}{c2]</p>");
     });
+
     test("should 2 peer insertText twice in 2 different paragraph", async () => {
         await testMultiEditor({
             peerIds: ["c1", "c2"],
@@ -90,7 +99,7 @@ describe("Conflict resolution", () => {
                     },
                 });
                 mergePeersSteps(peerInfos);
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             contentAfter: "<p>abef[c1}{c1]</p><p>cdgh[c2}{c2]</p>",
         });
@@ -109,7 +118,7 @@ describe("Conflict resolution", () => {
                     },
                 });
                 mergePeersSteps(peerInfos);
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             contentAfter: "<p>a[c2}{c2]d[c1}{c1]cc</p>",
         });
@@ -130,7 +139,7 @@ describe("Conflict resolution", () => {
                     },
                 });
                 mergePeersSteps(peerInfos);
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             contentAfter: "<p>de[c1}{c1]c[c2}{c2]c</p>",
         });
@@ -204,7 +213,7 @@ describe("steps whith no parent in history", () => {
                 peerInfos.c3.collaborationPlugin.onExternalHistorySteps([
                     peerInfos.c1.historyPlugin.steps[1],
                 ]);
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             contentAfter: "<p><x>ad[c1}{c1]</x><y>be[c2}{c2]</y><z>c[c3}{c3]</z></p>",
         });
@@ -435,7 +444,7 @@ describe("data-oe-protected", () => {
                 peerInfos.c2.collaborationPlugin.onExternalHistorySteps(
                     peerInfos.c1.historyPlugin.steps
                 );
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             afterCursorInserted: (peerInfos) => {
                 expect(peerInfos.c1.editor.editable.innerHTML).toBe(
@@ -484,7 +493,7 @@ describe("data-oe-transient-content", () => {
                 peerInfos.c2.collaborationPlugin.onExternalHistorySteps(
                     peerInfos.c1.historyPlugin.steps
                 );
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
             afterCursorInserted: (peerInfos) => {
                 expect(peerInfos.c1.editor.editable.innerHTML).toBe(
@@ -578,7 +587,7 @@ describe("post process external steps", () => {
                         <p>post-process</p>
                     `)
                 );
-                testSameHistory(peerInfos);
+                validateSameHistory(peerInfos);
             },
         });
     });
