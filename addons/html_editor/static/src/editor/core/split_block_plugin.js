@@ -59,7 +59,7 @@ export class SplitBlockPlugin extends Plugin {
     }
 
     splitElementBlock({ targetNode, targetOffset, blockToSplit }) {
-        this.dispatch("CLEAN_NODE", { root: blockToSplit });
+        this.dispatch("CLEAN_NODE", { node: blockToSplit });
 
         const restore = prepareUpdate(targetNode, targetOffset);
 

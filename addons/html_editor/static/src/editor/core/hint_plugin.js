@@ -66,7 +66,7 @@ export class HintPlugin extends Plugin {
             this.removeHint(this.tempHint);
         }
 
-        if (selection.isCollapsed && this.editable.contains(selection.commonAncestorContainer)) {
+        if (selection.isCollapsed) {
             for (const hint of this.resources["temp_hints"]) {
                 const target = hint.target(selection);
                 // Do not replace an existing empty block hint by a temp hint.
