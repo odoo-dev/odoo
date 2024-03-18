@@ -1,4 +1,4 @@
-import { expect } from "@odoo/hoot";
+import { after, expect } from "@odoo/hoot";
 import { registry } from "@web/core/registry";
 import { CollaborationPlugin } from "../../src/editor/core/collaboration_plugin";
 import { HistoryPlugin } from "../../src/editor/core/history_plugin";
@@ -45,14 +45,19 @@ function historyMissingParentSteps(peerInfos, peerInfo, { step, fromStepId }) {
 }
 
 /**
+ * Setup a editor with multiple peers
+ *
  * @param { MultiEditorSpec } spec
  * @returns { Promise<void> }
  */
-export const testMultiEditor = async (spec) => {
+export const setupMultiEditor = async (spec) => {
     /** @type { Record<string, PeerInfo> } */
     const peerInfos = {};
     const peerIds = spec.peerIds;
     const initialHystoryPluginGenerateId = CollaborationPlugin.prototype.generateId;
+    after(() => {
+        HistoryPlugin.prototype.generateId = initialHystoryPluginGenerateId;
+    });
 
     for (const peerId of peerIds) {
         const peerInfo = {
@@ -113,37 +118,43 @@ export const testMultiEditor = async (spec) => {
         historyPlugin.currentStep.id = historyPlugin.generateId();
     }
 
-    if (spec.afterCreate) {
-        await spec.afterCreate(peerInfos);
-    }
+    after(() => {
+        for (const peerInfo of peerInfosList) {
+            peerInfo.editor.destroy();
+        }
+    });
+    return peerInfos;
+};
 
-    renderTextualSelection(peerInfosList);
-
-    for (const peerInfo of peerInfosList) {
+export function cleanContent(peerInfos) {
+    for (const peerInfo of Object.values(peerInfos)) {
         // todo: should probably use only one method (like clean)
         const el = peerInfo.editor.editable;
         peerInfo.editor.dispatch("NORMALIZE", { node: el });
         peerInfo.editor.dispatch("CLEAN", el);
         peerInfo.editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
     }
+}
+
+export async function testMultiEditor(spec) {
+    const peerInfos = await setupMultiEditor(spec);
+
+    if (spec.afterCreate) {
+        await spec.afterCreate(peerInfos);
+    }
+
+    renderTextualSelection(peerInfos);
+
+    cleanContent(peerInfos);
 
     if (spec.contentAfter) {
-        for (const peerInfo of peerInfosList) {
-            const value = peerInfo.editor.editable.innerHTML;
-            expect(value).toBe(spec.contentAfter, {
-                message: `error with peer ${peerInfo.peerId}`,
-            });
-        }
+        validateContent(peerInfos, spec.contentAfter);
     }
     if (spec.afterCursorInserted) {
         await spec.afterCursorInserted(peerInfos);
     }
-    for (const peerInfo of peerInfosList) {
-        peerInfo.editor.destroy();
-    }
-
-    HistoryPlugin.prototype.generateId = initialHystoryPluginGenerateId;
-};
+    return peerInfos;
+}
 
 export const applyConcurrentActions = (peerInfos, concurrentActions) => {
     const peerInfosList = Object.values(peerInfos);
@@ -173,7 +184,7 @@ export const mergePeersSteps = (peerInfos) => {
 /**
  * @param {Record<string, PeerInfo>} peerInfos
  */
-export const testSameHistory = (peerInfos) => {
+export const validateSameHistory = (peerInfos) => {
     const peerInfosList = Object.values(peerInfos);
 
     const PeerInfo = peerInfosList[0];
@@ -191,10 +202,20 @@ export const testSameHistory = (peerInfos) => {
     }
 };
 
+export const validateContent = (peerInfos, content) => {
+    for (const peerInfo of Object.values(peerInfos)) {
+        const value = peerInfo.editor.editable.innerHTML;
+        expect(value).toBe(content, {
+            message: `error with peer ${peerInfo.peerId}`,
+        });
+    }
+};
+
 /**
- * @param {Record<string, PeerInfo>[]} peerInfosList
+ * @param {Record<string, PeerInfo>} peerInfos
  */
-function renderTextualSelection(peerInfosList) {
+export function renderTextualSelection(peerInfos) {
+    const peerInfosList = Object.values(peerInfos);
     const cursorNodes = {};
     for (const peerInfo of peerInfosList) {
         const iframeDocument = peerInfo.editor.document;
