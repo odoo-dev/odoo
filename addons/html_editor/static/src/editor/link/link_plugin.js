@@ -1,15 +1,15 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { findInSelection} from "../utils/selection";
+import { findInSelection } from "../utils/selection";
 import { closestBlock } from "../utils/blocks";
-import { isColorGradient, getLinkLabel, deduceURLfromText } from "./utils";
 
-const customizableLinksSelector = 'a'
-    + ':not([data-bs-toggle="tab"])'
-    + ':not([data-bs-toggle="collapse"])'
-    + ':not([data-bs-toggle="dropdown"])'
-    + ':not(.dropdown-item)';
+// const customizableLinksSelector =
+//     "a" +
+//     ':not([data-bs-toggle="tab"])' +
+//     ':not([data-bs-toggle="collapse"])' +
+//     ':not([data-bs-toggle="dropdown"])' +
+//     ":not(.dropdown-item)";
 
 // @todo @phoenix: fix the closestBlock function to be able to use it in the link plugin
 function isLinkActive() {
@@ -32,7 +32,7 @@ export class LinkPlugin extends Plugin {
                 {
                     id: "link",
                     cmd: "TOGGLE_LINK",
-                    cmdPayload: { options: {mode: "A"} },
+                    cmdPayload: { options: { mode: "A" } },
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
@@ -48,7 +48,7 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: {forceDialog: true} });
+                    dispatch("TOGGLE_LINK", { options: { forceDialog: true } });
                 },
             },
             {
@@ -57,7 +57,7 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: {forceDialog: true} });
+                    dispatch("TOGGLE_LINK", { options: { forceDialog: true } });
                 },
             },
         ],
@@ -90,9 +90,12 @@ export class LinkPlugin extends Plugin {
      */
     toggleLinkTools(options = {}) {
         // ...
-        const shouldFocusUrl = options.shouldFocusUrl === undefined ? true : options.shouldFocusUrl;
-        const linkEl = findInSelection(this.shared.getEditableSelection(), 'a');
-        if (linkEl && (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)) {
+        // const shouldFocusUrl = options.shouldFocusUrl === undefined ? true : options.shouldFocusUrl;
+        const linkEl = findInSelection(this.shared.getEditableSelection(), "a");
+        if (
+            linkEl &&
+            (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)
+        ) {
             return;
         }
 
@@ -101,12 +104,10 @@ export class LinkPlugin extends Plugin {
         // TODO: get/create link
 
         // TODO: open the link dialog
-
     }
 
     normalizeLink(root = this.editable) {
         // ...
-
     }
 
     /**
@@ -125,7 +126,6 @@ export class LinkPlugin extends Plugin {
         // TODO maybe have another component for the image link tool?
         this.toggleLinkTools();
     }
-
 }
 
 registry.category("phoenix_plugins").add(LinkPlugin.name, LinkPlugin);
