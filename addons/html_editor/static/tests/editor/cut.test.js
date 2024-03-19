@@ -73,7 +73,7 @@ describe("range not collapsed", () => {
         });
     });
 
-    test.todo("should not restore cut content when cut followed by delete forward", async () => {
+    test("should not restore cut content when cut followed by delete forward", async () => {
         await testEditor({
             contentBefore: "<p>a[]bcde</p>",
             stepFunction: async (editor) => {
