@@ -160,8 +160,8 @@ export class CollaborationPlugin extends Plugin {
     }
 
     /**
-     * @param {import("./history_plugin").HistoryStep[]} steps
-     * @param {import("./history_plugin").HistoryStep} newStep
+     * @param {import("../core/history_plugin").HistoryStep[]} steps
+     * @param {import("../core/history_plugin").HistoryStep} newStep
      */
     getInsertStepIndex(steps, newStep) {
         let index = steps.length - 1;
@@ -295,7 +295,7 @@ export class CollaborationPlugin extends Plugin {
     }
 
     /**
-     * @param {import("./history_plugin").HistoryStep} step
+     * @param {import("../core/history_plugin").HistoryStep} step
      */
     onStepAdded(step) {
         step.peerId = this.peerId;
@@ -312,7 +312,7 @@ export class CollaborationPlugin extends Plugin {
         return sanitizedNode;
     }
     /**
-     * @param {import("./history_plugin").HistoryStep} step
+     * @param {import("../core/history_plugin").HistoryStep} step
      */
     processHistoryStep(step) {
         step.peerId = this.peerId;
