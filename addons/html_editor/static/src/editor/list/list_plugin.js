@@ -21,7 +21,7 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split_block", "selection"];
+    static dependencies = ["tabulation", "split", "selection"];
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
