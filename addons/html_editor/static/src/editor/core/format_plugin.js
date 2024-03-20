@@ -1,14 +1,13 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
-import { closestElement } from "../utils/dom_traversal";
-import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
-import { getDeepRange, getSelectedNodes, getTraversedNodes } from "../utils/selection";
-import { insertAndSelectZws } from "../utils/insertion";
-import { isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
-import { splitAroundUntil } from "../utils/dom_split";
+import { isVisibleTextNode, isZWS } from "../utils/dom_info";
+import { closestElement } from "../utils/dom_traversal";
+import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
+import { insertAndSelectZws } from "../utils/insertion";
 import { DIRECTIONS } from "../utils/position";
+import { getDeepRange, getSelectedNodes, getTraversedNodes } from "../utils/selection";
 
 function isFormatted(format) {
     return (el, selection) => isSelectionFormat(el, format, selection);
@@ -16,7 +15,7 @@ function isFormatted(format) {
 
 export class FormatPlugin extends Plugin {
     static name = "format";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split"];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+b", command: "FORMAT_BOLD" },
@@ -189,7 +188,10 @@ export class FormatPlugin extends Plugin {
                 if (isUselessZws) {
                     unwrapContents(parentNode);
                 } else {
-                    const newLastAncestorInlineFormat = splitAroundUntil(currentNode, parentNode);
+                    const newLastAncestorInlineFormat = this.shared.splitAroundUntil(
+                        currentNode,
+                        parentNode
+                    );
                     removeFormat(newLastAncestorInlineFormat, formatSpec);
                     if (newLastAncestorInlineFormat.isConnected) {
                         inlineAncestors.push(newLastAncestorInlineFormat);

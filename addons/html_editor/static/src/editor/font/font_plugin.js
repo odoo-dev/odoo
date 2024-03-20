@@ -88,7 +88,7 @@ const handledElemSelector = [...headingTags, "PRE", "BLOCKQUOTE"].join(", ");
 
 export class FontPlugin extends Plugin {
     static name = "font";
-    static dependencies = ["split_block", "selection"];
+    static dependencies = ["split", "selection"];
     static resources = (p) => ({
         split_element_block: [
             { callback: p.handleSplitBlockPRE.bind(p) },

@@ -2,7 +2,6 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty } from "../utils/dom";
 import { isEmptyBlock, isWhitespace } from "../utils/dom_info";
-import { splitAroundUntil } from "../utils/dom_split";
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { getDeepRange, getSelectedNodes } from "../utils/selection";
 import { FontColorSelector } from "./font_color_selector";
@@ -53,7 +52,7 @@ function hasColor(element, mode) {
 
 export class ColorPlugin extends Plugin {
     static name = "color";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split"];
     static resources = () => ({
         toolbarGroup: {
             id: "color",
@@ -148,7 +147,7 @@ export class ColorPlugin extends Plugin {
                         selectedNodes.includes(child)
                     );
                     if (selectedChildren.length) {
-                        font = splitAroundUntil(selectedChildren, font);
+                        font = this.shared.splitAroundUntil(selectedChildren, font);
                     } else {
                         font = [];
                     }

@@ -2,19 +2,19 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
+import { removeClass } from "../utils/dom";
 import { getDeepestPosition, isProtected } from "../utils/dom_info";
-import { splitElement, splitTextNode } from "../utils/dom_split";
+import { splitTextNode } from "../utils/dom_split";
 import { ancestors, closestElement, lastLeaf } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
 import { TablePicker } from "./table_picker";
-import { removeClass } from "../utils/dom";
 
 export class TablePlugin extends Plugin {
     static name = "table";
-    static dependencies = ["dom", "history", "overlay", "selection", "delete"];
+    static dependencies = ["dom", "history", "overlay", "selection", "delete", "split"];
     static resources = (p) => ({
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
@@ -119,7 +119,7 @@ export class TablePlugin extends Plugin {
             const isTextNode = anchorNode.nodeType === Node.TEXT_NODE;
             const newAnchorNode = isTextNode
                 ? splitTextNode(anchorNode, sel.anchorOffset, DIRECTIONS.LEFT) + 1 && anchorNode
-                : splitElement(anchorNode, sel.anchorOffset).shift();
+                : this.shared.splitElement(anchorNode, sel.anchorOffset).shift();
             const newPosition = rightPos(newAnchorNode);
             sel = this.shared.setSelection(
                 { anchorNode: newPosition[0], anchorOffset: newPosition[1] },

@@ -13,7 +13,7 @@ import {
     isUnbreakable,
     paragraphRelatedElements,
 } from "../utils/dom_info";
-import { splitElement, splitTextNode } from "../utils/dom_split";
+import { splitTextNode } from "../utils/dom_split";
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
@@ -21,7 +21,7 @@ import { getDeepRange, getTraversedNodes } from "../utils/selection";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split"];
     static shared = ["domInsert"];
     static resources = () => ({
         powerboxCommands: {
@@ -226,7 +226,10 @@ export class DomPlugin extends Plugin {
                         offset += 1;
                     }
                     if (offset) {
-                        const [left, right] = splitElement(currentNode.parentElement, offset);
+                        const [left, right] = this.shared.splitElement(
+                            currentNode.parentElement,
+                            offset
+                        );
                         currentNode = insertBefore ? right : left;
                     } else {
                         currentNode = currentNode.parentElement;

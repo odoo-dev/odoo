@@ -3,7 +3,7 @@
  * @typedef { import("./core/history_plugin").HistoryPlugin } HistoryPlugin
  * @typedef { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
- * @typedef { import("./core/split_block_plugin").SplitBlockPlugin } SplitBlockPlugin
+ * @typedef { import("./core/split_plugin").SplitPlugin } SplitPlugin
  * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
  *
  * @typedef { Object } SharedMethods
@@ -20,7 +20,9 @@
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
  * @property { DomPlugin['domInsert'] } domInsert
- * @property { SplitBlockPlugin['splitElementBlock'] } splitElementBlock
+ * @property { SplitPlugin['splitElementBlock'] } splitElementBlock
+ * @property { SplitPlugin['splitElement'] } splitElement
+ * @property { SplitPlugin['splitAroundUntil'] } splitAroundUntil
  * @property { OverlayPlugin['createOverlay'] } createOverlay
  */
 

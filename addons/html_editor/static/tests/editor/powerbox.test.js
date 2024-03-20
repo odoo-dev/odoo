@@ -139,6 +139,22 @@ test.todo("should close the powerbox if keyup event is called on other block", a
     expect(".o-we-powerbox").toHaveCount(0);
 });
 
+test("should insert a 3x3 table on type `/table`", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>");
+    expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
+
+    insertText(editor, "/table");
+    await animationFrame();
+
+    press("Enter");
+    await animationFrame();
+
+    press("Enter");
+    expect(getContent(el)).toBe(
+        `<table class="table table-bordered o_table"><tbody><tr><td><p>[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr><tr><td><p><br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table><p></p><br>`
+    );
+});
+
 test.todo.tags("mobile")("should insert a 3x3 table on type `/table` in mobile view", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
     insertText(editor, "/table");
