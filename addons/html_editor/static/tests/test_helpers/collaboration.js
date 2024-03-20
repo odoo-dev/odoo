@@ -1,6 +1,6 @@
 import { after, expect } from "@odoo/hoot";
 import { registry } from "@web/core/registry";
-import { CollaborationPlugin } from "../../src/editor/core/collaboration_plugin";
+import { CollaborationPlugin } from "../../src/editor/collaboration/collaboration_plugin";
 import { HistoryPlugin } from "../../src/editor/core/history_plugin";
 import { Plugin } from "../../src/editor/plugin";
 import { createDOMPathGenerator } from "../../src/editor/utils/dom_traversal";
@@ -15,7 +15,7 @@ import { setupEditor } from "./editor";
  * @property { string } peerId
  * @property { import("../../src/editor/core/history_plugin").HistoryStep[] } steps
  * @property { Editor } editor
- * @property { import("../../src/editor/core/collaboration_plugin").CollaborationPlugin } collaborationPlugin
+ * @property { import("../../src/editor/collaboration/collaboration_plugin").CollaborationPlugin } collaborationPlugin
  * @property { import("../../src/editor/plugin").HistoryPlugin } historyPlugin
  *
  * @typedef { Object } MultiEditorSpec
