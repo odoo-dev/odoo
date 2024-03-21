@@ -4,7 +4,6 @@ import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { removeClass } from "../utils/dom";
 import { getDeepestPosition, isProtected } from "../utils/dom_info";
-import { splitTextNode } from "../utils/dom_split";
 import { ancestors, closestElement, lastLeaf } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
@@ -118,7 +117,8 @@ export class TablePlugin extends Plugin {
             const anchorNode = sel.anchorNode;
             const isTextNode = anchorNode.nodeType === Node.TEXT_NODE;
             const newAnchorNode = isTextNode
-                ? splitTextNode(anchorNode, sel.anchorOffset, DIRECTIONS.LEFT) + 1 && anchorNode
+                ? this.shared.splitTextNode(anchorNode, sel.anchorOffset, DIRECTIONS.LEFT) + 1 &&
+                  anchorNode
                 : this.shared.splitElement(anchorNode, sel.anchorOffset).shift();
             const newPosition = rightPos(newAnchorNode);
             sel = this.shared.setSelection(

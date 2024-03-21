@@ -16,7 +16,7 @@ import { childNodeIndex, DIRECTIONS } from "./position";
  * @returns {number} The parentOffset if the cursor was between the two text
  *          node parts after the split.
  */
-
+// @todo @phoenix need to be remove when we remove getDeepRange
 export function splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RIGHT) {
     const document = textNode.ownerDocument;
     let parentOffset = childNodeIndex(textNode);

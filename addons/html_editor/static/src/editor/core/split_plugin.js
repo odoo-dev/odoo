@@ -3,16 +3,15 @@ import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { fillEmpty } from "../utils/dom";
 import { isVisible } from "../utils/dom_info";
-import { splitTextNode } from "../utils/dom_split";
 import { prepareUpdate } from "../utils/dom_state";
 import { closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { collapseIfZWS } from "../utils/zws";
-import { childNodeIndex } from "../utils/position";
+import { DIRECTIONS, childNodeIndex } from "../utils/position";
 
 export class SplitPlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "split";
-    static shared = ["splitElementBlock", "splitElement", "splitAroundUntil"];
+    static shared = ["splitElementBlock", "splitElement", "splitAroundUntil", "splitTextNode"];
 
     setup() {
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
@@ -45,7 +44,7 @@ export class SplitPlugin extends Plugin {
 
     splitBlockNode({ targetNode, targetOffset }) {
         if (targetNode.nodeType === Node.TEXT_NODE) {
-            targetOffset = splitTextNode(targetNode, targetOffset);
+            targetOffset = this.splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
         const blockToSplit = closestElement(targetNode, isBlock);
@@ -177,6 +176,46 @@ export class SplitPlugin extends Plugin {
             beforeSplit = this.splitElement(limitAncestor, childNodeIndex(before) + 1)[1];
         }
         return beforeSplit || afterSplit || limitAncestor;
+    }
+
+    /**
+     * Splits a text node in two parts.
+     * If the split occurs at the beginning or the end, the text node stays
+     * untouched and unsplit. If a split actually occurs, the original text node
+     * still exists and become the right part of the split.
+     *
+     * Note: if split after or before whitespace, that whitespace may become
+     * invisible, it is up to the caller to replace it by nbsp if needed.
+     *
+     * @param {Node} textNode
+     * @param {number} offset
+     * @param {DIRECTIONS} originalNodeSide Whether the original node ends up on left
+     * or right after the split
+     * @returns {number} The parentOffset if the cursor was between the two text
+     *          node parts after the split.
+     */
+    splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RIGHT) {
+        const document = textNode.ownerDocument;
+        let parentOffset = childNodeIndex(textNode);
+
+        if (offset > 0) {
+            parentOffset++;
+
+            if (offset < textNode.length) {
+                const left = textNode.nodeValue.substring(0, offset);
+                const right = textNode.nodeValue.substring(offset);
+                if (originalNodeSide === DIRECTIONS.LEFT) {
+                    const newTextNode = document.createTextNode(right);
+                    textNode.after(newTextNode);
+                    textNode.nodeValue = left;
+                } else {
+                    const newTextNode = document.createTextNode(left);
+                    textNode.before(newTextNode);
+                    textNode.nodeValue = right;
+                }
+            }
+        }
+        return parentOffset;
     }
 
     onBeforeInput(e) {

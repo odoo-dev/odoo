@@ -1,13 +1,12 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { CTYPES } from "../utils/content_types";
-import { splitTextNode } from "../utils/dom_split";
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { collapseIfZWS } from "../utils/zws";
 
 export class LineBreakPlugin extends Plugin {
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split"];
     static name = "line_break";
     static shared = ["insertLineBreakElement"];
 
@@ -34,7 +33,7 @@ export class LineBreakPlugin extends Plugin {
         let targetOffset = selection.anchorOffset;
 
         if (targetNode.nodeType === Node.TEXT_NODE) {
-            targetOffset = splitTextNode(targetNode, targetOffset);
+            targetOffset = this.shared.splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
         this.insertLineBreakElement({ targetNode, targetOffset });
