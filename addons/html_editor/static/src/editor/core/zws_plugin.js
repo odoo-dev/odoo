@@ -3,12 +3,14 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { nextLeaf, previousLeaf } from "../utils/dom_info";
+import { prepareUpdate } from "../utils/dom_state";
 import { closestElement } from "../utils/dom_traversal";
-import { nodeSize } from "../utils/position";
+import { boundariesOut, nodeSize } from "../utils/position";
 
 export class ZwsPlugin extends Plugin {
     static name = "zws";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split"];
+    static shared = ["insertAndSelectZws"];
 
     setup() {
         this.addDomListener(this.editable, "keydown", (ev) => {
@@ -122,6 +124,48 @@ export class ZwsPlugin extends Plugin {
                 focusOffset,
             });
         }
+    }
+
+    insertText(selection, content) {
+        if (selection.anchorNode.nodeType === Node.TEXT_NODE) {
+            selection = this.shared.setSelection(
+                {
+                    anchorNode: selection.anchorNode.parentElement,
+                    anchorOffset: this.shared.splitTextNode(
+                        selection.anchorNode,
+                        selection.anchorOffset
+                    ),
+                },
+                { normalize: false }
+            );
+        }
+
+        const txt = this.document.createTextNode(content || "#");
+        const restore = prepareUpdate(selection.anchorNode, selection.anchorOffset);
+        selection.anchorNode.insertBefore(
+            txt,
+            selection.anchorNode.childNodes[selection.anchorOffset]
+        );
+        restore();
+        const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(txt);
+        this.shared.setSelection(
+            { anchorNode, anchorOffset, focusNode, focusOffset },
+            { normalize: false }
+        );
+        return txt;
+    }
+
+    /**
+     * Takes a selection (assumed to be collapsed) and insert a zero-width space at
+     * its anchor point. Then, select that zero-width space.
+     *
+     * @param {Selection} selection
+     * @returns {Node} the inserted zero-width space
+     */
+    insertAndSelectZws(selection) {
+        const zws = this.insertText(selection, "\u200B");
+        this.shared.splitTextNode(zws, selection.anchorOffset);
+        return zws;
     }
 }
 
