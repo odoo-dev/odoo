@@ -1,7 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isEditorTab, isZWS } from "../utils/dom_info";
-import { splitTextNode } from "../utils/dom_split";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import { DIRECTIONS, childNodeIndex } from "../utils/position";
@@ -26,7 +25,7 @@ function isIndentationTab(tab) {
 
 export class TabulationPlugin extends Plugin {
     static name = "tabulation";
-    static dependencies = ["dom", "selection", "delete"];
+    static dependencies = ["dom", "selection", "delete", "split"];
     static shared = ["indentBlocks", "outdentBlocks"];
     static resources = (p) => ({
         handle_delete_forward: { callback: p.handleDeleteForward.bind(p) },
@@ -125,7 +124,7 @@ export class TabulationPlugin extends Plugin {
             tab.nextSibling.nodeType === Node.TEXT_NODE &&
             tab.nextSibling.textContent.startsWith("\u200B")
         ) {
-            splitTextNode(tab.nextSibling, 1, DIRECTIONS.LEFT);
+            this.shared.splitTextNode(tab.nextSibling, 1, DIRECTIONS.LEFT);
             tab.nextSibling.remove();
             zwsRemoved++;
         }

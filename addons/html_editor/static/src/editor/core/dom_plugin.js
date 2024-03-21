@@ -13,7 +13,6 @@ import {
     isUnbreakable,
     paragraphRelatedElements,
 } from "../utils/dom_info";
-import { splitTextNode } from "../utils/dom_split";
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
@@ -93,7 +92,11 @@ export class DomPlugin extends Plugin {
         }
         if (selection.startContainer.nodeType === Node.TEXT_NODE) {
             insertBefore = !selection.startOffset;
-            splitTextNode(selection.startContainer, selection.startOffset, DIRECTIONS.LEFT);
+            this.shared.splitTextNode(
+                selection.startContainer,
+                selection.startOffset,
+                DIRECTIONS.LEFT
+            );
             startNode = selection.startContainer;
         }
 
