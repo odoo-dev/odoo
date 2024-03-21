@@ -5,7 +5,6 @@ import { unwrapContents } from "../utils/dom";
 import { isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
-import { insertAndSelectZws } from "../utils/insertion";
 import { DIRECTIONS } from "../utils/position";
 import { getDeepRange, getSelectedNodes, getTraversedNodes } from "../utils/selection";
 
@@ -15,7 +14,7 @@ function isFormatted(format) {
 
 export class FormatPlugin extends Plugin {
     static name = "format";
-    static dependencies = ["selection", "split"];
+    static dependencies = ["selection", "split", "zws"];
     static resources = () => ({
         shortcuts: [
             { hotkey: "control+b", command: "FORMAT_BOLD" },
@@ -137,7 +136,7 @@ export class FormatPlugin extends Plugin {
                 });
             } else {
                 // @todo phoenix: move it to selection plugin ?
-                zws = insertAndSelectZws(this.document.getSelection());
+                zws = this.shared.insertAndSelectZws(this.shared.getEditableSelection());
             }
             getDeepRange(this.editable, {
                 splitText: true,
