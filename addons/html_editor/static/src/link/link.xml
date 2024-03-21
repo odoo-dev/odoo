@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="html_editor.linkPopover">
+        <div t-ref="root" class="o-we-linkpopover d-flex bg-white overflow-auto">
+            <div t-if="state.editing" class="m-3 d-flex">
+                <input t-model="state.url" t-ref="urlInput" placeholder="Type your URL"/>
+                <button class="btn btn-primary align-self-end" t-on-click="onClickApply">Apply</button>
+            </div>
+            <div t-else="" class="d-flex">
+                <a href="#" class="mx-1 o_we_copy_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Copy Link')}">
+                    <i class="fa fa-clone"></i>
+                </a>
+                <a href="#" class="mx-1 o_we_edit_link text-dark" t-on-click="onClickEdit" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Edit Link')}">
+                    <i class="fa fa-edit"></i>
+                </a>
+                <a href="#" class="ms-1 o_we_remove_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Remove Link')}">
+                    <i class="fa fa-chain-broken"></i>
+                </a>
+            </div>
+        </div>
+    </t>
+
+</templates>

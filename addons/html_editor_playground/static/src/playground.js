@@ -29,6 +29,8 @@ const testHtml = `Hello Phoenix editor!
     <t t-esc="test">T-esc</t>
     <t t-esc="test">T-field</t>
 </div>
+<p>this is a link: <a>link</a></p>
+<p>this is another link: <a>link2</a></p>
 
 `;
 
