@@ -22,7 +22,7 @@
                         <page string="Description">
                             <group>
                                 <group>
-                                    <field name="src_lang_id" domain="[('id', 'not in', target_lang_ids)]"/>
+                                    <field name="src_lang_id" domain="[('id', 'not in', target_lang_ids)]" options="{'no_create': True}"/>
                                     <field name="target_lang_ids" domain="[('id', '!=', src_lang_id)]"/>
                                 </group>
                             </group>
