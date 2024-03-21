@@ -1,27 +1,19 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
-import { findInSelection } from "../utils/selection";
-import { closestBlock } from "../utils/blocks";
+// import { findInSelection } from "../utils/selection";
+import { closestElement } from "../utils/dom_traversal";
+import { LinkPopover } from "./link";
+import { reactive } from "@odoo/owl";
 
-// const customizableLinksSelector =
-//     "a" +
-//     ':not([data-bs-toggle="tab"])' +
-//     ':not([data-bs-toggle="collapse"])' +
-//     ':not([data-bs-toggle="dropdown"])' +
-//     ":not(.dropdown-item)";
-
-// @todo @phoenix: fix the closestBlock function to be able to use it in the link plugin
-function isLinkActive() {
-    return function (editable) {
-        const selection = editable.ownerDocument.getSelection();
-        const block = closestBlock(selection.anchorNode);
-        return block?.tagName === "A";
-    };
+function isLinkActive(editable) {
+    const selection = editable.ownerDocument.getSelection();
+    const linkElement = closestElement(selection.anchorNode, "A");
+    return linkElement;
 }
 
 export class LinkPlugin extends Plugin {
     static name = "link";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "overlay"];
     static shared = [];
     static resources = (p) => ({
         toolbarGroup: {
@@ -30,12 +22,12 @@ export class LinkPlugin extends Plugin {
             buttons: [
                 {
                     id: "link",
-                    cmd: "TOGGLE_LINK",
-                    cmdPayload: { options: { mode: "A" } },
+                    cmd: "CREATE_LINK_ON_SELECTION",
+                    cmdPayload: { options: { editing: true } },
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
-                    isFormatApplied: isLinkActive(),
+                    isFormatApplied: isLinkActive,
                 },
             ],
         },
@@ -60,10 +52,30 @@ export class LinkPlugin extends Plugin {
                 },
             },
         ],
+        onSelectionChange: p.handleSelectionChange.bind(p),
     });
+    setup() {
+        this.linkState = reactive({ linkElement: null });
+        this.overlay = this.shared.createOverlay(LinkPopover, {
+            dispatch: this.dispatch,
+            el: this.editable,
+            offset: () => 0,
+            linkState: this.linkState,
+        });
+        this.addDomListener(this.editable, "click", (ev) => {
+            if (ev.target.tagName === "A") {
+                ev.preventDefault();
+                this.toggleLinkTools({ link: ev.target });
+            }
+        });
+    }
 
     handleCommand(command, payload) {
         switch (command) {
+            case "CREATE_LINK_ON_SELECTION":
+                this.toggleLinkTools(payload.options);
+                break;
+
             case "TOGGLE_LINK":
                 this.toggleLinkTools(payload.options);
                 break;
@@ -90,13 +102,17 @@ export class LinkPlugin extends Plugin {
     toggleLinkTools(options = {}) {
         // ...
         // const shouldFocusUrl = options.shouldFocusUrl === undefined ? true : options.shouldFocusUrl;
-        const linkEl = findInSelection(this.shared.getEditableSelection(), "a");
-        if (
-            linkEl &&
-            (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)
-        ) {
-            return;
-        }
+        // const linkEl = findInSelection(this.shared.getEditableSelection(), "a");
+        // if (
+        //     linkEl &&
+        //     (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)
+        // ) {
+        //     return;
+        // }
+
+        const selection = this.shared.getEditableSelection();
+        const linkElement = closestElement(selection.anchorNode, "A");
+        this.linkState.linkElement = linkElement;
 
         // TODO: history step pause
 
@@ -106,7 +122,23 @@ export class LinkPlugin extends Plugin {
     }
 
     normalizeLink(root = this.editable) {
-        // ...
+        // do the sanitizing here
+    }
+
+    handleSelectionChange() {
+        const sel = this.shared.getEditableSelection();
+        const linkel = closestElement(sel.anchorNode, "A");
+        if (!linkel) {
+            this.overlay.close();
+        }
+        if (linkel && linkel !== this.linkState.linkElement) {
+            this.overlay.close();
+            this.linkState.linkElement = linkel;
+            this.overlay.open();
+        }
+        if (linkel && !this.overlay.isOpen) {
+            this.overlay.open();
+        }
     }
 
     /**
@@ -124,5 +156,13 @@ export class LinkPlugin extends Plugin {
 
         // TODO maybe have another component for the image link tool?
         this.toggleLinkTools();
+    }
+
+    /**
+     * todo get the link from the selection or create one if there is none
+     */
+    getOrCreateLink() {
+        const link = this.document.createElement("a");
+        return link;
     }
 }
