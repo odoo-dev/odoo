@@ -1,4 +1,3 @@
-import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
@@ -9,42 +8,23 @@ import { parseHTML } from "../utils/html";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { findInSelection, getDeepRange, getTraversedNodes } from "../utils/selection";
 import { getColumnIndex, getRowIndex } from "../utils/table";
-import { TablePicker } from "./table_picker";
 
+/**
+ * This plugin only contains the table manipulation and selection features. All UI overlay
+ * code is located in the table_ui plugin
+ */
 export class TablePlugin extends Plugin {
     static name = "table";
-    static dependencies = ["dom", "history", "overlay", "selection", "delete", "split"];
+    static dependencies = ["dom", "history", "selection", "delete", "split"];
     static resources = (p) => ({
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },
         handle_delete_range: { callback: p.handleDeleteRange.bind(p) },
         onSelectionChange: p.updateSelectionTable.bind(p),
-        powerboxCommands: [
-            {
-                name: _t("Table"),
-                description: _t("Insert a table"),
-                category: "structure",
-                fontawesome: "fa-table",
-                action(dispatch) {
-                    dispatch("OPEN_TABLE_PICKER");
-                },
-            },
-        ],
     });
-
-    setup() {
-        /** @type {import("../core/overlay_plugin").Overlay} */
-        this.picker = this.shared.createOverlay(TablePicker, {
-            dispatch: this.dispatch,
-            el: this.editable,
-        });
-    }
 
     handleCommand(command, payload) {
         switch (command) {
-            case "OPEN_TABLE_PICKER":
-                this.openPicker();
-                break;
             case "INSERT_TABLE":
                 this.insertTable(payload);
                 break;
@@ -94,15 +74,6 @@ export class TablePlugin extends Plugin {
             this.shiftCursorToTableCell(-1);
             return true;
         }
-    }
-
-    openPicker() {
-        const range = this.document.getSelection().getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        if (rect.width === 0 && rect.height === 0 && rect.x === 0) {
-            range.startContainer.parentElement.appendChild(this.document.createElement("br"));
-        }
-        this.picker.open();
     }
 
     insertTable({ rows = 2, cols = 2 } = {}) {
