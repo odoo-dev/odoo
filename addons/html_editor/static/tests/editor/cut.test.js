@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { press } from "@odoo/hoot-dom";
 import { testEditor } from "../test_helpers/editor";
 import { undo } from "../test_helpers/user_actions";
 
@@ -81,10 +81,7 @@ describe("range not collapsed", () => {
                 const selection = editor.document.getSelection();
                 selection.extend(selection.anchorNode, 4);
                 cut(editor);
-                // @todo @phoenix need fix in hoot to handle constructor beforeinput event
-                manuallyDispatchProgrammaticEvent(editor.editable, "beforeinput", {
-                    inputType: "deleteContentForward",
-                });
+                press("Delete");
             },
             contentAfter: "<p>a[]</p>",
         });
