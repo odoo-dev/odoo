@@ -42,7 +42,12 @@ export class ZwsPlugin extends Plugin {
 
     clean(element) {
         for (const el of element.querySelectorAll("[data-oe-zws-empty-inline]")) {
-            el.remove();
+            // @todo phoenix: consider making the delete plugin export isUnremovable instead?
+            if (this.resources.unremovables.some((predicate) => predicate(el))) {
+                delete el.dataset.oeZwsEmptyInline;
+            } else {
+                el.remove();
+            }
         }
     }
 
