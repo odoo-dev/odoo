@@ -296,7 +296,6 @@ describe("backward", () => {
                 });
             });
         });
-        // @todo @phoenix: unskip when doing unbreakable
         test("should delete first character of unbreakable, ignoring selected paragraph break (backward)", async () => {
             await testEditor({
                 contentBefore: `<p>abc[</p><p class="oe_unbreakable">d]ef</p>`,
@@ -468,72 +467,66 @@ describe("forward", () => {
             });
         });
 
-        // @todo @phoenix: unskip when doing unbreakable
-        // This test is wrong... It seems to have forgotten the "oe_unbreakable" class on the second paragraph.
-        test.todo(
-            "should delete first character of unbreakable, ignoring selected paragraph break (forward)",
-            async () => {
-                await testEditor({
-                    contentBefore: "<p>abc[</p><p>d]ef</p>",
-                    stepFunction: deleteForward,
-                    contentAfter: "<p>abc[]</p><p>ef</p>",
-                });
-            }
-        );
+        test("should delete first character of unbreakable, ignoring selected paragraph break (forward)", async () => {
+            await testEditor({
+                contentBefore: '<p>abc[</p><p class="oe_unbreakable">d]ef</p>',
+                stepFunction: deleteForward,
+                contentAfter: '<p>abc[]</p><p class="oe_unbreakable">ef</p>',
+            });
+        });
     });
 });
 
 describe("list", () => {
     describe("selection collapsed", () => {
-        test.todo(
-            "should not outdent while nested within a list item if the list is unbreakable",
-            async () => {
-                // Only one LI.
-                await testEditor({
-                    contentBefore: "<p>abc</p><ol><li>[]def</li></ol>",
-                    stepFunction: deleteBackward,
-                    contentAfter: "<p>abc</p><ol><li>[]def</li></ol>",
-                });
-                // First LI.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol><li><div><div>[]abc</div></div></li><li>def</li></ol>',
-                // });
-                // // In the middle.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol><li><div>abc</div></li><li><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol><li><div>abc</div></li><li><div><div>[]def</div></div></li><li>ghi</li></ol>',
-                // });
-                // // Last LI.
-                // await testEditor({
-                //     contentBefore:
-                //         '<ol><li>abc</li><li><div><div>[]def</div></div></li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<ol><li>abc</li><li><div><div>[]def</div></div></li></ol>',
-                // });
-                // // With a div before the list:
-                // await testEditor({
-                //     contentBefore:
-                //         '<div>abc</div><ol><li>def</li><li><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                //     stepFunction: deleteBackward,
-                //     contentAfter:
-                //         '<div>abc</div><ol><li>def</li><li><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
-                // });
-            }
-        );
+        test("should not outdent while nested within a list item if the list is unbreakable", async () => {
+            // Only one LI.
+            await testEditor({
+                contentBefore: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+                stepFunction: deleteBackward,
+                contentAfter: '<p>abc</p><ol t="1"><li>[]def</li></ol>',
+            });
+            // First LI.
+            // await testEditor({
+            //     contentBefore:
+            //         '<ol><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+            //     stepFunction: deleteBackward,
+            //     contentAfter:
+            //         '<ol><li><div><div>[]abc</div></div></li><li>def</li></ol>',
+            // });
+            // // In the middle.
+            // await testEditor({
+            //     contentBefore:
+            //         '<ol><li><div>abc</div></li><li><div><div>[]def</div></div></li><li>ghi</li></ol>',
+            //     stepFunction: deleteBackward,
+            //     contentAfter:
+            //         '<ol><li><div>abc</div></li><li><div><div>[]def</div></div></li><li>ghi</li></ol>',
+            // });
+            // // Last LI.
+            // await testEditor({
+            //     contentBefore:
+            //         '<ol><li>abc</li><li><div><div>[]def</div></div></li></ol>',
+            //     stepFunction: deleteBackward,
+            //     contentAfter:
+            //         '<ol><li>abc</li><li><div><div>[]def</div></div></li></ol>',
+            // });
+            // // With a div before the list:
+            // await testEditor({
+            //     contentBefore:
+            //         '<div>abc</div><ol><li>def</li><li><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+            //     stepFunction: deleteBackward,
+            //     contentAfter:
+            //         '<div>abc</div><ol><li>def</li><li><div><div>[]ghi</div></div></li><li>jkl</li></ol>',
+            // });
+        });
     });
     describe("selection not collapsed", () => {
+        // @phoenix @todo: this spec is weird. I would argue in favor of
+        // <p class="oe_unbreakable">a[]</p><ol><li>ef</li><li>ghi</li></ol>
         test.todo("shoud not merge list item in the previous unbreakable sibling (1)", async () => {
             await testEditor({
                 contentBefore: unformat(`
-                        <p>a[bc</p>
+                        <p class="oe_unbreakable">a[bc</p>
                         <ol>
                             <li>d]ef</li>
                             <li>ghi</li>
@@ -548,6 +541,8 @@ describe("list", () => {
             });
         });
 
+        // @phoenix @todo: weird spec. I would argue in favor of
+        // <div><p>a[]</p></div><ol><li>ef</li><li>ghi</li></ol>
         test.todo("shoud not merge list item in the previous unbreakable sibling (2)", async () => {
             await testEditor({
                 contentBefore: unformat(`
