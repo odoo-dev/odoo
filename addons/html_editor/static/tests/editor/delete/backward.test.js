@@ -1673,8 +1673,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    // test fails because ZWS plugin removes an unremovable node
-    test.todo("should empty an inline unremovable but remain in it", async () => {
+    test("should empty an inline unremovable but remain in it", async () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
             stepFunction: deleteBackward,
