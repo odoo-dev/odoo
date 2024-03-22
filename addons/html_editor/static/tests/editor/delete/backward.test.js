@@ -800,34 +800,6 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge with previous node (default behaviour)", async () => {
-            await testEditor({
-                contentBefore: "<jw-block-a>a</jw-block-a><jw-block-b>[]b</jw-block-b>",
-                stepFunction: deleteBackward,
-                contentAfter: "<jw-block-a>a[]b</jw-block-a>",
-            });
-            // await testEditor({
-            //     contentBefore: '<jw-block-a>a</jw-block-a><jw-block-b>[<br>]</jw-block-b>',
-            //     stepFunction: deleteBackward,
-            //     contentAfter: '<jw-block-a>a[]</jw-block-a>',
-            // });
-        });
-
-        test.todo("should merge nested elements (default behaviour)", async () => {
-            await testEditor({
-                contentBefore:
-                    "<jw-block-a><jw-block-b>ab</jw-block-b></jw-block-a><jw-block-c><jw-block-d>[]cd</jw-block-d></jw-block-c>",
-                stepFunction: deleteBackward,
-                contentAfter: "<jw-block-a><jw-block-b>ab[]cd</jw-block-b></jw-block-a>",
-            });
-            // await testEditor({
-            //     contentBefore:
-            //         '<jw-block-a><jw-block-b>ab</jw-block-b></jw-block-a><jw-block-c><jw-block-d>[<br>]</jw-block-d></jw-block-c>',
-            //     stepFunction: deleteBackward,
-            //     contentAfter: '<jw-block-a><jw-block-b>ab[]</jw-block-b></jw-block-a>',
-            // });
-        });
-
         test("should merge a text preceding a paragraph (removing the paragraph)", async () => {
             await testEditor({
                 contentBefore: "<div>ab<p>[]cd</p></div>",
