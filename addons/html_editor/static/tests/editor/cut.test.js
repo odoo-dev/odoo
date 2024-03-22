@@ -1,9 +1,8 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
-import { testEditor } from "../test_helpers/editor";
+import { setupEditor, testEditor } from "../test_helpers/editor";
 import { undo } from "../test_helpers/user_actions";
 
-// @todo @phoenix: should be replaced by press(["ctrl", "v"]) when hoot will support it
 function cut(editor) {
     const clipboardData = new DataTransfer();
     const cutEvent = new ClipboardEvent("cut", { clipboardData });
@@ -12,26 +11,21 @@ function cut(editor) {
 }
 
 describe("range collapsed", () => {
-    test("should ignore cutting an empty selection", async () => {
-        await testEditor({
-            contentBefore: "<p>[]</p>",
-            stepFunction: async (editor) => {
-                const clipboardData = cut(editor);
-                // Check that nothing was set as clipboard content
-                expect(clipboardData.types.length).toBe(0);
-            },
-        });
-        await testEditor({
-            contentBefore: "<p>[]</p>",
-            stepFunction: async (editor) => {
-                const clipboardData = new DataTransfer();
-                clipboardData.setData("text/plain", "should stay");
-                const cutEvent = new ClipboardEvent("cut", { clipboardData });
-                editor.editable.dispatchEvent(cutEvent);
-                // Check that clipboard data was not overwritten
-                expect(clipboardData.getData("text/plain")).toBe("should stay");
-            },
-        });
+    test("should ignore cutting an empty selection with empty clipboardData", async () => {
+        const { editor } = await setupEditor("<p>[]</p>");
+        const clipboardData = cut(editor);
+        // Check that nothing was set as clipboard content
+        expect(clipboardData.types.length).toBe(0);
+    });
+
+    test("should ignore cutting an empty selection with clipboardData", async () => {
+        const { editor } = await setupEditor("<p>[]</p>");
+        const clipboardData = new DataTransfer();
+        clipboardData.setData("text/plain", "should stay");
+        const cutEvent = new ClipboardEvent("cut", { clipboardData });
+        editor.editable.dispatchEvent(cutEvent);
+        // Check that clipboard data was not overwritten
+        expect(clipboardData.getData("text/plain")).toBe("should stay");
     });
 });
 
