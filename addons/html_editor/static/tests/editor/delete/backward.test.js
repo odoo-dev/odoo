@@ -243,14 +243,27 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge the following inline text node", async () => {
+        test("should merge the following inline text node", async () => {
             await testEditor({
-                contentBefore: "<p>abc</p>[]def",
+                contentBefore: "<div><p>abc</p>[]def</div>",
+                stepFunction: deleteBackward,
+                contentAfter: "<div><p>abc[]def</p></div>",
+            });
+            await testEditor({
+                contentBefore: "<div><p>abc</p>[]def<p>ghi</p></div>",
+                stepFunction: deleteBackward,
+                contentAfter: "<div><p>abc[]def</p><p>ghi</p></div>",
+            });
+        });
+
+        test("should merge paragraphs", async () => {
+            await testEditor({
+                contentBefore: '<p>abc</p><p style="margin-bottom: 0px;">[]def</p>',
                 stepFunction: deleteBackward,
                 contentAfter: "<p>abc[]def</p>",
             });
             await testEditor({
-                contentBefore: "<p>abc</p>[]def<p>ghi</p>",
+                contentBefore: '<p>abc</p><p style="margin-bottom: 0px;">[]def</p><p>ghi</p>',
                 stepFunction: deleteBackward,
                 contentAfter: "<p>abc[]def</p><p>ghi</p>",
             });
