@@ -45,11 +45,15 @@ export class OverlayPlugin extends Plugin {
     }
 }
 
-export function useOverlay(refName, position) {
+export function useOverlay(refName, config) {
     const env = useEnv();
     const ref = useRef(refName);
     const overlay = env.overlay;
-    overlay.position = position;
+    overlay.position = config.position;
+    if (config.offsetY !== undefined) {
+        overlay.offsetY = config.offsetY;
+    }
+    overlay.width = config.width;
     onMounted(() => {
         overlay.el = ref.el;
         ref.el.style.position = "absolute";
@@ -66,7 +70,9 @@ export class Overlay {
         this.el = null;
         this.isOpen = false;
         this.C = C;
+        this.offsetY = null;
         this.position = null;
+        this.width = null;
         this.props = props;
         this._remove = null;
     }
@@ -98,7 +104,7 @@ export class Overlay {
         }
         const elRect = this.plugin.editable.getBoundingClientRect();
         const overlayRect = this.el.getBoundingClientRect();
-        const Y_OFFSET = 6;
+        const Y_OFFSET = this.offsetY !== null ? this.offsetY : 6;
 
         // autoclose if overlay target is out of view
         const rect = this.target ? this.target.getBoundingClientRect() : this.getCurrentRect();
@@ -108,24 +114,30 @@ export class Overlay {
             return;
         }
 
+        const attemptTop = rect.top - Y_OFFSET - overlayRect.height;
+        const attemptBottom = rect.bottom + Y_OFFSET;
         let top;
         if (this.position === "top") {
             // try position === 'top'
-            top = rect.top - Y_OFFSET - overlayRect.height;
-            // fallback on position === 'bottom'
-            if (top < elRect.top) {
-                top = rect.bottom + Y_OFFSET;
+            top = attemptTop;
+            // if top does not work and bottom does work => fallback on bottom
+            if (attemptTop < elRect.top && attemptBottom + overlayRect.height < elRect.bottom) {
+                top = attemptBottom;
             }
         } else {
             // try position === "bottom"
-            top = rect.bottom + Y_OFFSET;
-            if (top > elRect.bottom) {
-                top = rect.top - Y_OFFSET - overlayRect.height;
+            top = attemptBottom;
+            // if bottom does not work and top does work => fallback on top
+            if (attemptBottom + overlayRect.height > elRect.bottom && attemptTop > elRect.top) {
+                top = attemptTop;
             }
         }
         const left = rect.left;
         this.el.style.left = left + "px";
         this.el.style.top = top + "px";
+        if (this.width === "auto") {
+            this.el.style.width = rect.width + "px";
+        }
     }
 
     getCurrentRect() {
