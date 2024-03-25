@@ -1,3 +1,4 @@
+import { unwrapContents } from "../utils/dom";
 import { getAdjacents } from "../utils/dom_traversal";
 import { preserveCursor } from "../utils/selection";
 
@@ -70,6 +71,7 @@ function compareListTypes(a, b) {
     return true;
 }
 
+// @todo @phoenix: use the selection plugin to preserve the cursor
 export function mergeSimilarLists(element) {
     if (!element.matches("ul, ol, li.oe-nested")) {
         return element;
@@ -78,6 +80,20 @@ export function mergeSimilarLists(element) {
     const mergedList = mergeSimilarSiblings(element, compareListTypes);
     restoreCursor();
     return mergedList;
+}
+
+// @todo @phoenix: use the selection plugin to preserve the cursor
+// @todo @phoenix: wrap P in a span if P has classes (mind the oe-hint class)
+export function unwrapParagraphInLI(element) {
+    if (!element.matches("li > p")) {
+        return element;
+    }
+    const parentLI = element.parentElement;
+    const restoreCursor = preserveCursor(element.ownerDocument);
+    const contents = unwrapContents(element);
+    restoreCursor(new Map([element, parentLI]));
+    // This assumes an empty P has at least one child (BR).
+    return contents[0];
 }
 
 export function applyToTree(root, func) {
