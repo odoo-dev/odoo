@@ -54,7 +54,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should remove the only character in a list", async () => {
+        test("should remove the only character in a list", async () => {
             await testEditor({
                 contentBefore: "<ul><li>[]a</li></ul>",
                 stepFunction: deleteForward,
@@ -255,7 +255,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should remove the only character in a checklist", async () => {
+        test("should remove the only character in a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore: '<ul class="o_checklist"><li class="o_checked">[]a</li></ul>',
