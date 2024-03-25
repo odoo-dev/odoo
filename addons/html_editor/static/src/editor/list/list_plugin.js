@@ -6,7 +6,14 @@ import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/d
 import { isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
-import { applyToTree, createList, getListMode, insertListAfter, mergeSimilarLists } from "./utils";
+import {
+    applyToTree,
+    createList,
+    getListMode,
+    insertListAfter,
+    mergeSimilarLists,
+    unwrapParagraphInLI,
+} from "./utils";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -107,7 +114,7 @@ export class ListPlugin extends Plugin {
                 this.toggleList(payload.mode);
                 break;
             case "NORMALIZE": {
-                this.mergeLists(payload.node);
+                this.normalize(payload.node);
                 break;
             }
         }
@@ -183,12 +190,16 @@ export class ListPlugin extends Plugin {
         this.dispatch("ADD_STEP");
     }
 
-    mergeLists(root = this.editable) {
+    normalize(root = this.editable) {
         const closestNestedLI = closestElement(root, "li.oe-nested");
         if (closestNestedLI) {
             root = closestNestedLI;
         }
-        applyToTree(root, mergeSimilarLists);
+        applyToTree(root, (element) => {
+            element = mergeSimilarLists(element);
+            element = unwrapParagraphInLI(element);
+            return element;
+        });
     }
 
     // --------------------------------------------------------------------------

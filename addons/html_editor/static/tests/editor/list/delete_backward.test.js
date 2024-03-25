@@ -45,7 +45,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove the only character in a list", async () => {
+            test("should remove the only character in a list", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a[]</li></ol>",
                     stepFunction: deleteBackward,
@@ -405,7 +405,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove the only character in a list", async () => {
+            test("should remove the only character in a list", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a[]</li></ul>",
                     stepFunction: deleteBackward,
@@ -796,7 +796,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove the only character in a list", async () => {
+            test("should remove the only character in a list", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">a[]</li></ul>',
@@ -1357,7 +1357,7 @@ describe("Selection collapsed", () => {
     });
     describe("Mixed", () => {
         describe("Ordered to unordered", () => {
-            test.todo("should merge an ordered list into an unordered list", async () => {
+            test("should merge an ordered list into an unordered list", async () => {
                 await testEditor({
                     contentBefore: "<ul><li>a</li></ul><ol><li>[]b</li></ol>",
                     stepFunction: async (editor) => {
@@ -1467,7 +1467,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Unordered to ordered", () => {
-            test.todo("should merge an unordered list into an ordered list", async () => {
+            test("should merge an unordered list into an ordered list", async () => {
                 await testEditor({
                     contentBefore: "<ol><li>a</li></ol><ul><li>[]b</li></ul>",
                     stepFunction: async (editor) => {
@@ -1595,7 +1595,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Checklist to unordered", () => {
-            test.todo("should merge an checklist list into an unordered list", async () => {
+            test("should merge an checklist list into an unordered list", async () => {
                 await testEditor({
                     contentBefore: '<ul><li>a</li></ul><ul class="o_checklist"><li>[]b</li></ul>',
                     stepFunction: async (editor) => {
@@ -1716,7 +1716,7 @@ describe("Selection collapsed", () => {
             });
         });
         describe("Unordered to checklist", () => {
-            test.todo("should merge an unordered list into an checklist list", async () => {
+            test("should merge an unordered list into an checklist list", async () => {
                 await testEditor({
                     removeCheckIds: true,
                     contentBefore:
