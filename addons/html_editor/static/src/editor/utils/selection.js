@@ -441,6 +441,7 @@ export function getSelectedNodes(editable) {
     ];
 }
 
+// @deprecated
 export function preserveCursor(document) {
     const sel = document.getSelection();
     const cursorPos = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];

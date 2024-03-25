@@ -2,17 +2,17 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/dom";
+import { copyAttributes, removeClass, setTagName, toggleClass, unwrapContents } from "../utils/dom";
 import { isEmptyBlock, isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import {
     applyToTree,
+    compareListTypes,
     createList,
     getListMode,
     insertListAfter,
-    mergeSimilarLists,
-    unwrapParagraphInLI,
+    mergeSimilarSiblings,
 } from "./utils";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
@@ -196,11 +196,18 @@ export class ListPlugin extends Plugin {
         if (closestNestedLI) {
             root = closestNestedLI;
         }
+        const selectionToRestore = this.shared.getEditableSelection();
         applyToTree(root, (element) => {
-            element = mergeSimilarLists(element);
-            element = unwrapParagraphInLI(element);
+            element = this.mergeSimilarLists(element);
+            element = this.unwrapParagraphInLI(element);
             return element;
         });
+        const isValid =
+            selectionToRestore.anchorNode.isConnected && selectionToRestore.focusNode.isConnected;
+        const shouldRestore = selectionToRestore.inEditable && isValid;
+        if (shouldRestore) {
+            this.shared.setSelection(selectionToRestore, { normalize: false });
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -310,6 +317,27 @@ export class ListPlugin extends Plugin {
         if (isValid) {
             this.shared.setSelection(selectionToRestore, { normalize: false });
         }
+    }
+
+    // --------------------------------------------------------------------------
+    // Helpers for normalize
+    // --------------------------------------------------------------------------
+
+    mergeSimilarLists(element) {
+        if (!element.matches("ul, ol, li.oe-nested")) {
+            return element;
+        }
+        return mergeSimilarSiblings(element, compareListTypes);
+    }
+
+    // @todo @phoenix: wrap P in a span if P has classes (mind the oe-hint class)
+    unwrapParagraphInLI(element) {
+        if (!element.matches("li > p")) {
+            return element;
+        }
+        const contents = unwrapContents(element);
+        // This assumes an empty P has at least one child (BR).
+        return contents[0];
     }
 
     // --------------------------------------------------------------------------

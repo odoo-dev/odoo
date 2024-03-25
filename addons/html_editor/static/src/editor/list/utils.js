@@ -1,6 +1,4 @@
-import { unwrapContents } from "../utils/dom";
 import { getAdjacents } from "../utils/dom_traversal";
-import { preserveCursor } from "../utils/selection";
 
 export function getListMode(pnode) {
     if (pnode.tagName == "OL") {
@@ -17,7 +15,6 @@ export function createList(document, mode) {
     return node;
 }
 
-// @todo use the correct document
 export function insertListAfter(document, afterNode, mode, content = []) {
     const list = createList(document, mode);
     afterNode.after(list);
@@ -38,7 +35,7 @@ export function insertListAfter(document, afterNode, mode, content = []) {
  * @param {Function} compare
  * @returns {HTMLElement}
  */
-function mergeSimilarSiblings(element, compare) {
+export function mergeSimilarSiblings(element, compare) {
     const adjacentElements = getAdjacents(element, (n) => compare(element, n));
     const dest = adjacentElements.shift();
     while (adjacentElements.length) {
@@ -55,7 +52,7 @@ function mergeSimilarSiblings(element, compare) {
  * - checklist (ul.o_checklist)
  * - container for nested lists (li.oe-nested)
  */
-function compareListTypes(a, b) {
+export function compareListTypes(a, b) {
     if (a.tagName !== b.tagName) {
         return false;
     }
@@ -69,31 +66,6 @@ function compareListTypes(a, b) {
         return compareListTypes(a.firstElementChild, b.firstElementChild);
     }
     return true;
-}
-
-// @todo @phoenix: use the selection plugin to preserve the cursor
-export function mergeSimilarLists(element) {
-    if (!element.matches("ul, ol, li.oe-nested")) {
-        return element;
-    }
-    const restoreCursor = preserveCursor(element.ownerDocument);
-    const mergedList = mergeSimilarSiblings(element, compareListTypes);
-    restoreCursor();
-    return mergedList;
-}
-
-// @todo @phoenix: use the selection plugin to preserve the cursor
-// @todo @phoenix: wrap P in a span if P has classes (mind the oe-hint class)
-export function unwrapParagraphInLI(element) {
-    if (!element.matches("li > p")) {
-        return element;
-    }
-    const parentLI = element.parentElement;
-    const restoreCursor = preserveCursor(element.ownerDocument);
-    const contents = unwrapContents(element);
-    restoreCursor(new Map([element, parentLI]));
-    // This assumes an empty P has at least one child (BR).
-    return contents[0];
 }
 
 export function applyToTree(root, func) {
