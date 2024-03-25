@@ -11,7 +11,7 @@ export class TablePicker extends Component {
     };
 
     setup() {
-        this.overlay = useOverlay("root", "bottom");
+        this.overlay = useOverlay("root", { position: "bottom" });
         this.state = useState({
             cols: 3,
             rows: 3,

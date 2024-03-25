@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.Powerbox">
-        <div t-ref="root" class="o-we-powerbox m-2 py-2 bg-white overflow-auto" style="width:300px;max-height:40vh;" t-on-mousedown.stop="">
+        <div t-ref="root" class="o-we-powerbox py-2 bg-white overflow-auto" style="width:300px;max-height:40vh;" t-on-mousedown.stop="">
             <t t-set="activeCmd" t-value="commands[cmdIndex]"/>
             <t t-foreach="categories" t-as="category" t-key="category_index">
                 <t t-if="categories.length > 1">

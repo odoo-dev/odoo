@@ -20,7 +20,7 @@ export class Toolbar extends Component {
     setup() {
         this.buttonsActiveState = useState(this.props.toolbar.buttonsActiveState);
         if (this.props.floating) {
-            this.overlay = useOverlay("root", "top");
+            this.overlay = useOverlay("root", { position: "top" });
         }
     }
 
