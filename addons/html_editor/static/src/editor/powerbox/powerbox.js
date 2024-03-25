@@ -38,7 +38,7 @@ export class Powerbox extends Component {
         const search = this.node.nodeValue?.slice(this.offset + 1, this.endOffset) || "";
         this.computeCommands(search);
 
-        this.overlay = useOverlay("root", "bottom");
+        this.overlay = useOverlay("root", { position: "bottom", offsetY: 0 });
         onMounted(() => {
             if (this.node.nodeType !== Node.TEXT_NODE) {
                 // in this case, we have an element, but we want the text node that
@@ -55,6 +55,7 @@ export class Powerbox extends Component {
             if (activeCommand) {
                 activeCommand.scrollIntoView({ block: "nearest", inline: "nearest" });
             }
+            this.overlay.updatePosition();
         });
 
         useExternalListener(this.props.el, "keydown", (ev) => {
