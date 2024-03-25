@@ -1,110 +1,96 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../../test_helpers/editor";
-import { manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { expect, test } from "@odoo/hoot";
+import { click, hover, waitFor } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
+import { setupEditor } from "../../test_helpers/editor";
+import { getContent } from "../../test_helpers/selection";
+import { unformat } from "../../test_helpers/format";
 
-async function tableUiMenuTest(editor) {
-    const column = editor.editable.querySelector("td");
-    await manuallyDispatchProgrammaticEvent(column, "mousemove", {});
-    if (editor._rowUi.style.visibility === "visible") {
-        const paragraph = editor.editable.querySelector("p");
-        const text = document.createTextNode("table ui");
-        paragraph.replaceChildren(text);
+test("should only display the table ui menu if the table isContentEditable=true", async () => {
+    const { el } = await setupEditor(`
+        <table><tbody><tr>
+            <td>11[]</td>
+        </tr></tbody></table>`);
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    hover(el.querySelector("td"));
+    await waitFor(".o-we-table-menu");
+    expect(".o-we-table-menu").toHaveCount(1);
+});
+
+test("should not display the table ui menu if the table element isContentEditable=false", async () => {
+    const { el } = await setupEditor(`
+        <table contenteditable="false"><tbody><tr>
+            <td>11[]</td>
+        </tr></tbody></table>`);
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    hover(el.querySelector("td"));
+    await animationFrame();
+    expect(".o-we-table-menu").toHaveCount(0);
+});
+
+test.todo(
+    "should display the resizeCursor if the table element isContentEditable=true",
+    async () => {
+        const { el } = await setupEditor(`
+        <table><tbody><tr>
+            <td>11[]</td>
+        </tr></tbody></table>`);
+
+        expect(".o_col_resize").toHaveCount(0);
+        expect(".o_row_resize").toHaveCount(0);
+
+        hover(el.querySelector("td"));
+
+        // commented for now to speed up tests. need to uncomment this when resize is implemented
+        // await waitFor(".o_col_resize");
+        expect(".o_col_resize").toHaveCount(1);
     }
-}
+);
 
-async function resizeTest(editor) {
-    const column = editor.editable.querySelector("td");
-    await manuallyDispatchProgrammaticEvent(column, "mousemove", {});
-    if (
-        ["o_row_resize", "o_col_resize"].filter((resize) =>
-            editor.editable.classList.contains(resize)
-        ).length
-    ) {
-        const paragraph = editor.editable.querySelector("p");
-        const text = document.createTextNode("resizeCursor");
-        paragraph.replaceChildren(text);
-    }
-}
+test("should not display the resizeCursor if the table element isContentEditable=false", async () => {
+    const { el } = await setupEditor(`
+        <table contenteditable="false"><tbody><tr>
+            <td>11[]</td>
+        </tr></tbody></table>`);
 
-describe("contenteditable", () => {
-    test.todo(
-        "should display the table ui menu if the table element isContentEditable=true",
-        async () => {
-            await testEditor({
-                contentBefore: `
-            <p>no table ui</p>
-            <table><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-                stepFunction: tableUiMenuTest,
-                contentAfter: `
-            <p>table ui</p>
-            <table><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-            });
-        }
+    expect(".o_col_resize").toHaveCount(0);
+    expect(".o_row_resize").toHaveCount(0);
+
+    hover(el.querySelector("td"));
+
+    await animationFrame();
+    expect(".o_col_resize").toHaveCount(0);
+});
+
+test("basic delete column operation", async () => {
+    const { el } = await setupEditor(
+        unformat(`
+        <table><tbody><tr>
+            <td>1[]</td>
+            <td>2</td>
+        </tr></tbody></table>`)
     );
+    expect(".o-we-table-menu").toHaveCount(0);
 
-    test.todo(
-        "should not display the table ui menu if the table element isContentEditable=false",
-        async () => {
-            await testEditor({
-                contentBefore: `
-            <p>no table ui</p>
-            <table contenteditable="false"><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-                stepFunction: tableUiMenuTest,
-                contentAfter: `
-            <p>no table ui</p>
-            <table contenteditable="false"><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-            });
-        }
+    // hover on td to show col ui
+    hover(el.querySelector("td"));
+    await waitFor(".o-we-table-menu");
+
+    // click on it to open dropdown
+    click(".o-we-table-menu");
+    await waitFor("div[name='delete']");
+
+    // delete row
+    click("div[name='delete']");
+    expect(getContent(el)).toBe(
+        unformat(`
+        <table>
+            <tbody>
+                <tr>
+                    <td>[]2</td>
+                </tr>
+            </tbody>
+        </table>`)
     );
-
-    test.todo(
-        "should display the resizeCursor if the table element isContentEditable=true",
-        async () => {
-            await testEditor({
-                contentBefore: `
-            <p>no resizeCursor</p>
-            <table><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-                stepFunction: resizeTest,
-                contentAfter: `
-            <p>resizeCursor</p>
-            <table><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-            });
-        }
-    );
-
-    test("should not display the resizeCursor if the table element isContentEditable=false", async () => {
-        await testEditor({
-            contentBefore: `
-            <p>no resizeCursor</p>
-            <table contenteditable="false"><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-            stepFunction: resizeTest,
-            contentAfter: `
-            <p>no resizeCursor</p>
-            <table contenteditable="false"><tbody><tr>
-                <td>11[]</td>
-            </tr></tbody></table>
-            `,
-        });
-    });
 });
