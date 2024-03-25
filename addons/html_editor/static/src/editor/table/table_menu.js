@@ -12,7 +12,7 @@ export class TableMenu extends Component {
     static components = { Dropdown, DropdownItem };
 
     setup() {
-        useOverlay("root", {
+        this.overlay = useOverlay("root", {
             position: this.props.position,
             offsetY: 0,
             width: "auto",
@@ -21,11 +21,19 @@ export class TableMenu extends Component {
 
     items = [
         {
+            name: "delete",
+            icon: "fa-trash",
             text: "Delete",
+            action: this.deleteColumn.bind(this),
         },
     ];
 
     onSelected(item) {
-        console.log(item);
+        item.action(this.overlay.target);
+        this.overlay.close();
+    }
+
+    deleteColumn(target) {
+        this.props.dispatch("REMOVE_COLUMN", { cell: target });
     }
 }

@@ -11,7 +11,7 @@ import { TablePicker } from "./table_picker";
  */
 export class TableUIPlugin extends Plugin {
     static name = "table_ui";
-    static dependencies = ["overlay"];
+    static dependencies = ["overlay", "table"];
     static resources = (p) => ({
         powerboxCommands: [
             {
@@ -40,7 +40,7 @@ export class TableUIPlugin extends Plugin {
             position: "top",
             dispatch: this.dispatch,
         });
-        this.addDomListener(this.editable, "mousemove", this.onMouseMove);
+        this.addDomListener(this.editable, "pointermove", this.onMouseMove);
     }
 
     handleCommand(command) {
@@ -63,7 +63,9 @@ export class TableUIPlugin extends Plugin {
     onMouseMove(ev) {
         const target = ev.target;
         if (ev.target.tagName === "TD" && target !== this.activeTd) {
-            this.setActiveTd(target);
+            if (ev.target.isContentEditable) {
+                this.setActiveTd(target);
+            }
         } else if (this.activeTd) {
             const parentTd = closestElement(target, "td");
             if (!parentTd) {
@@ -76,6 +78,7 @@ export class TableUIPlugin extends Plugin {
         this.activeTd = td;
         if (td) {
             //
+            this.colMenu.close();
             this.colMenu.open(td);
         } else {
             this.colMenu.close();
