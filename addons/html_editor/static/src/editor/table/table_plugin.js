@@ -219,6 +219,7 @@ export class TablePlugin extends Plugin {
         const siblingCell = cells[index - 1] || cells[index + 1];
         table.querySelectorAll(`tr td:nth-of-type(${index + 1})`).forEach((td) => td.remove());
         // @todo @phoenix should I call dispatch('DELETE_TABLE', table) or this.deleteTable?
+        // not sure we should move the cursor?
         siblingCell
             ? this.shared.setCursorStart(siblingCell)
             : this.dispatch("DELETE_TABLE", { table });
@@ -236,8 +237,9 @@ export class TablePlugin extends Plugin {
         const rowIndex = rows.findIndex((tr) => tr === row);
         const siblingRow = rows[rowIndex - 1] || rows[rowIndex + 1];
         row.remove();
+        // not sure we should move the cursor?
         siblingRow
-            ? this.shared.setCursorStart(siblingRow)
+            ? this.shared.setCursorStart(siblingRow.querySelector("td"))
             : this.dispatch("DELETE_TABLE", { table });
     }
     resetSize({ table }) {

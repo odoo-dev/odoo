@@ -157,7 +157,7 @@ describe("row", () => {
                     <table>
                         <tbody>
                             <tr>
-                                []<td>ef</td> <td>gh</td>
+                                <td>[]ef</td> <td>gh</td>
                             </tr>
                         </tbody>
                     </table>
@@ -187,7 +187,7 @@ describe("row", () => {
                     <table>
                         <tbody>
                             <tr>
-                                []<td>ab</td> <td>cd</td>
+                                <td>[]ab</td> <td>cd</td>
                             </tr>
                         </tbody>
                     </table>
