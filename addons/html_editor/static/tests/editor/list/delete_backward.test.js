@@ -2289,7 +2289,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test.todo("should not join the next list with the first one on delete range", async () => {
+        test("should not join the next list with the first one on delete range", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -2299,7 +2299,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test.todo("should remove the o_checked class on delete range", async () => {
+        test("should remove the o_checked class on delete range", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:
@@ -2309,7 +2309,7 @@ describe("Selection not collapsed", () => {
             });
         });
 
-        test.todo("should remove the o_checked class on delete range (2)", async () => {
+        test("should remove the o_checked class on delete range (2)", async () => {
             await testEditor({
                 removeCheckIds: true,
                 contentBefore:

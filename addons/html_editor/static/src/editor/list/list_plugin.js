@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { copyAttributes, removeClass, setTagName, toggleClass } from "../utils/dom";
-import { isVisible } from "../utils/dom_info";
+import { isEmptyBlock, isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
 import {
@@ -28,9 +28,10 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split", "selection"];
+    static dependencies = ["tabulation", "split", "selection", "delete"];
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
+        handle_delete_range: { callback: p.handleDeleteRange.bind(p) },
         handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
@@ -516,6 +517,28 @@ export class ListPlugin extends Plugin {
             this.liToP(closestLIendContainer);
             return true;
         }
+    }
+
+    // Uncheck checklist item left empty after deleting a multi-LI selection.
+    handleDeleteRange(range) {
+        const { startContainer, endContainer } = range;
+        const startCheckedLi = closestElement(startContainer, "li.o_checked");
+        if (!startCheckedLi) {
+            return;
+        }
+        const endLi = closestElement(endContainer, "li");
+        if (startCheckedLi === endLi) {
+            return;
+        }
+
+        const { cursorPos } = this.shared.deleteRange(range);
+
+        if (isEmptyBlock(startCheckedLi)) {
+            removeClass(startCheckedLi, "o_checked");
+        }
+
+        this.shared.setSelection(cursorPos);
+        return true;
     }
 
     // --------------------------------------------------------------------------
