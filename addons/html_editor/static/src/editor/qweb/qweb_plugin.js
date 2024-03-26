@@ -16,8 +16,6 @@ export class QWebPlugin extends Plugin {
         });
         this.addDomListener(this.editable, "click", this.onClick);
         this.groupIndex = 0;
-
-        this.normalize(this.editable);
     }
 
     handleCommand(command, payload) {

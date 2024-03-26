@@ -36,9 +36,6 @@ export class TabulationPlugin extends Plugin {
     });
 
     setup() {
-        for (const tab of this.editable.querySelectorAll(".oe-tabs")) {
-            tab.setAttribute("contenteditable", "false");
-        }
         this.resources["handle_tab"].sort((a, b) => a.sequence - b.sequence);
         this.resources["handle_shift_tab"].sort((a, b) => a.sequence - b.sequence);
     }
@@ -52,6 +49,9 @@ export class TabulationPlugin extends Plugin {
                 this.handleShiftTab();
                 break;
             case "NORMALIZE": {
+                for (const tab of payload.node.querySelectorAll(".oe-tabs")) {
+                    tab.setAttribute("contenteditable", "false");
+                }
                 this.alignTabs(payload.node);
                 break;
             }
