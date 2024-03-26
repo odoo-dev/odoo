@@ -330,10 +330,16 @@ export class ListPlugin extends Plugin {
         return mergeSimilarSiblings(element, compareListTypes);
     }
 
-    // @todo @phoenix: wrap P in a span if P has classes (mind the oe-hint class)
     unwrapParagraphInLI(element) {
         if (!element.matches("li > p")) {
             return element;
+        }
+        this.dispatch("CLEAN_NODE", { root: element });
+        // Wrap contents is a span if the P has classes.
+        // @todo @phoenix: consider always wrapping in a span. Normalize is
+        // supposed to unwrap spans that have no attributes anyway.
+        if (element.classList.length) {
+            return setTagName(element, "span");
         }
         const contents = unwrapContents(element);
         // This assumes an empty P has at least one child (BR).
