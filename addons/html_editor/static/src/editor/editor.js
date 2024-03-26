@@ -135,6 +135,7 @@ export class Editor {
             plugin.resources = resources;
             plugin.setup();
         }
+        this.dispatch("NORMALIZE", { node: this.editable });
     }
 
     createResources() {

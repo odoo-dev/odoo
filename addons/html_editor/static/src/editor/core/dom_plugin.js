@@ -34,12 +34,6 @@ export class DomPlugin extends Plugin {
         },
     });
 
-    setup() {
-        for (const separator of this.editable.querySelectorAll("hr")) {
-            separator.setAttribute("contenteditable", "false");
-        }
-    }
-
     handleCommand(command, payload) {
         switch (command) {
             case "SET_TAG":
@@ -64,6 +58,9 @@ export class DomPlugin extends Plugin {
                 break;
             }
             case "NORMALIZE": {
+                for (const separator of payload.node.querySelectorAll("hr")) {
+                    separator.setAttribute("contenteditable", "false");
+                }
                 this.mergeAdjacentNodes(payload.node);
                 break;
             }
