@@ -1,66 +1,3 @@
-<<<<<<< HEAD
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import fields, models
-
-_TYPE_EC = [
-    ("vat08", "VAT 8%"),
-    ("vat12", "VAT 12%"),
-    ("vat14", "VAT 14%"),
-    ("zero_vat", "VAT 0%"),
-    ("not_charged_vat", "VAT Not Charged"),
-    ("exempt_vat", "VAT Exempt"),
-    ("ice", "Special Consumptions Tax (ICE)"),
-    ("irbpnr", "Plastic Bottles (IRBPNR)"),
-    ("withhold_vat_sale", "VAT Withhold on Sales"),
-    ("withhold_vat_purchase", "VAT Withhold on Purchases"),
-    ("withhold_income_sale", "Profit Withhold on Sales"),
-    ("withhold_income_purchase", "Profit Withhold on Purchases"),
-    ("outflows_tax", "Exchange Outflows"),
-    ("other", "Others"),
-]
-
-
-class AccountTaxGroup(models.Model):
-    _inherit = "account.tax.group"
-
-    l10n_ec_type = fields.Selection(
-        _TYPE_EC, string="Type Ecuadorian Tax", help="Ecuadorian taxes subtype"
-    )
-||||||| parent of f3fe8ff957e4 (temp)
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import fields, models
-
-_TYPE_EC = [
-    ("vat08", "VAT 8%"),
-    ("vat12", "VAT 12%"),
-    ("vat14", "VAT 14%"),
-    ("zero_vat", "VAT 0%"),
-    ("not_charged_vat", "VAT Not Charged"),
-    ("exempt_vat", "VAT Exempt"),
-    ("ice", "Special Consumptions Tax (ICE)"),
-    ("irbpnr", "Plastic Bottles (IRBPNR)"),
-    ("withhold_vat_sale", "VAT Withhold on Sales"),
-    ("withhold_vat_purchase", "VAT Withhold on Purchases"),
-    ("withhold_income_sale", "Profit Withhold on Sales"),
-    ("withhold_income_purchase", "Profit Withhold on Purchases"),
-    ("outflows_tax", "Exchange Outflows"),
-    ("other", "Others"),
-    ("withhold_vat", "VAT Withhold (Deprecated)"),  # removed in master
-    ("withhold_income_tax", "Profit Withhold (Deprecated)"),  # removed in master
-]
-
-
-class AccountTaxGroup(models.Model):
-    _inherit = "account.tax.group"
-
-    l10n_ec_type = fields.Selection(
-        _TYPE_EC, string="Type Ecuadorian Tax", help="Ecuadorian taxes subtype"
-    )
-=======
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
@@ -84,8 +21,6 @@ _TYPE_EC = [
     ("withhold_income_purchase", "Profit Withhold on Purchases"),
     ("outflows_tax", "Exchange Outflows"),
     ("other", "Others"),
-    ("withhold_vat", "VAT Withhold (Deprecated)"),  # removed in master
-    ("withhold_income_tax", "Profit Withhold (Deprecated)"),  # removed in master
 ]
 
 
@@ -95,4 +30,3 @@ class AccountTaxGroup(models.Model):
     l10n_ec_type = fields.Selection(
         _TYPE_EC, string="Type Ecuadorian Tax", help="Ecuadorian taxes subtype"
     )
->>>>>>> f3fe8ff957e4 (temp)
