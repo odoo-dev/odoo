@@ -9,6 +9,10 @@
                     <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="showToolbar" t-model="config.showToolbar"/><label for="showToolbar" class="form-check-label">Show Toolbar</label></div>
                     <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="inIframe" t-model="config.inIframe"/><label for="inIframe" class="form-check-label">in iframe</label></div>
                 </div>
+                 <div>
+                    <h3>Plugins</h3>
+                    <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="hasQWebPlugin" t-model="config.hasQWebPlugin"/><label for="hasQWebPlugin" class="form-check-label">Has QWebPlugin</label></div>
+                </div>
                 <div class="">
                     <h3>Playground Config</h3>
                     <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="displayCurrentEditor" t-model="state.showWysiwyg"/><label for="displayCurrentEditor" class="form-check-label">Display Current Editor</label></div>
@@ -22,7 +26,9 @@
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;${!config.inIframe ? 'overflow:auto;' : ''}`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"
-                        toolbar="config.showToolbar"/>
+                        toolbar="config.showToolbar"
+                        Plugins="Plugins"
+                        classListEditor="classListEditor"/>
                 </div>
                 <t t-if="state.showWysiwyg">
                     <div class="d-flex">

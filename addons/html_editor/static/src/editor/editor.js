@@ -10,6 +10,7 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { boolean } [allowInlineAtRoot]
  * @property { PluginConstructor[] } [Plugins]
  * @property { boolean } [disableFloatingToolbar]
+ * @property { string[] } [classList]
  */
 
 export const defaultConfig = {};
@@ -71,6 +72,9 @@ export class Editor {
         editable.setAttribute("contenteditable", true);
         initElementForEdition(editable, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
         editable.classList.add("odoo-editor-editable");
+        if (this.config.classList) {
+            editable.classList.add(...this.config.classList);
+        }
         this.startPlugins();
     }
 

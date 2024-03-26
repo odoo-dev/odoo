@@ -56,6 +56,8 @@ export class Wysiwyg extends Component {
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
+        Plugins: { type: Array, optional: true },
+        classListEditor: { type: Array, optional: true },
     };
 
     setup() {
@@ -65,6 +67,8 @@ export class Wysiwyg extends Component {
         this.editor = useWysiwyg("content", {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
+            classList: this.props.classListEditor,
+            Plugins: this.props.Plugins,
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
