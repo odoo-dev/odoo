@@ -1,5 +1,6 @@
 import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { QWebPlugin } from "./editor/qweb/qweb_plugin";
 import { Wysiwyg } from "./editor/wysiwyg";
 
 const testHtml = `Hello Phoenix editor!
@@ -13,6 +14,20 @@ const testHtml = `Hello Phoenix editor!
     </tbody>
 </table>
 <p>this is another paragraph</p>
+<div>
+    <t t-if="test">
+        QWeb Hello
+        <t t-if="sub-test">Sub If</t>
+        <t t-else="">Sub else</t>
+    </t>
+    <t t-elif="test2">Hi</t>
+    <t t-else="">By</t>
+</div>
+<div>
+    <t t-out="test">T-Out</t>
+    <t t-esc="test">T-esc</t>
+    <t t-esc="test">T-field</t>
+</div>
 
 `;
 
@@ -24,14 +39,33 @@ export class Playground extends Component {
     setup() {
         this.testHtml = testHtml;
         // this.editor = useWysiwyg("html", { ...defaultConfig });
-        this.state = useState({ showWysiwyg: false });
+        this.state = useState({
+            showWysiwyg: false,
+        });
         this.config = useState({
             showToolbar: false,
             inIframe: false,
+            hasQWebPlugin: false,
         });
         this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
             "@web_editor/js/wysiwyg/wysiwyg"
         ).Wysiwyg;
+    }
+
+    get Plugins() {
+        const Plugins = registry.category("phoenix_plugins").getAll();
+        if (this.config.hasQWebPlugin) {
+            Plugins.push(QWebPlugin);
+        }
+        return Plugins;
+    }
+
+    get classListEditor() {
+        const classList = [];
+        if (this.config.hasQWebPlugin) {
+            classList.push("odoo-editor-qweb");
+        }
+        return classList;
     }
 
     toggleWysiwyg() {
