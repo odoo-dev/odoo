@@ -43,8 +43,7 @@ export class DomPlugin extends Plugin {
                 this.insertSeparator();
                 break;
             case "CLEAN": {
-                const root = payload;
-                for (const node of [root, ...descendants(root)]) {
+                for (const node of [this.editable, ...descendants(this.editable)]) {
                     if (node.classList && !node.classList.length) {
                         node.removeAttribute("class");
                     }
