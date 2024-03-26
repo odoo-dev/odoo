@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.TableMenu">
-        <Dropdown>
-            <button t-ref="root" class="o-we-table-menu fa fa-ellipsis-h">
+        <Dropdown menuClass="'m-0'" position="props.type === 'column' ? 'bottom' : 'right'">
+            <button t-ref="root" t-att-data-type="props.type" class="o-we-table-menu fa" t-attf-class="fa-ellipsis-{{props.type === 'column' ? 'h' : 'v'}}">
             </button>
             <t t-set-slot="content">
                 <t t-foreach="items" t-as="item" t-key="item_index">

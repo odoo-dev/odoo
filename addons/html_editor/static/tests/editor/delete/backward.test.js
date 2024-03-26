@@ -1512,7 +1512,7 @@ describe("Selection not collapsed", () => {
             stepFunction: deleteBackward,
             contentAfter: unformat(
                 `<table><tbody>
-                    <tr>[]<td>ef</td><td>gh</td></tr>
+                    <tr><td>[]ef</td><td>gh</td></tr>
                 </tbody></table>`
             ),
         });
