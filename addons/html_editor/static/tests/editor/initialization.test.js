@@ -126,7 +126,7 @@ describe("sanitize spans/fonts away", () => {
 });
 
 describe("sanitize should modify p within li", () => {
-    test.todo("should convert p into span if p has classes", async () => {
+    test("should convert p into span if p has classes", async () => {
         await testEditor({
             contentBefore: '<ul><li><p class="class-1">abc</p><p class="class-2">def</p></li></ul>',
             contentAfter:

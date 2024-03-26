@@ -35,7 +35,7 @@ export class HintPlugin extends Plugin {
                 this.updateHints(payload.root);
                 break;
             }
-            case "CLEAN_NODE": // @todo @phoenix: maybe use the NORMALIZE command for this?
+            case "CLEAN_NODE":
                 this.clearHints(payload.root);
                 break;
             case "CLEAN":
