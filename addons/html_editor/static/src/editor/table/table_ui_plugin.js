@@ -37,7 +37,12 @@ export class TableUIPlugin extends Plugin {
 
         /** @type {import("../core/overlay_plugin").Overlay} */
         this.colMenu = this.shared.createOverlay(TableMenu, {
-            position: "top",
+            type: "column",
+            dispatch: this.dispatch,
+        });
+        /** @type {import("../core/overlay_plugin").Overlay} */
+        this.rowMenu = this.shared.createOverlay(TableMenu, {
+            type: "row",
             dispatch: this.dispatch,
         });
         this.addDomListener(this.editable, "pointermove", this.onMouseMove);
@@ -76,12 +81,15 @@ export class TableUIPlugin extends Plugin {
 
     setActiveTd(td) {
         this.activeTd = td;
+        this.colMenu.close();
+        this.rowMenu.close();
         if (td) {
-            //
-            this.colMenu.close();
-            this.colMenu.open(td);
-        } else {
-            this.colMenu.close();
+            if (td.cellIndex === 0) {
+                this.rowMenu.open(td);
+            }
+            if (td.parentElement.rowIndex === 0) {
+                this.colMenu.open(td);
+            }
         }
     }
 }
