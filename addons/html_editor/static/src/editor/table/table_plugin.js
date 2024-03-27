@@ -53,6 +53,12 @@ export class TablePlugin extends Plugin {
             case "REMOVE_ROW":
                 this.removeRow(payload);
                 break;
+            case "MOVE_COLUMN":
+                this.moveColumn(payload);
+                break;
+            case "MOVE_ROW":
+                this.moveRow(payload);
+                break;
             case "RESET_SIZE":
                 this.resetSize(payload);
                 break;
@@ -239,6 +245,36 @@ export class TablePlugin extends Plugin {
         siblingRow
             ? this.shared.setCursorStart(siblingRow.querySelector("td"))
             : this.dispatch("DELETE_TABLE", { table });
+    }
+    moveColumn({ position, cell }) {
+        const columnIndex = getColumnIndex(cell);
+        const nColumns = cell.parentElement.children.length;
+        if (
+            columnIndex < 0 ||
+            (position === "left" && columnIndex === 0) ||
+            (position !== "left" && columnIndex === nColumns - 1)
+        ) {
+            return;
+        }
+
+        const trs = cell.parentElement.parentElement.children;
+        const tdsToMove = [...trs].map((tr) => tr.children[columnIndex]);
+        const selectionToRestore = this.shared.getEditableSelection();
+        if (position === "left") {
+            tdsToMove.forEach((td) => td.previousElementSibling.before(td));
+        } else {
+            tdsToMove.forEach((td) => td.nextElementSibling.after(td));
+        }
+        this.shared.setSelection(selectionToRestore);
+    }
+    moveRow({ position, row }) {
+        const selectionToRestore = this.shared.getEditableSelection();
+        if (position === "up") {
+            row.previousElementSibling?.before(row);
+        } else {
+            row.nextElementSibling?.after(row);
+        }
+        this.shared.setSelection(selectionToRestore);
     }
     resetSize({ table }) {
         if (!table) {

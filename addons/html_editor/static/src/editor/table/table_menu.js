@@ -107,8 +107,7 @@ export class TableMenu extends Component {
     }
 
     moveColumn(position, target) {
-        // @todo @phoenix
-        // this.props.dispatch("MOVE_COLUMN", { position, reference: target });
+        this.props.dispatch("MOVE_COLUMN", { position, cell: target });
     }
 
     insertColumn(position, target) {
@@ -120,8 +119,7 @@ export class TableMenu extends Component {
     }
 
     moveRow(position, target) {
-        // @todo @phoenix
-        // this.props.dispatch("MOVE_ROW", { position, reference: target });
+        this.props.dispatch("MOVE_ROW", { position, row: target.parentElement });
     }
 
     insertRow(position, target) {

@@ -267,7 +267,7 @@ test("basic delete column operation", async () => {
     click(".o-we-table-menu");
     await waitFor("div[name='delete']");
 
-    // delete row
+    // delete column
     click("div[name='delete']");
     // not sure about selection...
     expect(getContent(el)).toBe(
@@ -334,7 +334,7 @@ test("insert column left operation", async () => {
     click(".o-we-table-menu");
     await waitFor("div[name='insert_left']");
 
-    // delete row
+    // insert column left
     click("div[name='insert_left']");
     expect(getContent(el)).toBe(
         unformat(`
@@ -375,7 +375,7 @@ test("insert column right operation", async () => {
     click("[data-type='column'].o-we-table-menu");
     await waitFor("div[name='insert_right']");
 
-    // delete row
+    // insert column right
     click("div[name='insert_right']");
     expect(getContent(el)).toBe(
         unformat(`
@@ -416,7 +416,7 @@ test("insert row above operation", async () => {
     click(".o-we-table-menu");
     await waitFor("div[name='insert_above']");
 
-    // delete row
+    // insert row above
     click("div[name='insert_above']");
     expect(getContent(el)).toBe(
         unformat(`
@@ -459,7 +459,7 @@ test("insert row below operation", async () => {
     click("[data-type='row'].o-we-table-menu");
     await waitFor("div[name='insert_below']");
 
-    // delete row
+    // insert row below
     click("div[name='insert_below']");
     expect(getContent(el)).toBe(
         unformat(`
@@ -477,6 +477,138 @@ test("insert row below operation", async () => {
                     <td class="c">3</td>
                     <td class="d">4</td>
                 </tr>
+            </tbody>
+        </table>`)
+    );
+});
+
+test("move column left operation", async () => {
+    const { el } = await setupEditor(
+        unformat(`
+        <table>
+            <tbody>
+                <tr><td class="a">1</td><td class="b">2[]</td></tr>
+                <tr><td class="c">3</td><td class="d">4</td></tr>
+            </tbody>
+        </table>`)
+    );
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    // hover on td to show row ui
+    hover(el.querySelector("td.b"));
+    await waitFor("[data-type='column'].o-we-table-menu");
+
+    // click on it to open dropdown
+    click("[data-type='column'].o-we-table-menu");
+    await waitFor("div[name='move_left']");
+
+    // move column left
+    click("div[name='move_left']");
+    expect(getContent(el)).toBe(
+        unformat(`
+        <table>
+            <tbody>
+            <tr><td class="b">2[]</td><td class="a">1</td></tr>
+            <tr><td class="d">4</td><td class="c">3</td></tr>
+            </tbody>
+        </table>`)
+    );
+});
+
+test("move column right operation", async () => {
+    const { el } = await setupEditor(
+        unformat(`
+        <table>
+            <tbody>
+                <tr><td class="a">1</td><td class="b">2[]</td></tr>
+                <tr><td class="c">3</td><td class="d">4</td></tr>
+            </tbody>
+        </table>`)
+    );
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    // hover on td to show row ui
+    hover(el.querySelector("td.a"));
+    await waitFor("[data-type='column'].o-we-table-menu");
+
+    // click on it to open dropdown
+    click("[data-type='column'].o-we-table-menu");
+    await waitFor("div[name='move_right']");
+
+    // move column right
+    click("div[name='move_right']");
+    expect(getContent(el)).toBe(
+        unformat(`
+        <table>
+            <tbody>
+            <tr><td class="b">2[]</td><td class="a">1</td></tr>
+            <tr><td class="d">4</td><td class="c">3</td></tr>
+            </tbody>
+        </table>`)
+    );
+});
+
+test("move row above operation", async () => {
+    const { el } = await setupEditor(
+        unformat(`
+        <table>
+            <tbody>
+                <tr><td class="a">1[]</td><td class="b">2</td></tr>
+                <tr><td class="c">3</td><td class="d">4</td></tr>
+            </tbody>
+        </table>`)
+    );
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    // hover on td to show row ui
+    hover(el.querySelector("td.c"));
+    await waitFor("[data-type='row'].o-we-table-menu");
+
+    // click on it to open dropdown
+    click("[data-type='row'].o-we-table-menu");
+    await waitFor("div[name='move_up']");
+
+    // move row up
+    click("div[name='move_up']");
+    expect(getContent(el)).toBe(
+        unformat(`
+        <table>
+            <tbody>
+            <tr><td class="c">3</td><td class="d">4</td></tr>
+            <tr><td class="a">1[]</td><td class="b">2</td></tr>
+            </tbody>
+        </table>`)
+    );
+});
+
+test("move row below operation", async () => {
+    const { el } = await setupEditor(
+        unformat(`
+        <table>
+            <tbody>
+                <tr><td class="a">1[]</td><td class="b">2</td></tr>
+                <tr><td class="c">3</td><td class="d">4</td></tr>
+            </tbody>
+        </table>`)
+    );
+    expect(".o-we-table-menu").toHaveCount(0);
+
+    // hover on td to show row ui
+    hover(el.querySelector("td.a"));
+    await waitFor("[data-type='row'].o-we-table-menu");
+
+    // click on it to open dropdown
+    click("[data-type='row'].o-we-table-menu");
+    await waitFor("div[name='move_down']");
+
+    // move row below
+    click("div[name='move_down']");
+    expect(getContent(el)).toBe(
+        unformat(`
+        <table>
+            <tbody>
+            <tr><td class="c">3</td><td class="d">4</td></tr>
+            <tr><td class="a">1[]</td><td class="b">2</td></tr>
             </tbody>
         </table>`)
     );
