@@ -9,12 +9,7 @@ import { closestElement } from "./dom_traversal";
  */
 export function getRowIndex(trOrTd) {
     const tr = closestElement(trOrTd, "tr");
-    const trParent = tr && tr.parentElement;
-    if (!trParent) {
-        return -1;
-    }
-    const trSiblings = [...trParent.children].filter((child) => child.nodeName === "TR");
-    return trSiblings.findIndex((child) => child === tr);
+    return tr.rowIndex;
 }
 
 /**
@@ -25,12 +20,5 @@ export function getRowIndex(trOrTd) {
  * @returns {number}
  */
 export function getColumnIndex(td) {
-    const tdParent = td.parentElement;
-    if (!tdParent) {
-        return -1;
-    }
-    const tdSiblings = [...tdParent.children].filter(
-        (child) => child.nodeName === "TD" || child.nodeName === "TH"
-    );
-    return tdSiblings.findIndex((child) => child === td);
+    return td.cellIndex;
 }
