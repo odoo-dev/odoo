@@ -233,9 +233,7 @@ export class TablePlugin extends Plugin {
             }
         }
         const table = closestElement(row, "table");
-        const rows = [...table.querySelectorAll("tr")];
-        const rowIndex = rows.findIndex((tr) => tr === row);
-        const siblingRow = rows[rowIndex - 1] || rows[rowIndex + 1];
+        const siblingRow = row.previousElementSibling || row.nextElementSibling;
         row.remove();
         // not sure we should move the cursor?
         siblingRow
