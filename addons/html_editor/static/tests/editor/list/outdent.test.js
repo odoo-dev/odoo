@@ -647,7 +647,7 @@ describe("with selection", () => {
         }
     );
 
-    test.todo("should not outdent a non-editable list", async () => {
+    test("should not outdent a non-editable list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <p>[before</p>
