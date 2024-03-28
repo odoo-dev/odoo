@@ -210,13 +210,11 @@ export class ClipboardPlugin extends Plugin {
             });
         });
         this.shared.domInsert(modifiedText);
-        this.dispatch("ADD_STEP");
     }
 
     pasteHtml(html) {
         const fragment = parseHTML(this.document, html);
         this.shared.domInsert(fragment);
-        this.dispatch("ADD_STEP");
     }
 }
 
