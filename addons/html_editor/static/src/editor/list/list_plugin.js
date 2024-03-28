@@ -6,14 +6,7 @@ import { copyAttributes, removeClass, setTagName, toggleClass, unwrapContents } 
 import { isEmptyBlock, isVisible } from "../utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "../utils/dom_traversal";
 import { getTraversedBlocks } from "../utils/selection";
-import {
-    applyToTree,
-    compareListTypes,
-    createList,
-    getListMode,
-    insertListAfter,
-    mergeSimilarSiblings,
-} from "./utils";
+import { applyToTree, compareListTypes, createList, getListMode, insertListAfter } from "./utils";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -327,7 +320,18 @@ export class ListPlugin extends Plugin {
         if (!element.matches("ul, ol, li.oe-nested")) {
             return element;
         }
-        return mergeSimilarSiblings(element, compareListTypes);
+        const previousSibling = element.previousElementSibling;
+        if (
+            previousSibling &&
+            element.isContentEditable &&
+            previousSibling.isContentEditable &&
+            compareListTypes(previousSibling, element)
+        ) {
+            // @todo @phoenix: what if unremovable/unmergeable?
+            element.prepend(...previousSibling.childNodes);
+            previousSibling.remove();
+        }
+        return element;
     }
 
     unwrapParagraphInLI(element) {
@@ -490,7 +494,7 @@ export class ListPlugin extends Plugin {
             const closestLI = block.closest("li");
             if (closestLI) {
                 // Keep deepest list items only.
-                if (!closestLI.querySelector("li")) {
+                if (!closestLI.querySelector("li") && closestLI.isContentEditable) {
                     listItems.add(closestLI);
                 }
             } else if (!["UL", "OL"].includes(block.tagName)) {
