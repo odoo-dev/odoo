@@ -28,6 +28,8 @@ import { TablePlugin } from "./main/table/table_plugin";
 import { TableUIPlugin } from "./main/table/table_ui_plugin";
 import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { SearchPowerboxPlugin } from "./main/powerbox/search_powerbox_plugin";
+import { YoutubePlugin } from "./main/youtube_plugin";
+import { ImagePlugin } from "./main/image_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -44,6 +46,7 @@ export const CORE_PLUGINS = [
     SplitPlugin,
     UnbreakablePlugin,
     ZwsPlugin,
+    LinkPlugin,
 ];
 
 export const MAIN_PLUGINS = [
@@ -52,7 +55,6 @@ export const MAIN_PLUGINS = [
     ColumnPlugin,
     HintPlugin,
     JustifyPlugin,
-    LinkPlugin,
     ListPlugin,
     MediaPlugin,
     ShortCutPlugin,
@@ -63,6 +65,8 @@ export const MAIN_PLUGINS = [
     TabulationPlugin,
     ToolbarPlugin,
     FontPlugin, // note: if before ListPlugin, there are a few split tests that fails
+    YoutubePlugin,
+    ImagePlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin];
