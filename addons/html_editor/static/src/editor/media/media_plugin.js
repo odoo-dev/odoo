@@ -49,7 +49,11 @@ class MediaPlugin extends Plugin {
     }
 
     normalizeMedia(node) {
-        for (const el of node.querySelectorAll(MEDIA_SELECTOR)) {
+        const mediaElements = [...node.querySelectorAll(MEDIA_SELECTOR)];
+        if (node.matches(MEDIA_SELECTOR)) {
+            mediaElements.push(node);
+        }
+        for (const el of mediaElements) {
             el.setAttribute("contenteditable", "false");
             if (isIconElement(el)) {
                 el.textContent = "\u200B";

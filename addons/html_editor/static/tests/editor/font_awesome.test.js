@@ -2,6 +2,12 @@ import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../test_helpers/editor";
 import { deleteBackward, deleteForward, insertText } from "../test_helpers/user_actions";
 
+function insertFontAwesome(faClass) {
+    return (editor) => {
+        editor.dispatch("INSERT_FONT_AWESOME", { faClass });
+    };
+}
+
 describe("parse/render", () => {
     test("should parse an old-school fontawesome", async () => {
         await testEditor({
@@ -448,48 +454,40 @@ describe("deleteBackward", () => {
 });
 
 describe("FontAwesome insertion", () => {
-    test.todo("should insert a fontAwesome at the start of an element", async () => {
+    test("should insert a fontAwesome at the start of an element", async () => {
         await testEditor({
             contentBefore: "<p>[]abc</p>",
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfterEdit:
                 '<p><i class="fa fa-star" contenteditable="false">\u200b</i>[]abc</p>',
             contentAfter: '<p><i class="fa fa-star"></i>[]abc</p>',
         });
     });
 
-    test.todo("should insert a fontAwesome within an element", async () => {
+    test("should insert a fontAwesome within an element", async () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfterEdit:
                 '<p>ab<i class="fa fa-star" contenteditable="false">\u200b</i>[]cd</p>',
             contentAfter: '<p>ab<i class="fa fa-star"></i>[]cd</p>',
         });
     });
 
-    test.todo("should insert a fontAwesome at the end of an element", async () => {
+    test("should insert a fontAwesome at the end of an element", async () => {
         await testEditor({
             contentBefore: "<p>abc[]</p>",
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfterEdit:
                 '<p>abc<i class="fa fa-star" contenteditable="false">\u200b</i>[]</p>',
             contentAfter: '<p>abc<i class="fa fa-star"></i>[]</p>',
         });
     });
 
-    test.todo("should insert a fontAwesome after", async () => {
+    test("should insert a fontAwesome after", async () => {
         await testEditor({
             contentBefore: '<p>ab<i class="fa fa-pastafarianism"></i>c[]d</p>',
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfterEdit:
                 '<p>ab<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>c<i class="fa fa-star" contenteditable="false">\u200b</i>[]d</p>',
             contentAfter:
@@ -497,14 +495,12 @@ describe("FontAwesome insertion", () => {
         });
     });
 
-    test.todo("should insert a fontAwesome before", async () => {
+    test("should insert a fontAwesome before", async () => {
         await testEditor({
             contentBefore: '<p>ab[]<i class="fa fa-pastafarianism"></i>cd</p>',
             contentBeforeEdit:
                 '<p>ab[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfterEdit:
                 '<p>ab<i class="fa fa-star" contenteditable="false">\u200b</i>[]<i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>cd</p>',
             contentAfter:
@@ -514,9 +510,7 @@ describe("FontAwesome insertion", () => {
     test.skip("should insert a fontAwesome and replace the icon", async () => {
         await testEditor({
             contentBefore: '<p>ab[<i class="fa fa-pastafarianism"></i>]cd</p>',
-            stepFunction: async (editor) => {
-                editor.execCommand("insertFontAwesome", "fa fa-star");
-            },
+            stepFunction: insertFontAwesome("fa fa-star"),
             contentAfter: '<p>abs<i class="fa fa-star"></i>[]cd</p>',
         });
     });
