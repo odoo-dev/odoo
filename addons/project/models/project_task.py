@@ -536,6 +536,8 @@ class Task(models.Model):
             if project:
                 if project not in task.stage_id.project_ids:
                     task.stage_id = task.stage_find(project.id, [('fold', '=', False)])
+                elif not task.stage_id:
+                    task.stage_id = False
             else:
                 task.stage_id = False
 
