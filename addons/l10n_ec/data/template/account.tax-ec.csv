@@ -103,7 +103,7 @@
 "","","","","","","","","","","","100","tax","invoice","+520 (Reporte 104)","ec_purchase_vat","","","","",""
 "","","","","","","","","","","","100","base","refund","-510 (Reporte 104)","","","","","",""
 "","","","","","","","","","","","100","tax","refund","-520 (Reporte 104)","ec_purchase_vat","","","","",""
-"tax_vat_15_510_sup_15","5% 511 15 D S","purchase","percent","5","15","VAT 15% (510, 15 Digital Services)","510","520","tax_group_vat_15","","100","base","invoice","+500 (Reporte 104)||+510 (Reporte 104)","","IVA 15% (510, 15 Serv Dig)","IVA 15% (510, 15 Servicios Digitales)","IVA 15%","VAT 15% 511 15 D S","True"
+"tax_vat_15_510_sup_15","15% 511 15 D S","purchase","percent","5","15","VAT 15% (510, 15 Digital Services)","510","520","tax_group_vat_15","","100","base","invoice","+500 (Reporte 104)||+510 (Reporte 104)","","IVA 15% (510, 15 Serv Dig)","IVA 15% (510, 15 Servicios Digitales)","IVA 15%","VAT 15% 511 15 D S","True"
 "","","","","","","","","","","","100","tax","invoice","+520 (Reporte 104)","ec_purchase_vat","","","","",""
 "","","","","","","","","","","","100","base","refund","-510 (Reporte 104)","","","","","",""
 "","","","","","","","","","","","100","tax","refund","-520 (Reporte 104)","ec_purchase_vat","","","","",""
