@@ -116,6 +116,7 @@ export class TablePlugin extends Plugin {
             );
         }
         const [table] = this.shared.domInsert(parseHTML(this.document, tableHtml));
+        this.dispatch("ADD_STEP");
         this.shared.setCursorStart(table.querySelector("p"));
     }
     addColumn({ position, reference } = {}) {

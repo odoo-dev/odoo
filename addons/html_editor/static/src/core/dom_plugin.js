@@ -195,14 +195,18 @@ export class DomPlugin extends Plugin {
         // to have the need new line in the final result
         if (!container.hasChildNodes()) {
             if (isUnbreakable(closestBlock(currentNode.nextSibling))) {
-                // @todo @phoenix verify it works
-                this.dispatch("DOM_SHIFT_ENTER", { element: currentNode.nextSibling, index: 0 });
+                this.dispatch("INSERT_LINEBREAK_NODE", {
+                    targetNode: currentNode.nextSibling,
+                    targetOffset: 0,
+                });
             } else {
                 // If we arrive here, the o_enter index should always be 0.
                 const parent = currentNode.nextSibling.parentElement;
                 const index = [...parent.childNodes].indexOf(currentNode.nextSibling);
-                // @todo @phoenix verify it works
-                this.dispatch("DOM_ENTER", { element: currentNode.nextSibling, index });
+                this.dispatch("SPLIT_BLOCK_NODE", {
+                    targetNode: currentNode.nextSibling.parentElement,
+                    targetOffset: index,
+                });
             }
         }
 
@@ -255,7 +259,6 @@ export class DomPlugin extends Plugin {
             lastPosition = getDeepestPosition(...lastPosition);
         }
         this.shared.setSelection({ anchorNode: lastPosition[0], anchorOffset: lastPosition[1] });
-        this.dispatch("ADD_STEP");
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
     }
 
@@ -267,6 +270,7 @@ export class DomPlugin extends Plugin {
         const fontAwesomeNode = document.createElement("i");
         fontAwesomeNode.className = faClass;
         this.domInsert(fontAwesomeNode);
+        this.dispatch("ADD_STEP");
         const [anchorNode, anchorOffset] = rightPos(fontAwesomeNode);
         this.shared.setSelection({ anchorNode, anchorOffset });
     }

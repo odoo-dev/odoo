@@ -12,8 +12,9 @@ function isLinkActive(editable) {
 
 export class LinkPlugin extends Plugin {
     static name = "link";
-    static dependencies = ["selection", "overlay"];
-    static shared = [];
+    static dependencies = ["dom", "selection", "overlay"];
+    // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
+    static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
     static resources = (p) => ({
         toolbarGroup: {
             id: "link",
@@ -89,6 +90,50 @@ export class LinkPlugin extends Plugin {
     // Commands
     // -------------------------------------------------------------------------
 
+    /**
+     * @param {string} url
+     * @param {string} label
+     */
+    createLink(url, label) {
+        const link = this.document.createElement("a");
+        link.setAttribute("href", url);
+        for (const [param, value] of Object.entries(this.config.defaultLinkAttributes || {})) {
+            link.setAttribute(param, `${value}`);
+        }
+        link.innerText = label;
+        return link;
+    }
+    /**
+     * @param {string} url
+     * @param {string} label
+     */
+    insertLink(url, label) {
+        const link = this.createLink(url, label);
+        this.shared.domInsert(link);
+        this.dispatch("ADD_STEP");
+        const linkParent = link.parentElement;
+        const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
+        this.shared.setSelection(
+            { anchorNode: linkParent, anchorOffset: linkOffset + 1 },
+            { normalize: false }
+        );
+    }
+    /**
+     * @param {string} text
+     * @param {string} url
+     */
+    getPathAsUrlCommand(text, url) {
+        const pasteAsURLCommand = {
+            name: _t("Paste as URL"),
+            description: _t("Create an URL."),
+            fontawesome: "fa-link",
+            action: () => {
+                this.shared.domInsert(this.createLink(text, url));
+                this.dispatch("ADD_STEP");
+            },
+        };
+        return pasteAsURLCommand;
+    }
     /**
      * Toggle the Link popover to edit links
      *

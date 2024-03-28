@@ -20,6 +20,9 @@ export class SplitPlugin extends Plugin {
             case "SPLIT_BLOCK":
                 this.splitBlock();
                 break;
+            case "SPLIT_BLOCK_NODE":
+                this.splitBlockNode(payload);
+                break;
         }
     }
 
