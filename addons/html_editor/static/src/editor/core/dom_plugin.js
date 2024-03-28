@@ -39,6 +39,9 @@ export class DomPlugin extends Plugin {
             case "SET_TAG":
                 this.setTag(payload);
                 break;
+            case "INSERT_FONT_AWESOME":
+                this.insertFontAwesome(payload.faClass);
+                break;
             case "INSERT_SEPARATOR":
                 this.insertSeparator();
                 break;
@@ -253,12 +256,21 @@ export class DomPlugin extends Plugin {
             lastPosition = getDeepestPosition(...lastPosition);
         }
         this.shared.setSelection({ anchorNode: lastPosition[0], anchorOffset: lastPosition[1] });
+        this.dispatch("ADD_STEP");
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
     }
 
     // --------------------------------------------------------------------------
     // commands
     // --------------------------------------------------------------------------
+
+    insertFontAwesome(faClass = "fa fa-star") {
+        const fontAwesomeNode = document.createElement("i");
+        fontAwesomeNode.className = faClass;
+        this.domInsert(fontAwesomeNode);
+        const [anchorNode, anchorOffset] = rightPos(fontAwesomeNode);
+        this.shared.setSelection({ anchorNode, anchorOffset });
+    }
 
     setTag({ tagName, extraClass = "" }) {
         tagName = tagName.toUpperCase();
