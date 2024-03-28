@@ -27,6 +27,7 @@ import { QWebPlugin } from "./others/qweb_plugin";
 import { TablePlugin } from "./main/table/table_plugin";
 import { TableUIPlugin } from "./main/table/table_ui_plugin";
 import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
+import { SearchPowerboxPlugin } from "./main/powerbox/search_powerbox_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -56,6 +57,7 @@ export const MAIN_PLUGINS = [
     MediaPlugin,
     ShortCutPlugin,
     PowerboxPlugin,
+    SearchPowerboxPlugin,
     TablePlugin,
     TableUIPlugin,
     TabulationPlugin,
