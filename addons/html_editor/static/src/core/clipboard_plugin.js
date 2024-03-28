@@ -1,8 +1,20 @@
 import { Plugin } from "../plugin";
-import { parseHTML } from "../utils/html";
 import { ancestors, closestElement } from "../utils/dom_traversal";
 import { closestBlock, isBlock } from "../utils/blocks";
+import { URL_REGEX } from "../utils/regex";
+import { leftPos } from "../utils/position";
+import { parseHTML } from "../utils/html";
+import { unwrapContents } from "../utils/dom";
+import { isImageUrl } from "@html_editor/utils/url";
 
+/**
+ * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
+ */
+
+const CLIPBOARD_BLACKLISTS = {
+    unwrap: [".Apple-interchange-newline", "DIV"], // These elements' children will be unwrapped.
+    remove: ["META", "STYLE", "SCRIPT"], // These elements will be removed along with their children.
+};
 export const CLIPBOARD_WHITELISTS = {
     nodes: [
         // Style
@@ -70,12 +82,14 @@ export const CLIPBOARD_WHITELISTS = {
 
 export class ClipboardPlugin extends Plugin {
     static name = "clipboard";
-    static dependencies = ["dom", "selection"];
+    static dependencies = ["dom", "selection", "sanitize", "link", "history"];
 
     setup() {
-        this.addDomListener(this.editable, "paste", this.onPaste);
         this.addDomListener(this.editable, "copy", this.onCopy);
         this.addDomListener(this.editable, "cut", this.onCut);
+        this.addDomListener(this.editable, "paste", this.onPaste);
+        this.addDomListener(this.editable, "drop", this.onDrop);
+        this.resources["handle_paste_url"] = this.resources["handle_paste_url"] || [];
     }
 
     onCut(ev) {
@@ -171,7 +185,7 @@ export class ClipboardPlugin extends Plugin {
                 rangeContent.appendChild(clone);
             }
         }
-        const dataHtmlElement = document.createElement("data");
+        const dataHtmlElement = this.document.createElement("data");
         dataHtmlElement.append(rangeContent);
         const odooHtml = dataHtmlElement.innerHTML;
         const odooText = selection.toString();
@@ -181,38 +195,512 @@ export class ClipboardPlugin extends Plugin {
     }
 
     /**
-     * @param {ClipboardEvent} ev
+     * Handle safe pasting of html or plain text into the editor.
      */
     onPaste(ev) {
-        const types = new Set(ev.clipboardData.types);
-        if (types.has("text/html")) {
-            const html = ev.clipboardData.getData("text/html");
-            this.pasteHtml(html);
-        } else if (types.has("text/plain")) {
-            const text = ev.clipboardData.getData("text/plain");
-            this.pasteText(text);
+        const selection = this.document.getSelection();
+        if (!selection) {
+            return;
         }
+        // @phoenix @todo: handle protected content
+        // if (sel.anchorNode && isProtected(sel.anchorNode)) {
+        //     return;
+        // }
+
         ev.preventDefault();
+
+        this.onPasteRemoveFullySelectedLink(selection);
+
+        this.onPasteUnsupportedHtml(selection, ev.clipboardData) ||
+            this.onPasteOdooEditorHtml(ev.clipboardData) ||
+            this.onPasteHtml(selection, ev.clipboardData) ||
+            this.onPasteText(selection, ev.clipboardData);
+
+        this.dispatch("ADD_STEP");
+    }
+    /**
+     * @param {EditorSelection} selection
+     */
+    onPasteRemoveFullySelectedLink(selection) {
+        // Replace entire link if its label is fully selected.
+        const link = closestElement(selection.anchorNode, "a");
+        if (
+            link &&
+            selection.toString().replace(/\u200B/g, "") === link.innerText.replace(/\u200B/g, "")
+        ) {
+            const start = leftPos(link);
+            link.remove();
+            // @doto @phoenix do we still want normalize:false?
+            this.shared.setSelection({
+                anchorNode: start[0],
+                anchorOffset: start[1],
+                normalize: false,
+            });
+        }
+    }
+    /**
+     * @param {EditorSelection} selection
+     * @param {DataTransfer} clipboardData
+     */
+    onPasteUnsupportedHtml(selection, clipboardData) {
+        const targetSupportsHtmlContent = isHtmlContentSupported(selection.anchorNode);
+        if (!targetSupportsHtmlContent) {
+            const text = clipboardData.getData("text/plain");
+            this.shared.domInsert(text);
+            return true;
+        }
+    }
+    /**
+     * @param {DataTransfer} clipboardData
+     */
+    onPasteOdooEditorHtml(clipboardData) {
+        const odooEditorHtml = clipboardData.getData("text/odoo-editor");
+        if (odooEditorHtml) {
+            const fragment = parseHTML(this.document, odooEditorHtml);
+            this.shared.sanitize(fragment, { IN_PLACE: true });
+            if (fragment.hasChildNodes()) {
+                this.shared.domInsert(fragment);
+            }
+            return true;
+        }
+    }
+    /**
+     * @param {EditorSelection} selection
+     * @param {DataTransfer} clipboardData
+     */
+    onPasteHtml(selection, clipboardData) {
+        const files = getImageFiles(clipboardData);
+        const clipboardHtml = clipboardData.getData("text/html");
+        if (files.length || clipboardHtml) {
+            const clipboardElem = this.prepareClipboardData(clipboardHtml);
+            // @phoenix @todo: should it be handled in table plugin?
+            // When copy pasting a table from the outside, a picture of the
+            // table can be included in the clipboard as an image file. In that
+            // particular case the html table is given a higher priority than
+            // the clipboard picture.
+            if (files.length && !clipboardElem.querySelector("table")) {
+                this.addImagesFiles(files).then((html) => {
+                    this.shared.domInsert(html);
+                });
+            } else {
+                if (closestElement(selection.anchorNode, "a")) {
+                    this.shared.domInsert(clipboardElem.textContent);
+                } else {
+                    this.shared.domInsert(clipboardElem);
+                }
+            }
+            return true;
+        }
+    }
+    /**
+     * @param {EditorSelection} selection
+     * @param {DataTransfer} clipboardData
+     */
+    onPasteText(selection, clipboardData) {
+        const text = clipboardData.getData("text/plain");
+        let splitAroundUrl = [text];
+        // Avoid transforming dynamic placeholder pattern to url.
+        if (!text.match(/\${.*}/gi)) {
+            splitAroundUrl = text.split(URL_REGEX);
+            // Remove 'http(s)://' capturing group from the result (indexes
+            // 2, 5, 8, ...).
+            splitAroundUrl = splitAroundUrl.filter((_, index) => (index + 1) % 3);
+        }
+        if (splitAroundUrl.length === 3 && !splitAroundUrl[0] && !splitAroundUrl[2]) {
+            // Pasted content is a single URL.
+            this.onPasteTextUrl(text, selection);
+        } else {
+            this.onPasteTextMultiUrl(splitAroundUrl, selection);
+        }
+    }
+    /**
+     * @param {string} text
+     * @param {EditorSelection} selection
+     */
+    onPasteTextUrl(text, selection) {
+        const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
+        const url = /^https?:\/\//i.test(text) ? text : "http://" + text;
+        if (selectionIsInsideALink) {
+            this.onPasteTextUrlInsideLink(text, url, selectionIsInsideALink);
+            return;
+        }
+        const isHandled = this.resources["handle_paste_url"].some((handler) => handler(text, url));
+        if (isHandled) {
+            return;
+        }
+        this.shared.insertLink(url, text);
+    }
+    /**
+     * @param {string} text
+     * @param {string} url
+     * @param {boolean} selectionIsInsideALink
+     */
+    onPasteTextUrlInsideLink(text, url, selectionIsInsideALink) {
+        // A url cannot be transformed inside an existing link.
+        // An image can be embedded inside an existing link, a video cannot.
+        if (selectionIsInsideALink) {
+            if (isImageUrl(url)) {
+                const img = this.document.createElement("IMG");
+                img.setAttribute("src", url);
+                this.shared.domInsert(img);
+            } else {
+                this.shared.domInsert(text);
+            }
+        }
+    }
+    /**
+     * @param {string[]} splitAroundUrl
+     * @param {EditorSelection} selection
+     */
+    onPasteTextMultiUrl(splitAroundUrl, selection) {
+        const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
+        for (let i = 0; i < splitAroundUrl.length; i++) {
+            const url = /^https?:\/\//gi.test(splitAroundUrl[i])
+                ? splitAroundUrl[i]
+                : "http://" + splitAroundUrl[i];
+            // Even indexes will always be plain text, and odd indexes will always be URL.
+            // A url cannot be transformed inside an existing link.
+            if (i % 2 && !selectionIsInsideALink) {
+                this.shared.domInsert(this.shared.createLink(splitAroundUrl[i], url));
+            } else if (splitAroundUrl[i] !== "") {
+                const textFragments = splitAroundUrl[i].split(/\r?\n/);
+                let textIndex = 1;
+                for (const textFragment of textFragments) {
+                    // Replace consecutive spaces by alternating nbsp.
+                    const modifiedTextFragment = textFragment.replace(/( {2,})/g, (match) => {
+                        let alertnateValue = false;
+                        return match.replace(/ /g, () => {
+                            alertnateValue = !alertnateValue;
+                            const replaceContent = alertnateValue ? "\u00A0" : " ";
+                            return replaceContent;
+                        });
+                    });
+                    this.shared.domInsert(modifiedTextFragment);
+                    if (textIndex < textFragments.length) {
+                        // todo: to implement
+                        // Break line by inserting new paragraph and
+                        // remove current paragraph's bottom margin.
+                        // const p = closestElement(selection.anchorNode, "p");
+                        // if (isUnbreakable(closestBlock(selection.anchorNode))) {
+                        //     this._applyCommand("oShiftEnter");
+                        // } else {
+                        //     this._applyCommand("oEnter");
+                        //     p && (p.style.marginBottom = "0px");
+                        // }
+                    }
+                    textIndex++;
+                }
+            }
+        }
     }
 
     /**
-     * @param {string} text
+     * Prepare clipboard data (text/html) for safe pasting into the editor.
+     *
+     * @private
+     * @param {string} clipboardData
+     * @returns {Element}
      */
-    pasteText(text) {
-        // Replace consecutive spaces by alternating nbsp.
-        const modifiedText = text.replace(/( {2,})/g, (match) => {
-            let alertnateValue = false;
-            return match.replace(/ /g, () => {
-                alertnateValue = !alertnateValue;
-                const replaceContent = alertnateValue ? "\u00A0" : " ";
-                return replaceContent;
-            });
-        });
-        this.shared.domInsert(modifiedText);
+    prepareClipboardData(clipboardData) {
+        const container = this.document.createElement("fake-container");
+        container.append(parseHTML(this.document, clipboardData));
+
+        for (const tableElement of container.querySelectorAll("table")) {
+            tableElement.classList.add("table", "table-bordered", "o_table");
+        }
+
+        const progId = container.querySelector('meta[name="ProgId"]');
+        if (progId && progId.content === "Excel.Sheet") {
+            // Microsoft Excel keeps table style in a <style> tag with custom
+            // classes. The following lines parse that style and apply it to the
+            // style attribute of <td> tags with matching classes.
+            const xlStylesheet = container.querySelector("style");
+            const xlNodes = container.querySelectorAll("[class*=xl],[class*=font]");
+            for (const xlNode of xlNodes) {
+                for (const xlClass of xlNode.classList) {
+                    // Regex captures a CSS rule definition for that xlClass.
+                    const xlStyle = xlStylesheet.textContent
+                        .match(`.${xlClass}[^{]*{(?<xlStyle>[^}]*)}`)
+                        .groups.xlStyle.replace("background:", "background-color:");
+                    xlNode.setAttribute("style", xlNode.style.cssText + ";" + xlStyle);
+                }
+            }
+        }
+
+        for (const child of [...container.childNodes]) {
+            this.cleanForPaste(child);
+        }
+        // Force inline nodes at the root of the container into separate P
+        // elements. This is a tradeoff to ensure some features that rely on
+        // nodes having a parent (e.g. convert to list, title, etc.) can work
+        // properly on such nodes without having to actually handle that
+        // particular case in all of those functions. In fact, this case cannot
+        // happen on a new document created using this editor, but will happen
+        // instantly when editing a document that was created from Etherpad.
+        const fragment = this.document.createDocumentFragment();
+        let p = this.document.createElement("p");
+        for (const child of [...container.childNodes]) {
+            if (isBlock(child)) {
+                if (p.childNodes.length > 0) {
+                    fragment.appendChild(p);
+                    p = this.document.createElement("p");
+                }
+                fragment.appendChild(child);
+            } else {
+                p.appendChild(child);
+            }
+
+            if (p.childNodes.length > 0) {
+                fragment.appendChild(p);
+            }
+        }
+        return fragment;
+    }
+    /**
+     * Clean a node for safely pasting. Cleaning an element involves unwrapping
+     * its contents if it's an illegal (blacklisted or not whitelisted) element,
+     * or removing its illegal attributes and classes.
+     *
+     * @param {Node} node
+     */
+    cleanForPaste(node) {
+        if (
+            !this.isWhitelisted(node) ||
+            this.isBlacklisted(node) ||
+            // Google Docs have their html inside a B tag with custom id.
+            (node.id && node.id.startsWith("docs-internal-guid"))
+        ) {
+            if (!node.matches || node.matches(CLIPBOARD_BLACKLISTS.remove.join(","))) {
+                node.remove();
+            } else {
+                // Unwrap the illegal node's contents.
+                for (const unwrappedNode of unwrapContents(node)) {
+                    this.cleanForPaste(unwrappedNode);
+                }
+            }
+        } else if (node.nodeType !== Node.TEXT_NODE) {
+            if (node.nodeName === "TD") {
+                if (node.hasAttribute("bgcolor") && !node.style["background-color"]) {
+                    node.style["background-color"] = node.getAttribute("bgcolor");
+                }
+            } else if (node.nodeName === "FONT") {
+                // FONT tags have some style information in custom attributes,
+                // this maps them to the style attribute.
+                if (node.hasAttribute("color") && !node.style["color"]) {
+                    node.style["color"] = node.getAttribute("color");
+                }
+                if (node.hasAttribute("size") && !node.style["font-size"]) {
+                    // FONT size uses non-standard numeric values.
+                    node.style["font-size"] = +node.getAttribute("size") + 10 + "pt";
+                }
+            } else if (
+                ["S", "U"].includes(node.nodeName) &&
+                node.childNodes.length === 1 &&
+                node.firstChild.nodeName === "FONT"
+            ) {
+                // S and U tags sometimes contain FONT tags. We prefer the
+                // strike to adopt the style of the text, so we invert them.
+                const fontNode = node.firstChild;
+                node.before(fontNode);
+                node.replaceChildren(...fontNode.childNodes);
+                fontNode.appendChild(node);
+            }
+            // Remove all illegal attributes and classes from the node, then
+            // clean its children.
+            for (const attribute of [...node.attributes]) {
+                // Keep allowed styles on nodes with allowed tags.
+                if (
+                    CLIPBOARD_WHITELISTS.styledTags.includes(node.nodeName) &&
+                    attribute.name === "style"
+                ) {
+                    node.removeAttribute(attribute.name);
+                    if (["SPAN", "FONT"].includes(node.tagName)) {
+                        for (const unwrappedNode of unwrapContents(node)) {
+                            this.cleanForPaste(unwrappedNode);
+                        }
+                    }
+                } else if (!this.isWhitelisted(attribute)) {
+                    node.removeAttribute(attribute.name);
+                }
+            }
+            for (const klass of [...node.classList]) {
+                if (!this.isWhitelisted(klass)) {
+                    node.classList.remove(klass);
+                }
+            }
+            for (const child of [...node.childNodes]) {
+                this.cleanForPaste(child);
+            }
+        }
+    }
+    /**
+     * Return true if the given attribute, class or node is whitelisted for
+     * pasting, false otherwise.
+     *
+     * @private
+     * @param {Attr | string | Node} item
+     * @returns {boolean}
+     */
+    isWhitelisted(item) {
+        if (item instanceof Attr) {
+            return CLIPBOARD_WHITELISTS.attributes.includes(item.name);
+        } else if (typeof item === "string") {
+            return CLIPBOARD_WHITELISTS.classes.some((okClass) =>
+                okClass instanceof RegExp ? okClass.test(item) : okClass === item
+            );
+        } else {
+            return (
+                item.nodeType === Node.TEXT_NODE ||
+                (item.matches && item.matches(CLIPBOARD_WHITELISTS.nodes))
+            );
+        }
+    }
+    /**
+     * Return true if the given node is blacklisted for pasting, false
+     * otherwise.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    isBlacklisted(node) {
+        return (
+            node.nodeType !== Node.TEXT_NODE &&
+            node.matches([].concat(...Object.values(CLIPBOARD_BLACKLISTS)).join(","))
+        );
     }
 
-    pasteHtml(html) {
-        const fragment = parseHTML(this.document, html);
-        this.shared.domInsert(fragment);
+    /**
+     * @param {DragEvent} ev
+     */
+    onDragStart(ev) {
+        if (ev.target.nodeName === "IMG") {
+            ev.dataTransfer.setData("text/plain", `oid:${ev.target.oid}`);
+        }
     }
+    /**
+     * Handle safe dropping of html into the editor.
+     *
+     * @param {DragEvent} ev
+     */
+    onDrop(ev) {
+        ev.preventDefault();
+        if (!isHtmlContentSupported(ev.target)) {
+            return;
+        }
+        const sel = this.document.getSelection();
+        let isInEditor = false;
+        let ancestor = sel.anchorNode;
+        while (ancestor && !isInEditor) {
+            if (ancestor === this.editable) {
+                isInEditor = true;
+            }
+            ancestor = ancestor.parentNode;
+        }
+        const dataTransfer = (ev.originalEvent || ev).dataTransfer;
+        const imageOidMatch = (dataTransfer.getData("text") || "").match("oid:(.*)");
+        const imageOid = imageOidMatch && imageOidMatch[1];
+        const image =
+            imageOid &&
+            [...this.editable.querySelectorAll("*")].find((node) => node.oid === imageOid);
+        const fileTransferItems = getImageFiles(dataTransfer);
+        const htmlTransferItem = [...dataTransfer.items].find((item) => item.type === "text/html");
+        if (image || fileTransferItems.length || htmlTransferItem) {
+            if (this.document.caretPositionFromPoint) {
+                const range = this.document.caretPositionFromPoint(ev.clientX, ev.clientY);
+                this.shared.setSelection({
+                    anchorNode: range.offsetNode,
+                    anchorOffset: range.offset,
+                });
+            } else if (this.document.caretRangeFromPoint) {
+                const range = this.document.caretRangeFromPoint(ev.clientX, ev.clientY);
+                this.shared.setSelection({
+                    anchorNode: range.startContainer,
+                    offset: range.startOffset,
+                });
+            }
+        }
+        if (image) {
+            image.classList.toggle("img-fluid", true);
+            const html = image.outerHTML;
+            image.remove();
+            this.execCommand("insert", this.prepareClipboardData(html));
+        } else if (fileTransferItems.length) {
+            this.addImagesFiles(fileTransferItems).then((html) => {
+                this.execCommand("insert", html);
+            });
+        } else if (htmlTransferItem) {
+            htmlTransferItem.getAsString((pastedText) => {
+                this.execCommand("insert", this.prepareClipboardData(pastedText));
+            });
+        }
+        this.historyStep();
+    }
+    /**
+     * Add images inside the editable at the current selection.
+     *
+     * @param {File[]} imageFiles
+     */
+    async addImagesFiles(imageFiles) {
+        const promises = [];
+        for (const imageFile of imageFiles) {
+            const imageNode = this.document.createElement("img");
+            imageNode.classList.add("img-fluid");
+            // Mark images as having to be saved as attachments.
+            if (this.options.dropImageAsAttachment) {
+                imageNode.classList.add("o_b64_image_to_save");
+            }
+            imageNode.dataset.fileName = imageFile.name;
+            promises.push(
+                getImageUrl(imageFile).then((url) => {
+                    imageNode.src = url;
+                    return imageNode;
+                })
+            );
+        }
+        const nodes = await Promise.all(promises);
+        const fragment = this.document.createDocumentFragment();
+        fragment.append(...nodes);
+        return fragment;
+    }
+}
+
+/**
+ * @param {DataTransfer} dataTransfer
+ */
+function getImageFiles(dataTransfer) {
+    return [...dataTransfer.items]
+        .filter((item) => item.kind === "file" && item.type.includes("image/"))
+        .map((item) => item.getAsFile());
+}
+/**
+ * @param {File} file
+ */
+function getImageUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.readAsDataURL(file);
+        reader.onloadend = (e) => {
+            if (reader.error) {
+                return reject(reader.error);
+            }
+            resolve(e.target.result);
+        };
+    });
+}
+
+// @phoenix @todo: move to Odoo plugin?
+/**
+ * Returns true if the provided node can suport html content.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isHtmlContentSupported(node) {
+    return !closestElement(
+        node,
+        '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]',
+        true
+    );
 }

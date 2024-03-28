@@ -737,8 +737,18 @@ export class HistoryPlugin extends Plugin {
      * @returns {Function}
      */
     makeSavePoint() {
+        this.handleObserverRecords();
+        const currentStepMutations = [...this.currentStep.mutations];
         const savePointIndex = this.steps.length - 1;
-        return () => this.revertStepsUntil(savePointIndex);
+        let applied = false;
+        return () => {
+            if (applied) {
+                return;
+            }
+            applied = true;
+            this.revertStepsUntil(savePointIndex);
+            this.applyMutations(currentStepMutations);
+        };
     }
     /**
      * Reverts the history steps until the specified step index.
@@ -763,6 +773,7 @@ export class HistoryPlugin extends Plugin {
         const lastRevertedStep = stepsToRevert[0] || this.currentStep;
         this.setSerializedSelection(lastRevertedStep.selection);
 
+        // @phoenix @todo: should we do that here ?
         // Register resulting mutations as a new step.
         const addedStep = this.addStep();
         if (addedStep) {

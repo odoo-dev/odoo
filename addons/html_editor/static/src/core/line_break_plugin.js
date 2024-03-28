@@ -17,6 +17,9 @@ export class LineBreakPlugin extends Plugin {
             case "INSERT_LINEBREAK":
                 this.insertLineBreak();
                 break;
+            case "INSERT_LINEBREAK_NODE":
+                this.insertLineBreakNode(payload);
+                break;
         }
     }
 
@@ -28,15 +31,18 @@ export class LineBreakPlugin extends Plugin {
             selection = this.shared.getEditableSelection();
         }
 
-        let targetNode = selection.anchorNode;
-        let targetOffset = selection.anchorOffset;
+        const targetNode = selection.anchorNode;
+        const targetOffset = selection.anchorOffset;
 
+        this.insertLineBreakNode({ targetNode, targetOffset });
+        this.dispatch("ADD_STEP");
+    }
+    insertLineBreakNode({ targetNode, targetOffset }) {
         if (targetNode.nodeType === Node.TEXT_NODE) {
             targetOffset = this.shared.splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
         this.insertLineBreakElement({ targetNode, targetOffset });
-        this.dispatch("ADD_STEP");
     }
 
     insertLineBreakElement({ targetNode, targetOffset }) {

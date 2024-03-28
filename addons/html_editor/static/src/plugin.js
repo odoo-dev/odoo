@@ -5,6 +5,9 @@
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
  * @typedef { import("./core/split_plugin").SplitPlugin } SplitPlugin
  * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
+ * @typedef { import("./main/powerbox/powerbox_plugin").PowerboxPlugin } PowerboxPlugin
+ * @typedef { import("./main/link/link_plugin").LinkPlugin } LinkPlugin
+ * @typedef { import("./core/sanitize_plugin").SanitizePlugin } SanitizePlugin
  *
  * @typedef { Object } SharedMethods
  *
@@ -19,6 +22,13 @@
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
+ * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
+ * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
+ * @property { PowerboxPlugin['closePowerbox'] } closePowerbox
+ * @property { SanitizePlugin['sanitize'] } sanitize
+ * @property { LinkPlugin['createLink'] } createLink
+ * @property { LinkPlugin['insertLink'] } insertLink
+ * @property { LinkPlugin['getPathAsUrlCommand'] } getPathAsUrlCommand
  * @property { DomPlugin['domInsert'] } domInsert
  * @property { SplitPlugin['splitElementBlock'] } splitElementBlock
  * @property { SplitPlugin['splitElement'] } splitElement
