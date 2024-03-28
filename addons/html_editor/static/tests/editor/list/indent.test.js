@@ -1096,20 +1096,22 @@ describe("with selection", () => {
         });
     });
 
-    test.todo("should not intent a non-editable list", async () => {
+    test("should not indent a non-editable list", async () => {
+        const tab = '<span class="oe-tabs" style="width: 40px;">\u0009</span>\u200B';
         await testEditor({
             contentBefore: unformat(`
-                    <p>[before</p>
-                    <ul>
-                        <li>a</li>
-                    </ul>
-                    <ul contenteditable="false">
-                        <li>a</li>
-                    </ul>
-                    <p>after]</p>`),
+                <p>[before</p>
+                <ul>
+                    <li>a</li>
+                </ul>
+                <ul contenteditable="false">
+                    <li>a</li>
+                </ul>
+                <p>after]</p>`),
             stepFunction: keydownTab,
-            contentAfter: unformat(`
-                    <p>[before</p>
+            contentAfter:
+                `<p>${tab}[before</p>` +
+                unformat(`
                     <ul>
                         <li class="oe-nested">
                             <ul>
@@ -1119,8 +1121,8 @@ describe("with selection", () => {
                     </ul>
                     <ul contenteditable="false">
                         <li>a</li>
-                    </ul>
-                    <p>after]</p>`),
+                    </ul>`) +
+                `<p>${tab}after]</p>`,
         });
     });
 
