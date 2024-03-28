@@ -809,10 +809,10 @@ export class DeletePlugin extends Plugin {
     onBeforeInput(e) {
         if (e.inputType === "deleteContentBackward") {
             e.preventDefault();
-            this.deleteBackward();
+            this.dispatch("DELETE_BACKWARD");
         } else if (e.inputType === "deleteContentForward") {
             e.preventDefault();
-            this.deleteForward();
+            this.dispatch("DELETE_FORWARD");
         }
     }
 

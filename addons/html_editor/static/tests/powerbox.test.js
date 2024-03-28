@@ -1,10 +1,10 @@
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { setSelection } from "@html_editor/utils/selection";
 import { press } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
-import { insertText } from "./_helpers/user_actions";
+import { deleteBackward, insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
@@ -58,51 +58,86 @@ test("should open the Powerbox on type `/`, but in an empty paragraph", async ()
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
 });
+describe("search", () => {
+    test("should filter the Powerbox contents with term", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(16);
+        insertText(editor, "head");
+        await animationFrame();
+        expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
 
-test("should filter the Powerbox contents with term", async () => {
-    const { el, editor } = await setupEditor("<p>ab[]</p>");
-    insertText(editor, "/");
-    await animationFrame();
-    expect(commandNames(el).length).toBe(16);
-    insertText(editor, "head");
-    await animationFrame();
-    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-});
+    test.tags("iframe")("should filter the Powerbox contents with term, in iframe", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
+        insertText(editor, "/");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(16);
+        insertText(editor, "head");
+        await animationFrame();
+        expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
 
-test.tags("iframe")("should filter the Powerbox contents with term, in iframe", async () => {
-    const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
-    insertText(editor, "/");
-    await animationFrame();
-    expect(commandNames(el).length).toBe(16);
-    insertText(editor, "head");
-    await animationFrame();
-    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-});
+    test.todo(
+        "should filter the Powerbox contents with term, even after delete backward",
+        async () => {
+            const { el, editor } = await setupEditor("<p>ab[]</p>");
+            insertText(editor, "/");
+            await animationFrame();
+            expect(commandNames(el).length).toBe(16);
+            insertText(editor, "headx");
+            await animationFrame();
+            expect(commandNames(el)).toEqual([]);
+            deleteBackward(editor);
+            await animationFrame();
+            expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+        }
+    );
 
-test("should filter the Powerbox contents with term, even after delete backward", async () => {
-    const { el, editor } = await setupEditor("<p>ab[]</p>");
-    insertText(editor, "/");
-    await animationFrame();
-    expect(commandNames(el).length).toBe(16);
-    insertText(editor, "head");
-    await animationFrame();
-    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-});
+    test("should not filter the powerbox contents when collaborator type on two different blocks", async () => {
+        const { el, editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
+        insertText(editor, "/heading");
+        await animationFrame();
 
-test("should not filter the powerbox contents when collaborator type on two different blocks", async () => {
-    const { el, editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
-    insertText(editor, "/heading");
-    await animationFrame();
-
-    // simulate a collaboration scenario: move selection, insert text, restore it
-    setSelection(editor.editable.firstChild, 1);
-    silentInsert("random text");
-    setSelection(editor.editable.lastChild.firstChild, 9);
-    expect(".o-we-powerbox").toHaveCount(1);
-    insertText(editor, "1");
-    await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
-    expect(commandNames(el)).toEqual(["Heading 1"]);
+        // simulate a collaboration scenario: move selection, insert text, restore it
+        setSelection(editor.editable.firstChild, 1);
+        silentInsert("random text");
+        setSelection(editor.editable.lastChild.firstChild, 9);
+        expect(".o-we-powerbox").toHaveCount(1);
+        insertText(editor, "1");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el)).toEqual(["Heading 1"]);
+    });
+    describe("close", () => {
+        // @todo @phoenix: do we really want this spec? Why not temporarilly
+        // hide the powerbox so the person can type backspace and re-open the
+        // powerbox.
+        test("should close powerbox if there is no result", async () => {
+            const { el, editor } = await setupEditor("<p>a[]</p>");
+            insertText(editor, "/");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            insertText(editor, "zxzxzxz");
+            await animationFrame();
+            expect(getContent(el)).toBe("<p>a/zxzxzxz[]</p>");
+            expect(".o-we-powerbox").toHaveCount(0);
+        });
+        test("should close powerbox typing a space", async () => {
+            const { el, editor } = await setupEditor("<p>a[]</p>");
+            insertText(editor, "/");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            // We need to add another character (b) otherwise the space will be
+            // considered invisible in the getContent(el). This is a limitation
+            // of the test suite that does not transform the space into a nbsp.
+            insertText(editor, " b");
+            await animationFrame();
+            expect(getContent(el)).toBe("<p>a/ b[]</p>");
+            expect(".o-we-powerbox").toHaveCount(0);
+        });
+    });
 });
 
 test("should execute command and remove term and hot character on Enter", async () => {
@@ -167,9 +202,11 @@ test.todo.tags("mobile")("should insert a 3x3 table on type `/table` in mobile v
 
 test("should toggle list on empty paragraph", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
-    // Simulate typing "/checklist" in an empty paragraph (br gets removed)
+    insertText(editor, "/");
+    // @todo @phoenix: remove this once we manage inputs.
+    // Simulate <br> removal by contenteditable when something is inserted
     el.querySelector("p > br").remove();
-    insertText(editor, "/checklist");
+    insertText(editor, "checklist");
     expect(getContent(el)).toBe("<p>/checklist[]</p>");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Checklist"]);
@@ -201,7 +238,7 @@ class NoOpPlugin extends Plugin {
     });
 }
 
-test("should restore state before /command insertion when command is executed", async () => {
+test("should restore state before /command insertion when command is executed (1)", async () => {
     const { el, editor } = await setupEditor("<p>abc[]</p>", {
         config: { Plugins: [...MAIN_PLUGINS, NoOpPlugin] },
     });
@@ -221,10 +258,11 @@ test("should restore state before /command insertion when command is executed (2
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
     );
+    insertText(editor, "/");
     // @todo @phoenix: remove this once we manage inputs.
     // Simulate <br> removal by contenteditable when something is inserted
     el.querySelector("p > br").remove();
-    insertText(editor, "/no-op");
+    insertText(editor, "no-op");
     expect(getContent(el)).toBe("<p>/no-op[]</p>");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);

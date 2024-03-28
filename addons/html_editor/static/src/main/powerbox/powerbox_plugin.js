@@ -2,6 +2,25 @@ import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { isEmpty } from "@html_editor/utils/dom_info";
 import { Powerbox } from "./powerbox";
+import { reactive } from "@odoo/owl";
+
+/**
+ * @typedef {Object} CategoriesConfig
+ * @property {string} id
+ * @property {string} sequence
+ *
+ * @typedef {Object} Command
+ * @property {string} name
+ * @property {string} description
+ * @property {string} category
+ * @property {string} fontawesome
+ * @property {Function} action
+ *
+ * @typedef {Object} CommandGroup
+ * @property {string} id
+ * @property {string} name
+ * @property {Command[]} commands
+ */
 
 function target(selection) {
     const node = selection.anchorNode;
@@ -12,6 +31,7 @@ function target(selection) {
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
     static dependencies = ["overlay", "selection", "history"];
+    static shared = ["openPowerbox", "updatePowerbox", "closePowerbox", "isPowerboxOpen"];
     static resources = () => ({
         temp_hints: {
             text: _t('Type "/" for commands'),
@@ -21,46 +41,75 @@ export class PowerboxPlugin extends Plugin {
     });
 
     setup() {
-        this.offset = 0;
-        this.groups = this.getGroups();
-        this.historySavePointRestore = null;
+        this.commandGroups = reactive([]);
+
+        this.onApplyCommand = () => {};
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
-        this.powerbox = this.shared.createOverlay(Powerbox, {
-            dispatch: this.dispatch,
-            el: this.editable,
-            offset: () => this.offset,
-            groups: this.groups,
-            onApplyCommand: () => this.historySavePointRestore(),
+        this.overlay = this.shared.createOverlay(Powerbox, {
+            document: this.document,
+            close: () => {
+                return this.overlay.close();
+            },
+            onMounted: (el) => {
+                el.style.position = "absolute";
+                this.overlay.position = "bottom";
+                this.overlay.offsetY = 0;
+                this.overlay.el = el;
+                this.overlay.updatePosition();
+            },
+            onPatched: () => this.overlay.updatePosition(),
+            commandGroups: this.commandGroups,
+            onApplyCommand: (command) => {
+                this.onApplyCommand();
+                command.action(this.dispatch);
+            },
         });
-        this.addDomListener(this.editable, "keydown", (ev) => {
-            if (ev.key === "/") {
-                this.openPowerbox();
+    }
+
+    /**
+     * @param {Command[]} commands
+     */
+    openPowerbox({ commands, categoriesConfig, onApplyCommand = () => {}, commandGroups } = {}) {
+        if (!commandGroups) {
+            if (!categoriesConfig?.length) {
+                commandGroups = [{ id: "Main", name: _t("Main"), commands }];
+            } else {
+                commandGroups = this.getCommandGroups(commands, categoriesConfig);
             }
-        });
+        }
+        this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
+        this.onApplyCommand = onApplyCommand;
+        this.overlay.open();
+    }
+    /**
+     * @param {CommandGroup[]} commandGroups
+     */
+    updatePowerbox(commandGroups) {
+        this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
+        this.overlay.open();
+    }
+    closePowerbox() {
+        this.overlay.close();
+    }
+    isPowerboxOpen() {
+        return this.overlay.isOpen;
     }
 
-    openPowerbox() {
-        const selection = this.document.getSelection();
-        const range = selection.rangeCount && selection.getRangeAt(0);
-        this.offset = range && range.startOffset;
-        this.historySavePointRestore = this.shared.makeSavePoint();
-        this.powerbox.open();
-    }
-
-    getGroups() {
-        const groups = [];
-        for (const category of this.resources.powerboxCategory.sort(
-            (a, b) => a.sequence - b.sequence
-        )) {
-            groups.push({
+    /**
+     * @param {Command[]} commands
+     * @param {CategoriesConfig[]} categoriesConfig
+     * @returns {CommandGroup[]}
+     */
+    getCommandGroups(commands, categoriesConfig) {
+        const commandGroups = [];
+        for (const category of categoriesConfig.sort((a, b) => a.sequence - b.sequence)) {
+            commandGroups.push({
                 id: category.id,
                 name: category.name,
-                commands: this.resources.powerboxCommands.filter(
-                    (cmd) => cmd.category === category.id
-                ),
+                commands: commands.filter((cmd) => cmd.category === category.id),
             });
         }
-        return groups;
+        return commandGroups;
     }
 }
