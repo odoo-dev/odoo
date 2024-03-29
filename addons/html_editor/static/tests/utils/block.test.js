@@ -1,7 +1,7 @@
-import { closestBlock } from "@html_editor/editor/utils/blocks";
-import { isVisibleTextNode } from "@html_editor/editor/utils/dom_info";
+import { closestBlock } from "@html_editor/utils/blocks";
+import { isVisibleTextNode } from "@html_editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../test_helpers/editor";
+import { insertTestHtml } from "../_helpers/editor";
 
 describe("closestBlock", () => {
     test("should find the closest block of a deeply nested text node", () => {

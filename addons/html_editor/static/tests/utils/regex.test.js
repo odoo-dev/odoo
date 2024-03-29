@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { URL_REGEX } from "@html_editor/editor/utils/regex";
+import { URL_REGEX } from "@html_editor/utils/regex";
 
 function testUrlRegex(content, { expectedUrl, insideText } = {}) {
     const message = expectedUrl

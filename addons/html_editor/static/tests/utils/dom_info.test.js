@@ -3,9 +3,9 @@ import {
     isVisibleTextNode,
     nextLeaf,
     previousLeaf,
-} from "@html_editor/editor/utils/dom_info";
+} from "@html_editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../test_helpers/editor";
+import { insertTestHtml } from "../_helpers/editor";
 
 describe("previousLeaf", () => {
     test("should find the previous leaf of a deeply nested node", () => {
