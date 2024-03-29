@@ -1,12 +1,6 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "./_helpers/editor";
-import {
-    TAB_WIDTH,
-    getCharWidth,
-    getIndentWidth,
-    oeTab,
-    testTabulation,
-} from "./_helpers/tabs";
+import { TAB_WIDTH, getCharWidth, getIndentWidth, oeTab, testTabulation } from "./_helpers/tabs";
 import {
     deleteBackward,
     deleteForward,
@@ -714,6 +708,20 @@ describe("remove tabulation with shift+tab", () => {
             contentBefore: `<p><font style="background-color: rgb(255,255,0);">${oeTab()}a[]b</font></p>`,
             stepFunction: keydownShiftTab,
             contentAfter: `<p><font style="background-color: rgb(255,255,0);">a[]b</font></p>`,
+        });
+    });
+});
+
+describe("update tab width", () => {
+    test("should update tab width on content change", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterAA = TAB_WIDTH - 2 * getCharWidth("p", "a");
+        await testEditor({
+            contentBefore: `<p><span>a[]</span>${oeTab(tabAfterA)}</p>`,
+            stepFunction: async (editor) => {
+                insertText(editor, "a");
+            },
+            contentAfter: `<p><span>aa[]</span>${oeTab(tabAfterAA)}</p>`,
         });
     });
 });

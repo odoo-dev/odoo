@@ -1,4 +1,5 @@
 import { Plugin } from "../plugin";
+import { closestBlock } from "../utils/blocks";
 import { isEditorTab, isZWS } from "../utils/dom_info";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
@@ -173,7 +174,8 @@ export class TabulationPlugin extends Plugin {
      * @param {HTMLElement} [root] - The tree root.
      */
     alignTabs(root = this.editable) {
-        for (const tab of root.querySelectorAll("span.oe-tabs")) {
+        const block = closestBlock(root);
+        for (const tab of block.querySelectorAll("span.oe-tabs")) {
             this.adjustTabWidth(tab);
         }
     }
