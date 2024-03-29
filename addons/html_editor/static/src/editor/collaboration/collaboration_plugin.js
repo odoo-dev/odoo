@@ -12,7 +12,7 @@ const HISTORY_SNAPSHOT_BUFFER_TIME = 1000 * 10;
 
 export class CollaborationPlugin extends Plugin {
     static name = "collaboration";
-    static dependencies = ["history", "selection", "dompurify"];
+    static dependencies = ["history", "selection", "sanitize"];
     /** @type { (p: CollaborationPlugin) => Record<string, any> } */
     static resources = (p) => ({
         set_attribute: p.setAttribute.bind(p),
@@ -94,7 +94,7 @@ export class CollaborationPlugin extends Plugin {
     safeSetAttribute(node, attributeName, attributeValue) {
         const clone = this.document.createElement(node.tagName);
         clone.setAttribute(attributeName, attributeValue);
-        this.shared.purify(clone, { IN_PLACE: true });
+        this.shared.sanitize(clone, { IN_PLACE: true });
         if (clone.hasAttribute(attributeName)) {
             node.setAttribute(attributeName, clone.getAttribute(attributeName));
         } else {
@@ -307,7 +307,7 @@ export class CollaborationPlugin extends Plugin {
     unserializeNode(node) {
         const fakeNode = this.document.createElement("fake-el");
         fakeNode.appendChild(node);
-        this.shared.purify(fakeNode, { IN_PLACE: true });
+        this.shared.sanitize(fakeNode, { IN_PLACE: true });
         const sanitizedNode = fakeNode.childNodes[0];
         return sanitizedNode;
     }

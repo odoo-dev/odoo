@@ -1,18 +1,18 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
-export class DOMPurifyPlugin extends Plugin {
-    static name = "dompurify";
-    static shared = ["purify"];
+export class SanitizePlugin extends Plugin {
+    static name = "sanitize";
+    static shared = ["sanitize"];
     setup() {
         if (!window.DOMPurify) {
             throw new Error("DOMPurify is not available");
         }
         this.DOMPurify = DOMPurify(this.document.defaultView);
     }
-    purify(...args) {
+    sanitize(...args) {
         return this.DOMPurify.sanitize(...args);
     }
 }
 
-registry.category("phoenix_plugins").add(DOMPurifyPlugin.name, DOMPurifyPlugin);
+registry.category("phoenix_plugins").add(SanitizePlugin.name, SanitizePlugin);
