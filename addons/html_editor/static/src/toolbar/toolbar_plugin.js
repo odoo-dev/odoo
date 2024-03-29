@@ -1,5 +1,4 @@
 import { reactive } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { Toolbar } from "./toolbar";
 
@@ -82,5 +81,3 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(ToolbarPlugin.name, ToolbarPlugin);

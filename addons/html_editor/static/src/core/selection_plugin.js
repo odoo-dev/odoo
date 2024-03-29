@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, nodeSize } from "../utils/position";
 import {
@@ -50,7 +49,7 @@ export class SelectionPlugin extends Plugin {
             this.activeSelection = newSelection;
         }
 
-        for (const handler of this.resources.onSelectionChange) {
+        for (const handler of this.resources.onSelectionChange || []) {
             handler(this.activeSelection);
         }
     }
@@ -186,5 +185,3 @@ export class SelectionPlugin extends Plugin {
         return this.setSelection({ anchorNode: node, anchorOffset: nodeSize(node) });
     }
 }
-
-registry.category("phoenix_plugins").add(SelectionPlugin.name, SelectionPlugin);

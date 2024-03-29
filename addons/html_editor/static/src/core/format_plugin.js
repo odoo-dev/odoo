@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
@@ -319,5 +318,3 @@ function removeFormat(node, formatSpec) {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(FormatPlugin.name, FormatPlugin);

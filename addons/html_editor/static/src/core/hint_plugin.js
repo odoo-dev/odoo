@@ -1,7 +1,6 @@
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";
 import { removeClass } from "../utils/dom";
-import { registry } from "@web/core/registry";
 
 function isMutationRecordSavable(record) {
     if (record.type === "attributes" && record.attributeName === "placeholder") {
@@ -118,5 +117,3 @@ export class HintPlugin extends Plugin {
         return matchedElements;
     }
 }
-
-registry.category("phoenix_plugins").add(HintPlugin.name, HintPlugin);

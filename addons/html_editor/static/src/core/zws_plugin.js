@@ -1,5 +1,4 @@
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { nextLeaf, previousLeaf } from "../utils/dom_info";
@@ -173,5 +172,3 @@ export class ZwsPlugin extends Plugin {
         return zws;
     }
 }
-
-registry.category("phoenix_plugins").add(ZwsPlugin.name, ZwsPlugin);

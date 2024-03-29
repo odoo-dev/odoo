@@ -1,11 +1,11 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { ICON_SELECTOR, isIconElement } from "../utils/dom_info";
 import { MediaDialog } from "./media_dialog";
 
 const MEDIA_SELECTOR = `${ICON_SELECTOR} , .o_image, .media_iframe_video`;
-class MediaPlugin extends Plugin {
+
+export class MediaPlugin extends Plugin {
     static name = "media";
     static dependencies = ["selection", "history"];
     static resources = (p) => ({
@@ -130,5 +130,3 @@ class MediaPlugin extends Plugin {
         });
     }
 }
-
-registry.category("phoenix_plugins").add(MediaPlugin.name, MediaPlugin);

@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { onMounted, useEnv, useRef } from "@odoo/owl";
 
@@ -167,5 +166,3 @@ export class Overlay {
         return rect;
     }
 }
-
-registry.category("phoenix_plugins").add(OverlayPlugin.name, OverlayPlugin);

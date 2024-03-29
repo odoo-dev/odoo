@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty, setTagName } from "../utils/dom";
 import { isVisibleTextNode } from "../utils/dom_info";
@@ -262,5 +261,3 @@ export class FontPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(FontPlugin.name, FontPlugin);

@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestElement } from "../utils/dom_traversal";
 import { TableMenu } from "./table_menu";
@@ -93,5 +92,3 @@ export class TableUIPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(TableUIPlugin.name, TableUIPlugin);

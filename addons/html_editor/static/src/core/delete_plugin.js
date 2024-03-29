@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import {
@@ -907,5 +906,3 @@ export class DeletePlugin extends Plugin {
 // The first child element of a contenteditable="true" zone which
 // itself is contained in a contenteditable="false" zone can not be
 // removed if it is paragraph-like.
-
-registry.category("phoenix_plugins").add(DeletePlugin.name, DeletePlugin);

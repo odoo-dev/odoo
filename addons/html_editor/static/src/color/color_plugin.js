@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { fillEmpty } from "../utils/dom";
 import { isEmptyBlock, isWhitespace } from "../utils/dom_info";
@@ -269,5 +268,3 @@ export class ColorPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add("color", ColorPlugin);

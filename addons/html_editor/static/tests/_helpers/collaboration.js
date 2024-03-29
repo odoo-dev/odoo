@@ -1,11 +1,11 @@
 import { after, expect } from "@odoo/hoot";
-import { registry } from "@web/core/registry";
 import { CollaborationPlugin } from "../../src/collaboration/collaboration_plugin";
 import { HistoryPlugin } from "../../src/core/history_plugin";
 import { Plugin } from "../../src/plugin";
 import { createDOMPathGenerator } from "../../src/utils/dom_traversal";
 import { DIRECTIONS } from "../../src/utils/position";
 import { setupEditor } from "./editor";
+import { BASE_PLUGINS } from "../../src/plugin_sets";
 
 /**
  *
@@ -68,7 +68,7 @@ export const setupMultiEditor = async (spec) => {
         let n = 0;
         HistoryPlugin.prototype.generateId = () => `fake_id_${n++}`;
         let selection;
-        const defaultPlugins = registry.category("phoenix_plugins").getAll();
+        const defaultPlugins = BASE_PLUGINS;
         const base = await setupEditor(spec.contentBefore, {
             inIFrame: true,
             onMounted: (editable) => {

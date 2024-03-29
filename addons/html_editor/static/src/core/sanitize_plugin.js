@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
 export class SanitizePlugin extends Plugin {
@@ -14,5 +13,3 @@ export class SanitizePlugin extends Plugin {
         return this.DOMPurify.sanitize(...args);
     }
 }
-
-registry.category("phoenix_plugins").add(SanitizePlugin.name, SanitizePlugin);

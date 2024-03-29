@@ -1,6 +1,6 @@
-import { registry } from "@web/core/registry";
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
+import { CORE_PLUGINS } from "./plugin_sets";
 
 /**
  * @typedef { import("./plugin").SharedMethods } SharedMethods
@@ -13,9 +13,7 @@ import { initElementForEdition } from "./utils/sanitize";
  * @property { string[] } [classList]
  */
 
-export const defaultConfig = {};
-
-function getPlugins(plugins) {
+function sortPlugins(plugins) {
     const initialPlugins = new Set(plugins);
     const inResult = new Set();
     // need to sort them
@@ -79,8 +77,7 @@ export class Editor {
     }
 
     startPlugins() {
-        const defaultPlugins = registry.category("phoenix_plugins").getAll();
-        const Plugins = getPlugins(this.config.Plugins || defaultPlugins);
+        const Plugins = sortPlugins(this.config.Plugins || CORE_PLUGINS);
         const plugins = new Map();
         for (const P of Plugins) {
             if (P.name === "") {

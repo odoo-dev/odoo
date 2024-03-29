@@ -1,8 +1,8 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { QWebPlugin } from "@html_editor/qweb/qweb_plugin";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
+import { BASE_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
@@ -32,6 +32,12 @@ const testHtml = `Hello Phoenix editor!
 
 `;
 
+const PluginSets = {
+    core: CORE_PLUGINS,
+    base: BASE_PLUGINS,
+    extras: EXTRA_PLUGINS,
+};
+
 export class Playground extends Component {
     static template = "html_editor.Playground";
     static components = { Wysiwyg };
@@ -46,7 +52,7 @@ export class Playground extends Component {
         this.config = useState({
             showToolbar: false,
             inIframe: false,
-            hasQWebPlugin: false,
+            pluginSet: "base",
         });
         onWillStart(async () => {
             await loadBundle("web_editor.backend_assets_wysiwyg");
@@ -57,11 +63,7 @@ export class Playground extends Component {
     }
 
     get Plugins() {
-        const Plugins = registry.category("phoenix_plugins").getAll();
-        if (this.config.hasQWebPlugin) {
-            Plugins.push(QWebPlugin);
-        }
-        return Plugins;
+        return PluginSets[this.config.pluginSet];
     }
 
     get classListEditor() {

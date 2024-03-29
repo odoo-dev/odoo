@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isEmpty } from "../utils/dom_info";
 import { Powerbox } from "./powerbox";
@@ -65,5 +64,3 @@ export class PowerboxPlugin extends Plugin {
         return groups;
     }
 }
-
-registry.category("phoenix_plugins").add(PowerboxPlugin.name, PowerboxPlugin);

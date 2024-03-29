@@ -4,9 +4,9 @@ import { animationFrame, tick } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { QWebPlugin } from "../src/qweb/qweb_plugin";
-import { registry } from "@web/core/registry";
+import { BASE_PLUGINS } from "../src/plugin_sets";
 
-const config = { Plugins: [...registry.category("phoenix_plugins").getAll(), QWebPlugin] };
+const config = { Plugins: [...BASE_PLUGINS, QWebPlugin] };
 describe("qweb picker", () => {
     test("switch selected value to t-else value", async () => {
         const { el, editor } = await setupEditor(

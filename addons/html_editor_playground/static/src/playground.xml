@@ -11,7 +11,12 @@
                 </div>
                  <div>
                     <h3>Plugins</h3>
-                    <div class="m-1 form-check"><input class="form-check-input" type="checkbox" id="hasQWebPlugin" t-model="config.hasQWebPlugin"/><label for="hasQWebPlugin" class="form-check-label">Has QWebPlugin</label></div>
+
+                    <select class="form-select" t-model="config.pluginSet">
+                        <option value="core">Core Plugins</option>
+                        <option value="base">Base Plugins</option>
+                        <option value="extras">Extras Plugins</option>
+                    </select>
                 </div>
                 <div class="">
                     <h3>Playground Config</h3>
