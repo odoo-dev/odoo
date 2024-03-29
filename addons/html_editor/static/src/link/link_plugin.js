@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
-// import { findInSelection } from "../utils/selection";
 import { closestElement } from "../utils/dom_traversal";
 import { LinkPopover } from "./link";
 import { reactive } from "@odoo/owl";
@@ -91,34 +90,13 @@ export class LinkPlugin extends Plugin {
     // -------------------------------------------------------------------------
 
     /**
-     * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
-     * use the link tools, otherwise use the dialog.
+     * Toggle the Link popover to edit links
      *
-     * @param {boolean} [options.forceOpen] default: false
-     * @param {boolean} [options.forceDialog] force to open the dialog
-     * @param {boolean} [options.link] The anchor element to edit if it is known.
-     * @param {boolean} [options.shoudFocusUrl=true] Disable the automatic focusing of the URL field.
      */
     toggleLinkTools(options = {}) {
-        // ...
-        // const shouldFocusUrl = options.shouldFocusUrl === undefined ? true : options.shouldFocusUrl;
-        // const linkEl = findInSelection(this.shared.getEditableSelection(), "a");
-        // if (
-        //     linkEl &&
-        //     (!linkEl.matches(this.customizableLinksSelector) || !linkEl.isContentEditable)
-        // ) {
-        //     return;
-        // }
-
         const selection = this.shared.getEditableSelection();
         const linkElement = closestElement(selection.anchorNode, "A");
         this.linkState.linkElement = linkElement;
-
-        // TODO: history step pause
-
-        // TODO: get/create link
-
-        // TODO: open the link dialog
     }
 
     normalizeLink(root = this.editable) {
@@ -145,24 +123,6 @@ export class LinkPlugin extends Plugin {
      * Open the link tools or the image link tool depending on the selection.
      */
     openLinkToolsFromSelection() {
-        // TODO: open link tools
-        // const targetEl = this.odooEditor.document.getSelection().getRangeAt(0).startContainer;
-        // // Link tool is different if the selection is an image or a text.
-        // if (targetEl.nodeType === Node.ELEMENT_NODE
-        //         && (targetEl.tagName === 'IMG' || targetEl.querySelectorAll('img').length === 1)) {
-        //     this.odooEditor.dispatchEvent(new Event('activate_image_link_tool'));
-        //     return;
-        // }
-
-        // TODO maybe have another component for the image link tool?
         this.toggleLinkTools();
-    }
-
-    /**
-     * todo get the link from the selection or create one if there is none
-     */
-    getOrCreateLink() {
-        const link = this.document.createElement("a");
-        return link;
     }
 }
