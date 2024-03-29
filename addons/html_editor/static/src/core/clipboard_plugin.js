@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { parseHTML } from "../utils/html";
 import { ancestors, closestElement } from "../utils/dom_traversal";
@@ -217,5 +216,3 @@ export class ClipboardPlugin extends Plugin {
         this.shared.domInsert(fragment);
     }
 }
-
-registry.category("phoenix_plugins").add(ClipboardPlugin.name, ClipboardPlugin);

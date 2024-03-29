@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { CTYPES } from "../utils/content_types";
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
@@ -91,5 +90,3 @@ export class LineBreakPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(LineBreakPlugin.name, LineBreakPlugin);

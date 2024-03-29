@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { findInSelection } from "../utils/selection";
 import { closestBlock } from "../utils/blocks";
@@ -127,5 +126,3 @@ export class LinkPlugin extends Plugin {
         this.toggleLinkTools();
     }
 }
-
-registry.category("phoenix_plugins").add(LinkPlugin.name, LinkPlugin);

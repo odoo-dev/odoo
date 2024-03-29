@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { getTraversedNodes } from "../utils/selection";
 import { isVisibleTextNode } from "../utils/dom_info";
@@ -44,5 +43,3 @@ export class JustifyPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(JustifyPlugin.name, JustifyPlugin);

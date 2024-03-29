@@ -1,7 +1,7 @@
 import { Component, onMounted, onWillDestroy, useEnv, useRef, useState } from "@odoo/owl";
 import { Editor } from "./editor";
 import { Toolbar } from "./toolbar/toolbar";
-import { registry } from "@web/core/registry";
+import { BASE_PLUGINS } from "./plugin_sets";
 
 /**
  * @param {HTMLElement} el
@@ -9,13 +9,7 @@ import { registry } from "@web/core/registry";
  * @param {import("./editor").EditorConfig} [config]
  */
 export function wysiwyg(el, env, config = {}) {
-    const editor = new Editor(
-        {
-            Plugins: registry.category("phoenix_plugins").getAll(),
-            ...config,
-        },
-        env.services
-    );
+    const editor = new Editor(config, env.services);
     editor.attachTo(el);
     return editor;
 }
@@ -28,13 +22,7 @@ export function wysiwyg(el, env, config = {}) {
 export function useWysiwyg(target, config = {}) {
     const env = useEnv();
     const ref = typeof target === "string" ? useRef(target) : null;
-    const editor = new Editor(
-        {
-            Plugins: registry.category("phoenix_plugins").getAll(),
-            ...config,
-        },
-        env.services
-    );
+    const editor = new Editor(config, env.services);
     onMounted(() => {
         let el = ref ? ref.el : target();
         if (el.tagName === "IFRAME") {
@@ -68,7 +56,7 @@ export class Wysiwyg extends Component {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
             classList: this.props.classListEditor,
-            Plugins: this.props.Plugins,
+            Plugins: this.props.Plugins || BASE_PLUGINS,
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and

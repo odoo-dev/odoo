@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isEditorTab, isZWS } from "../utils/dom_info";
 import { descendants, getAdjacentPreviousSiblings } from "../utils/dom_traversal";
@@ -28,6 +27,8 @@ export class TabulationPlugin extends Plugin {
     static dependencies = ["dom", "selection", "delete", "split"];
     static shared = ["indentBlocks", "outdentBlocks"];
     static resources = (p) => ({
+        handle_tab: [],
+        handle_shift_tab: [],
         handle_delete_forward: { callback: p.handleDeleteForward.bind(p) },
         shortcuts: [
             { hotkey: "tab", command: "TAB" },
@@ -210,5 +211,3 @@ export class TabulationPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(TabulationPlugin.name, TabulationPlugin);

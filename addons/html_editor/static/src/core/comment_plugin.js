@@ -1,8 +1,7 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { descendants } from "../utils/dom_traversal";
 
-class CommentPlugin extends Plugin {
+export class CommentPlugin extends Plugin {
     static name = "comment";
 
     handleCommand(command, payload) {
@@ -22,5 +21,3 @@ class CommentPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(CommentPlugin.name, CommentPlugin);

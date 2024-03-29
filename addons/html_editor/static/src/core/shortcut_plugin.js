@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 
 export class ShortCutPlugin extends Plugin {
@@ -20,5 +19,3 @@ export class ShortCutPlugin extends Plugin {
         });
     }
 }
-
-registry.category("phoenix_plugins").add(ShortCutPlugin.name, ShortCutPlugin);

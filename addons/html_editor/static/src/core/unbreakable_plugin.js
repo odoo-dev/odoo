@@ -1,9 +1,8 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { isUnbreakable } from "../utils/dom_info";
 
-export class Unbreakable extends Plugin {
+export class UnbreakablePlugin extends Plugin {
     static name = "unbreakable";
     static dependencies = ["line_break"];
     static resources = (p) => ({
@@ -18,5 +17,3 @@ export class Unbreakable extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(Unbreakable.name, Unbreakable);

@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { copyAttributes, removeClass, setTagName, toggleClass, unwrapContents } from "../utils/dom";
@@ -628,5 +627,3 @@ export class ListPlugin extends Plugin {
         );
     }
 }
-
-registry.category("phoenix_plugins").add(ListPlugin.name, ListPlugin);

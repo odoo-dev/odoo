@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { descendants, getCommonAncestor } from "../utils/dom_traversal";
 
@@ -904,5 +903,3 @@ export class HistoryPlugin extends Plugin {
         return [node, _map];
     }
 }
-
-registry.category("phoenix_plugins").add(HistoryPlugin.name, HistoryPlugin);

@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { removeClass } from "../utils/dom";
@@ -527,5 +526,3 @@ export class TablePlugin extends Plugin {
         return didDeselectTable;
     }
 }
-
-registry.category("phoenix_plugins").add(TablePlugin.name, TablePlugin);

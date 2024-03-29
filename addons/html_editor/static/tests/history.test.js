@@ -2,7 +2,7 @@ import { expect, describe, test } from "@odoo/hoot";
 import { testEditor } from "./_helpers/editor";
 import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user_actions";
 import { Plugin } from "../src/plugin";
-import { registry } from "@web/core/registry";
+import { BASE_PLUGINS } from "../src/plugin_sets";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
@@ -178,7 +178,7 @@ describe("prevent renderingClasses to be set from history", () => {
             history_rendering_classes: ["x"],
         });
     }
-    const Plugins = [...registry.category("phoenix_plugins").getAll(), TestRenderingClassesPlugin];
+    const Plugins = [...BASE_PLUGINS, TestRenderingClassesPlugin];
     test("should prevent renderingClasses to be added", async () => {
         await testEditor({
             contentBefore: `<p>a</p>`,

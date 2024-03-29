@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { fillEmpty } from "../utils/dom";
@@ -225,5 +224,3 @@ export class SplitPlugin extends Plugin {
         }
     }
 }
-
-registry.category("phoenix_plugins").add(SplitPlugin.name, SplitPlugin);
