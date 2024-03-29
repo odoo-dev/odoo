@@ -23,13 +23,10 @@
     'depends': ['base', 'web'],
     'application': True,
     'installable': True,
-    'data': [
-        'views/views.xml',
-    ],
     'assets': {
         'web.assets_backend': [
             'html_editor/static/src/**/*',
-            ('include', 'web_editor.backend_assets_wysiwyg'),
+            'html_editor/static/lib/DOMpurify.js',
         ],
         'web.assets_unit_tests': [
             'html_editor/static/tests/**/*',

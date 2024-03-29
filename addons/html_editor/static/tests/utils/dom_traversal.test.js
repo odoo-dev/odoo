@@ -1,4 +1,4 @@
-import { isBlock } from "@html_editor/editor/utils/blocks";
+import { isBlock } from "@html_editor/utils/blocks";
 import {
     ancestors,
     closestElement,
@@ -9,10 +9,10 @@ import {
     getAdjacents,
     lastLeaf,
     getCommonAncestor,
-} from "@html_editor/editor/utils/dom_traversal";
+} from "@html_editor/utils/dom_traversal";
 import { describe, expect, test } from "@odoo/hoot";
-import { insertTestHtml } from "../test_helpers/editor";
-import { unformat } from "../test_helpers/format";
+import { insertTestHtml } from "../_helpers/editor";
+import { unformat } from "../_helpers/format";
 
 describe("closestElement", () => {
     test("should find the closest element to a text node", () => {

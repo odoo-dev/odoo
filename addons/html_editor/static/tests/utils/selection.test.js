@@ -1,4 +1,4 @@
-import { DIRECTIONS } from "@html_editor/editor/utils/position";
+import { DIRECTIONS } from "@html_editor/utils/position";
 import {
     ensureFocus,
     getCursorDirection,
@@ -9,11 +9,11 @@ import {
     setCursorEnd,
     setCursorStart,
     setSelection,
-} from "@html_editor/editor/utils/selection";
+} from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { insertTestHtml, insertText, setupEditor, testEditor } from "../test_helpers/editor";
-import { unformat } from "../test_helpers/format";
+import { insertTestHtml, insertText, setupEditor, testEditor } from "../_helpers/editor";
+import { unformat } from "../_helpers/format";
 
 describe("getTraversedNodes", () => {
     test("should return the anchor node of a collapsed selection", async () => {

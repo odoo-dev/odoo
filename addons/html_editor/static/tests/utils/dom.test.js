@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { splitTextNode } from "../../src/editor/utils/dom_split";
-import { setupEditor } from "../test_helpers/editor";
+import { splitTextNode } from "../../src/utils/dom_split";
+import { setupEditor } from "../_helpers/editor";
 
 describe("splitAroundUntil", () => {
     test("should split a slice of text from its inline ancestry (1)", async () => {
