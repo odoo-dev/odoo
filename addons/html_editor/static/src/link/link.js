@@ -1,5 +1,4 @@
-// import { _t } from "@web/core/l10n/translation";
-import { Component, useRef, useState, onMounted } from "@odoo/owl";
+import { Component, useRef, useState } from "@odoo/owl";
 import { useOverlay } from "../core/overlay_plugin";
 
 export class LinkPopover extends Component {
@@ -15,17 +14,12 @@ export class LinkPopover extends Component {
         linkState: Object,
     };
     setup() {
-        console.log(this.props.linkState.linkElement);
-        // const ref = useRef("root");
         this.urlInput = useRef("urlInput");
         this.state = useState({
             editing: this.props.linkState.linkElement.href ? false : true,
             url: this.props.linkState.linkElement.href || "",
         });
         this.overlay = useOverlay("root", { position: "bottom" });
-        onMounted(() => {
-            // this.urlInput.el.focus(); // Focus on the input by default
-        });
     }
     onClickApply() {
         this.state.editing = false;
