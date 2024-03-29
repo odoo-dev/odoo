@@ -115,7 +115,7 @@ describe("restoreState", () => {
         // Now looking to the right of "a " we see "b", which is content
         // and makes the formerly invisible space visible. We should get
         // back a rule that will enforce the invisibility of the space.
-        expect(rule.spaceVisibility).not.toBeTruthy();
+        expect(rule.spaceVisibility).not.toBe(true);
     });
 
     test("should restore visible space to the left (looking right) (among consecutive space within content)", () => {
@@ -136,7 +136,7 @@ describe("restoreState", () => {
         // tag, from the inside. This makes the formerly visible space
         // invisible. We should get back a rule that will enforce the
         // visibility of the space.
-        expect(rule.spaceVisibility).toBeTruthy();
+        expect(rule.spaceVisibility).toBe(true);
     });
 
     test("should restore visible space to the right (looking left) (followed by consecutive space within content)", () => {
@@ -158,7 +158,7 @@ describe("restoreState", () => {
         // invisible. Since it should be invisible, we should get back a
         // rule that will enforce the invisibility of the space (but no
         // rule would work as well).
-        expect(rule.spaceVisibility).not.toBeTruthy();
+        expect(rule.spaceVisibility).not.toBe(true);
     });
 
     test("should restore invisible space to the right (looking left) (nothing after)", () => {
@@ -179,7 +179,7 @@ describe("restoreState", () => {
         // on its visibility. Either way it should be invisible so we
         // should get back a rule that will enforce the invisibility of
         // the space (but no rule would work as well).
-        expect(rule.spaceVisibility).not.toBeTruthy();
+        expect(rule.spaceVisibility).not.toBe(true);
     });
 
     test("should restore invisible space to the right (looking left) (more space after)", () => {
@@ -200,7 +200,7 @@ describe("restoreState", () => {
         // on its visibility. Either way it should be invisible so we
         // should get back a rule that will enforce the invisibility of
         // the space (but no rule would work as well).
-        expect(rule.spaceVisibility).not.toBeTruthy();
+        expect(rule.spaceVisibility).not.toBe(true);
     });
 
     test("should restore invisible space to the right (looking left) (br after)", () => {
@@ -220,7 +220,7 @@ describe("restoreState", () => {
         // incidence on its visibility. Either way it should be
         // invisible so we should get back a rule that will enforce the
         // invisibility of the space (but no rule would work as well).
-        expect(rule.spaceVisibility).not.toBeTruthy();
+        expect(rule.spaceVisibility).not.toBe(true);
     });
 });
 

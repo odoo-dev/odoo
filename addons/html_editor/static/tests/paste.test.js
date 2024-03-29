@@ -1550,7 +1550,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, imageUrl);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the first command (Embed image)
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                 },
@@ -1561,7 +1561,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, imageUrl);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -1612,7 +1612,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${url} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${url}">${url}</a> def[]</p>`,
             });
@@ -1621,7 +1621,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${imgUrl} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`,
             });
@@ -1630,7 +1630,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${videoUrl} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`,
             });
@@ -1645,7 +1645,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`,
             });
@@ -1654,7 +1654,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p><a href="${url}">${url}</a> abc <a href="${videoUrl}">${videoUrl}</a> def <a href="${imgUrl}">${imgUrl}</a>[]</p>`,
             });
@@ -1754,7 +1754,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${url} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${url}">${url}</a> def[]<br></p>`,
             });
@@ -1763,7 +1763,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${imgUrl} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`,
             });
@@ -1772,7 +1772,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `abc ${videoUrl} def`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]<br></p>`,
             });
@@ -1781,7 +1781,7 @@ describe("link", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter: `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]<br></p>`,
             });
@@ -1835,7 +1835,7 @@ describe("link", () => {
                     stepFunction: async (editor) => {
                         await pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the first command (Embed image)
                         dispatch(editor.editable, "keydown", { key: "Enter" });
                     },
@@ -1847,7 +1847,7 @@ describe("link", () => {
                     stepFunction: async (editor) => {
                         await pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
                         dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                         dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -1887,7 +1887,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -1905,7 +1905,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -1923,7 +1923,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</a>d</p>',
@@ -1937,7 +1937,7 @@ describe("images", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -1958,7 +1958,7 @@ describe("images", () => {
                         await pasteText(editor, "*should not disappear*");
                         await pasteText(editor, url);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
                         dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                         dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -1979,7 +1979,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -1998,7 +1998,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -2016,7 +2016,7 @@ describe("images", () => {
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
                     // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</a>d</p>',
@@ -2030,7 +2030,7 @@ describe("images", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2062,7 +2062,7 @@ describe("images", () => {
                         // paste url
                         await pasteText(editor, url);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
                         dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                         dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2079,7 +2079,7 @@ describe("images", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick first command (Embed image)
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                     // Undo
@@ -2094,7 +2094,7 @@ describe("images", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2115,7 +2115,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -2130,7 +2130,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -2145,7 +2145,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     // Ensure the powerbox is not active
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">bhttps://youtu.be/dQw4w9WgXcQ[]c</a>d</p>',
@@ -2159,7 +2159,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2179,7 +2179,7 @@ describe("youtube video", () => {
                         await pasteText(editor, "*should not disappear*");
                         await pasteText(editor, url);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
                         dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                         dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2197,7 +2197,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -2213,7 +2213,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Force powerbox validation on the default first choice
                     await editor.powerbox._pickCommand();
                 },
@@ -2228,7 +2228,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     // Ensure the powerbox is not active
-                    expect(editor.powerbox.isOpen).not.toBeTruthy();
+                    expect(editor.powerbox.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">bhttps://www.youtube.com/watch?v=dQw4w9WgXcQ[]c</a>d</p>',
@@ -2242,7 +2242,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick the second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2274,7 +2274,7 @@ describe("youtube video", () => {
                         // paste url
                         await pasteText(editor, url);
                         // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBeTruthy();
+                        expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
                         dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                         dispatch(editor.editable, "keydown", { key: "Enter" });
@@ -2291,7 +2291,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick first command (Embed video)
                     dispatch(editor.editable, "keydown", { key: "Enter" });
                     // Undo
@@ -2304,7 +2304,7 @@ describe("youtube video", () => {
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
                     // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBeTruthy();
+                    expect(editor.powerbox.isOpen).toBe(true);
                     // Pick second command (Paste as URL)
                     dispatch(editor.editable, "keydown", { key: "ArrowDown" });
                     dispatch(editor.editable, "keydown", { key: "Enter" });

@@ -1,9 +1,4 @@
-import {
-    isVisible,
-    isVisibleTextNode,
-    nextLeaf,
-    previousLeaf,
-} from "@html_editor/utils/dom_info";
+import { isVisible, isVisibleTextNode, nextLeaf, previousLeaf } from "@html_editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
 import { insertTestHtml } from "../_helpers/editor";
 
@@ -197,25 +192,25 @@ describe("isVisible", () => {
         test("should identify an invisible textnode at the beginning of a paragraph before an inline node", () => {
             const [p] = insertTestHtml("<p> <i>a</i></p>");
             const result = isVisible(p.firstChild);
-            expect(result).not.toBeTruthy();
+            expect(result).not.toBe(true);
         });
 
         test("should identify invisible string space at the end of a paragraph after an inline node", () => {
             const [p] = insertTestHtml("<p><i>a</i> </p>");
             const result = isVisible(p.lastChild);
-            expect(result).not.toBeTruthy();
+            expect(result).not.toBe(true);
         });
 
         test("should identify a single visible space in an inline node in the middle of a paragraph", () => {
             const [p] = insertTestHtml("<p>a<i> </i>b</p>");
             const result = isVisible(p.querySelector("i").firstChild);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should identify a visible string with only one visible space in an inline node in the middle of a paragraph", () => {
             const [p] = insertTestHtml("<p>a<i>   </i>b</p>");
             const result = isVisible(p.querySelector("i").firstChild);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should identify a visible space in the middle of a paragraph", () => {
@@ -227,7 +222,7 @@ describe("isVisible", () => {
                 return textNode;
             });
             const result = isVisible(textNodes[1]);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should identify a visible string space in the middle of a paragraph", () => {
@@ -239,7 +234,7 @@ describe("isVisible", () => {
                 return textNode;
             });
             const result = isVisible(textNodes[1]);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should identify the first space in a series of spaces as in the middle of a paragraph as visible", () => {
@@ -251,7 +246,7 @@ describe("isVisible", () => {
                 return textNode;
             });
             const result = isVisible(textNodes[1]);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should identify the second space in a series of spaces in the middle of a paragraph as invisible", () => {
@@ -263,7 +258,7 @@ describe("isVisible", () => {
                 return textNode;
             });
             const result = isVisible(textNodes[2]);
-            expect(result).not.toBeTruthy();
+            expect(result).not.toBe(true);
         });
 
         test("should identify empty text node as invisible", () => {
@@ -272,7 +267,7 @@ describe("isVisible", () => {
             const textNode = document.createTextNode("");
             p.appendChild(textNode);
             const result = isVisible(textNode);
-            expect(result).not.toBeTruthy();
+            expect(result).not.toBe(true);
         });
 
         test("should identify a space between to visible char in inline nodes as visible", () => {
@@ -281,7 +276,7 @@ describe("isVisible", () => {
 
             const result = isVisible(textNode);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
     });
 });
