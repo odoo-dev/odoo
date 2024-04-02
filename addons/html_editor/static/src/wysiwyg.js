@@ -1,6 +1,6 @@
 import { Component, onMounted, onWillDestroy, useEnv, useRef, useState } from "@odoo/owl";
 import { Editor } from "./editor";
-import { Toolbar } from "./toolbar/toolbar";
+import { Toolbar } from "./main/toolbar/toolbar";
 import { BASE_PLUGINS } from "./plugin_sets";
 
 /**
