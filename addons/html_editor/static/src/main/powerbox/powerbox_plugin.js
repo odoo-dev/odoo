@@ -49,7 +49,7 @@ export class PowerboxPlugin extends Plugin {
         this.overlay = this.shared.createOverlay(Powerbox, {
             document: this.document,
             close: () => {
-                return this.overlay.close();
+                return this.closePowerbox();
             },
             onMounted: (el) => {
                 el.style.position = "absolute";
@@ -70,7 +70,14 @@ export class PowerboxPlugin extends Plugin {
     /**
      * @param {Command[]} commands
      */
-    openPowerbox({ commands, categoriesConfig, onApplyCommand = () => {}, commandGroups } = {}) {
+    openPowerbox({
+        commands,
+        categoriesConfig,
+        onApplyCommand = () => {},
+        commandGroups,
+        onClose = () => {},
+    } = {}) {
+        this.closePowerbox();
         if (!commandGroups) {
             if (!categoriesConfig?.length) {
                 commandGroups = [{ id: "Main", name: _t("Main"), commands }];
@@ -80,6 +87,7 @@ export class PowerboxPlugin extends Plugin {
         }
         this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
         this.onApplyCommand = onApplyCommand;
+        this.onClose = onClose;
         this.overlay.open();
     }
     /**
@@ -90,6 +98,7 @@ export class PowerboxPlugin extends Plugin {
         this.overlay.open();
     }
     closePowerbox() {
+        this.onClose?.();
         this.overlay.close();
     }
     isPowerboxOpen() {
