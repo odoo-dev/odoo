@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { Deferred } from "@web/core/utils/concurrency";
-import { Plugin } from "../src/plugin";
-import { parseHTML } from "../src/utils/html";
+import { Plugin } from "@html_editor/plugin";
+import { parseHTML } from "@html_editor/utils/html";
 import { unformat } from "./_helpers/format";
 import { addStep, undo } from "./_helpers/user_actions";
 import {

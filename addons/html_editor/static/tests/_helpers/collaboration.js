@@ -1,22 +1,22 @@
+import { HistoryPlugin } from "@html_editor/core/history_plugin";
+import { CollaborationPlugin } from "@html_editor/others/collaboration_plugin";
+import { Plugin } from "@html_editor/plugin";
+import { BASE_PLUGINS } from "@html_editor/plugin_sets";
+import { createDOMPathGenerator } from "@html_editor/utils/dom_traversal";
+import { DIRECTIONS } from "@html_editor/utils/position";
 import { after, expect } from "@odoo/hoot";
-import { CollaborationPlugin } from "../../src/collaboration/collaboration_plugin";
-import { HistoryPlugin } from "../../src/core/history_plugin";
-import { Plugin } from "../../src/plugin";
-import { createDOMPathGenerator } from "../../src/utils/dom_traversal";
-import { DIRECTIONS } from "../../src/utils/position";
 import { setupEditor } from "./editor";
-import { BASE_PLUGINS } from "../../src/plugin_sets";
 
 /**
  *
- * @typedef { import("../../src/editor").Editor } Editor
+ * @typedef { import("@html_editor/editor").Editor } Editor
  *
  * @typedef { Object } PeerInfo
  * @property { string } peerId
- * @property { import("../../src/core/history_plugin").HistoryStep[] } steps
+ * @property { import("@html_editor/core/history_plugin").HistoryStep[] } steps
  * @property { Editor } editor
- * @property { import("../../src/collaboration/collaboration_plugin").CollaborationPlugin } collaborationPlugin
- * @property { import("../../src/plugin").HistoryPlugin } historyPlugin
+ * @property { import("@html_editor/collaboration/collaboration_plugin").CollaborationPlugin } collaborationPlugin
+ * @property { import("@html_editor/plugin").HistoryPlugin } historyPlugin
  *
  * @typedef { Object } MultiEditorSpec
  * @property { string[] } peerIds

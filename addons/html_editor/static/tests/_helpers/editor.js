@@ -2,9 +2,9 @@ import { expect, getFixture } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { useService } from "@web/core/utils/hooks";
-import { useWysiwyg } from "../../src/wysiwyg";
+import { useWysiwyg } from "@html_editor/wysiwyg";
 import { getContent, getSelection, setContent } from "./selection";
-import { BASE_PLUGINS } from "../../src/plugin_sets";
+import { BASE_PLUGINS } from "@html_editor/plugin_sets";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -59,7 +59,7 @@ class TestEditor extends Component {
 
 /**
  * @typedef { Object } TestConfig
- * @property { import("../../src/editor").EditorConfig } [config]
+ * @property { import("@html_editor/editor").EditorConfig } [config]
  * @property { string } [styleContent]
  * @property { Function } [onMounted]
  * @property { boolean } [inIFrame]

@@ -5,8 +5,8 @@ import { setSelection } from "@html_editor/utils/selection";
 import { press } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
-import { Plugin } from "../src/plugin";
-import { BASE_PLUGINS } from "../src/plugin_sets";
+import { Plugin } from "@html_editor/plugin";
+import { BASE_PLUGINS } from "@html_editor/plugin_sets";
 
 function commandNames() {
     return [...document.querySelectorAll(".o-we-command-name")].map((c) => c.innerText);

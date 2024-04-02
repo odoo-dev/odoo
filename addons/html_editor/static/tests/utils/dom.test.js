@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { splitTextNode } from "../../src/utils/dom_split";
+import { splitTextNode } from "@html_editor/utils/dom_split";
 import { setupEditor } from "../_helpers/editor";
 
 describe("splitAroundUntil", () => {

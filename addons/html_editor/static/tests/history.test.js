@@ -1,8 +1,8 @@
 import { expect, describe, test } from "@odoo/hoot";
 import { testEditor } from "./_helpers/editor";
 import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user_actions";
-import { Plugin } from "../src/plugin";
-import { BASE_PLUGINS } from "../src/plugin_sets";
+import { Plugin } from "@html_editor/plugin";
+import { BASE_PLUGINS } from "@html_editor/plugin_sets";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
