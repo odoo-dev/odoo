@@ -23,6 +23,7 @@ export class SearchPowerboxPlugin extends Plugin {
                 this.update();
             }
         });
+        this.shouldUpdate = false;
     }
     handleCommand(command) {
         switch (command) {
@@ -33,7 +34,7 @@ export class SearchPowerboxPlugin extends Plugin {
         }
     }
     update() {
-        if (!this.shared.isPowerboxOpen()) {
+        if (!this.shouldUpdate) {
             return;
         }
         const selection = this.shared.getEditableSelection();
@@ -54,6 +55,7 @@ export class SearchPowerboxPlugin extends Plugin {
         const commandGroups = this.filterCommands(searchTerm);
         if (!commandGroups.length) {
             this.shared.closePowerbox();
+            this.shouldUpdate = true;
             return;
         }
         this.shared.updatePowerbox(commandGroups);
@@ -90,8 +92,12 @@ export class SearchPowerboxPlugin extends Plugin {
         this.offset = selection.startOffset - 1;
         this.shared.openPowerbox({
             commandGroups: this.commandGroups,
-            onApplyCommand: () => this.historySavePointRestore(),
+            onApplyCommand: this.historySavePointRestore,
+            onClose: () => {
+                this.shouldUpdate = false;
+            },
         });
+        this.shouldUpdate = true;
     }
     getCommandGroups() {
         /** @type {CommandGroup[]} */

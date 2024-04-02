@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { setSelection } from "@html_editor/utils/selection";
-import { press } from "@odoo/hoot-dom";
+import { press, queryOne } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
@@ -115,21 +115,54 @@ describe("search", () => {
         expect(commandNames(el)).toEqual(["Test1", "Test12"]);
     });
 
-    test.todo(
-        "should filter the Powerbox contents with term, even after delete backward",
-        async () => {
-            const { el, editor } = await setupEditor("<p>ab[]</p>");
-            insertText(editor, "/");
-            await animationFrame();
-            expect(commandNames(el).length).toBe(16);
-            insertText(editor, "headx");
-            await animationFrame();
-            expect(commandNames(el)).toEqual([]);
-            press("Backspace");
-            await animationFrame();
-            expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-        }
-    );
+    test("should filter the Powerbox contents with term, even after delete backward", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el).length).toBe(16);
+        insertText(editor, "headx");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(0);
+        press("Backspace");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
+
+    test("when the powerbox opens, the first command is selected by default", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/");
+        await animationFrame();
+        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]);
+
+        insertText(editor, "head");
+        await animationFrame();
+        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]); // "Heading 1"
+
+        insertText(editor, "/");
+        await animationFrame();
+        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]);
+    });
+
+    test("should filter the Powerbox contents with term, even after a second search and delete backward", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/head");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+        expect(queryOne(".active .o-we-command-name").innerText).toBe("Heading 1");
+
+        insertText(editor, "/headx");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(0);
+
+        press("backspace");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(queryOne(".active .o-we-command-name").innerText).toBe("Heading 1");
+        expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
 
     test("should not filter the powerbox contents when collaborator type on two different blocks", async () => {
         const { el, editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
