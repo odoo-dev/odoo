@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="html_editor.linkPopover">
-        <div t-ref="root" class="o-we-linkpopover d-flex bg-white overflow-auto">
+        <div class="o-we-linkpopover d-flex bg-white overflow-auto">
             <div t-if="state.editing" class="m-3 d-flex">
                 <input class="o_we_href_input_link" t-model="state.url" t-ref="urlInput" placeholder="Type your URL"/>
                 <button class="o_we_apply_link btn btn-primary align-self-end" t-on-click="onClickApply">Apply</button>

@@ -47,24 +47,18 @@ export class PowerboxPlugin extends Plugin {
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Powerbox, {
+            position: "bottom",
+            onClose: () => this.onClose?.(),
+        });
+        this.overlayProps = {
             document: this.document,
-            close: () => {
-                return this.closePowerbox();
-            },
-            onMounted: (el) => {
-                el.style.position = "absolute";
-                this.overlay.position = "bottom";
-                this.overlay.offsetY = 0;
-                this.overlay.el = el;
-                this.overlay.updatePosition();
-            },
-            onPatched: () => this.overlay.updatePosition(),
+            overlay: this.overlay,
             commandGroups: this.commandGroups,
             onApplyCommand: (command) => {
                 this.onApplyCommand();
                 command.action(this.dispatch);
             },
-        });
+        };
     }
 
     /**
@@ -88,14 +82,14 @@ export class PowerboxPlugin extends Plugin {
         this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
         this.onApplyCommand = onApplyCommand;
         this.onClose = onClose;
-        this.overlay.open();
+        this.overlay.open({ props: this.overlayProps });
     }
     /**
      * @param {CommandGroup[]} commandGroups
      */
     updatePowerbox(commandGroups) {
         this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
-        this.overlay.open();
+        this.overlay.open({ props: this.overlayProps });
     }
     closePowerbox() {
         this.onClose?.();

@@ -1,5 +1,4 @@
 import { Component } from "@odoo/owl";
-import { useOverlay } from "@html_editor/core/overlay_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -9,22 +8,17 @@ export class TableMenu extends Component {
     static props = {
         type: String, // column or row
         dispatch: Function,
+        overlay: Object,
+        target: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
     };
     static components = { Dropdown, DropdownItem };
 
     setup() {
-        const position = this.props.type === "column" ? "top" : "left";
-        const auto = this.props.type === "column" ? "width" : "height";
-        this.overlay = useOverlay("root", {
-            position: position,
-            offsetY: 0,
-            [auto]: "auto",
-        });
         if (this.props.type === "column") {
-            this.isFirst = this.overlay.target.cellIndex === 0;
-            this.isLast = !this.overlay.target.nextElementSibling;
+            this.isFirst = this.props.target.cellIndex === 0;
+            this.isLast = !this.props.target.nextElementSibling;
         } else {
-            const tr = this.overlay.target.parentElement;
+            const tr = this.props.target.parentElement;
             this.isFirst = !tr.previousElementSibling;
             this.isLast = !tr.nextElementSibling;
         }
@@ -32,8 +26,8 @@ export class TableMenu extends Component {
     }
 
     onSelected(item) {
-        item.action(this.overlay.target);
-        this.overlay.close();
+        item.action(this.props.target);
+        this.props.overlay.close();
     }
 
     colItems() {

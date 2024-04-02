@@ -28,21 +28,21 @@ export class TableUIPlugin extends Plugin {
     setup() {
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.picker = this.shared.createOverlay(TablePicker, {
-            dispatch: this.dispatch,
-            el: this.editable,
+            position: "bottom",
         });
 
         this.activeTd = null;
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.colMenu = this.shared.createOverlay(TableMenu, {
-            type: "column",
-            dispatch: this.dispatch,
+            position: "top",
+            offsetY: 0,
+            width: "auto",
         });
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.rowMenu = this.shared.createOverlay(TableMenu, {
-            type: "row",
-            dispatch: this.dispatch,
+            position: "left",
+            height: "auto",
         });
         this.addDomListener(this.editable, "pointermove", this.onMouseMove);
     }
@@ -61,7 +61,13 @@ export class TableUIPlugin extends Plugin {
         if (rect.width === 0 && rect.height === 0 && rect.x === 0) {
             range.startContainer.parentElement.appendChild(this.document.createElement("br"));
         }
-        this.picker.open();
+        this.picker.open({
+            props: {
+                dispatch: this.dispatch,
+                editable: this.editable,
+                overlay: this.picker,
+            },
+        });
     }
 
     onMouseMove(ev) {
@@ -84,10 +90,26 @@ export class TableUIPlugin extends Plugin {
         this.rowMenu.close();
         if (td) {
             if (td.cellIndex === 0) {
-                this.rowMenu.open(td);
+                this.rowMenu.open({
+                    target: td,
+                    props: {
+                        type: "row",
+                        dispatch: this.dispatch,
+                        overlay: this.rowMenu,
+                        target: td,
+                    },
+                });
             }
             if (td.parentElement.rowIndex === 0) {
-                this.colMenu.open(td);
+                this.colMenu.open({
+                    target: td,
+                    props: {
+                        type: "column",
+                        dispatch: this.dispatch,
+                        overlay: this.colMenu,
+                        target: td,
+                    },
+                });
             }
         }
     }
