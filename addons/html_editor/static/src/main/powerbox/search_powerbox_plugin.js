@@ -1,4 +1,3 @@
-import { registry } from "@web/core/registry";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { Plugin } from "../../plugin";
 
@@ -14,10 +13,16 @@ export class SearchPowerboxPlugin extends Plugin {
         this.commandGroups = this.getCommandGroups();
         this.addDomListener(this.editable, "keydown", (ev) => {
             if (ev.key === "/") {
-                this.openPowerbox();
+                this.historySavePointRestore = this.shared.makeSavePoint();
             }
         });
-        this.addDomListener(this.editable, "input", this.update);
+        this.addDomListener(this.editable, "input", (ev) => {
+            if (ev.data === "/") {
+                this.openPowerbox();
+            } else {
+                this.update();
+            }
+        });
     }
     handleCommand(command) {
         switch (command) {
@@ -82,11 +87,10 @@ export class SearchPowerboxPlugin extends Plugin {
     }
     openPowerbox() {
         const selection = this.shared.getEditableSelection();
-        this.offset = selection.startOffset;
-        const historySavePointRestore = this.shared.makeSavePoint();
+        this.offset = selection.startOffset - 1;
         this.shared.openPowerbox({
             commandGroups: this.commandGroups,
-            onApplyCommand: historySavePointRestore,
+            onApplyCommand: () => this.historySavePointRestore(),
         });
     }
     getCommandGroups() {
@@ -106,4 +110,3 @@ export class SearchPowerboxPlugin extends Plugin {
         return groups;
     }
 }
-registry.category("phoenix_plugins").add(SearchPowerboxPlugin.name, SearchPowerboxPlugin);

@@ -7,27 +7,28 @@ export function insertText(editor, text) {
     // events will be flagged `isTrusted: false` by the browser, requiring
     // the editor to detect them since they would not trigger the default
     // browser behavior otherwise.
-    const sel = editor.document.getSelection();
-    let range = sel.getRangeAt(0);
+    const range = editor.document.getSelection().getRangeAt(0);
     if (!range.collapsed) {
         throw new Error("need to implement something... maybe");
     }
-    if (range.startContainer.nodeType !== Node.TEXT_NODE) {
-        const txt = document.createTextNode("");
-        range.startContainer.appendChild(txt);
-        range.insertNode(txt);
-        setSelection({ anchorNode: txt, anchorOffset: 0, focusNode: txt, focusOffset: 0 });
-        range = sel.getRangeAt(0);
-    }
-    const node = range.startContainer;
     let offset = range.startOffset;
+    let node = range.startContainer;
     const insertChar = (char) => {
-        const range = editor.document.getSelection().getRangeAt(0);
-        node.textContent =
-            node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
-        offset++;
-        range.setStart(node, offset);
-        range.setEnd(node, offset);
+        if (node.nodeType !== Node.TEXT_NODE) {
+            node = document.createTextNode(char);
+            offset = 1;
+            range.startContainer.appendChild(node);
+            range.insertNode(node);
+            setSelection({ anchorNode: node, anchorOffset: 1 });
+        } else {
+            node.textContent =
+                node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
+            offset++;
+            setSelection({
+                anchorNode: node,
+                anchorOffset: offset,
+            });
+        }
     };
     for (const char of text) {
         // KeyDownEvent is required to trigger deleteRange.

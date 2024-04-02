@@ -4,7 +4,7 @@ import { setupEditor } from "./_helpers/editor";
 import { setSelection } from "@html_editor/utils/selection";
 import { press } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
-import { deleteBackward, insertText } from "./_helpers/user_actions";
+import { insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
@@ -79,6 +79,42 @@ describe("search", () => {
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
     });
 
+    test("press 'backspace' should adapt adapt the search in the Powerbox", async () => {
+        class TestPlugin extends Plugin {
+            static name = "test";
+            static resources = () => ({
+                powerboxCategory: { id: "test", name: "Test" },
+                powerboxCommands: [
+                    {
+                        name: "Test1",
+                        description: "Test1",
+                        category: "test",
+                    },
+                    {
+                        name: "Test12",
+                        description: "Test12",
+                        category: "test",
+                    },
+                ],
+            });
+        }
+        const { editor, el } = await setupEditor(`<p>[]</p>`, {
+            config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+        });
+        expect(".o-we-powerbox").toHaveCount(0);
+        insertText(editor, "/test12");
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>/test12[]</p>");
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el)).toEqual(["Test12"]);
+
+        press("backspace");
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>/test1[]</p>");
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames(el)).toEqual(["Test1", "Test12"]);
+    });
+
     test.todo(
         "should filter the Powerbox contents with term, even after delete backward",
         async () => {
@@ -89,7 +125,7 @@ describe("search", () => {
             insertText(editor, "headx");
             await animationFrame();
             expect(commandNames(el)).toEqual([]);
-            deleteBackward(editor);
+            press("Backspace");
             await animationFrame();
             expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
         }
@@ -302,4 +338,13 @@ test("should discard /command insertion from history when command is executed", 
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
     );
+});
+
+test("should open the Powerbox on type `/` in DIV", async () => {
+    const { editor } = await setupEditor(`<div>ab<br><br>[]</div>`);
+    expect(".o-we-powerbox").toHaveCount(0);
+    insertText(editor, "/");
+    await animationFrame();
+
+    expect(".o-we-powerbox").toHaveCount(1);
 });
