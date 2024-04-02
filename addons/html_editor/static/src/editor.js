@@ -33,10 +33,15 @@ function sortPlugins(plugins) {
         result.push(P);
     }
     if (initialPlugins.size) {
-        const missingDependencies = [
-            ...new Set([...initialPlugins].map((P) => P.dependencies).flat()),
-        ].filter((dep) => !inResult.has(dep));
-        throw new Error(`Missing dependencies:  ${missingDependencies.join(", ")}`);
+        const messages = [];
+        for (const P of initialPlugins) {
+            messages.push(
+                `"${P.name}" is missing (${P.dependencies
+                    .filter((d) => !inResult.has(d))
+                    .join(", ")})`
+            );
+        }
+        throw new Error(`Missing dependencies:  ${messages.join(", ")}`);
     }
     return result;
 }
