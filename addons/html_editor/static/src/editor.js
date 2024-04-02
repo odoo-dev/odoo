@@ -33,7 +33,10 @@ function sortPlugins(plugins) {
         result.push(P);
     }
     if (initialPlugins.size) {
-        throw new Error("missing dependency");
+        const missingDependencies = [
+            ...new Set([...initialPlugins].map((P) => P.dependencies).flat()),
+        ].filter((dep) => !inResult.has(dep));
+        throw new Error(`Missing dependencies:  ${missingDependencies.join(", ")}`);
     }
     return result;
 }
