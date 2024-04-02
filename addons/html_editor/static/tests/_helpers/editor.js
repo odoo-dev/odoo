@@ -4,7 +4,7 @@ import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { useService } from "@web/core/utils/hooks";
 import { useWysiwyg } from "@html_editor/wysiwyg";
 import { getContent, getSelection, setContent } from "./selection";
-import { BASE_PLUGINS } from "@html_editor/plugin_sets";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -53,7 +53,7 @@ class TestEditor extends Component {
                 }
             }
         });
-        this.editor = useWysiwyg(target, { Plugins: BASE_PLUGINS, ...this.props.config });
+        this.editor = useWysiwyg(target, { Plugins: MAIN_PLUGINS, ...this.props.config });
     }
 }
 
