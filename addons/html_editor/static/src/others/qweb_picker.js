@@ -1,13 +1,11 @@
 import { Component, useState } from "@odoo/owl";
-import { useOverlay } from "@html_editor/core/overlay_plugin";
 
 export class QWebPicker extends Component {
     static template = "html_editor.QWebPicker";
-    static props = ["getGroups", "select"];
+    static props = ["groups", "select"];
 
     setup() {
-        useOverlay("root", { position: "top" });
-        this.state = useState({ groups: this.props.getGroups() });
+        this.state = useState({ groups: this.props.groups });
     }
 
     onChange(ev) {

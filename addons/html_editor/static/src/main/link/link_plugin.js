@@ -55,12 +55,7 @@ export class LinkPlugin extends Plugin {
     });
     setup() {
         this.linkState = reactive({ linkElement: null });
-        this.overlay = this.shared.createOverlay(LinkPopover, {
-            dispatch: this.dispatch,
-            el: this.editable,
-            offset: () => 0,
-            linkState: this.linkState,
-        });
+        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom" });
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A") {
                 ev.preventDefault();
@@ -109,13 +104,17 @@ export class LinkPlugin extends Plugin {
         if (!linkel) {
             this.overlay.close();
         }
+        const props = {
+            linkState: this.linkState,
+            overlay: this.overlay,
+        };
         if (linkel && linkel !== this.linkState.linkElement) {
             this.overlay.close();
             this.linkState.linkElement = linkel;
-            this.overlay.open();
+            this.overlay.open({ props });
         }
         if (linkel && !this.overlay.isOpen) {
-            this.overlay.open();
+            this.overlay.open({ props });
         }
     }
 
