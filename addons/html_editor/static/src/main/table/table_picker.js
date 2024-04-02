@@ -1,25 +1,25 @@
 import { Component, useExternalListener, useState } from "@odoo/owl";
-import { useOverlay } from "@html_editor/core/overlay_plugin";
 
 export class TablePicker extends Component {
     static template = "html_editor.TablePicker";
     static props = {
         dispatch: Function,
-        el: {
+        editable: {
             validate: (el) => el.nodeType === Node.ELEMENT_NODE,
         },
+        overlay: Object,
     };
 
     setup() {
-        this.overlay = useOverlay("root", { position: "bottom" });
         this.state = useState({
             cols: 3,
             rows: 3,
         });
-        useExternalListener(document, "mousedown", (ev) => {
-            this.overlay.close();
+        const editable = this.props.editable;
+        useExternalListener(editable.ownerDocument, "mousedown", (ev) => {
+            this.props.overlay.close();
         });
-        useExternalListener(this.props.el, "keydown", (ev) => {
+        useExternalListener(this.props.editable, "keydown", (ev) => {
             const key = ev.key;
             switch (key) {
                 case "Escape":
@@ -60,6 +60,6 @@ export class TablePicker extends Component {
 
     insertTable() {
         this.props.dispatch("INSERT_TABLE", { cols: this.state.cols, rows: this.state.rows });
-        this.overlay.close();
+        this.props.overlay.close();
     }
 }

@@ -15,10 +15,7 @@ export class ToolbarPlugin extends Plugin {
         this.buttonsActiveState = reactive(
             this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
         );
-        this.overlay = this.shared.createOverlay(Toolbar, {
-            toolbar: this.getToolbarInfo(),
-            floating: true,
-        });
+        this.overlay = this.shared.createOverlay(Toolbar, { position: "top" });
     }
 
     handleCommand(command, payload) {
@@ -55,15 +52,17 @@ export class ToolbarPlugin extends Plugin {
         if (this.config.disableFloatingToolbar) {
             return;
         }
+        const props = { toolbar: this.getToolbarInfo() };
+
         const inEditable = sel.inEditable;
         if (this.overlay.isOpen) {
             if (!inEditable || sel.isCollapsed) {
                 this.overlay.close();
             } else {
-                this.overlay.open(); // will update position
+                this.overlay.open({ props }); // will update position
             }
         } else if (inEditable && !sel.isCollapsed) {
-            this.overlay.open();
+            this.overlay.open({ props });
         }
     }
 

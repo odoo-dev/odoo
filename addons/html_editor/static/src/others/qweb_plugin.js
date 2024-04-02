@@ -10,10 +10,7 @@ export class QWebPlugin extends Plugin {
     });
 
     setup() {
-        this.picker = this.shared.createOverlay(QWebPicker, {
-            getGroups: () => this.getNodeGroups(this.selectedNode),
-            select: this.select.bind(this),
-        });
+        this.picker = this.shared.createOverlay(QWebPicker, { position: "top" });
         this.addDomListener(this.editable, "click", this.onClick);
         this.groupIndex = 0;
     }
@@ -106,16 +103,26 @@ export class QWebPlugin extends Plugin {
                 isActive: node.getAttribute("data-oe-t-group-active") === "true",
             });
         }
-        return [...this.getNodeGroups(branchNode.parentElement), group];
+        return this.getNodeGroups(branchNode.parentElement).concat([group]);
     }
 
     onClick(ev) {
         this.picker.close();
         const targetNode = ev.target;
         if (targetNode.closest("[data-oe-t-group]")) {
-            this.selectedNode = targetNode;
-            this.picker.open(this.selectedNode);
+            this.selectNode(targetNode);
         }
+    }
+
+    selectNode(node) {
+        this.selectedNode = node;
+        this.picker.open({
+            target: node,
+            props: {
+                groups: this.getNodeGroups(node),
+                select: this.select.bind(this),
+            },
+        });
     }
 
     applyGroupQwebBranching(root) {
@@ -165,7 +172,7 @@ export class QWebPlugin extends Plugin {
         if (this.selectedNode.getAttribute("data-oe-t-group") !== groupId) {
             this.selectedNode = node;
             this.picker.close();
-            this.picker.open(node);
+            this.selectNode(node);
         }
     }
 }

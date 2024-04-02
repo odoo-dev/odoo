@@ -1,6 +1,5 @@
 import {
     Component,
-    onMounted,
     onPatched,
     onWillRender,
     useExternalListener,
@@ -17,9 +16,7 @@ export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
     static props = {
         document: { validate: (doc) => doc.constructor.name === "HTMLDocument" },
-        onMounted: Function,
-        close: Function,
-        onPatched: Function,
+        overlay: Object,
         commandGroups: Object,
         onApplyCommand: Function,
     };
@@ -30,16 +27,13 @@ export class Powerbox extends Component {
         this.state = useState({ currentCommand: null });
 
         this.commands = [];
-        onMounted(() => {
-            this.props.onMounted(ref.el);
-        });
 
         onPatched(() => {
             const activeCommand = ref.el.querySelector(".o-we-command.active");
             if (activeCommand) {
                 activeCommand.scrollIntoView({ block: "nearest", inline: "nearest" });
             }
-            this.props.onPatched(ref.el);
+            this.props.overlay.updatePosition();
         });
 
         onWillRender(() => {
@@ -53,7 +47,7 @@ export class Powerbox extends Component {
             const key = ev.key;
             switch (key) {
                 case "Escape":
-                    this.props.close();
+                    this.props.overlay.close();
                     break;
                 case "Enter":
                 case "Tab":
@@ -81,13 +75,13 @@ export class Powerbox extends Component {
         });
 
         useExternalListener(document, "mousedown", (ev) => {
-            this.props.close();
+            this.props.overlay.close();
         });
     }
 
     applyCommand(command) {
         this.props.onApplyCommand(command);
-        this.props.close();
+        this.props.overlay.close();
     }
 
     applyCurrentCommand() {

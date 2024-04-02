@@ -3,11 +3,6 @@
     padding: 0 2px;
     border-bottom: 1px solid lightgrey;
     
-    &.overlay {
-        box-shadow: $box-shadow;
-        border-radius: 4px;
-        border-bottom: none;
-    }
 
     .btn-group {
         padding: 0 2px;
@@ -16,4 +11,10 @@
             border-left: 1px solid lightgrey;
         }
     }
+}
+
+.overlay .o-we-toolbar {
+    box-shadow: $box-shadow;
+    border-radius: 4px;
+    border-bottom: none;
 }
