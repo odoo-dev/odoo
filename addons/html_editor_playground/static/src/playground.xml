@@ -14,7 +14,7 @@
 
                     <select class="form-select" t-model="config.pluginSet">
                         <option value="core">Core Plugins</option>
-                        <option value="base">Base Plugins</option>
+                        <option value="base">Main Plugins</option>
                         <option value="extras">Extras Plugins</option>
                     </select>
                 </div>
