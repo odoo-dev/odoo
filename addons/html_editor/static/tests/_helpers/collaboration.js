@@ -1,7 +1,7 @@
 import { HistoryPlugin } from "@html_editor/core/history_plugin";
 import { CollaborationPlugin } from "@html_editor/others/collaboration_plugin";
 import { Plugin } from "@html_editor/plugin";
-import { BASE_PLUGINS } from "@html_editor/plugin_sets";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { createDOMPathGenerator } from "@html_editor/utils/dom_traversal";
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { after, expect } from "@odoo/hoot";
@@ -68,7 +68,7 @@ export const setupMultiEditor = async (spec) => {
         let n = 0;
         HistoryPlugin.prototype.generateId = () => `fake_id_${n++}`;
         let selection;
-        const defaultPlugins = BASE_PLUGINS;
+        const defaultPlugins = MAIN_PLUGINS;
         const base = await setupEditor(spec.contentBefore, {
             inIFrame: true,
             onMounted: (editable) => {

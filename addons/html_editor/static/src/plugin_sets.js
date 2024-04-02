@@ -45,7 +45,7 @@ export const CORE_PLUGINS = [
     ZwsPlugin,
 ];
 
-export const BASE_PLUGINS = [
+export const MAIN_PLUGINS = [
     ...CORE_PLUGINS,
     ColorPlugin,
     ColumnPlugin,
@@ -63,4 +63,4 @@ export const BASE_PLUGINS = [
     FontPlugin, // note: if before ListPlugin, there are a few split tests that fails
 ];
 
-export const EXTRA_PLUGINS = [...BASE_PLUGINS, QWebPlugin];
+export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin];

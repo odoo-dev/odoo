@@ -3,8 +3,7 @@ import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
 import { Plugin } from "@html_editor/plugin";
 import { click } from "@odoo/hoot-dom";
-import { registry } from "@web/core/registry";
-import { BASE_PLUGINS } from "@html_editor/plugin_sets";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -79,7 +78,7 @@ test("event handlers are properly cleaned up after destruction", async () => {
     }
 
     const { editor } = await setupEditor("<p></p>", {
-        config: { Plugins: [...BASE_PLUGINS, TestHandlerPlugin] },
+        config: { Plugins: [...MAIN_PLUGINS, TestHandlerPlugin] },
     });
     expect(count).toBe(0);
 

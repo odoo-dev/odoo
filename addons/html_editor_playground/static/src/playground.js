@@ -2,7 +2,7 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
-import { BASE_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
+import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
@@ -36,7 +36,7 @@ const testHtml = `Hello Phoenix editor!
 
 const PluginSets = {
     core: CORE_PLUGINS,
-    base: BASE_PLUGINS,
+    base: MAIN_PLUGINS,
     extras: EXTRA_PLUGINS,
 };
 

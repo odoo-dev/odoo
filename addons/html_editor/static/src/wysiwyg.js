@@ -1,7 +1,7 @@
 import { Component, onMounted, onWillDestroy, useEnv, useRef, useState } from "@odoo/owl";
 import { Editor } from "./editor";
 import { Toolbar } from "./main/toolbar/toolbar";
-import { BASE_PLUGINS } from "./plugin_sets";
+import { MAIN_PLUGINS } from "./plugin_sets";
 
 /**
  * @param {HTMLElement} el
@@ -56,7 +56,7 @@ export class Wysiwyg extends Component {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
             classList: this.props.classListEditor,
-            Plugins: this.props.Plugins || BASE_PLUGINS,
+            Plugins: this.props.Plugins || MAIN_PLUGINS,
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
