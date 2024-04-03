@@ -121,9 +121,11 @@ describe("search", () => {
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(1);
         expect(commandNames(el).length).toBe(16);
+
         insertText(editor, "headx");
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(0);
+
         press("Backspace");
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(1);
