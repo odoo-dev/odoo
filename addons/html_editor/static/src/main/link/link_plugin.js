@@ -146,22 +146,28 @@ export class LinkPlugin extends Plugin {
 
     handleSelectionChange() {
         const sel = this.shared.getEditableSelection();
-        const linkel = closestElement(sel.anchorNode, "A");
-        if (!linkel) {
+        const linkEl = closestElement(sel.anchorNode, "A");
+        if (!linkEl) {
             this.overlay.close();
+            return;
         }
         const props = {
-            linkState: this.linkState,
-            overlay: this.overlay,
+            linkEl,
+            onApply: this.applyUrl.bind(this),
         };
-        if (linkel && linkel !== this.linkState.linkElement) {
+        if (linkEl !== this.linkState.linkElement) {
             this.overlay.close();
-            this.linkState.linkElement = linkel;
+            this.linkState.linkElement = linkEl;
             this.overlay.open({ props });
         }
-        if (linkel && !this.overlay.isOpen) {
+        if (!this.overlay.isOpen) {
             this.overlay.open({ props });
         }
+    }
+
+    applyUrl(newUrl) {
+        this.linkState.linkElement.href = newUrl;
+        this.overlay.close();
     }
 
     /**

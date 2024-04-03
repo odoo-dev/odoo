@@ -1,25 +1,23 @@
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
     static props = {
-        linkState: Object,
-        overlay: Object,
+        linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
+        onApply: Function,
     };
     setup() {
-        this.urlInput = useRef("urlInput");
         this.state = useState({
-            editing: this.props.linkState.linkElement.href ? false : true,
-            url: this.props.linkState.linkElement.href || "",
+            editing: this.props.linkEl.href ? false : true,
+            url: this.props.linkEl.href || "",
         });
     }
     onClickApply() {
         this.state.editing = false;
-        this.props.linkState.linkElement.href = this.state.url;
-        this.props.overlay.close();
+        this.props.onApply(this.state.url);
     }
     onClickEdit() {
         this.state.editing = true;
-        this.state.url = this.props.linkState.linkElement.href;
+        this.state.url = this.props.linkEl.href;
     }
 }
