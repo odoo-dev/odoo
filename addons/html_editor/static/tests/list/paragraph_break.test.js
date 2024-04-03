@@ -48,43 +48,40 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should indent an item in an ordered list and add value (with dom mutations)",
-                async () => {
-                    await testEditor({
-                        contentBefore: unformat(`
-                            <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
-                                    <ol>
-                                        <li>b</li>
-                                    </ol>
-                                </li>
-                                <li>c[]</li>
-                            </ol>`),
-                        stepFunction: async (editor) => {
-                            const ol = editor.editable.querySelector("ol");
-                            const li = document.createElement("li");
-                            const br = document.createElement("br");
-                            li.append(br);
-                            ol.insertBefore(li, ol.lastElementChild);
-                            await editor.execCommand("oEnter"); // new line
-                        },
-                        contentAfter: unformat(`
-                            <ol>
-                                <li>a</li>
-                                <li class="oe-nested">
-                                    <ol>
-                                        <li>b</li>
-                                    </ol>
-                                </li>
-                                <li><br></li>
-                                <li>c</li>
-                                <li>[]<br></li>
-                            </ol>`),
-                    });
-                }
-            );
+            test("should indent an item in an ordered list and add value (with dom mutations)", async () => {
+                await testEditor({
+                    contentBefore: unformat(`
+                        <ol>
+                            <li>a</li>
+                            <li class="oe-nested">
+                                <ol>
+                                    <li>b</li>
+                                </ol>
+                            </li>
+                            <li>c[]</li>
+                        </ol>`),
+                    stepFunction: async (editor) => {
+                        const ol = editor.editable.querySelector("ol");
+                        const li = document.createElement("li");
+                        const br = document.createElement("br");
+                        li.append(br);
+                        ol.insertBefore(li, ol.lastElementChild);
+                        splitBlock(editor); // new line
+                    },
+                    contentAfter: unformat(`
+                        <ol>
+                            <li>a</li>
+                            <li class="oe-nested">
+                                <ol>
+                                    <li>b</li>
+                                </ol>
+                            </li>
+                            <li><br></li>
+                            <li>c</li>
+                            <li>[]<br></li>
+                        </ol>`),
+                });
+            });
         });
         describe("Removing items", () => {
             test("should add an empty list item at the end of a list, then remove it", async () => {
