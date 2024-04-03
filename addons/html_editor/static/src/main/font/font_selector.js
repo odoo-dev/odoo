@@ -1,8 +1,8 @@
-import { Component } from "@odoo/owl";
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { closestBlock } from "@html_editor/utils/blocks";
 import { getFontSizeDisplayValue } from "@html_editor/utils/formatting";
+import { Component, useState } from "@odoo/owl";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 export class FontSelector extends Component {
     static template = "html_editor.FontSelector";
@@ -18,9 +18,12 @@ export class FontSelector extends Component {
 
     setup() {
         this.items = this.props.getItems();
+        this.state = useState({
+            displayName: this.getDisplay(),
+        });
     }
 
-    get displayName() {
+    getDisplay() {
         return this.props.isFontSize ? this.fontSizeName : this.fontName;
     }
 
@@ -57,5 +60,6 @@ export class FontSelector extends Component {
 
     onSelected(item) {
         this.props.dispatch(this.props.command, item);
+        this.state.displayName = this.getDisplay();
     }
 }
