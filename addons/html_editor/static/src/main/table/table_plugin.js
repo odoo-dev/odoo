@@ -27,6 +27,7 @@ function isUnremovableTableComponent(element, root) {
 export class TablePlugin extends Plugin {
     static name = "table";
     static dependencies = ["dom", "history", "selection", "delete", "split"];
+    /** @type { (p: TablePlugin) => Record<string, any> } */
     static resources = (p) => ({
         handle_tab: { callback: p.handleTab.bind(p), sequence: 20 },
         handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 20 },

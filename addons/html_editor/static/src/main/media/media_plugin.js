@@ -8,6 +8,7 @@ const MEDIA_SELECTOR = `${ICON_SELECTOR} , .o_image, .media_iframe_video`;
 export class MediaPlugin extends Plugin {
     static name = "media";
     static dependencies = ["selection", "history"];
+    /** @type { (p: MediaPlugin) => Record<string, any> } */
     static resources = (p) => ({
         powerboxCategory: { id: "media", name: _t("Media"), sequence: 20 },
         powerboxCommands: [

@@ -27,6 +27,7 @@ export class TabulationPlugin extends Plugin {
     static name = "tabulation";
     static dependencies = ["dom", "selection", "delete", "split"];
     static shared = ["indentBlocks", "outdentBlocks"];
+    /** @type { (p: TabulationPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handle_tab: [],
         handle_shift_tab: [],

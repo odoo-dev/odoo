@@ -11,6 +11,7 @@ import { TablePicker } from "./table_picker";
 export class TableUIPlugin extends Plugin {
     static name = "table_ui";
     static dependencies = ["overlay", "table"];
+    /** @type { (p: TableUIPlugin) => Record<string, any> } */
     static resources = (p) => ({
         powerboxCommands: [
             {
