@@ -15,7 +15,7 @@ import {
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
-import { getDeepRange, getTraversedNodes } from "../utils/selection";
+import { getTraversedNodes } from "../utils/selection";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
@@ -277,16 +277,16 @@ export class DomPlugin extends Plugin {
 
     setTag({ tagName, extraClass = "" }) {
         tagName = tagName.toUpperCase();
-        const range = getDeepRange(this.editable, { correctTripleClick: true });
+        const selection = this.shared.getEditableSelection();
         const selectedBlocks = [
-            ...new Set(getTraversedNodes(this.editable, range).map(closestBlock)),
+            ...new Set(getTraversedNodes(this.editable, selection).map(closestBlock)),
         ];
         const deepestSelectedBlocks = selectedBlocks.filter(
             (block) =>
                 !descendants(block).some((descendant) => selectedBlocks.includes(descendant)) &&
                 block.isContentEditable
         );
-        let { startContainer, startOffset, endContainer, endOffset } = range;
+        let { startContainer, startOffset, endContainer, endOffset } = selection;
         const startContainerChild = startContainer.firstChild;
         const endContainerChild = endContainer.lastChild;
         for (const block of deepestSelectedBlocks) {
@@ -344,10 +344,12 @@ export class DomPlugin extends Plugin {
         if (!endContainer.isConnected || isContextBlock(endContainer)) {
             endContainer = endContainerChild.parentNode;
         }
-        const newRange = new Range();
-        newRange.setStart(startContainer, startOffset);
-        newRange.setEnd(endContainer, endOffset);
-        getDeepRange(this.editable, { range: newRange, select: true });
+        this.shared.setSelection({
+            anchorNode: startContainer,
+            anchorOffset: startOffset,
+            focusNode: endContainer,
+            focusOffset: endOffset,
+        });
         this.dispatch("ADD_STEP");
     }
 

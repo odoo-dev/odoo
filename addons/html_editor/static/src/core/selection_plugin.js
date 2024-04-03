@@ -1,5 +1,5 @@
 import { Plugin } from "../plugin";
-import { DIRECTIONS, nodeSize } from "../utils/position";
+import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
 import {
     normalizeDeepCursorPosition,
     normalizeCursorPosition,
@@ -29,6 +29,13 @@ export class SelectionPlugin extends Plugin {
     setup() {
         this.activeSelection = this.makeSelection(false, false);
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
+        this.addDomListener(this.document, "click", (ev) => {
+            if (ev.detail >= 3) {
+                const { anchorNode, anchorOffset } = this.getEditableSelection();
+                const [focusNode, focusOffset] = endPos(anchorNode);
+                this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+            }
+        });
     }
 
     /**
