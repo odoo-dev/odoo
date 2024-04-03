@@ -158,9 +158,12 @@ test("toolbar works: can select font", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar [name='font']").toHaveText("Normal");
+
     await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
     await contains(".o_font_selector_menu .dropdown-item:contains('Header 2')").click();
     expect(getContent(el)).toBe("<h2>[test]</h2>");
+    expect(".o-we-toolbar [name='font']").toHaveText("Header 2");
 });
 
 test("toolbar works: can select font size", async () => {
@@ -171,11 +174,15 @@ test("toolbar works: can select font size", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
     setContent(el, "<p>[test]</p>");
     await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar [name='font-size']").toHaveText("14");
+
     await contains(".o-we-toolbar [name='font-size'] .dropdown-toggle").click();
     const items = ["80", "72", "64", "56", "28", "21", "18", "17", "15", "14"];
     expect(queryAllTexts(".o_font_selector_menu .dropdown-item")).toEqual(items);
+
     await contains(".o_font_selector_menu .dropdown-item:contains('28')").click();
     expect(getContent(el)).toBe(`<p><span class="h1-fs">[test]</span></p>`);
+    expect(".o-we-toolbar [name='font-size']").toHaveText("28");
 });
 
 test("toolbar should not open on keypress tab inside table", async () => {
