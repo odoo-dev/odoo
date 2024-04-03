@@ -12,6 +12,7 @@ function isMutationRecordSavable(record) {
 export class HintPlugin extends Plugin {
     static name = "hint";
     static dependencies = ["history", "selection"];
+    /** @type { (p: HintPlugin) => Record<string, any> } */
     static resources = (p) => ({
         history_rendering_classes: ["o-we-hint"],
         is_mutation_record_savable: isMutationRecordSavable,

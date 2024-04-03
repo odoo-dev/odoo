@@ -15,6 +15,7 @@ export class LinkPlugin extends Plugin {
     static dependencies = ["dom", "selection", "overlay"];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
     static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
+    /** @type { (p: LinkPlugin) => Record<string, any> } */
     static resources = (p) => ({
         toolbarGroup: {
             id: "link",

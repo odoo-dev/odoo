@@ -6,6 +6,7 @@ export class ToolbarPlugin extends Plugin {
     static name = "toolbar";
     static dependencies = ["overlay", "selection"];
     static shared = ["getToolbarInfo"];
+    /** @type { (p: ToolbarPlugin) => Record<string, any> } */
     static resources = (p) => ({
         onSelectionChange: p.handleSelectionChange.bind(p),
     });

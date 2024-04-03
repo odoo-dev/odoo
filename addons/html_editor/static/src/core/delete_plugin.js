@@ -32,6 +32,7 @@ export class DeletePlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "delete";
     static shared = ["deleteRange"];
+    /** @type { (p: DeletePlugin) => Record<string, any> } */
     static resources = (p) => ({
         shortcuts: [
             { hotkey: "backspace", command: "DELETE_BACKWARD" },

@@ -27,6 +27,7 @@ function isListActive(listMode) {
 export class ListPlugin extends Plugin {
     static name = "list";
     static dependencies = ["tabulation", "split", "selection", "delete"];
+    /** @type { (p: ListPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
         handle_delete_range: { callback: p.handleDeleteRange.bind(p) },

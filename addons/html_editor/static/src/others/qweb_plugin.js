@@ -5,6 +5,7 @@ import { QWebPicker } from "./qweb_picker";
 export class QWebPlugin extends Plugin {
     static name = "qweb";
     static dependencies = ["overlay", "selection"];
+    /** @type { (p: QWebPlugin) => Record<string, any> } */
     static resources = (p) => ({
         onSelectionChange: p.onSelectionChange.bind(p),
     });
