@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { LinkPopover } from "./link";
+import { LinkPopover } from "./link_popover";
 import { reactive } from "@odoo/owl";
 
 function isLinkActive(editable) {
