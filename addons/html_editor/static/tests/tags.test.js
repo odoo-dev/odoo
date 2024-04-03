@@ -1,5 +1,7 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "./_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { manuallyDispatchProgrammaticEvent, queryFirst } from "@odoo/hoot-dom";
+import { setupEditor, testEditor } from "./_helpers/editor";
+import { getContent, setSelection } from "./_helpers/selection";
 
 function setTag(tagName) {
     return (editor) => editor.dispatch("SET_TAG", { tagName });
@@ -387,5 +389,60 @@ describe("to blockquote", () => {
             contentAfter:
                 '<ul><li class="nav-item" style="color: red;"><blockquote>[abcd]</blockquote></li></ul>',
         });
+    });
+
+    test("setTag should work when we remove the selection", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]cd</p>");
+        editor.document.getSelection().removeAllRanges();
+        expect(getContent(el)).toBe("<p>abcd</p>");
+
+        setTag("h1")(editor);
+        expect(getContent(el)).toBe("<h1>ab[]cd</h1>");
+    });
+
+    test("setTag should work when we move the selection outside of the editor", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]cd</p>");
+        const anchorNode = queryFirst(".odoo-editor-editable").parentElement;
+        setSelection({ anchorNode, anchorOffset: 0 });
+        expect(getContent(el)).toBe("<p>abcd</p>");
+
+        setTag("h1")(editor);
+        expect(getContent(el)).toBe("<h1>ab[]cd</h1>");
+    });
+
+    test("triple click with setTag should only switch the tag on the selected line", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]cd</p><p>Plop</p>");
+        // Simulate selection trigger by triple click
+        // @todo @phoenix need to adapt when hoot add detail => 3 x click
+        const anchorNode = queryFirst("div p");
+        setSelection({
+            anchorNode,
+            anchorOffset: 0,
+            focusNode: anchorNode.nextSibling,
+            focusOffset: 0,
+        });
+        manuallyDispatchProgrammaticEvent(anchorNode, "click", { detail: 3 });
+        expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
+
+        setTag("h1")(editor);
+        expect(getContent(el)).toBe("<h1>[abcd]</h1><p>Plop</p>");
+    });
+
+    test("6 click with setTag should only switch the tag on the selected line", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]cd</p><p>Plop</p>");
+        // Simulate selection trigger by triple click
+        // @todo @phoenix need to adapt when hoot add detail => 6 x click
+        const anchorNode = queryFirst("div p");
+        setSelection({
+            anchorNode,
+            anchorOffset: 0,
+            focusNode: anchorNode.nextSibling,
+            focusOffset: 0,
+        });
+        manuallyDispatchProgrammaticEvent(anchorNode, "click", { detail: 6 });
+        expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
+
+        setTag("h1")(editor);
+        expect(getContent(el)).toBe("<h1>[abcd]</h1><p>Plop</p>");
     });
 });
