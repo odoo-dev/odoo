@@ -19,7 +19,7 @@ export function insertText(editor, text) {
             offset = 1;
             range.startContainer.appendChild(node);
             range.insertNode(node);
-            setSelection({ anchorNode: node, anchorOffset: 1 });
+            setSelection({ anchorNode: node, anchorOffset: offset });
         } else {
             node.textContent =
                 node.textContent.slice(0, offset) + char + node.textContent.slice(offset);
