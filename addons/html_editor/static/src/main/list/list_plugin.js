@@ -189,7 +189,7 @@ export class ListPlugin extends Plugin {
     normalize(root = this.editable) {
         const closestNestedLI = closestElement(root, "li.oe-nested");
         if (closestNestedLI) {
-            root = closestNestedLI;
+            root = closestNestedLI.parentElement;
         }
         const selectionToRestore = this.shared.getEditableSelection();
         applyToTree(root, (element) => {

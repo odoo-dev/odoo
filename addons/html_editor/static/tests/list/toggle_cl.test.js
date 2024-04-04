@@ -88,90 +88,86 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn a unordered list into a checklist between 2 checklists inside a checklist",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore: unformat(`
-                        <ul class="o_checklist">
-                            <li class="o_checked">abc</li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">def</li>
-                                </ul>
-                            </li>
-                            <li class="oe-nested">
-                                <ul>
-                                    <li>g[]hi</li>
-                                </ul>
-                            </li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">jkl</li>
-                                </ul>
-                            </li>
-                        </ul>`),
-                    stepFunction: toggleCheckList,
-                    contentAfterEdit: unformat(`
-                        <ul class="o_checklist">
-                            <li class="o_checked" id="checkId-1">abc</li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked" id="checkId-2">def</li>
-                                    <li id="checkId-4">g[]hi</li>
-                                    <li class="o_checked" id="checkId-3">jkl</li>
-                                </ul>
-                            </li>
-                        </ul>`),
-                    contentAfter: unformat(`
-                        <ul class="o_checklist">
-                            <li class="o_checked">abc</li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">def</li>
-                                    <li>g[]hi</li>
-                                    <li class="o_checked">jkl</li>
-                                </ul>
-                            </li>
-                        </ul>`),
-                });
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore: unformat(`
-                        <ul class="o_checklist">
-                            <li class="o_checked">abc</li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">def</li>
-                                </ul>
-                            </li>
-                            <li class="oe-nested">
-                                <ul>
-                                    <li class="a">g[]hi</li>
-                                </ul>
-                            </li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">jkl</li>
-                                </ul>
-                            </li>
-                        </ul>`),
-                    stepFunction: toggleCheckList,
-                    contentAfter: unformat(`
-                        <ul class="o_checklist">
-                            <li class="o_checked">abc</li>
-                            <li class="oe-nested">
-                                <ul class="o_checklist">
-                                    <li class="o_checked">def</li>
-                                    <li class="a">g[]hi</li>
-                                    <li class="o_checked">jkl</li>
-                                </ul>
-                            </li>
-                        </ul>`),
-                });
-            }
-        );
+        test("should turn a unordered list into a checklist between 2 checklists inside a checklist", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <ul class="o_checklist">
+                        <li class="o_checked">abc</li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">def</li>
+                            </ul>
+                        </li>
+                        <li class="oe-nested">
+                            <ul>
+                                <li>g[]hi</li>
+                            </ul>
+                        </li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">jkl</li>
+                            </ul>
+                        </li>
+                    </ul>`),
+                stepFunction: toggleCheckList,
+                /* @todo @phoenix: move this test case to a new file, with tests for checkitem IDs.
+                contentAfterEdit: unformat(`
+                    <ul class="o_checklist">
+                        <li class="o_checked" id="checkId-1">abc</li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked" id="checkId-2">def</li>
+                                <li id="checkId-4">g[]hi</li>
+                                <li class="o_checked" id="checkId-3">jkl</li>
+                            </ul>
+                        </li>
+                    </ul>`), */
+                contentAfter: unformat(`
+                    <ul class="o_checklist">
+                        <li class="o_checked">abc</li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">def</li>
+                                <li>g[]hi</li>
+                                <li class="o_checked">jkl</li>
+                            </ul>
+                        </li>
+                    </ul>`),
+            });
+            await testEditor({
+                contentBefore: unformat(`
+                    <ul class="o_checklist">
+                        <li class="o_checked">abc</li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">def</li>
+                            </ul>
+                        </li>
+                        <li class="oe-nested">
+                            <ul>
+                                <li class="a">g[]hi</li>
+                            </ul>
+                        </li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">jkl</li>
+                            </ul>
+                        </li>
+                    </ul>`),
+                stepFunction: toggleCheckList,
+                contentAfter: unformat(`
+                    <ul class="o_checklist">
+                        <li class="o_checked">abc</li>
+                        <li class="oe-nested">
+                            <ul class="o_checklist">
+                                <li class="o_checked">def</li>
+                                <li class="a">g[]hi</li>
+                                <li class="o_checked">jkl</li>
+                            </ul>
+                        </li>
+                    </ul>`),
+            });
+        });
 
         test("should remove the list-style when change the list style", async () => {
             await testEditor({
