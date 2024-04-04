@@ -1,7 +1,9 @@
-import { Component, useState } from "@odoo/owl";
+import { Component, useRef, useState } from "@odoo/owl";
 import { Colorpicker } from "@web/core/colorpicker/colorpicker";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { isCSSColor } from "@web/core/utils/colors";
+import { isColorGradient } from "@html_editor/utils/color";
 
 // These colors are already normalized as per normalizeCSSColor in @web/legacy/js/widgets/colorpicker
 const DEFAULT_COLORS = [
@@ -15,8 +17,8 @@ const DEFAULT_COLORS = [
     ["#630000", "#7B3900", "#846300", "#295218", "#083139", "#003163", "#21104A", "#4A1031"],
 ];
 
-export class FontColorSelector extends Component {
-    static template = "html_editor.FontColorSelector";
+export class ColorSelector extends Component {
+    static template = "html_editor.ColorSelector";
     static components = { Dropdown, Colorpicker };
     static props = {
         type: String, // either foreground or background
@@ -28,6 +30,7 @@ export class FontColorSelector extends Component {
         this.DEFAULT_COLORS = DEFAULT_COLORS;
         this.dropdown = useDropdownState();
         this.state = useState({ activeTab: "solid" });
+        this.colorWrapperEl = useRef("colorsWrapper");
     }
 
     setTab(tab) {
@@ -37,8 +40,12 @@ export class FontColorSelector extends Component {
     onColorEnter(ev) {
         // const color = ev.target.dataset.color;
     }
+
     onColorClick(ev) {
-        const color = ev.target.dataset.color;
+        let color = ev.target.dataset.color;
+        if (color && !isCSSColor(color) && !isColorGradient(color)) {
+            color = (this.props.type === "foreground" ? "text-" : "bg-") + color;
+        }
         const mode = this.props.type === "foreground" ? "color" : "background";
         this.props.dispatch("APPLY_COLOR", { color, mode });
         this.dropdown.close();
