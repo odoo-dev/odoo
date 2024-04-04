@@ -10,7 +10,12 @@ export class SearchPowerboxPlugin extends Plugin {
     static name = "search_powerbox";
     static dependencies = ["powerbox", "selection", "history"];
     setup() {
-        this.commandGroups = this.getCommandGroups();
+        this.categories = this.resources.powerboxCategory.sort((a, b) => a.sequence - b.sequence);
+        this.commands = this.resources.powerboxCommands.map((command) => ({
+            ...command,
+            categoryName: this.categories.find((category) => category.id === command.category).name,
+        }));
+
         this.addDomListener(this.editable, "keydown", (ev) => {
             if (ev.key === "/") {
                 this.historySavePointRestore = this.shared.makeSavePoint();
@@ -45,37 +50,28 @@ export class SearchPowerboxPlugin extends Plugin {
         }
         const searchTerm = this.searchNode.nodeValue.slice(this.offset + 1, selection.endOffset);
         if (!searchTerm) {
-            this.shared.updatePowerbox(this.commandGroups);
+            this.shared.updatePowerbox(this.commands, this.categories);
             return;
         }
         if (searchTerm.includes(" ")) {
             this.shared.closePowerbox();
             return;
         }
-        const commandGroups = this.filterCommands(searchTerm);
-        if (!commandGroups.length) {
+        const commands = this.filterCommands(searchTerm);
+        if (!commands.length) {
             this.shared.closePowerbox();
             this.shouldUpdate = true;
             return;
         }
-        this.shared.updatePowerbox(commandGroups);
+        this.shared.updatePowerbox(commands);
     }
     /**
      * @param {string} searchTerm
      */
     filterCommands(searchTerm) {
-        /** @type {CommandGroup[]} */
-        return this.commandGroups
-            .map((group) => {
-                const commands = fuzzyLookup(searchTerm.toLowerCase(), group.commands, (cmd) =>
-                    (cmd.name + cmd.description + group.name).toLowerCase()
-                );
-                if (!commands.length) {
-                    return null;
-                }
-                return { ...group, commands };
-            })
-            .filter(Boolean);
+        return fuzzyLookup(searchTerm.toLowerCase(), this.commands, (cmd) =>
+            (cmd.name + cmd.description + cmd.categoryName).toLowerCase()
+        );
     }
     /**
      * @param {EditorSelection} selection
@@ -83,6 +79,7 @@ export class SearchPowerboxPlugin extends Plugin {
     isSearching(selection) {
         return (
             selection.endContainer === this.searchNode &&
+            this.searchNode.nodeValue &&
             this.searchNode.nodeValue[this.offset] === "/" &&
             selection.endOffset >= this.offset
         );
@@ -91,28 +88,13 @@ export class SearchPowerboxPlugin extends Plugin {
         const selection = this.shared.getEditableSelection();
         this.offset = selection.startOffset - 1;
         this.shared.openPowerbox({
-            commandGroups: this.commandGroups,
+            commands: this.commands,
+            categories: this.categories,
             onApplyCommand: this.historySavePointRestore,
             onClose: () => {
                 this.shouldUpdate = false;
             },
         });
         this.shouldUpdate = true;
-    }
-    getCommandGroups() {
-        /** @type {CommandGroup[]} */
-        const groups = [];
-        for (const category of this.resources.powerboxCategory.sort(
-            (a, b) => a.sequence - b.sequence
-        )) {
-            groups.push({
-                id: category.id,
-                name: category.name,
-                commands: this.resources.powerboxCommands.filter(
-                    (cmd) => cmd.category === category.id
-                ),
-            });
-        }
-        return groups;
     }
 }

@@ -1,11 +1,4 @@
-import {
-    Component,
-    onPatched,
-    onWillRender,
-    useExternalListener,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onPatched, onWillRender, useExternalListener, useRef } from "@odoo/owl";
 import { rotate } from "@web/core/utils/arrays";
 
 /**
@@ -17,16 +10,23 @@ export class Powerbox extends Component {
     static props = {
         document: { validate: (doc) => doc.constructor.name === "HTMLDocument" },
         overlay: Object,
-        commandGroups: Object,
+        state: Object,
         onApplyCommand: Function,
     };
 
     setup() {
         const ref = useRef("root");
-        this.commandGroups = this.props.commandGroups;
-        this.state = useState({ currentCommand: null });
+        this.commandIndex = 0;
 
-        this.commands = [];
+        let lastCommandIndex = 0;
+        onWillRender(() => {
+            if (lastCommandIndex === this.commandIndex) {
+                this.commandIndex = 0;
+                lastCommandIndex = 0;
+            } else {
+                lastCommandIndex = this.commandIndex;
+            }
+        });
 
         onPatched(() => {
             const activeCommand = ref.el.querySelector(".o-we-command.active");
@@ -34,13 +34,6 @@ export class Powerbox extends Component {
                 activeCommand.scrollIntoView({ block: "nearest", inline: "nearest" });
             }
             this.props.overlay.updatePosition();
-        });
-
-        onWillRender(() => {
-            this.commands = this.commandGroups.map((group) => group.commands).flat();
-            if (!this.commands.includes(this.state.currentCommand)) {
-                this.state.currentCommand = this.commands[0];
-            }
         });
 
         useExternalListener(this.props.document, "keydown", (ev) => {
@@ -57,17 +50,17 @@ export class Powerbox extends Component {
                     break;
                 case "ArrowUp": {
                     ev.preventDefault();
-                    const currentIndex = this.commands.indexOf(this.state.currentCommand);
+                    const currentIndex = this.commandIndex;
                     const nextIndex = rotate(currentIndex, this.commands, -1);
-                    this.state.currentCommand = this.commands[nextIndex];
+                    this.commandIndex = nextIndex;
                     this.render();
                     break;
                 }
                 case "ArrowDown": {
                     ev.preventDefault();
-                    const currentIndex = this.commands.indexOf(this.state.currentCommand);
+                    const currentIndex = this.commandIndex;
                     const nextIndex = rotate(currentIndex, this.commands, 1);
-                    this.state.currentCommand = this.commands[nextIndex];
+                    this.commandIndex = nextIndex;
                     this.render();
                     break;
                 }
@@ -79,12 +72,25 @@ export class Powerbox extends Component {
         });
     }
 
+    get commands() {
+        return this.props.state.commands;
+    }
+
+    get showCategories() {
+        return this.props.state.showCategories;
+    }
+
     applyCommand(command) {
         this.props.onApplyCommand(command);
         this.props.overlay.close();
     }
 
     applyCurrentCommand() {
-        this.applyCommand(this.state.currentCommand);
+        this.applyCommand(this.commands[this.commandIndex]);
+    }
+
+    onMouseEnter(commandIndex) {
+        this.commandIndex = commandIndex;
+        this.render();
     }
 }

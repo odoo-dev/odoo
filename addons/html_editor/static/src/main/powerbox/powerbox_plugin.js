@@ -41,7 +41,7 @@ export class PowerboxPlugin extends Plugin {
     });
 
     setup() {
-        this.commandGroups = reactive([]);
+        this.state = reactive({});
 
         this.onApplyCommand = () => {};
 
@@ -53,7 +53,7 @@ export class PowerboxPlugin extends Plugin {
         this.overlayProps = {
             document: this.document,
             overlay: this.overlay,
-            commandGroups: this.commandGroups,
+            state: this.state,
             onApplyCommand: (command) => {
                 this.onApplyCommand();
                 command.action(this.dispatch);
@@ -64,32 +64,32 @@ export class PowerboxPlugin extends Plugin {
     /**
      * @param {Command[]} commands
      */
-    openPowerbox({
-        commands,
-        categoriesConfig,
-        onApplyCommand = () => {},
-        commandGroups,
-        onClose = () => {},
-    } = {}) {
+    openPowerbox({ commands, categories, onApplyCommand = () => {}, onClose = () => {} } = {}) {
         this.closePowerbox();
-        if (!commandGroups) {
-            if (!categoriesConfig?.length) {
-                commandGroups = [{ id: "Main", name: _t("Main"), commands }];
-            } else {
-                commandGroups = this.getCommandGroups(commands, categoriesConfig);
-            }
-        }
-        this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
+        this.state.showCategories = Boolean(categories);
+        this.state.categories = categories;
+        this.state.commands = categories ? this.getOrderCommands(commands, categories) : commands;
         this.onApplyCommand = onApplyCommand;
         this.onClose = onClose;
         this.overlay.open({ props: this.overlayProps });
     }
     /**
-     * @param {CommandGroup[]} commandGroups
+     * @param {Command[]} commands
+     * @param {Category[]} categories
      */
-    updatePowerbox(commandGroups) {
-        this.commandGroups.splice(0, this.commandGroups.length, ...commandGroups);
+    updatePowerbox(commands, categories) {
+        this.state.commands = categories
+            ? this.getOrderCommands(commands, this.state.categories)
+            : commands;
+        this.state.showCategories = Boolean(categories);
         this.overlay.open({ props: this.overlayProps });
+    }
+    getOrderCommands(commands, categories) {
+        const orderCommands = [];
+        for (const category of categories) {
+            orderCommands.push(...commands.filter((command) => command.category === category.id));
+        }
+        return orderCommands;
     }
     closePowerbox() {
         this.onClose?.();
@@ -97,22 +97,5 @@ export class PowerboxPlugin extends Plugin {
     }
     isPowerboxOpen() {
         return this.overlay.isOpen;
-    }
-
-    /**
-     * @param {Command[]} commands
-     * @param {CategoriesConfig[]} categoriesConfig
-     * @returns {CommandGroup[]}
-     */
-    getCommandGroups(commands, categoriesConfig) {
-        const commandGroups = [];
-        for (const category of categoriesConfig.sort((a, b) => a.sequence - b.sequence)) {
-            commandGroups.push({
-                id: category.id,
-                name: category.name,
-                commands: commands.filter((cmd) => cmd.category === category.id),
-            });
-        }
-        return commandGroups;
     }
 }

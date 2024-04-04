@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { setSelection } from "@html_editor/utils/selection";
-import { press, queryAllTexts } from "@odoo/hoot-dom";
+import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
@@ -58,6 +58,7 @@ test("should open the Powerbox on type `/`, but in an empty paragraph", async ()
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
 });
+
 describe("search", () => {
     test("should filter the Powerbox contents with term", async () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
@@ -67,6 +68,25 @@ describe("search", () => {
         insertText(editor, "head");
         await animationFrame();
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    });
+
+    test("should hide categories when you have a search term", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(16);
+        expect(".o-we-category").toHaveCount(4);
+        expect(queryAllTexts(".o-we-category")).toEqual([
+            "STRUCTURE",
+            "MEDIA",
+            "FORMAT",
+            "NAVIGATION",
+        ]);
+
+        insertText(editor, "h");
+        await animationFrame();
+        expect(commandNames(el).length).toBe(6);
+        expect(".o-we-category").toHaveCount(0);
     });
 
     test.tags("iframe")("should filter the Powerbox contents with term, in iframe", async () => {
@@ -107,12 +127,14 @@ describe("search", () => {
         expect(getContent(el)).toBe("<p>/test12[]</p>");
         expect(".o-we-powerbox").toHaveCount(1);
         expect(commandNames(el)).toEqual(["Test12"]);
+        expect(".active .o-we-command-name").toHaveText("Test12");
 
         press("backspace");
         await animationFrame();
         expect(getContent(el)).toBe("<p>/test1[]</p>");
         expect(".o-we-powerbox").toHaveCount(1);
         expect(commandNames(el)).toEqual(["Test1", "Test12"]);
+        expect(".active .o-we-command-name").toHaveText("Test1");
     });
 
     test("should filter the Powerbox contents with term, even after delete backward", async () => {
@@ -182,9 +204,6 @@ describe("search", () => {
         expect(commandNames(el)).toEqual(["Heading 1"]);
     });
     describe("close", () => {
-        // @todo @phoenix: do we really want this spec? Why not temporarilly
-        // hide the powerbox so the person can type backspace and re-open the
-        // powerbox.
         test("should close powerbox if there is no result", async () => {
             const { el, editor } = await setupEditor("<p>a[]</p>");
             insertText(editor, "/");
@@ -207,6 +226,26 @@ describe("search", () => {
             await animationFrame();
             expect(getContent(el)).toBe("<p>a/ b[]</p>");
             expect(".o-we-powerbox").toHaveCount(0);
+        });
+
+        test("delete '/' should close the powerbox", async () => {
+            const { editor, el } = await setupEditor("<p>[]</p>");
+            insertText(editor, "/");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe("<p>/[]</p>");
+
+            press("backspace");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+            );
+
+            insertText(editor, "a");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe("<p>a[]<br></p>");
         });
     });
 });
@@ -382,4 +421,70 @@ test("should open the Powerbox on type `/` in DIV", async () => {
     await animationFrame();
 
     expect(".o-we-powerbox").toHaveCount(1);
+});
+
+test("press 'arrowdown' to navigate", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+
+    press("arrowdown");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 2");
+
+    press("arrowdown");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 3");
+
+    press("arrowdown");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+});
+
+test("press 'arrowup' to navigate", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+
+    press("arrowup");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 3");
+
+    press("arrowup");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 2");
+
+    press("arrowup");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+});
+
+test("select command with 'mouseenter'", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+
+    hover(".o-we-command-name:last");
+    await animationFrame();
+    expect(".active .o-we-command-name").toHaveText("Heading 3");
+
+    press("enter");
+    expect(getContent(el)).toBe("<h3>ab[]</h3>");
+});
+
+test("click on a command", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+    expect(".active .o-we-command-name").toHaveText("Heading 1");
+
+    click(".o-we-command-name:last");
+    expect(getContent(el)).toBe("<h3>ab[]</h3>");
 });
