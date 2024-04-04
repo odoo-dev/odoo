@@ -463,7 +463,7 @@ test("press 'arrowup' to navigate", async () => {
     expect(".active .o-we-command-name").toHaveText("Heading 1");
 });
 
-test("select command with 'mouseenter'", async () => {
+test.tags("desktop")("select command with 'mouseenter'", async () => {
     const { editor, el } = await setupEditor("<p>ab[]</p>");
     insertText(editor, "/head");
     await animationFrame();
