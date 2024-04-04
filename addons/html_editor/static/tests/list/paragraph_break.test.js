@@ -35,8 +35,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ol><li><h1>ab[]cd</h1></li></ol>",
                     stepFunction: splitBlock,
-                    // Obs: normalization does not enter block elements.
-                    contentAfter: "<ol><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ol>",
+                    contentAfter: "<ol><li><h1>ab</h1></li><li><h1>[]cd</h1></li></ol>",
                 });
             });
 
@@ -245,8 +244,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ul><li><h1>ab[]cd</h1></li></ul>",
                     stepFunction: splitBlock,
-                    // Obs: normalization does not enter block elements.
-                    contentAfter: "<ul><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>",
+                    contentAfter: "<ul><li><h1>ab</h1></li><li><h1>[]cd</h1></li></ul>",
                 });
             });
 
@@ -422,9 +420,8 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
                     stepFunction: splitBlock,
-                    // Obs: normalization does not enter block elements.
                     contentAfter:
-                        '<ul class="o_checklist"><li><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
+                        '<ul class="o_checklist"><li><h1>ab</h1></li><li><h1>[]cd</h1></li></ul>',
                 });
             });
 
@@ -443,9 +440,8 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><h1>ab[]cd</h1></li></ul>',
                     stepFunction: splitBlock,
-                    // Obs: normalization does not enter block elements.
                     contentAfter:
-                        '<ul class="o_checklist"><li class="o_checked"><h1>ab</h1></li><li>[]<h1>cd</h1></li></ul>',
+                        '<ul class="o_checklist"><li class="o_checked"><h1>ab</h1></li><li><h1>[]cd</h1></li></ul>',
                 });
             });
 
