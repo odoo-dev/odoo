@@ -3,19 +3,11 @@ import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { getDeepRange, getSelectedNodes } from "@html_editor/utils/selection";
-import { FontColorSelector } from "./font_color_selector";
+import { isColorGradient } from "@html_editor/utils/color";
+import { ColorSelector } from "./color_selector";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
-
-/**
- * @param {string} [value]
- * @returns {boolean}
- */
-function isColorGradient(value) {
-    // FIXME duplicated in @web_editor/utils.js
-    return value && value.includes("-gradient(");
-}
 
 /**
  * Returns true if the given element has a visible color (fore- or
@@ -59,14 +51,14 @@ export class ColorPlugin extends Plugin {
             buttons: [
                 {
                     id: "forecolor",
-                    Component: FontColorSelector,
+                    Component: ColorSelector,
                     props: {
                         type: "foreground",
                     },
                 },
                 {
                     id: "backcolor",
-                    Component: FontColorSelector,
+                    Component: ColorSelector,
                     props: {
                         type: "background",
                     },
@@ -79,6 +71,9 @@ export class ColorPlugin extends Plugin {
         switch (command) {
             case "APPLY_COLOR":
                 this.applyColor(payload.color, payload.mode);
+                break;
+            case "SET_CSS_COLORS":
+                this.setCSSVariables(payload.el);
                 break;
         }
     }

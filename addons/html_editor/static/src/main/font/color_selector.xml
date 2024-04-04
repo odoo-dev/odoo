@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="html_editor.FontColorSelector">
+    <t t-name="html_editor.ColorSelector">
         <Dropdown state="dropdown">
             <button class="btn btn-light" t-attf-class="o-select-color-{{props.type}} {{dropdown.isOpen ? 'active' : ''}}">
                 <t t-if="props.type === 'foreground'">
@@ -29,10 +29,18 @@
                             Gradient
                         </div> 
                     </div>
-                    <div>
+                    <div t-ref="colorsWrapper">
                         <t t-if="state.activeTab==='solid'">
                             <div class="p-1"
                                 t-on-click="onColorClick">
+                                <div class="o_colorpicker_section">
+                                    <button data-color="o-color-1" t-attf-style="background-color: var(--o-color-1)" class="btn o_color_button"/>
+                                    <button data-color="o-color-3" t-attf-style="background-color: var(--o-color-3)" class="btn o_color_button"/>
+                                    <button data-color="o-color-2" t-attf-style="background-color: var(--o-color-2)" class="btn o_color_button"/>
+                                    <button data-color="o-color-4" t-attf-style="background-color: var(--o-color-4)" class="ms-2 btn o_color_button"/>
+                                    <button data-color="o-color-5" t-attf-style="background-color: var(--o-color-5)" class="btn o_color_button"/>
+                                </div>
+
                                 <t t-foreach="DEFAULT_COLORS" t-as="line" t-key="line_index">
                                     <div class="o_color_section d-flex">
                                         <t t-foreach="line" t-as="color" t-key="color_index">
@@ -43,10 +51,21 @@
                             </div>
                         </t>
                         <t t-if="state.activeTab==='custom'">
-                            TODO!
-                            <Colorpicker
-                                onColorSelect.bind="onColorSelect"
-                                onColorPreview.bind="onColorPreview" />
+                            <div class="p-1">
+                                <div class="o_colorpicker_section" t-on-click="onColorClick">
+                                    <button data-color="black" class="btn o_color_button bg-black"></button>
+                                    <button data-color="900" class="o_color_button btn" style="background-color: var(--900)"></button>
+                                    <button data-color="800" class="o_color_button btn" style="background-color: var(--800)"></button>
+                                    <button data-color="600" class="o_color_button btn" style="background-color: var(--600)"></button>
+                                    <button data-color="400" class="o_color_button btn" style="background-color: var(--400)"></button>
+                                    <button data-color="200" class="o_color_button btn" style="background-color: var(--200)"></button>
+                                    <button data-color="100" class="o_color_button btn" style="background-color: var(--100)"></button>
+                                    <button data-color="white" class="o_color_button btn bg-white"></button>
+                                </div>
+                                <Colorpicker
+                                    onColorSelect.bind="onColorSelect"
+                                    onColorPreview.bind="onColorPreview" />
+                            </div>
                         </t>
                         <t t-if="state.activeTab==='gradient'">
                         TODO!

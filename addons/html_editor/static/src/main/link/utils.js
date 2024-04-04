@@ -35,15 +35,6 @@ export const EMAIL_REGEX = /^(mailto:)?[\w-.]+@(?:[\w-]+\.)+[\w-]{2,4}$/i;
 export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()/]{3,25}$/;
 
 /**
- * @param {string} [value]
- * @returns {boolean}
- */
-export function isColorGradient(value) {
-    // FIXME duplicated in odoo-editor/utils.js also in color plugin
-    return value && value.includes("-gradient(");
-}
-
-/**
  * Returns the label of a link element.
  *
  * @param {HTMLElement} linkEl

@@ -1,4 +1,4 @@
-import { ColorPlugin } from "./main/color/color_plugin";
+import { ColorPlugin } from "./main/font/color_plugin";
 import { ColumnPlugin } from "./main/column_plugin";
 import { ClipboardPlugin } from "./core/clipboard_plugin";
 import { CommentPlugin } from "./core/comment_plugin";
