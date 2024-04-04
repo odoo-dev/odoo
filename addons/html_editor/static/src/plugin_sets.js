@@ -30,6 +30,7 @@ import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { SearchPowerboxPlugin } from "./main/powerbox/search_powerbox_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
 import { ImagePlugin } from "./main/image_plugin";
+import { LinkPastePlugin } from "./main/link/link_paste_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -46,7 +47,6 @@ export const CORE_PLUGINS = [
     SplitPlugin,
     UnbreakablePlugin,
     ZwsPlugin,
-    LinkPlugin,
 ];
 
 export const MAIN_PLUGINS = [
@@ -67,6 +67,8 @@ export const MAIN_PLUGINS = [
     FontPlugin, // note: if before ListPlugin, there are a few split tests that fails
     YoutubePlugin,
     ImagePlugin,
+    LinkPlugin,
+    LinkPastePlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin];

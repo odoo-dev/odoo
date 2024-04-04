@@ -1,11 +1,8 @@
 import { Plugin } from "../plugin";
-import { ancestors, closestElement } from "../utils/dom_traversal";
 import { closestBlock, isBlock } from "../utils/blocks";
-import { URL_REGEX } from "../utils/regex";
-import { leftPos } from "../utils/position";
-import { parseHTML } from "../utils/html";
 import { unwrapContents } from "../utils/dom";
-import { isImageUrl } from "@html_editor/utils/url";
+import { ancestors, closestElement } from "../utils/dom_traversal";
+import { parseHTML } from "../utils/html";
 
 /**
  * @typedef { import("./selection_plugin").EditorSelection } EditorSelection
@@ -82,14 +79,16 @@ export const CLIPBOARD_WHITELISTS = {
 
 export class ClipboardPlugin extends Plugin {
     static name = "clipboard";
-    static dependencies = ["dom", "selection", "sanitize", "link", "history"];
+    static dependencies = ["dom", "selection", "sanitize"];
+    static shared = ["pasteText"];
 
     setup() {
         this.addDomListener(this.editable, "copy", this.onCopy);
         this.addDomListener(this.editable, "cut", this.onCut);
         this.addDomListener(this.editable, "paste", this.onPaste);
         this.addDomListener(this.editable, "drop", this.onDrop);
-        this.resources["handle_paste_url"] = this.resources["handle_paste_url"] || [];
+        this.resources["handle_paste_text"] = this.resources["handle_paste_text"] || [];
+        this.resources["before_paste"] = this.resources["before_paste"] || [];
     }
 
     onCut(ev) {
@@ -209,40 +208,20 @@ export class ClipboardPlugin extends Plugin {
 
         ev.preventDefault();
 
-        this.onPasteRemoveFullySelectedLink(selection);
+        this.resources["before_paste"].forEach((handler) => handler(selection));
 
-        this.onPasteUnsupportedHtml(selection, ev.clipboardData) ||
-            this.onPasteOdooEditorHtml(ev.clipboardData) ||
-            this.onPasteHtml(selection, ev.clipboardData) ||
-            this.onPasteText(selection, ev.clipboardData);
+        this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
+            this.handlePasteOdooEditorHtml(ev.clipboardData) ||
+            this.handlePasteHtml(selection, ev.clipboardData) ||
+            this.handlePasteText(selection, ev.clipboardData);
 
         this.dispatch("ADD_STEP");
     }
     /**
      * @param {EditorSelection} selection
-     */
-    onPasteRemoveFullySelectedLink(selection) {
-        // Replace entire link if its label is fully selected.
-        const link = closestElement(selection.anchorNode, "a");
-        if (
-            link &&
-            selection.toString().replace(/\u200B/g, "") === link.innerText.replace(/\u200B/g, "")
-        ) {
-            const start = leftPos(link);
-            link.remove();
-            // @doto @phoenix do we still want normalize:false?
-            this.shared.setSelection({
-                anchorNode: start[0],
-                anchorOffset: start[1],
-                normalize: false,
-            });
-        }
-    }
-    /**
-     * @param {EditorSelection} selection
      * @param {DataTransfer} clipboardData
      */
-    onPasteUnsupportedHtml(selection, clipboardData) {
+    handlePasteUnsupportedHtml(selection, clipboardData) {
         const targetSupportsHtmlContent = isHtmlContentSupported(selection.anchorNode);
         if (!targetSupportsHtmlContent) {
             const text = clipboardData.getData("text/plain");
@@ -253,7 +232,7 @@ export class ClipboardPlugin extends Plugin {
     /**
      * @param {DataTransfer} clipboardData
      */
-    onPasteOdooEditorHtml(clipboardData) {
+    handlePasteOdooEditorHtml(clipboardData) {
         const odooEditorHtml = clipboardData.getData("text/odoo-editor");
         if (odooEditorHtml) {
             const fragment = parseHTML(this.document, odooEditorHtml);
@@ -268,7 +247,7 @@ export class ClipboardPlugin extends Plugin {
      * @param {EditorSelection} selection
      * @param {DataTransfer} clipboardData
      */
-    onPasteHtml(selection, clipboardData) {
+    handlePasteHtml(selection, clipboardData) {
         const files = getImageFiles(clipboardData);
         const clipboardHtml = clipboardData.getData("text/html");
         if (files.length || clipboardHtml) {
@@ -279,6 +258,7 @@ export class ClipboardPlugin extends Plugin {
             // particular case the html table is given a higher priority than
             // the clipboard picture.
             if (files.length && !clipboardElem.querySelector("table")) {
+                // @phoenix @todo: should it be handled in image plugin?
                 this.addImagesFiles(files).then((html) => {
                     this.shared.domInsert(html);
                 });
@@ -296,101 +276,44 @@ export class ClipboardPlugin extends Plugin {
      * @param {EditorSelection} selection
      * @param {DataTransfer} clipboardData
      */
-    onPasteText(selection, clipboardData) {
+    handlePasteText(selection, clipboardData) {
         const text = clipboardData.getData("text/plain");
-        let splitAroundUrl = [text];
-        // Avoid transforming dynamic placeholder pattern to url.
-        if (!text.match(/\${.*}/gi)) {
-            splitAroundUrl = text.split(URL_REGEX);
-            // Remove 'http(s)://' capturing group from the result (indexes
-            // 2, 5, 8, ...).
-            splitAroundUrl = splitAroundUrl.filter((_, index) => (index + 1) % 3);
-        }
-        if (splitAroundUrl.length === 3 && !splitAroundUrl[0] && !splitAroundUrl[2]) {
-            // Pasted content is a single URL.
-            this.onPasteTextUrl(text, selection);
+        if (this.resources["handle_paste_text"].some((handler) => handler(text, selection))) {
+            return;
         } else {
-            this.onPasteTextMultiUrl(splitAroundUrl, selection);
+            this.pasteText(text);
         }
     }
     /**
      * @param {string} text
-     * @param {EditorSelection} selection
      */
-    onPasteTextUrl(text, selection) {
-        const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
-        const url = /^https?:\/\//i.test(text) ? text : "http://" + text;
-        if (selectionIsInsideALink) {
-            this.onPasteTextUrlInsideLink(text, url, selectionIsInsideALink);
-            return;
-        }
-        const isHandled = this.resources["handle_paste_url"].some((handler) => handler(text, url));
-        if (isHandled) {
-            return;
-        }
-        this.shared.insertLink(url, text);
-    }
-    /**
-     * @param {string} text
-     * @param {string} url
-     * @param {boolean} selectionIsInsideALink
-     */
-    onPasteTextUrlInsideLink(text, url, selectionIsInsideALink) {
-        // A url cannot be transformed inside an existing link.
-        // An image can be embedded inside an existing link, a video cannot.
-        if (selectionIsInsideALink) {
-            if (isImageUrl(url)) {
-                const img = this.document.createElement("IMG");
-                img.setAttribute("src", url);
-                this.shared.domInsert(img);
-            } else {
-                this.shared.domInsert(text);
+    pasteText(text) {
+        const textFragments = text.split(/\r?\n/);
+        let textIndex = 1;
+        for (const textFragment of textFragments) {
+            // Replace consecutive spaces by alternating nbsp.
+            const modifiedTextFragment = textFragment.replace(/( {2,})/g, (match) => {
+                let alertnateValue = false;
+                return match.replace(/ /g, () => {
+                    alertnateValue = !alertnateValue;
+                    const replaceContent = alertnateValue ? "\u00A0" : " ";
+                    return replaceContent;
+                });
+            });
+            this.shared.domInsert(modifiedTextFragment);
+            if (textIndex < textFragments.length) {
+                // todo: to implement
+                // Break line by inserting new paragraph and
+                // remove current paragraph's bottom margin.
+                // const p = closestElement(selection.anchorNode, "p");
+                // if (isUnbreakable(closestBlock(selection.anchorNode))) {
+                //     this._applyCommand("oShiftEnter");
+                // } else {
+                //     this._applyCommand("oEnter");
+                //     p && (p.style.marginBottom = "0px");
+                // }
             }
-        }
-    }
-    /**
-     * @param {string[]} splitAroundUrl
-     * @param {EditorSelection} selection
-     */
-    onPasteTextMultiUrl(splitAroundUrl, selection) {
-        const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
-        for (let i = 0; i < splitAroundUrl.length; i++) {
-            const url = /^https?:\/\//gi.test(splitAroundUrl[i])
-                ? splitAroundUrl[i]
-                : "http://" + splitAroundUrl[i];
-            // Even indexes will always be plain text, and odd indexes will always be URL.
-            // A url cannot be transformed inside an existing link.
-            if (i % 2 && !selectionIsInsideALink) {
-                this.shared.domInsert(this.shared.createLink(splitAroundUrl[i], url));
-            } else if (splitAroundUrl[i] !== "") {
-                const textFragments = splitAroundUrl[i].split(/\r?\n/);
-                let textIndex = 1;
-                for (const textFragment of textFragments) {
-                    // Replace consecutive spaces by alternating nbsp.
-                    const modifiedTextFragment = textFragment.replace(/( {2,})/g, (match) => {
-                        let alertnateValue = false;
-                        return match.replace(/ /g, () => {
-                            alertnateValue = !alertnateValue;
-                            const replaceContent = alertnateValue ? "\u00A0" : " ";
-                            return replaceContent;
-                        });
-                    });
-                    this.shared.domInsert(modifiedTextFragment);
-                    if (textIndex < textFragments.length) {
-                        // todo: to implement
-                        // Break line by inserting new paragraph and
-                        // remove current paragraph's bottom margin.
-                        // const p = closestElement(selection.anchorNode, "p");
-                        // if (isUnbreakable(closestBlock(selection.anchorNode))) {
-                        //     this._applyCommand("oShiftEnter");
-                        // } else {
-                        //     this._applyCommand("oEnter");
-                        //     p && (p.style.marginBottom = "0px");
-                        // }
-                    }
-                    textIndex++;
-                }
-            }
+            textIndex++;
         }
     }
 
@@ -409,6 +332,7 @@ export class ClipboardPlugin extends Plugin {
             tableElement.classList.add("table", "table-bordered", "o_table");
         }
 
+        // todo: should it be in its own plugin ?
         const progId = container.querySelector('meta[name="ProgId"]');
         if (progId && progId.content === "Excel.Sheet") {
             // Microsoft Excel keeps table style in a <style> tag with custom
@@ -509,6 +433,7 @@ export class ClipboardPlugin extends Plugin {
             // clean its children.
             for (const attribute of [...node.attributes]) {
                 // Keep allowed styles on nodes with allowed tags.
+                // todo: should the whitelist be a resource?
                 if (
                     CLIPBOARD_WHITELISTS.styledTags.includes(node.nodeName) &&
                     attribute.name === "style"
@@ -636,6 +561,7 @@ export class ClipboardPlugin extends Plugin {
         }
         this.historyStep();
     }
+    // @phoenix @todo: move to image or image paste plugin?
     /**
      * Add images inside the editable at the current selection.
      *
