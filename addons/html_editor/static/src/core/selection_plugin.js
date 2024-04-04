@@ -24,7 +24,13 @@ import {
 
 export class SelectionPlugin extends Plugin {
     static name = "selection";
-    static shared = ["getEditableSelection", "setSelection", "setCursorStart", "setCursorEnd"];
+    static shared = [
+        "getEditableSelection",
+        "setSelection",
+        "setCursorStart",
+        "setCursorEnd",
+        "extractContent",
+    ];
 
     setup() {
         this.activeSelection = this.makeSelection(false, false);
@@ -116,6 +122,16 @@ export class SelectionPlugin extends Plugin {
 
         Object.freeze(activeSelection);
         return activeSelection;
+    }
+
+    /**
+     * @param { EditorSelection } selection
+     */
+    extractContent(selection) {
+        const range = new Range();
+        range.setStart(selection.startContainer, selection.startOffset);
+        range.setEnd(selection.endContainer, selection.endOffset);
+        return range.extractContents();
     }
 
     /**

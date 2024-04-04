@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import { findInSelection, getDeepRange } from "@html_editor/utils/selection";
 
 const tldWhitelist = [
     "com", "net", "org", "ac", "ad", "ae", "af", "ag", "ai", "al", "am", "an",
@@ -82,63 +81,3 @@ export function deduceURLfromText(text, link) {
     return null;
 }
 
-/**
- * Return the link element to edit. Create one from selection if none was
- * present in selection.
- *
- * @param {Node} [options.containerNode]
- * @param {Node} [options.startNode]
- * @returns {Object}
- */
-export function getOrCreateLink({ containerNode, startNode } = {}) {
-    if (startNode) {
-        if (startNode.tagName === "A") {
-            return { link: startNode, needLabel: false };
-        } else {
-            const link = this.document.createElement("a");
-            link.appendChild(startNode);
-            return { link: startNode.parentElement, needLabel: false };
-        }
-    }
-
-    let needLabel = false;
-    // fixme: use the correct selection, maybe shared.getEditableSelection()
-    let link = findInSelection(this.shared.getEditableSelection(), "a");
-    const $link = $(link);
-    const range = getDeepRange(containerNode, {
-        splitText: true,
-        select: true,
-        correctTripleClick: true,
-    });
-    if (!range) {
-        return {};
-    }
-    const isContained =
-        containerNode.contains(range.startContainer) && containerNode.contains(range.endContainer);
-    if (
-        link &&
-        (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)
-    ) {
-        // Expand the current link to include the whole selection.
-        let before = link.previousSibling;
-        while (before !== null && range.intersectsNode(before)) {
-            link.insertBefore(before, link.firstChild);
-            before = link.previousSibling;
-        }
-        let after = link.nextSibling;
-        while (after !== null && range.intersectsNode(after)) {
-            link.appendChild(after);
-            after = link.nextSibling;
-        }
-    } else if (!link && isContained) {
-        link = document.createElement("a");
-        if (range.collapsed) {
-            range.insertNode(link);
-            needLabel = true;
-        } else {
-            link.appendChild(range.extractContents());
-            range.insertNode(link);
-        }
-    }
-    return { link, needLabel };
-}

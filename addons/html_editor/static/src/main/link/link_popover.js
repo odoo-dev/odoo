@@ -5,8 +5,7 @@ export class LinkPopover extends Component {
     static props = {
         linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         onApply: Function,
-        dispatch: Function,
-        close: Function,
+        onRemove: Function,
     };
     setup() {
         this.state = useState({
@@ -17,16 +16,12 @@ export class LinkPopover extends Component {
     onClickApply() {
         this.state.editing = false;
         this.props.onApply(this.state.url);
-        this.props.dispatch("RESTORE_SELECTION");
     }
     onClickEdit() {
         this.state.editing = true;
         this.state.url = this.props.linkEl.href;
     }
     onClickRemove() {
-        this.props.dispatch("REMOVE_LINK");
-        this.props.close();
-        // todo selection is not restored after removing a link
-        this.props.dispatch("RESTORE_SELECTION");
+        this.props.onRemove();
     }
 }
