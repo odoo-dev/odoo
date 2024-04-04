@@ -1,3 +1,61 @@
+export const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = [
+    "primary",
+    "secondary",
+    "alpha",
+    "beta",
+    "gamma",
+    "delta",
+    "epsilon",
+    "success",
+    "info",
+    "warning",
+    "danger",
+];
+
+/**
+ * Colors of the default palette, used for substitution in shapes/illustrations.
+ * key: number of the color in the palette (ie, o-color-<1-5>)
+ * value: color hex code
+ */
+export const DEFAULT_PALETTE = {
+    1: "#3AADAA",
+    2: "#7C6576",
+    3: "#F6F6F6",
+    4: "#FFFFFF",
+    5: "#383E45",
+};
+
+/**
+ * These constants are colors that can be edited by the user when using
+ * web_editor in a website context. We keep track of them so that color
+ * palettes and their preview elements can always have the right colors
+ * displayed even if website has redefined the colors during an editing
+ * session.
+ *
+ * @type {string[]}
+ */
+export const EDITOR_COLOR_CSS_VARIABLES = [...COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES];
+
+// o-cc and o-colors
+for (let i = 1; i <= 5; i++) {
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-color-${i}`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-bg`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-bg-gradient`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-headings`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-text`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-primary`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-primary-text`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-secondary`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-secondary-text`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-primary-border`);
+    EDITOR_COLOR_CSS_VARIABLES.push(`o-cc${i}-btn-secondary-border`);
+}
+
+// Grays
+for (let i = 100; i <= 900; i += 100) {
+    EDITOR_COLOR_CSS_VARIABLES.push(`${i}`);
+}
+
 /**
  * Takes a color (rgb, rgba or hex) and returns its hex representation. If the
  * color is given in rgba, the background color of the node whose color we're
@@ -59,14 +117,18 @@ export function rgbToHex(rgb = "", node = null) {
 }
 
 /**
- * Colors of the default palette, used for substitution in shapes/illustrations.
- * key: number of the color in the palette (ie, o-color-<1-5>)
- * value: color hex code
+ * @param {string|number} name
+ * @returns {boolean}
  */
-export const DEFAULT_PALETTE = {
-    1: "#3AADAA",
-    2: "#7C6576",
-    3: "#F6F6F6",
-    4: "#FFFFFF",
-    5: "#383E45",
-};
+export function isColorCombinationName(name) {
+    const number = parseInt(name);
+    return !isNaN(number) && number % 100 !== 0;
+}
+
+/**
+ * @param {string} [value]
+ * @returns {boolean}
+ */
+export function isColorGradient(value) {
+    return value && value.includes("-gradient(");
+}
