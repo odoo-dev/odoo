@@ -150,7 +150,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should create list items after one with a block in it", async () => {
+            test("should create list items after one with a block in it", async () => {
                 await testEditor({
                     contentBefore:
                         '<ol><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ol>',
@@ -325,7 +325,7 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should create list items after one with a block in it", async () => {
+            test("should create list items after one with a block in it", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
@@ -553,7 +553,7 @@ describe("Selection collapsed", () => {
                     });
                 });
 
-                test.todo("should create list items after one with a block in it", async () => {
+                test("should create list items after one with a block in it", async () => {
                     await testEditor({
                         removeCheckIds: true,
                         contentBefore:

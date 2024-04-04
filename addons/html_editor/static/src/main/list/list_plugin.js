@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { removeClass, setTagName, toggleClass, unwrapContents } from "@html_editor/utils/dom";
-import { isEmptyBlock, isVisible } from "@html_editor/utils/dom_info";
+import { isEmptyBlock, isVisible, getDeepestPosition } from "@html_editor/utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "@html_editor/utils/dom_traversal";
 import { getTraversedBlocks } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
@@ -534,6 +534,8 @@ export class ListPlugin extends Plugin {
         if (closestLI.classList.contains("o_checked")) {
             removeClass(newLI, "o_checked");
         }
+        const [anchorNode, anchorOffset] = getDeepestPosition(newLI, 0);
+        this.shared.setSelection({ anchorNode, anchorOffset });
         return true;
     }
 
