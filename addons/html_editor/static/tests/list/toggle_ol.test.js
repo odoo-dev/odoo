@@ -63,62 +63,59 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn an empty paragraph of multiple table cells into a list",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[<br></td>
-                                    <td><br></td>
-                                    <td><br></td>
-                                </tr>
-                                <tr>
-                                    <td><br></td>
-                                    <td><br></td>
-                                    <td><br>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    stepFunction: toggleOrderedList,
-                    contentAfterEdit: unformat(`
-                        <table class="table table-bordered o_selected_table">
-                            <tbody>
-                                <tr>
-                                    <td class="o_selected_td">[<ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                    <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                    <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                </tr>
-                                <tr>
-                                    <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                    <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                    <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    contentAfter: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[]<ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                </tr>
-                                <tr>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                });
-            }
-        );
+        test("should turn an empty paragraph of multiple table cells into a list", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>[<br></td>
+                                <td><br></td>
+                                <td><br></td>
+                            </tr>
+                            <tr>
+                                <td><br></td>
+                                <td><br></td>
+                                <td><br>]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: toggleOrderedList,
+                contentAfterEdit: unformat(`
+                    <table class="table table-bordered o_selected_table">
+                        <tbody>
+                            <tr>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint">[<br></li></ol></td>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint"><br></li></ol></td>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint"><br></li></ol></td>
+                            </tr>
+                            <tr>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint"><br></li></ol></td>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint"><br></li></ol></td>
+                                <td class="o_selected_td"><ol><li placeholder="List" class="o-we-hint">]<br></li></ol></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                contentAfter: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td><ol><li>[<br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                            </tr>
+                            <tr>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li>]<br></li></ol></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
 
         test.todo(
             "should create a new ordered list if current node is inside a nav-item list",

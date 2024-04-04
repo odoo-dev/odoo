@@ -253,6 +253,10 @@ export class ListPlugin extends Plugin {
         if (element.tagName === "P") {
             return this.pToList(element, mode);
         }
+        // @todo @phoenix: check for callbacks registered as resources instead?
+        if (["TD", "TH"].includes(element.tagName)) {
+            return this.tdToList(element, mode);
+        }
         let list;
         const selectionToRestore = { ...this.shared.getEditableSelection() };
         if (element === this.editable) {
@@ -287,6 +291,15 @@ export class ListPlugin extends Plugin {
             selectionToRestore.focusNode = list.firstChild;
         }
         this.shared.setSelection(selectionToRestore, { normalize: false });
+        return list;
+    }
+
+    // @todo @phoenix: move this to table plugin?
+    tdToList(td, mode) {
+        const cursor = this.shared.preserveCursor();
+        const list = insertListAfter(this.document, td.lastChild, mode, [[...td.childNodes]]);
+        cursor.adjust(td, { newNode: list.firstChild });
+        cursor.restore();
         return list;
     }
 

@@ -196,68 +196,60 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn an empty paragraph of multiple table cells into a checklist",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[<br></td>
-                                    <td><br></td>
-                                    <td><br></td>
-                                </tr>
-                                <tr>
-                                    <td><br></td>
-                                    <td><br></td>
-                                    <td><br>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    stepFunction: (editor) => {
-                        toggleCheckList(editor);
-                        for (const li of editor.editable.querySelectorAll("li[id^=checkId-]")) {
-                            li.removeAttribute("id");
-                        }
-                    },
-                    contentAfterEdit: unformat(`
-                        <table class="table table-bordered o_selected_table">
-                            <tbody>
-                                <tr>
-                                    <td class="o_selected_td">[<ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                    <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                    <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                </tr>
-                                <tr>
-                                    <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                    <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                    <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    contentAfter: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[]<ul class="o_checklist"><li><br></li></ul></td>
-                                    <td><ul class="o_checklist"><li><br></li></ul></td>
-                                    <td><ul class="o_checklist"><li><br></li></ul></td>
-                                </tr>
-                                <tr>
-                                    <td><ul class="o_checklist"><li><br></li></ul></td>
-                                    <td><ul class="o_checklist"><li><br></li></ul></td>
-                                    <td><ul class="o_checklist"><li><br></li></ul></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                });
-            }
-        );
+        test("should turn an empty paragraph of multiple table cells into a checklist", async () => {
+            await testEditor({
+                removeCheckIds: true,
+                contentBefore: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>[<br></td>
+                                <td><br></td>
+                                <td><br></td>
+                            </tr>
+                            <tr>
+                                <td><br></td>
+                                <td><br></td>
+                                <td><br>]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: toggleCheckList,
+                contentAfterEdit: unformat(`
+                    <table class="table table-bordered o_selected_table">
+                        <tbody>
+                            <tr>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint">[<br></li></ul></td>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint"><br></li></ul></td>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint"><br></li></ul></td>
+                            </tr>
+                            <tr>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint"><br></li></ul></td>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint"><br></li></ul></td>
+                                <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="o-we-hint">]<br></li></ul></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                contentAfter: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td><ul class="o_checklist"><li>[<br></li></ul></td>
+                                <td><ul class="o_checklist"><li><br></li></ul></td>
+                                <td><ul class="o_checklist"><li><br></li></ul></td>
+                            </tr>
+                            <tr>
+                                <td><ul class="o_checklist"><li><br></li></ul></td>
+                                <td><ul class="o_checklist"><li><br></li></ul></td>
+                                <td><ul class="o_checklist"><li>]<br></li></ul></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
 
         test.todo(
             "should create a new checked list if current node is inside a nav-item list",
