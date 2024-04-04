@@ -22,6 +22,7 @@
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
+ * @property { SelectionPlugin['extractContent'] } extractContent
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
  * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
  * @property { PowerboxPlugin['closePowerbox'] } closePowerbox

@@ -1,23 +1,25 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
-import { getDeepRange, findInSelection, getSelectedNodes } from "@html_editor/utils/selection";
+import { findInSelection } from "@html_editor/utils/selection";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { LinkPopover } from "./link_popover";
-import { reactive } from "@odoo/owl";
 import { unwrapContents } from "@html_editor/utils/dom";
 
-function isLinkActive(editable) {
-    const linkElementAnchor = closestElement(editable.ownerDocument.getSelection().anchorNode, "A");
-    const linkElementFocus = closestElement(editable.ownerDocument.getSelection().focusNode, "A");
+/**
+ * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
+ */
+
+/**
+ * @param {EditorSelection} selection
+ */
+function isLinkActive(selection) {
+    const linkElementAnchor = closestElement(selection.anchorNode, "A");
+    const linkElementFocus = closestElement(selection.focusNode, "A");
     if (linkElementFocus && linkElementAnchor) {
         return linkElementAnchor === linkElementFocus;
     }
     if (linkElementAnchor || linkElementFocus) {
         return true;
-    }
-    const selectedNodes = getSelectedNodes(editable);
-    if (selectedNodes.length === 1) {
-        return closestElement(selectedNodes[0], "A") !== null;
     }
 
     return false;
@@ -37,11 +39,10 @@ export class LinkPlugin extends Plugin {
                 {
                     id: "link",
                     cmd: "CREATE_LINK_ON_SELECTION",
-                    cmdPayload: { options: {} },
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
-                    isFormatApplied: isLinkActive,
+                    isFormatApplied: () => isLinkActive(p.shared.getEditableSelection()),
                 },
             ],
         },
@@ -53,7 +54,7 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: {} });
+                    dispatch("TOGGLE_LINK");
                 },
             },
             {
@@ -62,19 +63,18 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: {} });
+                    dispatch("TOGGLE_LINK");
                 },
             },
         ],
         onSelectionChange: p.handleSelectionChange.bind(p),
     });
     setup() {
-        this.linkState = reactive({ linkElement: null });
-        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom-start" });
+        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom" });
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A") {
                 ev.preventDefault();
-                this.toggleLinkTools({});
+                this.toggleLinkTools({ link: ev.target });
             }
         });
     }
@@ -92,12 +92,6 @@ export class LinkPlugin extends Plugin {
                 this.normalizeLink(payload.node);
                 break;
             }
-            case "REMOVE_LINK":
-                this.removeLink(payload.node);
-                break;
-            case "RESTORE_SELECTION":
-                this.restoreSelection();
-                break;
         }
     }
 
@@ -152,22 +146,18 @@ export class LinkPlugin extends Plugin {
     /**
      * Toggle the Link popover to edit links
      *
+     * @param {Object} options
+     * @param {HTMLElement} options.link
      */
-    toggleLinkTools(options = {}) {
-        const linkElement = this.getOrCreateLink();
-        this.linkState.linkElement = linkElement;
+    toggleLinkTools({ link } = {}) {
+        if (!link) {
+            link = this.getOrCreateLink();
+        }
+        this.linkElement = link;
     }
 
     normalizeLink(root = this.editable) {
         // do the sanitizing here
-    }
-
-    restoreSelection() {
-        const isSelectionRestored =
-            this.document.getSelection() === this.shared.getEditableSelection();
-        if (!this.overlay.isOpen && !isSelectionRestored) {
-            this.shared.setSelection(this.shared.getEditableSelection(), { normalize: false });
-        }
     }
 
     handleSelectionChange() {
@@ -182,24 +172,26 @@ export class LinkPlugin extends Plugin {
             }
             const props = {
                 linkEl,
-                onApply: this.applyUrl.bind(this),
-                dispatch: this.dispatch,
-                close: () => this.overlay.close(),
+                onApply: (url) => {
+                    this.linkElement.href = url;
+                    this.overlay.close();
+                    this.shared.setSelection(this.shared.getEditableSelection());
+                },
+                onRemove: () => {
+                    this.removeLink();
+                    this.overlay.close();
+                    this.shared.setSelection(this.shared.getEditableSelection());
+                },
             };
-            if (linkEl !== this.linkState.linkElement) {
+            if (linkEl !== this.linkElement) {
                 this.overlay.close();
-                this.linkState.linkElement = linkEl;
+                this.linkElement = linkEl;
                 this.overlay.open({ props });
             }
             if (!this.overlay.isOpen) {
                 this.overlay.open({ props });
             }
         }
-    }
-
-    applyUrl(newUrl) {
-        this.linkState.linkElement.href = newUrl;
-        this.overlay.close();
     }
 
     /**
@@ -211,22 +203,31 @@ export class LinkPlugin extends Plugin {
 
     /**
      * get the link from the selection or create one if there is none
+     *
+     * @return {HTMLElement}
      */
     getOrCreateLink() {
-        const linkElement = findInSelection(this.shared.getEditableSelection(), "a");
+        const selection = this.shared.getEditableSelection();
+        const linkElement = findInSelection(selection, "a");
         if (linkElement) {
             return linkElement;
         } else {
             // create a new link element
-            const link = document.createElement("a");
-            const range = getDeepRange(this.editable, { splitText: true, select: true });
-            if (range.collapsed) {
-                link.appendChild(document.createElement("br"));
-                range.insertNode(link);
+            const link = this.document.createElement("a");
+            if (selection.isCollapsed) {
+                // todo: handle this case
             } else {
-                link.appendChild(range.extractContents());
-                range.insertNode(link);
+                const content = this.shared.extractContent(selection);
+                link.append(content);
             }
+            this.shared.domInsert(link);
+            this.shared.setSelection({
+                anchorNode: link,
+                anchorOffset: 0,
+                focusNode: link,
+                focusOffset: link.childNodes.length,
+            });
+            this.dispatch("ADD_STEP");
             return link;
         }
     }
@@ -235,7 +236,7 @@ export class LinkPlugin extends Plugin {
      * Remove the link from the selection
      */
     removeLink() {
-        const link = this.linkState.linkElement;
+        const link = this.linkElement;
         unwrapContents(link);
     }
 }
