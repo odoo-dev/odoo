@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { setSelection } from "@html_editor/utils/selection";
-import { press, queryAllTexts, queryOne } from "@odoo/hoot-dom";
+import { press, queryAllTexts } from "@odoo/hoot-dom";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
@@ -136,15 +136,15 @@ describe("search", () => {
         const { el, editor } = await setupEditor("<p>ab[]</p>");
         insertText(editor, "/");
         await animationFrame();
-        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]);
+        expect(".active .o-we-command-name").toHaveText(commandNames(el)[0]);
 
         insertText(editor, "head");
         await animationFrame();
-        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]); // "Heading 1"
+        expect(".active .o-we-command-name").toHaveText(commandNames(el)[0]); // "Heading 1"
 
         insertText(editor, "/");
         await animationFrame();
-        expect(queryOne(".active .o-we-command-name").innerText).toBe(commandNames(el)[0]);
+        expect(".active .o-we-command-name").toHaveText(commandNames(el)[0]);
     });
 
     test("should filter the Powerbox contents with term, even after a second search and delete backward", async () => {
@@ -153,7 +153,7 @@ describe("search", () => {
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(1);
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
-        expect(queryOne(".active .o-we-command-name").innerText).toBe("Heading 1");
+        expect(".active .o-we-command-name").toHaveText("Heading 1");
 
         insertText(editor, "/headx");
         await animationFrame();
@@ -162,7 +162,7 @@ describe("search", () => {
         press("backspace");
         await animationFrame();
         expect(".o-we-powerbox").toHaveCount(1);
-        expect(queryOne(".active .o-we-command-name").innerText).toBe("Heading 1");
+        expect(".active .o-we-command-name").toHaveText("Heading 1");
         expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
     });
 
