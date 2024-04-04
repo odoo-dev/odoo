@@ -1,5 +1,6 @@
-import { Component, onPatched, onWillRender, useExternalListener, useRef } from "@odoo/owl";
+import { Component, onPatched, useExternalListener, useRef, useState } from "@odoo/owl";
 import { rotate } from "@web/core/utils/arrays";
+import { useBus } from "@web/core/utils/hooks";
 
 /**
  * @todo @phoenix i think that most of the "control" code in this component
@@ -10,22 +11,26 @@ export class Powerbox extends Component {
     static props = {
         document: { validate: (doc) => doc.constructor.name === "HTMLDocument" },
         overlay: Object,
-        state: Object,
+        initialState: Object,
+        bus: Object,
         onApplyCommand: Function,
     };
 
     setup() {
         const ref = useRef("root");
-        this.commandIndex = 0;
+        this.state = useState({
+            commandIndex: 0,
+            commands: this.props.initialState.commands,
+            showCategories: this.props.initialState.showCategories,
+        });
 
-        let lastCommandIndex = 0;
-        onWillRender(() => {
-            if (lastCommandIndex === this.commandIndex) {
-                this.commandIndex = 0;
-                lastCommandIndex = 0;
-            } else {
-                lastCommandIndex = this.commandIndex;
-            }
+        useBus(this.props.bus, "updateCommands", (ev) => {
+            const { commands, showCategories } = ev.detail;
+            Object.assign(this.state, {
+                commands,
+                showCategories,
+                commandIndex: 0,
+            });
         });
 
         onPatched(() => {
@@ -33,7 +38,6 @@ export class Powerbox extends Component {
             if (activeCommand) {
                 activeCommand.scrollIntoView({ block: "nearest", inline: "nearest" });
             }
-            this.props.overlay.updatePosition();
         });
 
         useExternalListener(this.props.document, "keydown", (ev) => {
@@ -50,18 +54,16 @@ export class Powerbox extends Component {
                     break;
                 case "ArrowUp": {
                     ev.preventDefault();
-                    const currentIndex = this.commandIndex;
-                    const nextIndex = rotate(currentIndex, this.commands, -1);
-                    this.commandIndex = nextIndex;
-                    this.render();
+                    const currentIndex = this.state.commandIndex;
+                    const nextIndex = rotate(currentIndex, this.state.commands, -1);
+                    this.state.commandIndex = nextIndex;
                     break;
                 }
                 case "ArrowDown": {
                     ev.preventDefault();
-                    const currentIndex = this.commandIndex;
-                    const nextIndex = rotate(currentIndex, this.commands, 1);
-                    this.commandIndex = nextIndex;
-                    this.render();
+                    const currentIndex = this.state.commandIndex;
+                    const nextIndex = rotate(currentIndex, this.state.commands, 1);
+                    this.state.commandIndex = nextIndex;
                     break;
                 }
             }
@@ -72,25 +74,16 @@ export class Powerbox extends Component {
         });
     }
 
-    get commands() {
-        return this.props.state.commands;
-    }
-
-    get showCategories() {
-        return this.props.state.showCategories;
-    }
-
     applyCommand(command) {
         this.props.onApplyCommand(command);
         this.props.overlay.close();
     }
 
     applyCurrentCommand() {
-        this.applyCommand(this.commands[this.commandIndex]);
+        this.applyCommand(this.state.commands[this.state.commandIndex]);
     }
 
     onMouseEnter(commandIndex) {
-        this.commandIndex = commandIndex;
-        this.render();
+        this.state.commandIndex = commandIndex;
     }
 }
