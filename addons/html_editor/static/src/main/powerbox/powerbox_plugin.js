@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { isEmpty } from "@html_editor/utils/dom_info";
 import { Powerbox } from "./powerbox";
-import { reactive } from "@odoo/owl";
+import { EventBus } from "@odoo/owl";
 
 /**
  * @typedef {Object} CategoriesConfig
@@ -41,8 +41,6 @@ export class PowerboxPlugin extends Plugin {
     });
 
     setup() {
-        this.state = reactive({});
-
         this.onApplyCommand = () => {};
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
@@ -50,10 +48,14 @@ export class PowerboxPlugin extends Plugin {
             position: "bottom",
             onClose: () => this.onClose?.(),
         });
+
+        this.bus = new EventBus();
+        this.initialState = {};
         this.overlayProps = {
             document: this.document,
             overlay: this.overlay,
-            state: this.state,
+            bus: this.bus,
+            initialState: this.initialState,
             onApplyCommand: (command) => {
                 this.onApplyCommand();
                 command.action(this.dispatch);
@@ -66,28 +68,38 @@ export class PowerboxPlugin extends Plugin {
      */
     openPowerbox({ commands, categories, onApplyCommand = () => {}, onClose = () => {} } = {}) {
         this.closePowerbox();
-        this.state.showCategories = Boolean(categories);
-        this.state.categories = categories;
-        this.state.commands = categories ? this.getOrderCommands(commands, categories) : commands;
         this.onApplyCommand = onApplyCommand;
         this.onClose = onClose;
-        this.overlay.open({ props: this.overlayProps });
+        this.initialState.commands = categories
+            ? this.getOrderCommands(commands, categories)
+            : commands;
+        this.initialState.showCategories = !!categories;
+
+        this.overlay.open({
+            props: this.overlayProps,
+        });
     }
     /**
      * @param {Command[]} commands
      * @param {Category[]} categories
      */
     updatePowerbox(commands, categories) {
-        this.state.commands = categories
-            ? this.getOrderCommands(commands, this.state.categories)
+        this.initialState.commands = categories
+            ? this.getOrderCommands(commands, categories)
             : commands;
-        this.state.showCategories = Boolean(categories);
+        this.initialState.showCategories = !!categories;
+
+        if (this.isPowerboxOpen) {
+            this.bus.trigger("updateCommands", this.initialState);
+        }
         this.overlay.open({ props: this.overlayProps });
     }
     getOrderCommands(commands, categories) {
-        const orderCommands = [];
+        let orderCommands = [];
         for (const category of categories) {
-            orderCommands.push(...commands.filter((command) => command.category === category.id));
+            orderCommands = orderCommands.concat(
+                commands.filter((command) => command.category === category.id)
+            );
         }
         return orderCommands;
     }
