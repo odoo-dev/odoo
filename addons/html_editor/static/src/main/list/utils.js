@@ -13,6 +13,8 @@ export function createList(document, mode) {
     return node;
 }
 
+// @todo @phoenix Change this API (and implementation), as all use cases seem to
+// create a list with a single LI
 export function insertListAfter(document, afterNode, mode, content = []) {
     const list = createList(document, mode);
     afterNode.after(list);
