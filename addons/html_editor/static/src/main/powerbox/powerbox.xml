@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.Powerbox">
-        <div t-ref="root" class="o-we-powerbox py-2 bg-white overflow-auto" style="width:300px;max-height:40vh;" t-on-mousedown.stop="">
+        <div t-ref="root" class="o-we-powerbox py-2 bg-white overflow-auto my-1" style="width:300px;max-height:40vh;" t-on-mousedown.stop="">
             <t t-foreach="state.commands" t-as="command" t-key="command_index">
                 <t t-if="state.showCategories and command.category !== lastCategory">
                     <div class="o-we-category mx-3 my-1 text-uppercase"><t t-esc="command.categoryName"/></div></t>

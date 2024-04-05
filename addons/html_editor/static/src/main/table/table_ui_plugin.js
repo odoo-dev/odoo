@@ -29,21 +29,19 @@ export class TableUIPlugin extends Plugin {
     setup() {
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.picker = this.shared.createOverlay(TablePicker, {
-            position: "bottom",
+            position: "bottom-start",
         });
 
         this.activeTd = null;
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.colMenu = this.shared.createOverlay(TableMenu, {
-            position: "top",
+            position: "top-fit",
             offsetY: 0,
-            width: "auto",
         });
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.rowMenu = this.shared.createOverlay(TableMenu, {
-            position: "left",
-            height: "auto",
+            position: "left-fit",
         });
         this.addDomListener(this.editable, "pointermove", this.onMouseMove);
     }

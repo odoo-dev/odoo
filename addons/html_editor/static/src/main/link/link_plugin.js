@@ -57,7 +57,7 @@ export class LinkPlugin extends Plugin {
     });
     setup() {
         this.linkState = reactive({ linkElement: null });
-        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom" });
+        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom-start" });
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A") {
                 ev.preventDefault();

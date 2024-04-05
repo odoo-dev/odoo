@@ -65,7 +65,7 @@ export class Overlay {
             this._remove = this.plugin.services.overlay.add(
                 EditorOverlay,
                 markRaw({
-                    overlay: this,
+                    config: this.config,
                     Component: this.C,
                     editable: this.plugin.editable,
                     props,

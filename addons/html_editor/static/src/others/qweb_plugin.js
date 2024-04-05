@@ -11,7 +11,7 @@ export class QWebPlugin extends Plugin {
     });
 
     setup() {
-        this.picker = this.shared.createOverlay(QWebPicker, { position: "top" });
+        this.picker = this.shared.createOverlay(QWebPicker, { position: "top-start" });
         this.addDomListener(this.editable, "click", this.onClick);
         this.groupIndex = 0;
     }
