@@ -20,7 +20,7 @@ import { getTraversedNodes } from "../utils/selection";
 export class DomPlugin extends Plugin {
     static name = "dom";
     static dependencies = ["selection", "split"];
-    static shared = ["domInsert"];
+    static shared = ["domInsert", "copyAttributes"];
     static resources = () => ({
         powerboxCommands: {
             name: _t("Separator"),
@@ -260,6 +260,17 @@ export class DomPlugin extends Plugin {
         }
         this.shared.setSelection({ anchorNode: lastPosition[0], anchorOffset: lastPosition[1] });
         return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
+    }
+
+    copyAttributes(source, target) {
+        this.dispatch("CLEAN_NODE", { node: source });
+        for (const attr of source.attributes) {
+            if (attr.name === "class") {
+                target.classList.add(...source.classList);
+            } else {
+                target.setAttribute(attr.name, attr.value);
+            }
+        }
     }
 
     // --------------------------------------------------------------------------
