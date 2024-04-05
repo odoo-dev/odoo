@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { LinkPopover } from "./link";
+import { LinkPopover } from "./link_popover";
 import { reactive } from "@odoo/owl";
 
 function isLinkActive(editable) {
@@ -146,22 +146,28 @@ export class LinkPlugin extends Plugin {
 
     handleSelectionChange() {
         const sel = this.shared.getEditableSelection();
-        const linkel = closestElement(sel.anchorNode, "A");
-        if (!linkel) {
+        const linkEl = closestElement(sel.anchorNode, "A");
+        if (!linkEl) {
             this.overlay.close();
+            return;
         }
         const props = {
-            linkState: this.linkState,
-            overlay: this.overlay,
+            linkEl,
+            onApply: this.applyUrl.bind(this),
         };
-        if (linkel && linkel !== this.linkState.linkElement) {
+        if (linkEl !== this.linkState.linkElement) {
             this.overlay.close();
-            this.linkState.linkElement = linkel;
+            this.linkState.linkElement = linkEl;
             this.overlay.open({ props });
         }
-        if (linkel && !this.overlay.isOpen) {
+        if (!this.overlay.isOpen) {
             this.overlay.open({ props });
         }
+    }
+
+    applyUrl(newUrl) {
+        this.linkState.linkElement.href = newUrl;
+        this.overlay.close();
     }
 
     /**
