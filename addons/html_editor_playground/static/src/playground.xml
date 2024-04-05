@@ -33,12 +33,12 @@
                         iframe="config.inIframe"
                         toolbar="config.showToolbar"
                         Plugins="Plugins"
-                        classListEditor="classListEditor"/>
+                        classList="classList"/>
                 </div>
                 <t t-if="state.showWysiwyg">
                     <div class="d-flex">
                         <div class="m-2 p-1" style="width:600px;min-height: 500px;max-height:500px;overflow:auto;">
-                            <CurrentWysiwyg options="{value: testHtml}" startWysiwyg="startWysiwyg" />
+                            <WysiwygLoader />
                         </div>
                     </div>
                 </t>
