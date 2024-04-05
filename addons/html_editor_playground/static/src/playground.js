@@ -1,4 +1,4 @@
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
@@ -40,14 +40,30 @@ const PluginSets = {
     extras: EXTRA_PLUGINS,
 };
 
+class WysiwygLoader extends Component {
+    static template = xml`
+        <CurrentWysiwyg options="{value: testHtml}" startWysiwyg="startWysiwyg" />
+    `;
+    static components = { CurrentWysiwyg: null };
+
+    setup() {
+        this.testHtml = testHtml;
+        onWillStart(async () => {
+            await loadBundle("web_editor.backend_assets_wysiwyg");
+            this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
+                "@web_editor/js/wysiwyg/wysiwyg"
+            ).Wysiwyg;
+        });
+    }
+}
+
 export class Playground extends Component {
     static template = "html_editor.Playground";
-    static components = { Wysiwyg };
+    static components = { Wysiwyg, WysiwygLoader };
     static props = ["*"];
 
     setup() {
         this.testHtml = testHtml;
-        // this.editor = useWysiwyg("html", { ...defaultConfig });
         this.state = useState({
             showWysiwyg: false,
         });
@@ -56,28 +72,14 @@ export class Playground extends Component {
             inIframe: false,
             pluginSet: "base",
         });
-        onWillStart(async () => {
-            await loadBundle("web_editor.backend_assets_wysiwyg");
-        this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
-            "@web_editor/js/wysiwyg/wysiwyg"
-        ).Wysiwyg;
-        })
     }
 
     get Plugins() {
         return PluginSets[this.config.pluginSet];
     }
 
-    get classListEditor() {
-        const classList = [];
-        if (this.config.hasQWebPlugin) {
-            classList.push("odoo-editor-qweb");
-        }
-        return classList;
-    }
-
-    toggleWysiwyg() {
-        this.state.showWysiwyg = !this.state.showWysiwyg;
+    get classList() {
+        return (this.config.pluginSet === "extras") ? ["odoo-editor-qweb"] : [];
     }
 }
 
