@@ -10,7 +10,7 @@ export class Powerbox extends Component {
     static template = "html_editor.Powerbox";
     static props = {
         document: { validate: (doc) => doc.constructor.name === "HTMLDocument" },
-        overlay: Object,
+        close: Function,
         initialState: Object,
         bus: Object,
         onApplyCommand: Function,
@@ -44,7 +44,7 @@ export class Powerbox extends Component {
             const key = ev.key;
             switch (key) {
                 case "Escape":
-                    this.props.overlay.close();
+                    this.props.close();
                     break;
                 case "Enter":
                 case "Tab":
@@ -70,13 +70,13 @@ export class Powerbox extends Component {
         });
 
         useExternalListener(document, "mousedown", (ev) => {
-            this.props.overlay.close();
+            this.props.close();
         });
     }
 
     applyCommand(command) {
         this.props.onApplyCommand(command);
-        this.props.overlay.close();
+        this.props.close();
     }
 
     applyCurrentCommand() {
