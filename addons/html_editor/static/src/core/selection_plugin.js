@@ -30,7 +30,7 @@ export class SelectionPlugin extends Plugin {
         this.activeSelection = this.makeSelection(false, false);
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
         this.addDomListener(this.document, "click", (ev) => {
-            if (ev.detail >= 3) {
+            if (ev.detail >= 3 && this.editable.contains(ev.target)) {
                 const { anchorNode, anchorOffset } = this.getEditableSelection();
                 const [focusNode, focusOffset] = endPos(anchorNode);
                 this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
