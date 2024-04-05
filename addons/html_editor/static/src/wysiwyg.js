@@ -29,13 +29,16 @@ export function useWysiwyg(target, config = {}) {
             // grab the inner body instead
             el = ref.el.contentDocument.body;
             if (config.copyCss) {
+                const doc = el.ownerDocument;
                 for (const sheet of document.styleSheets) {
-                    const targetSheet = el.ownerDocument
-                        .querySelector("head")
-                        .appendChild(el.ownerDocument.createElement("style")).sheet;
-                    for (const rule of sheet.cssRules) {
-                        targetSheet.insertRule(rule.cssText);
+                    const rules = [];
+                    for (const r of sheet.cssRules) {
+                        rules.push(r.cssText);
                     }
+                    const cssRules = rules.join(" ");
+                    const styleTag = doc.createElement("style");
+                    styleTag.appendChild(doc.createTextNode(cssRules));
+                    doc.head.appendChild(styleTag);
                 }
             }
         }

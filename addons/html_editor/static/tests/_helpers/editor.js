@@ -1,7 +1,6 @@
 import { expect, getFixture } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { useService } from "@web/core/utils/hooks";
 import { useWysiwyg } from "@html_editor/wysiwyg";
 import { getContent, getSelection, setContent } from "./selection";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
@@ -29,7 +28,6 @@ class TestEditor extends Component {
         const target = this.props.inIFrame
             ? () => this.ref.el.contentDocument.body.firstChild
             : "target";
-        const hotkeyService = useService("hotkey");
         onMounted(() => {
             let el = this.ref.el;
             if (this.props.inIFrame) {
@@ -38,7 +36,6 @@ class TestEditor extends Component {
                 }</style>`;
                 this.ref.el.contentWindow.document.body.innerHTML = html;
                 el = target();
-                hotkeyService.registerIframe(this.ref.el);
             }
             el.setAttribute("contenteditable", true); // so we can focus it if needed
             if (this.props.content) {
