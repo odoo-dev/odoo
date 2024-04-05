@@ -1,7 +1,8 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
-import { toggleCheckList } from "../_helpers/user_actions";
+import { getContent } from "../_helpers/selection";
+import { insertText, toggleCheckList } from "../_helpers/user_actions";
 
 describe("Range collapsed", () => {
     describe("Insert", () => {
@@ -45,6 +46,20 @@ describe("Range collapsed", () => {
                 stepFunction: toggleCheckList,
                 contentAfter: '<ul class="o_checklist"><li><h1>ab[]cd</h1></li></ul>',
             });
+        });
+
+        test("should turn an empty heading into a checklist and display the right hint", async () => {
+            const { el, editor } = await setupEditor("<h1>[]</h1>");
+            expect(getContent(el)).toBe(`<h1 placeholder="Heading 1" class="o-we-hint">[]</h1>`);
+
+            toggleCheckList(editor);
+            expect(getContent(el)).toBe(
+                `<ul class="o_checklist"><li><h1 placeholder="Heading 1" class="o-we-hint">[]</h1></li></ul>`
+            );
+
+            insertText(editor, "a");
+            editor.dispatch("NORMALIZE", { node: el });
+            expect(getContent(el)).toBe(`<ul class="o_checklist"><li><h1>a[]</h1></li></ul>`);
         });
 
         test("should turn a paragraph in a div into a checklist", async () => {
