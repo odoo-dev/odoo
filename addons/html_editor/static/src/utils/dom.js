@@ -68,16 +68,6 @@ export function setTagName(el, newTagName) {
     return n;
 }
 
-export function copyAttributes(source, target) {
-    for (const attr of source.attributes) {
-        if (attr.name === "class") {
-            target.classList.add(...source.classList);
-        } else {
-            target.setAttribute(attr.name, attr.value);
-        }
-    }
-}
-
 /**
  * Removes the specified class names from the given element.  If the element has
  * no more class names after removal, the "class" attribute is removed.
