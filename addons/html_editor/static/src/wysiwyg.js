@@ -45,7 +45,7 @@ export class Wysiwyg extends Component {
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
         Plugins: { type: Array, optional: true },
-        classListEditor: { type: Array, optional: true },
+        classList: { type: Array, optional: true },
     };
 
     setup() {
@@ -55,7 +55,7 @@ export class Wysiwyg extends Component {
         this.editor = useWysiwyg("content", {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
-            classList: this.props.classListEditor,
+            classList: this.props.classList,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
         });
         onMounted(() => {
