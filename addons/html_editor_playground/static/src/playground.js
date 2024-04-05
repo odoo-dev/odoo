@@ -14,7 +14,9 @@ const testHtml = `Hello Phoenix editor!
         <tr><td>4</td><td>5</td><td>6</td></tr>
     </tbody>
 </table>
-<p>this is another paragraph</p>
+<p><font style="color: rgb(30, 125, 30);">this is another paragraph with color</font></p>
+<p><font style="color: rgb(125, 125, 0);">this is another paragraph with color 2</font></p>
+<p><font style="background: rgb(247, 173, 107);">this is another paragraph with background color</font></p>
 <div>
     <t t-if="test">
         QWeb Hello

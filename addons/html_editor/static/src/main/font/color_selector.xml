@@ -53,6 +53,11 @@
                         <t t-if="state.activeTab==='custom'">
                             <div class="p-1">
                                 <div class="o_colorpicker_section" t-on-click="onColorClick">
+                                    <t t-foreach="this.props.getUsedCustomColors()" t-as="color" t-key="color_index">
+                                        <button class="o_color_button btn" t-att-data-color="color" t-attf-style="background-color: {{color}}"/>
+                                    </t>
+                                </div>
+                                <div class="o_colorpicker_section" t-on-click="onColorClick">
                                     <button data-color="black" class="btn o_color_button bg-black"></button>
                                     <button data-color="900" class="o_color_button btn" style="background-color: var(--900)"></button>
                                     <button data-color="800" class="o_color_button btn" style="background-color: var(--800)"></button>

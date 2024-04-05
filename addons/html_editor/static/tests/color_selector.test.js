@@ -59,3 +59,26 @@ test("can render and apply color theme", async () => {
     await waitFor(".text-o-color-1");
     expect(".text-o-color-1").toHaveCount(1);
 });
+
+test("custom colors used in the editor are shown in the colorpicker", async () => {
+    await setupEditor(
+        `<p>
+            <font style="color: rgb(255, 0, 0);">[test]</font>
+            <font style="color: rgb(0, 255, 0);">test</font>
+        </p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click(".btn:contains('Custom')");
+    await animationFrame();
+    expect("button[data-color='rgb(255, 0, 0)']").toHaveCount(1);
+    expect(queryOne("button[data-color='rgb(255, 0, 0)']").style.backgroundColor).toBe(
+        "rgb(255, 0, 0)"
+    );
+    expect("button[data-color='rgb(0, 255, 0)']").toHaveCount(1);
+    expect(queryOne("button[data-color='rgb(0, 255, 0)']").style.backgroundColor).toBe(
+        "rgb(0, 255, 0)"
+    );
+});

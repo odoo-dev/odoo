@@ -24,6 +24,7 @@ export class ColorSelector extends Component {
         type: String, // either foreground or background
         dispatch: Function,
         getSelection: Function,
+        getUsedCustomColors: Function,
     };
 
     setup() {
