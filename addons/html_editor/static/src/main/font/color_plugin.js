@@ -5,6 +5,7 @@ import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { getDeepRange, getSelectedNodes } from "@html_editor/utils/selection";
 import { isColorGradient } from "@html_editor/utils/color";
 import { ColorSelector } from "./color_selector";
+import { isCSSColor } from "@web/core/utils/colors";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
@@ -44,7 +45,7 @@ function hasColor(element, mode) {
 export class ColorPlugin extends Plugin {
     static name = "color";
     static dependencies = ["selection", "split"];
-    static resources = () => ({
+    static resources = (p) => ({
         toolbarGroup: {
             id: "color",
             sequence: 28,
@@ -54,6 +55,7 @@ export class ColorPlugin extends Plugin {
                     Component: ColorSelector,
                     props: {
                         type: "foreground",
+                        getUsedCustomColors: () => p.getUsedCustomColors("color"),
                     },
                 },
                 {
@@ -61,6 +63,7 @@ export class ColorPlugin extends Plugin {
                     Component: ColorSelector,
                     props: {
                         type: "background",
+                        getUsedCustomColors: () => p.getUsedCustomColors("background"),
                     },
                 },
             ],
@@ -71,9 +74,6 @@ export class ColorPlugin extends Plugin {
         switch (command) {
             case "APPLY_COLOR":
                 this.applyColor(payload.color, payload.mode);
-                break;
-            case "SET_CSS_COLORS":
-                this.setCSSVariables(payload.el);
                 break;
         }
     }
@@ -226,6 +226,17 @@ export class ColorPlugin extends Plugin {
         //     newSelection.addRange(range);
         // }
         // return [...fontsSet, ...colore
+    }
+
+    getUsedCustomColors(mode) {
+        const allFont = this.editable.querySelectorAll("font");
+        const usedCustomColors = new Set();
+        for (const font of allFont) {
+            if (isCSSColor(font.style[mode])) {
+                usedCustomColors.add(font.style[mode]);
+            }
+        }
+        return usedCustomColors;
     }
 
     /**
