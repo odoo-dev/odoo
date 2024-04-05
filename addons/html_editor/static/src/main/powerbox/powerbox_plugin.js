@@ -1,8 +1,9 @@
-import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { isEmpty } from "@html_editor/utils/dom_info";
+import { reactive } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
+import { rotate } from "@web/core/utils/arrays";
 import { Powerbox } from "./powerbox";
-import { EventBus } from "@odoo/owl";
 
 /**
  * @typedef {Object} CategoriesConfig
@@ -31,7 +32,7 @@ function target(selection) {
 export class PowerboxPlugin extends Plugin {
     static name = "powerbox";
     static dependencies = ["overlay", "selection", "history"];
-    static shared = ["openPowerbox", "updatePowerbox", "closePowerbox", "isPowerboxOpen"];
+    static shared = ["openPowerbox", "updatePowerbox", "closePowerbox"];
     static resources = () => ({
         temp_hints: {
             text: _t('Type "/" for commands'),
@@ -41,26 +42,24 @@ export class PowerboxPlugin extends Plugin {
     });
 
     setup() {
-        this.onApplyCommand = () => {};
-
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.overlay = this.shared.createOverlay(Powerbox, {
             position: "bottom-start",
             onClose: () => this.onClose?.(),
         });
 
-        this.bus = new EventBus();
-        this.initialState = {};
+        this.state = reactive({});
         this.overlayProps = {
             document: this.document,
             close: () => this.overlay.close(),
-            bus: this.bus,
-            initialState: this.initialState,
-            onApplyCommand: (command) => {
-                this.onApplyCommand();
-                command.action(this.dispatch);
+            state: this.state,
+            activateCommand: (currentIndex) => {
+                this.state.currentIndex = currentIndex;
             },
+            applyCommand: this.applyCommand.bind(this),
         };
+
+        this.addDomListener(this.editable, "keydown", this.onKeyDown);
     }
 
     /**
@@ -70,44 +69,66 @@ export class PowerboxPlugin extends Plugin {
         this.closePowerbox();
         this.onApplyCommand = onApplyCommand;
         this.onClose = onClose;
-        this.initialState.commands = categories
-            ? this.getOrderCommands(commands, categories)
-            : commands;
-        this.initialState.showCategories = !!categories;
-
-        this.overlay.open({
-            props: this.overlayProps,
-        });
+        this.updatePowerbox(commands, categories);
     }
+
     /**
      * @param {Command[]} commands
-     * @param {Category[]} categories
+     * @param {Category[]?} categories
      */
     updatePowerbox(commands, categories) {
-        this.initialState.commands = categories
-            ? this.getOrderCommands(commands, categories)
-            : commands;
-        this.initialState.showCategories = !!categories;
-
-        if (this.isPowerboxOpen) {
-            this.bus.trigger("updateCommands", this.initialState);
+        if (categories) {
+            const orderCommands = [];
+            for (const category of categories) {
+                orderCommands.push(
+                    ...commands.filter((command) => command.category === category.id)
+                );
+            }
+            commands = orderCommands;
         }
+        Object.assign(this.state, {
+            showCategories: !!categories,
+            commands,
+            currentIndex: 0,
+        });
         this.overlay.open({ props: this.overlayProps });
     }
-    getOrderCommands(commands, categories) {
-        let orderCommands = [];
-        for (const category of categories) {
-            orderCommands = orderCommands.concat(
-                commands.filter((command) => command.category === category.id)
-            );
-        }
-        return orderCommands;
-    }
+
     closePowerbox() {
-        this.onClose?.();
         this.overlay.close();
     }
-    isPowerboxOpen() {
-        return this.overlay.isOpen;
+
+    onKeyDown(ev) {
+        if (!this.overlay.isOpen) {
+            return;
+        }
+        const key = ev.key;
+        switch (key) {
+            case "Escape":
+                this.closePowerbox();
+                break;
+            case "Enter":
+            case "Tab":
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                this.applyCommand(this.state.commands[this.state.currentIndex]);
+                break;
+            case "ArrowUp": {
+                ev.preventDefault();
+                this.state.currentIndex = rotate(this.state.currentIndex, this.state.commands, -1);
+                break;
+            }
+            case "ArrowDown": {
+                ev.preventDefault();
+                this.state.currentIndex = rotate(this.state.currentIndex, this.state.commands, 1);
+                break;
+            }
+        }
+    }
+
+    applyCommand(command) {
+        this.onApplyCommand(command);
+        command.action(this.dispatch);
+        this.closePowerbox();
     }
 }
