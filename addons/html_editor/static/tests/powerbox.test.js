@@ -474,6 +474,28 @@ test("press 'arrowup' to navigate", async () => {
     expect(".active .o-we-command-name").toHaveText("Heading 1");
 });
 
+test("press 'arrowleft' should close PowerBox", async () => {
+    const { editor } = await setupEditor("<p>ab[]c</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+
+    press("arrowleft");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+});
+
+test("press 'arrowright' should close PowerBox", async () => {
+    const { editor } = await setupEditor("<p>ab[]c</p>");
+    insertText(editor, "/head");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+
+    press("arrowright");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+});
+
 test.tags("desktop")("select command with 'mouseenter'", async () => {
     const { editor, el } = await setupEditor("<p>ab[]</p>");
     insertText(editor, "/head");

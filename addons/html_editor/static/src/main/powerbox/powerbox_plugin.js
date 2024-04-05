@@ -123,6 +123,11 @@ export class PowerboxPlugin extends Plugin {
                 this.state.currentIndex = rotate(this.state.currentIndex, this.state.commands, 1);
                 break;
             }
+            case "ArrowLeft":
+            case "ArrowRight": {
+                this.closePowerbox();
+                break;
+            }
         }
     }
 
