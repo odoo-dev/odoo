@@ -203,6 +203,17 @@ describe("search", () => {
         expect(".o-we-powerbox").toHaveCount(1);
         expect(commandNames(el)).toEqual(["Heading 1"]);
     });
+
+    test("powerbox doesn't need to be displayed to apply a command (fast search)", async () => {
+        const { el, editor } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/head");
+        expect(".o-we-powerbox").toHaveCount(0);
+
+        press("enter");
+        expect(".o-we-powerbox").toHaveCount(0);
+        expect(getContent(el)).toBe("<h1>ab[]</h1>");
+    });
+
     describe("close", () => {
         test("should close powerbox if there is no result", async () => {
             const { el, editor } = await setupEditor("<p>a[]</p>");
