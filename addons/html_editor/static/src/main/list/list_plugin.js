@@ -1,16 +1,10 @@
-import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
-import {
-    copyAttributes,
-    removeClass,
-    setTagName,
-    toggleClass,
-    unwrapContents,
-} from "@html_editor/utils/dom";
+import { removeClass, setTagName, toggleClass, unwrapContents } from "@html_editor/utils/dom";
 import { isEmptyBlock, isVisible } from "@html_editor/utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "@html_editor/utils/dom_traversal";
 import { getTraversedBlocks } from "@html_editor/utils/selection";
+import { _t } from "@web/core/l10n/translation";
 import { applyToTree, compareListTypes, createList, getListMode, insertListAfter } from "./utils";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
@@ -26,7 +20,7 @@ function isListActive(listMode) {
 
 export class ListPlugin extends Plugin {
     static name = "list";
-    static dependencies = ["tabulation", "split", "selection", "delete"];
+    static dependencies = ["tabulation", "split", "selection", "delete", "dom"];
     /** @type { (p: ListPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
@@ -267,8 +261,7 @@ export class ListPlugin extends Plugin {
             list = insertListAfter(this.document, callingNode, mode, [group]);
         } else {
             list = insertListAfter(this.document, element, mode, [element]);
-            this.dispatch("CLEAN_NODE", { node: element });
-            copyAttributes(element, list);
+            this.shared.copyAttributes(element, list);
         }
         this.shared.setSelection(selectionToRestore, { normalize: false });
         return list;
@@ -281,8 +274,7 @@ export class ListPlugin extends Plugin {
     pToList(p, mode) {
         const selectionToRestore = { ...this.shared.getEditableSelection() };
         const list = insertListAfter(this.document, p, mode, [[...p.childNodes]]);
-        this.dispatch("CLEAN_NODE", { node: p });
-        copyAttributes(p, list);
+        this.shared.copyAttributes(p, list);
         p.remove();
 
         if (selectionToRestore.anchorNode === p) {
