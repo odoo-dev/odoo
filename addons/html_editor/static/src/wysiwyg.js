@@ -28,6 +28,16 @@ export function useWysiwyg(target, config = {}) {
         if (el.tagName === "IFRAME") {
             // grab the inner body instead
             el = ref.el.contentDocument.body;
+            if (config.copyCss) {
+                for (const sheet of document.styleSheets) {
+                    const targetSheet = el.ownerDocument
+                        .querySelector("head")
+                        .appendChild(el.ownerDocument.createElement("style")).sheet;
+                    for (const rule of sheet.cssRules) {
+                        targetSheet.insertRule(rule.cssText);
+                    }
+                }
+            }
         }
         editor.attachTo(el);
     });
@@ -44,6 +54,7 @@ export class Wysiwyg extends Component {
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
+        copyCss: { type: Boolean, optional: true },
         Plugins: { type: Array, optional: true },
         classList: { type: Array, optional: true },
     };
@@ -56,6 +67,7 @@ export class Wysiwyg extends Component {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
             classList: this.props.classList,
+            copyCss: this.props.copyCss,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
         });
         onMounted(() => {

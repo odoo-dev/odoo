@@ -31,6 +31,7 @@
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;${!config.inIframe ? 'overflow:auto;' : ''}`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"
+                        copyCss="true"
                         toolbar="config.showToolbar"
                         Plugins="Plugins"
                         classList="classList"/>

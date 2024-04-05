@@ -72,6 +72,7 @@ class TestEditor extends Component {
  */
 export async function setupEditor(content, options = {}) {
     const config = options.config || {};
+    config.copyCss = true;
     const inIFrame = "inIFrame" in options ? options.inIFrame : false;
     const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
