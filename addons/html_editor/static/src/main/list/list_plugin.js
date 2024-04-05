@@ -267,13 +267,8 @@ export class ListPlugin extends Plugin {
             list = insertListAfter(this.document, callingNode, mode, [group]);
         } else {
             list = insertListAfter(this.document, element, mode, [element]);
+            this.dispatch("CLEAN_NODE", { node: element });
             copyAttributes(element, list);
-            if (selectionToRestore.anchorNode === element) {
-                selectionToRestore.anchorNode = list.firstElementChild;
-            }
-            if (selectionToRestore.focusNode === element) {
-                selectionToRestore.focusNode = list.firstElementChild;
-            }
         }
         this.shared.setSelection(selectionToRestore, { normalize: false });
         return list;
