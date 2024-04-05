@@ -259,7 +259,7 @@ export class DomPlugin extends Plugin {
             lastPosition = getDeepestPosition(...lastPosition);
         }
         this.shared.setSelection({ anchorNode: lastPosition[0], anchorOffset: lastPosition[1] });
-        return [...firstInsertedNodes, ...insertedNodes, ...lastInsertedNodes];
+        return firstInsertedNodes.concat(insertedNodes).concat(lastInsertedNodes);
     }
 
     copyAttributes(source, target) {
