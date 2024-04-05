@@ -1,9 +1,9 @@
-import { expect, test } from "@odoo/hoot";
-import { setupEditor, testEditor } from "./_helpers/editor";
-import { getContent, setContent } from "./_helpers/selection";
 import { Plugin } from "@html_editor/plugin";
-import { click } from "@odoo/hoot-dom";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { expect, test } from "@odoo/hoot";
+import { click, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { setupEditor, testEditor } from "./_helpers/editor";
+import { getContent, setContent, setSelection } from "./_helpers/selection";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -88,4 +88,14 @@ test("event handlers are properly cleaned up after destruction", async () => {
     editor.destroy();
     click(document.body);
     expect(count).toBe(1);
+});
+
+test("triple click outside of the Editor", async () => {
+    const { el } = await setupEditor("<p>[]abc</p>", {});
+    const anchorNode = el.parentElement;
+    setSelection({ anchorNode, anchorOffset: 0 });
+    expect(document.getSelection().anchorNode).toBe(anchorNode);
+
+    manuallyDispatchProgrammaticEvent(el.parentElement, "click", { detail: 3 });
+    expect(document.getSelection().anchorNode).toBe(anchorNode);
 });
