@@ -92,10 +92,11 @@ export function deduceURLfromText(text, link) {
  */
 export function getOrCreateLink({ containerNode, startNode } = {}) {
     if (startNode) {
-        if ($(startNode).is("a")) {
+        if (startNode.tagName === "A") {
             return { link: startNode, needLabel: false };
         } else {
-            $(startNode).wrap('<a href="#"/>');
+            const link = this.document.createElement("a");
+            link.appendChild(startNode);
             return { link: startNode.parentElement, needLabel: false };
         }
     }

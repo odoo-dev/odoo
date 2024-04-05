@@ -1,13 +1,26 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
+import { getDeepRange, findInSelection, getSelectedNodes } from "@html_editor/utils/selection";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { LinkPopover } from "./link_popover";
 import { reactive } from "@odoo/owl";
+import { unwrapContents } from "@html_editor/utils/dom";
 
 function isLinkActive(editable) {
-    const selection = editable.ownerDocument.getSelection();
-    const linkElement = closestElement(selection.anchorNode, "A");
-    return linkElement;
+    const linkElementAnchor = closestElement(editable.ownerDocument.getSelection().anchorNode, "A");
+    const linkElementFocus = closestElement(editable.ownerDocument.getSelection().focusNode, "A");
+    if (linkElementFocus && linkElementAnchor) {
+        return linkElementAnchor === linkElementFocus;
+    }
+    if (linkElementAnchor || linkElementFocus) {
+        return true;
+    }
+    const selectedNodes = getSelectedNodes(editable);
+    if (selectedNodes.length === 1) {
+        return closestElement(selectedNodes[0], "A") !== null;
+    }
+
+    return false;
 }
 
 export class LinkPlugin extends Plugin {
@@ -24,7 +37,7 @@ export class LinkPlugin extends Plugin {
                 {
                     id: "link",
                     cmd: "CREATE_LINK_ON_SELECTION",
-                    cmdPayload: { options: { editing: true } },
+                    cmdPayload: { options: {} },
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
@@ -40,7 +53,7 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: { forceDialog: true } });
+                    dispatch("TOGGLE_LINK", { options: {} });
                 },
             },
             {
@@ -49,7 +62,7 @@ export class LinkPlugin extends Plugin {
                 category: "navigation",
                 fontawesome: "fa-link",
                 action(dispatch) {
-                    dispatch("TOGGLE_LINK", { options: { forceDialog: true } });
+                    dispatch("TOGGLE_LINK", { options: {} });
                 },
             },
         ],
@@ -61,7 +74,7 @@ export class LinkPlugin extends Plugin {
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A") {
                 ev.preventDefault();
-                this.toggleLinkTools({ link: ev.target });
+                this.toggleLinkTools({});
             }
         });
     }
@@ -79,6 +92,12 @@ export class LinkPlugin extends Plugin {
                 this.normalizeLink(payload.node);
                 break;
             }
+            case "REMOVE_LINK":
+                this.removeLink(payload.node);
+                break;
+            case "RESTORE_SELECTION":
+                this.restoreSelection();
+                break;
         }
     }
 
@@ -135,8 +154,7 @@ export class LinkPlugin extends Plugin {
      *
      */
     toggleLinkTools(options = {}) {
-        const selection = this.shared.getEditableSelection();
-        const linkElement = closestElement(selection.anchorNode, "A");
+        const linkElement = this.getOrCreateLink();
         this.linkState.linkElement = linkElement;
     }
 
@@ -144,24 +162,38 @@ export class LinkPlugin extends Plugin {
         // do the sanitizing here
     }
 
+    restoreSelection() {
+        const isSelectionRestored =
+            this.document.getSelection() === this.shared.getEditableSelection();
+        if (!this.overlay.isOpen && !isSelectionRestored) {
+            this.shared.setSelection(this.shared.getEditableSelection(), { normalize: false });
+        }
+    }
+
     handleSelectionChange() {
         const sel = this.shared.getEditableSelection();
-        const linkEl = closestElement(sel.anchorNode, "A");
-        if (!linkEl) {
+        if (!sel.isCollapsed) {
             this.overlay.close();
-            return;
-        }
-        const props = {
-            linkEl,
-            onApply: this.applyUrl.bind(this),
-        };
-        if (linkEl !== this.linkState.linkElement) {
-            this.overlay.close();
-            this.linkState.linkElement = linkEl;
-            this.overlay.open({ props });
-        }
-        if (!this.overlay.isOpen) {
-            this.overlay.open({ props });
+        } else {
+            const linkEl = closestElement(sel.anchorNode, "A");
+            if (!linkEl) {
+                this.overlay.close();
+                return;
+            }
+            const props = {
+                linkEl,
+                onApply: this.applyUrl.bind(this),
+                dispatch: this.dispatch,
+                close: () => this.overlay.close(),
+            };
+            if (linkEl !== this.linkState.linkElement) {
+                this.overlay.close();
+                this.linkState.linkElement = linkEl;
+                this.overlay.open({ props });
+            }
+            if (!this.overlay.isOpen) {
+                this.overlay.open({ props });
+            }
         }
     }
 
@@ -174,6 +206,36 @@ export class LinkPlugin extends Plugin {
      * Open the link tools or the image link tool depending on the selection.
      */
     openLinkToolsFromSelection() {
-        this.toggleLinkTools();
+        this.handleSelectionChange();
+    }
+
+    /**
+     * get the link from the selection or create one if there is none
+     */
+    getOrCreateLink() {
+        const linkElement = findInSelection(this.shared.getEditableSelection(), "a");
+        if (linkElement) {
+            return linkElement;
+        } else {
+            // create a new link element
+            const link = document.createElement("a");
+            const range = getDeepRange(this.editable, { splitText: true, select: true });
+            if (range.collapsed) {
+                link.appendChild(document.createElement("br"));
+                range.insertNode(link);
+            } else {
+                link.appendChild(range.extractContents());
+                range.insertNode(link);
+            }
+            return link;
+        }
+    }
+
+    /**
+     * Remove the link from the selection
+     */
+    removeLink() {
+        const link = this.linkState.linkElement;
+        unwrapContents(link);
     }
 }

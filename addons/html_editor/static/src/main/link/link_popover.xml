@@ -14,7 +14,7 @@
                 <a href="#" class="mx-1 o_we_edit_link text-dark" t-on-click="onClickEdit" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Edit Link')}">
                     <i class="fa fa-edit"></i>
                 </a>
-                <a href="#" class="ms-1 o_we_remove_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Remove Link')}">
+                <a href="#" class="ms-1 o_we_remove_link text-dark" t-on-click="onClickRemove" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Remove Link')}">
                     <i class="fa fa-chain-broken"></i>
                 </a>
             </div>
