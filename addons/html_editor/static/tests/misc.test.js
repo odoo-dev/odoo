@@ -98,4 +98,11 @@ test("triple click outside of the Editor", async () => {
 
     manuallyDispatchProgrammaticEvent(el.parentElement, "click", { detail: 3 });
     expect(document.getSelection().anchorNode).toBe(anchorNode);
+    expect(getContent(el)).toBe("<p>abc</p>");
+
+    const p = el.querySelector("p");
+    setSelection({ anchorNode: p, anchorOffset: 0 });
+    manuallyDispatchProgrammaticEvent(p, "click", { detail: 3 });
+    expect(getContent(el)).toBe("<p>[abc]</p>");
+    expect(document.getSelection().anchorNode).toBe(p.childNodes[0]);
 });
