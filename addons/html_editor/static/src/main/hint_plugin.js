@@ -26,6 +26,7 @@ export class HintPlugin extends Plugin {
     }
 
     destroy() {
+        super.destroy();
         this.clearHints();
     }
 

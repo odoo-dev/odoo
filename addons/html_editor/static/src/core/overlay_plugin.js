@@ -21,6 +21,7 @@ export class OverlayPlugin extends Plugin {
     }
 
     destroy() {
+        super.destroy();
         for (const overlay of this.overlays) {
             overlay.close();
         }
