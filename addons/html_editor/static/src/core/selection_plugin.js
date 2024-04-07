@@ -43,7 +43,7 @@ export class SelectionPlugin extends Plugin {
      */
     updateActiveSelection() {
         const selection = this.document.getSelection();
-        if (selection.rangeCount === 0) {
+        if (!selection || selection.rangeCount === 0) {
             return;
         }
         const range = selection.getRangeAt(0);
@@ -124,6 +124,7 @@ export class SelectionPlugin extends Plugin {
     getEditableSelection() {
         const selection = this.document.getSelection();
         if (
+            selection &&
             selection.rangeCount &&
             this.editable.contains(selection.anchorNode) &&
             (selection.focusNode === selection.anchorNode ||
