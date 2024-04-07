@@ -14,6 +14,19 @@ export function wysiwyg(el, env, config = {}) {
     return editor;
 }
 
+function copyCss(sourceDoc, targetDoc) {
+    for (const sheet of sourceDoc.styleSheets) {
+        const rules = [];
+        for (const r of sheet.cssRules) {
+            rules.push(r.cssText);
+        }
+        const cssRules = rules.join(" ");
+        const styleTag = targetDoc.createElement("style");
+        styleTag.appendChild(targetDoc.createTextNode(cssRules));
+        targetDoc.head.appendChild(styleTag);
+    }
+}
+
 /**
  * @param {string | Function} target
  * @param {import("./editor").EditorConfig} config
@@ -24,25 +37,28 @@ export function useWysiwyg(target, config = {}) {
     const ref = typeof target === "string" ? useRef(target) : null;
     const editor = new Editor(config, env.services);
     onMounted(() => {
-        let el = ref ? ref.el : target();
+        const el = ref ? ref.el : target();
         if (el.tagName === "IFRAME") {
             // grab the inner body instead
-            el = ref.el.contentDocument.body;
+            const body = ref.el.contentDocument.body;
             if (config.copyCss) {
-                const doc = el.ownerDocument;
-                for (const sheet of document.styleSheets) {
-                    const rules = [];
-                    for (const r of sheet.cssRules) {
-                        rules.push(r.cssText);
-                    }
-                    const cssRules = rules.join(" ");
-                    const styleTag = doc.createElement("style");
-                    styleTag.appendChild(doc.createTextNode(cssRules));
-                    doc.head.appendChild(styleTag);
-                }
+                copyCss(document, body.ownerDocument);
             }
+            editor.attachTo(body);
+            // horrible workaround: firefox seems to reinitialize the document in
+            // an iframe, so we need to reattach the editor to the new document
+            setTimeout(() => {
+                if (editor.editable && el.contentDocument !== body.ownerDocument) {
+                    editor.destroy(); // to cleanup plugins
+                    editor.plugins = [];
+                    copyCss(document, el.contentDocument);
+                    editor.shared = {};
+                    editor.attachTo(el.contentDocument.body);
+                }
+            });
+        } else {
+            editor.attachTo(el);
         }
-        editor.attachTo(el);
     });
     onWillDestroy(() => editor.destroy());
     return editor;
