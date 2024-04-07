@@ -1,6 +1,23 @@
-import { describe, test, expect } from "@odoo/hoot";
-import { setupEditor } from "./_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { setupEditor } from "./_helpers/editor";
+
+test("getEditableSelection should work, even if getSelection returns null", async () => {
+    const { editor } = await setupEditor("<p>a[b]</p>");
+    let selection = editor.shared.getEditableSelection();
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+
+    // it happens sometimes in firefox that the selection is null
+    patchWithCleanup(document, {
+        getSelection: () => null,
+    });
+
+    selection = editor.shared.getEditableSelection();
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+});
 
 describe("inEditable", () => {
     test("inEditable should be true", async () => {
