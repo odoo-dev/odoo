@@ -208,6 +208,8 @@ export class ClipboardPlugin extends Plugin {
 
         ev.preventDefault();
 
+        this.dispatch("HISTORY_STAGE_SELECTION");
+
         this.resources["before_paste"].forEach((handler) => handler(selection));
 
         this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||

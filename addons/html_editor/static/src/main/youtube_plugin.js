@@ -38,27 +38,7 @@ export class YoutubePlugin extends Plugin {
                 description: _t("Embed the youtube video in the document."),
                 fontawesome: "fa-youtube-play",
                 action: async () => {
-                    let videoElement;
-                    // @todo @phoenix: should this.getYoutubeVideoElement be configurable?
-                    if (this.getYoutubeVideoElement) {
-                        videoElement = await this.getYoutubeVideoElement(youtubeUrl[0]);
-                    } else {
-                        // @todo @phoenix: is this still relevant? if getYoutubeVideoElement is not configurable, this code should be removed.
-                        videoElement = document.createElement("iframe");
-                        videoElement.setAttribute("width", "560");
-                        videoElement.setAttribute("height", "315");
-                        videoElement.setAttribute(
-                            "src",
-                            `https://www.youtube.com/embed/${encodeURIComponent(youtubeUrl[1])}`
-                        );
-                        videoElement.setAttribute("title", "YouTube video player");
-                        videoElement.setAttribute("frameborder", "0");
-                        videoElement.setAttribute(
-                            "allow",
-                            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        );
-                        videoElement.setAttribute("allowfullscreen", "1");
-                    }
+                    const videoElement = await this.getYoutubeVideoElement(youtubeUrl[0]);
                     this.shared.domInsert(videoElement);
                     this.dispatch("ADD_STEP");
                 },
