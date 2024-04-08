@@ -10,31 +10,35 @@ export function initElementForEdition(element, options = {}) {
     );
     if (orphanInlineChildNodes && !options.allowInlineAtRoot) {
         const childNodes = [...element.childNodes];
-        const tempEl = document.createElement("temp-container");
+        const blockMap = new WeakMap();
+        for (const node of childNodes) {
+            blockMap.set(node, isBlock(node));
+        }
+        const newChildren = [];
         let currentP = document.createElement("p");
         currentP.style.marginBottom = "0";
-        do {
-            const node = childNodes.shift();
-            const nodeIsBlock = isBlock(node);
+        for (let i = 0; i < childNodes.length; i++) {
+            const node = childNodes[i];
+            const nodeIsBlock = blockMap.get(node);
             const nodeIsBR = node.nodeName === "BR";
             // Append to the P unless child is block or an unneeded BR.
             if (!(nodeIsBlock || (nodeIsBR && currentP.childNodes.length))) {
                 currentP.append(node);
             }
             // Break paragraphs on blocks and BR.
-            if (nodeIsBlock || nodeIsBR || childNodes.length === 0) {
+            if (nodeIsBlock || nodeIsBR || childNodes.length === i + 1) {
                 // Ensure we don't add an empty P or a P containing only
                 // formating spaces that should not be visible.
                 if (currentP.childNodes.length && currentP.innerHTML.trim() !== "") {
-                    tempEl.append(currentP);
+                    newChildren.push(currentP);
                 }
                 currentP = currentP.cloneNode();
                 // Append block children directly to the template.
                 if (nodeIsBlock) {
-                    tempEl.append(node);
+                    newChildren.push(node);
                 }
             }
-        } while (childNodes.length);
-        element.replaceChildren(...tempEl.childNodes);
+        }
+        element.replaceChildren(...newChildren);
     }
 }
