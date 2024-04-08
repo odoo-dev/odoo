@@ -140,7 +140,7 @@ export class ListPlugin extends Plugin {
         // @todo @phoenix: original implementation removed whitespace-only text nodes from traversedNodes.
         // Check if this is necessary.
 
-        const traversedBlocks = new Set(getTraversedBlocks(this.editable));
+        const traversedBlocks = getTraversedBlocks(this.editable);
 
         // Keep deepest blocks only.
         for (const block of traversedBlocks) {

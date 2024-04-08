@@ -404,8 +404,15 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
     return [...traversedNodes];
 }
 
+/**
+ * Returns a Set of traversed blocks within the given range.
+ *
+ * @param {HTMLElement} editable
+ * @param {Range} [range=getDeepRange(editable)]
+ * @returns {Set<HTMLElement>}
+ */
 export function getTraversedBlocks(editable, range = getDeepRange(editable)) {
-    return [...new Set(getTraversedNodes(editable, range).map(closestBlock).filter(Boolean))];
+    return new Set(getTraversedNodes(editable, range).map(closestBlock).filter(Boolean));
 }
 
 /**
