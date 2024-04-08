@@ -59,7 +59,7 @@ export function useWysiwyg(target, config = {}) {
             editor.attachTo(el);
         }
     });
-    onWillDestroy(() => editor.destroy());
+    onWillDestroy(() => editor.destroy(true));
     return editor;
 }
 
