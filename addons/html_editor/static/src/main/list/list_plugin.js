@@ -140,11 +140,20 @@ export class ListPlugin extends Plugin {
         // @todo @phoenix: original implementation removed whitespace-only text nodes from traversedNodes.
         // Check if this is necessary.
 
-        // Classify selected blocks.
+        const traversedBlocks = new Set(getTraversedBlocks(this.editable));
+
+        // Keep deepest blocks only.
+        for (const block of traversedBlocks) {
+            if (descendants(block).some((descendant) => traversedBlocks.has(descendant))) {
+                traversedBlocks.delete(block);
+            }
+        }
+
+        // Classify traversed blocks.
         const sameModeListItems = new Set();
         const nonListBlocks = new Set();
         const listsToSwitch = new Set();
-        for (const block of getTraversedBlocks(this.editable)) {
+        for (const block of traversedBlocks) {
             if (["OL", "UL"].includes(block.tagName) || !block.isContentEditable) {
                 continue;
             }
@@ -157,13 +166,6 @@ export class ListPlugin extends Plugin {
                 }
             } else {
                 nonListBlocks.add(block);
-            }
-        }
-
-        // Keep deepest blocks only.
-        for (const block of nonListBlocks) {
-            if (descendants(block).some((descendant) => nonListBlocks.has(descendant))) {
-                nonListBlocks.delete(block);
             }
         }
 
