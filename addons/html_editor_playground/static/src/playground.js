@@ -3,10 +3,14 @@ import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
+import { Counter } from "./counter";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
 <p><em>this is another paragraph</em></p>
+<p>Embedded element here (with all plugins)
+    <span data-embedded="counter"/>
+</p>
 <div>this is a div</div>
 <table class="table table-bordered">
     <tbody>
@@ -33,8 +37,8 @@ const testHtml = `Hello Phoenix editor!
 </div>
 <p>this is a link: <a href="http://test.com">link</a></p>
 <p>this is another link: <a>link2</a></p>
-
 `;
+
 
 const PluginSets = {
     core: CORE_PLUGINS,
@@ -74,6 +78,10 @@ export class Playground extends Component {
             inIframe: false,
             pluginSet: "base",
         });
+        this.embeddedElements = [{
+            name: "counter",
+            Component: Counter
+        }];
     }
 
     get Plugins() {
