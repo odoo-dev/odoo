@@ -40,22 +40,21 @@ export function useWysiwyg(target, config = {}) {
         const el = ref ? ref.el : target();
         if (el.tagName === "IFRAME") {
             // grab the inner body instead
-            const body = ref.el.contentDocument.body;
-            if (config.copyCss) {
-                copyCss(document, body.ownerDocument);
-            }
-            editor.attachTo(body);
-            // horrible workaround: firefox seems to reinitialize the document in
-            // an iframe, so we need to reattach the editor to the new document
-            setTimeout(() => {
-                if (editor.editable && el.contentDocument !== body.ownerDocument) {
-                    editor.destroy(); // to cleanup plugins
-                    editor.plugins = [];
-                    copyCss(document, el.contentDocument);
-                    editor.shared = {};
+            const attachEditor = () => {
+                if (!editor.isDestroyed) {
+                    if (config.copyCss) {
+                        copyCss(document, el.contentDocument);
+                    }
                     editor.attachTo(el.contentDocument.body);
                 }
-            });
+            };
+            if (el.contentDocument.readyState === "complete") {
+                attachEditor();
+            } else {
+                // in firefox, iframe is not immediately available. we need to wait
+                // for it to be ready before mounting editor
+                el.addEventListener("load", attachEditor, { once: true });
+            }
         } else {
             editor.attachTo(el);
         }
