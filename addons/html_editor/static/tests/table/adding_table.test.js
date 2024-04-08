@@ -6,10 +6,14 @@ import { insertText } from "../_helpers/user_actions";
 import { unformat } from "../_helpers/format";
 import { press, waitFor } from "@odoo/hoot-dom";
 
+function expectContentToBe(el, html) {
+    expect(getContent(el)).toBe(unformat(html));
+}
+
 test("can add a table using the powerbox and keyboard", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>");
     expect(".o-we-powerbox").toHaveCount(0);
-    expect(getContent(el)).toBe(`<p>a[]</p>`);
+    expectContentToBe(el, `<p>a[]</p>`);
 
     // open powerbox
     insertText(editor, "/");
@@ -30,9 +34,9 @@ test("can add a table using the powerbox and keyboard", async () => {
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
     expect(".o-we-tablepicker").toHaveCount(0);
-    expect(getContent(el)).toBe(
-        unformat(`
-        <p>a</p>
+    expectContentToBe(
+        el,
+        `<p>a</p>
         <table class="table table-bordered o_table">
             <tbody>
                 <tr>
@@ -52,9 +56,24 @@ test("can add a table using the powerbox and keyboard", async () => {
                 </tr>
             </tbody>
         </table>
-        <p></p>
-    `)
+        <p></p>`
     );
+});
+
+test("can close table picker with escape", async () => {
+    const { el, editor } = await setupEditor("<p>a[]</p>");
+    insertText(editor, "/");
+    await waitFor(".o-we-powerbox");
+    insertText(editor, "table");
+    expectContentToBe(el, "<p>a/table[]</p>");
+    await animationFrame();
+    press("Enter");
+    await waitFor(".o-we-tablepicker");
+    expect(".o-we-tablepicker").toHaveCount(1);
+    expectContentToBe(el, "<p>a[]</p>");
+    press("escape");
+    await animationFrame();
+    expect(".o-we-tablepicker").toHaveCount(0);
 });
 
 test.tags("iframe")("in iframe, can add a table using the powerbox and keyboard", async () => {

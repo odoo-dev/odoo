@@ -23,7 +23,7 @@ export class TablePicker extends Component {
             const key = ev.key;
             switch (key) {
                 case "Escape":
-                    this.props.close();
+                    this.props.overlay.close();
                     break;
                 case "Enter":
                     ev.preventDefault();
