@@ -142,16 +142,13 @@ describe("Range collapsed", () => {
             }
         );
 
-        test.todo(
-            "should only keep dir attribute when converting a non Paragraph element",
-            async () => {
-                await testEditor({
-                    contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
-                    stepFunction: toggleUnorderedList,
-                    contentAfter: '<ul dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
-                });
-            }
-        );
+        test("should only keep dir attribute when converting a non Paragraph element", async () => {
+            await testEditor({
+                contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                stepFunction: toggleUnorderedList,
+                contentAfter: '<ul dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+            });
+        });
 
         test("should keep all attributes when converting a Paragraph element", async () => {
             await testEditor({

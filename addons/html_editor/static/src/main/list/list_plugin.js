@@ -261,7 +261,9 @@ export class ListPlugin extends Plugin {
             list = insertListAfter(this.document, callingNode, mode, [group]);
         } else {
             list = insertListAfter(this.document, element, mode, [element]);
-            this.shared.copyAttributes(element, list);
+            if (element.hasAttribute("dir")) {
+                list.setAttribute("dir", element.getAttribute("dir"));
+            }
         }
         this.shared.setSelection(selectionToRestore, { normalize: false });
         return list;
