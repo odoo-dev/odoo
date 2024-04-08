@@ -91,6 +91,7 @@ export class Editor {
     startPlugins() {
         const Plugins = sortPlugins(this.config.Plugins || CORE_PLUGINS);
         const plugins = new Map();
+        const dispatch = this.dispatch.bind(this);
         for (const P of Plugins) {
             if (P.name === "") {
                 throw new Error(`Missing plugin name (class ${P.constructor.name})`);
@@ -109,17 +110,6 @@ export class Editor {
                 }
             }
             plugins.set(P.name, P);
-            // debug
-            const dispatch = (command, payload) => {
-                let str = payload;
-                if (typeof payload === "object") {
-                    str = JSON.stringify(payload);
-                }
-                if (window.debug) {
-                    console.log(`[${P.name}] ${command} (payload=${str})`);
-                }
-                this.dispatch(command, payload);
-            };
             const plugin = new P(
                 this.document,
                 this.editable,
