@@ -230,7 +230,7 @@ export class ListPlugin extends Plugin {
                 }
             }
         }
-        removeClass(list, "o_checklist");
+        removeClass(newList, "o_checklist");
         if (newMode === "CL") {
             newList.classList.add("o_checklist");
         }
