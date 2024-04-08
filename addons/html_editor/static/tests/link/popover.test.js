@@ -1,8 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { setContent } from "../_helpers/selection";
+import { setContent, getContent } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
-import { waitUntil, waitFor, click } from "@odoo/hoot-dom";
-// import { insertText } from "../_helpers/user_actions";
+import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
 
 describe("should open a popover", () => {
     test("should open a popover when the selection is inside a link and close outside of a link", async () => {
@@ -34,27 +33,54 @@ describe("should open a popover", () => {
 });
 
 describe("popover should switch UI depending on editing state", () => {
-    test("after clicking on apply button, the popover should be closed", async () => {
-        await setupEditor("<p>this is a <a>li[]nk</a></p>");
-        await waitFor(".o-we-linkpopover");
-        // setSelection({
-        //     anchorNode: editor.document.querySelector(".o_we_href_input_link"),
-        //     anchorOffset: 0,
-        //     focusNode: editor.document.querySelector(".o_we_href_input_link"),
-        //     focusOffset: 0,
-        // });
-        // click(".o_we_href_input_link");
-        // insertText(editor, "http://test.com/");
-        click(".o_we_apply_link");
-        await waitUntil(() => !document.querySelector(".o-we-linkpopover"));
-        expect(".o-we-linkpopover").toHaveCount(0);
-        // expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">link</a></p>');
-    });
     test("after clicking on edit button, the popover should switch to editing mode", async () => {
         await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
         await waitFor(".o-we-linkpopover");
         click(".o_we_edit_link");
         await waitFor(".o_we_href_input_link");
         expect(".o_we_href_input_link").toHaveValue("http://test.com/");
+    });
+    test("after clicking on apply button, the selection should be restored", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await waitFor(".o_we_href_input_link");
+        click(".o_we_href_input_link");
+        click(".o_we_apply_link");
+        await waitFor(".o_we_edit_link");
+        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+    });
+    test("after clicking on apply button, the popover should be with the non editing mode, e.g. with three buttons", async () => {
+        await setupEditor("<p>this is a <a>li[]nk</a></p>");
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_href_input_link");
+        click(".o_we_apply_link");
+        await waitFor(".o_we_edit_link");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        expect(".o_we_copy_link").toHaveCount(1);
+        expect(".o_we_edit_link").toHaveCount(1);
+        expect(".o_we_remove_link").toHaveCount(1);
+    });
+});
+
+describe("popover should edit/remove the link", () => {
+    test("after apply url on a link without href, the link element should be updated", async () => {
+        const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
+        await waitFor(".o_we_href_input_link");
+        queryOne(".o_we_href_input_link").focus();
+        // mimic the link input behavior
+        for (const char of "http://test.com/") {
+            press(char);
+        }
+        await waitFor(".o_we_apply_link");
+        click(".o_we_apply_link");
+        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+    });
+    test("after clicking on remove button, the link element should be unwrapped", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_remove_link");
+        await waitUntil(() => !document.querySelector(".o-we-linkpopover"));
+        expect(getContent(el)).toBe("<p>this is a link[]</p>");
     });
 });
