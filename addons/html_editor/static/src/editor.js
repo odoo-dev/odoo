@@ -71,6 +71,9 @@ export class Editor {
     }
 
     attachTo(editable) {
+        if (this.isDestroyed || this.editable) {
+            throw new Error("Cannot re-attach an editor");
+        }
         this.editable = editable;
         this.document = editable.ownerDocument;
         if (this.config.innerHTML) {

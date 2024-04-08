@@ -14,6 +14,20 @@ test("can instantiate a Editor", async () => {
     expect(getContent(el)).toBe(`<div>a<strong>[dddb]</strong></div>`);
 });
 
+test("cannot reattach an editor", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>", {});
+    expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
+    expect(() => editor.attachTo(el)).toThrow("Cannot re-attach an editor");
+});
+
+test("cannot reattach a destroyed editor", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>", {});
+    expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
+    editor.destroy();
+    expect(getContent(el)).toBe(`<p>[]</p>`);
+    expect(() => editor.attachTo(el)).toThrow("Cannot re-attach an editor");
+});
+
 test.tags("iframe")("can instantiate a Editor in an iframe", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", { inIFrame: true });
     expect("iframe").toHaveCount(1);
