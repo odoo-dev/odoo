@@ -1,7 +1,9 @@
 import { CLIPBOARD_WHITELISTS } from "@html_editor/core/clipboard_plugin";
 import { setSelection } from "@html_editor/utils/selection";
-import { describe, test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { dispatch, press } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
+import { onRpc } from "@web/../tests/web_test_helpers";
 import { testEditor } from "./_helpers/editor";
 import { setSelection as setTestSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
@@ -1925,7 +1927,7 @@ describe("link", () => {
 
 describe("images", () => {
     describe("range collapsed", () => {
-        test.todo("should paste and transform an image URL in a p", async () => {
+        test("should paste and transform an image URL in a p (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
@@ -1933,17 +1935,16 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    press("Enter");
                 },
                 contentAfter:
                     '<p>ab<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]cd</p>',
             });
         });
 
-        test.todo("should paste and transform an image URL in a span", async () => {
+        test("should paste and transform an image URL in a span", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
@@ -1951,17 +1952,16 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    press("Enter");
                 },
                 contentAfter:
                     '<p>a<span class="a">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</span>d</p>',
             });
         });
 
-        test.todo("should paste and transform an image URL in an existing link", async () => {
+        test("should paste and transform an image URL in an existing link", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
@@ -1969,55 +1969,51 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(0);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</a>d</p>',
             });
         });
 
-        test.todo("should paste an image URL as a link in a p", async () => {
+        test("should paste an image URL as a link in a p (1)", async () => {
             const url = "https://download.odoocdn.com/icons/website/static/description/icon.png";
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("ArrowDown");
+                    press("Enter");
                 },
-                contentAfter: `<p><a href="${url}">${url}</a>[]</p>`,
+                contentAfter: `<p><a href="${url}">${url}[]</a></p>`,
             });
         });
 
-        test.todo(
-            "should not revert a history step when pasting an image URL as a link",
-            async () => {
-                const url =
-                    "https://download.odoocdn.com/icons/website/static/description/icon.png";
-                await testEditor({
-                    contentBefore: "<p>[]</p>",
-                    stepFunction: async (editor) => {
-                        // paste text to have a history step recorded
-                        await pasteText(editor, "*should not disappear*");
-                        await pasteText(editor, url);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>*should not disappear*<a href="${url}">${url}</a>[]</p>`,
-                });
-            }
-        );
+        test("should not revert a history step when pasting an image URL as a link (1)", async () => {
+            const url = "https://download.odoocdn.com/icons/website/static/description/icon.png";
+            await testEditor({
+                contentBefore: "<p>[]</p>",
+                stepFunction: async (editor) => {
+                    // paste text to have a history step recorded
+                    await pasteText(editor, "*should not disappear*");
+                    await pasteText(editor, url);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Pick the second command (Paste as URL)
+                    press("ArrowDown");
+                    press("Enter");
+                },
+                contentAfter: `<p>*should not disappear*<a href="${url}">${url}[]</a></p>`,
+            });
+        });
     });
 
     describe("range not collapsed", () => {
-        test.todo("should paste and transform an image URL in a p", async () => {
+        test("should paste and transform an image URL in a p (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
@@ -2025,17 +2021,16 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    press("Enter");
                 },
                 contentAfter:
                     '<p>ab<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]cd</p>',
             });
         });
 
-        test.todo("should paste and transform an image URL in a span", async () => {
+        test("should paste and transform an image URL in a span", async () => {
             await testEditor({
                 contentBefore:
                     '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
@@ -2044,17 +2039,16 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    press("Enter");
                 },
                 contentAfter:
                     '<p>a<span class="a">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</span>d</p>',
             });
         });
 
-        test.todo("should paste and transform an image URL inside an existing link", async () => {
+        test("should paste and transform an image URL inside an existing link", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
                 stepFunction: async (editor) => {
@@ -2062,76 +2056,69 @@ describe("images", () => {
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(0);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">b<img src="https://download.odoocdn.com/icons/website/static/description/icon.png">[]c</a>d</p>',
             });
         });
 
-        test.todo("should paste an image URL as a link in a p", async () => {
+        test("should paste an image URL as a link in a p (2)", async () => {
             const url = "https://download.odoocdn.com/icons/website/static/description/icon.png";
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("ArrowDown");
+                    press("Enter");
                 },
-                contentAfter: `<p>ab<a href="${url}">${url}</a>[]cd</p>`,
+                contentAfter: `<p>ab<a href="${url}">${url}[]</a>cd</p>`,
             });
         });
 
-        test.todo(
-            "should not revert a history step when pasting an image URL as a link",
-            async () => {
-                const url =
-                    "https://download.odoocdn.com/icons/website/static/description/icon.png";
-                await testEditor({
-                    contentBefore: "<p>[]</p>",
-                    stepFunction: async (editor) => {
-                        // paste text (to have a history step recorded)
-                        await pasteText(editor, "abxxxcd");
-                        // select xxx in "<p>ab[xxx]cd</p>""
-                        const p = editor.editable.querySelector("p");
-                        const selection = {
-                            anchorNode: p.childNodes[1],
-                            anchorOffset: 2,
-                            focusNode: p.childNodes[1],
-                            focusOffset: 5,
-                        };
-                        setTestSelection(selection, editor.document);
-                        editor._computeHistorySelection();
-                        // paste url
-                        await pasteText(editor, url);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>ab<a href="${url}">${url}</a>[]cd</p>`,
-                });
-            }
-        );
+        test("should not revert a history step when pasting an image URL as a link (2)", async () => {
+            const url = "https://download.odoocdn.com/icons/website/static/description/icon.png";
+            await testEditor({
+                contentBefore: "<p>[]</p>",
+                stepFunction: async (editor) => {
+                    // paste text (to have a history step recorded)
+                    await pasteText(editor, "abxxxcd");
+                    // select xxx in "<p>ab[xxx]cd</p>""
+                    const p = editor.editable.querySelector("p");
+                    const selection = {
+                        anchorNode: p.childNodes[1],
+                        anchorOffset: 2,
+                        focusNode: p.childNodes[1],
+                        focusOffset: 5,
+                    };
+                    setTestSelection(selection, editor.document);
+                    // paste url
+                    await pasteText(editor, url);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Pick the second command (Paste as URL)
+                    press("ArrowDown");
+                    press("Enter");
+                },
+                contentAfter: `<p>ab<a href="${url}">${url}[]</a>cd</p>`,
+            });
+        });
 
-        test.todo("should restore selection after pasting image URL followed by UNDO", async () => {
+        test("should restore selection after pasting image URL followed by UNDO", async () => {
             const url = "https://download.odoocdn.com/icons/website/static/description/icon.png";
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick first command (Embed image)
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("Enter");
                     // Undo
-                    // TODO @phoenix: still need nexTick here?
-                    // await nextTick();
                     undo(editor);
                 },
                 contentAfter: "<p>[abc]</p>",
@@ -2140,11 +2127,11 @@ describe("images", () => {
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("ArrowDown");
+                    press("Enter");
                     // Undo
                     undo(editor);
                 },
@@ -2156,191 +2143,208 @@ describe("images", () => {
 
 describe("youtube video", () => {
     describe("range collapsed", () => {
-        test.todo("should paste and transform a youtube URL in a p", async () => {
+        beforeEach(() => {
+            onRpc("/html_editor/video_url/data", (request) => {
+                return { embed_url: request.json().params.video_url };
+            });
+        });
+        test("should paste and transform a youtube URL in a p (1)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    press("Enter");
+                    // Wait for the getYoutubeVideoElement promise to resolve.
+                    await new Promise((resolve) => setTimeout(resolve));
                 },
-                contentAfter:
-                    '<p>ab<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="1"></iframe>[]cd</p>',
+                contentAfter: `<p>ab</p><div data-oe-expression="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="media_iframe_video"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"></iframe></div><p>[]cd</p>`,
             });
         });
 
-        test.todo("should paste and transform a youtube URL in a span", async () => {
+        test("should paste and transform a youtube URL in a span (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    press("Enter");
+                    // Wait for the getYoutubeVideoElement promise to resolve.
+                    await new Promise((resolve) => setTimeout(resolve));
                 },
                 contentAfter:
-                    '<p>a<span class="a">b<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="1"></iframe>[]c</span>d</p>',
+                    '<p>a<span class="a">b</span></p><div data-oe-expression="https://youtu.be/dQw4w9WgXcQ" class="media_iframe_video"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://youtu.be/dQw4w9WgXcQ"></iframe></div><p><span class="a">[]c</span>d</p>',
             });
         });
 
-        test.todo("should paste and not transform a youtube URL in a existing link", async () => {
+        test("should paste and not transform a youtube URL in a existing link", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
-                    // Ensure the powerbox is not active
-                    expect(editor.powerbox.isOpen).not.toBe(true);
+                    // Ensure the powerbox is active
+                    const powerbox = editor.plugins.find(
+                        (plugin) => plugin.constructor.name === "powerbox"
+                    );
+                    expect(powerbox.overlay.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">bhttps://youtu.be/dQw4w9WgXcQ[]c</a>d</p>',
             });
         });
 
-        test.todo("should paste a youtube URL as a link in a p", async () => {
+        test("should paste a youtube URL as a link in a p (1)", async () => {
             const url = "https://youtu.be/dQw4w9WgXcQ";
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("ArrowDown");
+                    press("Enter");
                 },
-                contentAfter: `<p><a href="${url}">${url}</a>[]</p>`,
+                contentAfter: `<p><a href="${url}">${url}[]</a></p>`,
             });
         });
 
-        test.todo(
-            "should not revert a history step when pasting a youtube URL as a link",
-            async () => {
-                const url = "https://youtu.be/dQw4w9WgXcQ";
-                await testEditor({
-                    contentBefore: "<p>[]</p>",
-                    stepFunction: async (editor) => {
-                        // paste text to have a history step recorded
-                        await pasteText(editor, "*should not disappear*");
-                        await pasteText(editor, url);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>*should not disappear*<a href="${url}">${url}</a>[]</p>`,
-                });
-            }
-        );
+        test("should not revert a history step when pasting a youtube URL as a link (1)", async () => {
+            const url = "https://youtu.be/dQw4w9WgXcQ";
+            await testEditor({
+                contentBefore: "<p>[]</p>",
+                stepFunction: async (editor) => {
+                    // paste text to have a history step recorded
+                    await pasteText(editor, "*should not disappear*");
+                    await pasteText(editor, url);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Pick the second command (Paste as URL)
+                    press("ArrowDown");
+                    press("Enter");
+                },
+                contentAfter: `<p>*should not disappear*<a href="${url}">${url}[]</a></p>`,
+            });
+        });
     });
 
     describe("range not collapsed", () => {
-        test.todo("should paste and transform a youtube URL in a p", async () => {
+        beforeEach(() => {
+            onRpc("/html_editor/video_url/data", (request) => {
+                return { embed_url: request.json().params.video_url };
+            });
+        });
+        test("should paste and transform a youtube URL in a p (2)", async () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    press("Enter");
+                    // Wait for the getYoutubeVideoElement promise to resolve.
+                    await new Promise((resolve) => setTimeout(resolve));
                 },
                 contentAfter:
-                    '<p>ab<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="1"></iframe>[]cd</p>',
+                    '<p>ab</p><div data-oe-expression="https://youtu.be/dQw4w9WgXcQ" class="media_iframe_video"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://youtu.be/dQw4w9WgXcQ"></iframe></div><p>[]cd</p>',
             });
         });
 
-        test.todo("should paste and transform a youtube URL in a span", async () => {
+        test("should paste and transform a youtube URL in a span (2)", async () => {
             await testEditor({
                 contentBefore:
                     '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
-                    await editor.powerbox._pickCommand();
+                    press("Enter");
+                    // Wait for the getYoutubeVideoElement promise to resolve.
+                    await new Promise((resolve) => setTimeout(resolve));
                 },
                 contentAfter:
-                    '<p>a<span class="a">b<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="1"></iframe>[]c</span>d</p>',
+                    '<p>a<span class="a">b</span></p><div data-oe-expression="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="media_iframe_video"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"></iframe></div><p><span class="a">[]c</span>d</p>',
             });
         });
 
-        test.todo("should paste and not transform a youtube URL in a existing link", async () => {
+        test("should paste and not transform a youtube URL in a existing link", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
                 stepFunction: async (editor) => {
                     await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-                    // Ensure the powerbox is not active
-                    expect(editor.powerbox.isOpen).not.toBe(true);
+                    // Ensure the powerbox is active
+                    const powerbox = editor.plugins.find(
+                        (plugin) => plugin.constructor.name === "powerbox"
+                    );
+                    expect(powerbox.overlay.isOpen).not.toBe(true);
                 },
                 contentAfter:
                     '<p>a<a href="http://existing.com">bhttps://www.youtube.com/watch?v=dQw4w9WgXcQ[]c</a>d</p>',
             });
         });
 
-        test.todo("should paste a youtube URL as a link in a p", async () => {
+        test("should paste a youtube URL as a link in a p (2)", async () => {
             const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    press("ArrowDown");
+                    press("Enter");
                 },
-                contentAfter: `<p>ab<a href="${url}">${url}</a>[]cd</p>`,
+                contentAfter: `<p>ab<a href="${url}">${url}[]</a>cd</p>`,
             });
         });
 
-        test.todo(
-            "should not revert a history step when pasting a youtube URL as a link",
-            async () => {
-                const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-                await testEditor({
-                    contentBefore: "<p>[]</p>",
-                    stepFunction: async (editor) => {
-                        // paste text (to have a history step recorded)
-                        await pasteText(editor, "abxxxcd");
-                        // select xxx in "<p>ab[xxx]cd</p>"
-                        const p = editor.editable.querySelector("p");
-                        const selection = {
-                            anchorNode: p.childNodes[1],
-                            anchorOffset: 2,
-                            focusNode: p.childNodes[1],
-                            focusOffset: 5,
-                        };
-                        setTestSelection(selection, editor.document);
-                        editor._computeHistorySelection();
+        test("should not revert a history step when pasting a youtube URL as a link (2)", async () => {
+            const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            await testEditor({
+                contentBefore: "<p>[]</p>",
+                stepFunction: async (editor) => {
+                    // paste text (to have a history step recorded)
+                    await pasteText(editor, "abxxxcd");
+                    // select xxx in "<p>ab[xxx]cd</p>"
+                    const p = editor.editable.querySelector("p");
+                    const selection = {
+                        anchorNode: p.childNodes[1],
+                        anchorOffset: 2,
+                        focusNode: p.childNodes[1],
+                        focusOffset: 5,
+                    };
+                    setTestSelection(selection, editor.document);
+                    setTestSelection(selection, editor.document);
 
-                        // paste url
-                        await pasteText(editor, url);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>ab<a href="${url}">${url}</a>[]cd</p>`,
-                });
-            }
-        );
+                    // paste url
+                    await pasteText(editor, url);
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Pick the second command (Paste as URL)
+                    press("ArrowDown");
+                    press("Enter");
+                },
+                contentAfter: `<p>ab<a href="${url}">${url}[]</a>cd</p>`,
+            });
+        });
 
-        test.todo("should restore selection after pasting video URL followed by UNDO", async () => {
+        test("should restore selection after pasting video URL followed by UNDO", async () => {
             const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Pick first command (Embed video)
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Force powerbox validation on the default first choice
+                    press("Enter");
                     // Undo
                     undo(editor);
                 },
@@ -2350,11 +2354,11 @@ describe("youtube video", () => {
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
                     await pasteText(editor, url);
-                    // Ensure the powerbox is active
-                    expect(editor.powerbox.isOpen).toBe(true);
-                    // Pick second command (Paste as URL)
-                    dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                    dispatch(editor.editable, "keydown", { key: "Enter" });
+                    await animationFrame();
+                    expect(".o-we-powerbox").toHaveCount(1);
+                    // Pick the second command (Paste as URL)
+                    press("ArrowDown");
+                    press("Enter");
                     // Undo
                     undo(editor);
                 },
