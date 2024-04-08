@@ -31,7 +31,7 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a checked list into a ordered list", async () => {
+        test("should turn a checked list into a ordered list", async () => {
             await testEditor({
                 contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                 stepFunction: toggleOrderedList,
