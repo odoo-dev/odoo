@@ -23,8 +23,8 @@ export class ToolbarPlugin extends Plugin {
         switch (command) {
             case "CONTENT_UPDATED":
                 if (this.overlay.isOpen) {
-                    const range = this.document.getSelection().getRangeAt(0);
-                    if (range.collapsed) {
+                    const sel = this.shared.getEditableSelection();
+                    if (sel.isCollapsed) {
                         this.overlay.close();
                     }
                 }

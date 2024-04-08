@@ -446,7 +446,8 @@ export class TablePlugin extends Plugin {
             .filter((node) => node.nodeName === "TABLE")
             .pop();
 
-        const traversedNodes = getTraversedNodes(this.editable);
+        const range = getDeepRange(this.editable, { sel: selection });
+        const traversedNodes = getTraversedNodes(this.editable, range);
         if (startTd !== endTd && startTable === endTable) {
             if (!isProtected(startTable)) {
                 // The selection goes through at least two different cells ->

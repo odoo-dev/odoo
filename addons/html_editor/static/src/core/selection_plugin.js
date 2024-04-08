@@ -49,11 +49,13 @@ export class SelectionPlugin extends Plugin {
      */
     updateActiveSelection() {
         const selection = this.document.getSelection();
+        let inEditable;
         if (!selection || selection.rangeCount === 0) {
-            return;
+            inEditable = false;
+        } else {
+            const range = selection.getRangeAt(0);
+            inEditable = this.editable.contains(range.commonAncestorContainer);
         }
-        const range = selection.getRangeAt(0);
-        const inEditable = this.editable.contains(range.commonAncestorContainer);
         if (inEditable) {
             this.activeSelection = this.makeSelection(selection, inEditable);
         } else {
