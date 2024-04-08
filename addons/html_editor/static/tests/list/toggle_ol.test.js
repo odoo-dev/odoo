@@ -203,62 +203,59 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should turn an list of multiple table cells into a empty paragraph",
-            async () => {
-                await testEditor({
-                    contentBefore: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[<ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                </tr>
-                                <tr>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol></td>
-                                    <td><ol><li><br></li></ol>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    stepFunction: toggleOrderedList,
-                    contentAfterEdit: unformat(`
-                        <table class="table table-bordered o_selected_table">
-                            <tbody>
-                                <tr>
-                                    <td class="o_selected_td">[<p><br></p></td>
-                                    <td class="o_selected_td"><p><br></p></td>
-                                    <td class="o_selected_td"><p><br></p></td>
-                                </tr>
-                                <tr>
-                                    <td class="o_selected_td"><p><br></p></td>
-                                    <td class="o_selected_td"><p><br></p></td>
-                                    <td class="o_selected_td"><p><br></p>]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                    contentAfter: unformat(`
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td>[]<p><br></p></td>
-                                    <td><p><br></p></td>
-                                    <td><p><br></p></td>
-                                </tr>
-                                <tr>
-                                    <td><p><br></p></td>
-                                    <td><p><br></p></td>
-                                    <td><p><br></p></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `),
-                });
-            }
-        );
+        test("should turn an list of multiple table cells into a empty paragraph", async () => {
+            await testEditor({
+                contentBefore: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>[<ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                            </tr>
+                            <tr>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol></td>
+                                <td><ol><li><br></li></ol>]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                stepFunction: toggleOrderedList,
+                contentAfterEdit: unformat(`
+                    <table class="table table-bordered o_selected_table">
+                        <tbody>
+                            <tr>
+                                <td class="o_selected_td">[<p><br></p></td>
+                                <td class="o_selected_td"><p><br></p></td>
+                                <td class="o_selected_td"><p><br></p></td>
+                            </tr>
+                            <tr>
+                                <td class="o_selected_td"><p><br></p></td>
+                                <td class="o_selected_td"><p><br></p></td>
+                                <td class="o_selected_td"><p><br></p>]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+                contentAfter: unformat(`
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>[<p><br></p></td>
+                                <td><p><br></p></td>
+                                <td><p><br></p></td>
+                            </tr>
+                            <tr>
+                                <td><p><br></p></td>
+                                <td><p><br></p></td>
+                                <td><p><br></p>]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `),
+            });
+        });
     });
 });
 
