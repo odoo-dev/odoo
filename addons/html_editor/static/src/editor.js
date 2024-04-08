@@ -57,6 +57,7 @@ export class Editor {
      * @param {*} services
      */
     constructor(config, services) {
+        this.isDestroyed = false;
         /** @type { EditorConfig } **/
         this.config = config;
         this.services = services;
@@ -184,5 +185,6 @@ export class Editor {
             }
             this.editable = null;
         }
+        this.isDestroyed = true;
     }
 }
