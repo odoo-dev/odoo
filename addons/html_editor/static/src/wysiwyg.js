@@ -75,6 +75,7 @@ export class Wysiwyg extends Component {
         copyCss: { type: Boolean, optional: true },
         Plugins: { type: Array, optional: true },
         classList: { type: Array, optional: true },
+        embeddedElements: { type: Array, optional: true },
     };
 
     setup() {
@@ -87,6 +88,7 @@ export class Wysiwyg extends Component {
             classList: this.props.classList,
             copyCss: this.props.copyCss,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
+            embeddedElements: this.props.embeddedElements || [],
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and

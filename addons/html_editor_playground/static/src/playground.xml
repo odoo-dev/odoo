@@ -34,7 +34,8 @@
                         copyCss="true"
                         toolbar="config.showToolbar"
                         Plugins="Plugins"
-                        classList="classList"/>
+                        classList="classList"
+                        embeddedElements="embeddedElements" />
                 </div>
                 <t t-if="state.showWysiwyg">
                     <div class="d-flex">

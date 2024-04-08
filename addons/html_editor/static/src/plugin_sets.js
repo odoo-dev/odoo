@@ -31,6 +31,7 @@ import { SearchPowerboxPlugin } from "./main/powerbox/search_powerbox_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
 import { ImagePlugin } from "./main/image_plugin";
 import { LinkPastePlugin } from "./main/link/link_paste_plugin";
+import { EmbeddedElementPlugin } from "./others/embedded_element_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -71,4 +72,4 @@ export const MAIN_PLUGINS = [
     LinkPastePlugin,
 ];
 
-export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin];
+export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, EmbeddedElementPlugin];
