@@ -173,21 +173,21 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: "<p>abx[]cd</p>",
             });
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "xyz 123");
+                    pasteText(editor, "xyz 123");
                 },
                 contentAfter: "<p>abxyz 123[]cd</p>",
             });
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x    y");
+                    pasteText(editor, "x    y");
                 },
                 contentAfter: "<p>abx&nbsp; &nbsp; y[]cd</p>",
             });
@@ -197,7 +197,7 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<p>a<span class="a">bx[]c</span>d</p>',
             });
@@ -209,7 +209,7 @@ describe("Simple text", () => {
                 // @phoenix content adapted to make it valid html
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "a\nb\nc\nd");
+                    pasteText(editor, "a\nb\nc\nd");
                 },
                 contentAfter:
                     '<p style="margin-bottom: 0px;">a</p>' +
@@ -224,7 +224,7 @@ describe("Simple text", () => {
                 // @phoenix content adapted to make it valid html
                 contentBefore: "<p>[]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "a\r\nb\r\nc\r\nd");
+                    pasteText(editor, "a\r\nb\r\nc\r\nd");
                 },
                 contentAfter:
                     '<p style="margin-bottom: 0px;">a</p>' +
@@ -240,7 +240,7 @@ describe("Simple text", () => {
                 await testEditor({
                     contentBefore: "<div>[]<br></div>",
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "a\nb\nc\nd");
+                        pasteText(editor, "a\nb\nc\nd");
                     },
                     contentAfter: "<div>a<br>b<br>c<br>d[]<br></div>",
                 });
@@ -253,7 +253,7 @@ describe("Simple text", () => {
                 await testEditor({
                     contentBefore: '<div><span style="font-size: 9px;">a[]</span></div>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "b\nc\nd");
+                        pasteText(editor, "b\nc\nd");
                     },
                     contentAfter:
                         '<div><span style="font-size: 9px;">ab<br>c<br>d[]<br></span></div>',
@@ -267,21 +267,21 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: "<p>ax[]d</p>",
             });
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "xyz 123");
+                    pasteText(editor, "xyz 123");
                 },
                 contentAfter: "<p>axyz 123[]d</p>",
             });
             await testEditor({
                 contentBefore: "<p>a[bc]d</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x    y");
+                    pasteText(editor, "x    y");
                 },
                 contentAfter: "<p>ax&nbsp; &nbsp; y[]d</p>",
             });
@@ -291,7 +291,7 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[cd]e</span>f</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<p>a<span class="a">bx[]e</span>f</p>',
             });
@@ -301,14 +301,14 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span><span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<p>a<span class="a">bx[]e</span>f</p>',
             });
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "y");
+                    pasteText(editor, "y");
                 },
                 contentAfter: '<p>a<span class="a">by[]e</span>f</p>',
             });
@@ -318,14 +318,14 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p><p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: "<div>a<p>bx[]e</p>f</div>",
             });
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "y");
+                    pasteText(editor, "y");
                 },
                 contentAfter: "<div>a<p>by[]e</p>f</div>",
             });
@@ -335,14 +335,14 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: '<div>ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<div>ab<span class="a">cx[]</span>f</div>',
             });
             await testEditor({
                 contentBefore: '<div>a[b<span class="a">c]d</span>ef</div>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "y");
+                    pasteText(editor, "y");
                 },
                 contentAfter: '<div>ay[]<span class="a">d</span>ef</div>',
             });
@@ -352,14 +352,14 @@ describe("Simple text", () => {
             await testEditor({
                 contentBefore: '<div>1a<p>b[c</p><span class="a">d]e</span>f</div>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<div>1a<p>bx[]<span class="a">e</span>f</p></div>',
             });
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "x");
+                    pasteText(editor, "x");
                 },
                 contentAfter: '<div>2a<span class="a">bx[]</span>e<br>f</div>',
             });
@@ -1447,7 +1447,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter: '<p>ab<a href="http://www.xyz.com">http://www.xyz.com</a>[]cd</p>',
             });
@@ -1457,7 +1457,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter:
                     '<p>a<span class="a">b<a href="http://www.xyz.com">http://www.xyz.com</a>[]c</span>d</p>',
@@ -1468,14 +1468,14 @@ describe("link", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter: '<p>a<a href="http://existing.com">bhttp://www.xyz.com[]c</a>d</p>',
             });
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "random");
+                    pasteText(editor, "random");
                 },
                 contentAfter: '<p>a<a href="http://existing.com">brandom[]c</a>d</p>',
             });
@@ -1487,7 +1487,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p>a<a href="http://existing.com">[]c</a>d</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "https://www.xyz.xdc");
+                        pasteText(editor, "https://www.xyz.xdc");
                     },
                     contentAfter:
                         '<p>a<a href="https://www.xyz.xdcc">https://www.xyz.xdc[]c</a>d</p>',
@@ -1495,7 +1495,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p>a<a href="http://existing.com">b[].com</a>d</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "oom");
+                        pasteText(editor, "oom");
                     },
                     contentAfter: '<p>a<a href="http://boom.com">boom[].com</a>d</p>',
                 });
@@ -1508,21 +1508,21 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p><a href="#" oe-zws-empty-inline="">[]\u200B</a></p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "abc");
+                        pasteText(editor, "abc");
                     },
                     contentAfter: "<p>abc[]</p>",
                 });
                 await testEditor({
                     contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "abc");
+                        pasteText(editor, "abc");
                     },
                     contentAfter: "<p>xyabc[]z</p>",
                 });
                 await testEditor({
                     contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "http://odoo.com");
+                        pasteText(editor, "http://odoo.com");
                     },
                     contentAfter: '<p>xy<a href="http://odoo.com">http://odoo.com</a>[]z</p>',
                 });
@@ -1531,7 +1531,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, imageUrl);
+                        pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
                         expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the first command (Embed image)
@@ -1542,7 +1542,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, imageUrl);
+                        pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
                         expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
@@ -1560,14 +1560,14 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p><a href="#">[]\u200B</a></p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "abc www.odoo.com xyz");
+                        pasteText(editor, "abc www.odoo.com xyz");
                     },
                     contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
                 });
                 await testEditor({
                     contentBefore: '<p><a href="#">[]\u200B</a></p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "odoo.com\ngoogle.com");
+                        pasteText(editor, "odoo.com\ngoogle.com");
                     },
                     contentAfter:
                         '<p style="margin-bottom: 0px;"><a href="http://odoo.com">odoo.com</a></p>' +
@@ -1597,7 +1597,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${url} def`);
+                    pasteText(editor, `abc ${url} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1606,7 +1606,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${imgUrl} def`);
+                    pasteText(editor, `abc ${imgUrl} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1615,7 +1615,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${videoUrl} def`);
+                    pasteText(editor, `abc ${videoUrl} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1630,7 +1630,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
+                    pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1639,7 +1639,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
+                    pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1663,7 +1663,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter: '<p>ab<a href="http://www.xyz.com">http://www.xyz.com</a>[]cd</p>',
             });
@@ -1674,7 +1674,7 @@ describe("link", () => {
                 contentBefore:
                     '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter:
                     '<p>a<span class="a">b<a href="http://www.xyz.com">http://www.xyz.com</a>[]c</span>d</p>',
@@ -1685,7 +1685,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "http://www.xyz.com");
+                    pasteText(editor, "http://www.xyz.com");
                 },
                 contentAfter: '<p>a<a href="http://existing.com">bhttp://www.xyz.com[]c</a>d</p>',
             });
@@ -1695,7 +1695,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "def");
+                    pasteText(editor, "def");
                     undo(editor);
                 },
                 contentAfter: "<p>[abc]</p>",
@@ -1705,7 +1705,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "www.odoo.com");
+                    pasteText(editor, "www.odoo.com");
                     undo(editor);
                 },
                 contentAfter: "<p>[abc]</p>",
@@ -1715,7 +1715,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "def www.odoo.com xyz");
+                    pasteText(editor, "def www.odoo.com xyz");
                     undo(editor);
                 },
                 contentAfter: "<p>[abc]</p>",
@@ -1743,7 +1743,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[xyz]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${url} def`);
+                    pasteText(editor, `abc ${url} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1752,7 +1752,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[xyz]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${imgUrl} def`);
+                    pasteText(editor, `abc ${imgUrl} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1761,7 +1761,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[xyz]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `abc ${videoUrl} def`);
+                    pasteText(editor, `abc ${videoUrl} def`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1770,7 +1770,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: "<p>[xyz]<br></p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
+                    pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
                     // Powerbox should not open
                     expect(editor.powerbox.isOpen).not.toBe(true);
                 },
@@ -1782,7 +1782,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: '<p>ab[<a href="http://www.xyz.com">http://www.xyz.com</a>]cd</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://www.xyz.xdc ");
+                    pasteText(editor, "https://www.xyz.xdc ");
                 },
                 contentAfter: '<p>ab<a href="https://www.xyz.xdc">https://www.xyz.xdc</a> []cd</p>',
             });
@@ -1798,7 +1798,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: "<p>[xyz]<br></p>",
                     stepFunction: async (editor) => {
-                        await pasteText(editor, `abc ${url} def`);
+                        pasteText(editor, `abc ${url} def`);
                         // Powerbox should not open
                         expect(editor.powerbox.isOpen).not.toBeTruthy();
                     },
@@ -1807,7 +1807,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: "<p>[xyz]<br></p>",
                     stepFunction: async (editor) => {
-                        await pasteText(editor, `abc ${imgUrl} def`);
+                        pasteText(editor, `abc ${imgUrl} def`);
                         // Powerbox should not open
                         expect(editor.powerbox.isOpen).not.toBeTruthy();
                     },
@@ -1816,7 +1816,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: "<p>[xyz]<br></p>",
                     stepFunction: async (editor) => {
-                        await pasteText(editor, `abc ${videoUrl} def`);
+                        pasteText(editor, `abc ${videoUrl} def`);
                         // Powerbox should not open
                         expect(editor.powerbox.isOpen).not.toBeTruthy();
                     },
@@ -1825,7 +1825,7 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: "<p>[xyz]<br></p>",
                     stepFunction: async (editor) => {
-                        await pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
+                        pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
                         // Powerbox should not open
                         expect(editor.powerbox.isOpen).not.toBeTruthy();
                     },
@@ -1841,7 +1841,7 @@ describe("link", () => {
                     contentBefore:
                         '<p>ab[<a href="http://www.xyz.com">http://www.xyz.com</a>]cd</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "https://www.xyz.xdc ");
+                        pasteText(editor, "https://www.xyz.xdc ");
                     },
                     contentAfter:
                         '<p>ab<a href="https://www.xyz.xdc">https://www.xyz.xdc</a> []cd</p>',
@@ -1853,7 +1853,7 @@ describe("link", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="#">[xyz]</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "bc");
+                    pasteText(editor, "bc");
                 },
                 contentAfter: "<p>abc[]d</p>",
             });
@@ -1865,14 +1865,14 @@ describe("link", () => {
                 await testEditor({
                     contentBefore: '<p><a href="#">[xyz]</a></p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "www.odoo.com");
+                        pasteText(editor, "www.odoo.com");
                     },
                     contentAfter: '<p><a href="http://www.odoo.com">www.odoo.com</a>[]</p>',
                 });
                 await testEditor({
                     contentBefore: '<p><a href="#">[xyz]</a></p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, "abc www.odoo.com xyz");
+                        pasteText(editor, "abc www.odoo.com xyz");
                     },
                     contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
                 });
@@ -1882,7 +1882,7 @@ describe("link", () => {
                     contentBefore:
                         '<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, imageUrl);
+                        pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
                         expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the first command (Embed image)
@@ -1894,7 +1894,7 @@ describe("link", () => {
                     contentBefore:
                         '<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>',
                     stepFunction: async (editor) => {
-                        await pasteText(editor, imageUrl);
+                        pasteText(editor, imageUrl);
                         // Ensure the powerbox is active
                         expect(editor.powerbox.isOpen).toBe(true);
                         // Pick the second command (Paste as URL)
@@ -1931,7 +1931,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -1948,7 +1948,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -1965,7 +1965,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -1982,7 +1982,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -1999,8 +1999,8 @@ describe("images", () => {
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     // paste text to have a history step recorded
-                    await pasteText(editor, "*should not disappear*");
-                    await pasteText(editor, url);
+                    pasteText(editor, "*should not disappear*");
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2017,7 +2017,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -2035,7 +2035,7 @@ describe("images", () => {
                 contentBefore:
                     '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -2052,7 +2052,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(
+                    pasteText(
                         editor,
                         "https://download.odoocdn.com/icons/website/static/description/icon.png"
                     );
@@ -2069,7 +2069,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2086,7 +2086,7 @@ describe("images", () => {
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     // paste text (to have a history step recorded)
-                    await pasteText(editor, "abxxxcd");
+                    pasteText(editor, "abxxxcd");
                     // select xxx in "<p>ab[xxx]cd</p>""
                     const p = editor.editable.querySelector("p");
                     const selection = {
@@ -2097,7 +2097,7 @@ describe("images", () => {
                     };
                     setTestSelection(selection, editor.document);
                     // paste url
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2113,7 +2113,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick first command (Embed image)
@@ -2126,7 +2126,7 @@ describe("images", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick second command (Paste as URL)
@@ -2152,7 +2152,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>ab[]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                    pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
@@ -2168,7 +2168,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: '<p>a<span class="a">b[]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
+                    pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
@@ -2185,7 +2185,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
+                    pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     // Ensure the powerbox is active
                     const powerbox = editor.plugins.find(
                         (plugin) => plugin.constructor.name === "powerbox"
@@ -2202,7 +2202,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2219,8 +2219,8 @@ describe("youtube video", () => {
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     // paste text to have a history step recorded
-                    await pasteText(editor, "*should not disappear*");
-                    await pasteText(editor, url);
+                    pasteText(editor, "*should not disappear*");
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2242,7 +2242,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
+                    pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
@@ -2260,7 +2260,7 @@ describe("youtube video", () => {
                 contentBefore:
                     '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                    pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
@@ -2277,7 +2277,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
                 stepFunction: async (editor) => {
-                    await pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                    pasteText(editor, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                     // Ensure the powerbox is active
                     const powerbox = editor.plugins.find(
                         (plugin) => plugin.constructor.name === "powerbox"
@@ -2294,7 +2294,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>ab[xxx]cd</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2311,7 +2311,7 @@ describe("youtube video", () => {
                 contentBefore: "<p>[]</p>",
                 stepFunction: async (editor) => {
                     // paste text (to have a history step recorded)
-                    await pasteText(editor, "abxxxcd");
+                    pasteText(editor, "abxxxcd");
                     // select xxx in "<p>ab[xxx]cd</p>"
                     const p = editor.editable.querySelector("p");
                     const selection = {
@@ -2324,7 +2324,7 @@ describe("youtube video", () => {
                     setTestSelection(selection, editor.document);
 
                     // paste url
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
@@ -2340,7 +2340,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Force powerbox validation on the default first choice
@@ -2353,7 +2353,7 @@ describe("youtube video", () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
                 stepFunction: async (editor) => {
-                    await pasteText(editor, url);
+                    pasteText(editor, url);
                     await animationFrame();
                     expect(".o-we-powerbox").toHaveCount(1);
                     // Pick the second command (Paste as URL)
