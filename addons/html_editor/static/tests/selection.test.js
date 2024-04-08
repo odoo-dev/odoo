@@ -2,6 +2,9 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "./_helpers/editor";
+import { MAIN_PLUGINS } from "../src/plugin_sets";
+import { getContent } from "./_helpers/selection";
+import { Plugin } from "../src/plugin";
 
 test("getEditableSelection should work, even if getSelection returns null", async () => {
     const { editor } = await setupEditor("<p>a[b]</p>");
@@ -18,6 +21,27 @@ test("getEditableSelection should work, even if getSelection returns null", asyn
     expect(selection.startOffset).toBe(1);
     expect(selection.endOffset).toBe(2);
 });
+
+test("plugins should be notified when ranges are removed", async () => {
+    let count = 0;
+    class TestPlugin extends Plugin {
+        static name = "test";
+        static resources = (p) => ({
+            onSelectionChange: () => count++,
+        });
+    }
+
+    const { el } = await setupEditor("<p>a[b]</p>", {
+        config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+    });
+    expect(count).toBe(3);
+
+    document.getSelection().removeAllRanges();
+    await animationFrame();
+    expect(count).toBe(4);
+    expect(getContent(el)).toBe("<p>ab</p>");
+});
+
 
 describe("inEditable", () => {
     test("inEditable should be true", async () => {

@@ -31,6 +31,9 @@ export class EditorOverlay extends Component {
     getCurrentRect() {
         const doc = this.props.editable.ownerDocument;
         const selection = doc.getSelection();
+        if (!selection || !selection.rangeCount) {
+            return null;
+        }
         const focusNode = selection.focusNode;
         const range = selection.getRangeAt(0);
         let rect = range.getBoundingClientRect();

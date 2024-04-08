@@ -249,3 +249,19 @@ test("toolbar buttons shouldn't be active without text node in the selection", a
     await waitFor(".o-we-toolbar");
     expect(queryAll(".o-we-toolbar .btn.active").length).toBe(0);
 });
+
+test("toolbar behave properly if selection has no range", async () => {
+    const { el } = await setupEditor("<p>test</p>");
+
+    expect(".o-we-toolbar").toHaveCount(0);
+    setContent(el, "<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(1);
+
+    const selection = document.getSelection();
+    selection.removeAllRanges();
+
+    setContent(el, "<p>abc</p>");
+    await waitUntil(() => !document.querySelector(".o-we-toolbar"));
+    expect(".o-we-toolbar").toHaveCount(0);
+});
