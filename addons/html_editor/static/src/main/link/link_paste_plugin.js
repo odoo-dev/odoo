@@ -21,7 +21,7 @@ export class LinkPastePlugin extends Plugin {
     // Commands
     // -------------------------------------------------------------------------
     handlePasteText(text, selection) {
-        let splitAroundUrl = [text];
+        let splitAroundUrl;
         // todo: add placeholder plugin that prevent any other plugin
         // Avoid transforming dynamic placeholder pattern to url.
         if (!text.match(/\${.*}/gi)) {
@@ -29,6 +29,10 @@ export class LinkPastePlugin extends Plugin {
             // Remove 'http(s)://' capturing group from the result (indexes
             // 2, 5, 8, ...).
             splitAroundUrl = splitAroundUrl.filter((_, index) => (index + 1) % 3);
+        }
+        if (!splitAroundUrl || splitAroundUrl.length < 3) {
+            // Let the default paste handle the text.
+            return false;
         }
         if (splitAroundUrl.length === 3 && !splitAroundUrl[0] && !splitAroundUrl[2]) {
             // Pasted content is a single URL.
