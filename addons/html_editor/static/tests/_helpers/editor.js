@@ -55,6 +55,8 @@ class TestEditor extends Component {
 }
 
 /**
+ * @typedef { import("@html_editor/editor").Editor } Editor
+ *
  * @typedef { Object } TestConfig
  * @property { import("@html_editor/editor").EditorConfig } [config]
  * @property { string } [styleContent]
@@ -86,7 +88,7 @@ export async function setupEditor(content, options = {}) {
  * @typedef { Object } TestEditorConfig
  * @property { string } contentBefore
  * @property { string } [contentBeforeEdit]
- * @property { Function } stepFunction
+ * @property { (editor: Editor) => void } stepFunction
  * @property { string } [contentAfter]
  * @property { string } [contentAfterEdit]
  * @property { string } [compareFunction]
