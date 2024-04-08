@@ -1,30 +1,95 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.map">
-        <div class="w-100 h-100" style="width: 30rem! important; height: 30rem !important;" t-ref="mapContainer"></div>
+        <div class="d-flex flex-column h-100 w-100">
+            <div class="o_locationSelector_map_container w-100 flex-grow-1" t-ref="mapContainer"/>
+
+            <!-- Desktop infos -->
+            <div
+                t-if="selectedLocation"
+                class="d-none d-md-flex justify-content-between flex-column flex-lg-row gap-3 gap-lg-0 p-4"
+            >
+                <div class="d-flex gap-3 col-lg-5">
+                    <strong
+                        class="o_locationSelector_number flex-shrink-0 h5 fw-bold text-center"
+                        t-out="this.props.locations.indexOf(selectedLocation) + 1"
+                    />
+                    <div class="d-flex flex-column flex-grow-1">
+                        <strong class="h5 fw-bold" t-out="selectedLocation.pick_up_point_name"/>
+                        <small t-out="selectedLocation.pick_up_point_address"/>
+                        <!-- TODO VCR postal code is hardcoded before the adress. I might not suits some l10n -->
+                        <small t-out="selectedLocation.postal_code + ' ' + selectedLocation.pick_up_point_town" class="mb-3"/>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary d-none d-lg-block mt-auto"
+                            t-att-disabled="!this.props.selectedLocationId"
+                            t-on-click="this.props.validateSelection">
+                                Choose this location
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedule -->
+                <LocationSchedule
+                    openingHours="selectedLocation.opening_hours"
+                    wrapClass="'col-lg-7 flex-grow-1 flex-lg-grow-0 ps-4'"
+                />
+
+                <button
+                    type="button"
+                    class="btn btn-primary d-block d-lg-none align-self-stretch ms-4"
+                    t-att-disabled="!this.props.selectedLocationId"
+                    t-on-click="this.props.validateSelection">
+                        Choose this location
+                </button>
+            </div>
+
+            <!-- Mobile infos -->
+            <button t-if="selectedLocation" class="collapsed d-flex d-md-none gap-2 gap-lg-3 w-100 border-0 p-3 bg-transparent text-start" type="button" data-bs-target="#map_collapseHours" aria-expanded="false" aria-controls="map_collapseHours" data-bs-toggle="collapse">
+                <strong t-out="this.props.locations.indexOf(selectedLocation) + 1" class="o_locationSelector_number fw-bold text-center"/>
+                <span class="d-flex flex-column gap-1 w-100">
+                    <span class="d-flex flex-column">
+                        <strong class="fw-bold" t-out="selectedLocation.pick_up_point_name"/>
+                        <small class="text-muted">
+                            <span t-out="selectedLocation.pick_up_point_address"/>
+                            <!-- TODO VCR postal code is hardcoded before the adress. I might not suits some l10n -->
+                            <span class="d-block" t-out="selectedLocation.postal_code + ' ' + selectedLocation.pick_up_point_town"/>
+                        </small>
+                    </span>
+                    <!-- TODO: Toggle "Open now/Close now" elements depending on the time -->
+                    <small class="d-md-none text-success fw-bold">Open now</small>
+                    <!-- <small class="d-md-none text-danger fw-bold">Close now</small> -->
+                    <span class="d-flex align-items-center gap-1 small fw-bold">
+                        <i class="fa fa-clock-o" role="img"/>
+                        Opening hours
+                        <i class="o_locationSelector_hours_caret fa fa-caret-up ms-auto transition-base"/>
+                    </span>
+
+                    <!-- Schedule -->
+                    <span class="collapse" id="map_collapseHours">
+                        <LocationSchedule openingHours="selectedLocation.opening_hours"/>
+                    </span>
+                </span>
+            </button>
+        </div>
     </t>
 
     <t t-name="website_sale.locationSelector.map.marker">
-        <div style="color: var(--primary);">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 61 78.9" style="enable-background:new 0 0 61 78.9;" xml:space="preserve">
-                <style type="text/css">
-                    .st0{opacity:0.3;enable-background:new;}
-                    .st1{fill:currentColor;stroke:#1A1919;stroke-width:3;stroke-miterlimit:10;}
-                </style>
-                <g>
-                    <g id="Layer_2_1_">
-                        <g id="Layer_1-2">
-                            <path class="st0" d="M33.5,4C18.3,4,6,16.3,6,31.5c0,18.2,23.4,44.6,24.4,45.7c1.5,1.7,4.1,1.8,5.8,0.3c0.1-0.1,0.2-0.2,0.3-0.3
-                                c1-1.1,24.4-27.4,24.4-45.7C61,16.3,48.7,4,33.5,4z"/>
-                            <path class="st1" d="M28.7,1.7c-14.9,0-27,12.1-27.1,27.1c0,18.5,24.2,45.7,25.3,46.9c0.9,1,2.4,1.1,3.4,0.2
-                                c0.1-0.1,0.1-0.1,0.2-0.2c1-1.1,25.3-28.3,25.3-46.9C55.8,13.8,43.6,1.7,28.7,1.7z"/>
-                        </g>
-                    </g>
-                </g>
-            </svg>
-            <p class="position-relative text-center">
-                <t t-out="number"/>
-            </p>
-        </div>
+        <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="15" cy="38" rx="12" ry="2" fill="#000" fill-opacity="0.25"/>
+            <path
+                d="M15 39.2507C14.9216 39.1623 14.8316 39.0606 14.731 38.9461C14.323 38.482 13.7395 37.8091 13.0391 36.9752C11.6379 35.3068 9.77066 32.9967 7.90454 30.4276C6.03711 27.8567 4.17807 25.0364 2.78794 22.3465C1.38981 19.6411 0.5 17.1309 0.5 15.1621C0.5 7.06077 6.9955 0.5 14.9995 0.5C23.0004 0.5 29.5 7.06089 29.5 15.1621C29.5 17.1309 28.6102 19.6411 27.2121 22.3465C25.8219 25.0364 23.9629 27.8567 22.0955 30.4276C20.2293 32.9967 18.3621 35.3068 16.9609 36.9752C16.2605 37.8091 15.677 38.482 15.269 38.9461C15.1684 39.0606 15.0784 39.1623 15 39.2507Z"
+                fill="var(--LocationSelectorMarker-background)"
+                stroke="var(--LocationSelectorMarker-border-color)"
+            />
+            <text
+                x="50%"
+                y="50%"
+                text-anchor="middle"
+                t-out="number"
+                fill="var(--LocationSelectorMarker-color)"
+            />
+        </svg>
     </t>
 </templates>

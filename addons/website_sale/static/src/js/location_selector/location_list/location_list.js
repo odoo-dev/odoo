@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useEffect, onMounted } from "@odoo/owl";
+import { Component, onMounted, useEffect } from "@odoo/owl";
 import { Location } from "@website_sale/js/location_selector/location/location";
 
 export class LocationList extends Component {
@@ -15,7 +15,7 @@ export class LocationList extends Component {
 
     setup() {
         onMounted(() => {
-            document.getElementById("location-"+this.props.selectedLocationId).scrollIntoView();
+            document.getElementById("location-"+this.props.selectedLocationId).focus();
         });
         useEffect(
             (locations, selectedLocationId) => {

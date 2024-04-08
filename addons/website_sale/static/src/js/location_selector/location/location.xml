@@ -1,15 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.location">
-        <div
+        <button
             t-att-id="'location-'+this.props.id"
-            class="border border-light"
-            t-att-class="{'o_location_selector_location_selected': props.isSelected}"
+            class="list-group-item list-group-item-action collapsed d-flex gap-2 gap-lg-3"
+            t-att-class="{'o_location_selector_location_selected text-bg-light': props.isSelected}"
             t-on-click="() => props.setSelectedLocation(props.id)"
+            type="button"
+            t-attf-data-bs-target="#collapseHours_{{props.id}}"
+            aria-expanded="false"
+            t-attf-aria-controls="collapseHours_{{props.id}}"
+            data-bs-toggle="collapse"
         >
-            <span t-out="props.number"/>
-            <span t-out="props.name"/>
-            <span t-out="props.address"/>
-        </div>
+            <span t-attf-class="o_locationSelector_active_border position-absolute top-0 start-0 h-100 ps-1 bg-primary transition-base #{props.isSelected ? 'ms-0' : 'ms-n1' }"/>
+            <strong t-out="props.number" class="o_locationSelector_number fw-bold text-center"/>
+            <span class="d-flex flex-column gap-1 gap-md-0 w-100">
+                <span class="d-flex flex-column">
+                    <strong t-out="props.name" class="fw-bold"/>
+                    <small class="opacity-75" t-out="props.address"/>
+                </span>
+                <!-- TODO: Toggle "Open now/Close now" elements depending on the time -->
+                <small class="d-md-none text-success fw-bold">Open now</small>
+                <!-- <small class="d-md-none text-danger fw-bold">Close now</small> -->
+                <small class="d-flex d-md-none align-items-center gap-1 fw-bold">
+                    <i class="fa fa-clock-o" role="img"/>
+                    Opening hours
+                    <i class="o_locationSelector_hours_caret fa fa-caret-up ms-auto transition-base"/>
+                </small>
+
+                <!-- Schedule -->
+                <span
+                    class="collapse d-md-none"
+                    t-attf-id="collapseHours_{{props.id}}"
+                    data-bs-parent="#o_location_selector_list_view"
+                  >
+                    <LocationSchedule openingHours="props.openingHours"/>
+                </span>
+            </span>
+        </button>
     </t>
 </templates>
