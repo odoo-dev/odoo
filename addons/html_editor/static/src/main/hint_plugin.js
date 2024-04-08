@@ -22,7 +22,7 @@ export class HintPlugin extends Plugin {
     setup() {
         this.tempHint = null;
         this.hintElements = new Set();
-        this.updateHints(this.editable);
+        this.makeEmptyBlockHints(this.editable);
     }
 
     destroy() {
@@ -47,8 +47,11 @@ export class HintPlugin extends Plugin {
 
     updateHints(root) {
         this.clearHints(root);
+        this.makeEmptyBlockHints(root);
+        this.updateTempHint(this.shared.getEditableSelection());
+    }
 
-        // Add empty block hints.
+    makeEmptyBlockHints(root) {
         for (const { selector, hint } of this.resources.emptyBlockHints) {
             for (const el of this.selectElements(root, selector)) {
                 if (isEmpty(el)) {
@@ -56,8 +59,6 @@ export class HintPlugin extends Plugin {
                 }
             }
         }
-
-        this.updateTempHint(this.shared.getEditableSelection());
     }
 
     updateTempHint(selection) {
