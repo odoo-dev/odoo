@@ -258,6 +258,19 @@ describe("search", () => {
             expect(".o-we-powerbox").toHaveCount(0);
             expect(getContent(el)).toBe("<p>a[]<br></p>");
         });
+
+        test("press escape should close the powerbox", async () => {
+            const { editor, el } = await setupEditor("<p>[]</p>");
+            insertText(editor, "/");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe("<p>/[]</p>");
+
+            press("escape");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>/[]</p>`);
+        });
     });
 });
 
