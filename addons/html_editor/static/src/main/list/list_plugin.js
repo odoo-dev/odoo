@@ -6,6 +6,7 @@ import { closestElement, descendants, getAdjacents } from "@html_editor/utils/do
 import { getTraversedBlocks } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { applyToTree, compareListTypes, createList, getListMode, insertListAfter } from "./utils";
+import { childNodeIndex } from "@html_editor/utils/position";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
 // get a selection as parameter instead of the editable.
@@ -191,18 +192,11 @@ export class ListPlugin extends Plugin {
         if (closestNestedLI) {
             root = closestNestedLI.parentElement;
         }
-        const selectionToRestore = this.shared.getEditableSelection();
         applyToTree(root, (element) => {
             element = this.mergeSimilarLists(element);
-            element = this.unwrapParagraphInLI(element);
+            element = this.removeParagraphInLI(element);
             return element;
         });
-        const isValid =
-            selectionToRestore.anchorNode.isConnected && selectionToRestore.focusNode.isConnected;
-        const shouldRestore = selectionToRestore.inEditable && isValid;
-        if (shouldRestore) {
-            this.shared.setSelection(selectionToRestore, { normalize: false });
-        }
     }
 
     // --------------------------------------------------------------------------
@@ -324,27 +318,52 @@ export class ListPlugin extends Plugin {
             previousSibling.isContentEditable &&
             compareListTypes(previousSibling, element)
         ) {
+            const cursor = this.shared.preserveCursor();
+            cursor.adjust(element, { shiftOffset: previousSibling.childNodes.length });
+            cursor.adjust(previousSibling, { newNode: element });
+
             // @todo @phoenix: what if unremovable/unmergeable?
             element.prepend(...previousSibling.childNodes);
             previousSibling.remove();
+
+            cursor.restore();
         }
         return element;
     }
 
-    unwrapParagraphInLI(element) {
+    convertPinLItoSpan(p) {
+        const cursor = this.shared.preserveCursor();
+
+        const span = this.document.createElement("span");
+        span.setAttribute("class", p.classList);
+        span.append(...p.childNodes);
+        p.replaceWith(span);
+
+        cursor.adjust(p, { newNode: span });
+        cursor.restore();
+
+        return span;
+    }
+
+    unwrapPinLI(p) {
+        const cursor = this.shared.preserveCursor();
+        cursor.adjust(p, { newNode: p.parentElement, shiftOffset: childNodeIndex(p) });
+        const contents = unwrapContents(p);
+        cursor.restore();
+        // This assumes the P has at least one child.
+        return contents[0];
+    }
+
+    removeParagraphInLI(element) {
         if (!element.matches("li > p")) {
             return element;
         }
         this.dispatch("CLEAN_NODE", { root: element });
-        // Wrap contents is a span if the P has classes.
-        // @todo @phoenix: consider always wrapping in a span. Normalize is
-        // supposed to unwrap spans that have no attributes anyway.
         if (element.classList.length) {
-            return setTagName(element, "span");
+            return this.convertPinLItoSpan(element);
         }
-        const contents = unwrapContents(element);
-        // This assumes an empty P has at least one child (BR).
-        return contents[0];
+        // Unwrap contents of P.
+        return this.unwrapPinLI(element);
     }
 
     // --------------------------------------------------------------------------
