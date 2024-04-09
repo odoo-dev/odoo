@@ -9,6 +9,7 @@ export class TableMenu extends Component {
         type: String, // column or row
         dispatch: Function,
         overlay: Object,
+        dropdownState: Object,
         target: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
     };
     static components = { Dropdown, DropdownItem };
