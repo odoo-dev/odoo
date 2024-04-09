@@ -1,7 +1,12 @@
 import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { removeClass, setTagName, toggleClass, unwrapContents } from "@html_editor/utils/dom";
-import { isEmptyBlock, isVisible, getDeepestPosition } from "@html_editor/utils/dom_info";
+import {
+    isEmptyBlock,
+    isVisible,
+    getDeepestPosition,
+    isShrunkBlock,
+} from "@html_editor/utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "@html_editor/utils/dom_traversal";
 import { getTraversedBlocks } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
@@ -331,6 +336,21 @@ export class ListPlugin extends Plugin {
         return element;
     }
 
+    removeEmptyPinLI(p) {
+        const cursor = this.shared.preserveCursor();
+        const li = p.parentElement;
+        // An empty block might cointain empty inlines as children.
+        for (const node of [p, ...descendants(p)]) {
+            cursor.adjust(node, { newNode: li, newOffset: childNodeIndex(p) });
+        }
+        p.remove();
+        if (isShrunkBlock(li)) {
+            li.append(this.document.createElement("br"));
+        }
+        cursor.restore();
+        return li;
+    }
+
     convertPinLItoSpan(p) {
         const cursor = this.shared.preserveCursor();
 
@@ -358,6 +378,11 @@ export class ListPlugin extends Plugin {
         if (!element.matches("li > p")) {
             return element;
         }
+        // Remove paragraph if empty.
+        if (isEmptyBlock(element)) {
+            return this.removeEmptyPinLI(element);
+        }
+        // Wrap contents in a span if P has classes.
         this.dispatch("CLEAN_NODE", { root: element });
         if (element.classList.length) {
             return this.convertPinLItoSpan(element);

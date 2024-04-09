@@ -107,6 +107,9 @@ describe("Selection collapsed", () => {
                 });
             });
 
+            // @misleading
+            // This test is misleading. Removal of P and B happens on normalize
+            // on start, it has nothing to do with the splitBlock.
             test("should remove a list with p", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><p>[]<br></p></li></ol>",
@@ -115,7 +118,8 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove a list set to bold", async () => {
+            // @misleading
+            test("should remove a list set to bold", async () => {
                 await testEditor({
                     contentBefore: "<ol><li><p><b>[]<br></b></p></li></ol>",
                     stepFunction: splitBlock,
@@ -289,7 +293,8 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove a list set to bold", async () => {
+            // @misleading
+            test("should remove a list set to bold", async () => {
                 await testEditor({
                     contentBefore: "<ul><li><p><b>[]<br></b></p></li></ul>",
                     stepFunction: splitBlock,
@@ -511,7 +516,8 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should remove a checklist set to bold", async () => {
+            // @misleading
+            test("should remove a checklist set to bold", async () => {
                 await testEditor({
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p><b>[]<br></b></p></li></ul>',
