@@ -17,7 +17,10 @@ Also:
     - activates a number of regional currencies.
     - sets up Australian taxes.
     """,
-    'depends': ['account'],
+    'depends': [
+        'account_qr_code_emv',
+        'account'
+    ],
     'auto_install': ['account'],
     'data': [
         'data/account_tax_report_data.xml',
