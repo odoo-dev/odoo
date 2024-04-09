@@ -467,7 +467,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
             rec2.write({'tag_ids': [Command.link(tag.id) for tag in tags[1:]]})
         self.assertEqual(rec2.tag_ids, tags)
 
-        with self.assertQueryCount(2):
+        with self.assertQueryCount(1):
             self.env.invalidate_all()
             rec2.write({'tag_ids': [Command.link(tag.id) for tag in tags[1:]]})
         self.assertEqual(rec2.tag_ids, tags)
@@ -479,7 +479,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         self.assertFalse(rec2.tag_ids)
         self.assertTrue(tags.exists())
 
-        with self.assertQueryCount(2):
+        with self.assertQueryCount(1):
             self.env.invalidate_all()
             rec2.write({'tag_ids': [Command.clear()]})
         self.assertFalse(rec2.tag_ids)
@@ -505,7 +505,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
             rec2.write({'tag_ids': [Command.set(tags.ids)]})
         self.assertEqual(rec2.tag_ids, tags)
 
-        with self.assertQueryCount(2):
+        with self.assertQueryCount(1):
             self.env.invalidate_all()
             rec2.write({'tag_ids': [Command.set(tags.ids)]})
         self.assertEqual(rec2.tag_ids, tags)
