@@ -1,6 +1,7 @@
-import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { reactive } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 import { TableMenu } from "./table_menu";
 import { TablePicker } from "./table_picker";
 
@@ -43,7 +44,14 @@ export class TableUIPlugin extends Plugin {
         this.rowMenu = this.shared.createOverlay(TableMenu, {
             position: "left-fit",
         });
-        this.addDomListener(this.editable, "pointermove", this.onMouseMove);
+        this.addDomListener(this.document, "pointermove", this.onMouseMove);
+        this.addDomListener(this.document, "click", () => {
+            if (this.isMenuOpened) {
+                this.isMenuOpened = false;
+                this.colMenu.close();
+                this.rowMenu.close();
+            }
+        });
     }
 
     handleCommand(command) {
@@ -71,16 +79,43 @@ export class TableUIPlugin extends Plugin {
 
     onMouseMove(ev) {
         const target = ev.target;
-        if (ev.target.tagName === "TD" && target !== this.activeTd) {
+        if (this.isMenuOpened) {
+            return;
+        }
+        if (
+            ev.target.tagName === "TD" &&
+            target !== this.activeTd &&
+            this.editable.contains(target)
+        ) {
             if (ev.target.isContentEditable) {
                 this.setActiveTd(target);
             }
         } else if (this.activeTd) {
+            const isOverlay = target.closest(".o-overlay-container");
+            if (isOverlay) {
+                return;
+            }
             const parentTd = closestElement(target, "td");
             if (!parentTd) {
                 this.setActiveTd(null);
             }
         }
+    }
+
+    createDropdownState(menuToClose) {
+        const dropdownState = reactive({
+            isOpen: false,
+            open: () => {
+                dropdownState.isOpen = true;
+                menuToClose.close();
+                this.isMenuOpened = true;
+            },
+            close: () => {
+                dropdownState.isOpen = false;
+                this.isMenuOpened = false;
+            },
+        });
+        return dropdownState;
     }
 
     setActiveTd(td) {
@@ -96,6 +131,7 @@ export class TableUIPlugin extends Plugin {
                         dispatch: this.dispatch,
                         overlay: this.rowMenu,
                         target: td,
+                        dropdownState: this.createDropdownState(this.colMenu),
                     },
                 });
             }
@@ -107,6 +143,7 @@ export class TableUIPlugin extends Plugin {
                         dispatch: this.dispatch,
                         overlay: this.colMenu,
                         target: td,
+                        dropdownState: this.createDropdownState(this.rowMenu),
                     },
                 });
             }
