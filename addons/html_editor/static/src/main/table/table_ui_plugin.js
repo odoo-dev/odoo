@@ -122,31 +122,32 @@ export class TableUIPlugin extends Plugin {
         this.activeTd = td;
         this.colMenu.close();
         this.rowMenu.close();
-        if (td) {
-            if (td.cellIndex === 0) {
-                this.rowMenu.open({
+        if (!td) {
+            return;
+        }
+        if (td.cellIndex === 0) {
+            this.rowMenu.open({
+                target: td,
+                props: {
+                    type: "row",
+                    dispatch: this.dispatch,
+                    overlay: this.rowMenu,
                     target: td,
-                    props: {
-                        type: "row",
-                        dispatch: this.dispatch,
-                        overlay: this.rowMenu,
-                        target: td,
-                        dropdownState: this.createDropdownState(this.colMenu),
-                    },
-                });
-            }
-            if (td.parentElement.rowIndex === 0) {
-                this.colMenu.open({
+                    dropdownState: this.createDropdownState(this.colMenu),
+                },
+            });
+        }
+        if (td.parentElement.rowIndex === 0) {
+            this.colMenu.open({
+                target: td,
+                props: {
+                    type: "column",
+                    dispatch: this.dispatch,
+                    overlay: this.colMenu,
                     target: td,
-                    props: {
-                        type: "column",
-                        dispatch: this.dispatch,
-                        overlay: this.colMenu,
-                        target: td,
-                        dropdownState: this.createDropdownState(this.rowMenu),
-                    },
-                });
-            }
+                    dropdownState: this.createDropdownState(this.rowMenu),
+                },
+            });
         }
     }
 }
