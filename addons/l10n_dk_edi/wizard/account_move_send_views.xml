@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record model="ir.ui.view" id="account_move_send_inherit_account_peppol">
+        <record model="ir.ui.view" id="account_move_send_inherit_l10n_dk_edi">
             <field name="name">account.move.send.form.inherit.peppol</field>
             <field name="model">account.move.send</field>
             <field name="inherit_id" ref="account.account_move_send_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@name='warnings']" position="inside">
-                    <field name="enable_peppol" invisible="1"/>
-                    <div class="alert alert-warning" role="alert" invisible="not checkbox_send_peppol or not peppol_warning">
-                        <field name="peppol_warning"/>
+                    <field name="enable_nemhandel" invisible="1"/>
+                    <div class="alert alert-warning" role="alert" invisible="not checkbox_send_nemhandel or not nemhandel_warning">
+                        <field name="nemhandel_warning"/>
                     </div>
                 </xpath>
                 <xpath expr="//div[@name='option_send_mail']" position='after'>
-                    <div name="option_peppol"
-                         invisible="not enable_peppol">
-                        <field name="checkbox_send_peppol"/>
+                    <div name="option_nemhandel"
+                         invisible="not enable_nemhandel">
+                        <field name="checkbox_send_nemhandel"/>
                         <b>
-                            <label for="checkbox_send_peppol"/>
+                            <label for="checkbox_send_nemhandel"/>
                         </b>
-                        <field name="account_peppol_edi_mode_info" class="oe_inline o_form_label"/>
+                        <field name="l10n_dk_edi_mode_info" class="oe_inline o_form_label"/>
                     </div>
                 </xpath>
             </field>

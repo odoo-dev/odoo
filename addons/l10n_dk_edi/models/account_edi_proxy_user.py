@@ -14,7 +14,7 @@ class AccountEdiProxyClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
     l10n_dk_edi_verification_code = fields.Char(string='SMS verification code')
-    proxy_type = fields.Selection(selection_add=[('l10n_dk_edi', 'Danish EDI')], ondelete={'l10n_dk_edi': 'cascade'})
+    proxy_type = fields.Selection(selection_add=[('l10n_dk_edi', 'Nemhandel')], ondelete={'l10n_dk_edi': 'cascade'})
 
     # -------------------------------------------------------------------------
     # HELPER METHODS
@@ -43,11 +43,12 @@ class AccountEdiProxyClientUser(models.Model):
 
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
-        urls['peppol'] = {
-            'prod': 'https://peppol.api.odoo.com',
-            'test': 'https://peppol.test.odoo.com',
-            'demo': 'demo',
-        }
+        # TODO
+        # urls['peppol'] = {
+        #     'prod': 'https://peppol.api.odoo.com',
+        #     'test': 'https://peppol.test.odoo.com',
+        #     'demo': 'demo',
+        # }
         return urls
 
     # -------------------------------------------------------------------------

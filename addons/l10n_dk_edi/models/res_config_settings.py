@@ -105,9 +105,10 @@ class ResConfigSettings(models.TransientModel):
         """
         self.ensure_one()
 
-        if self.account_peppol_proxy_state != 'not_registered':
-            raise UserError(
-                _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
+        # TODO check but maybe not necessary
+        # if self.account_peppol_proxy_state != 'not_registered':
+        #     raise UserError(
+        #         _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
 
         if not self.l10n_dk_edi_phone_number:
             raise ValidationError(_("Please enter a phone number to verify your application."))
@@ -125,6 +126,26 @@ class ResConfigSettings(models.TransientModel):
         # it is important to keep these two in sync, so commit before activating.
         if not tools.config['test_enable'] and not modules.module.current_test:
             self.env.cr.commit()
+
+        company_details = {
+            'l10n_dk_edi_company_name': company.display_name,
+            'l10n_dk_edi_company_vat': company.vat,
+            'l10n_dk_edi_company_street': company.street,
+            'l10n_dk_edi_company_city': company.city,
+            'l10n_dk_edi_company_zip': company.zip,
+            'l10n_dk_edi_country_code': company.country_id.code,
+            'l10n_dk_edi_phone_number': self.l10n_dk_edi_phone_number,
+        }
+
+        params = {
+            'company_details': company_details,
+        }
+
+        self._call_l10n_dk_edi_proxy(
+            endpoint='/api/l10n_dk_edi/1/activate_participant',
+            params=params,
+            edi_user=edi_user,
+        )
 
     @handle_demo
     def button_l10n_dk_edi_update_user_data(self):

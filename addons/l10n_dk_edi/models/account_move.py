@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
@@ -25,18 +24,18 @@ class AccountMove(models.Model):
     )
     l10n_dk_edi_is_demo_uuid = fields.Boolean(compute="_compute_l10n_dk_edi_is_demo_uuid")
 
-    def _need_ubl_cii_xml(self):
+    def _need_oioubl_21_xml(self):
         self.ensure_one()
 
         res = super()._need_ubl_cii_xml()
         partner = self.partner_id.commercial_partner_id
-        if partner.ubl_cii_format in {False, 'facturx', 'oioubl_201'} or self.company_id.account_peppol_proxy_state != 'active':
+        if partner.ubl_cii_format != 'oioubl_21' or self.company_id.l10n_dk_edi_proxy_state != 'active':
             return res
-        if not partner.peppol_eas or not partner.peppol_endpoint:
+        if not partner.l10n_dk_edi_identifier_type or not partner.l10n_dk_edi_identifier_value:
             return False
-        if partner.account_peppol_verification_label == 'not_verified':
-            partner.button_account_peppol_check_partner_endpoint()
-        return res and partner.account_peppol_is_endpoint_valid
+        if partner.l10n_dk_edi_verification_label == 'not_verified':
+            partner.button_l10n_dk_edi_check_partner_endpoint()
+        return res and partner.l10n_dk_edi_is_endpoint_valid
 
     def action_cancel_l10n_dk_edi_documents(self):
         # if the l10n_dk_edi_move_state is processing/done

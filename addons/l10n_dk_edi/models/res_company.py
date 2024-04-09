@@ -45,7 +45,7 @@ class ResCompany(models.Model):
             ('sent_verification', 'Verification code sent'),
             ('pending', 'Pending'),
             ('active', 'Active'),
-            ('rejected', 'Rejected'),
+            # ('rejected', 'Rejected'),
             ('canceled', 'Canceled'),
         ],
         string='Nemhandel status', required=True, default='not_verified',
@@ -150,29 +150,29 @@ class ResCompany(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _sanitize_peppol_endpoint(self, vals, eas=False, endpoint=False):
+    def _sanitize_l10n_dk_edi_endpoint(self, vals, type=False, value=False):
         # TODO sanitize value
-        if 'peppol_eas' not in vals and 'peppol_endpoint' not in vals:
+        if 'l10n_dk_edi_identifier_type' not in vals and 'l10n_dk_edi_identifier_value' not in vals:
             return vals
 
-        peppol_eas = vals['peppol_eas'] if 'peppol_eas' in vals else eas # let users remove the value
-        peppol_endpoint = vals['peppol_endpoint'] if 'peppol_endpoint' in vals else endpoint
-        if not peppol_eas or not peppol_endpoint:
+        identifier_type = vals['l10n_dk_edi_identifier_type'] if 'l10n_dk_edi_identifier_type' in vals else type # let users remove the value
+        identifier_value = vals['l10n_dk_edi_identifier_value'] if 'l10n_dk_edi_identifier_value' in vals else value
+        if not identifier_type or not identifier_value:
             return vals
 
-        if peppol_eas == '0208':
-            cbe_match = re.search('[0-9]{10}', peppol_endpoint)
-            if bool(cbe_match):
-                vals['peppol_endpoint'] = cbe_match.group(0)
+        # if peppol_eas == '0208':
+        #     cbe_match = re.search('[0-9]{10}', peppol_endpoint)
+        #     if bool(cbe_match):
+        #         vals['peppol_endpoint'] = cbe_match.group(0)
         return vals
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals = self._sanitize_peppol_endpoint(vals)
+            vals = self._sanitize_l10n_dk_edi_endpoint(vals)
         return super().create(vals_list)
 
     def write(self, vals):
         for company in self:
-            vals = self._sanitize_peppol_endpoint(vals, company.peppol_eas, company.peppol_endpoint)
+            vals = self._sanitize_l10n_dk_edi_endpoint(vals, company.l10n_dk_edi_identifier_type, company.l10n_dk_edi_identifier_value)
         return super().write(vals)
