@@ -21,6 +21,7 @@ describe("should open a popover", () => {
         await setupEditor("<p>this is a <a>li[]nk</a></p>");
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
+        expect(".o_we_label_link").toHaveValue("link");
         expect(".o_we_href_input_link").toHaveValue("");
     });
     test("link popover should have buttons for link operation when the link has href", async () => {
@@ -47,6 +48,7 @@ describe("popover should switch UI depending on editing state", () => {
         await waitFor(".o-we-linkpopover");
         click(".o_we_edit_link");
         await waitFor(".o_we_href_input_link");
+        expect(".o_we_label_link").toHaveValue("link");
         expect(".o_we_href_input_link").toHaveValue("http://test.com/");
     });
     test("after clicking on apply button, the selection should be restored", async () => {
@@ -91,5 +93,18 @@ describe("popover should edit/remove the link", () => {
         click(".o_we_remove_link");
         await waitUntil(() => !document.querySelector(".o-we-linkpopover"));
         expect(getContent(el)).toBe("<p>this is a link[]</p>");
+    });
+    test("after edit the label, the text of the link should be updated", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await waitFor(".o_we_apply_link");
+        queryOne(".o_we_label_link").focus();
+        // mimic the link input behavior
+        for (const char of "new") {
+            press(char);
+        }
+        click(".o_we_apply_link");
+        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">linknew[]</a></p>');
     });
 });
