@@ -172,15 +172,23 @@ export class LinkPlugin extends Plugin {
             }
             const props = {
                 linkEl,
-                onApply: (url) => {
+                onApply: (url, label) => {
                     this.linkElement.href = url;
-                    this.overlay.close();
-                    this.shared.setSelection(this.shared.getEditableSelection());
+                    if (this.linkElement.innerText === label) {
+                        this.overlay.close();
+                        this.shared.setSelection(this.shared.getEditableSelection());
+                    } else {
+                        this.linkElement.innerText = label;
+                        this.overlay.close();
+                        this.shared.setCursorEnd(this.linkElement);
+                    }
+                    this.dispatch("ADD_STEP");
                 },
                 onRemove: () => {
                     this.removeLink();
                     this.overlay.close();
                     this.shared.setSelection(this.shared.getEditableSelection());
+                    this.dispatch("ADD_STEP");
                 },
             };
             if (linkEl !== this.linkElement) {

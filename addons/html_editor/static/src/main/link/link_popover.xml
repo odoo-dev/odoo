@@ -3,9 +3,12 @@
 
     <t t-name="html_editor.linkPopover">
         <div class="o-we-linkpopover d-flex bg-white overflow-auto">
-            <div t-if="state.editing" class="m-3 d-flex">
-                <input class="o_we_href_input_link" t-model="state.url" placeholder="Type your URL"/>
-                <button class="o_we_apply_link btn btn-primary align-self-end" t-on-click="onClickApply">Apply</button>
+            <div t-if="state.editing" class="m-3 container-fluid">
+                <div class="row d-flex ">
+                    <input class="o_we_label_link col-8 m-1" t-model="state.label" placeholder="Type your link label"/>
+                    <input class="o_we_href_input_link col-8 align-self-stretch m-1" t-model="state.url" placeholder="Type your URL"/>
+                    <button class="o_we_apply_link btn btn-primary align-self-end col-3 m-1" t-on-click="onClickApply">Apply</button>
+                </div>
             </div>
             <div t-else="" class="d-flex">
                 <a href="#" class="mx-1 o_we_copy_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Copy Link')}">
