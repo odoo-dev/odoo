@@ -1,8 +1,8 @@
-import { test } from "@odoo/hoot";
-import { insertText, testEditor } from "../_helpers/editor";
-import { setSelection } from "../_helpers/selection";
+import { expect, test } from "@odoo/hoot";
+import { insertText, setupEditor, testEditor } from "../_helpers/editor";
+import { getContent, setSelection } from "../_helpers/selection";
 import { s, span } from "../_helpers/tags";
-import { strikeThrough } from "../_helpers/user_actions";
+import { strikeThrough, tripleClick } from "../_helpers/user_actions";
 
 test("should make a few characters strikeThrough", async () => {
     await testEditor({
@@ -108,11 +108,10 @@ test("should make a whole heading strikeThrough after a triple click", async () 
 });
 
 test("should make a whole heading not strikeThrough after a triple click", async () => {
-    await testEditor({
-        contentBefore: `<h1>${s(`[ab`)}</h1><p>]cd</p>`,
-        stepFunction: strikeThrough,
-        contentAfter: `<h1>[ab]</h1><p>cd</p>`,
-    });
+    const { el, editor } = await setupEditor(`<h1>${s(`[ab`)}</h1><p>]cd</p>`);
+    tripleClick(el.querySelector("h1"));
+    strikeThrough(editor);
+    expect(getContent(el)).toBe(`<h1>[ab]</h1><p>cd</p>`);
 });
 
 test("should make a selection starting with strikeThrough text fully strikeThrough", async () => {

@@ -5,7 +5,7 @@ import { isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
 import { DIRECTIONS } from "../utils/position";
-import { getDeepRange, getSelectedNodes, getTraversedNodes } from "../utils/selection";
+import { getSelectedNodes, getTraversedNodes } from "../utils/selection";
 
 function isFormatted(format) {
     return (el, selection) => isSelectionFormat(el, format, selection);
@@ -97,31 +97,14 @@ export class FormatPlugin extends Plugin {
     }
 
     formatSelection(formatName, { applyStyle, formatProps } = {}) {
-        let selection = this.shared.getEditableSelection();
-        const direction = selection.direction;
-        const wasCollapsed = selection.isCollapsed;
-        const range = getDeepRange(this.editable, {
-            sel: selection,
-            splitText: true,
-            correctTripleClick: true,
-        });
         // note: does it work if selection is in opposite direction?
-        selection = this.shared.setSelection(
-            {
-                anchorNode: range.startContainer,
-                anchorOffset: range.startOffset,
-                focusNode: range.endContainer,
-                focusOffset: range.endOffset,
-            },
-            { normalize: false }
-        );
-
+        const selection = this.shared.splitSelection();
         if (typeof applyStyle === "undefined") {
             applyStyle = !isSelectionFormat(this.editable, formatName, selection);
         }
 
         let zws;
-        if (wasCollapsed) {
+        if (selection.isCollapsed) {
             if (
                 selection.anchorNode.nodeType === Node.TEXT_NODE &&
                 selection.anchorNode.textContent === "\u200b"
@@ -137,11 +120,6 @@ export class FormatPlugin extends Plugin {
                 // @todo phoenix: move it to selection plugin ?
                 zws = this.shared.insertAndSelectZws(this.shared.getEditableSelection());
             }
-            getDeepRange(this.editable, {
-                splitText: true,
-                select: true,
-                correctTripleClick: true,
-            });
         }
 
         // Get selected nodes within td to handle non-p elements like h1, h2...
@@ -257,7 +235,7 @@ export class FormatPlugin extends Plugin {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
             let newSelection;
-            if (direction === DIRECTIONS.RIGHT) {
+            if (selection.direction === DIRECTIONS.RIGHT) {
                 newSelection = {
                     anchorNode: firstNode,
                     anchorOffset: 0,

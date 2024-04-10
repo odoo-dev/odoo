@@ -1,9 +1,10 @@
 import { isSelectionFormat } from "@html_editor/utils/formatting";
 import { describe, expect, test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { getContent } from "../_helpers/selection";
 import { BOLD_TAGS, notStrong, span, strong } from "../_helpers/tags";
-import { bold } from "../_helpers/user_actions";
+import { bold, tripleClick } from "../_helpers/user_actions";
 
 const styleH1Bold = `h1 { font-weight: bold; }`;
 
@@ -70,12 +71,12 @@ test("should make a whole heading bold after a triple click", async () => {
 });
 
 test("should make a whole heading not bold after a triple click (heading is considered bold)", async () => {
-    await testEditor({
+    const { el, editor } = await setupEditor(`<h1>[ab</h1><p>]cd</p>`, {
         styleContent: styleH1Bold,
-        contentBefore: "<h1>[ab</h1><p>]cd</p>",
-        stepFunction: bold,
-        contentAfter: `<h1>${notStrong(`[ab]`)}</h1><p>cd</p>`,
     });
+    tripleClick(el.querySelector("h1"));
+    bold(editor);
+    expect(getContent(el)).toBe(`<h1>${notStrong(`[ab]`)}</h1><p>cd</p>`);
 });
 
 test("should make a selection starting with bold text fully bold", async () => {
