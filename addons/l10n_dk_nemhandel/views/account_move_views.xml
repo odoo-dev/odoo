@@ -11,20 +11,20 @@
                         type="object"
                         class="btn btn-secondary"
                         string="Cancel Nemhandel"
-                        invisible="l10n_dk_nemhandel_edi_move_state != 'to_send' or state == 'draft'"/>
+                        invisible="l10n_dk_nemhandel_move_state != 'to_send' or state == 'draft'"/>
             </header>
 
             <xpath expr="//div[@name='journal_div']" position="after">
-                <label for="l10n_dk_nemhandel_edi_move_state"
-                       invisible="not l10n_dk_nemhandel_edi_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')"/>
+                <label for="l10n_dk_nemhandel_move_state"
+                       invisible="not l10n_dk_nemhandel_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')"/>
                 <div name="l10n_dk_nemhandel_div"
                      class="d-flex"
-                     invisible="not l10n_dk_nemhandel_edi_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')">
+                     invisible="not l10n_dk_nemhandel_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')">
                     <field name="l10n_dk_nemhandel_is_demo_uuid" invisible="1"/>
-                    <field name="l10n_dk_nemhandel_edi_move_state" class="oe_inline"/>
+                    <field name="l10n_dk_nemhandel_move_state" class="oe_inline"/>
                     <span class="mx-1" invisible="not l10n_dk_nemhandel_is_demo_uuid"> (Demo)</span>
                     <span class="text-muted mx-3"
-                          invisible="l10n_dk_nemhandel_edi_move_state != 'to_send'">
+                          invisible="l10n_dk_nemhandel_move_state != 'to_send'">
                         The invoice will be sent automatically to Nemhandel
                     </span>
                 </div>
@@ -38,7 +38,7 @@
         <field name="inherit_id" ref="account.view_out_invoice_tree"/>
         <field name="arch" type="xml">
             <field name="state" position="before">
-                <field name="l10n_dk_nemhandel_edi_move_state" optional="hide"/>
+                <field name="l10n_dk_nemhandel_move_state" optional="hide"/>
             </field>
         </field>
     </record>
@@ -49,7 +49,7 @@
         <field name="inherit_id" ref="account.view_out_credit_note_tree"/>
         <field name="arch" type="xml">
             <field name="state" position="before">
-                <field name="l10n_dk_nemhandel_edi_move_state" optional="hide"/>
+                <field name="l10n_dk_nemhandel_move_state" optional="hide"/>
             </field>
         </field>
     </record>
@@ -61,7 +61,7 @@
         <field name="inherit_id" ref="account.view_in_invoice_tree"/>
         <field name="arch" type="xml">
             <field name="state" position="before">
-                <field name="l10n_dk_nemhandel_edi_move_state" invisible="1"/>
+                <field name="l10n_dk_nemhandel_move_state" invisible="1"/>
             </field>
         </field>
     </record>
@@ -72,13 +72,13 @@
         <field name="inherit_id" ref="account.view_account_invoice_filter"/>
         <field name="arch" type="xml">
             <xpath expr="//search/group/filter[@name='status']" position="after">
-                <filter string="Nemhandel status" name="l10n_dk_nemhandel_edi_move_state" context="{'group_by': 'l10n_dk_nemhandel_edi_move_state'}"/>
+                <filter string="Nemhandel status" name="l10n_dk_nemhandel_move_state" context="{'group_by': 'l10n_dk_nemhandel_move_state'}"/>
             </xpath>
             <xpath expr="//filter[@name='to_check']" position='after'>
                 <separator/>
                 <filter name="l10n_dk_nemhandel_ready"
                         string="Nemhandel Ready"
-                        domain="[('state', '=', 'posted'), ('l10n_dk_nemhandel_edi_move_state', '=', 'ready'), ('move_type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))]"/>
+                        domain="[('state', '=', 'posted'), ('l10n_dk_nemhandel_move_state', '=', 'ready'), ('move_type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))]"/>
                 <separator/>
             </xpath>
         </field>

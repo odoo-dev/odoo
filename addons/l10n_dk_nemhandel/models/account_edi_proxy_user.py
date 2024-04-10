@@ -178,7 +178,7 @@ class AccountEdiProxyClientUser(models.Model):
     def _l10n_dk_nemhandel_get_message_status(self):
         for edi_user in self:
             edi_user_moves = self.env['account.move'].search([
-                ('l10n_dk_nemhandel_edi_move_state', '=', 'processing'),
+                ('l10n_dk_nemhandel_move_state', '=', 'processing'),
                 ('company_id', '=', edi_user.company_id.id),
             ])
             if not edi_user_moves:
@@ -194,18 +194,18 @@ class AccountEdiProxyClientUser(models.Model):
                 if uuid == 'error':
                     # this rare edge case can happen if the participant is not active on the proxy side
                     # in this case we can't get information about the invoices
-                    edi_user_moves.l10n_dk_nemhandel_edi_move_state = 'error'
+                    edi_user_moves.l10n_dk_nemhandel_move_state = 'error'
                     log_message = _("Nemhandel error: %s", content['message'])
                     edi_user_moves._message_log_batch(bodies=dict((move.id, log_message) for move in edi_user_moves))
                     continue
 
                 move = message_uuids[uuid]
                 if content.get('error'):
-                    move.l10n_dk_nemhandel_edi_move_state = 'error'
+                    move.l10n_dk_nemhandel_move_state = 'error'
                     move._message_log(body=_("Nemhandel error: %s", content['error']['message']))
                     continue
 
-                move.l10n_dk_nemhandel_edi_move_state = content['state']
+                move.l10n_dk_nemhandel_move_state = content['state']
                 move._message_log(body=_('Nemhandel status update: %s', content['state']))
 
             if message_uuids:

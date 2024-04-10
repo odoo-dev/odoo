@@ -13,7 +13,7 @@ class ResConfigSettings(models.TransientModel):
     l10n_dk_nemhandel_edi_user = fields.Many2one(
         comodel_name='account_edi_proxy_client.user',
         string='EDI user',
-        compute='_compute_l10n_nemhandel_dk_edi_user',
+        compute='_compute_l10n_dk_nemhandel_edi_user',
     )
     l10n_dk_nemhandel_identifier_type = fields.Selection(related='company_id.l10n_dk_nemhandel_identifier_type', readonly=False)
     l10n_dk_nemhandel_identifier_value = fields.Char(related='company_id.l10n_dk_nemhandel_identifier_value', readonly=False)

@@ -8,6 +8,10 @@
             <field name="arch" type="xml">
             <data>
                 <xpath expr="//field[@name='peppol_endpoint']" position="after">
+                    <field name="l10n_dk_nemhandel_identifier_type"
+                           invisible="ubl_cii_format != 'oioubl_201'"/>
+                    <field name="l10n_dk_nemhandel_identifier_value"
+                           invisible="ubl_cii_format != 'oioubl_201'"/>
                     <field name="l10n_dk_nemhandel_is_endpoint_valid" invisible="1"/>
                     <field name="l10n_dk_nemhandel_validity_last_check" invisible="1"/>
                     <label for="l10n_dk_nemhandel_verification_label"

@@ -31,15 +31,21 @@ class ResPartner(models.Model):
             ('not_valid', 'Not valid'),
             ('valid', 'Valid'),
         ],
-        string='Nemhandel endpoint validity',
+        string='Nemhandel endpoint validity label TODO',
         compute='_compute_l10n_dk_nemhandel_verification_label',
         copy=False,
     ) # field to compute the label to show for partner endpoint
 
-    l10n_dk_nemhandel_identifier_type = fields.Char(
+    l10n_dk_nemhandel_identifier_type = fields.Selection(
         string="Identifier type",
         help="TODO",
         tracking=True,
+        selection=[
+            ('EAN/GLN', "EAN/GLN"),
+            ('CVR', "CVR"),
+            ('IBAN', "IBAN"),
+            ('SE', "SE"),
+        ],
     )
     l10n_dk_nemhandel_identifier_value = fields.Char(
         string="RecipientID",

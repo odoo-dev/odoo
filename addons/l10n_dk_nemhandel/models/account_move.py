@@ -38,11 +38,11 @@ class AccountMove(models.Model):
         return res and partner.l10n_dk_nemhandel_is_endpoint_valid
 
     def action_cancel_l10n_dk_nemhandel_documents(self):
-        # if the l10n_dk_nemhandel_edi_move_state is processing/done
+        # if the l10n_dk_nemhandel_move_state is processing/done
         # then it means it has been already sent to l10n_dk_nemhandel proxy and we can't cancel
-        if any(move.l10n_dk_nemhandel_edi_move_state in {'processing', 'done'} for move in self):
+        if any(move.l10n_dk_nemhandel_move_state in {'processing', 'done'} for move in self):
             raise UserError(_("Cannot cancel an entry that has already been sent to Nemhandel"))
-        self.l10n_dk_nemhandel_edi_move_state = 'canceled'
+        self.l10n_dk_nemhandel_move_state = 'canceled'
         self.send_and_print_values = False
 
     @api.depends('l10n_dk_nemhandel_message_uuid')
@@ -51,15 +51,15 @@ class AccountMove(models.Model):
             move.l10n_dk_nemhandel_is_demo_uuid = (move.l10n_dk_nemhandel_message_uuid or '').startswith('demo_')
 
     @api.depends('state')
-    def _compute_l10n_dk_nemhandel_edi_move_state(self):
+    def _compute_l10n_dk_nemhandel_move_state(self):
         for move in self:
             if all([
                 move.company_id.l10n_dk_nemhandel_proxy_state == 'active',
                 move.partner_id.l10n_dk_nemhandel_is_endpoint_valid,
                 move.state == 'posted',
                 move.move_type in ('out_invoice', 'out_refund', 'out_receipt'),
-                not move.l10n_dk_nemhandel_edi_move_state,
+                not move.l10n_dk_nemhandel_move_state,
             ]):
-                move.l10n_dk_nemhandel_edi_move_state = 'ready'
+                move.l10n_dk_nemhandel_move_state = 'ready'
             else:
-                move.l10n_dk_nemhandel_edi_move_state = move.l10n_dk_nemhandel_edi_move_state
+                move.l10n_dk_nemhandel_move_state = move.l10n_dk_nemhandel_move_state
