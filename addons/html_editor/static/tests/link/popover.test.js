@@ -1,4 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { animationFrame } from "@odoo/hoot-mock";
 import { setContent, getContent } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
 import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
@@ -29,6 +30,14 @@ describe("should open a popover", () => {
         expect(".o_we_copy_link").toHaveCount(1);
         expect(".o_we_edit_link").toHaveCount(1);
         expect(".o_we_remove_link").toHaveCount(1);
+    });
+    test("link popover should not repositioned when clicking in the input field", async () => {
+        await setupEditor("<p>this is a <a>li[]nk</a></p>");
+        await waitFor(".o_we_href_input_link");
+        const style = queryOne(".o-we-linkpopover").parentElement.style.cssText;
+        queryOne(".o_we_href_input_link").focus();
+        await animationFrame();
+        expect(queryOne(".o-we-linkpopover").parentElement).toHaveAttribute("style", style);
     });
 });
 

@@ -70,7 +70,7 @@ export class LinkPlugin extends Plugin {
         onSelectionChange: p.handleSelectionChange.bind(p),
     });
     setup() {
-        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom" });
+        this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom-start" });
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.target.tagName === "A") {
                 ev.preventDefault();
@@ -186,7 +186,10 @@ export class LinkPlugin extends Plugin {
             if (linkEl !== this.linkElement) {
                 this.overlay.close();
                 this.linkElement = linkEl;
-                this.overlay.open({ props });
+                this.overlay.open({ target: this.linkElement, props });
+            } else {
+                // pass the link element to overlay to prevent position change
+                this.overlay.open({ target: linkEl, props });
             }
             if (!this.overlay.isOpen) {
                 this.overlay.open({ props });
