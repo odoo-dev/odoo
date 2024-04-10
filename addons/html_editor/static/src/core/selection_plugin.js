@@ -30,7 +30,7 @@ export class SelectionPlugin extends Plugin {
         "setCursorStart",
         "setCursorEnd",
         "extractContent",
-        "preserveCursor",
+        "preserveSelection",
         "resetSelection",
     ];
 
@@ -222,7 +222,7 @@ export class SelectionPlugin extends Plugin {
      * - restore: Restores the preserved cursor position.
      * - adjust: Maps a node to a new one and/or corrects the offset.
      */
-    preserveCursor() {
+    preserveSelection() {
         const selection = { ...this.getEditableSelection() };
         return {
             restore: () => {
@@ -231,15 +231,18 @@ export class SelectionPlugin extends Plugin {
                 }
             },
             adjust(oldNode, { newNode, newOffset, shiftOffset }) {
-                for (const node of ["anchor", "focus"]) {
-                    if (selection[node + "Node"] === oldNode) {
+                for (const [nodePropertyName, offsetPropertyName] of [
+                    ["anchorNode", "focusNode"],
+                    ["anchorOffset", "focusOffset"],
+                ]) {
+                    if (selection[nodePropertyName] === oldNode) {
                         if (newNode) {
-                            selection[node + "Node"] = newNode;
+                            selection[nodePropertyName] = newNode;
                         }
                         if (newOffset !== undefined) {
-                            selection[node + "Offset"] = newOffset;
+                            selection[offsetPropertyName] = newOffset;
                         } else if (shiftOffset) {
-                            selection[node + "Offset"] += shiftOffset;
+                            selection[offsetPropertyName] += shiftOffset;
                         }
                     }
                 }
