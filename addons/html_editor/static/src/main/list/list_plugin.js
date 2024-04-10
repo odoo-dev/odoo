@@ -296,7 +296,7 @@ export class ListPlugin extends Plugin {
 
     // @todo @phoenix: move this to table plugin?
     tdToList(td, mode) {
-        const cursor = this.shared.preserveCursor();
+        const cursor = this.shared.preserveSelection();
         const list = insertListAfter(this.document, td.lastChild, mode, [[...td.childNodes]]);
         cursor.adjust(td, { newNode: list.firstChild });
         cursor.restore();
@@ -336,7 +336,7 @@ export class ListPlugin extends Plugin {
             previousSibling.isContentEditable &&
             compareListTypes(previousSibling, element)
         ) {
-            const cursor = this.shared.preserveCursor();
+            const cursor = this.shared.preserveSelection();
             cursor.adjust(element, { shiftOffset: previousSibling.childNodes.length });
             cursor.adjust(previousSibling, { newNode: element });
 
@@ -350,7 +350,7 @@ export class ListPlugin extends Plugin {
     }
 
     removeEmptyPinLI(p) {
-        const cursor = this.shared.preserveCursor();
+        const cursor = this.shared.preserveSelection();
         const li = p.parentElement;
         // An empty block might cointain empty inlines as children.
         for (const node of [p, ...descendants(p)]) {
@@ -365,7 +365,7 @@ export class ListPlugin extends Plugin {
     }
 
     convertPinLItoSpan(p) {
-        const cursor = this.shared.preserveCursor();
+        const cursor = this.shared.preserveSelection();
 
         const span = this.document.createElement("span");
         span.setAttribute("class", p.classList);
@@ -379,7 +379,7 @@ export class ListPlugin extends Plugin {
     }
 
     unwrapPinLI(p) {
-        const cursor = this.shared.preserveCursor();
+        const cursor = this.shared.preserveSelection();
         cursor.adjust(p, { newNode: p.parentElement, shiftOffset: childNodeIndex(p) });
         const contents = unwrapContents(p);
         cursor.restore();

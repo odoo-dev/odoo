@@ -447,15 +447,3 @@ export function getSelectedNodes(editable) {
         ),
     ];
 }
-
-// @deprecated
-export function preserveCursor(document) {
-    const sel = document.getSelection();
-    const cursorPos = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
-    return (replace) => {
-        replace = replace || new Map();
-        cursorPos[0] = replace.get(cursorPos[0]) || cursorPos[0];
-        cursorPos[2] = replace.get(cursorPos[2]) || cursorPos[2];
-        return setSelection(...cursorPos, false);
-    };
-}
