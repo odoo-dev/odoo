@@ -31,10 +31,11 @@ export class SelectionPlugin extends Plugin {
         "setCursorEnd",
         "extractContent",
         "preserveCursor",
+        "resetSelection",
     ];
 
     setup() {
-        this.activeSelection = this.makeSelection(false, false);
+        this.resetSelection();
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
         this.addDomListener(this.editable, "click", (ev) => {
             if (ev.detail >= 3) {
@@ -43,6 +44,10 @@ export class SelectionPlugin extends Plugin {
                 this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
             }
         });
+    }
+
+    resetSelection() {
+        this.activeSelection = this.makeSelection(false, false);
     }
 
     /**
