@@ -1,7 +1,8 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
+import { getContent } from "../_helpers/selection";
 import { em, s, span, u } from "../_helpers/tags";
-import { italic, underline } from "../_helpers/user_actions";
+import { italic, tripleClick, underline } from "../_helpers/user_actions";
 
 test("should make a few characters underline", async () => {
     await testEditor({
@@ -52,11 +53,10 @@ test("should make a whole heading underline after a triple click", async () => {
 });
 
 test("should make a whole heading not underline after a triple click", async () => {
-    await testEditor({
-        contentBefore: `<h1>${u(`[ab`)}</h1><p>]cd</p>`,
-        stepFunction: underline,
-        contentAfter: `<h1>[ab]</h1><p>cd</p>`,
-    });
+    const { el, editor } = await setupEditor(`<h1>${u(`ab`)}</h1><p>cd</p>`);
+    tripleClick(el.querySelector("h1"));
+    underline(editor);
+    expect(getContent(el)).toBe(`<h1>[ab]</h1><p>cd</p>`);
 });
 
 test("should make a selection starting with underline text fully underline", async () => {

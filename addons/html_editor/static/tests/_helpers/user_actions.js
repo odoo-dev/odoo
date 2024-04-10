@@ -221,3 +221,13 @@ export function pasteHtml(editor, html) {
 export function pasteOdooEditorHtml(editor, html) {
     return pasteData(editor, html, "text/odoo-editor");
 }
+
+export function tripleClick(node) {
+    setSelection({
+        anchorNode: node,
+        anchorOffset: 0,
+        focusNode: node.nextSibling,
+        focusOffset: 0,
+    });
+    manuallyDispatchProgrammaticEvent(node, "click", { detail: 3 });
+}

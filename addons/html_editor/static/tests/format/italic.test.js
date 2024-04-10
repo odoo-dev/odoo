@@ -1,7 +1,8 @@
-import { test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
+import { getContent } from "../_helpers/selection";
 import { em, span } from "../_helpers/tags";
-import { italic } from "../_helpers/user_actions";
+import { italic, tripleClick } from "../_helpers/user_actions";
 
 test("should make a few characters italic", async () => {
     await testEditor({
@@ -52,11 +53,10 @@ test("should make a whole heading italic after a triple click", async () => {
 });
 
 test("should make a whole heading not italic after a triple click", async () => {
-    await testEditor({
-        contentBefore: `<h1>${em(`[ab`)}</h1><p>]cd</p>`,
-        stepFunction: italic,
-        contentAfter: `<h1>[ab]</h1><p>cd</p>`,
-    });
+    const { el, editor } = await setupEditor(`<h1>${em(`[ab`)}</h1><p>]cd</p>`);
+    tripleClick(el.querySelector("h1"));
+    italic(editor);
+    expect(getContent(el)).toBe(`<h1>[ab]</h1><p>cd</p>`);
 });
 
 test("should make a selection starting with italic text fully italic", async () => {
