@@ -10,7 +10,14 @@ import {
 import { closestElement, descendants, getAdjacents } from "@html_editor/utils/dom_traversal";
 import { getTraversedBlocks } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
-import { applyToTree, compareListTypes, createList, getListMode, insertListAfter } from "./utils";
+import {
+    applyToTree,
+    compareListTypes,
+    createList,
+    getListMode,
+    insertListAfter,
+    isListItem,
+} from "./utils";
 import { childNodeIndex } from "@html_editor/utils/position";
 
 // @todo @phoenix: isFormatApplied for toolbar buttons should probably
@@ -163,7 +170,7 @@ export class ListPlugin extends Plugin {
             if (["OL", "UL"].includes(block.tagName) || !block.isContentEditable) {
                 continue;
             }
-            const li = block.closest("li");
+            const li = closestElement(block, isListItem);
             if (li) {
                 if (getListMode(li.parentElement) === mode) {
                     sameModeListItems.add(li);
@@ -254,8 +261,8 @@ export class ListPlugin extends Plugin {
             return this.pToList(element, mode);
         }
         // @todo @phoenix: check for callbacks registered as resources instead?
-        if (["TD", "TH"].includes(element.tagName)) {
-            return this.tdToList(element, mode);
+        if (element.matches("td, th, li.nav-item")) {
+            return this.blockContentsToList(element, mode);
         }
         let list;
         const selectionToRestore = { ...this.shared.getEditableSelection() };
@@ -294,11 +301,10 @@ export class ListPlugin extends Plugin {
         return list;
     }
 
-    // @todo @phoenix: move this to table plugin?
-    tdToList(td, mode) {
+    blockContentsToList(block, mode) {
         const cursor = this.shared.preserveSelection();
-        const list = insertListAfter(this.document, td.lastChild, mode, [[...td.childNodes]]);
-        cursor.adjust(td, { newNode: list.firstChild });
+        const list = insertListAfter(this.document, block.lastChild, mode, [[...block.childNodes]]);
+        cursor.adjust(block, { newNode: list.firstChild });
         cursor.restore();
         return list;
     }
@@ -388,7 +394,7 @@ export class ListPlugin extends Plugin {
     }
 
     removeParagraphInLI(element) {
-        if (!element.matches("li > p")) {
+        if (!(element.tagName === "P" && isListItem(element.parentElement))) {
             return element;
         }
         // Remove paragraph if empty.
@@ -452,7 +458,7 @@ export class ListPlugin extends Plugin {
         }
 
         const selectionToRestore = { ...this.shared.getEditableSelection() };
-        if (li.parentNode.parentNode.tagName === "LI") {
+        if (isListItem(li.parentNode.parentNode)) {
             const ul = li.parentNode;
             const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
             const toremove = shouldRemoveParentLi ? ul.parentNode : null;
@@ -543,19 +549,22 @@ export class ListPlugin extends Plugin {
 
     separateListItems() {
         const listItems = new Set();
+        const navListItems = new Set();
         const nonListItems = [];
         for (const block of getTraversedBlocks(this.editable)) {
             const closestLI = block.closest("li");
             if (closestLI) {
-                // Keep deepest list items only.
-                if (!closestLI.querySelector("li") && closestLI.isContentEditable) {
+                if (closestLI.classList.contains("nav-item")) {
+                    navListItems.add(closestLI);
+                } else if (!closestLI.querySelector("li") && closestLI.isContentEditable) {
+                    // Keep deepest list items only.
                     listItems.add(closestLI);
                 }
             } else if (!["UL", "OL"].includes(block.tagName)) {
                 nonListItems.push(block);
             }
         }
-        return { listItems: [...listItems], nonListItems };
+        return { listItems: [...listItems], navListItems: [...navListItems], nonListItems };
     }
 
     // --------------------------------------------------------------------------
@@ -563,20 +572,22 @@ export class ListPlugin extends Plugin {
     // --------------------------------------------------------------------------
 
     handleTab() {
-        const { listItems, nonListItems } = this.separateListItems();
-        if (listItems.length) {
+        const { listItems, navListItems, nonListItems } = this.separateListItems();
+        if (listItems.length || navListItems.length) {
             this.indentListNodes(listItems);
             this.shared.indentBlocks(nonListItems);
+            // Do nothing to nav-items.
             this.dispatch("ADD_STEP");
             return true;
         }
     }
 
     handleShiftTab() {
-        const { listItems, nonListItems } = this.separateListItems();
-        if (listItems.length) {
+        const { listItems, navListItems, nonListItems } = this.separateListItems();
+        if (listItems.length || navListItems.length) {
             this.outdentListNodes(listItems);
             this.shared.outdentBlocks(nonListItems);
+            // Do nothing to nav-items.
             this.dispatch("ADD_STEP");
             return true;
         }

@@ -340,7 +340,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should outdent a list inside a nav-item list", async () => {
+    test("should outdent a list inside a nav-item list", async () => {
         await testEditor({
             contentBefore: unformat(`
                 <ul>
