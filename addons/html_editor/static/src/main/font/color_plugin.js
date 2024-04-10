@@ -2,7 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
-import { getDeepRange, getSelectedNodes } from "@html_editor/utils/selection";
+import { getSelectedNodes } from "@html_editor/utils/selection";
 import { isColorGradient } from "@html_editor/utils/color";
 import { ColorSelector } from "./color_selector";
 import { isCSSColor } from "@web/core/utils/colors";
@@ -106,17 +106,13 @@ export class ColorPlugin extends Plugin {
         //     insertAndSelectZws(selection);
         //     wasCollapsed = true;
         // }
-        const range = getDeepRange(this.editable, { splitText: true, select: true });
-        if (!range) {
-            return;
-        }
-        const selectionToRestore = this.shared.getEditableSelection();
+        const selection = this.shared.splitSelection();
         // Get the <font> nodes to color
         const selectionNodes = getSelectedNodes(this.editable).filter(
             (node) => closestElement(node).isContentEditable
         );
-        if (isEmptyBlock(range.endContainer)) {
-            selectionNodes.push(range.endContainer, ...descendants(range.endContainer));
+        if (isEmptyBlock(selection.endContainer)) {
+            selectionNodes.push(selection.endContainer, ...descendants(selection.endContainer));
         }
         const selectedNodes =
             mode === "backgroundColor"
@@ -216,7 +212,7 @@ export class ColorPlugin extends Plugin {
                 fontsSet.delete(font);
             }
         }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
+        this.shared.setSelection(selection, { normalize: false });
         // if (wasCollapsed) {
         //     const newSelection = this.shared.getEditableSelection();
         //     const range = new Range();
