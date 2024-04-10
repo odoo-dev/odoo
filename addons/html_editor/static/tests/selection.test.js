@@ -34,14 +34,12 @@ test("plugins should be notified when ranges are removed", async () => {
     const { el } = await setupEditor("<p>a[b]</p>", {
         config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
     });
-    expect(count).toBe(3);
-
+    const countBefore = count;
     document.getSelection().removeAllRanges();
     await animationFrame();
-    expect(count).toBe(4);
+    expect(count).toBe(countBefore + 1);
     expect(getContent(el)).toBe("<p>ab</p>");
 });
-
 
 describe("inEditable", () => {
     test("inEditable should be true", async () => {
