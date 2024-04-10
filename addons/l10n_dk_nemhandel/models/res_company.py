@@ -34,12 +34,12 @@ PEPPOL_ENDPOINT_WARNING = {
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    l10n_dk_edi_phone_number = fields.Char(
+    l10n_dk_nemhandel_phone_number = fields.Char(
         string='Phone number (for validation)',
-        compute='_compute_l10n_dk_edi_phone_number', store=True, readonly=False,
+        compute='_compute_l10n_dk_nemhandel_phone_number', store=True, readonly=False,
         help='You will receive a verification code to this phone number',
     )
-    l10n_dk_edi_proxy_state = fields.Selection(
+    l10n_dk_nemhandel_proxy_state = fields.Selection(
         selection=[
             ('not_verified', 'Not verified'),
             ('sent_verification', 'Verification code sent'),
@@ -50,21 +50,21 @@ class ResCompany(models.Model):
         ],
         string='Nemhandel status', required=True, default='not_verified',
     )
-    l10n_dk_edi_identifier_type = fields.Selection(related='partner_id.l10n_dk_edi_identifier_type', readonly=False)
-    l10n_dk_edi_identifier_value = fields.Char(related='partner_id.l10n_dk_edi_identifier_value', readonly=False)
-    l10n_dk_edi_purchase_journal_id = fields.Many2one(
+    l10n_dk_nemhandel_identifier_type = fields.Selection(related='partner_id.l10n_dk_nemhandel_identifier_type', readonly=False)
+    l10n_dk_nemhandel_identifier_value = fields.Char(related='partner_id.l10n_dk_nemhandel_identifier_value', readonly=False)
+    l10n_dk_nemhandel_purchase_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Denmark EDI Purchase Journal',
         domain=[('type', '=', 'purchase')],
-        compute='_compute_l10n_dk_edi_purchase_journal_id', store=True, readonly=False,
-        inverse='_inverse_l10n_dk_edi_purchase_journal_id',
+        compute='_compute_l10n_dk_nemhandel_purchase_journal_id', store=True, readonly=False,
+        inverse='_inverse_l10n_dk_nemhandel_purchase_journal_id',
     )
 
     # -------------------------------------------------------------------------
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
-    def _sanitize_l10n_dk_edi_phone_number(self, phone_number=None):
+    def _sanitize_l10n_dk_nemhandel_phone_number(self, phone_number=None):
         self.ensure_one()
 
         error_message = _(
@@ -75,7 +75,7 @@ class ResCompany(models.Model):
         if not phonenumbers:
             raise ValidationError(_("Please install the phonenumbers library."))
 
-        phone_number = phone_number or self.l10n_dk_edi_phone_number
+        phone_number = phone_number or self.l10n_dk_nemhandel_phone_number
         if not phone_number:
             return
 
@@ -95,53 +95,53 @@ class ResCompany(models.Model):
     # CONSTRAINTS
     # -------------------------------------------------------------------------
 
-    @api.constrains('l10n_dk_edi_phone_number')
-    def _check_l10n_dk_edi_phone_number(self):
+    @api.constrains('l10n_dk_nemhandel_phone_number')
+    def _check_l10n_dk_nemhandel_phone_number(self):
         for company in self:
-            if company.l10n_dk_edi_phone_number:
-                company._sanitize_l10n_dk_edi_phone_number()
+            if company.l10n_dk_nemhandel_phone_number:
+                company._sanitize_l10n_dk_nemhandel_phone_number()
 
-    @api.constrains('l10n_dk_edi_purchase_journal_id')
-    def _check_l10n_dk_edi_purchase_journal_id(self):
+    @api.constrains('l10n_dk_nemhandel_purchase_journal_id')
+    def _check_l10n_dk_nemhandel_purchase_journal_id(self):
         for company in self:
-            if company.l10n_dk_edi_purchase_journal_id and company.l10n_dk_edi_purchase_journal_id.type != 'purchase':
+            if company.l10n_dk_nemhandel_purchase_journal_id and company.l10n_dk_nemhandel_purchase_journal_id.type != 'purchase':
                 raise ValidationError(_("A purchase journal must be used to receive Nemhandel documents."))
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('l10n_dk_edi_proxy_state')
-    def _compute_l10n_dk_edi_purchase_journal_id(self):
+    @api.depends('l10n_dk_nemhandel_proxy_state')
+    def _compute_l10n_dk_nemhandel_purchase_journal_id(self):
         for company in self:
-            if not company.l10n_dk_edi_purchase_journal_id and company.l10n_dk_edi_proxy_state not in ('rejected'):
-                company.l10n_dk_edi_purchase_journal_id = self.env['account.journal'].search([
+            if not company.l10n_dk_nemhandel_purchase_journal_id and company.l10n_dk_nemhandel_proxy_state not in ('rejected'):
+                company.l10n_dk_nemhandel_purchase_journal_id = self.env['account.journal'].search([
                     *self.env['account.journal']._check_company_domain(company),
                     ('type', '=', 'purchase'),
                 ], limit=1)
-                company.l10n_dk_edi_purchase_journal_id.is_l10n_dk_edi_journal = True
+                company.l10n_dk_nemhandel_purchase_journal_id.is_l10n_dk_nemhandel_journal = True
             else:
-                company.l10n_dk_edi_purchase_journal_id = company.l10n_dk_edi_purchase_journal_id
+                company.l10n_dk_nemhandel_purchase_journal_id = company.l10n_dk_nemhandel_purchase_journal_id
 
-    def _inverse_l10n_dk_edi_purchase_journal_id(self):
+    def _inverse_l10n_dk_nemhandel_purchase_journal_id(self):
         for company in self:
             # This avoid having 2 or more journals from the same company with
-            # `is_l10n_dk_edi_journal` set to True (which could occur after changes).
+            # `is_l10n_dk_nemhandel_journal` set to True (which could occur after changes).
             journals_to_reset = self.env['account.journal'].search([
                 ('company_id', '=', company.id),
-                ('is_l10n_dk_edi_journal', '=', True),
+                ('is_l10n_dk_nemhandel_journal', '=', True),
             ])
-            journals_to_reset.is_l10n_dk_edi_journal = False
-            company.l10n_dk_edi_purchase_journal_id.is_l10n_dk_edi_journal = True
+            journals_to_reset.is_l10n_dk_nemhandel_journal = False
+            company.l10n_dk_nemhandel_purchase_journal_id.is_l10n_dk_nemhandel_journal = True
 
     @api.depends('phone')
-    def _compute_l10n_dk_edi_phone_number(self):
+    def _compute_l10n_dk_nemhandel_phone_number(self):
         for company in self:
-            if not company.l10n_dk_edi_phone_number:
+            if not company.l10n_dk_nemhandel_phone_number:
                 try:
                     # precompute only if it's a valid phone number
-                    company._sanitize_l10n_dk_edi_phone_number(company.phone)
-                    company.l10n_dk_edi_phone_number = company.phone
+                    company._sanitize_l10n_dk_nemhandel_phone_number(company.phone)
+                    company.l10n_dk_nemhandel_phone_number = company.phone
                 except ValidationError:
                     continue
 
@@ -150,13 +150,13 @@ class ResCompany(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _sanitize_l10n_dk_edi_endpoint(self, vals, type=False, value=False):
+    def _sanitize_l10n_dk_nemhandel_endpoint(self, vals, type=False, value=False):
         # TODO sanitize value
-        if 'l10n_dk_edi_identifier_type' not in vals and 'l10n_dk_edi_identifier_value' not in vals:
+        if 'l10n_dk_nemhandel_identifier_type' not in vals and 'l10n_dk_nemhandel_identifier_value' not in vals:
             return vals
 
-        identifier_type = vals['l10n_dk_edi_identifier_type'] if 'l10n_dk_edi_identifier_type' in vals else type # let users remove the value
-        identifier_value = vals['l10n_dk_edi_identifier_value'] if 'l10n_dk_edi_identifier_value' in vals else value
+        identifier_type = vals['l10n_dk_nemhandel_identifier_type'] if 'l10n_dk_nemhandel_identifier_type' in vals else type # let users remove the value
+        identifier_value = vals['l10n_dk_nemhandel_identifier_value'] if 'l10n_dk_nemhandel_identifier_value' in vals else value
         if not identifier_type or not identifier_value:
             return vals
 
@@ -169,10 +169,10 @@ class ResCompany(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals = self._sanitize_l10n_dk_edi_endpoint(vals)
+            vals = self._sanitize_l10n_dk_nemhandel_endpoint(vals)
         return super().create(vals_list)
 
     def write(self, vals):
         for company in self:
-            vals = self._sanitize_l10n_dk_edi_endpoint(vals, company.l10n_dk_edi_identifier_type, company.l10n_dk_edi_identifier_value)
+            vals = self._sanitize_l10n_dk_nemhandel_endpoint(vals, company.l10n_dk_nemhandel_identifier_type, company.l10n_dk_nemhandel_identifier_value)
         return super().write(vals)

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="res_partner_form_l10n_dk_edi" model="ir.ui.view">
-        <field name="name">res.partner.form.l10n.dk.edi</field>
+    <record id="res_partner_form_l10n_dk_nemhandel" model="ir.ui.view">
+        <field name="name">res.partner.form.l10n.dk.nemhandel</field>
             <field name="model">res.partner</field>
             <field name="priority">20</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
             <data>
                 <xpath expr="//field[@name='peppol_endpoint']" position="after">
-                    <field name="l10n_dk_edi_is_endpoint_valid" invisible="1"/>
-                    <field name="l10n_dk_edi_validity_last_check" invisible="1"/>
-                    <label for="l10n_dk_edi_verification_label"
-                           invisible="ubl_cii_format != 'oioubl_201' or not l10n_dk_edi_identifier_value"/>
+                    <field name="l10n_dk_nemhandel_is_endpoint_valid" invisible="1"/>
+                    <field name="l10n_dk_nemhandel_validity_last_check" invisible="1"/>
+                    <label for="l10n_dk_nemhandel_verification_label"
+                           invisible="ubl_cii_format != 'oioubl_201' or not l10n_dk_nemhandel_identifier_value"/>
                     <div class="row"
-                        invisible="ubl_cii_format != 'oioubl_201' or not l10n_dk_edi_identifier_value">
+                        invisible="ubl_cii_format != 'oioubl_201' or not l10n_dk_nemhandel_identifier_value">
                         <div class="col-4">
-                            <field name="l10n_dk_edi_verification_label"/>
+                            <field name="l10n_dk_nemhandel_verification_label"/>
                         </div>
                         <div class="col-8 pt-0">
-                            <button name="button_l10n_dk_edi_check_partner_endpoint"
+                            <button name="button_l10n_dk_nemhandel_check_partner_endpoint"
                                     class="btn btn-secondary"
                                     type="object"
                                     string="Verify"
@@ -36,22 +36,22 @@
         <field name="inherit_id" ref="base.view_partner_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='ubl_cii_format']" position="after">
-                <field name="l10n_dk_edi_identifier_type" string="Nemhandel RecipientID" optional="hide"/>
-                <field name="l10n_dk_edi_identifier_value" string="Nemhandel Endpoint" optional="hide"/>
-                <field name="l10n_dk_edi_is_endpoint_valid" string="Nemhandel Validity" optional="hide"/>
+                <field name="l10n_dk_nemhandel_identifier_type" string="Nemhandel RecipientID" optional="hide"/>
+                <field name="l10n_dk_nemhandel_identifier_value" string="Nemhandel Endpoint" optional="hide"/>
+                <field name="l10n_dk_nemhandel_is_endpoint_valid" string="Nemhandel Validity" optional="hide"/>
             </xpath>
         </field>
     </record>
 
-    <record id="partner_action_verify_l10n_dk_edi" model="ir.actions.server">
+    <record id="partner_action_verify_l10n_dk_nemhandel" model="ir.actions.server">
         <field name="name">Verify Nemhandel</field>
-        <field name="model_id" ref="l10n_dk_edi.model_res_partner"/>
+        <field name="model_id" ref="l10n_dk_nemhandel.model_res_partner"/>
         <field name="binding_model_id" ref="base.model_res_partner"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
             for record in records:
-                record.button_l10n_dk_edi_check_partner_endpoint()
+                record.button_l10n_dk_nemhandel_check_partner_endpoint()
         </field>
     </record>
 </odoo>

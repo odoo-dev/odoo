@@ -6,53 +6,64 @@ from hashlib import md5
 from urllib import parse
 
 from odoo import api, fields, models
-from odoo.addons.l10n_dk_edi.tools.demo_utils import handle_demo
+from odoo.addons.l10n_dk_nemhandel.tools.demo_utils import handle_demo
 
 TIMEOUT = 10
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    l10n_dk_edi_is_endpoint_valid = fields.Boolean(
+    l10n_dk_nemhandel_is_endpoint_valid = fields.Boolean(
         string="Nemhandel endpoint validity",
         help="The partner's identifier is valid",
-        compute="_compute_l10n_dk_edi_is_endpoint_valid", store=True,
+        compute="_compute_l10n_dk_nemhandel_is_endpoint_valid", store=True,
         copy=False,
     )
-    l10n_dk_edi_validity_last_check = fields.Date(
+    l10n_dk_nemhandel_validity_last_check = fields.Date(
         string="Checked on",
         help="Last Nemhandel endpoint verification",
         readonly=True,
         copy=False,
     )
-    l10n_dk_edi_verification_label = fields.Selection(
+    l10n_dk_nemhandel_verification_label = fields.Selection(
         selection=[
             ('not_verified', 'Not verified yet'),
             ('not_valid', 'Not valid'),
             ('valid', 'Valid'),
         ],
         string='Nemhandel endpoint validity',
-        compute='_compute_l10n_dk_edi_verification_label',
+        compute='_compute_l10n_dk_nemhandel_verification_label',
         copy=False,
     ) # field to compute the label to show for partner endpoint
 
-    @api.depends('l10n_dk_edi_identifier_type', 'l10n_dk_edi_identifier_value')
-    def _compute_l10n_dk_edi_is_endpoint_valid(self):
-        # Every change in l10n_dk_edi_identifier_type or l10n_dk_edi_identifier_value should set the validity back to False
-        self.l10n_dk_edi_is_endpoint_valid = False
+    l10n_dk_nemhandel_identifier_type = fields.Char(
+        string="Identifier type",
+        help="TODO",
+        tracking=True,
+    )
+    l10n_dk_nemhandel_identifier_value = fields.Char(
+        string="RecipientID",
+        help="TODO 'Recipient ID'.",
+        tracking=True,
+    )
 
-    @api.depends('l10n_dk_edi_is_endpoint_valid', 'l10n_dk_edi_validity_last_check')
-    def _compute_l10n_dk_edi_verification_label(self):
+    @api.depends('l10n_dk_nemhandel_identifier_type', 'l10n_dk_nemhandel_identifier_value')
+    def _compute_l10n_dk_nemhandel_is_endpoint_valid(self):
+        # Every change in l10n_dk_nemhandel_identifier_type or l10n_dk_nemhandel_identifier_value should set the validity back to False
+        self.l10n_dk_nemhandel_is_endpoint_valid = False
+
+    @api.depends('l10n_dk_nemhandel_is_endpoint_valid', 'l10n_dk_nemhandel_validity_last_check')
+    def _compute_l10n_dk_nemhandel_verification_label(self):
         for partner in self:
-            if not partner.l10n_dk_edi_validity_last_check:
-                partner.l10n_dk_edi_verification_label = 'not_verified'
-            elif partner.l10n_dk_edi_is_endpoint_valid:
-                partner.l10n_dk_edi_verification_label = 'valid'
+            if not partner.l10n_dk_nemhandel_validity_last_check:
+                partner.l10n_dk_nemhandel_verification_label = 'not_verified'
+            elif partner.l10n_dk_nemhandel_is_endpoint_valid:
+                partner.l10n_dk_nemhandel_verification_label = 'valid'
             else:
-                partner.l10n_dk_edi_verification_label = 'not_valid'
+                partner.l10n_dk_nemhandel_verification_label = 'not_valid'
 
     @api.model
-    def _check_l10n_dk_edi_participant_exists(self, edi_identification):
+    def _check_l10n_dk_nemhandel_participant_exists(self, edi_identification):
         # TODO check if partner exists
         # hash_participant = md5(edi_identification.lower().encode()).hexdigest()
         # endpoint_participant = parse.quote_plus(f"iso6523-actorid-upis::{edi_identification}")
@@ -79,7 +90,7 @@ class ResPartner(models.Model):
         return True
 
     @handle_demo
-    def button_l10n_dk_edi_check_partner_endpoint(self):
+    def button_l10n_dk_nemhandel_check_partner_endpoint(self):
         """ A basic check for whether a participant is reachable at the given
         Peppol participant ID - peppol_eas:peppol_endpoint (ex: '9999:test')
         The SML (Service Metadata Locator) assigns a DNS name to each peppol participant.
@@ -91,9 +102,9 @@ class ResPartner(models.Model):
         self.ensure_one()
 
         if not self.peppol_eas and self.peppol_endpoint:
-            self.l10n_dk_edi_is_endpoint_valid = False
+            self.l10n_dk_nemhandel_is_endpoint_valid = False
         else:
-            edi_identification = f'{self.l10n_dk_edi_identifier_type}:{self.l10n_dk_edi_identifier_value}'.lower()
-            self.l10n_dk_edi_validity_last_check = fields.Date.context_today(self)
-            self.l10n_dk_edi_is_endpoint_valid = self._check_l10n_dk_edi_participant_exists(edi_identification)
+            edi_identification = f'{self.l10n_dk_nemhandel_identifier_type}:{self.l10n_dk_nemhandel_identifier_value}'.lower()
+            self.l10n_dk_nemhandel_validity_last_check = fields.Date.context_today(self)
+            self.l10n_dk_nemhandel_is_endpoint_valid = self._check_l10n_dk_nemhandel_participant_exists(edi_identification)
         return False

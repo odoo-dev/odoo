@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record model="ir.ui.view" id="account_move_send_inherit_l10n_dk_edi">
+        <record model="ir.ui.view" id="account_move_send_inherit_l10n_dk_nemhandel">
             <field name="name">account.move.send.form.inherit.peppol</field>
             <field name="model">account.move.send</field>
             <field name="inherit_id" ref="account.account_move_send_form"/>
@@ -19,7 +19,7 @@
                         <b>
                             <label for="checkbox_send_nemhandel"/>
                         </b>
-                        <field name="l10n_dk_edi_mode_info" class="oe_inline o_form_label"/>
+                        <field name="l10n_dk_nemhandel_mode_info" class="oe_inline o_form_label"/>
                     </div>
                 </xpath>
             </field>

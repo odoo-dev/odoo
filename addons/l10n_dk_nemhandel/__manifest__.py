@@ -1,16 +1,14 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 {
     'name': "Denmark EDI - Nemhandel",
     'summary': "This module is used to send/receive documents with Nemhandel",
     'description': """
-- Send and receive documents via Nemhandel network in OIOUBL 2.1 format
+        - Send and receive documents via Nemhandel network in OIOUBL 2.1 format
     """,
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting/Localizations/EDI',
+    'countries': ['dk'],
     'version': '1.0',
     'depends': [
         'account_edi_proxy_client',
-        'account_edi_ubl_cii',
         'l10n_dk_oioubl',
     ],
     'data': [
@@ -22,12 +20,8 @@
         'wizard/account_move_send_views.xml',
     ],
     'demo': [
-        'demo/l10n_dk_edi_demo.xml',
+        'demo/l10n_dk_nemhandel_demo.xml',
     ],
+    'installable': True,
     'license': 'LGPL-3',
-    'assets': {
-        'web.assets_backend': [
-            'account_peppol/static/src/components/**/*',
-        ],
-    }
 }

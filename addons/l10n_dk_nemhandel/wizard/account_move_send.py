@@ -20,7 +20,7 @@ class AccountMoveSend(models.TransientModel):
         string="Warning",
         compute="_compute_nemhandel_warning",
     )
-    l10n_dk_edi_mode_info = fields.Char(compute='_compute_l10n_dk_edi_mode_info')
+    l10n_dk_nemhandel_mode_info = fields.Char(compute='_compute_l10n_dk_nemhandel_mode_info')
 
     def _get_wizard_values(self):
         # EXTENDS 'account'
@@ -78,26 +78,26 @@ class AccountMoveSend(models.TransientModel):
             # and moves are not processing/done and if partners have an edi format set to one that works for nemhandel
             invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(lambda partner: partner.ubl_cii_format != 'oioubl_201')
             wizard.enable_nemhandel = (
-                wizard.company_id.l10n_dk_edi_proxy_state == 'active'
+                wizard.company_id.l10n_dk_nemhandel_proxy_state == 'active'
                 and (
                     wizard.enable_ubl_cii_xml
-                    or any(m.ubl_cii_xml_id and m.l10n_dk_edi_move_state not in ('processing', 'done') for m in wizard.move_ids)
+                    or any(m.ubl_cii_xml_id and m.l10n_dk_nemhandel_edi_move_state not in ('processing', 'done') for m in wizard.move_ids)
                 )
                 and not invalid_partners
             )
 
     @api.depends('company_id.account_edi_proxy_client_ids.edi_mode')
-    def _compute_l10n_dk_edi_mode_info(self):
+    def _compute_l10n_dk_nemhandel_mode_info(self):
         mode_strings = {
             'test': _('Test'),
             'demo': _('Demo'),
         }
         for wizard in self:
             edi_user = wizard.company_id.account_edi_proxy_client_ids.filtered(
-                lambda usr: usr.proxy_type == 'l10n_dk_edi'
+                lambda usr: usr.proxy_type == 'l10n_dk_nemhandel'
             )
             mode = mode_strings.get(edi_user.edi_mode)
-            wizard.l10n_dk_edi_mode_info = f' ({mode})' if mode else ''
+            wizard.l10n_dk_nemhandel_mode_info = f' ({mode})' if mode else ''
 
     # -------------------------------------------------------------------------
     # ATTACHMENTS
@@ -118,8 +118,8 @@ class AccountMoveSend(models.TransientModel):
             self.checkbox_ubl_cii_xml = True
         if self.checkbox_send_nemhandel and self.enable_nemhandel:
             for move in self.move_ids:
-                if not move.l10n_dk_edi_move_state or move.l10n_dk_edi_move_state == 'ready':
-                    move.l10n_dk_edi_move_state = 'to_send'
+                if not move.l10n_dk_nemhandel_edi_move_state or move.l10n_dk_nemhandel_edi_move_state == 'ready':
+                    move.l10n_dk_nemhandel_edi_move_state = 'to_send'
 
         return super().action_send_and_print(force_synchronous=force_synchronous, allow_fallback_pdf=allow_fallback_pdf, **kwargs)
 
@@ -135,26 +135,26 @@ class AccountMoveSend(models.TransientModel):
                 if invoice_data.get('ubl_cii_xml_attachment_values'):
                     xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
                     filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-                elif invoice.ubl_cii_xml_id and invoice.l10n_dk_edi_move_state not in ('processing', 'canceled', 'done'):
+                elif invoice.ubl_cii_xml_id and invoice.l10n_dk_nemhandel_edi_move_state not in ('processing', 'canceled', 'done'):
                     xml_file = invoice.ubl_cii_xml_id.raw
                     filename = invoice.ubl_cii_xml_id.name
                 else:
-                    invoice.l10n_dk_edi_move_state = 'skipped'
+                    invoice.l10n_dk_nemhandel_edi_move_state = 'skipped'
                     continue
 
                 partner = invoice.partner_id.commercial_partner_id
-                if not partner.l10n_dk_edi_identifier_type or not partner.l10n_dk_edi_identifier_value:
+                if not partner.l10n_dk_nemhandel_identifier_type or not partner.l10n_dk_nemhandel_identifier_value:
                     # should never happen but in case it does, we need to handle it
-                    invoice.l10n_dk_edi_move_state = 'error'
+                    invoice.l10n_dk_nemhandel_edi_move_state = 'error'
                     invoice_data['error'] = _('The partner is missing Nemhandel RecipientID and/or Nemhandel identifier.')
                     continue
 
-                if not partner.l10n_dk_edi_is_endpoint_valid:
-                    invoice.l10n_dk_edi_move_state = 'error'
+                if not partner.l10n_dk_nemhandel_is_endpoint_valid:
+                    invoice.l10n_dk_nemhandel_edi_move_state = 'error'
                     invoice_data['error'] = _('Please verify partner configuration in partner settings.')
                     continue
 
-                receiver_identification = f"{partner.l10n_dk_edi_identifier_type}:{partner.l10n_dk_edi_identifier_value}"
+                receiver_identification = f"{partner.l10n_dk_nemhandel_identifier_type}:{partner.l10n_dk_nemhandel_identifier_value}"
                 params['documents'].append({
                     'filename': filename,
                     'receiver': receiver_identification,
@@ -166,30 +166,30 @@ class AccountMoveSend(models.TransientModel):
             return
 
         edi_user = next(iter(invoices_data)).company_id.account_edi_proxy_client_ids.filtered(
-            lambda u: u.proxy_type == 'l10n_dk_edi')
+            lambda u: u.proxy_type == 'l10n_dk_nemhandel')
 
         try:
             response = edi_user._make_request(
-                f"{edi_user._get_server_url()}/api/l10n_dk_edi/1/send_document",
+                f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/send_document",
                 params=params,
             )
         except AccountEdiProxyError as e:
             for invoice, invoice_data in invoices_data_nemhandel.items():
-                invoice.l10n_dk_edi_move_state = 'error'
+                invoice.l10n_dk_nemhandel_edi_move_state = 'error'
                 invoice_data['error'] = e.message
         else:
             if response.get('error'):
                 # at the moment the only error that can happen here is ParticipantNotReady error
                 for invoice, invoice_data in invoices_data_nemhandel.items():
-                    invoice.l10n_dk_edi_move_state = 'error'
+                    invoice.l10n_dk_nemhandel_edi_move_state = 'error'
                     invoice_data['error'] = response['error']['message']
             else:
                 # the response only contains message uuids,
                 # so we have to rely on the order to connect peppol messages to account.move
                 invoices = self.env['account.move']
                 for message, (invoice, invoice_data) in zip(response['messages'], invoices_data_nemhandel.items()):
-                    invoice.l10n_dk_edi_message_uuid = message['message_uuid']
-                    invoice.l10n_dk_edi_move_state = 'processing'
+                    invoice.l10n_dk_nemhandel_message_uuid = message['message_uuid']
+                    invoice.l10n_dk_nemhandel_edi_move_state = 'processing'
                     invoices |= invoice
                 log_message = _('The document has been sent to the Nemhandel Access Point for processing')
                 invoices._message_log_batch(bodies=dict((invoice.id, log_message) for invoice in invoices))

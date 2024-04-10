@@ -4,33 +4,32 @@ from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
-from odoo.addons.l10n_dk_edi.tools.demo_utils import handle_demo
+from odoo.addons.l10n_dk_nemhandel.tools.demo_utils import handle_demo
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    l10n_dk_edi_user = fields.Many2one(
+    l10n_dk_nemhandel_edi_user = fields.Many2one(
         comodel_name='account_edi_proxy_client.user',
         string='EDI user',
-        compute='_compute_l10n_dk_edi_user',
+        compute='_compute_l10n_nemhandel_dk_edi_user',
     )
-    l10n_dk_edi_identifier_type = fields.Selection(related='company_id.l10n_dk_edi_identifier_type', readonly=False)
-    l10n_dk_edi_identifier_value = fields.Char(related='company_id.l10n_dk_edi_identifier_value', readonly=False)
-    l10n_dk_edi_phone_number = fields.Char(related='company_id.l10n_dk_edi_phone_number', readonly=False)
-    l10n_dk_edi_proxy_state = fields.Selection(related='company_id.l10n_dk_edi_proxy_state', readonly=False)
-    l10n_dk_edi_purchase_journal_id = fields.Many2one(related='company_id.l10n_dk_edi_purchase_journal_id', readonly=False)
-    l10n_dk_edi_verification_code = fields.Char(related='l10n_dk_edi_user.l10n_dk_edi_verification_code', readonly=False)
-    l10n_dk_edi_mode = fields.Selection(
+    l10n_dk_nemhandel_identifier_type = fields.Selection(related='company_id.l10n_dk_nemhandel_identifier_type', readonly=False)
+    l10n_dk_nemhandel_identifier_value = fields.Char(related='company_id.l10n_dk_nemhandel_identifier_value', readonly=False)
+    l10n_dk_nemhandel_phone_number = fields.Char(related='company_id.l10n_dk_nemhandel_phone_number', readonly=False)
+    l10n_dk_nemhandel_proxy_state = fields.Selection(related='company_id.l10n_dk_nemhandel_proxy_state', readonly=False)
+    l10n_dk_nemhandel_purchase_journal_id = fields.Many2one(related='company_id.l10n_dk_nemhandel_purchase_journal_id', readonly=False)
+    l10n_dk_nemhandel_verification_code = fields.Char(related='l10n_dk_nemhandel_edi_user.l10n_dk_nemhandel_verification_code', readonly=False)
+    l10n_dk_nemhandel_edi_mode = fields.Selection(
         selection=[('demo', 'Demo'), ('test', 'Test'), ('prod', 'Live')],
-        compute='_compute_l10n_dk_edi_mode',
-        inverse='_inverse_l10n_dk_edi_mode',
+        compute='_compute_l10n_dk_nemhandel_edi_mode',
+        inverse='_inverse_l10n_dk_nemhandel_edi_mode',
         readonly=False,
     )
-    l10n_dk_edi_mode_constraint = fields.Selection(
+    l10n_dk_nemhandel_edi_mode_constraint = fields.Selection(
         selection=[('demo', 'Demo'), ('test', 'Test'), ('prod', 'Live')],
-        compute='_compute_l10n_dk_edi_mode_constraint',
+        compute='_compute_l10n_dk_nemhandel_edi_mode_constraint',
         help="Using the config params, this field specifies which edi modes may be selected from the UI"
     )
 
@@ -38,7 +37,7 @@ class ResConfigSettings(models.TransientModel):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
-    def _call_l10n_dk_edi_proxy(self, endpoint, params=None, edi_user=None):
+    def _call_l10n_dk_nemhandel_proxy(self, endpoint, params=None, edi_user=None):
         errors = {
             'code_incorrect': _('The verification code is not correct'),
             'code_expired': _('This verification code has expired. Please request a new one.'),
@@ -46,7 +45,7 @@ class ResConfigSettings(models.TransientModel):
         }
 
         if not edi_user:
-            edi_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_edi')
+            edi_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
 
         params = params or {}
         try:
@@ -66,42 +65,42 @@ class ResConfigSettings(models.TransientModel):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
-    @api.depends('l10n_dk_edi_user')
-    def _compute_l10n_dk_edi_mode_constraint(self):
-        mode_constraint = self.env['ir.config_parameter'].sudo().get_param('l10n_dk_edi.mode_constraint')
+    @api.depends('l10n_dk_nemhandel_edi_user')
+    def _compute_l10n_dk_nemhandel_edi_mode_constraint(self):
+        mode_constraint = self.env['ir.config_parameter'].sudo().get_param('l10n_dk_nemhandel.mode_constraint')
         trial_param = self.env['ir.config_parameter'].sudo().get_param('saas_trial.confirm_token')
-        self.l10n_dk_edi_mode_constraint = trial_param and 'demo' or mode_constraint or 'prod'
+        self.l10n_dk_nemhandel_edi_mode_constraint = trial_param and 'demo' or mode_constraint or 'prod'
 
-    @api.depends('l10n_dk_edi_user')
-    def _compute_l10n_dk_edi_mode(self):
-        edi_mode = self.env['ir.config_parameter'].sudo().get_param('l10n_dk_edi.edi.mode')
+    @api.depends('l10n_dk_nemhandel_edi_user')
+    def _compute_l10n_dk_nemhandel_edi_mode(self):
+        edi_mode = self.env['ir.config_parameter'].sudo().get_param('l10n_dk_nemhandel.edi.mode')
         for config in self:
-            if config.l10n_dk_edi_user:
-                config.l10n_dk_edi_mode = config.l10n_dk_edi_user.edi_mode
+            if config.l10n_dk_nemhandel_edi_user:
+                config.l10n_dk_nemhandel_edi_mode = config.l10n_dk_nemhandel_edi_user.edi_mode
             else:
-                config.l10n_dk_edi_mode = edi_mode or 'prod'
+                config.l10n_dk_nemhandel_edi_mode = edi_mode or 'prod'
 
-    def _inverse_l10n_dk_edi_mode(self):
+    def _inverse_l10n_dk_nemhandel_edi_mode(self):
         for config in self:
-            if not config.l10n_dk_edi_user and config.l10n_dk_edi_mode:
-                self.env['ir.config_parameter'].sudo().set_param('l10n_dk_edi.edi.mode', config.l10n_dk_edi_mode)
+            if not config.l10n_dk_nemhandel_edi_user and config.l10n_dk_nemhandel_edi_mode:
+                self.env['ir.config_parameter'].sudo().set_param('l10n_dk_nemhandel.edi.mode', config.l10n_dk_nemhandel_edi_mode)
                 return
 
     @api.depends("company_id.account_edi_proxy_client_ids")
-    def _compute_l10n_dk_edi_user(self):
+    def _compute_l10n_dk_nemhandel_edi_user(self):
         for config in self:
-            config.l10n_dk_edi_user = config.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_edi')
+            config.l10n_dk_nemhandel_edi_user = config.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
 
     @handle_demo
-    def button_create_l10n_dk_edi_proxy_user(self):
+    def button_create_l10n_dk_nemhandel_proxy_user(self):
         """
         The first step of the Nemhandel onboarding.
         - Creates an EDI proxy user on the iap side, then the client side
-        - Calls /activate_participant to mark the EDI user as l10n_dk_edi user
+        - Calls /activate_participant to mark the EDI user as l10n_dk_nemhandel user
         """
         self.ensure_one()
 
@@ -110,15 +109,15 @@ class ResConfigSettings(models.TransientModel):
         #     raise UserError(
         #         _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
 
-        if not self.l10n_dk_edi_phone_number:
+        if not self.l10n_dk_nemhandel_phone_number:
             raise ValidationError(_("Please enter a phone number to verify your application."))
 
         company = self.company_id
         edi_proxy_client = self.env['account_edi_proxy_client.user']
-        edi_identification = edi_proxy_client._get_proxy_identification(company, 'l10n_dk_edi')
+        edi_identification = edi_proxy_client._get_proxy_identification(company, 'l10n_dk_nemhandel')
 
-        edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'l10n_dk_edi', self.l10n_dk_edi_mode)
-        self.l10n_dk_edi_proxy_state = 'not_verified'
+        edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'l10n_dk_nemhandel', self.l10n_dk_nemhandel_edi_mode)
+        self.l10n_dk_nemhandel_proxy_state = 'not_verified'
 
         # if there is an error when activating the participant below,
         # the client side is rolled back and the edi user is deleted on the client side
@@ -128,48 +127,48 @@ class ResConfigSettings(models.TransientModel):
             self.env.cr.commit()
 
         company_details = {
-            'l10n_dk_edi_company_name': company.display_name,
-            'l10n_dk_edi_company_vat': company.vat,
-            'l10n_dk_edi_company_street': company.street,
-            'l10n_dk_edi_company_city': company.city,
-            'l10n_dk_edi_company_zip': company.zip,
-            'l10n_dk_edi_country_code': company.country_id.code,
-            'l10n_dk_edi_phone_number': self.l10n_dk_edi_phone_number,
+            'l10n_dk_nemhandel_company_name': company.display_name,
+            'l10n_dk_nemhandel_company_vat': company.vat,
+            'l10n_dk_nemhandel_company_street': company.street,
+            'l10n_dk_nemhandel_company_city': company.city,
+            'l10n_dk_nemhandel_company_zip': company.zip,
+            'l10n_dk_nemhandel_country_code': company.country_id.code,
+            'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
         }
 
         params = {
             'company_details': company_details,
         }
 
-        self._call_l10n_dk_edi_proxy(
-            endpoint='/api/l10n_dk_edi/1/activate_participant',
+        self._call_l10n_dk_nemhandel_proxy(
+            endpoint='/api/l10n_dk_nemhandel/1/activate_participant',
             params=params,
             edi_user=edi_user,
         )
 
     @handle_demo
-    def button_l10n_dk_edi_update_user_data(self):
+    def button_l10n_dk_nemhandel_update_user_data(self):
         """
         Action for the user to be able to update their contact details any time
         Calls /update_user on the iap server
         """
         self.ensure_one()
 
-        if not self.l10n_dk_edi_phone_number:
+        if not self.l10n_dk_nemhandel_phone_number:
             raise ValidationError(_("Phone number are required."))
 
         params = {
             'update_data': {
-                'l10n_dk_edi_phone_number': self.l10n_dk_edi_phone_number,
+                'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
             }
         }
 
-        self._call_l10n_dk_edi_proxy(
-            endpoint='/api/l10n_dk_edi/1/update_user',
+        self._call_l10n_dk_nemhandel_proxy(
+            endpoint='/api/l10n_dk_nemhandel/1/update_user',
             params=params,
         )
 
-    def button_l10n_dk_edi_send_verification_code(self):
+    def button_l10n_dk_nemhandel_send_verification_code(self):
         """
         Request user verification via SMS
         Calls the /send_verification_code to send the 6-digit verification code
@@ -177,34 +176,34 @@ class ResConfigSettings(models.TransientModel):
         self.ensure_one()
 
         # update contact details in case the user made changes
-        self.button_update_l10n_dk_edi_user_data()
+        self.button_update_l10n_dk_nemhandel_user_data()
 
-        self._call_l10n_dk_edi_proxy(
-            endpoint='/api/l10n_dk_edi/1/send_verification_code',
+        self._call_l10n_dk_nemhandel_proxy(
+            endpoint='/api/l10n_dk_nemhandel/1/send_verification_code',
             params={'message': _("Your confirmation code is")},
         )
-        self.l10n_dk_edi_proxy_state = 'sent_verification'
+        self.l10n_dk_nemhandel_proxy_state = 'sent_verification'
 
-    def button_l10n_dk_edi_check_verification_code(self):
+    def button_l10n_dk_nemhandel_check_verification_code(self):
         """
         Calls /verify_phone_number to compare user's input and the
         code generated on the IAP server
         """
         self.ensure_one()
 
-        if len(self.l10n_dk_edi_verification_code) != 6:
+        if len(self.l10n_dk_nemhandel_verification_code) != 6:
             raise ValidationError(_("The verification code should contain six digits."))
 
-        self._call_l10n_dk_edi_proxy(
-            endpoint='/api/l10n_dk_edi/1/verify_phone_number',
-            params={'verification_code': self.l10n_dk_edi_verification_code},
+        self._call_l10n_dk_nemhandel_proxy(
+            endpoint='/api/l10n_dk_nemhandel/1/verify_phone_number',
+            params={'verification_code': self.l10n_dk_nemhandel_verification_code},
         )
-        self.l10n_dk_edi_proxy_state = 'pending'
-        self.l10n_dk_edi_verification_code = False
+        self.l10n_dk_nemhandel_proxy_state = 'pending'
+        self.l10n_dk_nemhandel_verification_code = False
         # in case they have already been activated on the IAP side
-        self.env.ref('l10n_dk_edi.ir_cron_l10n_dk_edi_get_participant_status')._trigger()
+        self.env.ref('l10n_dk_nemhandel.ir_cron_l10n_dk_nemhandel_get_participant_status')._trigger()
 
-    def button_l10n_dk_edi_cancel_registration(self):
+    def button_l10n_dk_nemhandel_cancel_registration(self):
         """
         Sets the nemhandel registration to canceled
         - 'not_registered', 'rejected', 'canceled' proxy states mean that canceling the registration
@@ -214,15 +213,15 @@ class ResConfigSettings(models.TransientModel):
         """
         self.ensure_one()
         # check if the participant has been already registered
-        self.l10n_dk_edi_edi_user._l10n_dk_edi_get_participant_status()
+        self.l10n_dk_nemhandel_edi_user._l10n_dk_nemhandel_get_participant_status()
         if not tools.config['test_enable'] and not modules.module.current_test:
             self.env.cr.commit()
 
-        if self.l10n_dk_edi_proxy_state in {'rejected', 'canceled'}:
+        if self.l10n_dk_nemhandel_proxy_state in {'rejected', 'canceled'}:
             raise UserError(_(
-                "Can't cancel registration with this status: %s", self.l10n_dk_edi_proxy_state
+                "Can't cancel registration with this status: %s", self.l10n_dk_nemhandel_proxy_state
             ))
 
-        self._call_l10n_dk_edi_proxy(endpoint='/api/l10n_dk_edi/1/cancel_l10n_dk_edi_registration')
-        self.l10n_dk_edi_proxy_state = 'not_verified'
-        self.l10n_dk_edi_user.unlink()
+        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/l10n_dk_nemhandel/1/cancel_l10n_dk_nemhandel_registration')
+        self.l10n_dk_nemhandel_proxy_state = 'not_verified'
+        self.l10n_dk_nemhandel_edi_user.unlink()
