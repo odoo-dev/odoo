@@ -251,31 +251,23 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should create a new checked list if current node is inside a nav-item list",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
-                    stepFunction: toggleCheckList,
-                    contentAfter:
-                        '<ul><li class="nav-item"><ul class="o_checklist"><li>a[]b</li></ul></li></ul>',
-                });
-            }
-        );
+        test("should create a new checked list if current node is inside a nav-item list", async () => {
+            await testEditor({
+                contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                stepFunction: toggleCheckList,
+                contentAfter:
+                    '<ul><li class="nav-item"><ul class="o_checklist"><li>a[]b</li></ul></li></ul>',
+            });
+        });
 
-        test.todo(
-            "should create a new checked list if closestBlock is inside a nav-item list",
-            async () => {
-                await testEditor({
-                    removeCheckIds: true,
-                    contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
-                    stepFunction: toggleCheckList,
-                    contentAfter:
-                        '<ul><li class="nav-item"><div><ul class="o_checklist"><li>a[]b</li></ul></div></li></ul>',
-                });
-            }
-        );
+        test("should create a new checked list if closestBlock is inside a nav-item list", async () => {
+            await testEditor({
+                contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                stepFunction: toggleCheckList,
+                contentAfter:
+                    '<ul><li class="nav-item"><div><ul class="o_checklist"><li>a[]b</li></ul></div></li></ul>',
+            });
+        });
 
         test("should only keep dir attribute when converting a non Paragraph element", async () => {
             await testEditor({

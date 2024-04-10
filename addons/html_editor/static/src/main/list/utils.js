@@ -59,3 +59,7 @@ export function applyToTree(root, func) {
     }
     return modifiedRoot;
 }
+
+export function isListItem(node) {
+    return node.nodeName === "LI" && !node.classList.contains("nav-item");
+}

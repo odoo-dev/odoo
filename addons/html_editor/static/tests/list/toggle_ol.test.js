@@ -117,28 +117,22 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo(
-            "should create a new ordered list if current node is inside a nav-item list",
-            async () => {
-                await testEditor({
-                    contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
-                    stepFunction: toggleOrderedList,
-                    contentAfter: '<ul><li class="nav-item"><ol><li>a[]b</li></ol></li></ul>',
-                });
-            }
-        );
+        test("should create a new ordered list if current node is inside a nav-item list", async () => {
+            await testEditor({
+                contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                stepFunction: toggleOrderedList,
+                contentAfter: '<ul><li class="nav-item"><ol><li>a[]b</li></ol></li></ul>',
+            });
+        });
 
-        test.todo(
-            "should create a new ordered list if closestBlock is inside a nav-item list",
-            async () => {
-                await testEditor({
-                    contentBefore: '<ul><li class="nav-item"><div><h1>a[]b</h1></div></li></ul>',
-                    stepFunction: toggleOrderedList,
-                    contentAfter:
-                        '<ul><li class="nav-item"><div><ol><li><h1>a[]b</h1></li></ol></div></li></ul>',
-                });
-            }
-        );
+        test("should create a new ordered list if closestBlock is inside a nav-item list", async () => {
+            await testEditor({
+                contentBefore: '<ul><li class="nav-item"><div><h1>a[]b</h1></div></li></ul>',
+                stepFunction: toggleOrderedList,
+                contentAfter:
+                    '<ul><li class="nav-item"><div><ol><li><h1>a[]b</h1></li></ol></div></li></ul>',
+            });
+        });
 
         test("should only keep dir attribute when converting a non Paragraph element", async () => {
             await testEditor({

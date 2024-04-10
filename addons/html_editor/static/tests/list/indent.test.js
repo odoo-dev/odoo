@@ -637,7 +637,7 @@ describe("with selection collapsed", () => {
         });
     });
 
-    test.todo("should not indent a nav-item list", async () => {
+    test("should not indent a nav-item list", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item">a[]</li></ul>',
             stepFunction: keydownTab,
