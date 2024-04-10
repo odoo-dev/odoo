@@ -219,7 +219,7 @@ export class SelectionPlugin extends Plugin {
 
     /**
      * @returns {Object} An object with the following methods:
-     * - restore: Restores the preserved cursor position.
+     * - restore: Restores the preserved selection.
      * - adjust: Maps a node to a new one and/or corrects the offset.
      */
     preserveSelection() {
@@ -232,8 +232,8 @@ export class SelectionPlugin extends Plugin {
             },
             adjust(oldNode, { newNode, newOffset, shiftOffset }) {
                 for (const [nodePropertyName, offsetPropertyName] of [
-                    ["anchorNode", "focusNode"],
-                    ["anchorOffset", "focusOffset"],
+                    ["anchorNode", "anchorOffset"],
+                    ["focusNode", "focusOffset"],
                 ]) {
                     if (selection[nodePropertyName] === oldNode) {
                         if (newNode) {
