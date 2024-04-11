@@ -235,12 +235,7 @@ export class LinkPlugin extends Plugin {
                 link.append(content);
             }
             this.shared.domInsert(link);
-            this.shared.setSelection({
-                anchorNode: link,
-                anchorOffset: 0,
-                focusNode: link,
-                focusOffset: link.childNodes.length,
-            });
+            this.shared.setCursorEnd(link);
             this.dispatch("ADD_STEP");
             return link;
         }
