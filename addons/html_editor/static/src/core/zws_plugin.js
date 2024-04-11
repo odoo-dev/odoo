@@ -3,8 +3,10 @@ import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { nextLeaf, previousLeaf } from "../utils/dom_info";
 import { prepareUpdate } from "../utils/dom_state";
-import { closestElement } from "../utils/dom_traversal";
+import { closestElement, descendants } from "../utils/dom_traversal";
 import { boundariesOut, nodeSize } from "../utils/position";
+
+const allWhitespaceRegex = /^[\s\u200b]*$/;
 
 export class ZwsPlugin extends Plugin {
     static name = "zws";
@@ -41,13 +43,39 @@ export class ZwsPlugin extends Plugin {
 
     clean() {
         for (const el of this.editable.querySelectorAll("[data-oe-zws-empty-inline]")) {
-            // @todo phoenix: consider making the delete plugin export isUnremovable instead?
-            if (this.resources.unremovables.some((predicate) => predicate(el))) {
-                delete el.dataset.oeZwsEmptyInline;
-            } else {
-                el.remove();
+            this.cleanElement(el);
+        }
+    }
+
+    cleanElement(element) {
+        delete element.dataset.oeZwsEmptyInline;
+        if (!allWhitespaceRegex.test(element.textContent)) {
+            // The element has some meaningful text. Remove the ZWS in it.
+            this.cleanZWS(element);
+            return;
+        }
+        // @todo phoenix: consider making the delete plugin export isUnremovable instead?
+        if (this.resources.unremovables.some((predicate) => predicate(element))) {
+            return;
+        }
+        element.remove();
+    }
+
+    cleanZWS(element) {
+        const textNodes = descendants(element).filter((node) => node.nodeType === Node.TEXT_NODE);
+        const cursors = this.shared.preserveSelection();
+        for (const node of textNodes) {
+            let zwsIndex = node.textContent.search("\u200B");
+            while (zwsIndex !== -1) {
+                node.deleteData(zwsIndex, 1);
+                cursors.update(
+                    (cursor) => cursor.node === node && cursor.offset > zwsIndex,
+                    (cursor) => (cursor.offset -= 1)
+                );
+                zwsIndex = node.textContent.search("\u200B");
             }
         }
+        cursors.restore();
     }
 
     moveRight(hasShift) {
