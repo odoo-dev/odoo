@@ -1,3 +1,4 @@
+import { getDeepestPosition } from "@html_editor/utils/dom_info";
 import { splitTextNode } from "@html_editor/utils/dom_split";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
@@ -81,7 +82,7 @@ export class SelectionPlugin extends Plugin {
      * @param { Selection } selection The DOM selection
      * @return { EditorSelection }
      */
-    makeSelection(selection, inEditable) {
+    makeSelection(selection, inEditable, deep) {
         let range;
         if (!selection || !selection.rangeCount) {
             selection = false;
@@ -134,6 +135,39 @@ export class SelectionPlugin extends Plugin {
         return activeSelection;
     }
 
+    makeDeepSelection() {
+        let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed, direction } =
+            this.activeSelection;
+        [anchorNode, anchorOffset] = getDeepestPosition(anchorNode, anchorOffset);
+        [focusNode, focusOffset] = isCollapsed
+            ? [anchorNode, anchorOffset]
+            : getDeepestPosition(focusNode, focusOffset);
+        let startContainer, startOffset, endContainer, endOffset;
+        if (direction) {
+            [startContainer, startOffset] = [anchorNode, anchorOffset];
+            [endContainer, endOffset] = [focusNode, focusOffset];
+        } else {
+            [startContainer, startOffset] = [focusNode, focusOffset];
+            [endContainer, endOffset] = [anchorNode, anchorOffset];
+        }
+
+        const range = new Range();
+        range.setStart(startContainer, startOffset);
+        range.setEnd(endContainer, endOffset);
+        return Object.freeze({
+            ...this.activeSelection,
+            anchorNode,
+            anchorOffset,
+            focusNode,
+            focusOffset,
+            startContainer,
+            startOffset,
+            endContainer,
+            endOffset,
+            commonAncestorContainer: range.commonAncestorContainer,
+        });
+    }
+
     /**
      * @param { EditorSelection } selection
      */
@@ -147,7 +181,7 @@ export class SelectionPlugin extends Plugin {
     /**
      * @return { EditorSelection }
      */
-    getEditableSelection() {
+    getEditableSelection(deep = false) {
         const selection = this.document.getSelection();
         if (
             selection &&
@@ -157,6 +191,9 @@ export class SelectionPlugin extends Plugin {
                 this.editable.contains(selection.focusNode))
         ) {
             this.activeSelection = this.makeSelection(selection, true);
+        }
+        if (deep) {
+            return this.makeDeepSelection();
         }
         return this.activeSelection;
     }
