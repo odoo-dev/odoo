@@ -1,6 +1,7 @@
+import { childNodeIndex } from "@html_editor/utils/position";
+import { findInSelection } from "@html_editor/utils/selection";
 import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { setSelection } from "./selection";
-import { childNodeIndex } from "@html_editor/utils/position";
 
 export function insertText(editor, text) {
     // Create and dispatch events to mock text insertion. Unfortunatly, the
@@ -177,7 +178,8 @@ export function keydownShiftTab(editor) {
 }
 
 export function resetSize(editor) {
-    editor.dispatch("RESET_SIZE");
+    const selection = editor.shared.getEditableSelection();
+    editor.dispatch("RESET_SIZE", { table: findInSelection(selection, "table") });
 }
 
 export function justifyLeft(editor) {

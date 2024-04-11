@@ -1,22 +1,41 @@
+import { findInSelection } from "@html_editor/utils/selection";
 import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
 import { press } from "@odoo/hoot-dom";
+import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 
 function addRow(position) {
-    return (editor) => editor.dispatch("ADD_ROW", { position });
+    return (editor) => {
+        const selection = editor.shared.getEditableSelection();
+        editor.dispatch("ADD_ROW", { position, reference: findInSelection(selection, "tr") });
+    };
 }
 
 function addColumn(position) {
-    return (editor) => editor.dispatch("ADD_COLUMN", { position });
+    return (editor) => {
+        const selection = editor.shared.getEditableSelection();
+        editor.dispatch("ADD_COLUMN", { position, reference: findInSelection(selection, "td") });
+    };
 }
 
 function removeRow(row) {
-    return (editor) => editor.dispatch("REMOVE_ROW", { row });
+    return (editor) => {
+        if (!row) {
+            const selection = editor.shared.getEditableSelection();
+            row = findInSelection(selection, "tr");
+        }
+        editor.dispatch("REMOVE_ROW", { row });
+    };
 }
 
 function removeColumn(cell) {
-    return (editor) => editor.dispatch("REMOVE_COLUMN", { cell });
+    return (editor) => {
+        if (!cell) {
+            const selection = editor.shared.getEditableSelection();
+            cell = findInSelection(selection, "td");
+        }
+        editor.dispatch("REMOVE_COLUMN", { cell });
+    };
 }
 
 describe("row", () => {

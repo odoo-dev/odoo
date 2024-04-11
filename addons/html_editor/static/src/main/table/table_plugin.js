@@ -78,7 +78,7 @@ export class TablePlugin extends Plugin {
             // Move cursor to next cell.
             const shouldAddNewRow = !this.shiftCursorToTableCell(1);
             if (shouldAddNewRow) {
-                this.addRow({ position: "after" });
+                this.addRow({ position: "after", reference: findInSelection(selection, "tr") });
                 this.shiftCursorToTableCell(1);
             }
             return true;
@@ -121,13 +121,6 @@ export class TablePlugin extends Plugin {
         this.shared.setCursorStart(table.querySelector("p"));
     }
     addColumn({ position, reference } = {}) {
-        if (!reference) {
-            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            reference = findInSelection(this.shared.getEditableSelection(), "td");
-            if (!reference) {
-                return;
-            }
-        }
         const columnIndex = getColumnIndex(reference);
         const table = closestElement(reference, "table");
         const tableWidth = table.style.width ? parseFloat(table.style.width) : table.clientWidth;
@@ -175,13 +168,6 @@ export class TablePlugin extends Plugin {
         table.style.width = tableWidth + "px";
     }
     addRow({ position, reference } = {}) {
-        if (!reference) {
-            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            reference = findInSelection(this.shared.getEditableSelection(), "tr");
-            if (!reference) {
-                return;
-            }
-        }
         const referenceRowHeight = reference.style.height
             ? parseFloat(reference.style.height)
             : reference.clientHeight;
@@ -213,13 +199,6 @@ export class TablePlugin extends Plugin {
         }
     }
     removeColumn({ cell }) {
-        if (!cell) {
-            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
-            cell = findInSelection(this.shared.getEditableSelection(), "td");
-            if (!cell) {
-                return;
-            }
-        }
         const table = closestElement(cell, "table");
         const cells = [...closestElement(cell, "tr").querySelectorAll("th, td")];
         const index = cells.findIndex((td) => td === cell);
@@ -232,13 +211,6 @@ export class TablePlugin extends Plugin {
             : this.dispatch("DELETE_TABLE", { table });
     }
     removeRow({ row }) {
-        if (!row) {
-            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
-            row = findInSelection(this.shared.getEditableSelection(), "tr");
-            if (!row) {
-                return;
-            }
-        }
         const table = closestElement(row, "table");
         const siblingRow = row.previousElementSibling || row.nextElementSibling;
         row.remove();
@@ -278,10 +250,6 @@ export class TablePlugin extends Plugin {
         this.shared.setSelection(selectionToRestore);
     }
     resetSize({ table }) {
-        if (!table) {
-            getDeepRange(this.editable, { select: true });
-            table = findInSelection(this.shared.getEditableSelection(), "table");
-        }
         table.removeAttribute("style");
         const cells = [...table.querySelectorAll("tr, td")];
         cells.forEach((cell) => {
