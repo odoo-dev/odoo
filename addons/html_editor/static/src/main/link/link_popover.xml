@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div t-else="" class="d-flex">
-                <a href="#" class="mx-1 o_we_copy_link text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Copy Link')}">
+                <a href="#" class="mx-1 o_we_copy_link text-dark" t-on-click="onClickCopy" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Copy Link')}">
                     <i class="fa fa-clone"></i>
                 </a>
                 <a href="#" class="mx-1 o_we_edit_link text-dark" t-on-click="onClickEdit" data-bs-toggle="tooltip" data-bs-placement="top" title="${('Edit Link')}">

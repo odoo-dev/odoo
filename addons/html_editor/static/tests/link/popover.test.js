@@ -3,6 +3,7 @@ import { animationFrame } from "@odoo/hoot-mock";
 import { setContent, getContent } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
 import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
+import { browser } from "@web/core/browser/browser";
 
 describe("should open a popover", () => {
     test("should open a popover when the selection is inside a link and close outside of a link", async () => {
@@ -74,7 +75,7 @@ describe("popover should switch UI depending on editing state", () => {
     });
 });
 
-describe("popover should edit/remove the link", () => {
+describe("popover should edit/copy/remove the link", () => {
     test("after apply url on a link without href, the link element should be updated", async () => {
         const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
         await waitFor(".o_we_href_input_link");
@@ -106,5 +107,31 @@ describe("popover should edit/remove the link", () => {
         }
         click(".o_we_apply_link");
         expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">linknew[]</a></p>');
+    });
+    test("when the label is empty, it should be set as the URL", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await waitFor(".o_we_apply_link");
+        await animationFrame();
+        queryOne(".o_we_label_link").focus();
+        // mimic the link input behavior
+        for (let i = 0; i < el.textContent.length; i++) {
+            press("Backspace");
+        }
+        click(".o_we_apply_link");
+        expect(getContent(el)).toBe(
+            '<p>this is a <a href="http://test.com/">http://test.com/[]</a></p>'
+        );
+    });
+    test("after clicking on copy button, the url should be copied to clipboard", async () => {
+        await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_copy_link");
+        await waitFor(".o_notification_body");
+        expect(".o_notification_body").toHaveCount(1);
+        await animationFrame();
+        expect(".o-we-linkpopover").toHaveCount(0);
+        expect(browser.navigator.clipboard.readTextSync()).toBe("http://test.com/");
     });
 });

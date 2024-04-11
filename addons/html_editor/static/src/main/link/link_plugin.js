@@ -190,6 +190,9 @@ export class LinkPlugin extends Plugin {
                     this.shared.setSelection(this.shared.getEditableSelection());
                     this.dispatch("ADD_STEP");
                 },
+                onCopy: () => {
+                    this.overlay.close();
+                },
             };
             if (linkEl !== this.linkElement) {
                 this.overlay.close();
