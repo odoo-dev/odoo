@@ -115,6 +115,8 @@ class AssetsBundle(object):
 
         if self.has_js and self.javascripts:
             response.append(self.get_link('js'))
+
+        if self.templates:
             response.append(self.get_link('xml'))
 
         return self.external_assets + response
@@ -339,14 +341,21 @@ class AssetsBundle(object):
         if attachments := self.get_attachments('xml.js'):
             return attachments[0]
         bundle_content = textwrap.dedent(f"""
-            document.addEventListener("DOMContentLoaded", () => {{
-                odoo.define("{self.name}.bundle.xml", ["@web/core/templates"], function (require) {{
-                    "use strict";
-                    const {{ checkPrimaryTemplateParents, registerTemplate, registerTemplateExtension }} = require("@web/core/templates");
-                    /* {self.name} */
-                    {self.generate_xml_bundle()}
-                }});
-            }});
+            {{
+                const loadXmlTemplates = () => {{
+                    odoo.define("{self.name}.bundle.xml", ["@web/core/templates"], function (require) {{
+                        "use strict";
+                        const {{ checkPrimaryTemplateParents, registerTemplate, registerTemplateExtension }} = require("@web/core/templates");
+                        /* {self.name} */
+                        {self.generate_xml_bundle()}
+                    }});
+                }};
+                if (document.readyState === "loading") {{
+                    document.addEventListener("DOMContentLoaded", loadXmlTemplates);
+                }} else {{
+                    loadXmlTemplates();
+                }}
+            }}
         """)
         return self.save_attachment('xml.js', bundle_content)[0]
 
