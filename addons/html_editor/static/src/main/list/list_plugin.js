@@ -304,8 +304,7 @@ export class ListPlugin extends Plugin {
     blockContentsToList(block, mode) {
         const cursor = this.shared.preserveSelection();
         const list = insertListAfter(this.document, block.lastChild, mode, [[...block.childNodes]]);
-        cursor.adjust(block, { newNode: list.firstChild });
-        cursor.restore();
+        cursor.remapNode(block, list.firstChild).restore();
         return list;
     }
 
@@ -343,11 +342,12 @@ export class ListPlugin extends Plugin {
             compareListTypes(previousSibling, element)
         ) {
             const cursor = this.shared.preserveSelection();
-            cursor.adjust(element, { shiftOffset: previousSibling.childNodes.length });
-            cursor.adjust(previousSibling, { newNode: element });
 
-            // @todo @phoenix: what if unremovable/unmergeable?
+            cursor.shiftOffset(element, previousSibling.childNodes.length);
             element.prepend(...previousSibling.childNodes);
+
+            cursor.remapNode(previousSibling, element);
+            // @todo @phoenix: what if unremovable/unmergeable?
             previousSibling.remove();
 
             cursor.restore();
@@ -356,17 +356,21 @@ export class ListPlugin extends Plugin {
     }
 
     removeEmptyPinLI(p) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const li = p.parentElement;
-        // An empty block might cointain empty inlines as children.
-        for (const node of [p, ...descendants(p)]) {
-            cursor.adjust(node, { newNode: li, newOffset: childNodeIndex(p) });
-        }
+        // An empty block might contain empty inlines as children.
+        cursors.update(
+            (cursor) => p.contains(cursor.node),
+            (cursor) => {
+                cursor.node = li;
+                cursor.offset = childNodeIndex(p);
+            }
+        );
         p.remove();
         if (isShrunkBlock(li)) {
             li.append(this.document.createElement("br"));
         }
-        cursor.restore();
+        cursors.restore();
         return li;
     }
 
@@ -378,15 +382,14 @@ export class ListPlugin extends Plugin {
         span.append(...p.childNodes);
         p.replaceWith(span);
 
-        cursor.adjust(p, { newNode: span });
-        cursor.restore();
+        cursor.remapNode(p, span).restore();
 
         return span;
     }
 
     unwrapPinLI(p) {
         const cursor = this.shared.preserveSelection();
-        cursor.adjust(p, { newNode: p.parentElement, shiftOffset: childNodeIndex(p) });
+        cursor.remapNode(p, p.parentElement).shiftOffset(childNodeIndex(p));
         const contents = unwrapContents(p);
         cursor.restore();
         // This assumes the P has at least one child.
