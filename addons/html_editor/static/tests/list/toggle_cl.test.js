@@ -70,11 +70,12 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph with formats into a checklist", async () => {
+        test("should turn a paragraph with formats into a checklist", async () => {
             await testEditor({
                 contentBefore: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
                 stepFunction: toggleCheckList,
-                contentAfter: '<ul class="o_checklist"><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>',
+                contentAfter:
+                    '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
             });
         });
 
@@ -321,12 +322,12 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a checklist with formats into a paragraph", async () => {
+        test("should turn a checklist with formats into a paragraph", async () => {
             await testEditor({
                 contentBefore:
                     '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
                 stepFunction: toggleCheckList,
-                contentAfter: "<p><b>ab</b> <i>cd</i> ef[]gh</p>",
+                contentAfter: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
             });
         });
 

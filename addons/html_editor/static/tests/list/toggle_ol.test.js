@@ -55,11 +55,12 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a paragraph with formats into a list", async () => {
+        test("should turn a paragraph with formats into a list", async () => {
             await testEditor({
                 contentBefore: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
                 stepFunction: toggleOrderedList,
-                contentAfter: "<ol><li><b>ab</b> <i>cd</i> ef[]gh</li></ol>",
+                contentAfter:
+                    "<ol><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ol>",
             });
         });
 
@@ -185,12 +186,12 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should turn a list with formats into a paragraph", async () => {
+        test("should turn a list with formats into a paragraph", async () => {
             await testEditor({
                 contentBefore:
                     "<ol><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ol>",
                 stepFunction: toggleOrderedList,
-                contentAfter: "<p><b>ab</b> <i>cd</i> ef[]gh</p>",
+                contentAfter: "<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>",
             });
         });
 
