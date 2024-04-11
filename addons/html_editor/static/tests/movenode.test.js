@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { describe, expect, getFixture, test } from "@odoo/hoot";
 import { drag, hover } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
@@ -60,6 +60,7 @@ describe("drag", () => {
         expect(dropzones).toHaveLength(6);
         handle.moveTo(dropzones[0]);
         handle.drop();
+        expect(getContent(el)).toBe(`<p>a[]</p><div><br></div><p>b</p><p>c</p>`);
     });
     test("should drop at the same place after the same element", async () => {
         const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p><p>c</p>", {
@@ -77,6 +78,7 @@ describe("drag", () => {
         expect(dropzones).toHaveLength(6);
         handle.moveTo(dropzones[1]);
         handle.drop();
+        expect(getContent(el)).toBe(`<p>a[]</p><div><br></div><p>b</p><p>c</p>`);
     });
     test("should drop before the next P", async () => {
         const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p><p>c</p>", {
@@ -94,7 +96,7 @@ describe("drag", () => {
         expect(dropzones).toHaveLength(6);
         handle.moveTo(dropzones[2]);
         handle.drop();
-        expect(getContent(el)).toBe(`<div><br></div><p>[]a</p><p>b</p><p>c</p>`);
+        expect(getContent(el)).toBe(`<div><br></div><p>a[]</p><p>b</p><p>c</p>`);
     });
     test("should drop after the next P", async () => {
         const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p><p>c</p>", {
@@ -112,6 +114,47 @@ describe("drag", () => {
         expect(dropzones).toHaveLength(6);
         handle.moveTo(dropzones[3]);
         handle.drop();
-        expect(getContent(el)).toBe(`<div><br></div><p>b</p><p>[]a</p><p>c</p>`);
+        expect(getContent(el)).toBe(`<div><br></div><p>b</p><p>a[]</p><p>c</p>`);
+    });
+    test("should do nothing when dropping outside the editable", async () => {
+        const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p><p>c</p>", {
+            styleContent: styles,
+        });
+        const firstP = el.querySelector("p");
+        hover(firstP);
+        const moveElement = document.querySelector(".oe-sidewidget-move");
+        let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
+        expect(dropzones).toHaveLength(0);
+        await tick();
+        const handle = drag(moveElement);
+        await animationFrame();
+        dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
+        expect(dropzones).toHaveLength(6);
+        const outsideArea = document.createElement("div");
+        getFixture().appendChild(outsideArea);
+        handle.moveTo(outsideArea);
+        handle.drop();
+        expect(getContent(el)).toBe(`<p>a[]</p><div><br></div><p>b</p><p>c</p>`);
+    });
+    test("should do nothing when dropping outside the editable and after hovering a hook", async () => {
+        const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p><p>c</p>", {
+            styleContent: styles,
+        });
+        const firstP = el.querySelector("p");
+        hover(firstP);
+        const moveElement = document.querySelector(".oe-sidewidget-move");
+        let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
+        expect(dropzones).toHaveLength(0);
+        await tick();
+        const handle = drag(moveElement);
+        await animationFrame();
+        dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
+        expect(dropzones).toHaveLength(6);
+        handle.moveTo(dropzones[3]);
+        const outsideArea = document.createElement("div");
+        getFixture().appendChild(outsideArea);
+        handle.moveTo(outsideArea);
+        handle.drop();
+        expect(getContent(el)).toBe(`<p>a[]</p><div><br></div><p>b</p><p>c</p>`);
     });
 });

@@ -1,4 +1,5 @@
 import { useNativeDraggable } from "@html_editor/utils/drag_and_drop";
+import { endPos } from "@html_editor/utils/position";
 import { Plugin } from "../plugin";
 import { ancestors, closestElement } from "../utils/dom_traversal";
 
@@ -357,7 +358,7 @@ export class MoveNodePlugin extends Plugin {
                         this._currentDropHint.remove();
                         this._currentDropHint = null;
                     }
-                    this._currentDropHintCommand = null;
+                    this._currentDropHintElementPosition = null;
                 };
                 dropzoneBox.addEventListener("mouseleave", removeDropHint);
                 dropzoneBox.addEventListener("pointerleave", removeDropHint);
@@ -387,7 +388,11 @@ export class MoveNodePlugin extends Plugin {
                 p.append(br);
                 previousParent.append(p);
             }
-            this.shared.setSelection({ anchorNode: movableElement, anchorOffset: 0 });
+            const selectionPosition = endPos(movableElement);
+            this.shared.setSelection({
+                anchorNode: selectionPosition[0],
+                anchorOffset: selectionPosition[1],
+            });
             this.dispatch("ADD_STEP");
         }
     }
