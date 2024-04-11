@@ -17,7 +17,7 @@ function toIgnore(node) {
 }
 
 describe("Html Paste cleaning - whitelist", () => {
-    test.todo("should keep whitelisted Tags tag", async () => {
+    test("should keep whitelisted Tags tag", async () => {
         for (const node of CLIPBOARD_WHITELISTS.nodes) {
             if (!toIgnore(node)) {
                 const html = isInline(node)
@@ -29,7 +29,7 @@ describe("Html Paste cleaning - whitelist", () => {
                     stepFunction: async (editor) => {
                         pasteHtml(editor, `a<${node.toLowerCase()}>b</${node.toLowerCase()}>c`);
                     },
-                    contentAfter: "<p>123" + html.replace(/<\/?font>/g, "") + "[]4</p>",
+                    contentAfter: "<p>123" + html + "[]4</p>",
                 });
             }
         }

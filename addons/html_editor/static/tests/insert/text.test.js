@@ -23,6 +23,8 @@ describe("collapsed selection", () => {
         });
     });
 
+    // @todo @phoenix: ZWS Plugin: on CLEAN, check for content in
+    // [data-oe-zws-empty-inline] before removing it.
     test.todo(
         "should insert a char into a data-oe-zws-empty-inline span removing the zws and data-oe-zws-empty-inline",
         async () => {
@@ -31,7 +33,7 @@ describe("collapsed selection", () => {
                 stepFunction: async (editor) => {
                     insertText(editor, "x");
                 },
-                contentAfter: "<p>abx[]cd</p>",
+                contentAfter: "<p>ab<span>x[]</span>cd</p>",
             });
         }
     );
@@ -44,7 +46,7 @@ describe("collapsed selection", () => {
                 stepFunction: async (editor) => {
                     insertText(editor, "x");
                 },
-                contentAfter: "<p>abx[]cd</p>",
+                contentAfter: "<p>ab<span>x[]</span>cd</p>",
             });
         }
     );

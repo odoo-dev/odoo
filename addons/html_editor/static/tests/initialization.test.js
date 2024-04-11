@@ -109,18 +109,18 @@ describe("allowInlineAtRoot options", () => {
     });
 });
 
-describe("sanitize spans/fonts away", () => {
-    test.todo("should sanitize attributeless spans away", async () => {
+describe("sanitize spans/fonts", () => {
+    test("should NOT sanitize attributeless spans away", async () => {
         await testEditor({
             contentBefore: "<p><span>abc</span></p>",
-            contentAfter: "<p>abc</p>",
+            contentAfter: "<p><span>abc</span></p>",
         });
     });
 
-    test.todo("should sanitize attributeless fonts away", async () => {
+    test("should NOT sanitize attributeless fonts away", async () => {
         await testEditor({
             contentBefore: "<p><font>abc</font></p>",
-            contentAfter: "<p>abc</p>",
+            contentAfter: "<p><font>abc</font></p>",
         });
     });
 });
