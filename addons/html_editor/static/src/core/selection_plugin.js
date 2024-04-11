@@ -259,34 +259,62 @@ export class SelectionPlugin extends Plugin {
     }
 
     /**
-     * @returns {Object} An object with the following methods:
-     * - restore: Restores the preserved selection.
-     * - adjust: Maps a node to a new one and/or corrects the offset.
+     * Stores the current selection and returns an object with methods to:
+     * - update the cursors (anchor and focus) node and offset after DOM
+     * manipulations that migh affect them. Such methods are chainable.
+     * - restore the updated selection.
      */
     preserveSelection() {
-        const selection = { ...this.getEditableSelection() };
+        const selection = this.getEditableSelection();
+        const anchor = { node: selection.anchorNode, offset: selection.anchorOffset };
+        const focus = { node: selection.focusNode, offset: selection.focusOffset };
+
+        function updateCursors(predicate, action) {
+            for (const cursor of [anchor, focus]) {
+                if (predicate(cursor)) {
+                    action(cursor);
+                }
+            }
+        }
+        const nodeToPredicate = (node) => (cursor) => cursor.node === node;
+
         return {
             restore: () => {
                 if (selection.inEditable) {
-                    this.setSelection(selection, { normalize: false });
+                    this.setSelection(
+                        {
+                            anchorNode: anchor.node,
+                            anchorOffset: anchor.offset,
+                            focusNode: focus.node,
+                            focusOffset: focus.offset,
+                        },
+                        { normalize: false }
+                    );
                 }
             },
-            adjust(oldNode, { newNode, newOffset, shiftOffset }) {
-                for (const [nodePropertyName, offsetPropertyName] of [
-                    ["anchorNode", "anchorOffset"],
-                    ["focusNode", "focusOffset"],
-                ]) {
-                    if (selection[nodePropertyName] === oldNode) {
-                        if (newNode) {
-                            selection[nodePropertyName] = newNode;
-                        }
-                        if (newOffset !== undefined) {
-                            selection[offsetPropertyName] = newOffset;
-                        } else if (shiftOffset) {
-                            selection[offsetPropertyName] += shiftOffset;
-                        }
-                    }
-                }
+            remapNode(node, newNode) {
+                const action = (cursor) => (cursor.node = newNode);
+                updateCursors(nodeToPredicate(node), action);
+                return this;
+            },
+            setOffset(node, newOffset) {
+                const action = (cursor) => (cursor.offset = newOffset);
+                updateCursors(nodeToPredicate(node), action);
+                return this;
+            },
+            shiftOffset(node, shiftOffset) {
+                const action = (cursor) => (cursor.offset += shiftOffset);
+                updateCursors(nodeToPredicate(node), action);
+                return this;
+            },
+            // More flexible: takes a predicate and a custom action
+            /**
+             * @param {(cursor: {node, offset}) => boolean} predicate
+             * @param {(cursor: {node, offset}) => void} action
+             */
+            update(predicate, action) {
+                updateCursors(predicate, action);
+                return this;
             },
         };
     }
