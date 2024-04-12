@@ -3,10 +3,12 @@ import { splitTextNode } from "@html_editor/utils/dom_split";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
 import {
+    getTraversedNodes,
     normalizeCursorPosition,
     normalizeDeepCursorPosition,
     normalizeFakeBR,
 } from "../utils/selection";
+import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef { Object } EditorSelection
@@ -35,6 +37,7 @@ export class SelectionPlugin extends Plugin {
         "extractContent",
         "preserveSelection",
         "resetSelection",
+        "getSelectedNodes",
     ];
 
     setup() {
@@ -354,5 +357,35 @@ export class SelectionPlugin extends Plugin {
                 return this;
             },
         };
+    }
+
+    /**
+     * Returns an array containing all the nodes fully contained in the selection.
+     *
+     * @param {Node} editable
+     * @returns {Node[]}
+     */
+    getSelectedNodes() {
+        const selection = this.getEditableSelection();
+        const range = new Range();
+        range.setStart(selection.startContainer, selection.startOffset);
+        range.setEnd(selection.endContainer, selection.endOffset);
+        return [
+            ...new Set(
+                getTraversedNodes(this.editable, selection).flatMap((node) => {
+                    const td = closestElement(node, ".o_selected_td");
+                    if (td) {
+                        return descendants(td);
+                    } else if (
+                        range.isPointInRange(node, 0) &&
+                        range.isPointInRange(node, nodeSize(node))
+                    ) {
+                        return node;
+                    } else {
+                        return [];
+                    }
+                })
+            ),
+        ];
     }
 }

@@ -5,7 +5,7 @@ import { isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
 import { DIRECTIONS } from "../utils/position";
-import { getSelectedNodes, getTraversedNodes } from "../utils/selection";
+import { getTraversedNodes } from "../utils/selection";
 
 function isFormatted(format) {
     return (el, selection) => isSelectionFormat(el, format, selection);
@@ -90,7 +90,7 @@ export class FormatPlugin extends Plugin {
 
     removeFormat() {
         this.document.execCommand("removeFormat");
-        for (const node of getTraversedNodes(this.editable)) {
+        for (const node of getTraversedNodes(this.editable, this.shared.getEditableSelection())) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
         }
@@ -127,16 +127,19 @@ export class FormatPlugin extends Plugin {
         const selectedNodesInTds = [...this.editable.querySelectorAll(".o_selected_td")].map(
             (node) => closestElement(node).querySelector("br")
         );
-        const selectedNodes = getSelectedNodes(this.editable).filter(
-            (n) =>
-                n.nodeType === Node.TEXT_NODE &&
-                closestElement(n).isContentEditable &&
-                (isVisibleTextNode(n) || isZWS(n))
-        );
+        const selectedNodes = this.shared
+            .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+            .filter(
+                (n) =>
+                    n.nodeType === Node.TEXT_NODE &&
+                    closestElement(n).isContentEditable &&
+                    (isVisibleTextNode(n) || isZWS(n))
+            );
         const selectedTextNodes = selectedNodes.length ? selectedNodes : selectedNodesInTds;
 
         const selectedFieldNodes = new Set(
-            getSelectedNodes(this.editable)
+            this.shared
+                .getSelectedNodes(this.editable, this.shared.getEditableSelection())
                 .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
                 .filter(Boolean)
         );

@@ -1,11 +1,10 @@
 import { Plugin } from "@html_editor/plugin";
+import { isColorGradient } from "@html_editor/utils/color";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
-import { getSelectedNodes } from "@html_editor/utils/selection";
-import { isColorGradient } from "@html_editor/utils/color";
-import { ColorSelector } from "./color_selector";
 import { isCSSColor } from "@web/core/utils/colors";
+import { ColorSelector } from "./color_selector";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
@@ -108,9 +107,9 @@ export class ColorPlugin extends Plugin {
         // }
         const selection = this.shared.splitSelection();
         // Get the <font> nodes to color
-        const selectionNodes = getSelectedNodes(this.editable).filter(
-            (node) => closestElement(node).isContentEditable
-        );
+        const selectionNodes = this.shared
+            .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+            .filter((node) => closestElement(node).isContentEditable);
         if (isEmptyBlock(selection.endContainer)) {
             selectionNodes.push(selection.endContainer, ...descendants(selection.endContainer));
         }
@@ -119,7 +118,8 @@ export class ColorPlugin extends Plugin {
                 ? selectionNodes.filter((node) => !closestElement(node, "table.o_selected_table"))
                 : selectionNodes;
         const selectedFieldNodes = new Set(
-            getSelectedNodes(this.editable)
+            this.shared
+                .getSelectedNodes(this.editable, this.shared.getEditableSelection())
                 .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
                 .filter(Boolean)
         );

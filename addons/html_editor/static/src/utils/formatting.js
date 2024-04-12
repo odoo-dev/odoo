@@ -114,8 +114,10 @@ function removeStyle(node, styleName, item) {
  * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'
  * @returns {boolean}
  */
-export function isSelectionFormat(editable, format) {
-    const selectedNodes = getTraversedNodes(editable).filter((n) => n.nodeType === Node.TEXT_NODE);
+export function isSelectionFormat(editable, format, selection) {
+    const selectedNodes = getTraversedNodes(editable, selection).filter(
+        (n) => n.nodeType === Node.TEXT_NODE
+    );
     const isFormatted = formatsSpecs[format].isFormatted;
     return selectedNodes.length && selectedNodes.every((n) => isFormatted(n, editable));
 }
