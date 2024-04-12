@@ -108,7 +108,7 @@ export class ColorPlugin extends Plugin {
         const selection = this.shared.splitSelection();
         // Get the <font> nodes to color
         const selectionNodes = this.shared
-            .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+            .getSelectedNodes()
             .filter((node) => closestElement(node).isContentEditable);
         if (isEmptyBlock(selection.endContainer)) {
             selectionNodes.push(selection.endContainer, ...descendants(selection.endContainer));
@@ -119,7 +119,7 @@ export class ColorPlugin extends Plugin {
                 : selectionNodes;
         const selectedFieldNodes = new Set(
             this.shared
-                .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+                .getSelectedNodes()
                 .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
                 .filter(Boolean)
         );

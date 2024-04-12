@@ -85,7 +85,7 @@ export class SelectionPlugin extends Plugin {
      * @param { Selection } selection The DOM selection
      * @return { EditorSelection }
      */
-    makeSelection(selection, inEditable, deep) {
+    makeSelection(selection, inEditable) {
         let range;
         if (!selection || !selection.rangeCount) {
             selection = false;
@@ -184,7 +184,7 @@ export class SelectionPlugin extends Plugin {
     /**
      * @return { EditorSelection }
      */
-    getEditableSelection(deep = false) {
+    getEditableSelection({ deep = false } = {}) {
         const selection = this.document.getSelection();
         if (
             selection &&
@@ -362,7 +362,6 @@ export class SelectionPlugin extends Plugin {
     /**
      * Returns an array containing all the nodes fully contained in the selection.
      *
-     * @param {Node} editable
      * @returns {Node[]}
      */
     getSelectedNodes() {
