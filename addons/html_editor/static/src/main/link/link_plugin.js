@@ -168,6 +168,7 @@ export class LinkPlugin extends Plugin {
             const linkEl = closestElement(sel.anchorNode, "A");
             if (!linkEl) {
                 this.overlay.close();
+                this.removeCurrentLinkIfEmtpy();
                 return;
             }
             const props = {
@@ -183,6 +184,7 @@ export class LinkPlugin extends Plugin {
                         this.shared.setCursorEnd(this.linkElement);
                     }
                     this.dispatch("ADD_STEP");
+                    this.removeCurrentLinkIfEmtpy();
                 },
                 onRemove: () => {
                     this.removeLink();
@@ -195,6 +197,7 @@ export class LinkPlugin extends Plugin {
                 },
             };
             if (linkEl !== this.linkElement) {
+                this.removeCurrentLinkIfEmtpy();
                 this.overlay.close();
                 this.linkElement = linkEl;
                 this.overlay.open({ target: this.linkElement, props });
@@ -238,6 +241,12 @@ export class LinkPlugin extends Plugin {
             this.shared.setCursorEnd(link);
             this.dispatch("ADD_STEP");
             return link;
+        }
+    }
+
+    removeCurrentLinkIfEmtpy() {
+        if (this.linkElement && this.linkElement.innerText === "") {
+            this.linkElement.remove();
         }
     }
 
