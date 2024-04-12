@@ -1,14 +1,14 @@
+import { closestBlock } from "@html_editor/utils/blocks";
 import { getDeepestPosition } from "@html_editor/utils/dom_info";
 import { splitTextNode } from "@html_editor/utils/dom_split";
+import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
 import {
-    getTraversedNodes,
     normalizeCursorPosition,
     normalizeDeepCursorPosition,
     normalizeFakeBR,
 } from "../utils/selection";
-import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef { Object } EditorSelection
@@ -38,6 +38,8 @@ export class SelectionPlugin extends Plugin {
         "preserveSelection",
         "resetSelection",
         "getSelectedNodes",
+        "getTraversedNodes",
+        "getTraversedBlocks",
     ];
 
     setup() {
@@ -371,7 +373,7 @@ export class SelectionPlugin extends Plugin {
         range.setEnd(selection.endContainer, selection.endOffset);
         return [
             ...new Set(
-                getTraversedNodes(this.editable, selection).flatMap((node) => {
+                this.getTraversedNodes().flatMap((node) => {
                     const td = closestElement(node, ".o_selected_td");
                     if (td) {
                         return descendants(td);
@@ -386,5 +388,54 @@ export class SelectionPlugin extends Plugin {
                 })
             ),
         ];
+    }
+
+    /**
+     * Returns an array containing all the nodes traversed when walking the
+     * selection.
+     *
+     * @param {Boolean} deep
+     * @returns {Node[]}
+     */
+    getTraversedNodes({ deep = false } = {}) {
+        const selection = this.getEditableSelection({ deep });
+        const selectedTableCells = this.editable.querySelectorAll(".o_selected_td");
+        const document = this.editable.ownerDocument;
+        const iterator = document.createNodeIterator(selection.commonAncestorContainer);
+        let node;
+        do {
+            node = iterator.nextNode();
+        } while (
+            node &&
+            node !== selection.startContainer &&
+            !(selectedTableCells.length && node === selectedTableCells[0])
+        );
+        const traversedNodes = new Set([node, ...descendants(node)]);
+        while (node && node !== selection.endContainer) {
+            node = iterator.nextNode();
+            if (node) {
+                const selectedTable = closestElement(node, ".o_selected_table");
+                if (selectedTable) {
+                    for (const selectedTd of selectedTable.querySelectorAll(".o_selected_td")) {
+                        traversedNodes.add(selectedTd);
+                        descendants(selectedTd).forEach((descendant) =>
+                            traversedNodes.add(descendant)
+                        );
+                    }
+                } else {
+                    traversedNodes.add(node);
+                }
+            }
+        }
+        return [...traversedNodes];
+    }
+
+    /**
+     * Returns a Set of traversed blocks within the given range.
+     *
+     * @returns {Set<HTMLElement>}
+     */
+    getTraversedBlocks() {
+        return new Set(this.getTraversedNodes().map(closestBlock).filter(Boolean));
     }
 }

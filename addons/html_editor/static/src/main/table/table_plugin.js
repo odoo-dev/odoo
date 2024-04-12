@@ -5,7 +5,7 @@ import { getDeepestPosition, isProtected } from "@html_editor/utils/dom_info";
 import { ancestors, closestElement, lastLeaf } from "@html_editor/utils/dom_traversal";
 import { parseHTML } from "@html_editor/utils/html";
 import { DIRECTIONS, leftPos, rightPos } from "@html_editor/utils/position";
-import { findInSelection, getTraversedNodes } from "@html_editor/utils/selection";
+import { findInSelection } from "@html_editor/utils/selection";
 import { getColumnIndex, getRowIndex } from "@html_editor/utils/table";
 
 const tableInnerComponents = new Set(["THEAD", "TBODY", "TFOOT", "TR", "TH", "TD"]);
@@ -414,10 +414,7 @@ export class TablePlugin extends Plugin {
             .filter((node) => node.nodeName === "TABLE")
             .pop();
 
-        const traversedNodes = getTraversedNodes(
-            this.editable,
-            this.shared.getEditableSelection({ deep: true })
-        );
+        const traversedNodes = this.shared.getTraversedNodes({ deep: true });
         if (startTd !== endTd && startTable === endTable) {
             if (!isProtected(startTable)) {
                 // The selection goes through at least two different cells ->

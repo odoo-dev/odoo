@@ -3,18 +3,17 @@ import { isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
 import { isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
-import { FONT_SIZE_CLASSES, formatsSpecs, isSelectionFormat } from "../utils/formatting";
+import { FONT_SIZE_CLASSES, formatsSpecs } from "../utils/formatting";
 import { DIRECTIONS } from "../utils/position";
-import { getTraversedNodes } from "../utils/selection";
 
-function isFormatted(format) {
-    return (el, selection) => isSelectionFormat(el, format, selection);
+function isFormatted(formatPlugin, format) {
+    return () => formatPlugin.isSelectionFormat(format);
 }
 
 export class FormatPlugin extends Plugin {
     static name = "format";
     static dependencies = ["selection", "split", "zws"];
-    static resources = () => ({
+    static resources = (p) => ({
         shortcuts: [
             { hotkey: "control+b", command: "FORMAT_BOLD" },
             { hotkey: "control+i", command: "FORMAT_ITALIC" },
@@ -30,28 +29,28 @@ export class FormatPlugin extends Plugin {
                     cmd: "FORMAT_BOLD",
                     icon: "fa-bold",
                     name: "Toggle bold",
-                    isFormatApplied: isFormatted("bold"),
+                    isFormatApplied: isFormatted(p, "bold"),
                 },
                 {
                     id: "italic",
                     cmd: "FORMAT_ITALIC",
                     icon: "fa-italic",
                     name: "Toggle italic",
-                    isFormatApplied: isFormatted("italic"),
+                    isFormatApplied: isFormatted(p, "italic"),
                 },
                 {
                     id: "underline",
                     cmd: "FORMAT_UNDERLINE",
                     icon: "fa-underline",
                     name: "Toggle underline",
-                    isFormatApplied: isFormatted("underline"),
+                    isFormatApplied: isFormatted(p, "underline"),
                 },
                 {
                     id: "strikethrough",
                     cmd: "FORMAT_STRIKETHROUGH",
                     icon: "fa-strikethrough",
                     name: "Toggle strikethrough",
-                    isFormatApplied: isFormatted("strikeThrough"),
+                    isFormatApplied: isFormatted(p, "strikeThrough"),
                 },
             ],
         },
@@ -90,17 +89,34 @@ export class FormatPlugin extends Plugin {
 
     removeFormat() {
         this.document.execCommand("removeFormat");
-        for (const node of getTraversedNodes(this.editable, this.shared.getEditableSelection())) {
+        for (const node of this.shared.getTraversedNodes()) {
             // The only possible background image on text is the gradient.
             closestElement(node).style.backgroundImage = "";
         }
+    }
+
+    /**
+     * Return true if the current selection on the editable appears as the given
+     * format. The selection is considered to appear as that format if every text
+     * node in it appears as that format.
+     *
+     * @param {Element} editable
+     * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'
+     * @returns {boolean}
+     */
+    isSelectionFormat(format) {
+        const selectedNodes = this.shared
+            .getTraversedNodes()
+            .filter((n) => n.nodeType === Node.TEXT_NODE);
+        const isFormatted = formatsSpecs[format].isFormatted;
+        return selectedNodes.length && selectedNodes.every((n) => isFormatted(n, this.editable));
     }
 
     formatSelection(formatName, { applyStyle, formatProps } = {}) {
         // note: does it work if selection is in opposite direction?
         const selection = this.shared.splitSelection();
         if (typeof applyStyle === "undefined") {
-            applyStyle = !isSelectionFormat(this.editable, formatName, selection);
+            applyStyle = !this.isSelectionFormat(formatName);
         }
 
         let zws;

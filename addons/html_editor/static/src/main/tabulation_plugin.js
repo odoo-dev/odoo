@@ -4,7 +4,6 @@ import { isEditorTab, isZWS } from "@html_editor/utils/dom_info";
 import { descendants, getAdjacentPreviousSiblings } from "@html_editor/utils/dom_traversal";
 import { parseHTML } from "@html_editor/utils/html";
 import { DIRECTIONS, childNodeIndex } from "@html_editor/utils/position";
-import { getTraversedBlocks } from "@html_editor/utils/selection";
 
 const tabHtml = '<span class="oe-tabs" contenteditable="false">\u0009</span>\u200B';
 const GRID_COLUMN_WIDTH = 40; //@todo Configurable?
@@ -76,7 +75,7 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            const traversedBlocks = getTraversedBlocks(this.editable, selection);
+            const traversedBlocks = this.shared.getTraversedBlocks();
             this.indentBlocks(traversedBlocks);
         }
         this.dispatch("ADD_STEP");
@@ -88,10 +87,7 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
-        const traversedBlocks = getTraversedBlocks(
-            this.editable,
-            this.shared.getEditableSelection()
-        );
+        const traversedBlocks = this.shared.getTraversedBlocks();
         this.outdentBlocks(traversedBlocks);
         this.dispatch("ADD_STEP");
     }

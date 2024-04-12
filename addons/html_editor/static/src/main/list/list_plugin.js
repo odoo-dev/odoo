@@ -2,13 +2,13 @@ import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { removeClass, setTagName, toggleClass, unwrapContents } from "@html_editor/utils/dom";
 import {
-    isEmptyBlock,
-    isVisible,
     getDeepestPosition,
+    isEmptyBlock,
     isShrunkBlock,
+    isVisible,
 } from "@html_editor/utils/dom_info";
 import { closestElement, descendants, getAdjacents } from "@html_editor/utils/dom_traversal";
-import { getTraversedBlocks } from "@html_editor/utils/selection";
+import { childNodeIndex } from "@html_editor/utils/position";
 import { _t } from "@web/core/l10n/translation";
 import {
     applyToTree,
@@ -18,14 +18,9 @@ import {
     insertListAfter,
     isListItem,
 } from "./utils";
-import { childNodeIndex } from "@html_editor/utils/position";
 
-// @todo @phoenix: isFormatApplied for toolbar buttons should probably
-// get a selection as parameter instead of the editable.
 function isListActive(listMode) {
-    return function (editable) {
-        // @todo @phoenix get selection from the dom plugin?
-        const selection = editable.ownerDocument.getSelection();
+    return (selection) => {
         const block = closestBlock(selection.anchorNode);
         return block?.tagName === "LI" && getListMode(block.parentNode) === listMode;
     };
@@ -153,10 +148,7 @@ export class ListPlugin extends Plugin {
         // @todo @phoenix: original implementation removed whitespace-only text nodes from traversedNodes.
         // Check if this is necessary.
 
-        const traversedBlocks = getTraversedBlocks(
-            this.editable,
-            this.shared.getEditableSelection()
-        );
+        const traversedBlocks = this.shared.getTraversedBlocks();
 
         // Keep deepest blocks only.
         for (const block of traversedBlocks) {
@@ -557,7 +549,7 @@ export class ListPlugin extends Plugin {
         const listItems = new Set();
         const navListItems = new Set();
         const nonListItems = [];
-        for (const block of getTraversedBlocks(this.editable, this.shared.getEditableSelection())) {
+        for (const block of this.shared.getTraversedBlocks()) {
             const closestLI = block.closest("li");
             if (closestLI) {
                 if (closestLI.classList.contains("nav-item")) {

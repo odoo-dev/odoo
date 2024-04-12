@@ -10,7 +10,6 @@ import {
     isUnderline,
 } from "./dom_info";
 import { closestElement } from "./dom_traversal";
-import { getTraversedNodes } from "./selection";
 
 /**
  * Array of all the classes used by the editor to change the font size.
@@ -103,23 +102,6 @@ function removeStyle(node, styleName, item) {
     if (node.getAttribute("style") === "") {
         node.removeAttribute("style");
     }
-}
-
-/**
- * Return true if the current selection on the editable appears as the given
- * format. The selection is considered to appear as that format if every text
- * node in it appears as that format.
- *
- * @param {Element} editable
- * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'
- * @returns {boolean}
- */
-export function isSelectionFormat(editable, format, selection) {
-    const selectedNodes = getTraversedNodes(editable, selection).filter(
-        (n) => n.nodeType === Node.TEXT_NODE
-    );
-    const isFormatted = formatsSpecs[format].isFormatted;
-    return selectedNodes.length && selectedNodes.every((n) => isFormatted(n, editable));
 }
 
 /**

@@ -1,4 +1,3 @@
-import { isSelectionFormat } from "@html_editor/utils/formatting";
 import { describe, expect, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
@@ -217,41 +216,6 @@ describe("inside container font-weight: 500 and strong being strong-weight: 500"
             contentBefore: `<h1>a${strong(`[b]`)}c</h1>`,
             stepFunction: bold,
             contentAfter: `<h1>a<span style="font-weight: bolder;">[b]</span>c</h1>`,
-        });
-    });
-});
-
-describe("isSelectionFormat", () => {
-    test("return false for isSelectionFormat when partially selecting 2 text node, the anchor is formated and focus is not formated", async () => {
-        await testEditor({
-            contentBefore: `<p>${strong(`a[b`)}</p><p>c]d</p>`,
-            stepFunction: (editor) => {
-                expect(
-                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
-                ).toBe(false);
-            },
-        });
-    });
-
-    test("return false for isSelectionFormat when partially selecting 2 text node, the anchor is not formated and focus is formated", async () => {
-        await testEditor({
-            contentBefore: `<p>${strong(`a]b`)}</p><p>c[d</p>`,
-            stepFunction: (editor) => {
-                expect(
-                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
-                ).toBe(false);
-            },
-        });
-    });
-
-    test("return false for isSelectionFormat when selecting 3 text node, the anchor and focus not formated and the text node in between formated", async () => {
-        await testEditor({
-            contentBefore: `<p>a[b</p><p>${strong(`c`)}</p><p>d]e</p>`,
-            stepFunction: (editor) => {
-                expect(
-                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
-                ).toBe(false);
-            },
         });
     });
 });

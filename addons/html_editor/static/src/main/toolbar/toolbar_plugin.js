@@ -1,5 +1,5 @@
-import { reactive } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
+import { reactive } from "@odoo/owl";
 import { Toolbar } from "./toolbar";
 
 export class ToolbarPlugin extends Plugin {
@@ -72,10 +72,7 @@ export class ToolbarPlugin extends Plugin {
         if (selection.inEditable) {
             for (const buttonGroup of this.buttonGroups) {
                 for (const button of buttonGroup.buttons) {
-                    this.buttonsActiveState[button.id] = button.isFormatApplied?.(
-                        this.editable,
-                        selection
-                    );
+                    this.buttonsActiveState[button.id] = button.isFormatApplied?.(selection);
                 }
             }
         }
