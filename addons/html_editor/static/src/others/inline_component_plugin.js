@@ -7,9 +7,13 @@ import { App } from "@odoo/owl";
  */
 export class InlineComponentPlugin extends Plugin {
     static name = "inline_components";
+    static resources = (p) => ({
+        handle_before_remove: p.handleBeforeRemove.bind(p)
+    });
 
     setup() {
-        this.apps = [];
+        this.apps = new Set();
+        this.nodeToApp = new WeakMap();
         this.info = this.config.inlineComponentInfo;
         for (const embedding of this.config.inlineComponents || []) {
             const targets = this.editable.querySelectorAll(`[data-embedded="${embedding.name}"]`);
@@ -19,8 +23,17 @@ export class InlineComponentPlugin extends Plugin {
         }
     }
 
+    handleBeforeRemove(elem) {
+        const item = this.nodeToApp.get(elem);
+        if (item) {
+            item.app.destroy();
+            this.apps.delete(item);
+        }
+    }
+
     mountApp(elem, C) {
         elem.setAttribute("contenteditable", "false");
+        elem.dataset.oeHasRemovableHandler = true;
         const { dev, translateFn, getRawTemplate } = this.info.app;
         const app = new App(C, {
             test: dev,
@@ -32,12 +45,15 @@ export class InlineComponentPlugin extends Plugin {
         app.rawTemplates = this.info.app.rawTemplates;
         app.templates = this.info.app.templates;
         app.mount(elem);
-        this.apps.push({ app, elem });
+        const item = { app, elem };
+        this.apps.add(item);
+        this.nodeToApp.set(elem, item);
     }
     destroy() {
         super.destroy();
         for (const { app, elem } of this.apps) {
             elem.removeAttribute("contenteditable");
+            delete elem.dataset.oeHasRemovableHandler;
             app.destroy();
         }
     }
