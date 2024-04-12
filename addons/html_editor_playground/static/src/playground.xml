@@ -35,7 +35,7 @@
                         toolbar="config.showToolbar"
                         Plugins="Plugins"
                         classList="classList"
-                        embeddedElements="embeddedElements" />
+                        inlineComponents="inlineComponents" />
                 </div>
                 <t t-if="state.showWysiwyg">
                     <div class="d-flex">

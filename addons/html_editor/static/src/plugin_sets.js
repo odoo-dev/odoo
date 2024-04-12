@@ -31,7 +31,7 @@ import { SearchPowerboxPlugin } from "./main/powerbox/search_powerbox_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
 import { ImagePlugin } from "./main/image_plugin";
 import { LinkPastePlugin } from "./main/link/link_paste_plugin";
-import { EmbeddedElementPlugin } from "./others/embedded_element_plugin";
+import { InlineComponentPlugin } from "./others/inline_component_plugin";
 import { MoveNodePlugin } from "./main/movenode_plugin";
 import { ContainerNodePlugin } from "./main/container_plugin";
 
@@ -76,4 +76,4 @@ export const MAIN_PLUGINS = [
     ContainerNodePlugin,
 ];
 
-export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, EmbeddedElementPlugin];
+export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, InlineComponentPlugin];
