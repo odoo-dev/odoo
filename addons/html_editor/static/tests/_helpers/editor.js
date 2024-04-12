@@ -76,6 +76,7 @@ export async function setupEditor(content, options = {}) {
     const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
         props: { content, config, inIFrame, styleContent, onMounted: options.onMounted },
+        env: options.env,
     });
 
     return {

@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillDestroy, useEnv, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillDestroy, useComponent, useRef, useState } from "@odoo/owl";
 import { Editor } from "./editor";
 import { Toolbar } from "./main/toolbar/toolbar";
 import { MAIN_PLUGINS } from "./plugin_sets";
@@ -33,7 +33,13 @@ function copyCss(sourceDoc, targetDoc) {
  * @returns Editor
  */
 export function useWysiwyg(target, config = {}) {
-    const env = useEnv();
+    const comp = useComponent();
+    const env = comp.env;
+    // grab app and env for inline component plugin, if needed
+    config.inlineComponentInfo = {
+        app: comp.__owl__.app,
+        env,
+    }
     const ref = typeof target === "string" ? useRef(target) : null;
     const editor = new Editor(config, env.services);
     onMounted(() => {
@@ -75,7 +81,7 @@ export class Wysiwyg extends Component {
         copyCss: { type: Boolean, optional: true },
         Plugins: { type: Array, optional: true },
         classList: { type: Array, optional: true },
-        embeddedElements: { type: Array, optional: true },
+        inlineComponents: { type: Array, optional: true },
     };
 
     setup() {
@@ -88,7 +94,7 @@ export class Wysiwyg extends Component {
             classList: this.props.classList,
             copyCss: this.props.copyCss,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
-            embeddedElements: this.props.embeddedElements || [],
+            inlineComponents: this.props.inlineComponents || [],
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and

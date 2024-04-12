@@ -83,7 +83,7 @@ export class Playground extends Component {
             inIframe: false,
             pluginSet: "base",
         });
-        this.embeddedElements = [{
+        this.inlineComponents = [{
             name: "counter",
             Component: Counter
         }];
