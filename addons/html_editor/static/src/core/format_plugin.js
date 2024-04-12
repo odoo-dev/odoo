@@ -128,7 +128,7 @@ export class FormatPlugin extends Plugin {
             (node) => closestElement(node).querySelector("br")
         );
         const selectedNodes = this.shared
-            .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+            .getSelectedNodes()
             .filter(
                 (n) =>
                     n.nodeType === Node.TEXT_NODE &&
@@ -139,7 +139,7 @@ export class FormatPlugin extends Plugin {
 
         const selectedFieldNodes = new Set(
             this.shared
-                .getSelectedNodes(this.editable, this.shared.getEditableSelection())
+                .getSelectedNodes()
                 .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
                 .filter(Boolean)
         );

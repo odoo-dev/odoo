@@ -416,7 +416,7 @@ export class TablePlugin extends Plugin {
 
         const traversedNodes = getTraversedNodes(
             this.editable,
-            this.shared.getEditableSelection(true)
+            this.shared.getEditableSelection({ deep: true })
         );
         if (startTd !== endTd && startTable === endTable) {
             if (!isProtected(startTable)) {
