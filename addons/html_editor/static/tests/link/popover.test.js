@@ -1,9 +1,10 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setContent, getContent } from "../_helpers/selection";
+import { setContent, getContent, setSelection } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
 import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
+import { insertText } from "../_helpers/user_actions";
 
 describe("should open a popover", () => {
     test("should open a popover when the selection is inside a link and close outside of a link", async () => {
@@ -133,5 +134,61 @@ describe("popover should edit/copy/remove the link", () => {
         await animationFrame();
         expect(".o-we-linkpopover").toHaveCount(0);
         expect(browser.navigator.clipboard.readTextSync()).toBe("http://test.com/");
+    });
+    test("when edit a link's label and URL to '', the link should be removed", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await animationFrame();
+        queryOne(".o_we_label_link").focus();
+        const linkEl = queryOne("a");
+        // mimic the link input behavior
+        for (let i = 0; i < linkEl.textContent.length; i++) {
+            press("Backspace");
+        }
+        queryOne(".o_we_href_input_link").focus();
+        // mimic the link input behavior
+        for (let i = 0; i < linkEl.href.length; i++) {
+            press("Backspace");
+        }
+        click(".o_we_apply_link");
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>this is a []</p>");
+    });
+});
+
+describe("Link creation by powerbox", () => {
+    test("click on link command in powerbox should create a link element and open the linkpopover", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/link");
+        await animationFrame();
+        expect(".active .o-we-command-name").toHaveText("Link");
+
+        click(".o-we-command-name:first");
+        expect(getContent(el)).toBe("<p>ab<a>[]</a></p>");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+    });
+
+    test("when create a new link by powerbox and not input anything, the link should be removed", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/link");
+        await animationFrame();
+        click(".o-we-command-name:first");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        expect(getContent(el)).toBe("<p>ab<a>[]</a></p>");
+
+        const pNode = queryOne("p");
+        setSelection({
+            anchorNode: pNode,
+            anchorOffset: 0,
+            focusNode: pNode,
+            focusOffset: 0,
+        });
+        await animationFrame();
+        expect(getContent(el)).toBe("<p>[]ab</p>");
     });
 });
