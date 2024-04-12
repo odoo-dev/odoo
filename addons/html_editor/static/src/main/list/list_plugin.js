@@ -153,7 +153,10 @@ export class ListPlugin extends Plugin {
         // @todo @phoenix: original implementation removed whitespace-only text nodes from traversedNodes.
         // Check if this is necessary.
 
-        const traversedBlocks = getTraversedBlocks(this.editable);
+        const traversedBlocks = getTraversedBlocks(
+            this.editable,
+            this.shared.getEditableSelection()
+        );
 
         // Keep deepest blocks only.
         for (const block of traversedBlocks) {
@@ -554,7 +557,7 @@ export class ListPlugin extends Plugin {
         const listItems = new Set();
         const navListItems = new Set();
         const nonListItems = [];
-        for (const block of getTraversedBlocks(this.editable)) {
+        for (const block of getTraversedBlocks(this.editable, this.shared.getEditableSelection())) {
             const closestLI = block.closest("li");
             if (closestLI) {
                 if (closestLI.classList.contains("nav-item")) {

@@ -76,7 +76,7 @@ export class TabulationPlugin extends Plugin {
         if (selection.isCollapsed) {
             this.insertTab();
         } else {
-            const traversedBlocks = getTraversedBlocks(this.editable);
+            const traversedBlocks = getTraversedBlocks(this.editable, selection);
             this.indentBlocks(traversedBlocks);
         }
         this.dispatch("ADD_STEP");
@@ -88,7 +88,10 @@ export class TabulationPlugin extends Plugin {
                 return;
             }
         }
-        const traversedBlocks = getTraversedBlocks(this.editable);
+        const traversedBlocks = getTraversedBlocks(
+            this.editable,
+            this.shared.getEditableSelection()
+        );
         this.outdentBlocks(traversedBlocks);
         this.dispatch("ADD_STEP");
     }
