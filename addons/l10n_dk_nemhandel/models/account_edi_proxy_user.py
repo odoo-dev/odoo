@@ -33,7 +33,7 @@ class AccountEdiProxyClientUser(models.Model):
                 and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
             ):
                 self.company_id.write({
-                    'l10n_dk_nemhandel_proxy_state': 'not_verified',
+                    'account_peppol_proxy_state': 'not_registered',
                 })
                 # commit the above changes before raising below
                 if not tools.config['test_enable'] and not modules.module.current_test:
@@ -44,11 +44,11 @@ class AccountEdiProxyClientUser(models.Model):
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         # TODO
-        # urls['peppol'] = {
-        #     'prod': 'https://peppol.api.odoo.com',
-        #     'test': 'https://peppol.test.odoo.com',
-        #     'demo': 'demo',
-        # }
+        urls['l10n_dk_nemhandel'] = {
+            'prod': 'https://nemhandel.api.odoo.com',
+            'test': 'https://nemhandel.test.odoo.com',
+            'demo': 'demo',
+        }
         return urls
 
     # -------------------------------------------------------------------------

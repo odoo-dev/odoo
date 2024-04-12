@@ -5,11 +5,11 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 import { Component, onMounted, useRef } from "@odoo/owl";
 
-class VerificationCodeWidget extends Component {
+class NemhandelVerificationCodeWidget extends Component {
     static props = {
         ...standardFieldProps,
     };
-    static template = "account_peppol.VerificationCodeWidget";
+    static template = "l10n_dk_nemhandel.VerificationCodeWidget";
 
     setup() {
         super.setup();
@@ -23,7 +23,7 @@ class VerificationCodeWidget extends Component {
         pre-fill the input fields with the stored value.
         */
         onMounted(async () => {
-            const verificationCode = this.props.record.data.account_peppol_verification_code;
+            const verificationCode = this.props.record.data.l10n_dk_nemhandel_verification_code;
             for (let i = 0; i < this.inputs.length; i++) {
                 this.inputs[i].el.value = verificationCode[i] || null;
             }
@@ -62,12 +62,12 @@ class VerificationCodeWidget extends Component {
     _save() {
         let verificationCode = [...this.inputs.map((i) => i.el.value)].join('');
         if (verificationCode.length === 6) {
-            this.props.record.update({ account_peppol_verification_code: verificationCode });
+            this.props.record.update({ l10n_dk_nemhandel_verification_code: verificationCode });
         }
     }
 }
 
-registry.category("fields").add("verification_code", {
-    component: VerificationCodeWidget,
+registry.category("fields").add("l10n_dk_nemhandel_verification_code", {
+    component: NemhandelVerificationCodeWidget,
     supportedTypes: ["char"],
 });

@@ -13,27 +13,15 @@ except ImportError:
     phonenumbers = None
 
 
-PEPPOL_ENDPOINT_RULES = {
-    '0007': ['se', 'orgnr'],
-    '0088': ['ean'],
-    '0184': ['dk', 'cvr'],
-    '0192': ['no', 'orgnr'],
-    '0208': ['be', 'vat'],
-}
-
-PEPPOL_ENDPOINT_WARNING = {
-    '0201': ['regex', '[0-9a-zA-Z]{6}$'],
-    '0210': ['it', 'codicefiscale'],
-    '0211': ['it', 'iva'],
-    '9906': ['it', 'iva'],
-    '9907': ['it', 'codicefiscale'],
-    '0151': ['au', 'abn'],
-}
-
-
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+
+    l10n_dk_nemhandel_contact_email = fields.Char(
+        string='Contact email',
+        compute='_compute_l10n_dk_nemhandel_contact_email', store=True, readonly=False,
+        help='Primary contact email for Nemhandel-related communication',
+    )
     l10n_dk_nemhandel_phone_number = fields.Char(
         string='Phone number (for validation)',
         compute='_compute_l10n_dk_nemhandel_phone_number', store=True, readonly=False,
@@ -41,14 +29,15 @@ class ResCompany(models.Model):
     )
     l10n_dk_nemhandel_proxy_state = fields.Selection(
         selection=[
+            ('not_registered', 'Not registered'),
             ('not_verified', 'Not verified'),
             ('sent_verification', 'Verification code sent'),
             ('pending', 'Pending'),
             ('active', 'Active'),
-            # ('rejected', 'Rejected'),
+            ('rejected', 'Rejected'),
             ('canceled', 'Canceled'),
         ],
-        string='Nemhandel status', required=True, default='not_verified',
+        string='Nemhandel status', required=True, default='not_registered',
     )
     l10n_dk_nemhandel_identifier_type = fields.Selection(related='partner_id.l10n_dk_nemhandel_identifier_type', readonly=False)
     l10n_dk_nemhandel_identifier_value = fields.Char(related='partner_id.l10n_dk_nemhandel_identifier_value', readonly=False)
@@ -114,7 +103,7 @@ class ResCompany(models.Model):
     @api.depends('l10n_dk_nemhandel_proxy_state')
     def _compute_l10n_dk_nemhandel_purchase_journal_id(self):
         for company in self:
-            if not company.l10n_dk_nemhandel_purchase_journal_id and company.l10n_dk_nemhandel_proxy_state not in ('rejected'):
+            if not company.l10n_dk_nemhandel_purchase_journal_id and company.l10n_dk_nemhandel_proxy_state not in ('not_registered', 'rejected'):
                 company.l10n_dk_nemhandel_purchase_journal_id = self.env['account.journal'].search([
                     *self.env['account.journal']._check_company_domain(company),
                     ('type', '=', 'purchase'),
@@ -133,6 +122,12 @@ class ResCompany(models.Model):
             ])
             journals_to_reset.is_l10n_dk_nemhandel_journal = False
             company.l10n_dk_nemhandel_purchase_journal_id.is_l10n_dk_nemhandel_journal = True
+
+    @api.depends('email')
+    def _compute_l10n_dk_nemhandel_contact_email(self):
+        for company in self:
+            if not company.l10n_dk_nemhandel_contact_email:
+                company.l10n_dk_nemhandel_contact_email = company.email
 
     @api.depends('phone')
     def _compute_l10n_dk_nemhandel_phone_number(self):

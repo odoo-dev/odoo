@@ -15,6 +15,7 @@ class ResConfigSettings(models.TransientModel):
         string='EDI user',
         compute='_compute_l10n_dk_nemhandel_edi_user',
     )
+    l10n_dk_nemhandel_contact_email = fields.Char(related='company_id.l10n_dk_nemhandel_contact_email', readonly=False)
     l10n_dk_nemhandel_identifier_type = fields.Selection(related='company_id.l10n_dk_nemhandel_identifier_type', readonly=False)
     l10n_dk_nemhandel_identifier_value = fields.Char(related='company_id.l10n_dk_nemhandel_identifier_value', readonly=False)
     l10n_dk_nemhandel_phone_number = fields.Char(related='company_id.l10n_dk_nemhandel_phone_number', readonly=False)
@@ -104,10 +105,11 @@ class ResConfigSettings(models.TransientModel):
         """
         self.ensure_one()
 
-        # TODO check but maybe not necessary
-        # if self.account_peppol_proxy_state != 'not_registered':
-        #     raise UserError(
-        #         _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
+        if self.l10n_dk_nemhandel_proxy_state != 'not_registered':
+            raise UserError(
+                _('Cannot register a user with a %s application', self.l10n_dk_nemhandel_proxy_state))
+        if not self.l10n_dk_nemhandel_contact_email:
+            raise ValidationError(_("Please enter a primary contact email to verify your application."))
 
         if not self.l10n_dk_nemhandel_phone_number:
             raise ValidationError(_("Please enter a phone number to verify your application."))
@@ -134,6 +136,7 @@ class ResConfigSettings(models.TransientModel):
             'l10n_dk_nemhandel_company_zip': company.zip,
             'l10n_dk_nemhandel_country_code': company.country_id.code,
             'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
+            'l10n_dk_nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
         }
 
         params = {
@@ -154,12 +157,13 @@ class ResConfigSettings(models.TransientModel):
         """
         self.ensure_one()
 
-        if not self.l10n_dk_nemhandel_phone_number:
-            raise ValidationError(_("Phone number are required."))
+        if not self.l10n_dk_nemhandel_contact_email or not self.l10n_dk_nemhandel_phone_number:
+            raise ValidationError(_("Contact email and phone number are required."))
 
         params = {
             'update_data': {
                 'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
+                'l10n_dk_nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
             }
         }
 
@@ -217,11 +221,34 @@ class ResConfigSettings(models.TransientModel):
         if not tools.config['test_enable'] and not modules.module.current_test:
             self.env.cr.commit()
 
-        if self.l10n_dk_nemhandel_proxy_state in {'rejected', 'canceled'}:
+        if self.l10n_dk_nemhandel_proxy_state in {'not_registered', 'rejected', 'canceled'}:
             raise UserError(_(
                 "Can't cancel registration with this status: %s", self.l10n_dk_nemhandel_proxy_state
             ))
 
         self._call_l10n_dk_nemhandel_proxy(endpoint='/api/l10n_dk_nemhandel/1/cancel_l10n_dk_nemhandel_registration')
-        self.l10n_dk_nemhandel_proxy_state = 'not_verified'
+        self.l10n_dk_nemhandel_proxy_state = 'not_registered'
+        self.l10n_dk_nemhandel_edi_user.unlink()
+
+    @handle_demo
+    def button_l10n_dk_nemhandel_participant(self):
+        """
+        Deregister the edi user from Nemhandel network
+        """
+        self.ensure_one()
+
+        if self.l10n_dk_nemhandel_proxy_state != 'active':
+            raise UserError(_(
+                "Can't deregister with this status: %s", self.l10n_dk_nemhandel_proxy_state
+            ))
+
+        # fetch all documents and message statuses before unlinking the edi user
+        # so that the invoices are acknowledged
+        self.env['account_edi_proxy_client.user']._cron_l10n_dk_nemhandel_get_message_status()
+        self.env['account_edi_proxy_client.user']._cron_l10n_dk_nemhandel_get_new_documents()
+        if not tools.config['test_enable'] and not modules.module.current_test:
+            self.env.cr.commit()
+
+        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/peppol/1/cancel_l10n_dk_nemhandel_registration')
+        self.l10n_dk_nemhandel_proxy_state = 'not_registered'
         self.l10n_dk_nemhandel_edi_user.unlink()

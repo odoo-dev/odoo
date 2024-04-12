@@ -22,6 +22,10 @@
     'demo': [
         'demo/l10n_dk_nemhandel_demo.xml',
     ],
-    'installable': True,
+    'assets': {
+        'web.assets_backend': [
+            'l10n_dk_nemhandel/static/src/components/**/*',
+        ],
+    },
     'license': 'LGPL-3',
 }

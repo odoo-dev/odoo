@@ -134,7 +134,7 @@ def handle_demo(func, self, *args, **kwargs):
     execute. Whether we are in demo mode depends on the edi_mode of the EDI user, but the EDI user
     is accessible in different ways depending on the model the function is called from and in some
     contexts it might not yet exist, in which case demo mode should instead depend on the content
-    of the "account_peppol.edi.mode" config param.
+    of the "l10n_dk_nemhandel.edi.mode" config param.
     """
     def get_demo_mode_account_edi_proxy_client_user(self, args, kwargs):
         if self.id:
@@ -145,7 +145,7 @@ def handle_demo(func, self, *args, **kwargs):
         return demo_param
 
     def get_demo_mode_res_config_settings(self, args, kwargs):
-        if self.account_peppol_edi_user:
+        if self.l10n_dk_nemhandel_edi_user:
             return self.l10n_dk_nemhandel_edi_user.edi_mode == 'demo'
         return self.l10n_dk_nemhandel_edi_mode == 'demo'
 

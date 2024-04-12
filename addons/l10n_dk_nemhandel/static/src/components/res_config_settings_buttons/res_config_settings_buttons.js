@@ -12,11 +12,11 @@ import { Component, markup, useState } from "@odoo/owl";
 
 const waitTime = 60000;
 
-class PeppolSettingsButtons extends Component {
+class NemhandelSettingsButtons extends Component {
     static props = {
         ...standardWidgetProps,
     };
-    static template = "account_peppol.ActionButtons";
+    static template = "l10n_dk_nemhandel.ActionButtons";
 
     setup() {
         super.setup();
@@ -28,19 +28,15 @@ class PeppolSettingsButtons extends Component {
     }
 
     get proxyState() {
-        return this.props.record.data.account_peppol_proxy_state;
-    }
-
-    get migrationPrepared() {
-        return this.props.record.data.account_peppol_proxy_state === "active" && Boolean(this.props.record.data.account_peppol_migration_key);
+        return this.props.record.data.l10n_dk_nemhandel_proxy_state;
     }
 
     get ediMode() {
-        return this.props.record.data.account_peppol_edi_mode;
+        return this.props.record.data.l10n_dk_nemhandel_edi_mode;
     }
 
     get modeConstraint() {
-        return this.props.record.data.account_peppol_mode_constraint;
+        return this.props.record.data.l10n_dk_nemhandel_mode_constraint;
     }
 
     get createUserButtonLabel() {
@@ -56,7 +52,7 @@ class PeppolSettingsButtons extends Component {
         const modes = {
             demo: _t("Switch to Live"),
         }
-        return this.modeConstraint !== "demo" && modes[this.ediMode] || _t("Deregister from Peppol");
+        return this.modeConstraint !== "demo" && modes[this.ediMode] || _t("Deregister from Nemhandel");
     }
 
     async _callConfigMethod(methodName, save = false) {
@@ -80,7 +76,7 @@ class PeppolSettingsButtons extends Component {
 
     showConfirmation(warning, methodName) {
         const message = _t(warning);
-        const confirmMessage = _t("You will not be able to send or receive Peppol documents in Odoo anymore. Are you sure you want to proceed?");
+        const confirmMessage = _t("You will not be able to send or receive Nemhandel documents in Odoo anymore. Are you sure you want to proceed?");
         this.dialogService.add(ConfirmationDialog, {
             body: markup(
                 `<div class="text-danger">${escape(message)}</div>
@@ -93,21 +89,13 @@ class PeppolSettingsButtons extends Component {
         });
     }
 
-    migrate() {
-        this.showConfirmation(
-            "This will migrate your Peppol registration away from Odoo. A migration key will be generated. \
-            If the other service does not support migration, consider deregistering instead.",
-            "button_migrate_peppol_registration"
-        )
-    }
-
     deregister() {
         if (this.ediMode === 'demo') {
-            this._callConfigMethod("button_deregister_peppol_participant");
+            this._callConfigMethod("button_deregister_l10n_dk_nemhandel_participant");
         } else {
             this.showConfirmation(
-                "This will delete your Peppol registration.",
-                "button_deregister_peppol_participant"
+                "This will delete your Nemhandel registration.",
+                "button_deregister_l10n_dk_nemhandel_participant"
             )
         }
     }
@@ -116,7 +104,7 @@ class PeppolSettingsButtons extends Component {
         // avoid making users click save on the settings
         // and then clicking the update button
         // changes on both the client side and the iap side need to be saved within one method
-        await this._callConfigMethod("button_update_peppol_user_data", true);
+        await this._callConfigMethod("button_update_l10n_dk_nemhandel_user_data", true);
         this.notification.add(
             _t("Contact details were updated."),
             { type: "success" }
@@ -126,21 +114,21 @@ class PeppolSettingsButtons extends Component {
     async checkCode() {
         // avoid making users click save on the settings
         // and then clicking the confirm button to check the code
-        await this._callConfigMethod("button_check_peppol_verification_code", true);
+        await this._callConfigMethod("button_check_l10n_dk_nemhandel_verification_code", true);
     }
 
     async sendCode() {
         this.state.isSmsButtonDisabled = true;
         // don't allow spamming the button
         setTimeout(() => this.state.isSmsButtonDisabled = false, waitTime);
-        await this._callConfigMethod("button_send_peppol_verification_code", true);
+        await this._callConfigMethod("button_send_l10n_dk_nemhandel_verification_code", true);
     }
 
     async createUser() {
-        await this._callConfigMethod("button_create_peppol_proxy_user", true);
+        await this._callConfigMethod("button_create_l10n_dk_nemhandel_proxy_user", true);
     }
 }
 
-registry.category("view_widgets").add("peppol_settings_buttons", {
-    component: PeppolSettingsButtons,
+registry.category("view_widgets").add("l10n_dk_nemhandel_settings_buttons", {
+    component: NemhandelSettingsButtons,
 });
