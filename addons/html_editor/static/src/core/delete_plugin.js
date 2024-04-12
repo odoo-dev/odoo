@@ -331,6 +331,15 @@ export class DeletePlugin extends Plugin {
     removeNode(node) {
         const root = node;
         const remove = (node) => {
+            if (node.dataset?.oeHasRemovableHandler) {
+                for (let cb of this.resources["handle_before_remove"] || []) {
+                    if (cb(node)) {
+                        break;
+                    }
+                }
+                node.remove();
+                return true;
+            }
             for (const child of [...node.childNodes]) {
                 remove(child);
             }
