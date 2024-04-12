@@ -331,6 +331,11 @@ export class DeletePlugin extends Plugin {
     removeNode(node) {
         const root = node;
         const remove = (node) => {
+            if (node.__beforeRemove) {
+                node.__beforeRemove();
+                node.remove();
+                return true;
+            }
             for (const child of [...node.childNodes]) {
                 remove(child);
             }

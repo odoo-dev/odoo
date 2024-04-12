@@ -9,7 +9,8 @@ export class InlineComponentPlugin extends Plugin {
     static name = "inline_components";
 
     setup() {
-        this.apps = [];
+        this.apps = new Set();
+        this.elems = new Set();
         this.info = this.config.inlineComponentInfo;
         for (const embedding of this.config.inlineComponents || []) {
             const targets = this.editable.querySelectorAll(`[data-embedded="${embedding.name}"]`);
@@ -32,7 +33,14 @@ export class InlineComponentPlugin extends Plugin {
         app.rawTemplates = this.info.app.rawTemplates;
         app.templates = this.info.app.templates;
         app.mount(elem);
-        this.apps.push({ app, elem });
+        const item = { app, elem };
+        this.apps.add(item);
+        this.elems.add(elem);
+        elem.__beforeRemove = () => {
+            this.apps.delete(item);
+            this.elems.delete(elem);
+            app.destroy();
+        };
     }
     destroy() {
         super.destroy();
