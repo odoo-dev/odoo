@@ -1,7 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
-import { getTraversedNodes } from "@html_editor/utils/selection";
-import { isVisibleTextNode } from "@html_editor/utils/dom_info";
 import { closestBlock } from "@html_editor/utils/blocks";
+import { isVisibleTextNode } from "@html_editor/utils/dom_info";
 
 export class JustifyPlugin extends Plugin {
     static name = "justify";
@@ -26,7 +25,7 @@ export class JustifyPlugin extends Plugin {
 
     align(mode) {
         const visitedBlocks = new Set();
-        const traversedNode = getTraversedNodes(this.editable, this.shared.getEditableSelection());
+        const traversedNode = this.shared.getTraversedNodes();
         for (const node of traversedNode) {
             if (isVisibleTextNode(node)) {
                 const block = closestBlock(node);

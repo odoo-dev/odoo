@@ -1,5 +1,4 @@
-import { closestBlock, isBlock } from "./blocks";
-import { splitTextNode } from "./dom_split";
+import { isBlock } from "./blocks";
 import {
     getDeepestPosition,
     isNotEditableNode,
@@ -8,8 +7,9 @@ import {
     isZWS,
     previousLeaf,
 } from "./dom_info";
+import { splitTextNode } from "./dom_split";
 import { isFakeLineBreak } from "./dom_state";
-import { closestElement, createDOMPathGenerator, descendants, firstLeaf } from "./dom_traversal";
+import { closestElement, createDOMPathGenerator, firstLeaf } from "./dom_traversal";
 import {
     DIRECTIONS,
     childNodeIndex,
@@ -361,54 +361,4 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
         range.setEnd(end, endOffset);
     }
     return range;
-}
-
-// @todo @phoenix: remove table logic from this util
-/**
- * Returns an array containing all the nodes traversed when walking the
- * selection.
- *
- * @param {Node} editable
- * @param {Selection} selection
- * @returns {Node[]}
- */
-export function getTraversedNodes(editable, selection) {
-    const selectedTableCells = editable.querySelectorAll(".o_selected_td");
-    const document = editable.ownerDocument;
-    const iterator = document.createNodeIterator(selection.commonAncestorContainer);
-    let node;
-    do {
-        node = iterator.nextNode();
-    } while (
-        node &&
-        node !== selection.startContainer &&
-        !(selectedTableCells.length && node === selectedTableCells[0])
-    );
-    const traversedNodes = new Set([node, ...descendants(node)]);
-    while (node && node !== selection.endContainer) {
-        node = iterator.nextNode();
-        if (node) {
-            const selectedTable = closestElement(node, ".o_selected_table");
-            if (selectedTable) {
-                for (const selectedTd of selectedTable.querySelectorAll(".o_selected_td")) {
-                    traversedNodes.add(selectedTd);
-                    descendants(selectedTd).forEach((descendant) => traversedNodes.add(descendant));
-                }
-            } else {
-                traversedNodes.add(node);
-            }
-        }
-    }
-    return [...traversedNodes];
-}
-
-/**
- * Returns a Set of traversed blocks within the given range.
- *
- * @param {HTMLElement} editable
- * @param {Selection} [selection]
- * @returns {Set<HTMLElement>}
- */
-export function getTraversedBlocks(editable, selection) {
-    return new Set(getTraversedNodes(editable, selection).map(closestBlock).filter(Boolean));
 }

@@ -1,9 +1,9 @@
-import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
-import { findInSelection } from "@html_editor/utils/selection";
-import { closestElement } from "@html_editor/utils/dom_traversal";
-import { LinkPopover } from "./link_popover";
 import { unwrapContents } from "@html_editor/utils/dom";
+import { closestElement } from "@html_editor/utils/dom_traversal";
+import { findInSelection } from "@html_editor/utils/selection";
+import { _t } from "@web/core/l10n/translation";
+import { LinkPopover } from "./link_popover";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -42,7 +42,7 @@ export class LinkPlugin extends Plugin {
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
-                    isFormatApplied: () => isLinkActive(p.shared.getEditableSelection()),
+                    isFormatApplied: isLinkActive,
                 },
             ],
         },

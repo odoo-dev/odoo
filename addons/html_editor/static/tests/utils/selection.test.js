@@ -4,7 +4,6 @@ import {
     getCursorDirection,
     getDeepRange,
     getNormalizedCursorPosition,
-    getTraversedNodes,
     setCursorEnd,
     setCursorStart,
     setSelection,
@@ -16,36 +15,42 @@ import { unformat } from "../_helpers/format";
 
 describe("getTraversedNodes", () => {
     test("should return the anchor node of a collapsed selection", async () => {
-        const { el, editor } = await setupEditor("<div><p>a[]bc</p><div>def</div></div>");
+        const { editor } = await setupEditor("<div><p>a[]bc</p><div>def</div></div>");
         expect(
-            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
-                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
-            )
+            editor.shared
+                .getTraversedNodes()
+                .map((node) =>
+                    node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
+                )
         ).toEqual(["abc"]);
     });
 
     test("should return the nodes traversed in a cross-blocks selection", async () => {
-        const { el, editor } = await setupEditor("<div><p>a[bc</p><div>d]ef</div></div>");
+        const { editor } = await setupEditor("<div><p>a[bc</p><div>d]ef</div></div>");
         expect(
-            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
-                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
-            )
+            editor.shared
+                .getTraversedNodes()
+                .map((node) =>
+                    node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
+                )
         ).toEqual(["abc", "DIV", "def"]);
     });
 
     test("should return the nodes traversed in a cross-blocks selection with hybrid nesting", async () => {
-        const { el, editor } = await setupEditor(
+        const { editor } = await setupEditor(
             "<div><section><p>a[bc</p></section><div>d]ef</div></div>"
         );
         expect(
-            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
-                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
-            )
+            editor.shared
+                .getTraversedNodes()
+                .map((node) =>
+                    node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
+                )
         ).toEqual(["abc", "DIV", "def"]);
     });
 
     test("should return an image in a parent selection", async () => {
-        const { el, editor } = await setupEditor(`<div id="parent-element-to-select"><img></div>`);
+        const { editor } = await setupEditor(`<div id="parent-element-to-select"><img></div>`);
         const sel = editor.document.getSelection();
         const range = editor.document.createRange();
         const parent = editor.document.querySelector("div#parent-element-to-select");
@@ -54,16 +59,18 @@ describe("getTraversedNodes", () => {
         sel.removeAllRanges();
         sel.addRange(range);
         expect(
-            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
-                node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
-            )
+            editor.shared
+                .getTraversedNodes()
+                .map((node) =>
+                    node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
+                )
         ).toEqual(["DIV", "IMG"]);
     });
 
     test("should return the text node in which the range is collapsed", async () => {
         const { el: editable, editor } = await setupEditor("<p>ab[]cd</p>");
         const abcd = editable.firstChild.firstChild;
-        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
+        const result = editor.shared.getTraversedNodes();
         expect(result).toEqual([abcd]);
     });
 
@@ -72,7 +79,7 @@ describe("getTraversedNodes", () => {
         const abcd = editable.firstChild.firstChild;
         const p2 = editable.childNodes[1];
         const efgh = p2.firstChild;
-        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
+        const result = editor.shared.getTraversedNodes();
         expect(result).toEqual([abcd, p2, efgh]);
     });
 
@@ -89,7 +96,7 @@ describe("getTraversedNodes", () => {
         const e = b.firstChild;
         const i = b.nextSibling;
         const fg = i.firstChild;
-        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
+        const result = editor.shared.getTraversedNodes();
         expect(result).toEqual([ab, cd, div, p2, span2, b, e, i, fg]);
     });
 });

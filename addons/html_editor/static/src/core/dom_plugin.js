@@ -15,7 +15,6 @@ import {
 import { closestElement, descendants } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, TEXT_STYLE_CLASSES } from "../utils/formatting";
 import { DIRECTIONS, childNodeIndex, rightPos, startPos } from "../utils/position";
-import { getTraversedNodes } from "../utils/selection";
 
 export class DomPlugin extends Plugin {
     static name = "dom";
@@ -289,9 +288,7 @@ export class DomPlugin extends Plugin {
     setTag({ tagName, extraClass = "" }) {
         tagName = tagName.toUpperCase();
         const selection = this.shared.getEditableSelection();
-        const selectedBlocks = [
-            ...new Set(getTraversedNodes(this.editable, selection).map(closestBlock)),
-        ];
+        const selectedBlocks = [...new Set(this.shared.getTraversedNodes().map(closestBlock))];
         const deepestSelectedBlocks = selectedBlocks.filter(
             (block) =>
                 !descendants(block).some((descendant) => selectedBlocks.includes(descendant)) &&
