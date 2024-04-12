@@ -4,7 +4,6 @@ import { fillEmpty } from "../utils/dom";
 import { isVisible } from "../utils/dom_info";
 import { prepareUpdate } from "../utils/dom_state";
 import { closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
-import { collapseIfZWS } from "../utils/zws";
 import { DIRECTIONS, childNodeIndex } from "../utils/position";
 
 export class SplitPlugin extends Plugin {
@@ -32,7 +31,8 @@ export class SplitPlugin extends Plugin {
     splitBlock() {
         let selection = this.shared.getEditableSelection();
         if (!selection.isCollapsed) {
-            collapseIfZWS(this.editable, selection);
+            // @todo @phoenix collapseIfZWS is not tested
+            this.shared.collapseIfZWS();
             this.dispatch("DELETE_RANGE");
             selection = this.shared.getEditableSelection();
         }

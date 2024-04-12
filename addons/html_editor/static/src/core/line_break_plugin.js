@@ -2,7 +2,6 @@ import { Plugin } from "../plugin";
 import { CTYPES } from "../utils/content_types";
 import { getState, isFakeLineBreak, prepareUpdate } from "../utils/dom_state";
 import { DIRECTIONS, leftPos, rightPos } from "../utils/position";
-import { collapseIfZWS } from "../utils/zws";
 
 export class LineBreakPlugin extends Plugin {
     static dependencies = ["selection", "split"];
@@ -26,7 +25,8 @@ export class LineBreakPlugin extends Plugin {
     insertLineBreak() {
         let selection = this.shared.getEditableSelection();
         if (!selection.isCollapsed) {
-            collapseIfZWS(this.editable, selection);
+            // @todo @phoenix collapseIfZWS is not tested
+            this.shared.collapseIfZWS();
             this.dispatch("DELETE_RANGE");
             selection = this.shared.getEditableSelection();
         }
