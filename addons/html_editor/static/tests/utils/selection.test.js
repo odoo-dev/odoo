@@ -4,7 +4,6 @@ import {
     getCursorDirection,
     getDeepRange,
     getNormalizedCursorPosition,
-    getSelectedNodes,
     getTraversedNodes,
     setCursorEnd,
     setCursorStart,
@@ -17,29 +16,29 @@ import { unformat } from "../_helpers/format";
 
 describe("getTraversedNodes", () => {
     test("should return the anchor node of a collapsed selection", async () => {
-        const { el } = await setupEditor("<div><p>a[]bc</p><div>def</div></div>");
+        const { el, editor } = await setupEditor("<div><p>a[]bc</p><div>def</div></div>");
         expect(
-            getTraversedNodes(el).map((node) =>
+            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
             )
         ).toEqual(["abc"]);
     });
 
     test("should return the nodes traversed in a cross-blocks selection", async () => {
-        const { el } = await setupEditor("<div><p>a[bc</p><div>d]ef</div></div>");
+        const { el, editor } = await setupEditor("<div><p>a[bc</p><div>d]ef</div></div>");
         expect(
-            getTraversedNodes(el).map((node) =>
+            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
             )
         ).toEqual(["abc", "DIV", "def"]);
     });
 
     test("should return the nodes traversed in a cross-blocks selection with hybrid nesting", async () => {
-        const { el } = await setupEditor(
+        const { el, editor } = await setupEditor(
             "<div><section><p>a[bc</p></section><div>d]ef</div></div>"
         );
         expect(
-            getTraversedNodes(el).map((node) =>
+            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
             )
         ).toEqual(["abc", "DIV", "def"]);
@@ -55,30 +54,30 @@ describe("getTraversedNodes", () => {
         sel.removeAllRanges();
         sel.addRange(range);
         expect(
-            getTraversedNodes(el).map((node) =>
+            getTraversedNodes(el, editor.shared.getEditableSelection()).map((node) =>
                 node.nodeType === Node.TEXT_NODE ? node.textContent : node.nodeName
             )
         ).toEqual(["DIV", "IMG"]);
     });
 
     test("should return the text node in which the range is collapsed", async () => {
-        const { el: editable } = await setupEditor("<p>ab[]cd</p>");
+        const { el: editable, editor } = await setupEditor("<p>ab[]cd</p>");
         const abcd = editable.firstChild.firstChild;
-        const result = getTraversedNodes(editable);
+        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
         expect(result).toEqual([abcd]);
     });
 
     test("should find that a the range traverses the next paragraph as well", async () => {
-        const { el: editable } = await setupEditor("<p>ab[cd</p><p>ef]gh</p>");
+        const { el: editable, editor } = await setupEditor("<p>ab[cd</p><p>ef]gh</p>");
         const abcd = editable.firstChild.firstChild;
         const p2 = editable.childNodes[1];
         const efgh = p2.firstChild;
-        const result = getTraversedNodes(editable);
+        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
         expect(result).toEqual([abcd, p2, efgh]);
     });
 
     test("should find all traversed nodes in nested range", async () => {
-        const { el: editable } = await setupEditor(
+        const { el: editable, editor } = await setupEditor(
             '<p><span class="a">ab[</span>cd</p><div><p><span class="b"><b>e</b><i>f]g</i>h</span></p></div>'
         );
         const ab = editable.firstChild.firstChild.firstChild;
@@ -90,7 +89,7 @@ describe("getTraversedNodes", () => {
         const e = b.firstChild;
         const i = b.nextSibling;
         const fg = i.firstChild;
-        const result = getTraversedNodes(editable);
+        const result = getTraversedNodes(editable, editor.shared.getEditableSelection());
         expect(result).toEqual([ab, cd, div, p2, span2, b, e, i, fg]);
     });
 });
@@ -573,8 +572,7 @@ describe("getSelectedNodes", () => {
         await testEditor({
             contentBefore: "<p>ab[]cd</p>",
             stepFunction: (editor) => {
-                const editable = editor.editable;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 expect(result).toEqual([]);
             },
             contentAfter: "<p>ab[]cd</p>",
@@ -585,8 +583,7 @@ describe("getSelectedNodes", () => {
         await testEditor({
             contentBefore: "<p>ab[c]d</p>",
             stepFunction: (editor) => {
-                const editable = editor.editable;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 expect(result).toEqual([]);
             },
         });
@@ -596,8 +593,7 @@ describe("getSelectedNodes", () => {
         await testEditor({
             contentBefore: "<p>ab[cd</p><p>ef]gh</p>",
             stepFunction: (editor) => {
-                const editable = editor.editable;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 expect(result).toEqual([]);
             },
         });
@@ -608,7 +604,7 @@ describe("getSelectedNodes", () => {
             contentBefore: '<p><span class="a">ab</span>[cd]</p>',
             stepFunction: (editor) => {
                 const editable = editor.editable;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 const cd = editable.firstChild.lastChild;
                 expect(result).toEqual([cd]);
             },
@@ -620,7 +616,7 @@ describe("getSelectedNodes", () => {
             contentBefore: "<p>[ab</p><p>cd</p><p>ef]gh</p>",
             stepFunction: (editor) => {
                 const editable = editor.editable;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 const ab = editable.firstChild.firstChild;
                 const p2 = editable.childNodes[1];
                 const cd = p2.firstChild;
@@ -638,7 +634,7 @@ describe("getSelectedNodes", () => {
                 const cd = editable.firstChild.lastChild;
                 const b = editable.lastChild.firstChild.firstChild.firstChild;
                 const e = b.firstChild;
-                const result = getSelectedNodes(editable);
+                const result = editor.shared.getSelectedNodes();
                 expect(result).toEqual([cd, b, e]);
             },
         });

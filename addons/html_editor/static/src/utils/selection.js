@@ -369,25 +369,23 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
  * selection.
  *
  * @param {Node} editable
+ * @param {Selection} selection
  * @returns {Node[]}
  */
-export function getTraversedNodes(editable, range = getDeepRange(editable)) {
+export function getTraversedNodes(editable, selection) {
     const selectedTableCells = editable.querySelectorAll(".o_selected_td");
     const document = editable.ownerDocument;
-    if (!range) {
-        return [];
-    }
-    const iterator = document.createNodeIterator(range.commonAncestorContainer);
+    const iterator = document.createNodeIterator(selection.commonAncestorContainer);
     let node;
     do {
         node = iterator.nextNode();
     } while (
         node &&
-        node !== range.startContainer &&
+        node !== selection.startContainer &&
         !(selectedTableCells.length && node === selectedTableCells[0])
     );
     const traversedNodes = new Set([node, ...descendants(node)]);
-    while (node && node !== range.endContainer) {
+    while (node && node !== selection.endContainer) {
         node = iterator.nextNode();
         if (node) {
             const selectedTable = closestElement(node, ".o_selected_table");
@@ -413,37 +411,4 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
  */
 export function getTraversedBlocks(editable, range = getDeepRange(editable)) {
     return new Set(getTraversedNodes(editable, range).map(closestBlock).filter(Boolean));
-}
-
-/**
- * Returns an array containing all the nodes fully contained in the selection.
- *
- * @param {Node} editable
- * @returns {Node[]}
- */
-export function getSelectedNodes(editable) {
-    const selectedTableCells = editable.querySelectorAll(".o_selected_td");
-    const document = editable.ownerDocument;
-    const sel = document.getSelection();
-    if (!sel.rangeCount && !selectedTableCells.length) {
-        return [];
-    }
-    const range = sel.getRangeAt(0);
-    return [
-        ...new Set(
-            getTraversedNodes(editable).flatMap((node) => {
-                const td = closestElement(node, ".o_selected_td");
-                if (td) {
-                    return descendants(td);
-                } else if (
-                    range.isPointInRange(node, 0) &&
-                    range.isPointInRange(node, nodeSize(node))
-                ) {
-                    return node;
-                } else {
-                    return [];
-                }
-            })
-        ),
-    ];
 }

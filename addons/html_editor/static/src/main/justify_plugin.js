@@ -26,7 +26,7 @@ export class JustifyPlugin extends Plugin {
 
     align(mode) {
         const visitedBlocks = new Set();
-        const traversedNode = getTraversedNodes(this.editable);
+        const traversedNode = getTraversedNodes(this.editable, this.shared.getEditableSelection());
         for (const node of traversedNode) {
             if (isVisibleTextNode(node)) {
                 const block = closestBlock(node);

@@ -226,7 +226,9 @@ describe("isSelectionFormat", () => {
         await testEditor({
             contentBefore: `<p>${strong(`a[b`)}</p><p>c]d</p>`,
             stepFunction: (editor) => {
-                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+                expect(
+                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
+                ).toBe(false);
             },
         });
     });
@@ -235,7 +237,9 @@ describe("isSelectionFormat", () => {
         await testEditor({
             contentBefore: `<p>${strong(`a]b`)}</p><p>c[d</p>`,
             stepFunction: (editor) => {
-                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+                expect(
+                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
+                ).toBe(false);
             },
         });
     });
@@ -244,7 +248,9 @@ describe("isSelectionFormat", () => {
         await testEditor({
             contentBefore: `<p>a[b</p><p>${strong(`c`)}</p><p>d]e</p>`,
             stepFunction: (editor) => {
-                expect(isSelectionFormat(editor.editable, "bold")).toBe(false);
+                expect(
+                    isSelectionFormat(editor.editable, "bold", editor.shared.getEditableSelection())
+                ).toBe(false);
             },
         });
     });
