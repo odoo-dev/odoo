@@ -1,6 +1,5 @@
 import { closestBlock } from "@html_editor/utils/blocks";
 import { getDeepestPosition } from "@html_editor/utils/dom_info";
-import { splitTextNode } from "@html_editor/utils/dom_split";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
@@ -33,7 +32,6 @@ export class SelectionPlugin extends Plugin {
         "setSelection",
         "setCursorStart",
         "setCursorEnd",
-        "splitSelection",
         "extractContent",
         "preserveSelection",
         "resetSelection",
@@ -244,45 +242,6 @@ export class SelectionPlugin extends Plugin {
 
         this.activeSelection = this.makeSelection(selection, true);
         return this.activeSelection;
-    }
-
-    splitSelection() {
-        let { startContainer, startOffset, endContainer, endOffset } = this.getEditableSelection();
-        const isInSingleContainer = startContainer === endContainer;
-        if (
-            endContainer.nodeType === Node.TEXT_NODE &&
-            endOffset !== 0 &&
-            endOffset !== endContainer.textContent.length
-        ) {
-            const endParent = endContainer.parentNode;
-            const splitOffset = splitTextNode(endContainer, endOffset);
-            endContainer = endParent.childNodes[splitOffset - 1] || endParent.firstChild;
-            if (isInSingleContainer) {
-                startContainer = endContainer;
-            }
-            endOffset = endContainer.textContent.length;
-        }
-        if (
-            startContainer.nodeType === Node.TEXT_NODE &&
-            startOffset !== 0 &&
-            startOffset !== startContainer.textContent.length
-        ) {
-            splitTextNode(startContainer, startOffset);
-            startOffset = 0;
-            if (isInSingleContainer) {
-                endOffset = startContainer.textContent.length;
-            }
-        }
-
-        return this.setSelection(
-            {
-                anchorNode: startContainer,
-                anchorOffset: startOffset,
-                focusNode: endContainer,
-                focusOffset: endOffset,
-            },
-            { normalize: false }
-        );
     }
 
     /**

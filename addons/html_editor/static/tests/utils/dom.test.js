@@ -1,5 +1,4 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { splitTextNode } from "@html_editor/utils/dom_split";
 import { setupEditor } from "../_helpers/editor";
 
 describe("splitAroundUntil", () => {
@@ -8,9 +7,9 @@ describe("splitAroundUntil", () => {
         const [p] = el.childNodes;
         const cde = p.childNodes[1].childNodes[1].firstChild;
         // We want to test with "cde" being three separate text nodes.
-        splitTextNode(cde, 2);
+        editor.shared.splitTextNode(cde, 2);
         const cd = cde.previousSibling;
-        splitTextNode(cd, 1);
+        editor.shared.splitTextNode(cd, 1);
         const d = cd;
         const result = editor.shared.splitAroundUntil(d, p.childNodes[1]);
         expect(result.tagName === "FONT").toBe(true);
@@ -24,13 +23,13 @@ describe("splitAroundUntil", () => {
         const [p] = el.childNodes;
         const cdefg = p.childNodes[1].childNodes[1].firstChild;
         // We want to test with "cdefg" being five separate text nodes.
-        splitTextNode(cdefg, 4);
+        editor.shared.splitTextNode(cdefg, 4);
         const cdef = cdefg.previousSibling;
-        splitTextNode(cdef, 3);
+        editor.shared.splitTextNode(cdef, 3);
         const cde = cdef.previousSibling;
-        splitTextNode(cde, 2);
+        editor.shared.splitTextNode(cde, 2);
         const cd = cde.previousSibling;
-        splitTextNode(cd, 1);
+        editor.shared.splitTextNode(cd, 1);
         const d = cd;
         const result = editor.shared.splitAroundUntil(
             [d, d.nextSibling.nextSibling],

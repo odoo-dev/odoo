@@ -9,7 +9,13 @@ import { DIRECTIONS, childNodeIndex } from "../utils/position";
 export class SplitPlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "split";
-    static shared = ["splitElementBlock", "splitElement", "splitAroundUntil", "splitTextNode"];
+    static shared = [
+        "splitElementBlock",
+        "splitElement",
+        "splitAroundUntil",
+        "splitTextNode",
+        "splitSelection",
+    ];
 
     setup() {
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
@@ -218,6 +224,46 @@ export class SplitPlugin extends Plugin {
             }
         }
         return parentOffset;
+    }
+
+    splitSelection() {
+        let { startContainer, startOffset, endContainer, endOffset } =
+            this.shared.getEditableSelection();
+        const isInSingleContainer = startContainer === endContainer;
+        if (
+            endContainer.nodeType === Node.TEXT_NODE &&
+            endOffset !== 0 &&
+            endOffset !== endContainer.textContent.length
+        ) {
+            const endParent = endContainer.parentNode;
+            const splitOffset = this.splitTextNode(endContainer, endOffset);
+            endContainer = endParent.childNodes[splitOffset - 1] || endParent.firstChild;
+            if (isInSingleContainer) {
+                startContainer = endContainer;
+            }
+            endOffset = endContainer.textContent.length;
+        }
+        if (
+            startContainer.nodeType === Node.TEXT_NODE &&
+            startOffset !== 0 &&
+            startOffset !== startContainer.textContent.length
+        ) {
+            this.splitTextNode(startContainer, startOffset);
+            startOffset = 0;
+            if (isInSingleContainer) {
+                endOffset = startContainer.textContent.length;
+            }
+        }
+
+        return this.shared.setSelection(
+            {
+                anchorNode: startContainer,
+                anchorOffset: startOffset,
+                focusNode: endContainer,
+                focusOffset: endOffset,
+            },
+            { normalize: false }
+        );
     }
 
     onBeforeInput(e) {
