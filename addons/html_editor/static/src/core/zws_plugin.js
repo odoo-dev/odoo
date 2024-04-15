@@ -58,6 +58,13 @@ export class ZwsPlugin extends Plugin {
         if (this.resources.unremovables.some((predicate) => predicate(element))) {
             return;
         }
+        if (element.classList.length) {
+            // Original comment from web_editor:
+            // We only remove the empty element if it has no class, to ensure we
+            // don't break visual styles (in that case, its ZWS was kept to
+            // ensure the cursor can be placed in it).
+            return;
+        }
         element.remove();
     }
 

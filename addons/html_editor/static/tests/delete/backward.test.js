@@ -94,7 +94,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should keep inline block", async () => {
+        test("should keep inline block", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab</p><br><i>c[]</i></div>",
                 stepFunction: deleteBackward,
@@ -133,7 +133,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("ZWS: should delete element content but keep cursor in", async () => {
+        test("ZWS: should delete element content but keep cursor in", async () => {
             await testEditor({
                 contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
                 stepFunction: async (editor) => {
@@ -1200,7 +1200,7 @@ describe("Selection collapsed", () => {
 });
 
 describe("Selection not collapsed", () => {
-    test.todo("ZWS : should keep inline block", async () => {
+    test("ZWS : should keep inline block", async () => {
         await testEditor({
             contentBefore: '<div><p>ab <span class="style">[c]</span> d</p></div>',
             stepFunction: async (editor) => {
@@ -1679,9 +1679,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    // contentAfterEdit is correct. And empty inlines get removed on cleanup.
-    // Shouldn't they?
-    test.todo("should not delete styling nodes if not selected", async () => {
+    test("should not delete styling nodes if not selected", async () => {
         // deleteBackward selection
         await testEditor({
             contentBefore: '<p>a<span class="style-class">[bcde]</span>f</p>',
