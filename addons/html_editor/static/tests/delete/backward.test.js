@@ -317,13 +317,13 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should remove a media element", async () => {
+        test("should remove a media element", async () => {
             await testEditor({
-                contentBefore: `<p>abc</p><div class="o_image"></div><p>[]def</p>`,
+                contentBefore: `<div><p>abc</p><div class="o_image"></div><p>[]def</p></div>`,
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
                 },
-                contentAfter: `<p>abc</p><p>[]def</p>`,
+                contentAfter: `<div><p>abc</p><p>[]def</p></div>`,
             });
         });
     });
