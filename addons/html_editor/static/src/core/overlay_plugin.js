@@ -1,4 +1,4 @@
-import { markRaw } from "@odoo/owl";
+import { markRaw, EventBus } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { EditorOverlay } from "./overlay";
 
@@ -12,14 +12,6 @@ export class OverlayPlugin extends Plugin {
 
     overlays = [];
 
-    setup() {
-        // @todo @phoenix handle the case where the editable is in an iframe
-        // => need to listen to event in main document/window and in iframe
-        // => need to apply offsets
-        this.addDomListener(this.document, "scroll", this.onScroll, true);
-        this.addDomListener(this.document.defaultView, "resize", this.updatePositions, true);
-    }
-
     destroy() {
         super.destroy();
         for (const overlay of this.overlays) {
@@ -32,18 +24,6 @@ export class OverlayPlugin extends Plugin {
         this.overlays.push(overlay);
         return overlay;
     }
-
-    onScroll(ev) {
-        if (ev.target.contains(this.editable)) {
-            this.updatePositions();
-        }
-    }
-
-    updatePositions() {
-        for (const overlay of this.overlays) {
-            overlay.updatePosition();
-        }
-    }
 }
 
 export class Overlay {
@@ -54,7 +34,9 @@ export class Overlay {
         this.isOpen = false;
         this._remove = null;
         this.component = null;
+        this.bus = new EventBus();
     }
+
     /**
      * @param {HTMLElement | null} target for the overlay. If null, current selection will be used instead
      */
@@ -71,10 +53,12 @@ export class Overlay {
                     editable: this.plugin.editable,
                     props,
                     target,
+                    bus: this.bus,
                 })
             );
         }
     }
+
     close() {
         this.isOpen = false;
         if (this._remove) {
@@ -84,6 +68,6 @@ export class Overlay {
     }
 
     updatePosition() {
-        this.component?.updatePosition();
+        this.bus.trigger("updatePosition");
     }
 }
