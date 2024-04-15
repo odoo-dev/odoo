@@ -73,7 +73,7 @@ test("should make a whole heading not bold after a triple click (heading is cons
     const { el, editor } = await setupEditor(`<h1>[ab</h1><p>]cd</p>`, {
         styleContent: styleH1Bold,
     });
-    tripleClick(el.querySelector("h1"));
+    await tripleClick(el.querySelector("h1"));
     bold(editor);
     expect(getContent(el)).toBe(`<h1>${notStrong(`[ab]`)}</h1><p>cd</p>`);
 });
