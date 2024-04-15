@@ -80,6 +80,17 @@ describe("No orphan inline elements compatibility mode", () => {
                 '<p>ab</p><p style="margin-bottom: 0px;"><i class="fa fa-beer"></i></p><p>c</p>',
         });
     });
+
+    // This is what the editor currently does (.o_image has display: inline-block)
+    // But the resulting editable is NOT valid html (DIV inside P).
+    // @todo @phoenix: change behaviour/spec ?
+    test("should transform root div.o_image", async () => {
+        await testEditor({
+            contentBefore: '<p>abc</p><div class="o_image"></div><p>def</p>',
+            contentAfter:
+                '<p>abc</p><p style="margin-bottom: 0px;"><div class="o_image"></div></p><p>def</p>',
+        });
+    });
 });
 
 describe("allowInlineAtRoot options", () => {
