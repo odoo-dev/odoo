@@ -326,6 +326,13 @@ describe("Selection collapsed", () => {
                 contentAfter: `<div><p>abc</p><p>[]def</p></div>`,
             });
         });
+        test("should remove a media element inside a p", async () => {
+            await testEditor({
+                contentBefore: `<p>abc</p><p style="margin-bottom: 0px;"><o-image class="o_image" contenteditable="false"></o-image></p><p>[]def</p>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<p>abc</p><p>[]def</p>`,
+            });
+        });
     });
 
     describe("Line breaks", () => {
