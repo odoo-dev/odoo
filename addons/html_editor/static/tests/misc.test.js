@@ -68,19 +68,16 @@ test("with an empty selector and a <br>", async () => {
     );
 });
 
-test.todo(
-    "no arrow key press or mouse click so we remove selection (contenteditable='false')",
-    async () => {
-        await testEditor({
-            contentBefore: '[]<hr contenteditable="false">',
-            contentAfter: '<hr contenteditable="false">',
-        });
-        await testEditor({
-            contentBefore: '<hr contenteditable="false">[]',
-            contentAfter: '<hr contenteditable="false">',
-        });
-    }
-);
+test("no arrow key press or mouse click should keep selection near a contenteditable='false'", async () => {
+    await testEditor({
+        contentBefore: '[]<hr contenteditable="false">',
+        contentAfter: '[]<hr contenteditable="false">',
+    });
+    await testEditor({
+        contentBefore: '<hr contenteditable="false">[]',
+        contentAfter: '<hr contenteditable="false">[]',
+    });
+});
 
 test("event handlers are properly cleaned up after destruction", async () => {
     let count = 0;

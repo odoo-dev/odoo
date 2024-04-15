@@ -1,5 +1,6 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
+import { getContent } from "../_helpers/selection";
 
 export async function insertSeparator(editor) {
     editor.dispatch("INSERT_SEPARATOR");
@@ -48,5 +49,16 @@ describe("insert separator", () => {
             stepFunction: insertSeparator,
             contentAfter: "<table><tbody><tr><td><hr><p>[]<br></p></td></tr></tbody></table>",
         });
+    });
+    test("should set the contenteditable attribute to false on the separator when inserted as a child after normalization", async () => {
+        const { el, editor } = await setupEditor("<p>[]<br></p>");
+        const div = editor.document.createElement("div");
+        const separator = editor.document.createElement("hr");
+        div.append(separator);
+        el.append(div);
+        editor.dispatch("ADD_STEP");
+        expect(getContent(el)).toBe(
+            '<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p><div><hr contenteditable="false"></div>'
+        );
     });
 });
