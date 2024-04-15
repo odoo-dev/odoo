@@ -171,6 +171,11 @@ export class LinkPlugin extends Plugin {
                 this.removeCurrentLinkIfEmtpy();
                 return;
             }
+            if (linkEl !== this.linkElement) {
+                this.removeCurrentLinkIfEmtpy();
+                this.overlay.close();
+                this.linkElement = linkEl;
+            }
             const props = {
                 linkEl,
                 onApply: (url, label) => {
@@ -196,18 +201,8 @@ export class LinkPlugin extends Plugin {
                     this.overlay.close();
                 },
             };
-            if (linkEl !== this.linkElement) {
-                this.removeCurrentLinkIfEmtpy();
-                this.overlay.close();
-                this.linkElement = linkEl;
-                this.overlay.open({ target: this.linkElement, props });
-            } else {
-                // pass the link element to overlay to prevent position change
-                this.overlay.open({ target: linkEl, props });
-            }
-            if (!this.overlay.isOpen) {
-                this.overlay.open({ props });
-            }
+            // pass the link element to overlay to prevent position change
+            this.overlay.open({ target: this.linkElement, props });
         }
     }
 
