@@ -3,7 +3,16 @@ import { click } from "@odoo/hoot-dom";
 import { setupEditor } from "./_helpers/editor";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { InlineComponentPlugin } from "../src/others/inline_component_plugin";
-import { Component, xml, useState, onMounted, onWillUnmount, onWillDestroy, useSubEnv, useRef } from "@odoo/owl";
+import {
+    Component,
+    xml,
+    useState,
+    onMounted,
+    onWillUnmount,
+    onWillDestroy,
+    useSubEnv,
+    useRef,
+} from "@odoo/owl";
 import { getContent } from "./_helpers/selection";
 import { animationFrame } from "@odoo/hoot-mock";
 import { useWysiwyg } from "../src/wysiwyg";
@@ -15,7 +24,7 @@ class Counter extends Component {
     static template = xml`
         <span t-ref="root" class="counter" t-on-click="increment">Counter: <t t-esc="state.value"/></span>`;
 
-    state = useState({ value: 0});
+    state = useState({ value: 0 });
     ref = useRef("root");
 
     increment() {
@@ -23,28 +32,29 @@ class Counter extends Component {
     }
 }
 
-
 function getConfig(name, Comp) {
     return {
         Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
-        inlineComponents: [{ name, Component: Comp}],
+        inlineComponents: [{ name, Component: Comp }],
     };
 }
 
-
-
 test("can mount a inline component", async () => {
-    const { el, editor } = await setupEditor(`<div><span data-embedded="counter"></span></div>`,{
-        config: getConfig("counter", Counter)
+    const { el } = await setupEditor(`<div><span data-embedded="counter"></span></div>`, {
+        config: getConfig("counter", Counter),
     });
-    expect(getContent(el)).toBe(`<div><span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`);
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+    );
     click(".counter");
     await animationFrame();
-    expect(getContent(el)).toBe(`<div><span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span></div>`);
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span></div>`
+    );
 });
 
 test("inline component are mounted and destroyed", async () => {
-    let steps = [];
+    const steps = [];
     class Test extends Counter {
         static props = {};
         setup() {
@@ -59,8 +69,8 @@ test("inline component are mounted and destroyed", async () => {
             onWillDestroy(() => steps.push("willdestroy"));
         }
     }
-    const { el, editor } = await setupEditor(`<div><span data-embedded="counter"></span></div>`,{
-        config: getConfig("counter", Test)
+    const { el, editor } = await setupEditor(`<div><span data-embedded="counter"></span></div>`, {
+        config: getConfig("counter", Test),
     });
     expect(steps).toEqual(["mounted"]);
 
@@ -83,23 +93,21 @@ test("inline component get proper env", async () => {
         static props = {};
 
         setup() {
-            useSubEnv({ somevalue: 1});
+            useSubEnv({ somevalue: 1 });
             useWysiwyg("root", {
                 innerHTML: `<div><span data-embedded="counter"></span></div>`,
                 Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
-                inlineComponents: [{ name: "counter", Component: Test}],
+                inlineComponents: [{ name: "counter", Component: Test }],
             });
         }
-
     }
 
     await mountWithCleanup(Parent);
     expect(env.somevalue).toBe(1);
 });
 
-
 test("inline component are destroyed when deleted", async () => {
-    let steps = [];
+    const steps = [];
     class Test extends Counter {
         static props = {};
         setup() {
@@ -113,11 +121,16 @@ test("inline component are destroyed when deleted", async () => {
             });
         }
     }
-    const { el, editor } = await setupEditor(`<div>a<span data-embedded="counter"></span>[]</div>`,{
-        config: getConfig("counter", Test)
-    });
+    const { el, editor } = await setupEditor(
+        `<div>a<span data-embedded="counter"></span>[]</div>`,
+        {
+            config: getConfig("counter", Test),
+        }
+    );
 
-    expect(getContent(el)).toBe(`<div>a<span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`);
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+    );
     expect(steps).toEqual(["mounted"]);
 
     deleteBackward(editor);
