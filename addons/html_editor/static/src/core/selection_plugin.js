@@ -44,11 +44,9 @@ export class SelectionPlugin extends Plugin {
     setup() {
         this.resetSelection();
         this.addDomListener(this.document, "selectionchange", this.updateActiveSelection);
-        this.addDomListener(this.editable, "click", (ev) => {
+        this.addDomListener(this.editable, "mousedown", (ev) => {
             if (ev.detail >= 3) {
-                const { anchorNode, anchorOffset } = this.getEditableSelection();
-                const [focusNode, focusOffset] = endPos(anchorNode);
-                this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+                this.correctTripleClick = true;
             }
         });
     }
@@ -70,6 +68,12 @@ export class SelectionPlugin extends Plugin {
             inEditable = this.editable.contains(range.commonAncestorContainer);
         }
         if (inEditable) {
+            if (this.correctTripleClick) {
+                this.correctTripleClick = false;
+                const { anchorNode, anchorOffset } = selection;
+                const [focusNode, focusOffset] = endPos(anchorNode);
+                return this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+            }
             this.activeSelection = this.makeSelection(selection, inEditable);
         } else {
             const newSelection = { ...this.activeSelection, inEditable: false };

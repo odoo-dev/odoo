@@ -1,9 +1,10 @@
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { expect, test } from "@odoo/hoot";
-import { click, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { click } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "./_helpers/editor";
-import { getContent, setContent, setSelection } from "./_helpers/selection";
+import { getContent, setContent } from "./_helpers/selection";
+import { tripleClick } from "./_helpers/user_actions";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -127,16 +128,12 @@ test("editable node attributes are cleared (or not) after destruction", async ()
 test("triple click outside of the Editor", async () => {
     const { el } = await setupEditor("<p>[]abc</p>", {});
     const anchorNode = el.parentElement;
-    setSelection({ anchorNode, anchorOffset: 0 });
-    expect(document.getSelection().anchorNode).toBe(anchorNode);
-
-    manuallyDispatchProgrammaticEvent(el.parentElement, "click", { detail: 3 });
+    await tripleClick(el.parentElement);
     expect(document.getSelection().anchorNode).toBe(anchorNode);
     expect(getContent(el)).toBe("<p>abc</p>");
 
     const p = el.querySelector("p");
-    setSelection({ anchorNode: p, anchorOffset: 0 });
-    manuallyDispatchProgrammaticEvent(p, "click", { detail: 3 });
+    await tripleClick(p);
     expect(document.getSelection().anchorNode).toBe(p.childNodes[0]);
     expect(getContent(el)).toBe("<p>[abc]</p>");
 });

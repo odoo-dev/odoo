@@ -3,6 +3,7 @@ import { manuallyDispatchProgrammaticEvent, queryFirst } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { tripleClick } from "./_helpers/user_actions";
+import { tick } from "@odoo/hoot-mock";
 
 function setTag(tagName) {
     return (editor) => editor.dispatch("SET_TAG", { tagName });
@@ -415,7 +416,7 @@ describe("to blockquote", () => {
         const { editor, el } = await setupEditor("<p>ab[]cd</p><p>Plop</p>");
         // Simulate selection trigger by triple click
         // @todo @phoenix need to adapt when hoot add detail => 3 x click
-        tripleClick(queryFirst("div p"));
+        await tripleClick(queryFirst("div p"));
         expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
 
         setTag("h1")(editor);
@@ -427,13 +428,14 @@ describe("to blockquote", () => {
         // Simulate selection trigger by triple click
         // @todo @phoenix need to adapt when hoot add detail => 6 x click
         const anchorNode = queryFirst("div p");
+        manuallyDispatchProgrammaticEvent(anchorNode, "mousedown", { detail: 6 });
         setSelection({
             anchorNode,
             anchorOffset: 0,
             focusNode: anchorNode.nextSibling,
             focusOffset: 0,
         });
-        manuallyDispatchProgrammaticEvent(anchorNode, "click", { detail: 6 });
+        await tick();
         expect(getContent(el)).toBe("<p>[abcd]</p><p>Plop</p>");
 
         setTag("h1")(editor);

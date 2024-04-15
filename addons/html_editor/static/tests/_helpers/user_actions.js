@@ -1,6 +1,7 @@
 import { childNodeIndex } from "@html_editor/utils/position";
 import { findInSelection } from "@html_editor/utils/selection";
 import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { tick } from "@odoo/hoot-mock";
 import { setSelection } from "./selection";
 
 export function insertText(editor, text) {
@@ -224,12 +225,16 @@ export function pasteOdooEditorHtml(editor, html) {
     return pasteData(editor, html, "text/odoo-editor");
 }
 
-export function tripleClick(node) {
+export async function tripleClick(node) {
+    manuallyDispatchProgrammaticEvent(node, "mousedown", { detail: 3 });
     setSelection({
         anchorNode: node,
         anchorOffset: 0,
         focusNode: node.nextSibling,
         focusOffset: 0,
     });
+    manuallyDispatchProgrammaticEvent(node, "mouseup", { detail: 3 });
     manuallyDispatchProgrammaticEvent(node, "click", { detail: 3 });
+
+    await tick();
 }
