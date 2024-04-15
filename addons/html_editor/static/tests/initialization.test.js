@@ -6,6 +6,20 @@ import { testEditor } from "./_helpers/editor";
  */
 
 describe("No orphan inline elements compatibility mode", () => {
+    test("should wrap inline node inside a p", async () => {
+        await testEditor({
+            contentBefore: "<p>abc</p> <p>def</p> orphan node",
+            contentAfter: '<p>abc</p><p>def</p><p style="margin-bottom: 0px;"> orphan node</p>',
+        });
+    });
+
+    test("should wrap inline node inside a p (2)", async () => {
+        await testEditor({
+            contentBefore: "<p>ab</p>cd<p>ef</p>",
+            contentAfter: '<p>ab</p><p style="margin-bottom: 0px;">cd</p><p>ef</p>',
+        });
+    });
+
     test("should transform root <br> into <p>", async () => {
         await testEditor({
             contentBefore: "ab<br>c",
