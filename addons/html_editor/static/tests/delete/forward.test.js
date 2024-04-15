@@ -283,14 +283,15 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo("should merge the two <p>", async () => {
+            test("should merge the two <p>", async () => {
                 await testEditor({
                     contentBefore: "<p>abc[]</p> <p>def</p>",
                     stepFunction: deleteForward,
                     contentAfter: "<p>abc[]def</p>",
                 });
                 await testEditor({
-                    contentBefore: "<p>abc[]</p> <p>def</p> orphan node",
+                    contentBefore:
+                        '<p>abc[]</p><p>def</p><p style="margin-bottom: 0px;"> orphan node</p>',
                     stepFunction: deleteForward,
                     contentAfter: '<p>abc[]def</p><p style="margin-bottom: 0px;"> orphan node</p>',
                 });
@@ -743,14 +744,14 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should merge a text following a paragraph (keeping the text)", async () => {
+        test("should merge a text following a paragraph (keeping the text)", async () => {
             await testEditor({
-                contentBefore: "<p>ab[]</p>cd",
+                contentBefore: '<p>ab[]</p><p style="margin-bottom: 0px;">cd</p>',
                 stepFunction: deleteForward,
                 contentAfter: "<p>ab[]cd</p>",
             });
             await testEditor({
-                contentBefore: "<p>ab[]</p>cd<p>ef</p>",
+                contentBefore: '<p>ab[]</p><p style="margin-bottom: 0px;">cd</p><p>ef</p>',
                 stepFunction: deleteForward,
                 contentAfter: "<p>ab[]cd</p><p>ef</p>",
             });
