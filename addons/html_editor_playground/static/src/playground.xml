@@ -27,7 +27,7 @@
                 <div class="d-flex">
                     <Wysiwyg
                         content="testHtml"
-                        class="'m-2'"
+                        class="'m-2 px-4'"
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;${!config.inIframe ? 'overflow:auto;' : ''}`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"

@@ -11,7 +11,7 @@ const ALLOWED_ELEMENTS =
 
 export class MoveNodePlugin extends Plugin {
     static name = "movenode";
-    static dependencies = ["selection", "container"];
+    static dependencies = ["selection", "local-overlay"];
 
     setup() {
         this.intersectionObserver = new IntersectionObserver(
@@ -30,27 +30,16 @@ export class MoveNodePlugin extends Plugin {
         this.addDomListener(this.document, "mousemove", this.onDocumentMousemove, true);
         this.addDomListener(this.document, "touchmove", this.onDocumentMousemove, true);
 
-        const avatarContainer = this.shared.getAbsoluteContainer("oe-avatars-counters-container");
-
         // This container help to add zone into which the mouse can activate the move widget.
-        this.widgetHookContainer = this.shared.makeAbsoluteContainer("oe-widget-hooks-container");
-        this.shared.addContainerBefore(this.widgetHookContainer, avatarContainer);
+        this.widgetHookContainer = this.shared.makeLocalOverlay("oe-widget-hooks-container");
         // This container contains the differents widgets.
-        this.widgetContainer = this.shared.makeAbsoluteContainer("oe-widgets-container");
-        this.shared.addContainerBefore(this.widgetContainer, avatarContainer);
+        this.widgetContainer = this.shared.makeLocalOverlay("oe-widgets-container");
         // This container contains the jquery helper element.
-        this.dragHelperContainer = this.shared.makeAbsoluteContainer(
-            "oe-movenode-helper-container"
-        );
-        this.shared.addContainerBefore(this.dragHelperContainer, avatarContainer);
+        this.dragHelperContainer = this.shared.makeLocalOverlay("oe-movenode-helper-container");
         // This container contains drop zones. They are the zones that handle where the drop should happen.
-        this.dropzonesContainer = this.shared.makeAbsoluteContainer("oe-dropzones-container");
-        this.shared.addContainerBefore(this.dropzonesContainer, avatarContainer);
+        this.dropzonesContainer = this.shared.makeLocalOverlay("oe-dropzones-container");
         // This container contains drop hint. The final rectangle showed to the user.
-        this.dropzoneHintContainer = this.shared.makeAbsoluteContainer(
-            "oe-dropzone-hint-container"
-        );
-        this.shared.addContainerBefore(this.dropzoneHintContainer, avatarContainer);
+        this.dropzoneHintContainer = this.shared.makeLocalOverlay("oe-dropzone-hint-container");
 
         // Uncomment line for debugging tranparent zones
         // this.widgetHookContainer.classList.add("debug");

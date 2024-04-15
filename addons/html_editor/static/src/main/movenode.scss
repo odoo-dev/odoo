@@ -64,13 +64,13 @@ $oe-dropzone-size: $oe-dropzone-size-outside + $oe-dropzone-size-inside;
 .oe-dropzone-hook {
     position: absolute;
 }
-[data-oe-absolute-container-id=oe-dropzones-container] {
+[data-oe-local-overlay-id=oe-dropzones-container] {
     opacity: 0.3;
 }
-[data-oe-absolute-container-id=oe-widget-hooks-container] {
+[data-oe-local-overlay-id=oe-widget-hooks-container] {
     opacity: 0.3;
 }
-[data-oe-absolute-container-id=oe-dropzone-hint-container] {
+[data-oe-local-overlay-id=oe-dropzone-hint-container] {
     pointer-events: none;
 }
 .oe-current-drop-hint {

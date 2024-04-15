@@ -33,7 +33,7 @@ import { ImagePlugin } from "./main/image_plugin";
 import { LinkPastePlugin } from "./main/link/link_paste_plugin";
 import { InlineComponentPlugin } from "./others/inline_component_plugin";
 import { MoveNodePlugin } from "./main/movenode_plugin";
-import { ContainerNodePlugin } from "./main/container_plugin";
+import { LocalOverlayPlugin } from "./main/local_overlay_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -73,7 +73,7 @@ export const MAIN_PLUGINS = [
     LinkPlugin,
     LinkPastePlugin,
     MoveNodePlugin,
-    ContainerNodePlugin,
+    LocalOverlayPlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, InlineComponentPlugin];

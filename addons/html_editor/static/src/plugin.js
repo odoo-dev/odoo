@@ -5,6 +5,7 @@
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
  * @typedef { import("./core/split_plugin").SplitPlugin } SplitPlugin
  * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
+ * @typedef { import("./main/local_overlay_plugin").LocalOverlayPlugin } LocalOverlayPlugin
  * @typedef { import("./main/powerbox/powerbox_plugin").PowerboxPlugin } PowerboxPlugin
  * @typedef { import("./main/link/link_plugin").LinkPlugin } LinkPlugin
  * @typedef { import("./core/sanitize_plugin").SanitizePlugin } SanitizePlugin
@@ -24,6 +25,7 @@
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
  * @property { SelectionPlugin['extractContent'] } extractContent
  * @property { SelectionPlugin['preserveSelection'] } preserveSelection
+ * @property { LocalOverlayPlugin['makeLocalOverlay'] } makeLocalOverlay
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
  * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
  * @property { PowerboxPlugin['closePowerbox'] } closePowerbox

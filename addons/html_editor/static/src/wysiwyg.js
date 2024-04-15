@@ -39,9 +39,12 @@ export function useWysiwyg(target, config = {}) {
     config.inlineComponentInfo = {
         app: comp.__owl__.app,
         env,
-    }
+    };
     const ref = typeof target === "string" ? useRef(target) : null;
-    const editor = new Editor(config, env.services);
+    const localOverlaContainerRef = useRef(config.localOverlayRefName);
+    const _config = Object.create(config);
+    _config.getLocalOverlayContainer = () => localOverlaContainerRef.el;
+    const editor = new Editor(_config, env.services);
     onMounted(() => {
         const el = ref ? ref.el : target();
         if (el.tagName === "IFRAME") {
@@ -76,6 +79,7 @@ export class Wysiwyg extends Component {
         content: { type: String, optional: true },
         class: { type: String, optional: true },
         style: { type: String, optional: true },
+        localOverlay: { type: Boolean, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
         copyCss: { type: Boolean, optional: true },
@@ -95,6 +99,7 @@ export class Wysiwyg extends Component {
             copyCss: this.props.copyCss,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
             inlineComponents: this.props.inlineComponents || [],
+            localOverlayRefName: "localOverlay",
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
