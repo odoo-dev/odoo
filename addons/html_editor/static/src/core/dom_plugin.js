@@ -31,6 +31,7 @@ export class DomPlugin extends Plugin {
             },
         },
     });
+    contentEditableToRemove = new Set();
 
     handleCommand(command, payload) {
         switch (command) {
@@ -51,16 +52,27 @@ export class DomPlugin extends Plugin {
                     if (node.style && !node.style.length) {
                         node.removeAttribute("style");
                     }
-                    if (node.tagName === "HR") {
+                    for (const node of this.contentEditableToRemove) {
                         node.removeAttribute("contenteditable");
                     }
                 }
                 break;
             }
             case "NORMALIZE": {
-                for (const separator of payload.node.querySelectorAll("hr")) {
-                    separator.setAttribute("contenteditable", "false");
+                if (payload.node.tagName === "HR") {
+                    if (!payload.node.hasAttribute("contenteditable")) {
+                        payload.node.setAttribute("contenteditable", "false");
+                        this.contentEditableToRemove.add(payload.node);
+                    }
+                } else {
+                    for (const separator of payload.node.querySelectorAll("hr")) {
+                        if (!separator.hasAttribute("contenteditable")) {
+                            separator.setAttribute("contenteditable", "false");
+                            this.contentEditableToRemove.add(separator);
+                        }
+                    }
                 }
+
                 this.mergeAdjacentNodes(payload.node);
                 break;
             }
@@ -364,7 +376,6 @@ export class DomPlugin extends Plugin {
     insertSeparator() {
         const selection = this.shared.getEditableSelection();
         const sep = this.document.createElement("hr");
-        sep.setAttribute("contenteditable", false);
         const element = closestElement(selection.startContainer, (el) =>
             paragraphRelatedElements.includes(el.tagName)
         );
@@ -372,6 +383,7 @@ export class DomPlugin extends Plugin {
         if (element && element !== this.editable) {
             element.before(sep);
         }
+        this.dispatch("ADD_STEP");
     }
 
     mergeAdjacentNodes(node) {
