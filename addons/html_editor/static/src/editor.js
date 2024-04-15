@@ -11,6 +11,7 @@ import { CORE_PLUGINS } from "./plugin_sets";
  * @property { PluginConstructor[] } [Plugins]
  * @property { boolean } [disableFloatingToolbar]
  * @property { string[] } [classList]
+ * @property { HTMLElement } [getLocalOverlayContainer]
  */
 
 function sortPlugins(plugins) {
