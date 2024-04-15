@@ -42,7 +42,10 @@ export class DeletePlugin extends Plugin {
             { callback: p.deleteBackwardContentEditableFalse.bind(p) },
             { callback: p.deleteBackwardUnmergeable.bind(p) },
         ],
-        handle_delete_forward: { callback: p.deleteForwardUnmergeable.bind(p) },
+        handle_delete_forward: [
+            { callback: p.deleteForwardUnmergeable.bind(p) },
+            { callback: p.deleteForwardEmptyInline.bind(p) },
+        ],
         // @todo @phoenix: move these predicates to different plugins
         unremovables: [
             // The root editable (@todo @phoenix: I don't think this is necessary)
@@ -909,6 +912,21 @@ export class DeletePlugin extends Plugin {
             node = node.parentElement;
         }
         return null;
+    }
+
+    // @todo @phoenix Consider refactoring joinFragments and handleEmptyElements
+    // so that this is not necessary.
+    deleteForwardEmptyInline(range) {
+        let { startContainer, startOffset } = range;
+        const closestEmptyInline = closestElement(startContainer, "[data-oe-zws-empty-inline]");
+        if (!closestEmptyInline || !isZWS(closestEmptyInline)) {
+            return;
+        }
+        // Fully select the empty inline element so that it gets removed.
+        [startContainer, startOffset] = leftPos(closestEmptyInline);
+        const { cursorPos } = this.deleteRange({ ...range, startContainer, startOffset });
+        this.shared.setSelection(cursorPos);
+        return true;
     }
 }
 

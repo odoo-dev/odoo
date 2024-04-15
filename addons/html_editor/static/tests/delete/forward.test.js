@@ -143,7 +143,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("ZWS: should delete element content but keep cursor in", async () => {
+        test("ZWS: should delete element content but keep cursor in", async () => {
             await testEditor({
                 contentBefore: '<p>ab<span class="style">[]cd</span>ef</p>',
                 stepFunction: async (editor) => {
@@ -165,7 +165,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should ignore ZWS and merge", async () => {
+        test("should ignore ZWS and merge", async () => {
             await testEditor({
                 contentBefore:
                     '<p><span class="removeme" data-oe-zws-empty-inline="">[]\u200B</span><b>ab</b></p>',
@@ -1030,7 +1030,7 @@ describe("Selection not collapsed", () => {
         });
     });
 
-    test.todo("should not delete styling nodes if not selected", async () => {
+    test("should not delete styling nodes if not selected", async () => {
         await testEditor({
             contentBefore: '<p>a<span class="style-class">[bcde]</span>f</p>',
             stepFunction: deleteForward,
