@@ -87,6 +87,8 @@ describe("No orphan inline elements compatibility mode", () => {
     test("should transform root div.o_image", async () => {
         await testEditor({
             contentBefore: '<p>abc</p><div class="o_image"></div><p>def</p>',
+            contentBeforeEdit:
+                '<p>abc</p><p style="margin-bottom: 0px;"><div class="o_image" contenteditable="false"></div></p><p>def</p>',
             contentAfter:
                 '<p>abc</p><p style="margin-bottom: 0px;"><div class="o_image"></div></p><p>def</p>',
         });
