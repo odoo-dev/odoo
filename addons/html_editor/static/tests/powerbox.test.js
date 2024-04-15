@@ -1,12 +1,12 @@
-import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-mock";
-import { setupEditor } from "./_helpers/editor";
-import { setSelection } from "@html_editor/utils/selection";
-import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
-import { getContent } from "./_helpers/selection";
-import { insertText } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { setSelection } from "@html_editor/utils/selection";
+import { describe, expect, test } from "@odoo/hoot";
+import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
+import { setupEditor } from "./_helpers/editor";
+import { getContent } from "./_helpers/selection";
+import { insertText } from "./_helpers/user_actions";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");

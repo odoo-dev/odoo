@@ -13,6 +13,7 @@ export class EditorOverlay extends Component {
         Component: Function,
         props: { type: Object, optional: true },
         editable: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
+        bus: Object,
     };
 
     setup() {
@@ -20,8 +21,7 @@ export class EditorOverlay extends Component {
         if (this.props.target) {
             getTarget = () => this.props.target;
         } else {
-            // target is selection
-            useExternalListener(this.props.editable.ownerDocument, "selectionchange", () => {
+            useExternalListener(this.props.bus, "updatePosition", () => {
                 position.unlock();
             });
             getTarget = this.getCurrentRect.bind(this);
