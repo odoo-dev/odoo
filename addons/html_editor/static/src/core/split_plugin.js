@@ -38,7 +38,7 @@ export class SplitPlugin extends Plugin {
         let selection = this.shared.getEditableSelection();
         if (!selection.isCollapsed) {
             // @todo @phoenix collapseIfZWS is not tested
-            this.shared.collapseIfZWS();
+            // this.shared.collapseIfZWS();
             this.dispatch("DELETE_RANGE");
             selection = this.shared.getEditableSelection();
         }

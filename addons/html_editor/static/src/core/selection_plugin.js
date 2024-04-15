@@ -38,7 +38,7 @@ export class SelectionPlugin extends Plugin {
         "getSelectedNodes",
         "getTraversedNodes",
         "getTraversedBlocks",
-        "collapseIfZWS",
+        // "collapseIfZWS",
     ];
 
     setup() {
@@ -399,24 +399,25 @@ export class SelectionPlugin extends Plugin {
         return new Set(this.getTraversedNodes().map(closestBlock).filter(Boolean));
     }
 
-    /**
-     * Set a deep selection that split the text and collapse it if only one ZWS is
-     * selected.
-     *
-     * @returns {boolean} true if the selection has only one ZWS.
-     */
-    collapseIfZWS() {
-        const selection = this.getEditableSelection({ deep: true });
-        if (
-            selection.startContainer === selection.endContainer &&
-            selection.startContainer.nodeType === Node.TEXT_NODE &&
-            selection.startContainer.textContent === "\u200B"
-        ) {
-            // We Collapse the selection and bypass deleteRange
-            // if the range content is only one ZWS.
-            this.setCursorStart(selection.startContainer);
-            return true;
-        }
-        return false;
-    }
+    // @todo @phoenix we should find a real use case and test it
+    // /**
+    //  * Set a deep selection that split the text and collapse it if only one ZWS is
+    //  * selected.
+    //  *
+    //  * @returns {boolean} true if the selection has only one ZWS.
+    //  */
+    // collapseIfZWS() {
+    //     const selection = this.getEditableSelection({ deep: true });
+    //     if (
+    //         selection.startContainer === selection.endContainer &&
+    //         selection.startContainer.nodeType === Node.TEXT_NODE &&
+    //         selection.startContainer.textContent === "\u200B"
+    //     ) {
+    //         // We Collapse the selection and bypass deleteRange
+    //         // if the range content is only one ZWS.
+    //         this.setCursorStart(selection.startContainer);
+    //         return true;
+    //     }
+    //     return false;
+    // }
 }
