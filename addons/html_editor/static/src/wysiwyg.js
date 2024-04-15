@@ -32,7 +32,7 @@ function copyCss(sourceDoc, targetDoc) {
  * @param {import("./editor").EditorConfig} config
  * @returns Editor
  */
-export function useWysiwyg(target, config = {}) {
+export function useWysiwyg(target, localOverlayRefName, config = {}) {
     const comp = useComponent();
     const env = comp.env;
     // grab app and env for inline component plugin, if needed
@@ -41,9 +41,9 @@ export function useWysiwyg(target, config = {}) {
         env,
     };
     const ref = typeof target === "string" ? useRef(target) : null;
-    const localOverlaContainerRef = useRef(config.localOverlayRefName);
+    const localOverlaContainerRef = localOverlayRefName && useRef(localOverlayRefName);
     const _config = Object.create(config);
-    _config.getLocalOverlayContainer = () => localOverlaContainerRef.el;
+    _config.getLocalOverlayContainer = () => localOverlaContainerRef?.el;
     const editor = new Editor(_config, env.services);
     onMounted(() => {
         const el = ref ? ref.el : target();
@@ -92,14 +92,13 @@ export class Wysiwyg extends Component {
         this.state = useState({
             showToolbar: false,
         });
-        this.editor = useWysiwyg("content", {
+        this.editor = useWysiwyg("content", "localOverlay", {
             innerHTML: this.props.content,
             disableFloatingToolbar: this.props.toolbar,
             classList: this.props.classList,
             copyCss: this.props.copyCss,
             Plugins: this.props.Plugins || MAIN_PLUGINS,
             inlineComponents: this.props.inlineComponents || [],
-            localOverlayRefName: "localOverlay",
         });
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
