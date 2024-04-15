@@ -12,6 +12,7 @@ export const Direction = {
 
 class TestEditor extends Component {
     static template = xml`
+        <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="localOverlay" />
         <t t-if="props.inIFrame">
             <iframe t-ref="target"/>
         </t>
@@ -50,7 +51,10 @@ class TestEditor extends Component {
                 }
             }
         });
-        this.editor = useWysiwyg(target, { Plugins: MAIN_PLUGINS, ...this.props.config });
+        this.editor = useWysiwyg(target, "localOverlay", {
+            Plugins: MAIN_PLUGINS,
+            ...this.props.config,
+        });
     }
 }
 

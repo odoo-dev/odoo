@@ -94,7 +94,7 @@ test("inline component get proper env", async () => {
 
         setup() {
             useSubEnv({ somevalue: 1 });
-            useWysiwyg("root", {
+            useWysiwyg("root", undefined, {
                 innerHTML: `<div><span data-embedded="counter"></span></div>`,
                 Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
                 inlineComponents: [{ name: "counter", Component: Test }],

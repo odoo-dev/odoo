@@ -23,7 +23,9 @@ export class LocalOverlayPlugin extends Plugin {
         const container = this.document.createElement("div");
         container.className = `oe-local-overlay`;
         container.setAttribute("data-oe-local-overlay-id", containerId);
-        this.localOverlayContainer.append(container);
+        if (this.localOverlayContainer) {
+            this.localOverlayContainer.append(container);
+        }
         return container;
     }
 }
