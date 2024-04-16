@@ -495,21 +495,18 @@ describe("Selection collapsed", () => {
                 });
             });
 
-            test.todo(
-                "should delete two line breaks, then merge a paragraph into a paragraph with 2 <br>",
-                async () => {
-                    // 4-3
-                    await testEditor({
-                        contentBefore: "<p>ab</p><p><br>[]<br><br><br></p><p>cd</p>",
-                        stepFunction: async (editor) => {
-                            deleteForward(editor);
-                            deleteForward(editor);
-                            deleteForward(editor);
-                        },
-                        contentAfter: "<p>ab</p><p><br>[]cd</p>",
-                    });
-                }
-            );
+            test("should delete two line breaks, then merge a paragraph into a paragraph with 2 <br>", async () => {
+                // 4-3
+                await testEditor({
+                    contentBefore: "<p>ab</p><p><br>[]<br><br><br></p><p>cd</p>",
+                    stepFunction: async (editor) => {
+                        deleteForward(editor);
+                        deleteForward(editor);
+                        deleteForward(editor);
+                    },
+                    contentAfter: "<p>ab</p><p><br>[]cd</p>",
+                });
+            });
 
             test("should delete a line break (2)", async () => {
                 // 5-1

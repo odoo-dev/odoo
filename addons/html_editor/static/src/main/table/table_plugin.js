@@ -344,15 +344,16 @@ export class TablePlugin extends Plugin {
         }
         range = { startContainer, startOffset, endContainer, endOffset };
 
-        let { cursorPos } = this.shared.deleteRange(range);
+        range = this.shared.deleteRange(range);
 
         // Normalize deep.
         // @todo @phoenix: Use something from the selection plugin (normalize deep?)
-        let { anchorNode, anchorOffset } = cursorPos;
-        [anchorNode, anchorOffset] = getDeepestPosition(anchorNode, anchorOffset);
-        cursorPos = { anchorNode, anchorOffset };
+        const [anchorNode, anchorOffset] = getDeepestPosition(
+            range.startContainer,
+            range.startOffset
+        );
 
-        this.shared.setSelection(cursorPos);
+        this.shared.setSelection({ anchorNode, anchorOffset });
     }
 
     handleDeleteRange(range) {
