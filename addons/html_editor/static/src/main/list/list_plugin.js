@@ -358,13 +358,12 @@ export class ListPlugin extends Plugin {
         const cursors = this.shared.preserveSelection();
         const li = p.parentElement;
         // An empty block might contain empty inlines as children.
-        cursors.update(
-            (cursor) => p.contains(cursor.node),
-            (cursor) => {
+        cursors.update((cursor) => {
+            if (p.contains(cursor.node)) {
                 cursor.node = li;
                 cursor.offset = childNodeIndex(p);
             }
-        );
+        });
         p.remove();
         if (isShrunkBlock(li)) {
             li.append(this.document.createElement("br"));

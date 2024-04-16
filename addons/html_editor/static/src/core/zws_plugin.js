@@ -75,10 +75,11 @@ export class ZwsPlugin extends Plugin {
             let zwsIndex = node.textContent.search("\u200B");
             while (zwsIndex !== -1) {
                 node.deleteData(zwsIndex, 1);
-                cursors.update(
-                    (cursor) => cursor.node === node && cursor.offset > zwsIndex,
-                    (cursor) => (cursor.offset -= 1)
-                );
+                cursors.update((cursor) => {
+                    if (cursor.node === node && cursor.offset > zwsIndex) {
+                        cursor.offset -= 1;
+                    }
+                });
                 zwsIndex = node.textContent.search("\u200B");
             }
         }
