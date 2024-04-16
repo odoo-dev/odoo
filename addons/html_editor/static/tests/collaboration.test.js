@@ -12,7 +12,6 @@ import {
     validateSameHistory,
     validateContent,
     renderTextualSelection,
-    cleanContent,
 } from "./_helpers/collaboration";
 
 /**
@@ -57,7 +56,6 @@ describe("Conflict resolution", () => {
         validateSameHistory(peerInfos);
 
         renderTextualSelection(peerInfos);
-        cleanContent(peerInfos);
         validateContent(
             peerInfos,
             "<p><x>abcd[c1}{c1]</x><y>efgh[c2}{c2]</y><z>ijkl[c3}{c3]</z></p>"
@@ -404,7 +402,8 @@ describe("sanitize", () => {
                 editor.dispatch("HISTORY_UNDO");
                 editor.dispatch("HISTORY_REDO");
             },
-            contentAfter: '<div contenteditable="true">[c1}{c1]<br></div>',
+            contentAfter:
+                '<div contenteditable="true" placeholder="Type &quot;/&quot; for commands" class="o-we-hint">[c1}{c1]<br></div>',
         });
     });
 });
@@ -501,7 +500,7 @@ describe("data-oe-transient-content", () => {
                         <div data-oe-transient-content="true">
                             <p>secret</p>
                         </div>
-                        <p>[c1}{c1][c2}{c2]</p>
+                        <p placeholder="Type &quot;/&quot; for commands" class="o-we-hint">[c1}{c1][c2}{c2]</p>
                     `)
                 );
                 expect(peerInfos.c2.editor.editable.innerHTML).toBe(
