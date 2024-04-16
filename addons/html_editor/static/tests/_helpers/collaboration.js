@@ -131,7 +131,7 @@ export function cleanContent(peerInfos) {
         // todo: should probably use only one method (like clean)
         const el = peerInfo.editor.editable;
         peerInfo.editor.dispatch("NORMALIZE", { node: el });
-        peerInfo.editor.dispatch("CLEAN", el);
+        peerInfo.editor.dispatch("CLEAN", { node: el });
         peerInfo.editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
     }
 }
