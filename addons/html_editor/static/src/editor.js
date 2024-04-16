@@ -17,6 +17,7 @@ import { MAIN_PLUGINS } from "./plugin_sets";
  * @property { Function } [getLocalOverlayContainer]
  * @property { Object } [inlineComponentInfo]
  * @property { Object } [resources]
+ * @property { string } [direction="ltr"]
  */
 
 function sortPlugins(plugins) {

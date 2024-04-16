@@ -1,5 +1,6 @@
 /**
  * @typedef { import("./editor").Editor } Editor
+ * @typedef { import("./editor").EditorConfig } EditorConfig
  * @typedef { import("./core/history_plugin").HistoryPlugin } HistoryPlugin
  * @typedef { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
@@ -9,6 +10,7 @@
  * @typedef { import("./main/powerbox/powerbox_plugin").PowerboxPlugin } PowerboxPlugin
  * @typedef { import("./main/link/link_plugin").LinkPlugin } LinkPlugin
  * @typedef { import("./core/sanitize_plugin").SanitizePlugin } SanitizePlugin
+ * @typedef { import("./core/format_plugin").FormatPlugin } FormatPlugin
  *
  * @typedef { Object } SharedMethods
  *
@@ -27,6 +29,11 @@
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
  * @property { SelectionPlugin['extractContent'] } extractContent
  * @property { SelectionPlugin['preserveSelection'] } preserveSelection
+ * @property { SelectionPlugin['resetSelection'] } resetSelection
+ * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
+ * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
+ * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
+ * @property { FormatPlugin['isSelectionFormat'] } isSelectionFormat
  * @property { LocalOverlayPlugin['makeLocalOverlay'] } makeLocalOverlay
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
  * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
@@ -40,6 +47,8 @@
  * @property { SplitPlugin['splitElement'] } splitElement
  * @property { SplitPlugin['splitSelection'] } splitSelection
  * @property { SplitPlugin['splitAroundUntil'] } splitAroundUntil
+ * @property { SplitPlugin['splitTextNode'] } splitTextNode
+ * @property { SplitPlugin['splitSelection'] } splitSelection
  * @property { OverlayPlugin['createOverlay'] } createOverlay
  */
 
@@ -61,6 +70,7 @@ export class Plugin {
         this.document = document;
         /** @type { HTMLElement } **/
         this.editable = editable;
+        /** @type { EditorConfig } **/
         this.config = config;
         this.services = services;
         /** @type { SharedMethods } **/

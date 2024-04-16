@@ -13,6 +13,7 @@ function isFormatted(formatPlugin, format) {
 export class FormatPlugin extends Plugin {
     static name = "format";
     static dependencies = ["selection", "split", "zws"];
+    static shared = ["isSelectionFormat"];
     static resources = (p) => ({
         shortcuts: [
             { hotkey: "control+b", command: "FORMAT_BOLD" },
