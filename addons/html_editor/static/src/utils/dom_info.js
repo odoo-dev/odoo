@@ -106,7 +106,7 @@ export function hasClass(node, props) {
  * @returns {boolean}
  */
 export function isDirectionSwitched(node, editable) {
-    const defaultDirection = editable.getAttribute("dir");
+    const defaultDirection = editable.getAttribute("dir") || "ltr";
     return getComputedStyle(closestElement(node)).direction !== defaultDirection;
 }
 

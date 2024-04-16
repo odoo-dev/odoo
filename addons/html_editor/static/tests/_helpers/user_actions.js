@@ -5,6 +5,12 @@ import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-d
 import { tick } from "@odoo/hoot-mock";
 import { setSelection } from "./selection";
 
+/** @typedef {import("@html_editor/plugin").Editor} Editor */
+
+/**
+ * @param {Editor} editor
+ * @param {string} text
+ */
 export function insertText(editor, text) {
     const insertChar = (char) => {
         // Create and dispatch events to mock text insertion. Unfortunatly, the
@@ -45,10 +51,15 @@ export function insertText(editor, text) {
     }
 }
 
+/** @param {Editor} editor */
 export function deleteForward(editor) {
     editor.dispatch("DELETE_FORWARD");
 }
 
+/**
+ * @param {Editor} editor
+ * @param {boolean} [isMobileTest=false]
+ */
 export function deleteBackward(editor, isMobileTest = false) {
     // TODO phoenix: find a strategy for test mobile and desktop. (check legacy code)
 
@@ -56,13 +67,15 @@ export function deleteBackward(editor, isMobileTest = false) {
 }
 
 // history
+/** @param {Editor} editor */
 export function addStep(editor) {
     editor.dispatch("ADD_STEP");
 }
+/** @param {Editor} editor */
 export function undo(editor) {
     editor.dispatch("HISTORY_UNDO");
 }
-
+/** @param {Editor} editor */
 export function redo(editor) {
     editor.dispatch("HISTORY_REDO");
 }
@@ -71,11 +84,11 @@ export function redo(editor) {
 export function toggleOrderedList(editor) {
     editor.dispatch("TOGGLE_LIST", { mode: "OL" });
 }
-
+/** @param {Editor} editor */
 export function toggleUnorderedList(editor) {
     editor.dispatch("TOGGLE_LIST", { mode: "UL" });
 }
-
+/** @param {Editor} editor */
 export function toggleCheckList(editor) {
     editor.dispatch("TOGGLE_LIST", { mode: "CL" });
 }
@@ -94,36 +107,37 @@ export function clickCheckbox(li) {
     click(li, { position: { clientX: liRect.left - 10, clientY: liRect.top + 10 } });
 }
 
+/** @param {Editor} editor */
 export function insertLineBreak(editor) {
     editor.dispatch("INSERT_LINEBREAK");
 }
 
 // Format commands
+
+/** @param {Editor} editor */
 export function bold(editor) {
     editor.dispatch("FORMAT_BOLD");
 }
-
+/** @param {Editor} editor */
 export function italic(editor) {
     editor.dispatch("FORMAT_ITALIC");
 }
-
+/** @param {Editor} editor */
 export function underline(editor) {
     editor.dispatch("FORMAT_UNDERLINE");
 }
-
+/** @param {Editor} editor */
 export function strikeThrough(editor) {
     editor.dispatch("FORMAT_STRIKETHROUGH");
 }
-
 export function setFontSize(size) {
     return (editor) => editor.dispatch("FORMAT_FONT_SIZE", { size });
 }
-
+/** @param {Editor} editor */
 export function switchDirection(editor) {
-    console.log("should dispatch FORMAT_SWITCH_DIRECTION");
-    //editor.execCommand('switchDirection')}
+    return editor.dispatch("SWITCH_DIRECTION");
 }
-
+/** @param {Editor} editor */
 export function splitBlock(editor) {
     editor.dispatch("SPLIT_BLOCK");
 }
@@ -168,62 +182,84 @@ export function unlink(editor) {
     throw new Error("Not implemented command to replace unlink");
     // editor.dispatch('unlink');
 }
-
+/** @param {Editor} editor */
 export function keydownTab(editor) {
     manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab" });
 }
-
+/** @param {Editor} editor */
 export function keydownShiftTab(editor) {
     manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key: "Tab", shiftKey: true });
 }
-
+/** @param {Editor} editor */
 export function resetSize(editor) {
     const selection = editor.shared.getEditableSelection();
     editor.dispatch("RESET_SIZE", { table: findInSelection(selection, "table") });
 }
-
+/** @param {Editor} editor */
 export function justifyLeft(editor) {
     editor.dispatch("JUSTIFY_LEFT");
 }
-
+/** @param {Editor} editor */
 export function justifyCenter(editor) {
     editor.dispatch("JUSTIFY_CENTER");
 }
-
+/** @param {Editor} editor */
 export function justifyRight(editor) {
     editor.dispatch("JUSTIFY_RIGHT");
 }
-
+/** @param {Editor} editor */
 export function justifyFull(editor) {
     editor.dispatch("JUSTIFY_FULL");
 }
 
+/**
+ * @param {string} color
+ * @param {string} mode
+ */
 export function setColor(color, mode) {
+    /** @param {Editor} editor */
     return (editor) => {
         editor.dispatch("APPLY_COLOR", { color, mode });
     };
 }
 
 // Mock an paste event and send it to the editor.
+
+/**
+ * @param {Editor} editor
+ * @param {string} text
+ * @param {string} type
+ */
 function pasteData(editor, text, type) {
     const clipboardData = new DataTransfer();
     clipboardData.setData(type, text);
     const pasteEvent = new ClipboardEvent("paste", { clipboardData, bubbles: true });
     editor.editable.dispatchEvent(pasteEvent);
 }
-
+/**
+ * @param {Editor} editor
+ * @param {string} text
+ */
 export function pasteText(editor, text) {
     return pasteData(editor, text, "text/plain");
 }
-
+/**
+ * @param {Editor} editor
+ * @param {string} html
+ */
 export function pasteHtml(editor, html) {
     return pasteData(editor, html, "text/html");
 }
-
+/**
+ * @param {Editor} editor
+ * @param {string} html
+ */
 export function pasteOdooEditorHtml(editor, html) {
     return pasteData(editor, html, "text/odoo-editor");
 }
-
+/**
+ * @param {Node} node
+ */
 export async function tripleClick(node) {
     const anchorNode = node;
     node = node.nodeType === Node.ELEMENT_NODE ? node : node.parentNode;
