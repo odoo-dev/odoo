@@ -38,7 +38,10 @@ export class Overlay {
     }
 
     /**
-     * @param {HTMLElement | null} target for the overlay. If null, current selection will be used instead
+     * @param {Object} options
+     * @param {HTMLElement | null} [options.target] for the overlay.
+     *  If null or undefined, the current selection will be used instead
+     * @param {any} [options.props] overlay component props
      */
     open({ target, props }) {
         if (this.isOpen) {
@@ -54,8 +57,9 @@ export class Overlay {
                     props,
                     target,
                     bus: this.bus,
-                }), {
-                    sequence: this.config.sequence || 50
+                }),
+                {
+                    sequence: this.config.sequence || 50,
                 }
             );
         }

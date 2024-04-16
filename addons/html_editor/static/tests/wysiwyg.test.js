@@ -9,7 +9,7 @@ import { getContent, setContent, setSelection } from "./_helpers/selection";
 describe("wysiwig hook", () => {
     test("useWysiwyg create an editor on ref", async () => {
         class TestWysiwygHook extends Component {
-            static props = {};
+            static props = [];
             static template = xml`<div>coucou<p t-ref="content"/></div>`;
 
             setup() {
@@ -22,9 +22,14 @@ describe("wysiwig hook", () => {
 });
 
 describe("Wysiwyg Component", () => {
+    /**
+     *
+     * @param {Object} props
+     * @returns { Promise<{el: HTMLElement, wysiwyg: Wysiwyg}> } result
+     */
     async function setupWysiwyg(props = {}) {
         const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
-        const el = queryOne(".odoo-editor-editable");
+        const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
         if (props.content) {
             // force selection to be put properly
             setContent(el, props.content);

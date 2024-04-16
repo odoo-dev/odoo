@@ -97,14 +97,14 @@ export class SplitPlugin extends Plugin {
      * the process so caution is advised in dealing with its reference. Returns a
      * tuple containing the new elements on both sides of the split.
      *
-     * @param {Element} element
+     * @param {HTMLElement} element
      * @param {number} offset
-     * @returns {[Element, Element]}
+     * @returns {[HTMLElement, HTMLElement]}
      */
     splitElement(element, offset) {
         this.dispatch("CLEAN_NODE", { node: element });
-        const before = element.cloneNode();
-        const after = element.cloneNode();
+        const before = /** @type {HTMLElement} **/ (element.cloneNode());
+        const after = /** @type {HTMLElement} **/ (element.cloneNode());
         let index = 0;
         for (const child of [...element.childNodes]) {
             index < offset ? before.appendChild(child) : after.appendChild(child);
@@ -122,10 +122,10 @@ export class SplitPlugin extends Plugin {
      * with its reference. Returns a tuple containing the new elements on both sides
      * of the split.
      *
-     * @param {Element} element
+     * @param {HTMLElement} element
      * @param {number} offset
-     * @param {Element} limitAncestor
-     * @returns {[Element, Element]}
+     * @param {HTMLElement} limitAncestor
+     * @returns {[HTMLElement, HTMLElement]}
      */
     splitElementUntil(element, offset, limitAncestor) {
         if (element === limitAncestor) {
@@ -149,10 +149,9 @@ export class SplitPlugin extends Plugin {
      * references. Returns the new split root element that is a clone of
      * limitAncestor or the original limitAncestor if no split occured.
      *
-     * @see this.splitElement
      * @param {Node[] | Node} elements
-     * @param {Node} limitAncestor
-     * @returns {[Node, Node]}
+     * @param {HTMLElement} limitAncestor
+     * @returns { Node }
      */
     splitAroundUntil(elements, limitAncestor) {
         elements = Array.isArray(elements) ? elements : [elements];
@@ -195,9 +194,9 @@ export class SplitPlugin extends Plugin {
      * Note: if split after or before whitespace, that whitespace may become
      * invisible, it is up to the caller to replace it by nbsp if needed.
      *
-     * @param {Node} textNode
+     * @param {Text} textNode
      * @param {number} offset
-     * @param {DIRECTIONS} originalNodeSide Whether the original node ends up on left
+     * @param {boolean} originalNodeSide Whether the original node ends up on left
      * or right after the split
      * @returns {number} The parentOffset if the cursor was between the two text
      *          node parts after the split.
