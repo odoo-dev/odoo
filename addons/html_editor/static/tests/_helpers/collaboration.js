@@ -126,16 +126,6 @@ export const setupMultiEditor = async (spec) => {
     return peerInfos;
 };
 
-export function cleanContent(peerInfos) {
-    for (const peerInfo of Object.values(peerInfos)) {
-        // todo: should probably use only one method (like clean)
-        const el = peerInfo.editor.editable;
-        peerInfo.editor.dispatch("NORMALIZE", { node: el });
-        peerInfo.editor.dispatch("CLEAN", { node: el });
-        peerInfo.editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
-    }
-}
-
 export async function testMultiEditor(spec) {
     const peerInfos = await setupMultiEditor(spec);
 
@@ -144,8 +134,6 @@ export async function testMultiEditor(spec) {
     }
 
     renderTextualSelection(peerInfos);
-
-    cleanContent(peerInfos);
 
     if (spec.contentAfter) {
         validateContent(peerInfos, spec.contentAfter);
