@@ -143,14 +143,16 @@ export class FormatPlugin extends Plugin {
         const selectedNodesInTds = [...this.editable.querySelectorAll(".o_selected_td")].map(
             (node) => closestElement(node).querySelector("br")
         );
-        const selectedNodes = this.shared
-            .getSelectedNodes()
-            .filter(
-                (n) =>
-                    n.nodeType === Node.TEXT_NODE &&
-                    closestElement(n).isContentEditable &&
-                    (isVisibleTextNode(n) || isZWS(n))
-            );
+        const selectedNodes = /** @type { Text[] } **/ (
+            this.shared
+                .getSelectedNodes()
+                .filter(
+                    (n) =>
+                        n.nodeType === Node.TEXT_NODE &&
+                        closestElement(n).isContentEditable &&
+                        (isVisibleTextNode(n) || isZWS(n))
+                )
+        );
         const selectedTextNodes = selectedNodes.length ? selectedNodes : selectedNodesInTds;
 
         const selectedFieldNodes = new Set(
@@ -162,6 +164,7 @@ export class FormatPlugin extends Plugin {
         const formatSpec = formatsSpecs[formatName];
         for (const selectedTextNode of selectedTextNodes) {
             const inlineAncestors = [];
+            /** @type { Node } */
             let currentNode = selectedTextNode;
             let parentNode = selectedTextNode.parentElement;
 

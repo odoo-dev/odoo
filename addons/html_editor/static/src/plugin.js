@@ -20,6 +20,8 @@
  * @property { HistoryPlugin['getHistorySteps'] } getHistorySteps
  * @property { HistoryPlugin['resetFromSteps'] } resetFromSteps
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
+ * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
+ * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
@@ -36,6 +38,7 @@
  * @property { DomPlugin['domInsert'] } domInsert
  * @property { SplitPlugin['splitElementBlock'] } splitElementBlock
  * @property { SplitPlugin['splitElement'] } splitElement
+ * @property { SplitPlugin['splitSelection'] } splitSelection
  * @property { SplitPlugin['splitAroundUntil'] } splitAroundUntil
  * @property { OverlayPlugin['createOverlay'] } createOverlay
  */
