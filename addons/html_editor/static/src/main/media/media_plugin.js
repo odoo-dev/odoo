@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
-import { ICON_SELECTOR, isIconElement } from "@html_editor/utils/dom_info";
+import { ICON_SELECTOR, isIconElement, isProtected } from "@html_editor/utils/dom_info";
 import { MediaDialog } from "./media_dialog";
 
 const MEDIA_SELECTOR = `${ICON_SELECTOR} , .o_image, .media_iframe_video`;
@@ -55,6 +55,9 @@ export class MediaPlugin extends Plugin {
             mediaElements.push(node);
         }
         for (const el of mediaElements) {
+            if (isProtected(el)) {
+                continue;
+            }
             el.setAttribute("contenteditable", "false");
             if (isIconElement(el)) {
                 el.textContent = "\u200B";

@@ -1,5 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
-import { isEmpty } from "@html_editor/utils/dom_info";
+import { isEmpty, isProtected } from "@html_editor/utils/dom_info";
 import { removeClass } from "@html_editor/utils/dom";
 
 function isMutationRecordSavable(record) {
@@ -54,7 +54,7 @@ export class HintPlugin extends Plugin {
     makeEmptyBlockHints(root) {
         for (const { selector, hint } of this.resources.emptyBlockHints) {
             for (const el of this.selectElements(root, selector)) {
-                if (isEmpty(el)) {
+                if (isEmpty(el) && !isProtected(el)) {
                     this.makeHint(el, hint);
                 }
             }
