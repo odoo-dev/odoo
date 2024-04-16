@@ -78,6 +78,7 @@ export class ColumnPlugin extends Plugin {
             case "COLUMNIZE": {
                 const { numberOfColumns, addParagraphAfter } = payload;
                 this.columnize(numberOfColumns, addParagraphAfter);
+                this.dispatch("ADD_STEP");
                 break;
             }
         }
