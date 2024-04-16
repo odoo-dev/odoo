@@ -11,14 +11,12 @@ describe("left", () => {
         });
     });
 
-    test.todo("should not align left a non-editable node", async () => {
+    test("should not align left a non-editable node", async () => {
         await testEditor({
             contentBefore: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
-            contentBeforeEdit:
-                '<p>ab</p><div contenteditable="false" data-oe-keep-contenteditable=""><p>c[]d</p></div>',
+            contentBeforeEdit: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
             stepFunction: justifyLeft,
-            contentAfterEdit:
-                '<p>ab</p><div contenteditable="false" data-oe-keep-contenteditable=""><p>c[]d</p></div>',
+            contentAfterEdit: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
             contentAfter: '<p>ab</p><div contenteditable="false"><p>c[]d</p></div>',
         });
     });
