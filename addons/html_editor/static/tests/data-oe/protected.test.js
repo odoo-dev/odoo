@@ -48,7 +48,7 @@ test("should not ignore unprotected elements children mutations (false)", async 
     });
 });
 
-test.todo("should not normalize protected elements children (true)", async () => {
+test("should not normalize protected elements children (true)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div>
@@ -64,7 +64,7 @@ test.todo("should not normalize protected elements children (true)", async () =>
         contentAfterEdit: unformat(`
                 <div>
                     <p><i class="fa" contenteditable="false">\u200B</i></p>
-                    <ul><li><br></li></ul>
+                    <ul><li placeholder="List" class="o-we-hint"><br></li></ul>
                 </div>
                 <div data-oe-protected="true">
                     <p><i class="fa"></i></p>
@@ -74,7 +74,7 @@ test.todo("should not normalize protected elements children (true)", async () =>
     });
 });
 
-test.todo("should normalize unprotected elements children (false)", async () => {
+test("should normalize unprotected elements children (false)", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div data-oe-protected="true">
@@ -93,7 +93,7 @@ test.todo("should normalize unprotected elements children (false)", async () => 
                     <ul><li><p><br></p></li></ul>
                     <div data-oe-protected="false">
                         <p><i class="fa" contenteditable="false">\u200B</i></p>
-                        <ul><li><br></li></ul>
+                        <ul><li placeholder="List" class="o-we-hint"><br></li></ul>
                     </div>
                 </div>
                 `),

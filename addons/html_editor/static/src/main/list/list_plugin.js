@@ -4,6 +4,7 @@ import { removeClass, setTagName, toggleClass, unwrapContents } from "@html_edit
 import {
     getDeepestPosition,
     isEmptyBlock,
+    isProtected,
     isShrunkBlock,
     isVisible,
 } from "@html_editor/utils/dom_info";
@@ -200,6 +201,9 @@ export class ListPlugin extends Plugin {
             root = closestNestedLI.parentElement;
         }
         applyToTree(root, (element) => {
+            if (isProtected(element)) {
+                return element;
+            }
             element = this.mergeSimilarLists(element);
             element = this.removeParagraphInLI(element);
             return element;
