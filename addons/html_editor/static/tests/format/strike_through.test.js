@@ -1,8 +1,8 @@
 import { expect, test } from "@odoo/hoot";
-import { insertText, setupEditor, testEditor } from "../_helpers/editor";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { getContent, setSelection } from "../_helpers/selection";
 import { s, span } from "../_helpers/tags";
-import { strikeThrough, tripleClick } from "../_helpers/user_actions";
+import { insertText, strikeThrough, tripleClick } from "../_helpers/user_actions";
 
 test("should make a few characters strikeThrough", async () => {
     await testEditor({
@@ -165,7 +165,7 @@ test("should do nothing when a block already has a line-through decoration", asy
     });
 });
 
-test.todo("should insert before strikethrough", async () => {
+test("should insert before strikethrough (1)", async () => {
     await testEditor({
         contentBefore: `<p>d[a${s("bc]<br><br>")}</p>`,
         stepFunction: async (editor) => {
@@ -173,6 +173,8 @@ test.todo("should insert before strikethrough", async () => {
         },
         contentAfter: `<p>dA[]${s(`<br><br>`)}</p>`,
     });
+});
+test("should insert before strikethrough (2)", async () => {
     await testEditor({
         contentBefore: `<p>[a${s("bc]<br><br>")}</p>`,
         stepFunction: async (editor) => {
