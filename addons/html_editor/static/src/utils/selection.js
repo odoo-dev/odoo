@@ -258,13 +258,20 @@ function updateCursorBeforeRemove(node, cursor) {
     }
 }
 
+/** @typedef {import("@html_editor/core/selection_plugin").Cursor} Cursor */
+
 export const callbacksForCursorUpdate = {
+    /** @type {(node: Node) => (cursor: Cursor) => void} */
     remove: (node) => (cursor) => updateCursorBeforeRemove(node, cursor),
+    /** @type {(ref: HTMLElement, node: Node) => (cursor: Cursor) => void} */
     before: (ref, node) => (cursor) =>
         updateCursorBeforeMove(ref.parentNode, childNodeIndex(ref), node, cursor),
+    /** @type {(ref: HTMLElement, node: Node) => (cursor: Cursor) => void} */
     after: (ref, node) => (cursor) =>
         updateCursorBeforeMove(ref.parentNode, childNodeIndex(ref) + 1, node, cursor),
+    /** @type {(ref: HTMLElement, node: Node) => (cursor: Cursor) => void} */
     append: (to, node) => (cursor) =>
         updateCursorBeforeMove(to, to.childNodes.length, node, cursor),
+    /** @type {(ref: HTMLElement, node: Node) => (cursor: Cursor) => void} */
     prepend: (to, node) => (cursor) => updateCursorBeforeMove(to, 0, node, cursor),
 };
