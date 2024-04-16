@@ -5,17 +5,15 @@ import { tick } from "@odoo/hoot-mock";
 import { setSelection } from "./selection";
 
 export function insertText(editor, text) {
-    // Create and dispatch events to mock text insertion. Unfortunatly, the
-    // events will be flagged `isTrusted: false` by the browser, requiring
-    // the editor to detect them since they would not trigger the default
-    // browser behavior otherwise.
-    const range = editor.document.getSelection().getRangeAt(0);
-    if (!range.collapsed) {
-        throw new Error("need to implement something... maybe");
-    }
-    let offset = range.startOffset;
-    let node = range.startContainer;
     const insertChar = (char) => {
+        // Create and dispatch events to mock text insertion. Unfortunatly, the
+        // events will be flagged `isTrusted: false` by the browser, requiring
+        // the editor to detect them since they would not trigger the default
+        // browser behavior otherwise.
+        const range = editor.document.getSelection().getRangeAt(0);
+        let offset = range.startOffset;
+        let node = range.startContainer;
+
         if (node.nodeType !== Node.TEXT_NODE) {
             node = document.createTextNode(char);
             offset = 1;
