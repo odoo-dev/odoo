@@ -25,6 +25,21 @@ import {
  * @property { boolean } inEditable
  */
 
+/**
+ * @typedef {Object} Cursors
+ * @property {() => void} restore
+ * @property {(callback: (cursor: Cursor) => void) => Cursors} update
+ * @property {(node: Node, newNode: Node) => Cursors} remapNode
+ * @property {(node: Node, newOffset: number) => Cursors} setOffset
+ * @property {(node: Node, shiftOffset: number) => Cursors} shiftOffset
+ */
+
+/**
+ * @typedef {Object} Cursor
+ * @property {Node} node
+ * @property {number} offset
+ */
+
 export class SelectionPlugin extends Plugin {
     static name = "selection";
     static shared = [
@@ -269,6 +284,7 @@ export class SelectionPlugin extends Plugin {
      * - update the cursors (anchor and focus) node and offset after DOM
      * manipulations that migh affect them. Such methods are chainable.
      * - restore the updated selection.
+     * @returns {Cursors}
      */
     preserveSelection() {
         const selection = this.getEditableSelection();
@@ -289,9 +305,6 @@ export class SelectionPlugin extends Plugin {
                     );
                 }
             },
-            /**
-             * @param {(cursor: {node, offset}) => void} callback
-             */
             update(callback) {
                 callback(anchor);
                 callback(focus);
