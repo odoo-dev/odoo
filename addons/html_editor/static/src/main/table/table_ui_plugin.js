@@ -39,10 +39,12 @@ export class TableUIPlugin extends Plugin {
         this.colMenu = this.shared.createOverlay(TableMenu, {
             position: "top-fit",
             offsetY: 0,
+            sequence: 30,
         });
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.rowMenu = this.shared.createOverlay(TableMenu, {
             position: "left-fit",
+            sequence: 30,
         });
         this.addDomListener(this.document, "pointermove", this.onMouseMove);
         this.addDomListener(this.document, "click", () => {

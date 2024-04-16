@@ -54,7 +54,9 @@ export class Overlay {
                     props,
                     target,
                     bus: this.bus,
-                })
+                }), {
+                    sequence: this.config.sequence || 50
+                }
             );
         }
     }
