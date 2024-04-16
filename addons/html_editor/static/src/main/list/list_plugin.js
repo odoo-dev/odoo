@@ -19,6 +19,7 @@ import {
     insertListAfter,
     isListItem,
 } from "./utils";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 function isListActive(listMode) {
     return (selection) => {
@@ -188,7 +189,7 @@ export class ListPlugin extends Plugin {
             }
         } else {
             for (const li of sameModeListItems) {
-                this.liToP(li);
+                this.liToBlocks(li);
             }
         }
 
@@ -304,20 +305,13 @@ export class ListPlugin extends Plugin {
     }
 
     /**
-     * Transforms a LI into a paragraph.
+     * Unwraps LI's content into blocks. Equivalent to fully outdenting the LI.
      *
      * @param {HTMLLIElement} li
      */
-    liToP(li) {
-        const selectionToRestore = this.shared.getEditableSelection();
+    liToBlocks(li) {
         while (li) {
             li = this.outdentLI(li);
-        }
-        const isValid =
-            selectionToRestore.anchorNode.parentElement &&
-            selectionToRestore.focusNode.parentElement;
-        if (isValid) {
-            this.shared.setSelection(selectionToRestore, { normalize: false });
         }
     }
 
@@ -354,13 +348,7 @@ export class ListPlugin extends Plugin {
         const cursors = this.shared.preserveSelection();
         const li = p.parentElement;
         // An empty block might contain empty inlines as children.
-        // @todo handle case where cursor.node is li
-        cursors.update((cursor) => {
-            if (p.contains(cursor.node)) {
-                cursor.node = li;
-                cursor.offset = childNodeIndex(p);
-            }
-        });
+        cursors.update(callbacksForCursorUpdate.remove(p));
         p.remove();
         if (isShrunkBlock(li)) {
             li.append(this.document.createElement("br"));
@@ -440,97 +428,114 @@ export class ListPlugin extends Plugin {
     }
 
     // @temp comment: former oShiftTab
-    // @todo @phoenix: consider refactoring this method. It should return a P of a LI.
     /**
      * @param {HTMLLIElement} li
-     * @returns is still in a <LI> nested list
+     * @returns {HTMLLIElement|null} li or null if it no longer exists.
      */
     outdentLI(li) {
         if (li.nextElementSibling) {
-            const ul = li.parentElement.cloneNode(false);
-            while (li.nextSibling) {
-                ul.append(li.nextSibling);
-            }
-            if (li.parentNode.parentNode.tagName === "LI") {
-                const lip = this.document.createElement("li");
-                lip.classList.add("oe-nested");
-                lip.append(ul);
-                li.parentNode.parentNode.after(lip);
-            } else {
-                li.parentNode.after(ul);
-            }
+            this.splitList(li.nextElementSibling);
         }
 
-        const selectionToRestore = { ...this.shared.getEditableSelection() };
         if (isListItem(li.parentNode.parentNode)) {
-            const ul = li.parentNode;
-            const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
-            const toremove = shouldRemoveParentLi ? ul.parentNode : null;
-            ul.parentNode.after(li);
-            let shouldRestore = true;
-            if (toremove) {
-                if (toremove.classList.contains("oe-nested")) {
-                    if (
-                        toremove === selectionToRestore.anchorNode ||
-                        toremove === selectionToRestore.focusNode
-                    ) {
-                        shouldRestore = false;
-                    }
-                    // <li>content<ul>...</ul></li>
-                    toremove.remove();
-                } else {
-                    if (
-                        ul === selectionToRestore.anchorNode ||
-                        ul === selectionToRestore.focusNode
-                    ) {
-                        shouldRestore = false;
-                    }
-                    // <li class="oe-nested"><ul>...</ul></li>
-                    ul.remove();
-                }
-            }
-            if (shouldRestore) {
-                this.shared.setSelection(selectionToRestore);
-            }
-
+            this.outdentNestedLI(li);
             return li;
-        } else {
-            const ul = li.parentNode;
-            const dir = ul.getAttribute("dir");
-            let p;
-            while (li.firstChild) {
-                if (isBlock(li.firstChild)) {
-                    if (p && isVisible(p)) {
-                        ul.after(p);
-                    }
-                    p = undefined;
-                    ul.after(li.firstChild);
-                } else {
-                    p = p || this.document.createElement("P");
-                    if (dir) {
-                        p.setAttribute("dir", dir);
-                        p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
-                    }
-                    p.append(li.firstChild);
-                }
-            }
-            if (p && isVisible(p)) {
-                ul.after(p);
-            }
-
-            if (selectionToRestore.anchorNode === li) {
-                selectionToRestore.anchorNode = ul.nextSibling;
-            }
-            if (selectionToRestore.focusNode === li) {
-                selectionToRestore.focusNode = ul.nextSibling;
-            }
-            this.shared.setSelection(selectionToRestore);
-            li.remove();
-            if (!ul.firstElementChild) {
-                ul.remove();
-            }
         }
-        return false;
+        this.outdentTopLevelLI(li);
+        return null;
+    }
+
+    /**
+     * Splits a list at the given LI element (li is moved to the new list).
+     *
+     * @param {HTMLLIElement} li
+     */
+    splitList(li) {
+        const cursor = this.shared.preserveSelection();
+        // Create new list
+        const currentList = li.parentElement;
+        const newList = currentList.cloneNode(false);
+        if (isListItem(li.parentNode.parentNode)) {
+            // li is nested list item
+            const lip = this.document.createElement("li");
+            lip.classList.add("oe-nested");
+            lip.append(newList);
+            cursor.update(callbacksForCursorUpdate.after(li.parentNode.parentNode, lip));
+            li.parentNode.parentNode.after(lip);
+        } else {
+            cursor.update(callbacksForCursorUpdate.after(li.parentNode, newList));
+            li.parentNode.after(newList);
+        }
+        // Move nodes to new list
+        while (li.nextSibling) {
+            cursor.update(callbacksForCursorUpdate.append(newList, li.nextSibling));
+            newList.append(li.nextSibling);
+        }
+        cursor.update(callbacksForCursorUpdate.prepend(newList, li));
+        newList.prepend(li);
+        cursor.restore();
+        return newList;
+    }
+
+    outdentNestedLI(li) {
+        const cursor = this.shared.preserveSelection();
+        const ul = li.parentNode;
+        const lip = ul.parentNode;
+        // Move LI
+        cursor.update(callbacksForCursorUpdate.after(lip, li));
+        lip.after(li);
+
+        // Remove UL and LI.oe-nested if left empty.
+        if (!ul.children.length) {
+            cursor.update(callbacksForCursorUpdate.remove(ul));
+            ul.remove();
+        }
+        // @todo @phoenix: not sure in which scenario lip would not have
+        // oe-nested class
+        if (!lip.children.length && lip.classList.contains("oe-nested")) {
+            cursor.update(callbacksForCursorUpdate.remove(lip));
+            lip.remove();
+        }
+        cursor.restore();
+    }
+
+    outdentTopLevelLI(li) {
+        const cursor = this.shared.preserveSelection();
+        const ul = li.parentNode;
+        const dir = ul.getAttribute("dir");
+        let p;
+        let toMove = li.lastChild;
+        while (toMove) {
+            if (isBlock(toMove)) {
+                if (p && isVisible(p)) {
+                    cursor.update(callbacksForCursorUpdate.after(ul, p));
+                    ul.after(p);
+                }
+                p = undefined;
+                cursor.update(callbacksForCursorUpdate.after(ul, toMove));
+                ul.after(toMove);
+            } else {
+                p = p || this.document.createElement("P");
+                if (dir) {
+                    p.setAttribute("dir", dir);
+                    p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
+                }
+                cursor.update(callbacksForCursorUpdate.prepend(p, toMove));
+                p.prepend(toMove);
+            }
+            toMove = li.lastChild;
+        }
+        if (p && isVisible(p)) {
+            cursor.update(callbacksForCursorUpdate.after(ul, p));
+            ul.after(p);
+        }
+        cursor.update(callbacksForCursorUpdate.remove(li));
+        li.remove();
+        if (!ul.firstElementChild) {
+            cursor.update(callbacksForCursorUpdate.remove(ul));
+            ul.remove();
+        }
+        cursor.restore();
     }
 
     indentListNodes(listNodes) {
@@ -541,11 +546,9 @@ export class ListPlugin extends Plugin {
     }
 
     outdentListNodes(listNodes) {
-        const selectionToRestore = this.shared.getEditableSelection();
         for (const li of listNodes) {
             this.outdentLI(li);
         }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
         this.dispatch("ADD_STEP");
     }
 
@@ -621,7 +624,7 @@ export class ListPlugin extends Plugin {
         }
         // Detect if cursor is at beginning of LI.
         if (closestElement(startContainer, "LI") !== closestLIendContainer) {
-            this.liToP(closestLIendContainer);
+            this.liToBlocks(closestLIendContainer);
             return true;
         }
     }

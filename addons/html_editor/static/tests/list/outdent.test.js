@@ -470,6 +470,25 @@ describe("with selection collapsed", () => {
             `),
         });
     });
+    test("should outdent a list item with blocks", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>a</li>
+                    <li>
+                        <h1>[]b</h1>
+                        <h2>c</h2>
+                    </li>
+                </ul>`),
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
+                <ul>
+                    <li>a</li>
+                </ul>
+                <h1>[]b</h1>
+                <h2>c</h2>`),
+        });
+    });
 });
 
 describe("with selection", () => {

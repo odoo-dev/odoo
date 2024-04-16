@@ -233,3 +233,38 @@ export function setCursorEnd(node, normalize = true) {
     const pos = endPos(node);
     return setSelection(...pos, ...pos, normalize);
 }
+
+function updateCursorBeforeMove(destParent, destIndex, node, cursor) {
+    if (cursor.node === destParent && cursor.offset >= destIndex) {
+        // Update cursor at destination
+        cursor.offset += 1;
+    } else if (cursor.node === node.parentNode) {
+        const childIndex = childNodeIndex(node);
+        // Update cursor at origin
+        if (cursor.offset === childIndex) {
+            // Keep pointing to the moved node
+            [cursor.node, cursor.offset] = [destParent, destIndex];
+        } else if (cursor.offset > childIndex) {
+            cursor.offset -= 1;
+        }
+    }
+}
+
+function updateCursorBeforeRemove(node, cursor) {
+    if (node.contains(cursor.node)) {
+        [cursor.node, cursor.offset] = [node.parentNode, childNodeIndex(node)];
+    } else if (cursor.node === node.parentNode && cursor.offset > childNodeIndex(node)) {
+        cursor.offset -= 1;
+    }
+}
+
+export const callbacksForCursorUpdate = {
+    remove: (node) => (cursor) => updateCursorBeforeRemove(node, cursor),
+    before: (ref, node) => (cursor) =>
+        updateCursorBeforeMove(ref.parentNode, childNodeIndex(ref), node, cursor),
+    after: (ref, node) => (cursor) =>
+        updateCursorBeforeMove(ref.parentNode, childNodeIndex(ref) + 1, node, cursor),
+    append: (to, node) => (cursor) =>
+        updateCursorBeforeMove(to, to.childNodes.length, node, cursor),
+    prepend: (to, node) => (cursor) => updateCursorBeforeMove(to, 0, node, cursor),
+};
