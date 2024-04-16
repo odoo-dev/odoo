@@ -722,6 +722,26 @@ describe("with selection", () => {
         });
     });
 
+    test("should indent list item containing a block (2)", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    [<li><h1>abc</h1></li>]
+                </ul>
+            `),
+            stepFunction: async (editor) => keydownTab(editor),
+            contentAfter: unformat(`
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            [<li><h1>abc</h1></li>]
+                        </ul>
+                    </li>
+                </ul>
+            `),
+        });
+    });
+
     test("should indent three list items, one of them containing a block", async () => {
         await testEditor({
             contentBefore: unformat(`

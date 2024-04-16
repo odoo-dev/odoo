@@ -272,8 +272,12 @@ export class ListPlugin extends Plugin {
             const childIndex = childNodeIndex(element);
             list = insertListAfter(this.document, element, mode, [element]);
             cursors.update((cursor) => {
-                if (cursor.node === parent && cursor.offset === childIndex) {
-                    [cursor.node, cursor.offset] = [list.firstChild, 0];
+                if (cursor.node === parent) {
+                    if (cursor.offset === childIndex) {
+                        [cursor.node, cursor.offset] = [list.firstChild, 0];
+                    } else if (cursor.offset === childIndex + 1) {
+                        [cursor.node, cursor.offset] = [list.firstChild, 1];
+                    }
                 }
             });
             if (element.hasAttribute("dir")) {
@@ -420,8 +424,13 @@ export class ListPlugin extends Plugin {
         li.before(lip);
         ul.append(li);
         cursors.update((cursor) => {
-            if (cursor.node === lip.parentNode && cursor.offset === childNodeIndex(lip)) {
-                [cursor.node, cursor.offset] = [ul, 0];
+            if (cursor.node === lip.parentNode) {
+                const childIndex = childNodeIndex(lip);
+                if (cursor.offset === childIndex) {
+                    [cursor.node, cursor.offset] = [ul, 0];
+                } else if (cursor.offset === childIndex + 1) {
+                    [cursor.node, cursor.offset] = [ul, 1];
+                }
             }
         });
         cursors.restore();

@@ -47,6 +47,14 @@ describe("Range collapsed", () => {
             });
         });
 
+        test("should turn a heading into a list (2)", async () => {
+            await testEditor({
+                contentBefore: "[<h1>abcd</h1>]",
+                stepFunction: toggleUnorderedList,
+                contentAfter: "<ul><li>[<h1>abcd</h1>]</li></ul>",
+            });
+        });
+
         test("should turn a paragraph in a div into a list", async () => {
             await testEditor({
                 contentBefore: "<div><p>ab[]cd</p></div>",
