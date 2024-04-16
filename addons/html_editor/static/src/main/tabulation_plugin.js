@@ -200,6 +200,7 @@ export class TabulationPlugin extends Plugin {
         return [previous.parentElement, childNodeIndex(previous) + 1];
     }
 
+    // @todo consider registering this as adjustRange callback instead.
     handleDeleteForward(range) {
         let { endContainer, endOffset } = range;
         if (!(endContainer?.nodeType === Node.ELEMENT_NODE) || !endOffset) {
@@ -208,8 +209,11 @@ export class TabulationPlugin extends Plugin {
         const nodeToDelete = endContainer.childNodes[endOffset - 1];
         if (isEditorTab(nodeToDelete)) {
             [endContainer, endOffset] = this.expandRangeToIncludeZWS(nodeToDelete);
-            const { cursorPos } = this.shared.deleteRange({ ...range, endContainer, endOffset });
-            this.shared.setSelection(cursorPos);
+            range = this.shared.deleteRange({ ...range, endContainer, endOffset });
+            this.shared.setSelection({
+                anchorNode: range.startContainer,
+                anchorOffset: range.startOffset,
+            });
             return true;
         }
     }

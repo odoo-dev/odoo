@@ -650,13 +650,16 @@ export class ListPlugin extends Plugin {
             return;
         }
 
-        const { cursorPos } = this.shared.deleteRange(range);
+        range = this.shared.deleteRange(range);
+        this.shared.setSelection({
+            anchorNode: range.startContainer,
+            anchorOffset: range.startOffset,
+        });
 
         if (isEmptyBlock(startCheckedLi)) {
             removeClass(startCheckedLi, "o_checked");
         }
 
-        this.shared.setSelection(cursorPos);
         return true;
     }
 
