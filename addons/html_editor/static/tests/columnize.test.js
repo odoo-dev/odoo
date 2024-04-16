@@ -321,7 +321,7 @@ describe("complex", () => {
 });
 
 describe("undo", () => {
-    test.todo("should be able to write after undo", async () => {
+    test("should be able to write after undo", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
