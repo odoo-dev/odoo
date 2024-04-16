@@ -35,7 +35,9 @@ class Counter extends Component {
 function getConfig(name, Comp) {
     return {
         Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
-        inlineComponents: [{ name, Component: Comp }],
+        resources: {
+            inlineComponents: [{ name, Component: Comp }],
+        },
     };
 }
 
@@ -94,11 +96,12 @@ test("inline component get proper env", async () => {
 
         setup() {
             useSubEnv({ somevalue: 1 });
-            useWysiwyg("root", undefined, {
-                innerHTML: `<div><span data-embedded="counter"></span></div>`,
-                Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
-                inlineComponents: [{ name: "counter", Component: Test }],
-            });
+            useWysiwyg(
+                "root",
+                Object.assign(getConfig("counter", Test), {
+                    content: `<div><span data-embedded="counter"></span></div>`,
+                })
+            );
         }
     }
 

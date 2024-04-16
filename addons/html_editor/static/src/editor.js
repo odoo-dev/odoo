@@ -1,17 +1,22 @@
 import { removeClass } from "./utils/dom";
 import { initElementForEdition } from "./utils/sanitize";
-import { CORE_PLUGINS } from "./plugin_sets";
+import { MAIN_PLUGINS } from "./plugin_sets";
 
 /**
  * @typedef { import("./plugin").SharedMethods } SharedMethods
- *
+ * @typedef {typeof import("./plugin").Plugin} PluginConstructor
+ **/
+
+/**
  * @typedef { Object } EditorConfig
- * @property { string } [innerHTML]
+ * @property { string } [content]
  * @property { boolean } [allowInlineAtRoot]
  * @property { PluginConstructor[] } [Plugins]
  * @property { boolean } [disableFloatingToolbar]
  * @property { string[] } [classList]
- * @property { HTMLElement } [getLocalOverlayContainer]
+ * @property { Function } [getLocalOverlayContainer]
+ * @property { Object } [inlineComponentInfo]
+ * @property { Object } [resources]
  */
 
 function sortPlugins(plugins) {
@@ -47,19 +52,13 @@ function sortPlugins(plugins) {
     return result;
 }
 
-/**
- * @typedef {typeof import("./plugin").Plugin} PluginConstructor
- */
-
 export class Editor {
     /**
-     * @param { PluginConstructor[] } Plugins
      * @param { EditorConfig } config
      * @param {*} services
      */
     constructor(config, services) {
         this.isDestroyed = false;
-        /** @type { EditorConfig } **/
         this.config = config;
         this.services = services;
         this.plugins = [];
@@ -67,7 +66,7 @@ export class Editor {
         this.editable = null;
         /** @type { Document } **/
         this.document = null;
-        /** @type { SharedMethods } **/
+        /** @ts-ignore  @type { SharedMethods } **/
         this.shared = {};
     }
 
@@ -77,8 +76,8 @@ export class Editor {
         }
         this.editable = editable;
         this.document = editable.ownerDocument;
-        if (this.config.innerHTML) {
-            editable.innerHTML = this.config.innerHTML;
+        if (this.config.content) {
+            editable.innerHTML = this.config.content;
         }
         editable.setAttribute("contenteditable", true);
         initElementForEdition(editable, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
@@ -90,7 +89,7 @@ export class Editor {
     }
 
     startPlugins() {
-        const Plugins = sortPlugins(this.config.Plugins || CORE_PLUGINS);
+        const Plugins = sortPlugins(this.config.Plugins || MAIN_PLUGINS);
         const plugins = new Map();
         const dispatch = this.dispatch.bind(this);
         for (const P of Plugins) {
@@ -140,17 +139,21 @@ export class Editor {
 
     createResources() {
         const resources = {};
-        for (const plugin of this.plugins) {
-            if (!plugin.constructor.resources) {
-                continue;
-            }
 
-            const pluginResources = plugin.constructor.resources(plugin);
-            for (const key in pluginResources) {
+        function registerResources(obj) {
+            for (const key in obj) {
                 if (!(key in resources)) {
                     resources[key] = [];
                 }
-                resources[key].push(pluginResources[key]);
+                resources[key].push(obj[key]);
+            }
+        }
+        if (this.config.resources) {
+            registerResources(this.config.resources);
+        }
+        for (const plugin of this.plugins) {
+            if (plugin.constructor.resources) {
+                registerResources(plugin.constructor.resources(plugin));
             }
         }
 
