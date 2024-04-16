@@ -3,17 +3,6 @@ import { Editor } from "./editor";
 import { Toolbar } from "./main/toolbar/toolbar";
 import { MAIN_PLUGINS } from "./plugin_sets";
 
-/**
- * @param {HTMLElement} el
- * @param {any} env
- * @param {import("./editor").EditorConfig} [config]
- */
-export function wysiwyg(el, env, config = {}) {
-    const editor = new Editor(config, env.services);
-    editor.attachTo(el);
-    return editor;
-}
-
 function copyCss(sourceDoc, targetDoc) {
     for (const sheet of sourceDoc.styleSheets) {
         const rules = [];

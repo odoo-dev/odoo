@@ -1,43 +1,10 @@
-import { describe, expect, getFixture, test } from "@odoo/hoot";
-import { makeMockEnv } from "@web/../tests/_framework/env_test_helpers";
-import { Wysiwyg, useWysiwyg, wysiwyg } from "@html_editor/wysiwyg";
+import { Wysiwyg, useWysiwyg } from "@html_editor/wysiwyg";
+import { describe, expect, test } from "@odoo/hoot";
+import { click, queryOne, waitFor } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { animationFrame } from "@odoo/hoot-mock";
 import { getContent, setContent, setSelection } from "./_helpers/selection";
-import { click, queryOne, waitFor } from "@odoo/hoot-dom";
-
-describe("wysiwig function", () => {
-    test("can edit a element with wysiwyg function", async () => {
-        const el = getFixture();
-        const d = document.createElement("div");
-        d.innerHTML = "<p>hello wysiwyg</p>";
-        el.appendChild(d);
-        const env = await makeMockEnv();
-        expect(d.outerHTML).toBe("<div><p>hello wysiwyg</p></div>");
-        const editor = wysiwyg(d, env);
-        expect(d.outerHTML).toBe(
-            `<div contenteditable="true" class="odoo-editor-editable"><p>hello wysiwyg</p></div>`
-        );
-        editor.destroy();
-        expect(d.outerHTML).toBe("<div><p>hello wysiwyg</p></div>");
-    });
-
-    test("wysiwyg innerHTML option takes precedence over content of element", async () => {
-        const el = getFixture();
-        const d = document.createElement("div");
-        d.innerHTML = "<p>hello wysiwyg</p>";
-        el.appendChild(d);
-        const env = await makeMockEnv();
-        expect(d.outerHTML).toBe("<div><p>hello wysiwyg</p></div>");
-        const editor = wysiwyg(d, env, { innerHTML: "<p>bouh</p>" });
-        expect(d.outerHTML).toBe(
-            `<div contenteditable="true" class="odoo-editor-editable"><p>bouh</p></div>`
-        );
-        editor.destroy();
-        expect(d.outerHTML).toBe("<div><p>bouh</p></div>");
-    });
-});
 
 describe("wysiwig hook", () => {
     test("useWysiwyg create an editor on ref", async () => {
