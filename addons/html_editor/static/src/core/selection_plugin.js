@@ -275,15 +275,6 @@ export class SelectionPlugin extends Plugin {
         const anchor = { node: selection.anchorNode, offset: selection.anchorOffset };
         const focus = { node: selection.focusNode, offset: selection.focusOffset };
 
-        function updateCursors(predicate, action) {
-            for (const cursor of [anchor, focus]) {
-                if (predicate(cursor)) {
-                    action(cursor);
-                }
-            }
-        }
-        const nodeToPredicate = (node) => (cursor) => cursor.node === node;
-
         return {
             restore: () => {
                 if (selection.inEditable) {
@@ -298,29 +289,34 @@ export class SelectionPlugin extends Plugin {
                     );
                 }
             },
-            remapNode(node, newNode) {
-                const action = (cursor) => (cursor.node = newNode);
-                updateCursors(nodeToPredicate(node), action);
+            /**
+             * @param {(cursor: {node, offset}) => void} callback
+             */
+            update(callback) {
+                callback(anchor);
+                callback(focus);
                 return this;
+            },
+            remapNode(node, newNode) {
+                return this.update((cursor) => {
+                    if (cursor.node === node) {
+                        cursor.node = newNode;
+                    }
+                });
             },
             setOffset(node, newOffset) {
-                const action = (cursor) => (cursor.offset = newOffset);
-                updateCursors(nodeToPredicate(node), action);
-                return this;
+                return this.update((cursor) => {
+                    if (cursor.node === node) {
+                        cursor.offset = newOffset;
+                    }
+                });
             },
             shiftOffset(node, shiftOffset) {
-                const action = (cursor) => (cursor.offset += shiftOffset);
-                updateCursors(nodeToPredicate(node), action);
-                return this;
-            },
-            // More flexible: takes a predicate and a custom action
-            /**
-             * @param {(cursor: {node, offset}) => boolean} predicate
-             * @param {(cursor: {node, offset}) => void} action
-             */
-            update(predicate, action) {
-                updateCursors(predicate, action);
-                return this;
+                return this.update((cursor) => {
+                    if (cursor.node === node) {
+                        cursor.offset += shiftOffset;
+                    }
+                });
             },
         };
     }
