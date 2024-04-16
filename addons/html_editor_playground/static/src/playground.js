@@ -9,7 +9,7 @@ const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
 <p><em>this is another paragraph</em></p>
 <p>Embedded element here (with all plugins)
-    <span data-embedded="counter"/>
+<span data-embedded="counter"/>
 </p>
 <div>this is a div</div>
 <table class="table table-bordered">
@@ -37,6 +37,9 @@ const testHtml = `Hello Phoenix editor!
 </div>
 <p>this is a link: <a href="http://test.com">link</a></p>
 <p>this is another link: <a>link2</a></p>
+<p>
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+</p>
 `;
 
 
@@ -74,7 +77,6 @@ export class Playground extends Component {
     static props = ["*"];
 
     setup() {
-        this.testHtml = testHtml;
         this.state = useState({
             showWysiwyg: false,
         });
@@ -83,14 +85,20 @@ export class Playground extends Component {
             inIframe: false,
             pluginSet: "base",
         });
-        this.inlineComponents = [{
-            name: "counter",
-            Component: Counter
-        }];
     }
 
-    get Plugins() {
-        return PluginSets[this.config.pluginSet];
+    getConfig() {
+        return {
+            content: testHtml,
+            Plugins: PluginSets[this.config.pluginSet],
+            classList: this.classList,
+            resources: {
+                inlineComponents: [{
+                    name: "counter",
+                    Component: Counter,
+                }],
+            }
+        };
     }
 
     get classList() {

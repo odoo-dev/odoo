@@ -11,7 +11,7 @@ export class ProtectedNodePlugin extends Plugin {
 
     /**
      * @param {MutationRecord[]} records
-     * @return {MutationRecord[]}
+     * @return {boolean}
      */
     isMutationRecordSavable(record) {
         const closestProtectedCandidate = closestElement(record.target, "[data-oe-protected]");

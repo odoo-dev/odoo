@@ -30,9 +30,9 @@ describe("Wysiwyg Component", () => {
     async function setupWysiwyg(props = {}) {
         const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
         const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
-        if (props.content) {
+        if (props.config?.content) {
             // force selection to be put properly
-            setContent(el, props.content);
+            setContent(el, props.config.content);
         }
         return { wysiwyg, el };
     }
@@ -52,7 +52,9 @@ describe("Wysiwyg Component", () => {
     });
 
     test("Wysiwyg component can be instantiated with initial content", async () => {
-        const { el } = await setupWysiwyg({ content: "<p>hello rodolpho</p>" });
+        const { el } = await setupWysiwyg({
+            config: { content: "<p>hello rodolpho</p>" },
+        });
         expect(el.innerHTML).toBe(`<p>hello rodolpho</p>`);
     });
 
@@ -65,7 +67,10 @@ describe("Wysiwyg Component", () => {
     });
 
     test("wysiwyg with toolbar: buttons react to selection change", async () => {
-        const { el } = await setupWysiwyg({ toolbar: true, content: "<p>test some text</p>" });
+        const { el } = await setupWysiwyg({
+            toolbar: true,
+            config: { content: "<p>test some text</p>" },
+        });
         expect(el.innerHTML).toBe(`<p>test some text</p>`);
 
         setContent(el, "<p>test [some] text</p>");
@@ -85,7 +90,7 @@ describe("Wysiwyg Component", () => {
     test("wysiwyg with toolbar: properly behave when selection leaves editable", async () => {
         const { el } = await setupWysiwyg({
             toolbar: true,
-            content: "<p>test <strong>[some]</strong> text</p>",
+            config: { content: "<p>test <strong>[some]</strong> text</p>" },
         });
 
         await animationFrame();
@@ -106,7 +111,7 @@ describe("Wysiwyg Component", () => {
     test("wysiwyg with toolbar: remember last active selection", async () => {
         const { el } = await setupWysiwyg({
             toolbar: true,
-            content: "<p>test [some] text</p>",
+            config: { content: "<p>test [some] text</p>" },
         });
         await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 

@@ -8,14 +8,14 @@ import { App } from "@odoo/owl";
 export class InlineComponentPlugin extends Plugin {
     static name = "inline_components";
     static resources = (p) => ({
-        handle_before_remove: p.handleBeforeRemove.bind(p)
+        handle_before_remove: p.handleBeforeRemove.bind(p),
     });
 
     setup() {
         this.apps = new Set();
         this.nodeToApp = new WeakMap();
         this.info = this.config.inlineComponentInfo;
-        for (const embedding of this.config.inlineComponents || []) {
+        for (const embedding of this.resources.inlineComponents || []) {
             const targets = this.editable.querySelectorAll(`[data-embedded="${embedding.name}"]`);
             for (const target of targets) {
                 this.mountApp(target, embedding.Component);

@@ -134,3 +134,21 @@ test("triple click outside of the Editor", async () => {
     expect(document.getSelection().anchorNode).toBe(p.childNodes[0]);
     expect(getContent(el)).toBe("<p>[abc]</p>");
 });
+
+test("can give resources in config", async () => {
+    expect.assertions(1);
+    class TestPlugin extends Plugin {
+        static name = "test";
+
+        setup() {
+            expect(this.resources.some).toEqual(["value"]);
+        }
+    }
+
+    await setupEditor("<p></p>", {
+        config: {
+            Plugins: [...MAIN_PLUGINS, TestPlugin],
+            resources: { some: ["value"] },
+        },
+    });
+});

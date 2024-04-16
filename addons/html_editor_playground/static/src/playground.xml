@@ -26,16 +26,13 @@
             <div class="flex-grow-1 h-100 overflow-auto">
                 <div class="d-flex">
                     <Wysiwyg
-                        content="testHtml"
+                        config="getConfig()"
                         class="'m-2 px-4'"
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;${!config.inIframe ? 'overflow:auto;' : ''}`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"
                         copyCss="true"
-                        toolbar="config.showToolbar"
-                        Plugins="Plugins"
-                        classList="classList"
-                        inlineComponents="inlineComponents" />
+                        toolbar="config.showToolbar" />
                 </div>
                 <t t-if="state.showWysiwyg">
                     <div class="d-flex">

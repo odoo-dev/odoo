@@ -3,7 +3,6 @@ import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { useWysiwyg } from "@html_editor/wysiwyg";
 import { getContent, getSelection, setContent } from "./selection";
-import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -51,10 +50,11 @@ class TestEditor extends Component {
                 }
             }
         });
-        this.editor = useWysiwyg(target, "localOverlay", {
-            Plugins: MAIN_PLUGINS,
-            ...this.props.config,
+        const overlayRef = useRef("localOverlay");
+        const config = Object.assign(this.props.config, {
+            getLocalOverlayContainer: () => overlayRef?.el,
         });
+        this.editor = useWysiwyg(target, config, true);
     }
 }
 
@@ -75,7 +75,6 @@ class TestEditor extends Component {
  */
 export async function setupEditor(content, options = {}) {
     const config = options.config || {};
-    config.copyCss = true;
     const inIFrame = "inIFrame" in options ? options.inIFrame : false;
     const styleContent = options.styleContent || "";
     const testEditor = await mountWithCleanup(TestEditor, {
