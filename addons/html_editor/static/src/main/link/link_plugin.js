@@ -4,6 +4,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { findInSelection } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
+import { EMAIL_REGEX, URL_REGEX } from "./utils";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -77,6 +78,15 @@ export class LinkPlugin extends Plugin {
                 this.toggleLinkTools({ link: ev.target });
             }
         });
+        this.addDomListener(this.editable, "keydown", (ev) => {
+            if (ev.shiftKey && ev.key === "Enter") {
+                this._handleAutomaticLinkInsertion();
+            } else if (ev.key === " ") {
+                this._handleAutomaticLinkInsertion();
+            } else if (ev.key === "Enter") {
+                this._handleAutomaticLinkInsertion();
+            }
+        });
     }
 
     handleCommand(command, payload) {
@@ -84,14 +94,12 @@ export class LinkPlugin extends Plugin {
             case "CREATE_LINK_ON_SELECTION":
                 this.toggleLinkTools(payload.options);
                 break;
-
             case "TOGGLE_LINK":
                 this.toggleLinkTools(payload.options);
                 break;
-            case "NORMALIZE": {
+            case "NORMALIZE":
                 this.normalizeLink(payload.node);
                 break;
-            }
         }
     }
 
@@ -252,4 +260,74 @@ export class LinkPlugin extends Plugin {
         const link = this.linkElement;
         unwrapContents(link);
     }
+
+    /**
+     * @param {String} label
+     * @param {String} url
+     */
+    _createLink(label, url) {
+        const link = this.document.createElement("a");
+        link.setAttribute("href", url);
+        // @phoenix @todo: understand + add the defaultLinkAttributes to the link
+        if (this.options?.defaultLinkAttributes) {
+            for (const [param, value] of Object.entries(this.options.defaultLinkAttributes)) {
+                link.setAttribute(param, `${value}`);
+            }
+        }
+        link.innerText = label;
+        return link;
+    }
+
+    /**
+     * Inserts a link in the editor. Called after pressing space or (shif +) enter.
+     * Performs a regex check to determine if the url has correct syntax.
+     */
+    _handleAutomaticLinkInsertion() {
+        let selection = this.shared.getEditableSelection();
+        if (
+            selection &&
+            selection.anchorNode &&
+            isHtmlContentSupported(selection.anchorNode) &&
+            !closestElement(selection.anchorNode).closest("a") &&
+            selection.anchorNode.nodeType === Node.TEXT_NODE
+        ) {
+            // Merge adjacent text nodes.
+            selection.anchorNode.parentNode.normalize();
+            selection = this.shared.getEditableSelection();
+            const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
+            const textNodeSplitted = textSliced.split(/\s/);
+            const potentialUrl = textNodeSplitted.pop();
+            // In case of multiple matches, only the last one will be converted.
+            const match = [...potentialUrl.matchAll(new RegExp(URL_REGEX, "g"))].pop();
+
+            if (match && !EMAIL_REGEX.test(match[0])) {
+                const nodeForSelectionRestore = selection.anchorNode.splitText(
+                    selection.anchorOffset
+                );
+                const url = match[2] ? match[0] : "http://" + match[0];
+                const range = this.document.createRange();
+                const startOffset = selection.anchorOffset - potentialUrl.length + match.index;
+                range.setStart(selection.anchorNode, startOffset);
+                range.setEnd(selection.anchorNode, startOffset + match[0].length);
+                const link = this._createLink(range.extractContents().textContent, url);
+                range.insertNode(link);
+                this.shared.setCursorStart(nodeForSelectionRestore);
+            }
+        }
+    }
+}
+
+// @phoenix @todo: duplicate from the clipboard plugin, should be moved to a shared location
+/**
+ * Returns true if the provided node can suport html content.
+ *
+ * @param {Node} node
+ * @returns {boolean}
+ */
+export function isHtmlContentSupported(node) {
+    return !closestElement(
+        node,
+        '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]',
+        true
+    );
 }
