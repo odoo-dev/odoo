@@ -227,7 +227,7 @@ export class ListPlugin extends Plugin {
             return;
         }
         const newTag = newMode === "CL" ? "UL" : newMode;
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const newList = setTagName(list, newTag);
         // Clear list style (@todo @phoenix - why??)
         for (const li of newList.children) {
@@ -242,7 +242,7 @@ export class ListPlugin extends Plugin {
         if (newMode === "CL") {
             newList.classList.add("o_checklist");
         }
-        cursor.remapNode(list, newList).restore();
+        cursors.remapNode(list, newList).restore();
         return newList;
     }
 
@@ -289,18 +289,18 @@ export class ListPlugin extends Plugin {
      * @param {"UL"|"OL"|"CL"} mode
      */
     pToList(p, mode) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const list = insertListAfter(this.document, p, mode, [[...p.childNodes]]);
         this.shared.copyAttributes(p, list);
         p.remove();
-        cursor.remapNode(p, list.firstChild).restore();
+        cursors.remapNode(p, list.firstChild).restore();
         return list;
     }
 
     blockContentsToList(block, mode) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const list = insertListAfter(this.document, block.lastChild, mode, [[...block.childNodes]]);
-        cursor.remapNode(block, list.firstChild).restore();
+        cursors.remapNode(block, list.firstChild).restore();
         return list;
     }
 
@@ -330,16 +330,16 @@ export class ListPlugin extends Plugin {
             previousSibling.isContentEditable &&
             compareListTypes(previousSibling, element)
         ) {
-            const cursor = this.shared.preserveSelection();
+            const cursors = this.shared.preserveSelection();
 
-            cursor.shiftOffset(element, previousSibling.childNodes.length);
+            cursors.shiftOffset(element, previousSibling.childNodes.length);
             element.prepend(...previousSibling.childNodes);
 
-            cursor.remapNode(previousSibling, element);
+            cursors.remapNode(previousSibling, element);
             // @todo @phoenix: what if unremovable/unmergeable?
             previousSibling.remove();
 
-            cursor.restore();
+            cursors.restore();
         }
         return element;
     }
@@ -358,23 +358,23 @@ export class ListPlugin extends Plugin {
     }
 
     convertPinLItoSpan(p) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
 
         const span = this.document.createElement("span");
         span.setAttribute("class", p.classList);
         span.append(...p.childNodes);
         p.replaceWith(span);
 
-        cursor.remapNode(p, span).restore();
+        cursors.remapNode(p, span).restore();
 
         return span;
     }
 
     unwrapPinLI(p) {
-        const cursor = this.shared.preserveSelection();
-        cursor.remapNode(p, p.parentElement).shiftOffset(childNodeIndex(p));
+        const cursors = this.shared.preserveSelection();
+        cursors.remapNode(p, p.parentElement).shiftOffset(childNodeIndex(p));
         const contents = unwrapContents(p);
-        cursor.restore();
+        cursors.restore();
         // This assumes the P has at least one child.
         return contents[0];
     }
@@ -451,7 +451,7 @@ export class ListPlugin extends Plugin {
      * @param {HTMLLIElement} li
      */
     splitList(li) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         // Create new list
         const currentList = li.parentElement;
         const newList = currentList.cloneNode(false);
@@ -460,47 +460,47 @@ export class ListPlugin extends Plugin {
             const lip = this.document.createElement("li");
             lip.classList.add("oe-nested");
             lip.append(newList);
-            cursor.update(callbacksForCursorUpdate.after(li.parentNode.parentNode, lip));
+            cursors.update(callbacksForCursorUpdate.after(li.parentNode.parentNode, lip));
             li.parentNode.parentNode.after(lip);
         } else {
-            cursor.update(callbacksForCursorUpdate.after(li.parentNode, newList));
+            cursors.update(callbacksForCursorUpdate.after(li.parentNode, newList));
             li.parentNode.after(newList);
         }
         // Move nodes to new list
         while (li.nextSibling) {
-            cursor.update(callbacksForCursorUpdate.append(newList, li.nextSibling));
+            cursors.update(callbacksForCursorUpdate.append(newList, li.nextSibling));
             newList.append(li.nextSibling);
         }
-        cursor.update(callbacksForCursorUpdate.prepend(newList, li));
+        cursors.update(callbacksForCursorUpdate.prepend(newList, li));
         newList.prepend(li);
-        cursor.restore();
+        cursors.restore();
         return newList;
     }
 
     outdentNestedLI(li) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const ul = li.parentNode;
         const lip = ul.parentNode;
         // Move LI
-        cursor.update(callbacksForCursorUpdate.after(lip, li));
+        cursors.update(callbacksForCursorUpdate.after(lip, li));
         lip.after(li);
 
         // Remove UL and LI.oe-nested if left empty.
         if (!ul.children.length) {
-            cursor.update(callbacksForCursorUpdate.remove(ul));
+            cursors.update(callbacksForCursorUpdate.remove(ul));
             ul.remove();
         }
         // @todo @phoenix: not sure in which scenario lip would not have
         // oe-nested class
         if (!lip.children.length && lip.classList.contains("oe-nested")) {
-            cursor.update(callbacksForCursorUpdate.remove(lip));
+            cursors.update(callbacksForCursorUpdate.remove(lip));
             lip.remove();
         }
-        cursor.restore();
+        cursors.restore();
     }
 
     outdentTopLevelLI(li) {
-        const cursor = this.shared.preserveSelection();
+        const cursors = this.shared.preserveSelection();
         const ul = li.parentNode;
         const dir = ul.getAttribute("dir");
         let p;
@@ -508,11 +508,11 @@ export class ListPlugin extends Plugin {
         while (toMove) {
             if (isBlock(toMove)) {
                 if (p && isVisible(p)) {
-                    cursor.update(callbacksForCursorUpdate.after(ul, p));
+                    cursors.update(callbacksForCursorUpdate.after(ul, p));
                     ul.after(p);
                 }
                 p = undefined;
-                cursor.update(callbacksForCursorUpdate.after(ul, toMove));
+                cursors.update(callbacksForCursorUpdate.after(ul, toMove));
                 ul.after(toMove);
             } else {
                 p = p || this.document.createElement("P");
@@ -520,22 +520,22 @@ export class ListPlugin extends Plugin {
                     p.setAttribute("dir", dir);
                     p.style.setProperty("text-align", ul.style.getPropertyValue("text-align"));
                 }
-                cursor.update(callbacksForCursorUpdate.prepend(p, toMove));
+                cursors.update(callbacksForCursorUpdate.prepend(p, toMove));
                 p.prepend(toMove);
             }
             toMove = li.lastChild;
         }
         if (p && isVisible(p)) {
-            cursor.update(callbacksForCursorUpdate.after(ul, p));
+            cursors.update(callbacksForCursorUpdate.after(ul, p));
             ul.after(p);
         }
-        cursor.update(callbacksForCursorUpdate.remove(li));
+        cursors.update(callbacksForCursorUpdate.remove(li));
         li.remove();
         if (!ul.firstElementChild) {
-            cursor.update(callbacksForCursorUpdate.remove(ul));
+            cursors.update(callbacksForCursorUpdate.remove(ul));
             ul.remove();
         }
-        cursor.restore();
+        cursors.restore();
     }
 
     indentListNodes(listNodes) {
