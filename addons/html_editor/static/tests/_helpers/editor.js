@@ -138,7 +138,7 @@ export async function testEditor(config) {
     if (contentAfterEdit) {
         compareFunction(getContent(el), contentAfterEdit, "contentAfterEdit");
     }
-    editor.dispatch("CLEAN");
+    editor.dispatch("CLEAN", { node: el });
     editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
     if (contentAfter) {
         compareFunction(getContent(el), contentAfter, "contentAfter");

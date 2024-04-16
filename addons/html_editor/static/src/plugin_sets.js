@@ -34,6 +34,7 @@ import { LinkPastePlugin } from "./main/link/link_paste_plugin";
 import { InlineComponentPlugin } from "./others/inline_component_plugin";
 import { MoveNodePlugin } from "./main/movenode_plugin";
 import { LocalOverlayPlugin } from "./main/local_overlay_plugin";
+import { TransientNodePlugin } from "./core/transient_node_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -45,6 +46,7 @@ export const CORE_PLUGINS = [
     LineBreakPlugin,
     OverlayPlugin,
     ProtectedNodePlugin,
+    TransientNodePlugin,
     SanitizePlugin,
     SelectionPlugin,
     SplitPlugin,

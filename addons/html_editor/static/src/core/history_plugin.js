@@ -828,7 +828,7 @@ export class HistoryPlugin extends Plugin {
     unserializeNode(node) {
         let [unserializedNode, nodeMap] = this._unserializeNode(node);
 
-        for (const cb of this.resources["unserialize_node"]) {
+        for (const cb of this.resources["unserialize_node"] || []) {
             unserializedNode = cb(unserializedNode);
         }
 
