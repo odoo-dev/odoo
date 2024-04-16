@@ -226,7 +226,7 @@ export class ListPlugin extends Plugin {
             return;
         }
         const newTag = newMode === "CL" ? "UL" : newMode;
-        const selectionToRestore = { ...this.shared.getEditableSelection() };
+        const cursor = this.shared.preserveSelection();
         const newList = setTagName(list, newTag);
         // Clear list style (@todo @phoenix - why??)
         for (const li of newList.children) {
@@ -241,13 +241,7 @@ export class ListPlugin extends Plugin {
         if (newMode === "CL") {
             newList.classList.add("o_checklist");
         }
-        if (selectionToRestore.anchorNode === list) {
-            selectionToRestore.anchorNode = newList;
-        }
-        if (selectionToRestore.focusNode === list) {
-            selectionToRestore.focusNode = newList;
-        }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
+        cursor.remapNode(list, newList).restore();
         return newList;
     }
 
@@ -264,19 +258,28 @@ export class ListPlugin extends Plugin {
             return this.blockContentsToList(element, mode);
         }
         let list;
-        const selectionToRestore = { ...this.shared.getEditableSelection() };
+        const cursors = this.shared.preserveSelection();
         if (element === this.editable) {
             // @todo @phoenix: check if this is needed
+            // Refactor insertListAfter in order to make proper preserveCursor
+            // possible.
             const callingNode = element.firstChild;
             const group = getAdjacents(callingNode, (n) => !isBlock(n));
             list = insertListAfter(this.document, callingNode, mode, [group]);
         } else {
+            const parent = element.parentNode;
+            const childIndex = childNodeIndex(element);
             list = insertListAfter(this.document, element, mode, [element]);
+            cursors.update((cursor) => {
+                if (cursor.node === parent && cursor.offset === childIndex) {
+                    [cursor.node, cursor.offset] = [list.firstChild, 0];
+                }
+            });
             if (element.hasAttribute("dir")) {
                 list.setAttribute("dir", element.getAttribute("dir"));
             }
         }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
+        cursors.restore();
         return list;
     }
 
@@ -285,18 +288,11 @@ export class ListPlugin extends Plugin {
      * @param {"UL"|"OL"|"CL"} mode
      */
     pToList(p, mode) {
-        const selectionToRestore = { ...this.shared.getEditableSelection() };
+        const cursor = this.shared.preserveSelection();
         const list = insertListAfter(this.document, p, mode, [[...p.childNodes]]);
         this.shared.copyAttributes(p, list);
         p.remove();
-
-        if (selectionToRestore.anchorNode === p) {
-            selectionToRestore.anchorNode = list.firstChild;
-        }
-        if (selectionToRestore.focusNode === p) {
-            selectionToRestore.focusNode = list.firstChild;
-        }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
+        cursor.remapNode(p, list.firstChild).restore();
         return list;
     }
 
@@ -358,6 +354,7 @@ export class ListPlugin extends Plugin {
         const cursors = this.shared.preserveSelection();
         const li = p.parentElement;
         // An empty block might contain empty inlines as children.
+        // @todo handle case where cursor.node is li
         cursors.update((cursor) => {
             if (p.contains(cursor.node)) {
                 cursor.node = li;
@@ -421,6 +418,7 @@ export class ListPlugin extends Plugin {
      */
     indentLI(li) {
         const lip = this.document.createElement("li");
+        lip.classList.add("oe-nested");
         const destul =
             li.previousElementSibling?.querySelector("ol, ul") ||
             li.nextElementSibling?.querySelector("ol, ul") ||
@@ -429,11 +427,16 @@ export class ListPlugin extends Plugin {
         const ul = createList(this.document, getListMode(destul));
         lip.append(ul);
 
-        const selectionToRestore = this.shared.getEditableSelection();
-        lip.classList.add("oe-nested");
+        const cursors = this.shared.preserveSelection();
+        // lip replaces li
         li.before(lip);
         ul.append(li);
-        this.shared.setSelection(selectionToRestore, { normalize: false });
+        cursors.update((cursor) => {
+            if (cursor.node === lip.parentNode && cursor.offset === childNodeIndex(lip)) {
+                [cursor.node, cursor.offset] = [ul, 0];
+            }
+        });
+        cursors.restore();
     }
 
     // @temp comment: former oShiftTab
@@ -531,11 +534,9 @@ export class ListPlugin extends Plugin {
     }
 
     indentListNodes(listNodes) {
-        const selectionToRestore = this.shared.getEditableSelection();
         for (const li of listNodes) {
             this.indentLI(li);
         }
-        this.shared.setSelection(selectionToRestore, { normalize: false });
         this.dispatch("ADD_STEP");
     }
 
