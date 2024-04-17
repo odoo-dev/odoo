@@ -33,6 +33,7 @@ export class InlineComponentPlugin extends Plugin {
 
     mountApp(elem, C) {
         elem.setAttribute("contenteditable", "false");
+        elem.dataset.oeProtected = true;
         elem.dataset.oeHasRemovableHandler = true;
         const { dev, translateFn, getRawTemplate } = this.info.app;
         const app = new App(C, {

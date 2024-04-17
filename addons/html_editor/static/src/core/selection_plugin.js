@@ -1,5 +1,5 @@
 import { closestBlock } from "@html_editor/utils/blocks";
-import { getDeepestPosition, previousLeaf } from "@html_editor/utils/dom_info";
+import { getDeepestPosition, previousLeaf, isProtected } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
@@ -80,7 +80,9 @@ export class SelectionPlugin extends Plugin {
             inEditable = false;
         } else {
             const range = selection.getRangeAt(0);
-            inEditable = this.editable.contains(range.commonAncestorContainer);
+            inEditable =
+                this.editable.contains(range.commonAncestorContainer) &&
+                !isProtected(range.commonAncestorContainer);
         }
         if (inEditable) {
             if (this.correctTripleClick) {
@@ -94,12 +96,11 @@ export class SelectionPlugin extends Plugin {
             this.activeSelection = this.makeSelection(selection, inEditable);
         } else {
             const newSelection = { ...this.activeSelection, inEditable: false };
-            Object.freeze(newSelection);
-            this.activeSelection = newSelection;
+            this.activeSelection = Object.freeze(newSelection);
         }
-
+        const activeSelection = this.activeSelection;
         for (const handler of this.resources.onSelectionChange || []) {
-            handler(this.activeSelection);
+            handler(activeSelection);
         }
     }
 
