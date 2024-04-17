@@ -41,11 +41,10 @@ export class ToolbarPlugin extends Plugin {
         };
     }
 
-    handleSelectionChange() {
-        const sel = this.shared.getEditableSelection();
-        this.updateToolbarVisibility(sel);
+    handleSelectionChange(selection) {
+        this.updateToolbarVisibility(selection);
         if (this.overlay.isOpen || this.config.disableFloatingToolbar) {
-            this.updateButtonsActiveState();
+            this.updateButtonsActiveState(selection);
         }
     }
 
@@ -67,8 +66,7 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateButtonsActiveState() {
-        const selection = this.shared.getEditableSelection();
+    updateButtonsActiveState(selection) {
         if (selection.inEditable) {
             for (const buttonGroup of this.buttonGroups) {
                 for (const button of buttonGroup.buttons) {

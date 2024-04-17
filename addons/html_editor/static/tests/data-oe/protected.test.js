@@ -1,8 +1,10 @@
 import { setSelection } from "@html_editor/utils/selection";
-import { test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { insertText } from "../_helpers/user_actions";
+import { animationFrame } from "@odoo/hoot-mock";
+import { setContent } from "../_helpers/selection";
 
 test("should ignore protected elements children mutations (true)", async () => {
     await testEditor({
@@ -160,4 +162,26 @@ test("should not select a protected table (true)", async () => {
                     </tr></tbody></table>
                 `),
     });
+});
+
+test("select a protected element shouldn't open the toolbar", async () => {
+    const { el } = await setupEditor(
+        `<div><p>[a]</p></div><div data-oe-protected="true"><p>b</p><div data-oe-protected="false">c</div></div>`
+    );
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(1);
+
+    setContent(
+        el,
+        `<div><p>a</p></div><div data-oe-protected="true"><p>[b]</p><div data-oe-protected="false">c</div></div>`
+    );
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(0);
+
+    setContent(
+        el,
+        `<div><p>a</p></div><div data-oe-protected="true"><p>b</p><div data-oe-protected="false">[c]</div></div>`
+    );
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(1);
 });
