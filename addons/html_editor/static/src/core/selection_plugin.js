@@ -1,5 +1,5 @@
 import { closestBlock } from "@html_editor/utils/blocks";
-import { getDeepestPosition } from "@html_editor/utils/dom_info";
+import { getDeepestPosition, previousLeaf } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
@@ -85,9 +85,11 @@ export class SelectionPlugin extends Plugin {
         if (inEditable) {
             if (this.correctTripleClick) {
                 this.correctTripleClick = false;
-                const { anchorNode, anchorOffset } = selection;
-                const [focusNode, focusOffset] = endPos(anchorNode);
-                return this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+                let { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+                if (focusOffset === 0 && anchorNode !== focusNode) {
+                    [focusNode, focusOffset] = endPos(previousLeaf(focusNode));
+                    return this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+                }
             }
             this.activeSelection = this.makeSelection(selection, inEditable);
         } else {
