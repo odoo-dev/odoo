@@ -1,4 +1,5 @@
-import { childNodeIndex } from "@html_editor/utils/position";
+import { closestBlock } from "@html_editor/utils/blocks";
+import { childNodeIndex, endPos } from "@html_editor/utils/position";
 import { findInSelection } from "@html_editor/utils/selection";
 import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { tick } from "@odoo/hoot-mock";
@@ -224,12 +225,19 @@ export function pasteOdooEditorHtml(editor, html) {
 }
 
 export async function tripleClick(node) {
+    const anchorNode = node;
+    node = node.nodeType === Node.ELEMENT_NODE ? node : node.parentNode;
     manuallyDispatchProgrammaticEvent(node, "mousedown", { detail: 3 });
+    let focusNode = closestBlock(anchorNode).nextSibling;
+    let focusOffset = 0;
+    if (!focusNode) {
+        [focusNode, focusOffset] = endPos(anchorNode);
+    }
     setSelection({
-        anchorNode: node,
+        anchorNode,
         anchorOffset: 0,
-        focusNode: node.nextSibling,
-        focusOffset: 0,
+        focusNode,
+        focusOffset,
     });
     manuallyDispatchProgrammaticEvent(node, "mouseup", { detail: 3 });
     manuallyDispatchProgrammaticEvent(node, "click", { detail: 3 });

@@ -1,10 +1,12 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { queryFirst } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { setupEditor } from "./_helpers/editor";
-import { MAIN_PLUGINS } from "../src/plugin_sets";
-import { getContent } from "./_helpers/selection";
 import { Plugin } from "../src/plugin";
+import { MAIN_PLUGINS } from "../src/plugin_sets";
+import { setupEditor } from "./_helpers/editor";
+import { getContent } from "./_helpers/selection";
+import { tripleClick } from "./_helpers/user_actions";
 
 test("getEditableSelection should work, even if getSelection returns null", async () => {
     const { editor } = await setupEditor("<p>a[b]</p>");
@@ -39,6 +41,25 @@ test("plugins should be notified when ranges are removed", async () => {
     await animationFrame();
     expect(count).toBe(countBefore + 1);
     expect(getContent(el)).toBe("<p>ab</p>");
+});
+
+test("triple click outside of the Editor", async () => {
+    const { el } = await setupEditor("<p>[]abc</p><p>d</p>", {});
+    const anchorNode = el.parentElement;
+    await tripleClick(el.parentElement);
+    expect(document.getSelection().anchorNode).toBe(anchorNode);
+    expect(getContent(el)).toBe("<p>abc</p><p>d</p>");
+
+    const p = el.querySelector("p");
+    await tripleClick(p);
+    expect(document.getSelection().anchorNode).toBe(p.childNodes[0]);
+    expect(getContent(el)).toBe("<p>[abc]</p><p>d</p>");
+});
+
+test("correct selection after triple click with bold", async () => {
+    const { el } = await setupEditor("<p>[]abc<strong>d</strong></p><p>efg</p>", {});
+    await tripleClick(queryFirst("p").firstChild);
+    expect(getContent(el)).toBe("<p>[abc<strong>d]</strong></p><p>efg</p>");
 });
 
 describe("inEditable", () => {

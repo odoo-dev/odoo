@@ -4,7 +4,6 @@ import { expect, test } from "@odoo/hoot";
 import { click } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
-import { tripleClick } from "./_helpers/user_actions";
 
 test("can instantiate a Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -120,19 +119,6 @@ test("editable node attributes are cleared (or not) after destruction", async ()
     expect(el2.outerHTML).toBe(
         `<div contenteditable="true" class="odoo-editor-editable"><p>a</p></div>`
     );
-});
-
-test("triple click outside of the Editor", async () => {
-    const { el } = await setupEditor("<p>[]abc</p>", {});
-    const anchorNode = el.parentElement;
-    await tripleClick(el.parentElement);
-    expect(document.getSelection().anchorNode).toBe(anchorNode);
-    expect(getContent(el)).toBe("<p>abc</p>");
-
-    const p = el.querySelector("p");
-    await tripleClick(p);
-    expect(document.getSelection().anchorNode).toBe(p.childNodes[0]);
-    expect(getContent(el)).toBe("<p>[abc]</p>");
 });
 
 test("can give resources in config", async () => {
