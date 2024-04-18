@@ -17,7 +17,7 @@ import { OwlComponentPlugin } from "../src/others/owl_component_plugin";
 import { useWysiwyg } from "../src/wysiwyg";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
-import { deleteBackward } from "./_helpers/user_actions";
+import { deleteBackward, undo } from "./_helpers/user_actions";
 
 class Counter extends Component {
     static props = [];
@@ -46,12 +46,12 @@ test("can mount a inline component", async () => {
         config: getConfig("counter", Counter),
     });
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
     );
     click(".counter");
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span></div>`
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span></div>`
     );
 });
 
@@ -78,11 +78,12 @@ test("inline component are mounted and destroyed", async () => {
     editor.destroy();
     expect(steps).toEqual(["mounted", "willunmount", "willdestroy"]);
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" data-oe-protected="true"></span></div>`
+        `<div><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true"></span></div>`
     );
 });
 
 test("inline component get proper env", async () => {
+    /** @type { any } */
     let env;
     class Test extends Counter {
         setup() {
@@ -131,7 +132,7 @@ test("inline component are destroyed when deleted", async () => {
     );
 
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
     );
     expect(steps).toEqual(["mounted"]);
 
@@ -147,14 +148,65 @@ test("select content of a component shouldn't open the toolbar", async () => {
     await animationFrame();
     expect(".o-we-toolbar").toHaveCount(1);
     expect(getContent(el)).toBe(
-        `<div><p>[a]</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+        `<div><p>[a]</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
     );
 
-    const node = queryFirst(".counter").firstChild;
+    const node = queryFirst(".counter", {}).firstChild;
     setSelection({ anchorNode: node, anchorOffset: 1, focusNode: node, focusOffset: 3 });
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div><p>a</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-has-removable-handler="true"><span class="counter">C[ou]nter: 0</span></span></div>`
+        `<div><p>a</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">C[ou]nter: 0</span></span></div>`
     );
     expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test("components delete can be undone", async () => {
+    let steps = [];
+    class Test extends Counter {
+        setup() {
+            onMounted(() => {
+                steps.push("mounted");
+                expect(this.ref.el.isConnected).toBe(true);
+            });
+            onWillUnmount(() => {
+                console.trace();
+                steps.push("willunmount");
+                expect(this.ref.el?.isConnected).toBe(true);
+            });
+        }
+    }
+    const { el, editor } = await setupEditor(
+        `<div>a<span data-embedded="counter"></span>[]</div>`,
+        {
+            config: getConfig("counter", Test),
+        }
+    );
+
+    editor.dispatch("HISTORY_STAGE_SELECTION");
+
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+    );
+    expect(steps).toEqual(["mounted"]);
+
+    deleteBackward(editor);
+    expect(steps).toEqual(["mounted", "willunmount"]);
+    expect(getContent(el)).toBe(`<div>a[]</div>`);
+
+    // now, we undo and check that component still works
+    steps = [];
+    undo(editor);
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"></span>[]</div>`
+    );
+    await animationFrame();
+    expect(steps).toEqual(["mounted"]);
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+    );
+    click(".counter");
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span>[]</div>`
+    );
 });
