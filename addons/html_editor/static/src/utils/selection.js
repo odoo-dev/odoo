@@ -143,16 +143,6 @@ export function normalizeDeepCursorPosition(node, offset) {
     return [node, offset];
 }
 
-// todo @phoenix: remove with legacy setSelection
-export function getNormalizedCursorPosition(node, offset, deep = true) {
-    [node, offset] = normalizeCursorPosition(node, offset, "left");
-    if (deep) {
-        [node, offset] = normalizeDeepCursorPosition(node, offset);
-    }
-    [node, offset] = normalizeFakeBR(node, offset);
-    return [node, offset];
-}
-
 function updateCursorBeforeMove(destParent, destIndex, node, cursor) {
     if (cursor.node === destParent && cursor.offset >= destIndex) {
         // Update cursor at destination
