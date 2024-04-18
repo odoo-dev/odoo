@@ -1,8 +1,10 @@
 import { expect, describe, test } from "@odoo/hoot";
-import { testEditor } from "./_helpers/editor";
+import { setupEditor, testEditor } from "./_helpers/editor";
 import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { getContent } from "./_helpers/selection";
+import { queryOne } from "@odoo/hoot-dom";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
@@ -242,5 +244,32 @@ describe("prevent renderingClasses to be set from history", () => {
             contentAfter: `<p class="x">a</p>`,
             config: { Plugins: Plugins },
         });
+    });
+});
+
+describe("makeSavePoint", () => {
+    test("makeSavePoint should correctly revert mutations", async () => {
+        // Before, the makeSavePoint method was reverting all the current mutations to finally re-apply
+        // the old ones.
+        // The current limitation of the editor is that newly created element that is not connected to
+        // the DOM is not observed by the MutationObserver. The list of mutations resulted from an
+        // operation can therefore be incomplete and cannot be re-applied. The goal of this test is to
+        // verify that the makeSavePoint does not revert more mutation that it should.
+
+        const { el, editor } = await setupEditor("<p>this is another paragraph with color 2</p>");
+
+        const history = editor.plugins.find((plugin) => plugin.constructor.name === "history");
+        const p = queryOne("p");
+        const font = document.createElement("font");
+        // The following line cause a REMOVE since the child does not belong to the p element anymore
+        // The font element is not observed by the mutation observer, the ADD mutation is therefore not
+        // recorded.
+        font.appendChild(p.childNodes[0]);
+        p.before(font);
+        const numberOfSteps = history.steps.length;
+        const safePoint = history.makeSavePoint();
+        safePoint();
+        expect(getContent(el)).toBe("[]<font>this is another paragraph with color 2</font><p></p>");
+        expect(history.steps.length).toBe(numberOfSteps);
     });
 });
