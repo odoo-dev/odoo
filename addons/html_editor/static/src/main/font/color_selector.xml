@@ -32,7 +32,9 @@
                     <div t-ref="colorsWrapper">
                         <t t-if="state.activeTab==='solid'">
                             <div class="p-1"
-                                t-on-click="onColorClick">
+                                t-on-click="onColorApply"
+                                t-on-mouseover="onColorHover"
+                                t-on-mouseout="onColorHoverOut">
                                 <div class="o_colorpicker_section">
                                     <button data-color="o-color-1" t-attf-style="background-color: var(--o-color-1)" class="btn o_color_button"/>
                                     <button data-color="o-color-3" t-attf-style="background-color: var(--o-color-3)" class="btn o_color_button"/>
@@ -44,7 +46,7 @@
                                 <t t-foreach="DEFAULT_COLORS" t-as="line" t-key="line_index">
                                     <div class="o_color_section d-flex">
                                         <t t-foreach="line" t-as="color" t-key="color_index">
-                                            <div class="o_color_button btn" t-att-data-color="color" t-attf-style="background-color: {{color}}" t-on-mouseenter="onColorEnter"/>
+                                            <button class="o_color_button btn" t-att-data-color="color" t-attf-style="background-color: {{color}}"/>
                                         </t>
                                     </div>
                                 </t>
@@ -52,12 +54,12 @@
                         </t>
                         <t t-if="state.activeTab==='custom'">
                             <div class="p-1">
-                                <div class="o_colorpicker_section" t-on-click="onColorClick">
+                                <div class="o_colorpicker_section" t-on-click="onColorApply" t-on-mouseover="onColorHover" t-on-mouseout="onColorHoverOut">
                                     <t t-foreach="this.props.getUsedCustomColors()" t-as="color" t-key="color_index">
                                         <button class="o_color_button btn" t-att-data-color="color" t-attf-style="background-color: {{color}}"/>
                                     </t>
                                 </div>
-                                <div class="o_colorpicker_section" t-on-click="onColorClick">
+                                <div class="o_colorpicker_section" t-on-click="onColorApply" t-on-mouseover="onColorHover" t-on-mouseout="onColorHoverOut">
                                     <button data-color="black" class="btn o_color_button bg-black"></button>
                                     <button data-color="900" class="o_color_button btn" style="background-color: var(--900)"></button>
                                     <button data-color="800" class="o_color_button btn" style="background-color: var(--800)"></button>
@@ -68,7 +70,7 @@
                                     <button data-color="white" class="o_color_button btn bg-white"></button>
                                 </div>
                                 <Colorpicker
-                                    onColorSelect.bind="onColorSelect"
+                                    onColorSelect.bind="(ev) => this.onColorApply(ev, { closeDropdown: false })"
                                     onColorPreview.bind="onColorPreview" />
                             </div>
                         </t>
