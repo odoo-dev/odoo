@@ -103,7 +103,9 @@ export class SplitPlugin extends Plugin {
      */
     splitElement(element, offset) {
         this.dispatch("CLEAN_NODE", { node: element });
-        const before = /** @type {HTMLElement} **/ (element.cloneNode());
+        // const before = /** @type {HTMLElement} **/ (element.cloneNode());
+        /** @type {HTMLElement} **/
+        const before = element.cloneNode();
         const after = /** @type {HTMLElement} **/ (element.cloneNode());
         let index = 0;
         for (const child of [...element.childNodes]) {

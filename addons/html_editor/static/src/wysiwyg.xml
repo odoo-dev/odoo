@@ -2,10 +2,10 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.Wysiwyg">
         <div class="o-wysiwyg" t-att-class="props.class" t-att-style="props.style">
-            <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="localOverlay" />
             <t t-if="props.toolbar and state.showToolbar">
                 <Toolbar toolbar="editor.shared.getToolbarInfo()" />
             </t>
+            <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="localOverlay" />
             <t t-if="props.iframe">
                 <iframe t-ref="content" class="w-100 h-100 p-1"/>
             </t>
