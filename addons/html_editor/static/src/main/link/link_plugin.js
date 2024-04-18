@@ -79,12 +79,8 @@ export class LinkPlugin extends Plugin {
             }
         });
         this.addDomListener(this.editable, "keydown", (ev) => {
-            if (ev.shiftKey && ev.key === "Enter") {
-                this._handleAutomaticLinkInsertion();
-            } else if (ev.key === " ") {
-                this._handleAutomaticLinkInsertion();
-            } else if (ev.key === "Enter") {
-                this._handleAutomaticLinkInsertion();
+            if (ev.key === "Enter" || ev.key === " ") {
+                this.handleAutomaticLinkInsertion();
             }
         });
     }
@@ -262,31 +258,12 @@ export class LinkPlugin extends Plugin {
     }
 
     /**
-     * @param {String} label
-     * @param {String} url
-     */
-    _createLink(label, url) {
-        const link = this.document.createElement("a");
-        link.setAttribute("href", url);
-        // @phoenix @todo: understand + add the defaultLinkAttributes to the link
-        if (this.options?.defaultLinkAttributes) {
-            for (const [param, value] of Object.entries(this.options.defaultLinkAttributes)) {
-                link.setAttribute(param, `${value}`);
-            }
-        }
-        link.innerText = label;
-        return link;
-    }
-
-    /**
      * Inserts a link in the editor. Called after pressing space or (shif +) enter.
      * Performs a regex check to determine if the url has correct syntax.
      */
-    _handleAutomaticLinkInsertion() {
+    handleAutomaticLinkInsertion() {
         let selection = this.shared.getEditableSelection();
         if (
-            selection &&
-            selection.anchorNode &&
             isHtmlContentSupported(selection.anchorNode) &&
             !closestElement(selection.anchorNode).closest("a") &&
             selection.anchorNode.nodeType === Node.TEXT_NODE
@@ -305,12 +282,16 @@ export class LinkPlugin extends Plugin {
                     selection.anchorOffset
                 );
                 const url = match[2] ? match[0] : "http://" + match[0];
-                const range = this.document.createRange();
                 const startOffset = selection.anchorOffset - potentialUrl.length + match.index;
-                range.setStart(selection.anchorNode, startOffset);
-                range.setEnd(selection.anchorNode, startOffset + match[0].length);
-                const link = this._createLink(range.extractContents().textContent, url);
-                range.insertNode(link);
+                const text = selection.anchorNode.textContent.slice(
+                    startOffset,
+                    startOffset + match[0].length
+                );
+                const link = this.createLink(url, text);
+                // split the text node and replace the url text with the link
+                const textNodeToReplace = selection.anchorNode.splitText(startOffset);
+                textNodeToReplace.splitText(match[0].length);
+                selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
                 this.shared.setCursorStart(nodeForSelectionRestore);
             }
         }
