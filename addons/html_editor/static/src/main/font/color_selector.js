@@ -29,7 +29,10 @@ export class ColorSelector extends Component {
 
     setup() {
         this.DEFAULT_COLORS = DEFAULT_COLORS;
-        this.dropdown = useDropdownState();
+        this.dropdown = useDropdownState({
+            onClose: () => this.props.dispatch("COLOR_RESET_PREVIEW"),
+        });
+
         this.state = useState({ activeTab: "solid" });
         this.colorWrapperEl = useRef("colorsWrapper");
     }
@@ -38,21 +41,40 @@ export class ColorSelector extends Component {
         this.state.activeTab = tab;
     }
 
-    onColorEnter(ev) {
-        // const color = ev.target.dataset.color;
-    }
-
-    onColorClick(ev) {
+    processColorFromEvent(ev) {
         let color = ev.target.dataset.color;
         if (color && !isCSSColor(color) && !isColorGradient(color)) {
             color = (this.props.type === "foreground" ? "text-" : "bg-") + color;
         }
-        const mode = this.props.type === "foreground" ? "color" : "background";
-        this.props.dispatch("APPLY_COLOR", { color, mode });
-        this.dropdown.close();
+        return color;
     }
 
-    onColorSelect() {}
+    onColorApply(ev, { closeDropdown = true } = {}) {
+        const color = ev.hex ? ev.hex : this.processColorFromEvent(ev);
+        const mode = this.props.type === "foreground" ? "color" : "background";
+        this.props.dispatch("APPLY_COLOR", { color, mode });
+        if (closeDropdown) {
+            this.dropdown.close();
+        }
+    }
 
-    onColorPreview() {}
+    onColorPreview(ev) {
+        const color = ev.hex ? ev.hex : this.processColorFromEvent(ev);
+        const mode = this.props.type === "foreground" ? "color" : "background";
+        this.props.dispatch("COLOR_PREVIEW", { color, mode });
+    }
+
+    onColorHover(ev) {
+        if (ev.target.tagName !== "BUTTON") {
+            return;
+        }
+        this.onColorPreview(ev);
+    }
+
+    onColorHoverOut(ev) {
+        if (ev.target.tagName !== "BUTTON") {
+            return;
+        }
+        this.props.dispatch("COLOR_RESET_PREVIEW");
+    }
 }

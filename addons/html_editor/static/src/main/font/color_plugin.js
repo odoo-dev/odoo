@@ -43,7 +43,7 @@ function hasColor(element, mode) {
 
 export class ColorPlugin extends Plugin {
     static name = "color";
-    static dependencies = ["selection", "split"];
+    static dependencies = ["selection", "split", "history"];
     static resources = (p) => ({
         toolbarGroup: {
             id: "color",
@@ -69,10 +69,24 @@ export class ColorPlugin extends Plugin {
         },
     });
 
+    setup() {
+        this.revertPreview = () => {};
+    }
+
     handleCommand(command, payload) {
         switch (command) {
             case "APPLY_COLOR":
+                this.revertPreview();
                 this.applyColor(payload.color, payload.mode);
+                this.dispatch("ADD_STEP");
+                break;
+            case "COLOR_PREVIEW":
+                this.revertPreview();
+                this.revertPreview = this.shared.makeSavePoint();
+                this.applyColor(payload.color, payload.mode);
+                break;
+            case "COLOR_RESET_PREVIEW":
+                this.revertPreview();
                 break;
         }
     }
