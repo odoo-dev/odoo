@@ -110,52 +110,51 @@ export class SelectionPlugin extends Plugin {
      */
     makeSelection(selection, inEditable) {
         let range;
+        let activeSelection;
         if (!selection || !selection.rangeCount) {
-            selection = false;
-            range = new Range();
-            range.setStart(this.editable, 0);
-            range.setEnd(this.editable, 0);
+            activeSelection = {
+                anchorNode: this.editable,
+                anchorOffset: 0,
+                focusNode: this.editable,
+                focusOffset: 0,
+                startContainer: this.editable,
+                startOffset: 0,
+                endContainer: this.editable,
+                endOffset: 0,
+                commonAncestorContainer: this.editable,
+                isCollapsed: true,
+                direction: DIRECTIONS.RIGHT,
+                inEditable,
+            };
         } else {
             range = selection.getRangeAt(0);
+            const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+            let direction =
+                anchorNode === range.startContainer ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
+            if (anchorNode === focusNode && focusOffset <= anchorOffset) {
+                direction = !direction;
+            }
+
+            const [startContainer, startOffset, endContainer, endOffset] =
+                direction === DIRECTIONS.RIGHT
+                    ? [anchorNode, anchorOffset, focusNode, focusOffset]
+                    : [focusNode, focusOffset, anchorNode, anchorOffset];
+
+            activeSelection = {
+                anchorNode,
+                anchorOffset,
+                focusNode,
+                focusOffset,
+                startContainer,
+                startOffset,
+                endContainer,
+                endOffset,
+                commonAncestorContainer: range.commonAncestorContainer,
+                isCollapsed: selection.isCollapsed,
+                direction,
+                inEditable,
+            };
         }
-        const isCollapsed = selection && selection.isCollapsed;
-
-        const anchorNode = selection ? selection.anchorNode : range.startContainer;
-        const anchorOffset = selection ? selection.anchorOffset : range.startOffset;
-        let startContainer, startOffset, endContainer, endOffset;
-        const focusNode = selection ? selection.focusNode : range.endContainer;
-        const focusOffset = selection ? selection.focusOffset : range.endOffset;
-
-        this.lastAnchorOffset = anchorOffset;
-        this.lastFocusOffset = focusOffset;
-
-        let direction = anchorNode === range.startContainer ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
-        if (anchorNode === focusNode && focusOffset <= anchorOffset) {
-            direction = !direction;
-        }
-
-        if (direction) {
-            [startContainer, startOffset] = [anchorNode, anchorOffset];
-            [endContainer, endOffset] = [focusNode, focusOffset];
-        } else {
-            [startContainer, startOffset] = [focusNode, focusOffset];
-            [endContainer, endOffset] = [anchorNode, anchorOffset];
-        }
-
-        const activeSelection = {
-            anchorNode,
-            anchorOffset,
-            focusNode,
-            focusOffset,
-            startContainer,
-            startOffset,
-            endContainer,
-            endOffset,
-            commonAncestorContainer: range.commonAncestorContainer,
-            isCollapsed,
-            direction,
-            inEditable,
-        };
 
         Object.freeze(activeSelection);
         return activeSelection;
