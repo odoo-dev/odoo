@@ -219,7 +219,11 @@ class AssetsBundle(object):
                                else: the url contains a version equal to that of the self.get_version(type)
                                 => web/assets/self.get_version(type)/name.extension.
         """
-        unique = ANY_UNIQUE if ignore_version else self.get_version('css' if self.is_css(extension) else 'js')
+        unique = (
+            ANY_UNIQUE
+            if ignore_version
+            else self.get_version('css' if self.is_css(extension) else 'xml' if extension == 'xml.js' else 'js')
+        )
         url_pattern = self.get_asset_url(
             unique=unique,
             extension=extension,
@@ -289,7 +293,7 @@ class AssetsBundle(object):
             'application/json' if extension in ['js.map', 'css.map'] else
             'application/javascript'
         )
-        unique = self.get_version('css' if self.is_css(extension) else 'js')
+        unique = self.get_version('css' if self.is_css(extension) else 'xml' if extension == 'xml.js' else 'js')
         url = self.get_asset_url(
             unique=unique,
             extension=extension,
@@ -893,7 +897,7 @@ class XMLAsset(WebAsset):
 
     @property
     def bundle_version(self):
-        return self.bundle.get_version('js')
+        return self.bundle.get_version('xml')
 
     def with_header(self, content=None):
         if content is None:
