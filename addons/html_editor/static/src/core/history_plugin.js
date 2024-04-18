@@ -738,16 +738,25 @@ export class HistoryPlugin extends Plugin {
      */
     makeSavePoint() {
         this.handleObserverRecords();
-        const currentStepMutations = [...this.currentStep.mutations];
+        const currentStepMutationsUntilLength = this.currentStep.mutations.length;
         const savePointIndex = this.steps.length - 1;
         let applied = false;
+        const selection = this.shared.getEditableSelection();
         return () => {
             if (applied) {
                 return;
             }
             applied = true;
-            this.revertStepsUntil(savePointIndex);
-            this.applyMutations(currentStepMutations);
+            if (savePointIndex === this.steps.length - 1) {
+                const mutationsToRevert = this.currentStep.mutations.splice(
+                    currentStepMutationsUntilLength
+                );
+                this.revertMutations(mutationsToRevert);
+                this.observer.takeRecords();
+                this.shared.setSelection(selection, { normalize: false });
+            } else {
+                this.revertStepsUntil(savePointIndex);
+            }
         };
     }
     /**
