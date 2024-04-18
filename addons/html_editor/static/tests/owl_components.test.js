@@ -13,14 +13,14 @@ import {
     xml,
 } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { InlineComponentPlugin } from "../src/others/inline_component_plugin";
+import { OwlComponentPlugin } from "../src/others/owl_component_plugin";
 import { useWysiwyg } from "../src/wysiwyg";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { deleteBackward } from "./_helpers/user_actions";
 
 class Counter extends Component {
-    static props = {};
+    static props = [];
     static template = xml`
         <span t-ref="root" class="counter" t-on-click="increment">Counter: <t t-esc="state.value"/></span>`;
 
@@ -34,7 +34,7 @@ class Counter extends Component {
 
 function getConfig(name, Comp) {
     return {
-        Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
+        Plugins: [...MAIN_PLUGINS, OwlComponentPlugin],
         resources: {
             inlineComponents: [{ name, Component: Comp }],
         },
@@ -58,7 +58,6 @@ test("can mount a inline component", async () => {
 test("inline component are mounted and destroyed", async () => {
     const steps = [];
     class Test extends Counter {
-        static props = {};
         setup() {
             onMounted(() => {
                 steps.push("mounted");
@@ -86,7 +85,6 @@ test("inline component are mounted and destroyed", async () => {
 test("inline component get proper env", async () => {
     let env;
     class Test extends Counter {
-        static props = {};
         setup() {
             env = this.env;
         }
@@ -94,7 +92,7 @@ test("inline component get proper env", async () => {
 
     class Parent extends Component {
         static template = xml`<div t-ref="root"/>`;
-        static props = {};
+        static props = [];
 
         setup() {
             useSubEnv({ somevalue: 1 });
@@ -114,7 +112,6 @@ test("inline component get proper env", async () => {
 test("inline component are destroyed when deleted", async () => {
     const steps = [];
     class Test extends Counter {
-        static props = {};
         setup() {
             onMounted(() => {
                 steps.push("mounted");

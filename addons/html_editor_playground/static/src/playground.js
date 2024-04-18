@@ -42,7 +42,6 @@ Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
 </p>
 `;
 
-
 const PluginSets = {
     core: CORE_PLUGINS,
     base: MAIN_PLUGINS,
@@ -62,10 +61,12 @@ class WysiwygLoader extends Component {
         };
         onWillStart(async () => {
             await loadBundle("web_editor.backend_assets_wysiwyg");
-            this.constructor.components.CurrentWysiwyg = odoo.loader.modules.get(
+            WysiwygLoader.components.CurrentWysiwyg = odoo.loader.modules.get(
                 "@web_editor/js/wysiwyg/wysiwyg"
             ).Wysiwyg;
-            const MoveNodePlugin = odoo.loader.modules.get('@web_editor/js/wysiwyg/MoveNodePlugin').MoveNodePlugin;
+            const MoveNodePlugin = odoo.loader.modules.get(
+                "@web_editor/js/wysiwyg/MoveNodePlugin"
+            ).MoveNodePlugin;
             this.wysiwygOptions.editorPlugins = [MoveNodePlugin];
         });
     }
@@ -93,16 +94,18 @@ export class Playground extends Component {
             Plugins: PluginSets[this.config.pluginSet],
             classList: this.classList,
             resources: {
-                inlineComponents: [{
-                    name: "counter",
-                    Component: Counter,
-                }],
-            }
+                inlineComponents: [
+                    {
+                        name: "counter",
+                        Component: Counter,
+                    },
+                ],
+            },
         };
     }
 
     get classList() {
-        return (this.config.pluginSet === "extras") ? ["odoo-editor-qweb"] : [];
+        return this.config.pluginSet === "extras" ? ["odoo-editor-qweb"] : [];
     }
 }
 

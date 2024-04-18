@@ -5,8 +5,8 @@ import { App } from "@odoo/owl";
  * This plugin is responsible with providing the API to manipulate/insert
  * sub components in an editor.
  */
-export class InlineComponentPlugin extends Plugin {
-    static name = "inline_components";
+export class OwlComponentPlugin extends Plugin {
+    static name = "owl_components";
     static resources = (p) => ({
         handle_before_remove: p.handleBeforeRemove.bind(p),
     });
