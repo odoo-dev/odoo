@@ -3,14 +3,16 @@ import {
     ensureFocus,
     getCursorDirection,
     getNormalizedCursorPosition,
-    setCursorEnd,
-    setCursorStart,
-    setSelection,
 } from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
-import { insertTestHtml, insertText, setupEditor, testEditor } from "../_helpers/editor";
+import { insertText, setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+
+function getProcessSelection(selection) {
+    const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+    return [anchorNode, anchorOffset, focusNode, focusOffset];
+}
 
 describe("getTraversedNodes", () => {
     test("should return the anchor node of a collapsed selection", async () => {
@@ -121,7 +123,7 @@ describe("ensureFocus", () => {
                     await dispatch(element, "keyup", { key: "2" });
                     await dispatch(editor.editable, "keydown", { key: "Enter" });
                     const activeElement = document.activeElement;
-                    setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild);
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -148,7 +150,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     let activeElement = document.activeElement;
-                    setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild);
                     insertText(editor, "focusWasConserved");
                     // Proof that a simple call to Element.focus would change
                     // the focus in this case.
@@ -156,7 +158,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     activeElement = document.activeElement;
-                    setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild);
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -186,7 +188,7 @@ describe("ensureFocus", () => {
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                     const activeElement = document.activeElement;
-                    setCursorStart(activeElement.lastElementChild);
+                    editor.shared.setCursorStart(activeElement.lastElementChild);
                     // TODO @phoenix still need it ?
                     // await nextTickFrame();
                 },
@@ -203,26 +205,30 @@ describe("ensureFocus", () => {
 });
 
 describe("getNormalizedCursorPosition", () => {
-    test("should move the cursor from after a <b> to within it", () => {
-        const [p] = insertTestHtml("<p><b>abc</b>def</p>");
+    test("should move the cursor from after a <b> to within it", async () => {
+        const { el } = await setupEditor("<p><b>abc</b>def</p>");
+        const p = el.firstChild;
         const result = getNormalizedCursorPosition(p.lastChild, 0);
         expect(result).toEqual([p.firstChild.firstChild, 3]);
     });
 
-    test('should move the cursor after a "visibleEmpty" element', () => {
-        const [p] = insertTestHtml("<p>ab<br>cd</p>");
+    test('should move the cursor after a "visibleEmpty" element', async () => {
+        const { el } = await setupEditor("<p>ab<br>cd</p>");
+        const p = el.firstChild;
         const result = getNormalizedCursorPosition(p.lastElementChild, 0);
         expect(result).toEqual([p.lastChild, 0]);
     });
 
-    test('should move the cursor before a "fake line break element"', () => {
-        const [p] = insertTestHtml("<p><br></p>");
+    test('should move the cursor before a "fake line break element"', async () => {
+        const { el } = await setupEditor("<p><br></p>");
+        const p = el.firstChild;
+
         const result = getNormalizedCursorPosition(p.lastElementChild, 0);
         expect(result).toEqual([p, 0]);
     });
 
-    test("should loop outside (left) a non-editable context and then find the deepest editable leaf position", () => {
-        const [p] = insertTestHtml(
+    test("should loop outside (left) a non-editable context and then find the deepest editable leaf position", async () => {
+        const { el } = await setupEditor(
             unformat(`
             <p>
                 <a class="end">text</a>
@@ -234,14 +240,16 @@ describe("getNormalizedCursorPosition", () => {
             </p>
         `)
         );
+        const p = el.firstChild;
+
         const start = p.querySelector(".start");
         const end = p.querySelector(".end");
         const result = getNormalizedCursorPosition(start.lastChild, 0);
         expect(result).toEqual([end.firstChild, 4]);
     });
 
-    test("should loop outside (right) a non-editable context and then find the deepest editable leaf position", () => {
-        const [p] = insertTestHtml(
+    test("should loop outside (right) a non-editable context and then find the deepest editable leaf position", async () => {
+        const { el } = await setupEditor(
             unformat(`
             <p>
                 <span contenteditable="false">
@@ -253,14 +261,15 @@ describe("getNormalizedCursorPosition", () => {
             </p>
         `)
         );
+        const p = el.firstChild;
         const start = p.querySelector(".start");
         const end = p.querySelector(".end");
         const result = getNormalizedCursorPosition(start.lastChild, 1);
         expect(result).toEqual([end.lastChild, 0]);
     });
 
-    test("should loop outside (left) a non-editable context and not traverse a non-editable leaf position", () => {
-        const [p] = insertTestHtml(
+    test("should loop outside (left) a non-editable context and not traverse a non-editable leaf position", async () => {
+        const { el } = await setupEditor(
             unformat(`
             <p>
                 <a contenteditable="false">leavemealone</a>
@@ -272,6 +281,7 @@ describe("getNormalizedCursorPosition", () => {
             </p>
         `)
         );
+        const p = el.firstChild;
         const start = p.querySelector(".start");
         const result = getNormalizedCursorPosition(start.lastChild, 0);
         expect(result).toEqual([p, 1]);
@@ -280,9 +290,15 @@ describe("getNormalizedCursorPosition", () => {
 
 describe("setSelection", () => {
     describe("collapsed", () => {
-        test("should collapse the cursor at the beginning of an element", () => {
-            const [p] = insertTestHtml("<p>abc</p>");
-            const result = setSelection(p.firstChild, 0);
+        test("should collapse the cursor at the beginning of an element", async () => {
+            const { editor, el } = await setupEditor("<p>abc</p>");
+            const p = el.firstChild;
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: p.firstChild,
+                    anchorOffset: 0,
+                })
+            );
             expect(result).toEqual([p.firstChild, 0, p.firstChild, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -293,9 +309,15 @@ describe("setSelection", () => {
             ]);
         });
 
-        test("should collapse the cursor within an element", () => {
-            const [p] = insertTestHtml("<p>abcd</p>");
-            const result = setSelection(p.firstChild, 2);
+        test("should collapse the cursor within an element", async () => {
+            const { editor, el } = await setupEditor("<p>abcd</p>");
+            const p = el.firstChild;
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: p.firstChild,
+                    anchorOffset: 2,
+                })
+            );
             expect(result).toEqual([p.firstChild, 2, p.firstChild, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -306,9 +328,15 @@ describe("setSelection", () => {
             ]);
         });
 
-        test("should collapse the cursor at the end of an element", () => {
-            const [p] = insertTestHtml("<p>abc</p>");
-            const result = setSelection(p.firstChild, 3);
+        test("should collapse the cursor at the end of an element", async () => {
+            const { editor, el } = await setupEditor("<p>abc</p>");
+            const p = el.firstChild;
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: p.firstChild,
+                    anchorOffset: 3,
+                })
+            );
             expect(result).toEqual([p.firstChild, 3, p.firstChild, 3]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -319,52 +347,87 @@ describe("setSelection", () => {
             ]);
         });
 
-        test("should collapse the cursor before a nested inline element", () => {
-            const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        test("should collapse the cursor before a nested inline element", async () => {
+            const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+            const p = el.firstChild;
             const cd = p.childNodes[1].firstChild;
-            const result = setSelection(cd, 2);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: cd,
+                    anchorOffset: 2,
+                })
+            );
             expect(result).toEqual([cd, 2, cd, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([cd, 2, cd, 2]);
         });
 
-        test("should collapse the cursor at the beginning of a nested inline element", () => {
-            const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        test("should collapse the cursor at the beginning of a nested inline element", async () => {
+            const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+            const p = el.firstChild;
             const ef = p.childNodes[1].childNodes[1].firstChild;
-            const result = setSelection(ef, 0);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: ef,
+                    anchorOffset: 0,
+                })
+            );
             expect(result).toEqual([ef, 0, ef, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 0, ef, 0]);
         });
 
-        test("should collapse the cursor within a nested inline element", () => {
-            const [p] = insertTestHtml("<p>ab<span>cd<b>efgh</b>ij</span>kl</p>");
+        test("should collapse the cursor within a nested inline element", async () => {
+            const { editor, el } = await setupEditor("<p>ab<span>cd<b>efgh</b>ij</span>kl</p>");
+            const p = el.firstChild;
             const efgh = p.childNodes[1].childNodes[1].firstChild;
-            const result = setSelection(efgh, 2);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: efgh,
+                    anchorOffset: 2,
+                })
+            );
             expect(result).toEqual([efgh, 2, efgh, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([efgh, 2, efgh, 2]);
         });
 
-        test("should collapse the cursor at the end of a nested inline element", () => {
-            const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        test("should collapse the cursor at the end of a nested inline element", async () => {
+            const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+            const p = el.firstChild;
             const ef = p.childNodes[1].childNodes[1].firstChild;
-            const result = setSelection(ef, 2);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: ef,
+                    anchorOffset: 2,
+                })
+            );
             expect(result).toEqual([ef, 2, ef, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);
         });
 
-        test("should collapse the cursor after a nested inline element", () => {
-            const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        test("should collapse the cursor after a nested inline element", async () => {
+            const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+            const p = el.firstChild;
             const ef = p.childNodes[1].childNodes[1].firstChild;
             const gh = p.childNodes[1].lastChild;
-            const result = setSelection(gh, 0);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: gh,
+                    anchorOffset: 0,
+                })
+            );
             expect(result).toEqual([ef, 2, ef, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);
 
-            const nonNormalizedResult = setSelection(gh, 0, gh, 0, false);
+            const nonNormalizedResult = getProcessSelection(
+                editor.shared.setSelection(
+                    { anchorNode: gh, anchorOffset: 0 },
+                    { normalize: false }
+                )
+            );
             expect(nonNormalizedResult).toEqual([gh, 0, gh, 0]);
             const sel = document.getSelection();
             expect([sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]).toEqual([
@@ -377,9 +440,17 @@ describe("setSelection", () => {
     });
 
     describe("forward", () => {
-        test("should select the contents of an element", () => {
-            const [p] = insertTestHtml("<p>abc</p>");
-            const result = setSelection(p.firstChild, 0, p.firstChild, 3);
+        test("should select the contents of an element", async () => {
+            const { editor, el } = await setupEditor("<p>abc</p>");
+            const p = el.firstChild;
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: p.firstChild,
+                    anchorOffset: 0,
+                    focusNode: p.firstChild,
+                    focusOffset: 3,
+                })
+            );
             expect(result).toEqual([p.firstChild, 0, p.firstChild, 3]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -390,19 +461,37 @@ describe("setSelection", () => {
             ]);
         });
 
-        test("should make a complex selection", () => {
-            const [p1, p2] = insertTestHtml(
+        test("should make a complex selection", async () => {
+            const { el, editor } = await setupEditor(
                 "<p>ab<span>cd<b>ef</b>gh</span>ij</p><p>kl<span>mn<b>op</b>qr</span>st</p>"
             );
+            const [p1, p2] = el.childNodes;
             const ef = p1.childNodes[1].childNodes[1].firstChild;
             const qr = p2.childNodes[1].childNodes[2];
             const st = p2.childNodes[2];
-            const result = setSelection(ef, 1, st, 0);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: ef,
+                    anchorOffset: 1,
+                    focusNode: st,
+                    focusOffset: 0,
+                })
+            );
             expect(result).toEqual([ef, 1, qr, 2]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 1, qr, 2]);
 
-            const nonNormalizedResult = setSelection(ef, 1, st, 0, false);
+            const nonNormalizedResult = getProcessSelection(
+                editor.shared.setSelection(
+                    {
+                        anchorNode: ef,
+                        anchorOffset: 1,
+                        focusNode: st,
+                        focusOffset: 0,
+                    },
+                    { normalize: false }
+                )
+            );
             expect(nonNormalizedResult).toEqual([ef, 1, st, 0]);
             const sel = document.getSelection();
             expect([sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]).toEqual([
@@ -415,9 +504,17 @@ describe("setSelection", () => {
     });
 
     describe("backward", () => {
-        test("should select the contents of an element", () => {
-            const [p] = insertTestHtml("<p>abc</p>");
-            const result = setSelection(p.firstChild, 3, p.firstChild, 0);
+        test("should select the contents of an element", async () => {
+            const { editor, el } = await setupEditor("<p>abc</p>");
+            const p = el.firstChild;
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: p.firstChild,
+                    anchorOffset: 3,
+                    focusNode: p.firstChild,
+                    focusOffset: 0,
+                })
+            );
             expect(result).toEqual([p.firstChild, 3, p.firstChild, 0]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -428,19 +525,37 @@ describe("setSelection", () => {
             ]);
         });
 
-        test("should make a complex selection", () => {
-            const [p1, p2] = insertTestHtml(
+        test("should make a complex selection", async () => {
+            const { el, editor } = await setupEditor(
                 "<p>ab<span>cd<b>ef</b>gh</span>ij</p><p>kl<span>mn<b>op</b>qr</span>st</p>"
             );
+            const [p1, p2] = el.childNodes;
             const ef = p1.childNodes[1].childNodes[1].firstChild;
             const qr = p2.childNodes[1].childNodes[2];
             const st = p2.childNodes[2];
-            const result = setSelection(st, 0, ef, 1);
+            const result = getProcessSelection(
+                editor.shared.setSelection({
+                    anchorNode: st,
+                    anchorOffset: 0,
+                    focusNode: ef,
+                    focusOffset: 1,
+                })
+            );
             expect(result).toEqual([qr, 2, ef, 1]);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
             expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([qr, 2, ef, 1]);
 
-            const nonNormalizedResult = setSelection(st, 0, ef, 1, false);
+            const nonNormalizedResult = getProcessSelection(
+                editor.shared.setSelection(
+                    {
+                        anchorNode: st,
+                        anchorOffset: 0,
+                        focusNode: ef,
+                        focusOffset: 1,
+                    },
+                    { normalize: false }
+                )
+            );
             expect(nonNormalizedResult).toEqual([st, 0, ef, 1]);
             const sel = document.getSelection();
             expect([sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]).toEqual([
@@ -454,9 +569,10 @@ describe("setSelection", () => {
 });
 
 describe("setCursorStart", () => {
-    test("should collapse the cursor at the beginning of an element", () => {
-        const [p] = insertTestHtml("<p>abc</p>");
-        const result = setCursorStart(p);
+    test("should collapse the cursor at the beginning of an element", async () => {
+        const { editor, el } = await setupEditor("<p>abc</p>");
+        const p = el.firstChild;
+        const result = getProcessSelection(editor.shared.setCursorStart(p));
         expect(result).toEqual([p.firstChild, 0, p.firstChild, 0]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -467,41 +583,45 @@ describe("setCursorStart", () => {
         ]);
     });
 
-    test("should collapse the cursor at the beginning of a nested inline element", () => {
-        const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+    test("should collapse the cursor at the beginning of a nested inline element", async () => {
+        const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        const p = el.firstChild;
         const b = p.childNodes[1].childNodes[1];
         const ef = b.firstChild;
-        const result = setCursorStart(b);
+        const result = getProcessSelection(editor.shared.setCursorStart(b));
         expect(result).toEqual([ef, 0, ef, 0]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 0, ef, 0]);
     });
 
-    test("should collapse the cursor after a nested inline element", () => {
-        const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+    test("should collapse the cursor after a nested inline element", async () => {
+        const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        const p = el.firstChild;
         const ef = p.childNodes[1].childNodes[1].firstChild;
         const gh = p.childNodes[1].lastChild;
-        const result = setCursorStart(gh);
+        const result = getProcessSelection(editor.shared.setCursorStart(gh));
         expect(result).toEqual([ef, 2, ef, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);
 
-        const nonNormalizedResult = setCursorStart(gh, false);
-        expect(nonNormalizedResult).toEqual([gh, 0, gh, 0]);
-        const sel = document.getSelection();
-        expect([sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]).toEqual([
-            gh,
-            0,
-            gh,
-            0,
-        ]);
+        // @todo @phoenix normalize false is never use
+        // const nonNormalizedResult = getProcessSelection(editor.shared.setCursorStart(gh, false));
+        // expect(nonNormalizedResult).toEqual([gh, 0, gh, 0]);
+        // const sel = document.getSelection();
+        // expect([sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]).toEqual([
+        //     gh,
+        //     0,
+        //     gh,
+        //     0,
+        // ]);
     });
 });
 
 describe("setCursorEnd", () => {
-    test("should collapse the cursor at the end of an element", () => {
-        const [p] = insertTestHtml("<p>abc</p>");
-        const result = setCursorEnd(p);
+    test("should collapse the cursor at the end of an element", async () => {
+        const { editor, el } = await setupEditor("<p>abc</p>");
+        const p = el.firstChild;
+        const result = getProcessSelection(editor.shared.setCursorEnd(p));
         expect(result).toEqual([p.firstChild, 3, p.firstChild, 3]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([
@@ -512,20 +632,22 @@ describe("setCursorEnd", () => {
         ]);
     });
 
-    test("should collapse the cursor before a nested inline element", () => {
-        const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+    test("should collapse the cursor before a nested inline element", async () => {
+        const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        const p = el.firstChild;
         const cd = p.childNodes[1].firstChild;
-        const result = setCursorEnd(cd);
+        const result = getProcessSelection(editor.shared.setCursorEnd(cd));
         expect(result).toEqual([cd, 2, cd, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([cd, 2, cd, 2]);
     });
 
-    test("should collapse the cursor at the end of a nested inline element", () => {
-        const [p] = insertTestHtml("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+    test("should collapse the cursor at the end of a nested inline element", async () => {
+        const { editor, el } = await setupEditor("<p>ab<span>cd<b>ef</b>gh</span>ij</p>");
+        const p = el.firstChild;
         const b = p.childNodes[1].childNodes[1];
         const ef = b.firstChild;
-        const result = setCursorEnd(b);
+        const result = getProcessSelection(editor.shared.setCursorEnd(b));
         expect(result).toEqual([ef, 2, ef, 2]);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = document.getSelection();
         expect([anchorNode, anchorOffset, focusNode, focusOffset]).toEqual([ef, 2, ef, 2]);

@@ -7,7 +7,6 @@ import {
 } from "./dom_info";
 import { prepareUpdate } from "./dom_state";
 import { boundariesOut, leftPos, nodeSize, rightPos } from "./position";
-import { setSelection } from "./selection";
 
 /**
  * Take a node and unwrap all of its block contents recursively. All blocks
@@ -111,7 +110,6 @@ export function fillEmpty(el) {
         if (previousSibling && previousSibling.nodeName === "BR") {
             previousSibling.remove();
         }
-        setSelection(zws, 0, zws, 0);
     }
     return fillers;
 }

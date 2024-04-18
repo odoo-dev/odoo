@@ -1,6 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
-import { setSelection } from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
@@ -194,9 +193,12 @@ describe("search", () => {
         await animationFrame();
 
         // simulate a collaboration scenario: move selection, insert text, restore it
-        setSelection(editor.editable.firstChild, 1);
+        editor.shared.setSelection({ anchorNode: editor.editable.firstChild, anchorOffset: 1 });
         silentInsert("random text");
-        setSelection(editor.editable.lastChild.firstChild, 9);
+        editor.shared.setSelection({
+            anchorNode: editor.editable.lastChild.firstChild,
+            anchorOffset: 9,
+        });
         expect(".o-we-powerbox").toHaveCount(1);
         insertText(editor, "1");
         await animationFrame();

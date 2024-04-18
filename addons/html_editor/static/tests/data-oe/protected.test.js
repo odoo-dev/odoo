@@ -1,10 +1,9 @@
-import { setSelection } from "@html_editor/utils/selection";
 import { expect, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { setSelection, setContent } from "../_helpers/selection";
 import { insertText } from "../_helpers/user_actions";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setContent } from "../_helpers/selection";
 
 test("should ignore protected elements children mutations (true)", async () => {
     await testEditor({
@@ -39,7 +38,7 @@ test("should not ignore unprotected elements children mutations (false)", async 
             const unProtectedParagraph = editor.editable.querySelector(
                 '[data-oe-protected="false"] > p'
             );
-            setSelection(unProtectedParagraph, 1);
+            setSelection({ anchorNode: unProtectedParagraph, anchorOffset: 1 });
             insertText(editor, "bc");
             editor.dispatch("HISTORY_UNDO");
         },
