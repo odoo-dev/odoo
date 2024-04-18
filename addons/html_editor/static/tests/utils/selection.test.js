@@ -1,9 +1,5 @@
 import { DIRECTIONS } from "@html_editor/utils/position";
-import {
-    ensureFocus,
-    getCursorDirection,
-    getNormalizedCursorPosition,
-} from "@html_editor/utils/selection";
+import { ensureFocus, getCursorDirection } from "@html_editor/utils/selection";
 import { describe, expect, test } from "@odoo/hoot";
 import { dispatch } from "@odoo/hoot-dom";
 import { insertText, setupEditor, testEditor } from "../_helpers/editor";
@@ -202,90 +198,6 @@ describe("ensureFocus", () => {
             });
         }
     );
-});
-
-describe("getNormalizedCursorPosition", () => {
-    test("should move the cursor from after a <b> to within it", async () => {
-        const { el } = await setupEditor("<p><b>abc</b>def</p>");
-        const p = el.firstChild;
-        const result = getNormalizedCursorPosition(p.lastChild, 0);
-        expect(result).toEqual([p.firstChild.firstChild, 3]);
-    });
-
-    test('should move the cursor after a "visibleEmpty" element', async () => {
-        const { el } = await setupEditor("<p>ab<br>cd</p>");
-        const p = el.firstChild;
-        const result = getNormalizedCursorPosition(p.lastElementChild, 0);
-        expect(result).toEqual([p.lastChild, 0]);
-    });
-
-    test('should move the cursor before a "fake line break element"', async () => {
-        const { el } = await setupEditor("<p><br></p>");
-        const p = el.firstChild;
-
-        const result = getNormalizedCursorPosition(p.lastElementChild, 0);
-        expect(result).toEqual([p, 0]);
-    });
-
-    test("should loop outside (left) a non-editable context and then find the deepest editable leaf position", async () => {
-        const { el } = await setupEditor(
-            unformat(`
-            <p>
-                <a class="end">text</a>
-                <span contenteditable="false">
-                    <b class="start">
-                        text
-                    </b>
-                </span>
-            </p>
-        `)
-        );
-        const p = el.firstChild;
-
-        const start = p.querySelector(".start");
-        const end = p.querySelector(".end");
-        const result = getNormalizedCursorPosition(start.lastChild, 0);
-        expect(result).toEqual([end.firstChild, 4]);
-    });
-
-    test("should loop outside (right) a non-editable context and then find the deepest editable leaf position", async () => {
-        const { el } = await setupEditor(
-            unformat(`
-            <p>
-                <span contenteditable="false">
-                    <b class="start">
-                        text
-                    </b>
-                </span>
-                <a class="end">text</a>
-            </p>
-        `)
-        );
-        const p = el.firstChild;
-        const start = p.querySelector(".start");
-        const end = p.querySelector(".end");
-        const result = getNormalizedCursorPosition(start.lastChild, 1);
-        expect(result).toEqual([end.lastChild, 0]);
-    });
-
-    test("should loop outside (left) a non-editable context and not traverse a non-editable leaf position", async () => {
-        const { el } = await setupEditor(
-            unformat(`
-            <p>
-                <a contenteditable="false">leavemealone</a>
-                <span contenteditable="false">
-                    <b class="start">
-                        text
-                    </b>
-                </span>
-            </p>
-        `)
-        );
-        const p = el.firstChild;
-        const start = p.querySelector(".start");
-        const result = getNormalizedCursorPosition(start.lastChild, 0);
-        expect(result).toEqual([p, 1]);
-    });
 });
 
 describe("setSelection", () => {
