@@ -1,10 +1,11 @@
-import { Wysiwyg, useWysiwyg } from "@html_editor/wysiwyg";
+import { useWysiwyg } from "@html_editor/wysiwyg";
 import { describe, expect, test } from "@odoo/hoot";
-import { click, queryOne, waitFor } from "@odoo/hoot-dom";
+import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { getContent, setContent, setSelection } from "./_helpers/selection";
+import { setupWysiwyg } from "./_helpers/editor";
 
 describe("wysiwig hook", () => {
     test("useWysiwyg create an editor on ref", async () => {
@@ -22,21 +23,6 @@ describe("wysiwig hook", () => {
 });
 
 describe("Wysiwyg Component", () => {
-    /**
-     *
-     * @param {Object} props
-     * @returns { Promise<{el: HTMLElement, wysiwyg: Wysiwyg}> } result
-     */
-    async function setupWysiwyg(props = {}) {
-        const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
-        const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
-        if (props.config?.content) {
-            // force selection to be put properly
-            setContent(el, props.config.content);
-        }
-        return { wysiwyg, el };
-    }
-
     test("Wysiwyg component can be instantiated", async () => {
         const { el } = await setupWysiwyg();
         expect(".o-wysiwyg").toHaveCount(1);
