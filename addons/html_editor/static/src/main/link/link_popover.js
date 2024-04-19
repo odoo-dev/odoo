@@ -2,6 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
+import { deduceURLfromText } from "./utils";
 
 export class LinkPopover extends Component {
     static template = "html_editor.linkPopover";
@@ -24,6 +25,10 @@ export class LinkPopover extends Component {
         if (this.state.label === "") {
             this.state.label = this.state.url;
         }
+        const deducedUrl = this.deduceUrl(this.state.url);
+        this.state.url = deducedUrl
+            ? this.correctLink(deducedUrl)
+            : this.correctLink(this.state.url);
         this.props.onApply(this.state.url, this.state.label);
     }
     onClickEdit() {
@@ -41,5 +46,33 @@ export class LinkPopover extends Component {
     }
     onClickRemove() {
         this.props.onRemove();
+    }
+
+    /**
+     * @private
+     */
+    correctLink(url) {
+        if (url.indexOf("tel:") === 0) {
+            url = url.replace(/^tel:([0-9]+)$/, "tel://$1");
+        } else if (
+            url &&
+            !url.startsWith("mailto:") &&
+            url.indexOf("://") === -1 &&
+            url[0] !== "/" &&
+            url[0] !== "#" &&
+            url.slice(0, 2) !== "${"
+        ) {
+            url = "http://" + url;
+        }
+        return url;
+    }
+    deduceUrl(text) {
+        text = text.trim();
+        if (/^(https?:|mailto:|tel:)/.test(text)) {
+            // Text begins with a known protocol, accept it as valid URL.
+            return text;
+        } else {
+            return deduceURLfromText(text, this.props.linkEl) || "";
+        }
     }
 }

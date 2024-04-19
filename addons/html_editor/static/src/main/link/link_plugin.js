@@ -141,7 +141,7 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             fontawesome: "fa-link",
             action: () => {
-                this.shared.domInsert(this.createLink(text, url));
+                this.shared.domInsert(this.createLink(url, text));
                 this.dispatch("ADD_STEP");
             },
         };
