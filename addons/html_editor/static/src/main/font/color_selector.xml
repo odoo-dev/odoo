@@ -4,10 +4,10 @@
         <Dropdown state="dropdown">
             <button class="btn btn-light" t-attf-class="o-select-color-{{props.type}} {{dropdown.isOpen ? 'active' : ''}}">
                 <t t-if="props.type === 'foreground'">
-                    <i class="fa fa-font fore-color" title="Font Color"/>
+                    <i class="fa fa-font p-1" title="Font Color" t-attf-style="border-bottom: 2px solid {{this.selectedColors.color}};"/>
                 </t>
                 <t t-else="">
-                    <i class="fa fa-paint-brush hilite-color" title="Background Color"/>
+                    <i class="fa fa-paint-brush p-1" title="Background Color" t-attf-style="border-bottom: 2px solid {{this.selectedColors.background}};"/>
                 </t>
             </button>
             <t t-set-slot="content">

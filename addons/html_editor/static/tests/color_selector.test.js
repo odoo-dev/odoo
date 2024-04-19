@@ -1,8 +1,8 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor, queryOne, hover, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setupEditor } from "./_helpers/editor";
-import { getContent } from "./_helpers/selection";
+import { setupEditor, setupWysiwyg } from "./_helpers/editor";
+import { getContent, setContent } from "./_helpers/selection";
 
 test("can set foreground color", async () => {
     const { el } = await setupEditor("<p>[test]</p>");
@@ -81,6 +81,89 @@ test("custom colors used in the editor are shown in the colorpicker", async () =
     expect(queryOne("button[data-color='rgb(0, 255, 0)']").style.backgroundColor).toBe(
         "rgb(0, 255, 0)"
     );
+});
+
+test.tags("desktop")(
+    "selected text color is shown in the toolbar and update when hovering",
+    async () => {
+        await setupEditor(
+            `<p>
+            <font style="color: rgb(255, 0, 0);">[test]</font>
+        </p>`
+        );
+
+        await waitFor(".o-we-toolbar");
+        expect(".o_font_color_selector").toHaveCount(0);
+        await animationFrame();
+        expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+        click(".o-select-color-foreground");
+        await animationFrame();
+        // Hover a color
+        hover(queryOne("button[data-color='#FF00FF']"));
+        await animationFrame();
+        expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
+        // Hover out
+        hover(queryOne(".o-select-color-foreground"));
+        await animationFrame();
+        expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+    }
+);
+
+test("selected text color is shown in the toolbar and update when clicking", async () => {
+    await setupEditor(
+        `<p>
+            <font style="color: rgb(255, 0, 0);">[test]</font>
+        </p>`
+    );
+
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click("button[data-color='#FF00FF']");
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
+});
+
+test("collapsed selection color is shown in the permanent toolbar", async () => {
+    await setupWysiwyg({
+        toolbar: true,
+        config: { content: `<font style="color: rgb(255, 0, 0);">t[]est</font>` },
+    });
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+});
+
+test("selected color is shown and updates when selection change", async () => {
+    const { el } = await setupEditor(
+        `<p><font style="color: rgb(255, 156, 0);">test1</font> [test2]</p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(73, 80, 87)" });
+    setContent(el, `<p><font style="color: rgb(255, 156, 0);">[test1]</font> test2</p>`);
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 156, 0)" });
+});
+
+test("selected background color is shown in the toolbar and update when clicking", async () => {
+    await setupEditor(
+        `<p>
+            <font style="background: rgb(255, 0, 0);">[test]</font>
+        </p>`
+    );
+
+    await waitFor(".o-we-toolbar");
+    await animationFrame();
+    expect("i.fa-paint-brush").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+    click(".o-select-color-background");
+    await animationFrame();
+    click("button[data-color='#FF00FF']");
+    await animationFrame();
+    expect("i.fa-paint-brush").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
 });
 
 describe.tags("desktop")("color preview", () => {

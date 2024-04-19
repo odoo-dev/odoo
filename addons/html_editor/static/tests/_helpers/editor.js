@@ -1,8 +1,9 @@
 import { expect, getFixture } from "@odoo/hoot";
 import { Component, onMounted, useRef, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { useWysiwyg } from "@html_editor/wysiwyg";
+import { useWysiwyg, Wysiwyg } from "@html_editor/wysiwyg";
 import { getContent, getSelection, setContent } from "./selection";
+import { queryOne } from "@odoo/hoot-dom";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -142,6 +143,20 @@ export async function testEditor(config) {
     if (contentAfter) {
         compareFunction(getContent(el), contentAfter, "contentAfter");
     }
+}
+/**
+ *
+ * @param {Object} props
+ * @returns { Promise<{el: HTMLElement, wysiwyg: Wysiwyg}> } result
+ */
+export async function setupWysiwyg(props = {}) {
+    const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
+    const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
+    if (props.config?.content) {
+        // force selection to be put properly
+        setContent(el, props.config.content);
+    }
+    return { wysiwyg, el };
 }
 
 export function insertTestHtml(innerHtml) {

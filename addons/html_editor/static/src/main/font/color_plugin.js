@@ -1,10 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
-import { isColorGradient } from "@html_editor/utils/color";
+import { isColorGradient, rgbToHex } from "@html_editor/utils/color";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { isCSSColor } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
+import { reactive } from "@odoo/owl";
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
@@ -55,6 +56,7 @@ export class ColorPlugin extends Plugin {
                     props: {
                         type: "foreground",
                         getUsedCustomColors: () => p.getUsedCustomColors("color"),
+                        getSelectedColors: () => p.selectedColors,
                     },
                 },
                 {
@@ -63,14 +65,28 @@ export class ColorPlugin extends Plugin {
                     props: {
                         type: "background",
                         getUsedCustomColors: () => p.getUsedCustomColors("background"),
+                        getSelectedColors: () => p.selectedColors,
                     },
                 },
             ],
         },
+        onSelectionChange: p.updateSelectedColor.bind(p),
     });
 
     setup() {
         this.revertPreview = () => {};
+        this.selectedColors = reactive({ font: "", background: "" });
+    }
+
+    updateSelectedColor(selection) {
+        const el = closestElement(selection.startContainer);
+        if (!el) {
+            return;
+        }
+        const color = getComputedStyle(el).color;
+        const background = getComputedStyle(el).backgroundColor;
+        this.selectedColors.color = rgbToHex(color);
+        this.selectedColors.background = rgbToHex(background);
     }
 
     handleCommand(command, payload) {
@@ -78,15 +94,18 @@ export class ColorPlugin extends Plugin {
             case "APPLY_COLOR":
                 this.revertPreview();
                 this.applyColor(payload.color, payload.mode);
+                this.updateSelectedColor(this.shared.getEditableSelection());
                 this.dispatch("ADD_STEP");
                 break;
             case "COLOR_PREVIEW":
                 this.revertPreview();
                 this.revertPreview = this.shared.makeSavePoint();
                 this.applyColor(payload.color, payload.mode);
+                this.updateSelectedColor(this.shared.getEditableSelection());
                 break;
             case "COLOR_RESET_PREVIEW":
                 this.revertPreview();
+                this.updateSelectedColor(this.shared.getEditableSelection());
                 break;
         }
     }

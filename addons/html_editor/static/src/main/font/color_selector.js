@@ -25,6 +25,7 @@ export class ColorSelector extends Component {
         dispatch: Function,
         getSelection: Function,
         getUsedCustomColors: Function,
+        getSelectedColors: Function,
     };
 
     setup() {
@@ -35,6 +36,7 @@ export class ColorSelector extends Component {
 
         this.state = useState({ activeTab: "solid" });
         this.colorWrapperEl = useRef("colorsWrapper");
+        this.selectedColors = useState(this.props.getSelectedColors());
     }
 
     setTab(tab) {
