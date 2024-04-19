@@ -442,7 +442,7 @@ const logEvents = (actionName) => {
  */
 const parseKeyStrokes = (keyStrokes, options) =>
     (isIterable(keyStrokes) ? [...keyStrokes] : [keyStrokes])
-        .flatMap((keyStroke) => keyStroke.split(/\s*[,+]\s*/))
+        .flatMap((keyStroke) => (keyStroke === "+" ? ["+"] : keyStroke.split(/\s*[,+]\s*/)))
         .map((key) => {
             const lower = key.toLowerCase();
             return {
