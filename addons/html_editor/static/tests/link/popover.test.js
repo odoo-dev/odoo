@@ -2,7 +2,14 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setContent, getContent, setSelection } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
-import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
+import {
+    waitUntil,
+    waitFor,
+    click,
+    queryOne,
+    press,
+    manuallyDispatchProgrammaticEvent,
+} from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
 import { insertText } from "../_helpers/user_actions";
 
@@ -76,7 +83,7 @@ describe("popover should switch UI depending on editing state", () => {
     });
 });
 
-describe("popover should edit/copy/remove the link", () => {
+describe("popover should edit,copy,remove the link", () => {
     test("after apply url on a link without href, the link element should be updated", async () => {
         const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
         await waitFor(".o_we_href_input_link");
@@ -157,6 +164,55 @@ describe("popover should edit/copy/remove the link", () => {
     });
 });
 
+describe("Incorrect URL should be corrected", () => {
+    test("when edit a link's URL to 'test.com', the link's URL should be corrected", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await animationFrame();
+        queryOne(".o_we_label_link").focus();
+        const linkEl = queryOne("a");
+
+        queryOne(".o_we_href_input_link").focus();
+        // mimic the link input behavior
+        for (let i = 0; i < linkEl.href.length; i++) {
+            press("Backspace");
+        }
+        for (const char of "newtest.com") {
+            press(char);
+        }
+        click(".o_we_apply_link");
+        await animationFrame();
+        expect(getContent(el)).toBe('<p>this is a <a href="http://newtest.com">li[]nk</a></p>');
+    });
+    test("when a link's URL is an email, the link's URL should start with mailto:", async () => {
+        const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
+        await animationFrame();
+        await waitFor(".o_we_href_input_link");
+
+        queryOne(".o_we_href_input_link").focus();
+        for (const char of "test@test.com") {
+            press(char);
+        }
+        click(".o_we_apply_link");
+        await animationFrame();
+        expect(getContent(el)).toBe('<p>this is a <a href="mailto:test@test.com">li[]nk</a></p>');
+    });
+    test("when a link's URL is an phonenumber, the link's URL should start with tel://:", async () => {
+        const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
+        await waitFor(".o_we_href_input_link");
+        await animationFrame();
+
+        queryOne(".o_we_href_input_link").focus();
+        for (const char of "+1234567890") {
+            press(char);
+        }
+        click(".o_we_apply_link");
+        await animationFrame();
+        expect(getContent(el)).toBe('<p>this is a <a href="tel://+1234567890">li[]nk</a></p>');
+    });
+});
+
 describe("Link creation by powerbox", () => {
     test("click on link command in powerbox should create a link element and open the linkpopover", async () => {
         const { editor, el } = await setupEditor("<p>ab[]</p>");
@@ -190,5 +246,21 @@ describe("Link creation by powerbox", () => {
         });
         await animationFrame();
         expect(getContent(el)).toBe("<p>[]ab</p>");
+    });
+    test("when create a new link by powerbox and only input the URL, the link should be created with corrected URL", async () => {
+        const { editor, el } = await setupEditor("<p>ab[]</p>");
+        insertText(editor, "/link");
+        await animationFrame();
+        click(".o-we-command-name:first");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+
+        queryOne(".o_we_href_input_link").focus();
+        for (const char of "test.com") {
+            press(char);
+        }
+        await waitFor(".o_we_apply_link");
+        click(".o_we_apply_link");
+        expect(getContent(el)).toBe('<p>ab<a href="http://test.com">test.com[]</a></p>');
     });
 });
