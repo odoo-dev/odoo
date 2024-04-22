@@ -54,7 +54,7 @@ export const setupMultiEditor = async (spec) => {
     /** @type { Record<string, PeerInfo> } */
     const peerInfos = {};
     const peerIds = spec.peerIds;
-    const initialHystoryPluginGenerateId = CollaborationPlugin.prototype.generateId;
+    const initialHystoryPluginGenerateId = HistoryPlugin.prototype.generateId;
     after(() => {
         HistoryPlugin.prototype.generateId = initialHystoryPluginGenerateId;
     });

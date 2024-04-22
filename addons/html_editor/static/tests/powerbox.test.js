@@ -3,28 +3,19 @@ import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { describe, expect, test } from "@odoo/hoot";
 import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
+import {
+    applyConcurrentActions,
+    mergePeersSteps,
+    renderTextualSelection,
+    setupMultiEditor,
+    validateContent,
+} from "./_helpers/collaboration";
 import { setupEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
 import { insertText } from "./_helpers/user_actions";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
-}
-
-function silentInsert(text) {
-    const sel = window.getSelection();
-    const range = sel.getRangeAt(0);
-    if (range.collapsed && range.startContainer.nodeType === Node.TEXT_NODE) {
-        const node = range.startContainer;
-        let offset = range.startOffset;
-        node.textContent =
-            node.textContent.slice(0, offset) + text + node.textContent.slice(offset);
-        offset += text.length;
-        range.setStart(node, offset);
-        range.setEnd(node, offset);
-    } else {
-        throw new Error("hmmm...");
-    }
 }
 
 test("should open the Powerbox on type `/`", async () => {
@@ -188,22 +179,43 @@ describe("search", () => {
     });
 
     test("should not filter the powerbox contents when collaborator type on two different blocks", async () => {
-        const { el, editor } = await setupEditor("<p>ab</p><p>c[]d</p>");
-        insertText(editor, "/heading");
-        await animationFrame();
-
-        // simulate a collaboration scenario: move selection, insert text, restore it
-        editor.shared.setSelection({ anchorNode: editor.editable.firstChild, anchorOffset: 1 });
-        silentInsert("random text");
-        editor.shared.setSelection({
-            anchorNode: editor.editable.lastChild.firstChild,
-            anchorOffset: 9,
+        const peerInfos = await setupMultiEditor({
+            peerIds: ["c1", "c2"],
+            contentBefore: "<p>a[c1}{c1]b</p><p>c[c2}{c2]d</p>",
         });
-        expect(".o-we-powerbox").toHaveCount(1);
-        insertText(editor, "1");
+
+        applyConcurrentActions(peerInfos, {
+            c1: (editor) => {
+                insertText(editor, "/heading");
+            },
+        });
         await animationFrame();
+        mergePeersSteps(peerInfos);
         expect(".o-we-powerbox").toHaveCount(1);
-        expect(commandNames(el)).toEqual(["Heading 1"]);
+        expect(commandNames()).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+
+        applyConcurrentActions(peerInfos, {
+            c2: (editor) => {
+                insertText(editor, "g");
+            },
+        });
+        await animationFrame();
+        mergePeersSteps(peerInfos);
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames()).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+
+        applyConcurrentActions(peerInfos, {
+            c1: (editor) => {
+                insertText(editor, "1");
+            },
+        });
+        await animationFrame();
+        mergePeersSteps(peerInfos);
+        expect(".o-we-powerbox").toHaveCount(1);
+        expect(commandNames()).toEqual(["Heading 1"]);
+
+        renderTextualSelection(peerInfos);
+        validateContent(peerInfos, "<p>a/heading1[c1}{c1]b</p><p>cg[c2}{c2]d</p>");
     });
 
     test("powerbox doesn't need to be displayed to apply a command (fast search)", async () => {
