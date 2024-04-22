@@ -47,7 +47,6 @@ test("can render and apply color theme", async () => {
     expect(".o_font_color_selector").toHaveCount(0);
     click(".o-select-color-foreground");
     await animationFrame();
-    await animationFrame(); // style of colored buttons is applied on the next animation frame
     expect(".o_font_color_selector").toHaveCount(1);
     expect("button[data-color='o-color-1']").toHaveCount(1);
     expect(queryOne("button[data-color='o-color-1']").style.backgroundColor).toBe(
@@ -58,6 +57,31 @@ test("can render and apply color theme", async () => {
     click("button[data-color='o-color-1']");
     await waitFor(".text-o-color-1");
     expect(".text-o-color-1").toHaveCount(1);
+});
+
+test("can render and apply gradient color", async () => {
+    await setupEditor("<p>[test]</p>");
+
+    await waitFor(".o-we-toolbar");
+    click(".o-select-color-foreground");
+    await animationFrame();
+    expect(queryOne("button[data-color='o-color-1']").style.backgroundColor).toBe(
+        "var(--o-color-1)"
+    );
+    click(".btn:contains('Gradient')");
+    await animationFrame();
+    click(
+        "button[data-color='linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%)']"
+    );
+    await animationFrame();
+    expect("i.fa-font").toHaveStyle({
+        borderImage:
+            "linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%) 1 / 1 / 0 stretch",
+    });
+    expect("font.text-gradient").toHaveCount(1);
+    expect("font.text-gradient").toHaveStyle({
+        backgroundImage: "linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%)",
+    });
 });
 
 test("custom colors used in the editor are shown in the colorpicker", async () => {
