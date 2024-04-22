@@ -8,21 +8,21 @@ export const DIRECTIONS = {
 
 /**
  * @param {Node} node
- * @returns {Array.<HTMLElement, number>}
+ * @returns {[HTMLElement, number]}
  */
 export function leftPos(node) {
     return [node.parentNode, childNodeIndex(node)];
 }
 /**
  * @param {Node} node
- * @returns {Array.<HTMLElement, number>}
+ * @returns {[HTMLElement, number]}
  */
 export function rightPos(node) {
     return [node.parentNode, childNodeIndex(node) + 1];
 }
 /**
  * @param {Node} node
- * @returns {Array.<HTMLElement, number, HTMLElement, number>}
+ * @returns {[HTMLElement, number, HTMLElement, number]}
  */
 export function boundariesOut(node) {
     const index = childNodeIndex(node);
@@ -30,14 +30,14 @@ export function boundariesOut(node) {
 }
 /**
  * @param {Node} node
- * @returns {Array.<Node, number>}
+ * @returns {[Node, number]}
  */
 export function startPos(node) {
     return [node, 0];
 }
 /**
  * @param {Node} node
- * @returns {Array.<Node, number>}
+ * @returns {[Node, number]}
  */
 export function endPos(node) {
     return [node, nodeSize(node)];
