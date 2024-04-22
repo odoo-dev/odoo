@@ -147,7 +147,7 @@ describe("to heading 1", () => {
         });
     });
 
-    test.todo("should not transfer attributes of list to heading 1", async () => {
+    test("should not transfer attributes of list to heading 1", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
             stepFunction: setTag("h1"),
@@ -208,7 +208,7 @@ describe("to heading 2", () => {
         });
     });
 
-    test.todo("should not transfer attributes of list to heading 2", async () => {
+    test("should not transfer attributes of list to heading 2", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
             stepFunction: setTag("h2"),
@@ -269,7 +269,7 @@ describe("to heading 3", () => {
         });
     });
 
-    test.todo("should not transfer attributes of list to heading 3", async () => {
+    test("should not transfer attributes of list to heading 3", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item">[abcd]</li></ul>',
             stepFunction: setTag("h3"),
@@ -322,7 +322,7 @@ describe("to pre", () => {
         });
     });
 
-    test.todo("should not transfer attributes of list to pre", async () => {
+    test("should not transfer attributes of list to pre", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item" id="test">[abcd]</li></ul>',
             stepFunction: setTag("pre"),
@@ -384,7 +384,7 @@ describe("to blockquote", () => {
         });
     });
 
-    test.todo("should not transfer attributes of list to blockquote", async () => {
+    test("should not transfer attributes of list to blockquote", async () => {
         await testEditor({
             contentBefore: '<ul><li class="nav-item" style="color: red;">[abcd]</li></ul>',
             stepFunction: setTag("blockquote"),
