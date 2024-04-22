@@ -3,13 +3,14 @@ import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
-import { Counter } from "./counter";
+import { counter } from "./counter";
+import { card } from "./card";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
 <p><em>this is another paragraph</em></p>
 <p>Embedded element here (with all plugins)
-<span data-embedded="counter"/>
+<span data-embedded="counter" data-count="1"/>
 </p>
 <div>this is a div</div>
 <table class="table table-bordered">
@@ -37,6 +38,9 @@ const testHtml = `Hello Phoenix editor!
 </div>
 <p>this is a link: <a href="http://test.com">link</a></p>
 <p>this is another link: <a>link2</a></p>
+<div data-embedded="card" data-title="Some Title">
+    <p >Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+</div>
 <p>
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 </p>
@@ -94,12 +98,7 @@ export class Playground extends Component {
             Plugins: PluginSets[this.config.pluginSet],
             classList: this.classList,
             resources: {
-                inlineComponents: [
-                    {
-                        name: "counter",
-                        Component: Counter,
-                    },
-                ],
+                inlineComponents: [counter, card],
             },
         };
     }
