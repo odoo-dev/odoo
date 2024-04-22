@@ -17,6 +17,17 @@ const DEFAULT_COLORS = [
     ["#630000", "#7B3900", "#846300", "#295218", "#083139", "#003163", "#21104A", "#4A1031"],
 ];
 
+const DEFAULT_GRADIENT_COLORS = [
+    "linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%)",
+    "linear-gradient(135deg, rgb(102, 153, 255) 0%, rgb(255, 51, 102) 100%)",
+    "linear-gradient(135deg, rgb(47, 128, 237) 0%, rgb(178, 255, 218) 100%)",
+    "linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+    "linear-gradient(135deg, rgb(214, 255, 127) 0%, rgb(0, 179, 204) 100%)",
+    "linear-gradient(135deg, rgb(255, 222, 69) 0%, rgb(69, 33, 0) 100%)",
+    "linear-gradient(135deg, rgb(222, 222, 222) 0%, rgb(69, 69, 69) 100%)",
+    "linear-gradient(135deg, rgb(255, 222, 202) 0%, rgb(202, 115, 69) 100%)",
+];
+
 export class ColorSelector extends Component {
     static template = "html_editor.ColorSelector";
     static components = { Dropdown, Colorpicker };
@@ -30,6 +41,7 @@ export class ColorSelector extends Component {
 
     setup() {
         this.DEFAULT_COLORS = DEFAULT_COLORS;
+        this.DEFAULT_GRADIENT_COLORS = DEFAULT_GRADIENT_COLORS;
         this.dropdown = useDropdownState({
             onClose: () => this.props.dispatch("COLOR_RESET_PREVIEW"),
         });
@@ -78,5 +90,12 @@ export class ColorSelector extends Component {
             return;
         }
         this.props.dispatch("COLOR_RESET_PREVIEW");
+    }
+
+    getSelectedColorStyle(mode) {
+        if (isColorGradient(this.selectedColors[mode])) {
+            return `border-bottom: 2px solid transparent; border-image: ${this.selectedColors[mode]}; border-image-slice: 1`;
+        }
+        return `border-bottom: 2px solid ${this.selectedColors[mode]}`;
     }
 }

@@ -83,10 +83,17 @@ export class ColorPlugin extends Plugin {
         if (!el) {
             return;
         }
-        const color = getComputedStyle(el).color;
-        const background = getComputedStyle(el).backgroundColor;
-        this.selectedColors.color = rgbToHex(color);
-        this.selectedColors.background = rgbToHex(background);
+        const elStyle = getComputedStyle(el);
+        const backgroundImage = elStyle.backgroundImage;
+        const hasGradient = isColorGradient(backgroundImage);
+        const hasTextGradientClass = el.classList.contains("text-gradient");
+
+        this.selectedColors.color =
+            hasGradient && hasTextGradientClass ? backgroundImage : rgbToHex(elStyle.color);
+        this.selectedColors.background =
+            hasGradient && !hasTextGradientClass
+                ? backgroundImage
+                : rgbToHex(elStyle.backgroundColor);
     }
 
     handleCommand(command, payload) {
