@@ -1,10 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
 import { unwrapContents } from "@html_editor/utils/dom";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { findInSelection } from "@html_editor/utils/selection";
+import { getCursorDirection, findInSelection } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
 import { EMAIL_REGEX, URL_REGEX } from "./utils";
+import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -28,7 +29,7 @@ function isLinkActive(selection) {
 
 export class LinkPlugin extends Plugin {
     static name = "link";
-    static dependencies = ["dom", "selection", "overlay"];
+    static dependencies = ["dom", "selection", "split", "overlay"];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
     static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
     /** @type { (p: LinkPlugin) => Record<string, any> } */
@@ -44,6 +45,13 @@ export class LinkPlugin extends Plugin {
                     name: "link",
                     label: _t("Link"),
                     isFormatApplied: isLinkActive,
+                },
+                {
+                    id: "unlink",
+                    cmd: "REMOVE_LINK_FROM_SELECTION",
+                    icon: "fa-unlink",
+                    name: "unlink",
+                    label: _t("Remove Link"),
                 },
             ],
         },
@@ -95,6 +103,10 @@ export class LinkPlugin extends Plugin {
                 break;
             case "NORMALIZE":
                 this.normalizeLink(payload.node);
+                break;
+            case "REMOVE_LINK_FROM_SELECTION":
+                this.removeLinkFromSelection();
+                this.dispatch("ADD_STEP");
                 break;
         }
     }
@@ -197,7 +209,6 @@ export class LinkPlugin extends Plugin {
                 onRemove: () => {
                     this.removeLink();
                     this.overlay.close();
-                    this.shared.setSelection(this.shared.getEditableSelection());
                     this.dispatch("ADD_STEP");
                 },
                 onCopy: () => {
@@ -246,7 +257,63 @@ export class LinkPlugin extends Plugin {
      */
     removeLink() {
         const link = this.linkElement;
-        unwrapContents(link);
+        const selection = this.shared.getEditableSelection();
+        if (link && link.isContentEditable) {
+            unwrapContents(link);
+        }
+        if (selection.anchorNode.isConnected) {
+            this.shared.setSelection(selection, { normalize: false });
+        } else {
+            this.shared.setSelection(this.shared.getEditableSelection());
+        }
+    }
+
+    removeLinkFromSelection() {
+        this.shared.splitSelection();
+        const selection = this.shared.getEditableSelection();
+
+        // If not, unlink only the part(s) of the link(s) that are selected:
+        // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
+        let { anchorNode, focusNode, anchorOffset, focusOffset } = selection;
+        const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
+        // Split the links around the selection.
+        const [startLink, endLink] = [
+            closestElement(anchorNode, "a"),
+            closestElement(focusNode, "a"),
+        ];
+        if (startLink) {
+            anchorNode = this.shared.splitAroundUntil(anchorNode, startLink);
+            anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
+            this.shared.setSelection(
+                { anchorNode, anchorOffset, focusNode, focusOffset },
+                { normalize: true }
+            );
+        }
+        // Only split the end link if it was not already done above.
+        if (endLink && endLink.isConnected) {
+            focusNode = this.shared.splitAroundUntil(focusNode, endLink);
+            focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
+            this.shared.setSelection(
+                { anchorNode, anchorOffset, focusNode, focusOffset },
+                { normalize: true }
+            );
+        }
+        const targetedNodes = this.shared.getSelectedNodes();
+        const links = new Set(
+            targetedNodes
+                .map((node) => closestElement(node, "a"))
+                .filter((a) => a && a.isContentEditable)
+        );
+        if (links.size) {
+            for (const link of links) {
+                unwrapContents(link);
+            }
+            if (selection.anchorNode.isConnected && selection.focusNode.isConnected) {
+                this.shared.setSelection(selection, { normalize: false });
+            } else {
+                this.shared.setSelection(this.shared.getEditableSelection());
+            }
+        }
     }
 
     /**

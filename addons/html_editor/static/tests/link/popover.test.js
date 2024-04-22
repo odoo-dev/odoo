@@ -2,14 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setContent, getContent, setSelection } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
-import {
-    waitUntil,
-    waitFor,
-    click,
-    queryOne,
-    press,
-    manuallyDispatchProgrammaticEvent,
-} from "@odoo/hoot-dom";
+import { waitUntil, waitFor, click, queryOne, press } from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
 import { insertText } from "../_helpers/user_actions";
 
@@ -101,7 +94,7 @@ describe("popover should edit,copy,remove the link", () => {
         await waitFor(".o-we-linkpopover");
         click(".o_we_remove_link");
         await waitUntil(() => !document.querySelector(".o-we-linkpopover"));
-        expect(getContent(el)).toBe("<p>this is a link[]</p>");
+        expect(getContent(el)).toBe("<p>this is a li[]nk</p>");
     });
     test("after edit the label, the text of the link should be updated", async () => {
         const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
