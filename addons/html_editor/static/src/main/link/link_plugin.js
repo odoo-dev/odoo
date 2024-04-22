@@ -164,12 +164,11 @@ export class LinkPlugin extends Plugin {
         // do the sanitizing here
     }
 
-    handleSelectionChange() {
-        const sel = this.shared.getEditableSelection();
-        if (!sel.isCollapsed) {
+    handleSelectionChange(selection) {
+        if (!selection.isCollapsed) {
             this.overlay.close();
         } else {
-            const linkEl = closestElement(sel.anchorNode, "A");
+            const linkEl = closestElement(selection.anchorNode, "A");
             if (!linkEl) {
                 this.overlay.close();
                 this.removeCurrentLinkIfEmtpy();
@@ -208,13 +207,6 @@ export class LinkPlugin extends Plugin {
             // pass the link element to overlay to prevent position change
             this.overlay.open({ target: this.linkElement, props });
         }
-    }
-
-    /**
-     * Open the link tools or the image link tool depending on the selection.
-     */
-    openLinkToolsFromSelection() {
-        this.handleSelectionChange();
     }
 
     /**
