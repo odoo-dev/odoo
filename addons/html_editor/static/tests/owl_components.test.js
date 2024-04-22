@@ -32,11 +32,19 @@ class Counter extends Component {
     }
 }
 
-function getConfig(name, Comp) {
+function getConfig(name, Comp, getProps) {
+    const embedding = {
+        name,
+        Component: Comp,
+    };
+    if (getProps) {
+        embedding.getProps = getProps;
+    }
+
     return {
         Plugins: [...MAIN_PLUGINS, OwlComponentPlugin],
         resources: {
-            inlineComponents: [{ name, Component: Comp }],
+            inlineComponents: [embedding],
         },
     };
 }
@@ -208,5 +216,83 @@ test("components delete can be undone", async () => {
     await animationFrame();
     expect(getContent(el)).toBe(
         `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span>[]</div>`
+    );
+});
+
+test("element with data-embedded content is removed when component is mounting", async () => {
+    const { el } = await setupEditor(`<div><span data-embedded="counter">hello</span></div>`, {
+        config: getConfig("counter", Counter),
+    });
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+    );
+});
+
+test("inline component get proper props", async () => {
+    class Test extends Counter {
+        static props = ["initialCount"];
+        setup() {
+            expect(this.props.initialCount).toBe(10);
+            this.state.value = this.props.initialCount;
+        }
+    }
+    const { el } = await setupEditor(`<div><span data-embedded="counter"></span></div>`, {
+        config: getConfig("counter", Test, () => ({ initialCount: 10 })),
+    });
+
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+    );
+});
+
+test("inline component can compute props from element", async () => {
+    class Test extends Counter {
+        static props = ["initialCount"];
+        setup() {
+            expect(this.props.initialCount).toBe(10);
+            this.state.value = this.props.initialCount;
+        }
+    }
+    const { el } = await setupEditor(
+        `<div><span data-embedded="counter" data-count="10"></span></div>`,
+        {
+            config: getConfig("counter", Test, (elem) => ({
+                initialCount: parseInt(elem.dataset.count),
+            })),
+        }
+    );
+
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" data-count="10" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+    );
+});
+
+test("inline component can set attributes on element", async () => {
+    class Test extends Counter {
+        static props = ["elem"];
+        setup() {
+            const initialCount = parseInt(this.props.elem.dataset.count);
+            this.state.value = initialCount;
+        }
+        increment() {
+            super.increment();
+            this.props.elem.dataset.count = this.state.value;
+        }
+    }
+    const { el } = await setupEditor(
+        `<div><span data-embedded="counter" data-count="10"></span></div>`,
+        {
+            config: getConfig("counter", Test, (elem) => ({ elem })),
+        }
+    );
+
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" data-count="10" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+    );
+
+    click(".counter");
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        `<div><span data-embedded="counter" data-count="11" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 11</span></span></div>`
     );
 });
