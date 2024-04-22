@@ -1,8 +1,8 @@
 import { closestBlock } from "@html_editor/utils/blocks";
 import { childNodeIndex, endPos } from "@html_editor/utils/position";
 import { findInSelection } from "@html_editor/utils/selection";
-import { click, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
-import { tick } from "@odoo/hoot-mock";
+import { click, manuallyDispatchProgrammaticEvent, waitFor } from "@odoo/hoot-dom";
+import { tick, animationFrame } from "@odoo/hoot-mock";
 import { setSelection } from "./selection";
 
 /** @typedef {import("@html_editor/plugin").Editor} Editor */
@@ -159,9 +159,15 @@ export async function simulateArrowKeyPress(editor, key) {
     await tick();
 }
 
-export function unlink(editor) {
-    throw new Error("Not implemented command to replace unlink");
-    // editor.dispatch('unlink');
+export async function unlink(editor) {
+    const selection = editor.shared.getEditableSelection();
+    if (selection.isCollapsed) {
+        await waitFor(".o-we-linkpopover");
+        await animationFrame();
+        click(".o_we_remove_link");
+    } else {
+        editor.dispatch("REMOVE_LINK_FROM_SELECTION");
+    }
 }
 /** @param {Editor} editor */
 export function keydownTab(editor) {
