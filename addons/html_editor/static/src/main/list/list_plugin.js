@@ -632,7 +632,7 @@ export class ListPlugin extends Plugin {
             return;
         }
         // Detect if cursor is at beginning of LI.
-        if (closestElement(startContainer, "LI") !== closestLIendContainer) {
+        if (!startContainer || closestElement(startContainer, "LI") !== closestLIendContainer) {
             this.liToBlocks(closestLIendContainer);
             return true;
         }
