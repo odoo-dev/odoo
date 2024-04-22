@@ -51,20 +51,19 @@ export function setTagName(el, newTagName) {
     if (el.tagName === newTagName) {
         return el;
     }
-    var n = document.createElement(newTagName);
-    var attr = el.attributes;
-    for (var i = 0, len = attr.length; i < len; ++i) {
-        n.setAttribute(attr[i].name, attr[i].value);
-    }
+    const newEl = document.createElement(newTagName);
     while (el.firstChild) {
-        n.append(el.firstChild);
+        newEl.append(el.firstChild);
     }
     if (el.tagName === "LI") {
-        el.append(n);
+        el.append(newEl);
     } else {
-        el.parentNode.replaceChild(n, el);
+        for (const attribute of el.attributes) {
+            newEl.setAttribute(attribute.name, attribute.value);
+        }
+        el.parentNode.replaceChild(newEl, el);
     }
-    return n;
+    return newEl;
 }
 
 /**
