@@ -6,9 +6,16 @@ export class Counter extends Component {
             Counter: <t t-esc="state.value"/>
         </span>`;
 
-    state = useState({ value: 0});
+    state = useState({ value: parseInt(this.props.elem.dataset.count) });
 
     increment() {
         this.state.value++;
+        this.props.elem.dataset.count = this.state.value;
     }
 }
+
+export const counter = {
+    name: "counter",
+    Component: Counter,
+    getProps: (elem) => ({ elem }),
+};
