@@ -1,4 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { queryOne } from "@odoo/hoot-dom";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { getContent } from "../_helpers/selection";
@@ -53,11 +54,14 @@ test("should make qweb tag bold", async () => {
 });
 
 test("should make qweb tag bold even with partial selection", async () => {
-    await testEditor({
-        contentBefore: `<div><p t-esc="'Test'" contenteditable="false">T[e]st</p></div>`,
-        stepFunction: bold,
-        contentAfter: `<div>[<p t-esc="'Test'" contenteditable="false" style="font-weight: bolder;">Test</p>]</div>`,
-    });
+    const { editor, el } = await setupEditor(
+        `<div><p t-esc="'Test'" contenteditable="false">T[e]st</p></div>`
+    );
+    bold(editor);
+    expect(getContent(el)).toBe(
+        `<div>[<p t-esc="'Test'" contenteditable="false" style="font-weight: bolder;">Test</p>]</div>`
+    );
+    expect(queryOne(`p[contenteditable="false"]`).childNodes.length).toBe(1);
 });
 
 test("should make a whole heading bold after a triple click", async () => {
