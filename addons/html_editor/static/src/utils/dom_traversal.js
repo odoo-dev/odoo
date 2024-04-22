@@ -37,9 +37,6 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  * @returns {HTMLElement|null}
  */
 export function closestElement(node, predicate = "*") {
-    if (!node) {
-        return null;
-    }
     let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
     if (typeof predicate === "function") {
         while (element && !predicate(element)) {
