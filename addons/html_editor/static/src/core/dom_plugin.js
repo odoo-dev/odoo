@@ -403,18 +403,10 @@ export class DomPlugin extends Plugin {
                 (node.textContent === "\u200B" || node.previousSibling.textContent === "\u200B")
             )
         ) {
-            const selection = this.shared.getEditableSelection();
-            const [anchorNode, anchorOffset] = getDeepestPosition(
-                selection.anchorNode,
-                selection.anchorOffset
-            );
-            const [focusNode, focusOffset] = getDeepestPosition(
-                selection.focusNode,
-                selection.focusOffset
-            );
+            const selection = this.shared.getEditableSelection({ deep: true });
             // Merge identical elements together.
             moveNodes(...startPos(node), node.previousSibling);
-            this.shared.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+            this.shared.setSelection(selection);
         }
     }
 }
