@@ -42,28 +42,30 @@ export class OwlComponentPlugin extends Plugin {
             const targets = node.querySelectorAll(selector);
             if (node.matches(selector)) {
                 if (!this.nodeMap.has(node)) {
-                    this.mountComponent(node, embedding.Component);
+                    this.mountComponent(node, embedding);
                 }
             }
             for (const target of targets) {
                 if (!this.nodeMap.has(target)) {
-                    this.mountComponent(target, embedding.Component);
+                    this.mountComponent(target, embedding);
                 }
             }
         }
     }
 
-    mountComponent(elem, C) {
+    mountComponent(elem, { Component, getProps }) {
+        const props = getProps ? getProps(elem) : {};
         elem.setAttribute("contenteditable", "false");
         elem.dataset.oeProtected = true;
         elem.dataset.oeTransientContent = true;
         elem.dataset.oeHasRemovableHandler = true;
         const { dev, translateFn, getRawTemplate } = this.app;
-        const app = new App(C, {
+        const app = new App(Component, {
             test: dev,
             env: this.env,
             translateFn,
             getTemplate: getRawTemplate,
+            props,
         });
         // copy templates so they don't have to be recompiled
         app.rawTemplates = this.app.rawTemplates;
