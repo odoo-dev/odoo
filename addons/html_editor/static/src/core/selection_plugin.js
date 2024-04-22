@@ -128,17 +128,30 @@ export class SelectionPlugin extends Plugin {
             };
         } else {
             range = selection.getRangeAt(0);
-            const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+            let { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
             let direction =
                 anchorNode === range.startContainer ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
-            if (anchorNode === focusNode && focusOffset <= anchorOffset) {
+            if (anchorNode === focusNode && focusOffset < anchorOffset) {
                 direction = !direction;
             }
 
+            [anchorNode, anchorOffset] = normalizeCursorPosition(
+                anchorNode,
+                anchorOffset,
+                direction ? "left" : "right"
+            );
+            [focusNode, focusOffset] = normalizeCursorPosition(
+                focusNode,
+                focusOffset,
+                direction ? "right" : "left"
+            );
             const [startContainer, startOffset, endContainer, endOffset] =
                 direction === DIRECTIONS.RIGHT
                     ? [anchorNode, anchorOffset, focusNode, focusOffset]
                     : [focusNode, focusOffset, anchorNode, anchorOffset];
+            range = this.document.createRange();
+            range.setStart(startContainer, startOffset);
+            range.setEnd(endContainer, endOffset);
 
             activeSelection = {
                 anchorNode,
