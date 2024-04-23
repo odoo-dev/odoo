@@ -39,7 +39,7 @@ export class SplitPlugin extends Plugin {
         if (!selection.isCollapsed) {
             // @todo @phoenix collapseIfZWS is not tested
             // this.shared.collapseIfZWS();
-            this.dispatch("DELETE_RANGE");
+            this.dispatch("DELETE_SELECTION");
             selection = this.shared.getEditableSelection();
         }
 
