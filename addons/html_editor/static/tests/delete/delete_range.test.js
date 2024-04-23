@@ -20,9 +20,9 @@ async function deleteRange(editor) {
     selection.setBaseAndExtent(startContainer, startOffset, endContainer, endOffset);
 }
 
-// Tests the DELETE_RANGE command.
+// Tests the DELETE_SELECTION command.
 async function deleteSelection(editor) {
-    editor.dispatch("DELETE_RANGE");
+    editor.dispatch("DELETE_SELECTION");
 }
 
 describe("deleteRange method", () => {
@@ -125,7 +125,7 @@ describe("deleteRange method", () => {
         });
 
         test("should merge right block's content into fully selected left block", async () => {
-            // As opposed to the DELETE_RANGE command, in which fully selected block on the left is removed.
+            // As opposed to the DELETE_SELECTION command, in which fully selected block on the left is removed.
             // See "should remove fully selected left block and keep second block"
             await testEditor({
                 contentBefore: "<h1>[abc</h1><p>d]ef</p>",
@@ -217,7 +217,7 @@ describe("deleteRange method", () => {
     });
 });
 
-describe("DELETE_RANGE command", () => {
+describe("DELETE_SELECTION command", () => {
     describe("Merge blocks", () => {
         test("should remove fully selected left block and keep second block", async () => {
             // As opposed to the deleteRange method.

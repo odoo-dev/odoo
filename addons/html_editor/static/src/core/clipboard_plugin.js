@@ -94,7 +94,7 @@ export class ClipboardPlugin extends Plugin {
     onCut(ev) {
         this.onCopy(ev);
         this.dispatch("HISTORY_STAGE_SELECTION");
-        this.dispatch("DELETE_RANGE");
+        this.dispatch("DELETE_SELECTION");
         this.dispatch("ADD_STEP");
     }
 

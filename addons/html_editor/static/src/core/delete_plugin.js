@@ -77,8 +77,7 @@ export class DeletePlugin extends Plugin {
             case "DELETE_FORWARD":
                 this.deleteForward();
                 break;
-            case "DELETE_RANGE":
-                // @todo @phoenix: consider renaming the command name
+            case "DELETE_SELECTION":
                 this.deleteSelection();
                 break;
         }
