@@ -1,5 +1,4 @@
 import { CLIPBOARD_WHITELISTS } from "@html_editor/core/clipboard_plugin";
-import { setSelection } from "@html_editor/utils/selection";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { dispatch, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
@@ -2337,35 +2336,10 @@ describe("Odoo editor own html", () => {
 });
 
 describe("editable in iframe", () => {
-    test.todo("should paste odoo-editor html", async () => {
-        // Setup
-        const testContainer = document.querySelector("#editor-test-container");
-        const iframe = document.createElement("iframe");
-
-        testContainer.append(iframe);
-        const iframeDocument = iframe.contentDocument;
-        const editable = iframeDocument.createElement("div");
-        iframeDocument.body.append(editable);
-        // TODO @phoenix: need to use setupEditor.
-        // const editor = new BasicEditor(editable, { document: iframeDocument });
-        const editor = null;
-
-        // Action: paste
-        setSelection(editable.querySelector("p"), 0);
-        const clipboardData = new DataTransfer();
-        clipboardData.setData("text/odoo-editor", "<p>text<b>bold text</b>more text</p>");
-        dispatch(editor.editable, "paste", { clipboardData });
-
-        // Clean-up
-        editor.clean();
-        editor.destroy();
-        iframe.remove();
-
-        // Assertion
-        expect(editable.innerHTML).toBe(
-            "<p>text<b>bold text</b>more text<br></p>",
-            "should paste content in the paragraph"
-        );
+    test("should paste odoo-editor html", async () => {
+        const { el, editor } = await setupEditor("<p>[]</p>", { inIFrame: true });
+        pasteOdooEditorHtml(editor, `<p>text<b>bold text</b>more text</p>`);
+        expect(getContent(el)).toBe("<p>text<b>bold text</b>more text[]</p>");
     });
 });
 
