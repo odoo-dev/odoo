@@ -96,7 +96,7 @@ export class DomPlugin extends Plugin {
         let startNode;
         let insertBefore = false;
         if (!selection.isCollapsed) {
-            this.dispatch("DELETE_RANGE", { selection });
+            this.dispatch("DELETE_SELECTION", { selection });
             selection = this.shared.getEditableSelection();
         }
         if (selection.startContainer.nodeType === Node.TEXT_NODE) {

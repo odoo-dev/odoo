@@ -101,7 +101,7 @@ export class TablePlugin extends Plugin {
         const tableHtml = `<table class="table table-bordered o_table"><tbody>${trsHtml}</tbody></table>`;
         let sel = this.shared.getEditableSelection();
         if (!sel.isCollapsed) {
-            this.dispatch("DELETE_RANGE", sel);
+            this.dispatch("DELETE_SELECTION", sel);
         }
         while (!isBlock(sel.anchorNode)) {
             const anchorNode = sel.anchorNode;
