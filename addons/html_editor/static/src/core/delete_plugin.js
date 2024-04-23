@@ -157,7 +157,11 @@ export class DeletePlugin extends Plugin {
             }
         }
 
-        range = this.adjustRange(range, [this.includeEmptyInlineEnd, this.includeEndOrStartBlock]);
+        range = this.adjustRange(range, [
+            this.includeEmptyInlineEnd,
+            this.includePreviousZWS,
+            this.includeEndOrStartBlock,
+        ]);
         range = this.deleteRange(range);
         this.setCursorFromRange(range, { collapseToEnd: true });
     }
@@ -754,6 +758,21 @@ export class DeletePlugin extends Plugin {
             endContainer.textContent[endOffset] === "\u200B"
         ) {
             range.setEnd(endContainer, endOffset + 1);
+        }
+        return range;
+    }
+
+    /**
+     * @param {Range} range
+     * @returns {Range}
+     */
+    includePreviousZWS(range) {
+        const { startContainer, startOffset } = range;
+        if (
+            startContainer.nodeType === Node.TEXT_NODE &&
+            startContainer.textContent[startOffset - 1] === "\u200B"
+        ) {
+            range.setStart(startContainer, startOffset - 1);
         }
         return range;
     }
