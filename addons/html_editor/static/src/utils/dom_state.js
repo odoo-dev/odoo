@@ -146,7 +146,7 @@ const rightLeafOnlyNotBlockPath = createDOMPathGenerator(DIRECTIONS.RIGHT, {
  *
  * @param {HTMLElement} el
  * @param {number} offset
- * @param {DIRECTIONS} direction @see DIRECTIONS.LEFT @see DIRECTIONS.RIGHT
+ * @param {boolean} direction @see DIRECTIONS.LEFT @see DIRECTIONS.RIGHT
  * @param {CTYPES} [leftCType]
  * @returns {Object}
  */
