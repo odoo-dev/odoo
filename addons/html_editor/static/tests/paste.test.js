@@ -1,7 +1,7 @@
 import { CLIPBOARD_WHITELISTS } from "@html_editor/core/clipboard_plugin";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { dispatch, press } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 import { onRpc } from "@web/../tests/web_test_helpers";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection as setTestSelection } from "./_helpers/selection";
@@ -2132,7 +2132,7 @@ describe("youtube video", () => {
             // Force powerbox validation on the default first choice
             press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
-            await new Promise((resolve) => setTimeout(resolve));
+            await tick();
             expect(getContent(el)).toBe(
                 `<p>ab</p><div data-oe-expression="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="media_iframe_video" contenteditable="false"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"></iframe></div><p>[]cd</p>`
             );
@@ -2146,7 +2146,7 @@ describe("youtube video", () => {
             // Force powerbox validation on the default first choice
             press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
-            await new Promise((resolve) => setTimeout(resolve));
+            await tick();
             expect(getContent(el)).toBe(
                 '<p>a<span class="a">b</span></p><div data-oe-expression="https://youtu.be/dQw4w9WgXcQ" class="media_iframe_video" contenteditable="false"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://youtu.be/dQw4w9WgXcQ"></iframe></div><p><span class="a">[]c</span>d</p>'
             );
@@ -2210,7 +2210,7 @@ describe("youtube video", () => {
             // Force powerbox validation on the default first choice
             press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
-            await new Promise((resolve) => setTimeout(resolve));
+            await tick();
             expect(getContent(el)).toBe(
                 '<p>ab</p><div data-oe-expression="https://youtu.be/dQw4w9WgXcQ" class="media_iframe_video" contenteditable="false"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://youtu.be/dQw4w9WgXcQ"></iframe></div><p>[]cd</p>'
             );
@@ -2226,7 +2226,7 @@ describe("youtube video", () => {
             // Force powerbox validation on the default first choice
             press("Enter");
             // Wait for the getYoutubeVideoElement promise to resolve.
-            await new Promise((resolve) => setTimeout(resolve));
+            await tick();
             expect(getContent(el)).toBe(
                 '<p>a<span class="a">b</span></p><div data-oe-expression="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="media_iframe_video" contenteditable="false"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"></iframe></div><p><span class="a">[]c</span>d</p>'
             );
@@ -2318,7 +2318,7 @@ describe("Odoo editor own html", () => {
         await testEditor({
             contentBefore: "<p>a[]b</p>",
             stepFunction: async (editor) => {
-                await pasteOdooEditorHtml(editor, '<div class="custom-paste">b</div>');
+                pasteOdooEditorHtml(editor, '<div class="custom-paste">b</div>');
             },
             contentAfter: '<p>a</p><div class="custom-paste">b</div><p>[]b</p>',
         });
@@ -2328,7 +2328,7 @@ describe("Odoo editor own html", () => {
         await testEditor({
             contentBefore: "<p>a[]b</p>",
             stepFunction: async (editor) => {
-                await pasteOdooEditorHtml(editor, `<script>console.log('xss attack')</script>`);
+                pasteOdooEditorHtml(editor, `<script>console.log('xss attack')</script>`);
             },
             contentAfter: "<p>a[]b</p>",
         });
