@@ -87,7 +87,7 @@ class TestConfigManager(TransactionCase):
             'from_filter': False,
             'smtp_server': 'localhost',
             'smtp_port': 25,
-            'smtp_ssl': False,
+            'smtp_ssl': 'none',
             'smtp_user': False,
             'smtp_password': False,
             'smtp_ssl_certificate_filename': False,
@@ -148,7 +148,7 @@ class TestConfigManager(TransactionCase):
 
         self.assertEqual(self.config.options, default_values, "Options don't match")
 
-    def test_02_default_config_file(self):
+    def test_02_config_file(self):
         values = {
             # options not exposed on the command line
             'admin_passwd': 'Tigrou007',
@@ -204,7 +204,7 @@ class TestConfigManager(TransactionCase):
             'from_filter': '.*',
             'smtp_server': 'localhoost',
             'smtp_port': 12,
-            'smtp_ssl': True,
+            'smtp_ssl': 'ssl_strict',
             'smtp_user': 'spongebob',
             'smtp_password': 'Tigrou007',
             'smtp_ssl_certificate_filename': '/var/www/cert',
@@ -327,7 +327,7 @@ class TestConfigManager(TransactionCase):
             'smtp_password': False,
             'smtp_port': 25,
             'smtp_server': 'localhost',
-            'smtp_ssl': False,
+            'smtp_ssl': 'none',
             'smtp_user': False,
             'syslog': False,
             'test_enable': False,
