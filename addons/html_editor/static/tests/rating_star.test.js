@@ -41,6 +41,6 @@ test("should delete star rating elements when delete is pressed twice", async ()
             deleteBackward(editor);
             deleteBackward(editor);
         },
-        contentAfter: "<p>\u200B[]<br></p>",
+        contentAfter: "<p>[]<br></p>",
     });
 });
