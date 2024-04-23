@@ -1,7 +1,7 @@
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { expect, test } from "@odoo/hoot";
 import { click, queryFirst } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
     Component,
     onMounted,
@@ -161,6 +161,7 @@ test("select content of a component shouldn't open the toolbar", async () => {
 
     const node = queryFirst(".counter", {}).firstChild;
     setSelection({ anchorNode: node, anchorOffset: 1, focusNode: node, focusOffset: 3 });
+    await tick();
     await animationFrame();
     expect(getContent(el)).toBe(
         `<div><p>a</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">C[ou]nter: 0</span></span></div>`
