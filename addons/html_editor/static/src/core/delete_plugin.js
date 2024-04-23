@@ -145,16 +145,16 @@ export class DeletePlugin extends Plugin {
         selection = this.shared.setSelection(selection);
 
         const { endContainer, endOffset } = selection;
-        const [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
+        let [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
+        if (!startContainer) {
+            [startContainer, startOffset] = [endContainer, endOffset];
+        }
         let range = { startContainer, startOffset, endContainer, endOffset };
 
         for (const { callback } of this.resources["handle_delete_backward"]) {
             if (callback(range)) {
                 return;
             }
-        }
-        if (!startContainer) {
-            return;
         }
 
         range = this.adjustRange(range, [this.includeEmptyInlineEnd, this.includeEndOrStartBlock]);
@@ -167,9 +167,9 @@ export class DeletePlugin extends Plugin {
         selection = this.shared.setSelection(selection);
 
         const { startContainer, startOffset } = selection;
-        const [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
+        let [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
         if (!endContainer) {
-            return;
+            [endContainer, endOffset] = [startContainer, startOffset];
         }
         let range = { startContainer, startOffset, endContainer, endOffset };
 
@@ -181,6 +181,7 @@ export class DeletePlugin extends Plugin {
 
         range = this.adjustRange(range, [
             this.includeEmptyInlineStart,
+            this.includeNextZWS,
             this.includeEndOrStartBlock,
         ]);
         range = this.deleteRange(range);
@@ -230,6 +231,10 @@ export class DeletePlugin extends Plugin {
      * @returns {RangeLike}
      */
     deleteRange(range) {
+        // Do nothing if the range is collapsed.
+        if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
+            return range;
+        }
         // Split text nodes in order to have elements as start/end containers.
         range = this.splitTextNodes(range);
 
@@ -731,6 +736,24 @@ export class DeletePlugin extends Plugin {
         const element = closestElement(range.endContainer);
         if (this.isEmptyInline(element)) {
             range.setEndAfter(element);
+        }
+        return range;
+    }
+
+    // @todo @phoenix This is here because of the second test case in
+    // delete/forward/selection collapsed/basic/should ignore ZWS, and its
+    // importance is questionable.
+    /**
+     * @param {Range} range
+     * @returns {Range}
+     */
+    includeNextZWS(range) {
+        const { endContainer, endOffset } = range;
+        if (
+            endContainer.nodeType === Node.TEXT_NODE &&
+            endContainer.textContent[endOffset] === "\u200B"
+        ) {
+            range.setEnd(endContainer, endOffset + 1);
         }
         return range;
     }

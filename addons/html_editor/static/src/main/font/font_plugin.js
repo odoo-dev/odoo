@@ -254,13 +254,13 @@ export class FontPlugin extends Plugin {
         }
     }
 
-    handleDeleteBackward({ startContainer, endContainer }) {
+    handleDeleteBackward({ startContainer, startOffset, endContainer, endOffset }) {
         const closestHandledElement = closestElement(endContainer, handledElemSelector);
         if (!closestHandledElement) {
             return;
         }
-        // Detect if cursor is at the start of the editable.
-        if (!startContainer) {
+        // Detect if cursor is at the start of the editable (collapsed range).
+        if (startContainer === endContainer && startOffset === endOffset) {
             const p = this.document.createElement("p");
             p.append(...closestHandledElement.childNodes);
             closestHandledElement.after(p);

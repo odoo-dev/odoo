@@ -113,7 +113,7 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test.todo("should ignore ZWS", async () => {
+        test("should ignore ZWS", async () => {
             await testEditor({
                 contentBefore: "<p>ab[]\u200Bc</p>",
                 stepFunction: deleteForward,
