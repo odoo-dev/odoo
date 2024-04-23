@@ -3,8 +3,9 @@ import { setupEditor, testEditor } from "./_helpers/editor";
 import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
-import { getContent } from "./_helpers/selection";
-import { queryOne } from "@odoo/hoot-dom";
+import { getContent, setSelection } from "./_helpers/selection";
+import { pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
+import { tick } from "@odoo/hoot-mock";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
@@ -142,20 +143,29 @@ describe("redo", () => {
     });
 });
 
-describe("revertCurrentStep", () => {
-    test.todo("should not lose initially nested style", async () => {
-        await testEditor({
-            contentBefore: '<p>a[b<span style="color: tomato;">c</span>d]e</p>',
-            stepFunction: async (editor) => {
-                // simulate preview
-                editor.historyPauseSteps();
-                editor.dispatch("FORMAT_BOLD");
-                editor.historyUnpauseSteps();
-                // simulate preview's reset
-                editor.historyRevertCurrentStep(); // back to initial state
-            },
-            contentAfter: '<p>a[b<span style="color: tomato;">c</span>d]e</p>',
+describe("selection", () => {
+    test("should stage the selection upon click", async () => {
+        const { el, editor } = await setupEditor("<p>a</p>");
+        const pElement = queryOne("p");
+        pointerDown(pElement);
+        setSelection({
+            anchorNode: pElement.firstChild,
+            anchorOffset: 0,
+            focusNode: pElement.firstChild,
+            focusOffset: 0,
         });
+        await tick();
+        pointerUp(pElement);
+        await tick();
+        const historyPlugin = editor.plugins.find((p) => p.constructor.name === "history");
+        const nodeId = historyPlugin.nodeToIdMap.get(pElement.firstChild);
+        expect(historyPlugin.currentStep.selection).toEqual({
+            anchorNodeId: nodeId,
+            anchorOffset: 0,
+            focusNodeId: nodeId,
+            focusOffset: 0,
+        });
+        expect(getContent(el)).toBe("<p>[]a</p>");
     });
 });
 
@@ -248,7 +258,23 @@ describe("prevent renderingClasses to be set from history", () => {
 });
 
 describe("makeSavePoint", () => {
-    test("makeSavePoint should correctly revert mutations", async () => {
+    test("makeSavePoint should correctly revert mutations (1)", async () => {
+        const { el, editor } = await setupEditor(
+            `<p>a[b<span style="color: tomato;">c</span>d]e</p>`
+        );
+        // The HISTORY_STAGE_SELECTION should have been triggered by the click on
+        // the editable. As we set the selection programmatically, we dispatch the
+        // selection here for the commands that relies on it.
+        // If the selection of the editor would be programatically set upon start
+        // (like an autofocus feature), it would be the role of the autofocus
+        // feature to trigger the HISTORY_STAGE_SELECTION.
+        editor.dispatch("HISTORY_STAGE_SELECTION");
+        const restore = editor.shared.makeSavePoint();
+        editor.dispatch("FORMAT_BOLD");
+        restore();
+        expect(getContent(el)).toBe(`<p>a[b<span style="color: tomato;">c</span>d]e</p>`);
+    });
+    test("makeSavePoint should correctly revert mutations (2)", async () => {
         // Before, the makeSavePoint method was reverting all the current mutations to finally re-apply
         // the old ones.
         // The current limitation of the editor is that newly created element that is not connected to

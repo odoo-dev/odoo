@@ -121,6 +121,12 @@ export async function testEditor(config) {
         };
     }
     const { el, editor } = await setupEditor(contentBefore, config);
+    // The HISTORY_STAGE_SELECTION should have been triggered by the click on
+    // the editable. As we set the selection programmatically, we dispatch the
+    // selection here for the commands that relies on it.
+    // If the selection of the editor would be programatically set upon start
+    // (like an autofocus feature), it would be the role of the autofocus
+    // feature to trigger the HISTORY_STAGE_SELECTION.
     editor.dispatch("HISTORY_STAGE_SELECTION");
     if (inIFrame) {
         expect("iframe").toHaveCount(1);
