@@ -626,13 +626,16 @@ export class ListPlugin extends Plugin {
     }
 
     handleDeleteBackward(range) {
-        const { startContainer, endContainer } = range;
+        const { startContainer, startOffset, endContainer, endOffset } = range;
         const closestLIendContainer = closestElement(endContainer, "LI");
         if (!closestLIendContainer) {
             return;
         }
-        // Detect if cursor is at beginning of LI.
-        if (!startContainer || closestElement(startContainer, "LI") !== closestLIendContainer) {
+        // Detect if cursor is at beginning of LI (or the editable === collapsed range).
+        if (
+            (startContainer === endContainer && startOffset === endOffset) ||
+            closestElement(startContainer, "LI") !== closestLIendContainer
+        ) {
             this.liToBlocks(closestLIendContainer);
             return true;
         }
