@@ -87,7 +87,7 @@ export class CollaborationPlugin extends Plugin {
     }
     /**
      * Safely set an attribute on a node.
-     * @param {Node} node
+     * @param {HTMLElement} node
      * @param {string} attributeName
      * @param {string} attributeValue
      */

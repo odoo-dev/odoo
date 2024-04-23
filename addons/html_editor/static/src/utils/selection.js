@@ -98,6 +98,7 @@ export function normalizeFakeBR(node, offset) {
  *
  * @param {Node} node
  * @param {number} offset
+ * @returns { [Node, number] }
  */
 export function normalizeDeepCursorPosition(node, offset) {
     // Put the cursor in deepest inline node around the given position if

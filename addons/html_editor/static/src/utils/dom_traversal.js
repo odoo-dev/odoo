@@ -98,7 +98,8 @@ export const PATH_END_REASONS = {
  * @see rightLeafOnlyNotBlockPath
  * @see rightLeafOnlyNotBlockNotEditablePath
  *
- * @param {number} direction
+ * @param {boolean} direction
+ * @param {Object} options
  * @param {boolean} [options.leafOnly] if true, do not yield any non-leaf node
  * @param {boolean} [options.inScope] if true, stop the generator as soon as a node is not
  *                      a descendant of `node` provided when traversing the

@@ -3,6 +3,7 @@
  * @typedef { import("./editor").EditorConfig } EditorConfig
  * @typedef { import("./core/history_plugin").HistoryPlugin } HistoryPlugin
  * @typedef { import("./core/selection_plugin").SelectionPlugin } SelectionPlugin
+ * @typedef { import("./core/delete_plugin").DeletePlugin } DeletePlugin
  * @typedef { import("./core/dom_plugin").DomPlugin } DomPlugin
  * @typedef { import("./core/split_plugin").SplitPlugin } SplitPlugin
  * @typedef { import("./core/overlay_plugin").OverlayPlugin } OverlayPlugin
@@ -24,6 +25,7 @@
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
  * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
  * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
+ * @property { SelectionPlugin['getTraversedBlocks'] } getTraversedBlocks
  * @property { SelectionPlugin['setSelection'] } setSelection
  * @property { SelectionPlugin['setCursorStart'] } setCursorStart
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
@@ -32,17 +34,18 @@
  * @property { SelectionPlugin['resetSelection'] } resetSelection
  * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
  * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
- * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
  * @property { FormatPlugin['isSelectionFormat'] } isSelectionFormat
  * @property { LocalOverlayPlugin['makeLocalOverlay'] } makeLocalOverlay
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
  * @property { PowerboxPlugin['updatePowerbox'] } updatePowerbox
  * @property { PowerboxPlugin['closePowerbox'] } closePowerbox
  * @property { SanitizePlugin['sanitize'] } sanitize
+ * @property { DeletePlugin['deleteRange'] } deleteRange
  * @property { LinkPlugin['createLink'] } createLink
  * @property { LinkPlugin['insertLink'] } insertLink
  * @property { LinkPlugin['getPathAsUrlCommand'] } getPathAsUrlCommand
  * @property { DomPlugin['domInsert'] } domInsert
+ * @property { DomPlugin['copyAttributes'] } copyAttributes
  * @property { SplitPlugin['splitElementBlock'] } splitElementBlock
  * @property { SplitPlugin['splitElement'] } splitElement
  * @property { SplitPlugin['splitSelection'] } splitSelection
