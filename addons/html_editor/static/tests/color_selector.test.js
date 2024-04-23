@@ -190,6 +190,19 @@ test("selected background color is shown in the toolbar and update when clicking
     expect("i.fa-paint-brush").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
 });
 
+test("clicking on button color parent does not crash", async () => {
+    const { el } = await setupEditor("<p>[test]</p>");
+
+    await waitFor(".o-we-toolbar");
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click(".o_colorpicker_section");
+    await animationFrame();
+    click(".o_color_button[data-color='#6BADDE']");
+    await animationFrame();
+    expect(getContent(el)).toBe(`<p><font style="color: rgb(107, 173, 222);">[test]</font></p>`);
+});
+
 describe.tags("desktop")("color preview", () => {
     test("preview color should work and be reverted", async () => {
         await setupEditor("<p>[test]</p>");
