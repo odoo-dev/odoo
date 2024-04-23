@@ -5,7 +5,7 @@ import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { getContent, setSelection } from "./_helpers/selection";
 import { pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
-import { tick } from "@odoo/hoot-mock";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
@@ -297,5 +297,58 @@ describe("makeSavePoint", () => {
         safePoint();
         expect(getContent(el)).toBe("[]<font>this is another paragraph with color 2</font><p></p>");
         expect(history.steps.length).toBe(numberOfSteps);
+    });
+});
+
+describe("makePreviewableOperation", () => {
+    test("makePreviewableOperation correctly revert previews", async () => {
+        const { editor } = await setupEditor(`<div id="test"></div>`);
+
+        const history = editor.plugins.find((plugin) => plugin.constructor.name === "history");
+        const div = queryOne("#test");
+        const previewableAddParagraph = history.makePreviewableOperation((elemId) => {
+            const newElem = document.createElement("p");
+            newElem.setAttribute("id", elemId);
+            div.appendChild(newElem);
+        });
+        const numberOfSteps = history.steps.length;
+        const numberOfCurrentMutations = history.currentStep.mutations.length;
+        previewableAddParagraph.preview("first");
+        await animationFrame();
+        expect(history.steps.length).toBe(numberOfSteps);
+        expect("#first").toHaveCount(1);
+        previewableAddParagraph.preview("second");
+        await animationFrame();
+        expect(history.steps.length).toBe(numberOfSteps);
+        expect("#first").toHaveCount(0);
+        expect("#second").toHaveCount(1);
+        previewableAddParagraph.revert();
+        await animationFrame();
+        expect("#first").toHaveCount(0);
+        expect("#second").toHaveCount(0);
+        expect(history.steps.length).toBe(numberOfSteps);
+        expect(history.currentStep.mutations.length).toBe(numberOfCurrentMutations);
+    });
+
+    test("makePreviewableOperation correctly commit operation", async () => {
+        const { editor } = await setupEditor(`<div id="test"></div>`);
+
+        const history = editor.plugins.find((plugin) => plugin.constructor.name === "history");
+        const div = queryOne("#test");
+        const previewableAddParagraph = history.makePreviewableOperation((elemId) => {
+            const newElem = document.createElement("p");
+            newElem.setAttribute("id", elemId);
+            div.appendChild(newElem);
+        });
+        const numberOfSteps = history.steps.length;
+        previewableAddParagraph.preview("first");
+        await animationFrame();
+        expect(history.steps.length).toBe(numberOfSteps);
+        expect("#first").toHaveCount(1);
+        previewableAddParagraph.commit("second");
+        await animationFrame();
+        expect("#first").toHaveCount(0);
+        expect("#second").toHaveCount(1);
+        expect(history.steps.length).toBe(numberOfSteps + 1);
     });
 });
