@@ -4,6 +4,7 @@ import { unformat } from "../_helpers/format";
 import { setSelection, setContent } from "../_helpers/selection";
 import { insertText } from "../_helpers/user_actions";
 import { animationFrame } from "@odoo/hoot-mock";
+import { waitFor, waitForNone } from "@odoo/hoot-dom";
 
 test("should ignore protected elements children mutations (true)", async () => {
     await testEditor({
@@ -167,20 +168,20 @@ test("select a protected element shouldn't open the toolbar", async () => {
     const { el } = await setupEditor(
         `<div><p>[a]</p></div><div data-oe-protected="true"><p>b</p><div data-oe-protected="false">c</div></div>`
     );
-    await animationFrame();
+    await waitFor(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(1);
 
     setContent(
         el,
         `<div><p>a</p></div><div data-oe-protected="true"><p>[b]</p><div data-oe-protected="false">c</div></div>`
     );
-    await animationFrame();
+    await waitForNone(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(0);
 
     setContent(
         el,
         `<div><p>a</p></div><div data-oe-protected="true"><p>b</p><div data-oe-protected="false">[c]</div></div>`
     );
-    await animationFrame();
+    await waitFor(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(1);
 });
