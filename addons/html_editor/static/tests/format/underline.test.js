@@ -158,11 +158,11 @@ describe("with strikeThrough", () => {
             await testEditor({
                 contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
                 stepFunction: async (editor) => {
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "A");
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "B");
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "C");
                 },
                 contentAfterEdit: `<p>ab${u(s(`cd`))}${s(
@@ -187,8 +187,8 @@ describe("with italic", () => {
         await testEditor({
             contentBefore: `<p>ab[]cd</p>`,
             stepFunction: async (editor) => {
-                await italic(editor);
-                await underline(editor);
+                italic(editor);
+                underline(editor);
             },
             contentAfterEdit: `<p>ab${em(u(`[]\u200B`, "first"), "first")}cd</p>`,
             contentAfter: `<p>ab[]cd</p>`,
@@ -199,9 +199,9 @@ describe("with italic", () => {
         await testEditor({
             contentBefore: `<p>ab[]cd</p>`,
             stepFunction: async (editor) => {
-                await italic(editor);
-                await underline(editor);
-                await underline(editor);
+                italic(editor);
+                underline(editor);
+                underline(editor);
             },
             contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
             contentAfter: `<p>ab[]cd</p>`,
@@ -212,9 +212,9 @@ describe("with italic", () => {
         await testEditor({
             contentBefore: `<p>ab[]cd</p>`,
             stepFunction: async (editor) => {
-                await underline(editor);
-                await italic(editor);
-                await underline(editor);
+                underline(editor);
+                italic(editor);
+                underline(editor);
             },
             contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
             contentAfter: `<p>ab[]cd</p>`,
@@ -225,9 +225,9 @@ describe("with italic", () => {
         await testEditor({
             contentBefore: `<p>ab[]cd</p>`,
             stepFunction: async (editor) => {
-                await underline(editor);
-                await underline(editor);
-                await italic(editor);
+                underline(editor);
+                underline(editor);
+                italic(editor);
             },
             contentAfterEdit: `<p>ab${em(`[]\u200B`, "first")}cd</p>`,
             contentAfter: `<p>ab[]cd</p>`,
@@ -279,11 +279,11 @@ describe("with italic", () => {
             await testEditor({
                 contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
                 stepFunction: async (editor) => {
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "A");
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "B");
-                    await underline(editor);
+                    underline(editor);
                     await editor.execCommand("insert", "C");
                 },
                 contentAfter: `<p>ab${u(em(`cd`))}${em(`A${u(`B`)}C[]`)}${u(em(`ef`))}</p>`,

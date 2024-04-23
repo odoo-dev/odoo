@@ -24,7 +24,7 @@ test("should make a few characters strikeThrough then remove style inside", asyn
     await testEditor({
         contentBefore: `<p>ab[c d]ef</p>`,
         stepFunction: async (editor) => {
-            await strikeThrough(editor);
+            strikeThrough(editor);
             const styleSpan = editor.editable.querySelector("s").childNodes[0];
             const selection = {
                 anchorNode: styleSpan,
@@ -33,7 +33,7 @@ test("should make a few characters strikeThrough then remove style inside", asyn
                 focusOffset: 2,
             };
             setSelection(selection);
-            await strikeThrough(editor);
+            strikeThrough(editor);
         },
         contentAfter: `<p>ab<s>c</s>[ ]<s>d</s>ef</p>`,
     });
@@ -43,7 +43,7 @@ test("should make strikeThrough then more then remove", async () => {
     await testEditor({
         contentBefore: `<p>abc[ ]def</p>`,
         stepFunction: async (editor) => {
-            await strikeThrough(editor);
+            strikeThrough(editor);
             const pElem = editor.editable.querySelector("p").childNodes;
             const selection = {
                 anchorNode: pElem[0],
@@ -52,14 +52,14 @@ test("should make strikeThrough then more then remove", async () => {
                 focusOffset: 1,
             };
             setSelection(selection);
-            await strikeThrough(editor);
+            strikeThrough(editor);
         },
         contentAfter: `<p>ab${s(`[c d]`)}ef</p>`,
     });
     await testEditor({
         contentBefore: `<p>abc[ ]def</p>`,
         stepFunction: async (editor) => {
-            await strikeThrough(editor);
+            strikeThrough(editor);
             const pElem = editor.editable.querySelector("p").childNodes;
             const selection = {
                 anchorNode: pElem[0],
@@ -68,8 +68,8 @@ test("should make strikeThrough then more then remove", async () => {
                 focusOffset: 1,
             };
             setSelection(selection);
-            await strikeThrough(editor);
-            await strikeThrough(editor);
+            strikeThrough(editor);
+            strikeThrough(editor);
         },
         contentAfter: `<p>ab[c d]ef</p>`,
     });
