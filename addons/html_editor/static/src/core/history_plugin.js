@@ -94,6 +94,10 @@ export class HistoryPlugin extends Plugin {
     setup() {
         this.renderingClasses = new Set(this.resources["history_rendering_classes"]);
         this.addDomListener(this.editable, "input", this.addStep);
+        this.addDomListener(this.editable, "pointerup", () => {
+            this.stageSelection();
+            this.stageNextSelection = true;
+        });
         this.addDomListener(this.editable, "keydown", this.stageSelection);
         this.addDomListener(this.editable, "beforeinput", this.stageSelection);
         this.observer = new MutationObserver(this.handleNewRecords.bind(this));
