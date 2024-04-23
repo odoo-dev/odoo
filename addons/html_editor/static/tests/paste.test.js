@@ -2372,7 +2372,7 @@ describe("editable in iframe", () => {
 describe("Paste HTML tables", () => {
     // The tests below are very sensitive to whitespaces as they do represent actual
     // whitespace text nodes in the DOM. The tests will fail if those are removed.
-    test.todo("should keep all allowed style (Excel Online)", async () => {
+    test("should keep all allowed style (Excel Online)", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
@@ -2608,11 +2608,11 @@ describe("Paste HTML tables", () => {
     
 
     
-[]<br></p>`,
+[]</p>`,
         });
     });
 
-    test.todo("should keep all allowed style (Google Sheets)", async () => {
+    test("should keep all allowed style (Google Sheets)", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
@@ -2720,11 +2720,11 @@ describe("Paste HTML tables", () => {
             </tr>
         </tbody>
     </table><p>
-[]<br></p>`,
+[]</p>`,
         });
     });
 
-    test.todo("should keep all allowed style (Libre Office)", async () => {
+    test("should keep all allowed style (Libre Office)", async () => {
         await testEditor({
             contentBefore: "<p>[]</p>",
             stepFunction: async (editor) => {
@@ -2852,7 +2852,7 @@ describe("Paste HTML tables", () => {
     </tbody></table><p>
 
 
-[]<br></p>`,
+[]</p>`,
         });
     });
 });
