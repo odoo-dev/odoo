@@ -70,6 +70,11 @@ import { descendants, getCommonAncestor } from "../utils/dom_traversal";
  * @property { string } previousId
  *
  * @typedef { HistoryMutationCharacterData | HistoryMutationAttributes | HistoryMutationAdd | HistoryMutationRemove } HistoryMutation
+ *
+ * @typedef { Object } PreviewableOperation
+ * @property { Function } apply
+ * @property { Function } preview
+ * @property { Function } revert
  */
 
 export class HistoryPlugin extends Plugin {
@@ -77,6 +82,7 @@ export class HistoryPlugin extends Plugin {
     static dependencies = ["dom", "selection"];
     static shared = [
         "makeSavePoint",
+        "makePreviewableOperation",
         "makeSnapshotStep",
         "disableObserver",
         "enableObserver",
@@ -761,6 +767,30 @@ export class HistoryPlugin extends Plugin {
             } else {
                 this.revertStepsUntil(savePointIndex);
             }
+        };
+    }
+    /**
+     * Creates a set of functions to preview, apply, and revert an operation.
+     * @param {Function} operation
+     * @returns {PreviewableOperation}
+     */
+    makePreviewableOperation(operation) {
+        let revertOperation = () => {};
+
+        return {
+            preview: (...args) => {
+                revertOperation();
+                revertOperation = this.makeSavePoint();
+                operation(...args);
+            },
+            commit: (...args) => {
+                revertOperation();
+                operation(...args);
+                this.addStep();
+            },
+            revert: () => {
+                revertOperation();
+            },
         };
     }
     /**

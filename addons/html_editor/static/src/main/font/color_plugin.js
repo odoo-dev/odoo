@@ -74,8 +74,10 @@ export class ColorPlugin extends Plugin {
     });
 
     setup() {
-        this.revertPreview = () => {};
         this.selectedColors = reactive({ font: "", background: "" });
+        this.previewableApplyColor = this.shared.makePreviewableOperation((color, mode) =>
+            this.applyColor(color, mode)
+        );
     }
 
     updateSelectedColor(selection) {
@@ -99,19 +101,15 @@ export class ColorPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "APPLY_COLOR":
-                this.revertPreview();
-                this.applyColor(payload.color, payload.mode);
+                this.previewableApplyColor.commit(payload.color, payload.mode);
                 this.updateSelectedColor(this.shared.getEditableSelection());
-                this.dispatch("ADD_STEP");
                 break;
             case "COLOR_PREVIEW":
-                this.revertPreview();
-                this.revertPreview = this.shared.makeSavePoint();
-                this.applyColor(payload.color, payload.mode);
+                this.previewableApplyColor.preview(payload.color, payload.mode);
                 this.updateSelectedColor(this.shared.getEditableSelection());
                 break;
             case "COLOR_RESET_PREVIEW":
-                this.revertPreview();
+                this.previewableApplyColor.revert();
                 this.updateSelectedColor(this.shared.getEditableSelection());
                 break;
         }
