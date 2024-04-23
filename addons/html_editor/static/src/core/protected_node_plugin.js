@@ -10,7 +10,7 @@ export class ProtectedNodePlugin extends Plugin {
     }
 
     /**
-     * @param {MutationRecord[]} records
+     * @param {MutationRecord} record
      * @return {boolean}
      */
     isMutationRecordSavable(record) {

@@ -67,7 +67,7 @@ export class SelectionPlugin extends Plugin {
     }
 
     resetSelection() {
-        this.activeSelection = this.makeSelection(false, false);
+        this.activeSelection = this.makeSelection();
     }
 
     /**
@@ -105,7 +105,8 @@ export class SelectionPlugin extends Plugin {
     }
 
     /**
-     * @param { Selection } selection The DOM selection
+     * @param { Selection } [selection] The DOM selection
+     * @param { boolean } [inEditable]
      * @return { EditorSelection }
      */
     makeSelection(selection, inEditable) {
@@ -245,7 +246,7 @@ export class SelectionPlugin extends Plugin {
      * @param { Node } [selection.focusNode=selection.anchorNode]
      * @param { number } [selection.focusOffset=selection.anchorOffset]
      * @param { Object } [options]
-     * @param { boolean } [normalize=true] Normalize deep the selection
+     * @param { boolean } [options.normalize=true] Normalize deep the selection
      * @return { EditorSelection }
      */
     setSelection(
