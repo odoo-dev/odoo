@@ -63,13 +63,18 @@ export class ColorSelector extends Component {
         return color;
     }
 
-    onColorApply(ev, { closeDropdown = true } = {}) {
-        const color = ev.hex ? ev.hex : this.processColorFromEvent(ev);
+    applyColor(color) {
         const mode = this.props.type === "foreground" ? "color" : "background";
         this.props.dispatch("APPLY_COLOR", { color, mode });
-        if (closeDropdown) {
-            this.dropdown.close();
+    }
+
+    onColorApply(ev) {
+        if (ev.target.tagName !== "BUTTON") {
+            return;
         }
+        const color = this.processColorFromEvent(ev);
+        this.applyColor(color);
+        this.dropdown.close();
     }
 
     onColorPreview(ev) {
