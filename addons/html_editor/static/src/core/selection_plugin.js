@@ -290,7 +290,7 @@ export class SelectionPlugin extends Plugin {
      *
      * @param { Object } selection
      * @param { Node } selection.anchorNode
-     * @param { number } selection.anchorOffset
+     * @param { number } selection.anchorOffset=0
      * @param { Node } [selection.focusNode=selection.anchorNode]
      * @param { number } [selection.focusOffset=selection.anchorOffset]
      * @param { Object } [options]
@@ -298,7 +298,7 @@ export class SelectionPlugin extends Plugin {
      * @return { EditorSelection }
      */
     setSelection(
-        { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
+        { anchorNode, anchorOffset = 0, focusNode = anchorNode, focusOffset = anchorOffset },
         { normalize = true } = {}
     ) {
         if (
