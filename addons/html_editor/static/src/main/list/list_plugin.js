@@ -384,7 +384,9 @@ export class ListPlugin extends Plugin {
     }
 
     removeParagraphInLI(element) {
-        if (!(element.tagName === "P" && isListItem(element.parentElement))) {
+        if (
+            !(element.tagName === "P" && element.parentElement && isListItem(element.parentElement))
+        ) {
             return element;
         }
         // Remove paragraph if empty.

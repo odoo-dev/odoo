@@ -116,6 +116,9 @@ export class DomPlugin extends Plugin {
         if (typeof content === "string") {
             container.textContent = content;
         } else {
+            for (const child of content.children) {
+                this.dispatch("NORMALIZE", { node: child });
+            }
             container.replaceChildren(content);
         }
 
@@ -131,7 +134,7 @@ export class DomPlugin extends Plugin {
         startNode = startNode || this.shared.getEditableSelection().anchorNode;
         // If the selection anchorNode is the editable itself, the content
         // should not be unwrapped.
-        if (selection.anchorNode.oid !== "root") {
+        if (selection.anchorNode !== this.editable) {
             // In case the html inserted is all contained in a single root <p> or <li>
             // tag, we take the all content of the <p> or <li> and avoid inserting the
             // <p> or <li>. The same is true for a <pre> inside a <pre>.
