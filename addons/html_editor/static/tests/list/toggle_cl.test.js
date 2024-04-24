@@ -184,19 +184,6 @@ describe("Range collapsed", () => {
             });
         });
 
-        test.todo("should add a unique id on a new checklist", async () => {
-            await testEditor({
-                contentBefore: "<p>ab[]cd</p>",
-                stepFunction: (editor) => {
-                    toggleCheckList(editor);
-                    const id = editor.editable.querySelector("li[id^=checkId-]").getAttribute("id");
-                    window.chai
-                        .expect(editor.editable.innerHTML)
-                        .to.be.equal(`<ul class="o_checklist"><li id="${id}">abcd</li></ul>`);
-                },
-            });
-        });
-
         test("should turn an empty paragraph of multiple table cells into a checklist", async () => {
             await testEditor({
                 removeCheckIds: true,
