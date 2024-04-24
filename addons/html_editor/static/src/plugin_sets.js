@@ -36,6 +36,7 @@ import { MoveNodePlugin } from "./main/movenode_plugin";
 import { LocalOverlayPlugin } from "./main/local_overlay_plugin";
 import { TransientNodePlugin } from "./core/transient_node_plugin";
 import { TextDirectionPlugin } from "./main/text_direction_plugin";
+import { InlineCodePlugin } from "./main/inline_code";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -78,6 +79,7 @@ export const MAIN_PLUGINS = [
     MoveNodePlugin,
     LocalOverlayPlugin,
     TextDirectionPlugin,
+    InlineCodePlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, OwlComponentPlugin];

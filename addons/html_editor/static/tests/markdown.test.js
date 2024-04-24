@@ -3,7 +3,7 @@ import { testEditor } from "./_helpers/editor";
 import { insertText } from "./_helpers/user_actions";
 
 describe("inline code", () => {
-    test.todo("should convert text into inline code (start)", async () => {
+    test("should convert text into inline code (start)", async () => {
         await testEditor({
             contentBefore: "<p>`ab[]cd</p>",
             stepFunction: async (editor) => insertText(editor, "`"),
@@ -17,7 +17,7 @@ describe("inline code", () => {
         });
     });
 
-    test.todo("should convert text into inline code (middle)", async () => {
+    test("should convert text into inline code (middle)", async () => {
         await testEditor({
             contentBefore: "<p>ab`cd[]ef</p>",
             stepFunction: async (editor) => insertText(editor, "`"),
@@ -31,7 +31,7 @@ describe("inline code", () => {
         });
     });
 
-    test.todo("should convert text into inline code (end)", async () => {
+    test("should convert text into inline code (end)", async () => {
         await testEditor({
             contentBefore: "<p>ab`cd[]</p>",
             stepFunction: async (editor) => insertText(editor, "`"),
@@ -45,7 +45,7 @@ describe("inline code", () => {
         });
     });
 
-    test.todo("should convert text into inline code, with parasite backticks", async () => {
+    test("should convert text into inline code, with parasite backticks", async () => {
         await testEditor({
             contentBefore: "<p>a`b`cd[]e`f</p>",
             stepFunction: async (editor) => insertText(editor, "`"),
@@ -84,7 +84,7 @@ describe("inline code", () => {
         });
     });
 
-    test.todo("should convert text into inline code even when text nodes are split", async () => {
+    test("should convert text into inline code even when text nodes are split", async () => {
         // BEFORE
         await testEditor({
             contentBefore: "<p>b`c[]d</p>",
@@ -115,27 +115,24 @@ describe("inline code", () => {
         });
     });
 
-    test.todo(
-        "should convert text into inline code even when the other backtick is in a separate text node",
-        async () => {
-            // BACKTICK IS PREVIOUS SIBLING
-            await testEditor({
-                contentBefore: "<p>ab[]c</p>",
-                stepFunction: async (editor) => {
-                    editor.document.getSelection().anchorNode.before(document.createTextNode("`"));
-                    insertText(editor, "`");
-                },
-                contentAfter: '<p>\u200B<code class="o_inline_code">ab</code>\u200B[]c</p>',
-            });
-            // BACKTICK IS NEXT SIBLING
-            await testEditor({
-                contentBefore: "<p>ab[]c</p>",
-                stepFunction: async (editor) => {
-                    editor.document.getSelection().anchorNode.after(document.createTextNode("`"));
-                    insertText(editor, "`");
-                },
-                contentAfter: '<p>ab<code class="o_inline_code">[]c</code></p>',
-            });
-        }
-    );
+    test("should convert text into inline code even when the other backtick is in a separate text node", async () => {
+        // BACKTICK IS PREVIOUS SIBLING
+        await testEditor({
+            contentBefore: "<p>ab[]c</p>",
+            stepFunction: async (editor) => {
+                editor.document.getSelection().anchorNode.before(document.createTextNode("`"));
+                insertText(editor, "`");
+            },
+            contentAfter: '<p>\u200B<code class="o_inline_code">ab</code>\u200B[]c</p>',
+        });
+        // BACKTICK IS NEXT SIBLING
+        await testEditor({
+            contentBefore: "<p>ab[]c</p>",
+            stepFunction: async (editor) => {
+                editor.document.getSelection().anchorNode.after(document.createTextNode("`"));
+                insertText(editor, "`");
+            },
+            contentAfter: '<p>ab<code class="o_inline_code">[]c</code></p>',
+        });
+    });
 });
