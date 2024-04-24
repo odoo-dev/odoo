@@ -228,7 +228,7 @@ export class SplitPlugin extends Plugin {
     }
 
     splitSelection() {
-        let { startContainer, startOffset, endContainer, endOffset } =
+        let { startContainer, startOffset, endContainer, endOffset, direction } =
             this.shared.getEditableSelection();
         const isInSingleContainer = startContainer === endContainer;
         if (
@@ -256,15 +256,27 @@ export class SplitPlugin extends Plugin {
             }
         }
 
-        return this.shared.setSelection(
-            {
-                anchorNode: startContainer,
-                anchorOffset: startOffset,
-                focusNode: endContainer,
-                focusOffset: endOffset,
-            },
-            { normalize: false }
-        );
+        if (direction === DIRECTIONS.RIGHT) {
+            return this.shared.setSelection(
+                {
+                    anchorNode: startContainer,
+                    anchorOffset: startOffset,
+                    focusNode: endContainer,
+                    focusOffset: endOffset,
+                },
+                { normalize: false }
+            );
+        } else {
+            return this.shared.setSelection(
+                {
+                    anchorNode: endContainer,
+                    anchorOffset: endOffset,
+                    focusNode: startContainer,
+                    focusOffset: startOffset,
+                },
+                { normalize: false }
+            );
+        }
     }
 
     onBeforeInput(e) {
