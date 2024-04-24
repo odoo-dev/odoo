@@ -2,7 +2,15 @@ import { isBlock } from "./blocks";
 import { isNotEditableNode, isSelfClosingElement } from "./dom_info";
 import { isFakeLineBreak } from "./dom_state";
 import { closestElement, createDOMPathGenerator } from "./dom_traversal";
-import { DIRECTIONS, childNodeIndex, endPos, leftPos, rightPos, startPos } from "./position";
+import {
+    DIRECTIONS,
+    childNodeIndex,
+    endPos,
+    leftPos,
+    nodeSize,
+    rightPos,
+    startPos,
+} from "./position";
 
 /**
  * From selection position, checks if it is left-to-right or right-to-left.
@@ -168,6 +176,14 @@ function updateCursorBeforeRemove(node, cursor) {
     }
 }
 
+function updateCursorBeforeUnwrap(node, cursor) {
+    if (cursor.node === node) {
+        [cursor.node, cursor.offset] = [node.parentNode, cursor.offset + childNodeIndex(node)];
+    } else if (cursor.node === node.parentNode && cursor.offset > childNodeIndex(node)) {
+        cursor.offset += nodeSize(node) - 1;
+    }
+}
+
 /** @typedef {import("@html_editor/core/selection_plugin").Cursor} Cursor */
 
 export const callbacksForCursorUpdate = {
@@ -184,4 +200,6 @@ export const callbacksForCursorUpdate = {
         updateCursorBeforeMove(to, to.childNodes.length, node, cursor),
     /** @type {(ref: HTMLElement, node: Node) => (cursor: Cursor) => void} */
     prepend: (to, node) => (cursor) => updateCursorBeforeMove(to, 0, node, cursor),
+    /** @type {(node: HTMLElement) => (cursor: Cursor) => void} */
+    unwrap: (node) => (cursor) => updateCursorBeforeUnwrap(node, cursor),
 };
