@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { unwrapContents } from "@html_editor/utils/dom";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { getCursorDirection, findInSelection } from "@html_editor/utils/selection";
+import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
 import { EMAIL_REGEX, URL_REGEX } from "./utils";
@@ -106,7 +106,6 @@ export class LinkPlugin extends Plugin {
                 break;
             case "REMOVE_LINK_FROM_SELECTION":
                 this.removeLinkFromSelection();
-                this.dispatch("ADD_STEP");
                 break;
         }
     }
@@ -253,29 +252,26 @@ export class LinkPlugin extends Plugin {
     }
 
     /**
-     * Remove the link from the selection
+     * Remove the link from the collapsed selection
      */
     removeLink() {
         const link = this.linkElement;
-        const selection = this.shared.getEditableSelection();
+        const cursors = this.shared.preserveSelection();
         if (link && link.isContentEditable) {
+            cursors.update(callbacksForCursorUpdate.unwrap(link));
             unwrapContents(link);
         }
-        if (selection.anchorNode.isConnected) {
-            this.shared.setSelection(selection, { normalize: false });
-        } else {
-            this.shared.setSelection(this.shared.getEditableSelection());
-        }
+        cursors.restore();
     }
 
     removeLinkFromSelection() {
-        this.shared.splitSelection();
-        const selection = this.shared.getEditableSelection();
+        const selection = this.shared.splitSelection();
+        const cursors = this.shared.preserveSelection();
 
         // If not, unlink only the part(s) of the link(s) that are selected:
         // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
         let { anchorNode, focusNode, anchorOffset, focusOffset } = selection;
-        const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
+        const direction = selection.direction;
         // Split the links around the selection.
         const [startLink, endLink] = [
             closestElement(anchorNode, "a"),
@@ -306,14 +302,12 @@ export class LinkPlugin extends Plugin {
         );
         if (links.size) {
             for (const link of links) {
+                cursors.update(callbacksForCursorUpdate.unwrap(link));
                 unwrapContents(link);
             }
-            if (selection.anchorNode.isConnected && selection.focusNode.isConnected) {
-                this.shared.setSelection(selection, { normalize: false });
-            } else {
-                this.shared.setSelection(this.shared.getEditableSelection());
-            }
+            cursors.restore();
         }
+        this.dispatch("ADD_STEP");
     }
 
     /**
