@@ -141,25 +141,21 @@ describe("backward", () => {
                             </div>`),
                     });
                 });
-                test.todo(
-                    "should remove sandwitched unbreakable (anchor start, focus between) (backward)",
-                    async () => {
-                        await testEditor({
-                            contentBefore: unformat(`
+                test("should remove sandwitched unbreakable (anchor start, focus between) (backward)", async () => {
+                    await testEditor({
+                        contentBefore: unformat(`
                             <div>
                                 <div>[ab</div>
                                 <div>cd</div>
                                 <div>e]f</div>
                             </div>`),
-                            stepFunction: deleteBackward,
-                            contentAfter: unformat(`
+                        stepFunction: deleteBackward,
+                        contentAfter: unformat(`
                             <div>
-                                <div>[]<br></div>
-                                <div>f</div>
+                                <div>[]f</div>
                             </div>`),
-                        });
-                    }
-                );
+                    });
+                });
             });
 
             describe("anchor between", () => {
@@ -199,11 +195,9 @@ describe("backward", () => {
 
         describe("multilevel", () => {
             describe("anchor start", () => {
-                test.todo(
-                    "should remove sandwitched unbreakable (multilevel, anchor start, focus between) (backward)",
-                    async () => {
-                        await testEditor({
-                            contentBefore: unformat(`
+                test("should remove sandwitched unbreakable (multilevel, anchor start, focus between) (backward)", async () => {
+                    await testEditor({
+                        contentBefore: unformat(`
                             <div>
                                 <div>[ab</div>
                                 <div>cd</div>
@@ -214,17 +208,13 @@ describe("backward", () => {
                                 <div>ij</div>
                                 <div>k]l</div>
                             </div>`),
-                            stepFunction: deleteBackward,
-                            contentAfter: unformat(`
+                        stepFunction: deleteBackward,
+                        contentAfter: unformat(`
                             <div>
-                                <div>[]</div>
-                            </div>
-                            <div>
-                                <div>l</div>
+                                <div>[]l</div>
                             </div>`),
-                        });
-                    }
-                );
+                    });
+                });
             });
             describe("anchor between", () => {
                 test("should remove sandwitched unbreakable (multilevel, anchor between, focus between) (backward)", async () => {
@@ -521,9 +511,7 @@ describe("list", () => {
         });
     });
     describe("selection not collapsed", () => {
-        // @phoenix @todo: this spec is weird. I would argue in favor of
-        // <p class="oe_unbreakable">a[]</p><ol><li>ef</li><li>ghi</li></ol>
-        test.todo("shoud not merge list item in the previous unbreakable sibling (1)", async () => {
+        test("shoud not merge list item in the previous unbreakable sibling (1)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <p class="oe_unbreakable">a[bc</p>
@@ -533,17 +521,15 @@ describe("list", () => {
                         </ol>`),
                 stepFunction: deleteBackward,
                 contentAfter: unformat(`
-                        <p>a[]</p>
-                        <p>ef</p>
+                        <p class="oe_unbreakable">a[]</p>
                         <ol>
+                            <li>ef</li>
                             <li>ghi</li>
                         </ol>`),
             });
         });
 
-        // @phoenix @todo: weird spec. I would argue in favor of
-        // <div><p>a[]</p></div><ol><li>ef</li><li>ghi</li></ol>
-        test.todo("shoud not merge list item in the previous unbreakable sibling (2)", async () => {
+        test("shoud not merge list item in the previous unbreakable sibling (2)", async () => {
             await testEditor({
                 contentBefore: unformat(`
                         <div>
@@ -558,8 +544,8 @@ describe("list", () => {
                         <div>
                             <p>a[]</p>
                         </div>
-                        <p>ef</p>
                         <ol>
+                            <li>ef</li>
                             <li>ghi</li>
                         </ol>`),
             });
