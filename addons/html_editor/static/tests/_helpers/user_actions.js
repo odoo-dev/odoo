@@ -1,7 +1,7 @@
 import { closestBlock } from "@html_editor/utils/blocks";
 import { childNodeIndex, endPos } from "@html_editor/utils/position";
 import { findInSelection } from "@html_editor/utils/selection";
-import { click, dispatch, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { click, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
 import { tick } from "@odoo/hoot-mock";
 import { setSelection } from "./selection";
 
@@ -158,24 +158,6 @@ export async function simulateArrowKeyPress(editor, key) {
     selection.setBaseAndExtent(...pos, ...pos);
     // TODO @phoenix to check if we need the nextTick
     // await nextTick();
-}
-
-// Simulates placing the cursor at the editable root after a mouse click.
-export async function simulateMouseClick(editor, node, after = false) {
-    let editableChild = node;
-    while (editableChild.parentNode !== editor.editable) {
-        editableChild = editableChild.parentNode;
-    }
-    const index = after ? childNodeIndex(editableChild) + 1 : childNodeIndex(editableChild);
-    const pos = [editor.editable, index];
-    manuallyDispatchProgrammaticEvent(editor.editable, "mousedown");
-    const selection = editor.document.getSelection();
-    selection.setBaseAndExtent(...pos, ...pos);
-
-    //TODO @phoenix check if this is still needed nextTick
-    // await nextTick();
-    dispatch(editor.editable, "mouseup");
-    dispatch(editor.editable, "click");
 }
 
 export function unlink(editor) {
