@@ -330,7 +330,13 @@ class AssetsBundle(object):
         js_attachment = self.get_attachments(extension)
 
         if not js_attachment:
-            template_bundle = ''
+            template_bundle = f"""
+                document.dispatchEvent(new Event('odoo:js_asset:{self.name}:loaded'));
+                if (!globalThis.odoo.js_assets_loaded) {{
+                    globalThis.odoo.js_assets_loaded = [];
+                }}
+                globalThis.odoo.js_assets_loaded.push("{self.name}");
+            """
 
             if is_minified:
                 content_bundle = ';\n'.join(asset.minify() for asset in self.javascripts)
@@ -354,10 +360,10 @@ class AssetsBundle(object):
                         {self.generate_xml_bundle()}
                     }});
                 }};
-                if (document.readyState === "loading") {{
-                    document.addEventListener("DOMContentLoaded", loadXmlTemplates);
-                }} else {{
+                if (globalThis.odoo?.js_assets_loaded?.includes("{self.name}")) {{
                     loadXmlTemplates();
+                }} else {{
+                    document.addEventListener("odoo:js_asset:{self.name}:loaded", loadXmlTemplates);
                 }}
             }}
         """)
