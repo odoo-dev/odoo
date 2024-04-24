@@ -3,6 +3,7 @@ import { describe, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
 import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { undo } from "../_helpers/user_actions";
 
 function addRow(position) {
     return (editor) => {
@@ -468,6 +469,18 @@ describe("tab", () => {
             stepFunction: () => press("Tab"),
             contentAfter:
                 '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef</td></tr><tr style="height: 20px;"><td><p>[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
+        });
+    });
+    test("should add a history step when adding a new row on press tab at the end of a table", async () => {
+        await testEditor({
+            contentBefore:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
+            stepFunction: (editor) => {
+                press("Tab");
+                undo(editor);
+            },
+            contentAfter:
+                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
         });
     });
 

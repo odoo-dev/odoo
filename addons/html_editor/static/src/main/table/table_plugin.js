@@ -80,6 +80,7 @@ export class TablePlugin extends Plugin {
             if (shouldAddNewRow) {
                 this.addRow({ position: "after", reference: findInSelection(selection, "tr") });
                 this.shiftCursorToTableCell(1);
+                this.dispatch("ADD_STEP");
             }
             return true;
         }
@@ -380,7 +381,6 @@ export class TablePlugin extends Plugin {
         return false;
     }
 
-    // @todo @phoenix This could be usefull for handling arrow up and down in tables (spec change?).
     /**
      * Moves the cursor by shiftIndex table cells.
      *

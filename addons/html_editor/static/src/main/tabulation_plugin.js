@@ -94,7 +94,6 @@ export class TabulationPlugin extends Plugin {
 
     insertTab() {
         this.shared.domInsert(parseHTML(this.document, tabHtml));
-        this.dispatch("ADD_STEP");
     }
 
     indentBlocks(blocks) {
