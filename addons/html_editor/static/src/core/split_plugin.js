@@ -256,27 +256,22 @@ export class SplitPlugin extends Plugin {
             }
         }
 
-        if (direction === DIRECTIONS.RIGHT) {
-            return this.shared.setSelection(
-                {
+        const selection = direction === DIRECTIONS.RIGHT ? {
                     anchorNode: startContainer,
                     anchorOffset: startOffset,
                     focusNode: endContainer,
                     focusOffset: endOffset,
-                },
-                { normalize: false }
-            );
-        } else {
-            return this.shared.setSelection(
-                {
+                } : {
                     anchorNode: endContainer,
                     anchorOffset: endOffset,
                     focusNode: startContainer,
                     focusOffset: startOffset,
-                },
+                }
+                return this.shared.setSelection(
+               selection,
                 { normalize: false }
             );
-        }
+        
     }
 
     onBeforeInput(e) {
