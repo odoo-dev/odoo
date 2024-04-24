@@ -557,8 +557,7 @@ export class SelectionPlugin extends Plugin {
      * separators), the cursor could be placed having its anchorNode at
      * the editable root, allowing the user to insert inlined text at
      * it.
-     */
-    /**
+     *
      * @param {Node} nodeAfterCursor
      * @param {Node} nodeBeforeCursor
      * @returns {boolean}
