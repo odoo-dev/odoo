@@ -4,6 +4,7 @@ import {
     previousLeaf,
     isProtected,
     paragraphRelatedElements,
+    isMediaElement,
 } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
@@ -45,6 +46,33 @@ import {
  * @property {number} offset
  */
 
+// https://developer.mozilla.org/en-US/docs/Glossary/Void_element
+const VOID_ELEMENT_NAMES = [
+    "AREA",
+    "BASE",
+    "BR",
+    "COL",
+    "EMBED",
+    "HR",
+    "IMG",
+    "INPUT",
+    "KEYGEN",
+    "LINK",
+    "META",
+    "PARAM",
+    "SOURCE",
+    "TRACK",
+    "WBR",
+];
+
+export function isArtificialVoidElement(node) {
+    return isMediaElement(node) || node.nodeName === "HR";
+}
+
+export function isNotAllowedContent(node) {
+    return isArtificialVoidElement(node) || VOID_ELEMENT_NAMES.includes(node.nodeName);
+}
+
 export class SelectionPlugin extends Plugin {
     static name = "selection";
     static shared = [
@@ -60,12 +88,6 @@ export class SelectionPlugin extends Plugin {
         "getTraversedBlocks",
         // "collapseIfZWS",
     ];
-    /** @type { (p: SelectionPlugin) => Record<string, any> } */
-    static resources = (p) => {
-        return {
-            onSelectionChange: p.fixSelectionOnEditableRoot.bind(p),
-        };
-    };
 
     setup() {
         this.resetSelection();
@@ -75,8 +97,8 @@ export class SelectionPlugin extends Plugin {
                 this.correctTripleClick = true;
             }
         });
-        this.addDomListener(this.editable, "keypress", (ev) => {
-            this.currentKeyPress = ev.key;
+        this.addDomListener(this.editable, "keydown", (ev) => {
+            this.currentKeyDown = ev.key;
         });
         this.addDomListener(this.editable, "pointerdown", () => {
             this.isPointerDown = true;
@@ -105,6 +127,7 @@ export class SelectionPlugin extends Plugin {
                 this.editable.contains(range.commonAncestorContainer) &&
                 !isProtected(range.commonAncestorContainer);
         }
+        let newSelection;
         if (inEditable) {
             if (this.correctTripleClick) {
                 this.correctTripleClick = false;
@@ -114,11 +137,15 @@ export class SelectionPlugin extends Plugin {
                     return this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
                 }
             }
-            this.activeSelection = this.makeSelection(selection, inEditable);
+            newSelection = this.makeSelection(selection, inEditable);
         } else {
-            const newSelection = { ...this.activeSelection, inEditable: false };
-            this.activeSelection = Object.freeze(newSelection);
+            newSelection = Object.freeze({ ...this.activeSelection, inEditable: false });
         }
+
+        if (this.fixSelectionOnEditableRoot(newSelection)) {
+            return;
+        }
+        this.activeSelection = newSelection;
         const activeSelection = this.activeSelection;
         for (const handler of this.resources.onSelectionChange || []) {
             handler(activeSelection);
@@ -448,6 +475,15 @@ export class SelectionPlugin extends Plugin {
     getTraversedBlocks() {
         return new Set(this.getTraversedNodes().map(closestBlock).filter(Boolean));
     }
+    resetActiveSelection() {
+        const selection = this.document.getSelection();
+        selection.setBaseAndExtent(
+            this.activeSelection.anchorNode,
+            this.activeSelection.anchorOffset,
+            this.activeSelection.focusNode,
+            this.activeSelection.focusOffset
+        );
+    }
 
     // @todo @phoenix we should find a real use case and test it
     // /**
@@ -476,7 +512,7 @@ export class SelectionPlugin extends Plugin {
      * Inserts an empty paragraph if selection results from mouse click and
      * there's no other way to insert text before/after a block.
      *
-     * @param {EditorSelection} selection - Collapsed selection at the editable root.
+     * @param {Selection} selection - Collapsed selection at the editable root.
      */
     fixSelectionOnEditableRoot(selection) {
         if (
@@ -493,9 +529,11 @@ export class SelectionPlugin extends Plugin {
         const nodeAfterCursor = this.editable.childNodes[selection.anchorOffset];
         const nodeBeforeCursor = nodeAfterCursor && nodeAfterCursor.previousElementSibling;
 
-        this.fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor) ||
+        return (
+            this.fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor) ||
             this.fixSelectionOnEditableRootGeneric(nodeAfterCursor, nodeBeforeCursor) ||
-            this.fixSelectionOnEditableRootCreateP(nodeAfterCursor, nodeBeforeCursor);
+            this.fixSelectionOnEditableRootCreateP(nodeAfterCursor, nodeBeforeCursor)
+        );
     }
     /**
      * @param {Node} nodeAfterCursor
@@ -503,31 +541,34 @@ export class SelectionPlugin extends Plugin {
      * @returns {boolean}
      */
     fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor) {
-        // const currentKeyPress = this.currentKeyPress;
-        // delete this.currentKeyPress;
-        // const nodeAfterCursor = this.editable.childNodes[selection.anchorOffset];
-        // const nodeBeforeCursor = nodeAfterCursor && nodeAfterCursor.previousElementSibling;
-        // if (currentKeyPress === "ArrowRight" || currentKeyPress === "ArrowDown") {
-        //     // @todo: check it is implemented
-        //     while (nodeAfterCursor && isNotAllowedContent(nodeAfterCursor)) {
-        //         nodeAfterCursor = nodeAfterCursor.nextElementSibling;
-        //     }
-        //     if (nodeAfterCursor) {
-        //         // setSelection(...getDeepestPosition(nodeAfterCursor, 0));
-        //     } else {
-        //         // this.historyResetLatestComputedSelection(true);
-        //     }
-        // } else if (currentKeyPress === "ArrowLeft" || currentKeyPress === "ArrowUp") {
-        //     // @todo: check it is implemented
-        //     while (nodeBeforeCursor && isNotAllowedContent(nodeBeforeCursor)) {
-        //         nodeBeforeCursor = nodeBeforeCursor.previousElementSibling;
-        //     }
-        //     if (nodeBeforeCursor) {
-        //         setSelection(...getDeepestPosition(nodeBeforeCursor, nodeSize(nodeBeforeCursor)));
-        //     } else {
-        //         this.historyResetLatestComputedSelection(true);
-        //     }
-        // }
+        const currentKeyDown = this.currentKeyDown;
+        delete this.currentKeyDown;
+        if (currentKeyDown === "ArrowRight" || currentKeyDown === "ArrowDown") {
+            while (nodeAfterCursor && isNotAllowedContent(nodeAfterCursor)) {
+                nodeAfterCursor = nodeAfterCursor.nextElementSibling;
+            }
+            const deepest = getDeepestPosition(nodeAfterCursor, 0);
+            if (nodeAfterCursor) {
+                this.setSelection({ anchorNode: deepest[0], anchorOffset: 0 });
+                return true;
+            } else {
+                this.resetActiveSelection();
+            }
+        } else if (currentKeyDown === "ArrowLeft" || currentKeyDown === "ArrowUp") {
+            while (nodeBeforeCursor && isNotAllowedContent(nodeBeforeCursor)) {
+                nodeBeforeCursor = nodeBeforeCursor.previousElementSibling;
+            }
+            if (nodeBeforeCursor) {
+                const deepest = getDeepestPosition(nodeBeforeCursor, nodeSize(nodeBeforeCursor));
+                this.setSelection({
+                    anchorNode: deepest[0],
+                    anchorOffset: deepest[1],
+                });
+                return true;
+            } else {
+                this.resetActiveSelection();
+            }
+        }
     }
     /**
      * @param {Node} nodeAfterCursor

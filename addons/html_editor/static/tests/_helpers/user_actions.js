@@ -156,8 +156,7 @@ export async function simulateArrowKeyPress(editor, key) {
     const pos = [editor.editable, index];
     manuallyDispatchProgrammaticEvent(editor.editable, "keydown", { key });
     selection.setBaseAndExtent(...pos, ...pos);
-    // TODO @phoenix to check if we need the nextTick
-    // await nextTick();
+    await tick();
 }
 
 export function unlink(editor) {
