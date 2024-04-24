@@ -547,9 +547,9 @@ export class SelectionPlugin extends Plugin {
             while (nodeAfterCursor && isNotAllowedContent(nodeAfterCursor)) {
                 nodeAfterCursor = nodeAfterCursor.nextElementSibling;
             }
-            const deepest = getDeepestPosition(nodeAfterCursor, 0);
+            const [anchorNode] = getDeepestPosition(nodeAfterCursor, 0);
             if (nodeAfterCursor) {
-                this.setSelection({ anchorNode: deepest[0], anchorOffset: 0 });
+                this.setSelection({ anchorNode: anchorNode, anchorOffset: 0 });
                 return true;
             } else {
                 this.resetActiveSelection();
@@ -559,10 +559,13 @@ export class SelectionPlugin extends Plugin {
                 nodeBeforeCursor = nodeBeforeCursor.previousElementSibling;
             }
             if (nodeBeforeCursor) {
-                const deepest = getDeepestPosition(nodeBeforeCursor, nodeSize(nodeBeforeCursor));
+                const [anchorNode, anchorOffset] = getDeepestPosition(
+                    nodeBeforeCursor,
+                    nodeSize(nodeBeforeCursor)
+                );
                 this.setSelection({
-                    anchorNode: deepest[0],
-                    anchorOffset: deepest[1],
+                    anchorNode: anchorNode,
+                    anchorOffset: anchorOffset,
                 });
                 return true;
             } else {
