@@ -376,13 +376,15 @@ export class ListPlugin extends Plugin {
 
     unwrapPinLI(p) {
         const cursors = this.shared.preserveSelection();
-        cursors.remapNode(p, p.parentElement).shiftOffset(childNodeIndex(p));
+        cursors.update(callbacksForCursorUpdate.unwrap(p));
         const contents = unwrapContents(p);
         cursors.restore();
         // This assumes the P has at least one child.
         return contents[0];
     }
 
+    // @todo: this method does not preserve line breaks if there are multiple
+    // paragraphs in a list item.
     removeParagraphInLI(element) {
         if (!(element.tagName === "P" && isListItem(element.parentElement))) {
             return element;
