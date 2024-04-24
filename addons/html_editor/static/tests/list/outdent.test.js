@@ -543,12 +543,18 @@ describe("with selection", () => {
         });
     });
 
-    // @todo @phoenix: is this a valid contentBefore?
-    test.todo(
-        "should outdent multiples list item in the middle element of a list with sublist",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    // @wrongCommand
+    // This test fails because the original test tested the "indentList" command
+    // (with mode="outdent"), which has a different behavior than keydown
+    // shift+Tab.
+    // In web_editor, "indentList" commmand is not called anywhere, except in
+    // the tests.
+    // So, not passing this test does not mean that a previously working feature
+    // is broken, as the user had no way to trigger the "indentList" command.
+    // By the way: is this a valid contentBefore?
+    test.skip("should outdent multiples list item in the middle element of a list with sublist", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                     <ul>
                         <li>
                             a
@@ -564,8 +570,8 @@ describe("with selection", () => {
                         </li>
                         <li>e</li>
                     </ul>`),
-                stepFunction: keydownShiftTab,
-                contentAfter: unformat(`
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
                     <ul>
                         <li>a</li>
                         <li>
@@ -579,9 +585,9 @@ describe("with selection", () => {
                         <li>d]</li>
                         <li>e</li>
                     </ul>`),
-            });
-            await testEditor({
-                contentBefore: unformat(`
+        });
+        await testEditor({
+            contentBefore: unformat(`
                     <ul>
                         <li>
                             a
@@ -597,8 +603,8 @@ describe("with selection", () => {
                         </li>
                         <li>e</li>
                     </ul>`),
-                stepFunction: keydownShiftTab,
-                contentAfter: unformat(`
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
                     <ul>
                         <li>
                             a
@@ -610,15 +616,13 @@ describe("with selection", () => {
                         <li>d]</li>
                         <li>e</li>
                     </ul>`),
-            });
-        }
-    );
+        });
+    });
 
-    test.todo(
-        "should outdent nested list and list with elements in a upper level than the rangestart",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(`
+    // @wrongCommand (same as above)
+    test.skip("should outdent nested list and list with elements in a upper level than the rangestart", async () => {
+        await testEditor({
+            contentBefore: unformat(`
                     <ul>
                         <li>a</li>
                         <li>
@@ -642,8 +646,8 @@ describe("with selection", () => {
                         </li>
                         <li>i</li>
                     </ul>`),
-                stepFunction: keydownShiftTab,
-                contentAfter: unformat(`
+            stepFunction: keydownShiftTab,
+            contentAfter: unformat(`
                     <ul>
                         <li>a</li>
                         <li>b
@@ -662,9 +666,8 @@ describe("with selection", () => {
                         <li>h]</li>
                         <li>i</li>
                     </ul>`),
-            });
-        }
-    );
+        });
+    });
 
     test("should not outdent a non-editable list", async () => {
         await testEditor({
