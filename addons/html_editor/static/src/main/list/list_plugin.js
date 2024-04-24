@@ -555,14 +555,12 @@ export class ListPlugin extends Plugin {
         for (const li of listNodes) {
             this.indentLI(li);
         }
-        this.dispatch("ADD_STEP");
     }
 
     outdentListNodes(listNodes) {
         for (const li of listNodes) {
             this.outdentLI(li);
         }
-        this.dispatch("ADD_STEP");
     }
 
     separateListItems() {
