@@ -53,7 +53,6 @@ export const CORE_PLUGINS = [
     SplitPlugin,
     UnbreakablePlugin,
     ZwsPlugin,
-    TextDirectionPlugin,
 ];
 
 export const MAIN_PLUGINS = [
@@ -78,6 +77,7 @@ export const MAIN_PLUGINS = [
     LinkPastePlugin,
     MoveNodePlugin,
     LocalOverlayPlugin,
+    TextDirectionPlugin,
 ];
 
 export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, OwlComponentPlugin];

@@ -1,6 +1,9 @@
-import { test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
-import { switchDirection } from "../_helpers/user_actions";
+import { expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
+import { insertText, switchDirection } from "../_helpers/user_actions";
+import { animationFrame } from "@odoo/hoot-mock";
+import { press, queryAllTexts } from "@odoo/hoot-dom";
+import { getContent } from "../_helpers/selection";
 
 test("should switch direction on a collapsed range", async () => {
     await testEditor({
@@ -112,4 +115,20 @@ test("should properly switch the direction of nested list (rtl).", async () => {
         stepFunction: switchDirection,
         contentAfter: `<ul><li>a[]</li><li class="oe-nested"><ul class="o_checklist"><li>b</li><li class="oe-nested"><ol><li>g</li><li>e</li></ol></li><li>c</li></ul></li><li>d</li></ul>`,
     });
+});
+
+test("should switch the direction from the powerbox", async () => {
+    const { el, editor } = await setupEditor("<p>a[]</p>");
+    insertText(editor, "/Switchdirection");
+    await animationFrame();
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Switch direction"]);
+    expect(".o-we-powerbox").toHaveCount(1);
+    press("Enter");
+    expect(getContent(el)).toBe(`<p dir="rtl">a[]</p>`);
+    insertText(editor, "/Switchdirection");
+    await animationFrame();
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Switch direction"]);
+    expect(".o-we-powerbox").toHaveCount(1);
+    press("Enter");
+    expect(getContent(el)).toBe(`<p>a[]</p>`);
 });
