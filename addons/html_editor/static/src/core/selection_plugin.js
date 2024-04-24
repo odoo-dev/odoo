@@ -130,7 +130,7 @@ export class SelectionPlugin extends Plugin {
      * @param { boolean } [inEditable]
      * @return { EditorSelection }
      */
-    makeSelection(selection, inEditable) {
+    makeSelection(selection, inEditable = false) {
         let range;
         let activeSelection;
         if (!selection || !selection.rangeCount) {
