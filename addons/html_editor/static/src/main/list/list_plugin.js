@@ -386,7 +386,9 @@ export class ListPlugin extends Plugin {
     // @todo: this method does not preserve line breaks if there are multiple
     // paragraphs in a list item.
     removeParagraphInLI(element) {
-        if (!(element.tagName === "P" && isListItem(element.parentElement))) {
+        if (
+            !(element.tagName === "P" && element.parentElement && isListItem(element.parentElement))
+        ) {
             return element;
         }
         // Remove paragraph if empty.
