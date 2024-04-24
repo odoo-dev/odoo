@@ -1,7 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
-import { splitBlock, keydownTab } from "../_helpers/user_actions";
+import { splitBlock, keydownTab, undo } from "../_helpers/user_actions";
 
 describe("Checklist", () => {
     test("should indent a checklist", async () => {
@@ -1193,6 +1193,48 @@ describe("with selection", () => {
                             </tbody>
                         </table>
                     `),
+        });
+    });
+});
+
+describe("Mixed: list + paragraph", () => {
+    test("should indent a list and paragraph", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>[abc</li>
+                </ul>
+                <p>def]</p>`),
+            stepFunction: keydownTab,
+            /* eslint-disable prettier/prettier */
+            contentAfter: unformat(`
+                <ul>
+                    <li class="oe-nested">
+                        <ul>
+                            <li>[abc</li>
+                        </ul>
+                    </li>
+                </ul>`) +
+                '<p><span class="oe-tabs" style="width: 40px;">\t</span>\u200bdef]</p>',
+            /* eslint-enable prettier/prettier */
+        });
+    });
+    test("should indent a list and paragraph in a single history step", async () => {
+        await testEditor({
+            contentBefore: unformat(`
+                <ul>
+                    <li>[abc</li>
+                </ul>
+                <p>def]</p>`),
+            stepFunction: async (editor) => {
+                keydownTab(editor);
+                undo(editor);
+            },
+            contentAfter: unformat(`
+                <ul>
+                    <li>[abc</li>
+                </ul>
+                <p>def]</p>`),
         });
     });
 });
