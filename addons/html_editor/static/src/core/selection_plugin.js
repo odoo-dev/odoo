@@ -1,5 +1,10 @@
 import { closestBlock } from "@html_editor/utils/blocks";
-import { getDeepestPosition, previousLeaf, isProtected } from "@html_editor/utils/dom_info";
+import {
+    getDeepestPosition,
+    previousLeaf,
+    isProtected,
+    paragraphRelatedElements,
+} from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { Plugin } from "../plugin";
 import { DIRECTIONS, endPos, nodeSize } from "../utils/position";
@@ -55,6 +60,12 @@ export class SelectionPlugin extends Plugin {
         "getTraversedBlocks",
         // "collapseIfZWS",
     ];
+    /** @type { (p: SelectionPlugin) => Record<string, any> } */
+    static resources = (p) => {
+        return {
+            onSelectionChange: p.fixSelectionOnEditableRoot.bind(p),
+        };
+    };
 
     setup() {
         this.resetSelection();
@@ -63,6 +74,16 @@ export class SelectionPlugin extends Plugin {
             if (ev.detail >= 3) {
                 this.correctTripleClick = true;
             }
+        });
+        this.addDomListener(this.editable, "keypress", (ev) => {
+            this.currentKeyPress = ev.key;
+        });
+        this.addDomListener(this.editable, "pointerdown", () => {
+            this.isPointerDown = true;
+        });
+        this.addDomListener(this.editable, "pointerup", () => {
+            this.isPointerDown = false;
+            this.preventNextMousedownFix = false;
         });
     }
 
@@ -163,7 +184,7 @@ export class SelectionPlugin extends Plugin {
                 endContainer,
                 endOffset,
                 commonAncestorContainer: range.commonAncestorContainer,
-                isCollapsed: selection.isCollapsed,
+                isCollapsed: range.collapsed,
                 direction,
                 inEditable,
             };
@@ -448,4 +469,122 @@ export class SelectionPlugin extends Plugin {
     //     }
     //     return false;
     // }
+
+    /**
+     * Places the cursor in a safe place (not the editable root).
+     * Inserts an empty paragraph if selection results from mouse click and
+     * there's no other way to insert text before/after a block.
+     *
+     * @param {EditorSelection} selection - Collapsed selection at the editable root.
+     */
+    fixSelectionOnEditableRoot(selection) {
+        if (
+            !(
+                selection.isCollapsed &&
+                selection.anchorNode === this.editable &&
+                selection.inEditable &&
+                !this.config.allowInlineAtRoot
+            )
+        ) {
+            return false;
+        }
+
+        const nodeAfterCursor = this.editable.childNodes[selection.anchorOffset];
+        const nodeBeforeCursor = nodeAfterCursor && nodeAfterCursor.previousElementSibling;
+
+        this.fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor) ||
+            this.fixSelectionOnEditableRootGeneric(nodeAfterCursor, nodeBeforeCursor) ||
+            this.fixSelectionOnEditableRootCreateP(nodeAfterCursor, nodeBeforeCursor);
+    }
+    /**
+     * @param {Node} nodeAfterCursor
+     * @param {Node} nodeBeforeCursor
+     * @returns {boolean}
+     */
+    fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor) {
+        // const currentKeyPress = this.currentKeyPress;
+        // delete this.currentKeyPress;
+        // const nodeAfterCursor = this.editable.childNodes[selection.anchorOffset];
+        // const nodeBeforeCursor = nodeAfterCursor && nodeAfterCursor.previousElementSibling;
+        // if (currentKeyPress === "ArrowRight" || currentKeyPress === "ArrowDown") {
+        //     // @todo: check it is implemented
+        //     while (nodeAfterCursor && isNotAllowedContent(nodeAfterCursor)) {
+        //         nodeAfterCursor = nodeAfterCursor.nextElementSibling;
+        //     }
+        //     if (nodeAfterCursor) {
+        //         // setSelection(...getDeepestPosition(nodeAfterCursor, 0));
+        //     } else {
+        //         // this.historyResetLatestComputedSelection(true);
+        //     }
+        // } else if (currentKeyPress === "ArrowLeft" || currentKeyPress === "ArrowUp") {
+        //     // @todo: check it is implemented
+        //     while (nodeBeforeCursor && isNotAllowedContent(nodeBeforeCursor)) {
+        //         nodeBeforeCursor = nodeBeforeCursor.previousElementSibling;
+        //     }
+        //     if (nodeBeforeCursor) {
+        //         setSelection(...getDeepestPosition(nodeBeforeCursor, nodeSize(nodeBeforeCursor)));
+        //     } else {
+        //         this.historyResetLatestComputedSelection(true);
+        //     }
+        // }
+    }
+    /**
+     * @param {Node} nodeAfterCursor
+     * @param {Node} nodeBeforeCursor
+     * @returns {boolean}
+     */
+    fixSelectionOnEditableRootGeneric(nodeAfterCursor, nodeBeforeCursor) {
+        // Handle arrow key presses.
+        if (nodeAfterCursor && paragraphRelatedElements.includes(nodeAfterCursor.nodeName)) {
+            // Cursor is right before a 'P'.
+            this.setCursorStart(nodeAfterCursor);
+            return true;
+        } else if (
+            nodeBeforeCursor &&
+            paragraphRelatedElements.includes(nodeBeforeCursor.nodeName)
+        ) {
+            // Cursor is right after a 'P'.
+            this.setCursorEnd(nodeBeforeCursor);
+            return true;
+        }
+    }
+    /**
+     * Handle cursor not next to a 'P'.
+     * Insert a new 'P' if selection resulted from a mouse click.
+     *
+     * In some situations (notably around tables and horizontal
+     * separators), the cursor could be placed having its anchorNode at
+     * the editable root, allowing the user to insert inlined text at
+     * it.
+     */
+    /**
+     * @param {Node} nodeAfterCursor
+     * @param {Node} nodeBeforeCursor
+     * @returns {boolean}
+     */
+    fixSelectionOnEditableRootCreateP(nodeAfterCursor, nodeBeforeCursor) {
+        if (this.isPointerDown && !this.preventNextPointerdownFix) {
+            // The setSelection at the end of this fix could trigger another
+            // setSelection (that would re-trigger this fix). So this flag is
+            // used to prevent to fix twice from the same mouse event.
+            this.preventNextPointerdownFix = true;
+
+            const p = this.document.createElement("p");
+            p.append(this.document.createElement("br"));
+            if (!nodeAfterCursor) {
+                // Cursor is at the end of the editable.
+                this.editable.append(p);
+            } else if (!nodeBeforeCursor) {
+                // Cursor is at the beginning of the editable.
+                this.editable.prepend(p);
+            } else {
+                // Cursor is between two non-p blocks
+                nodeAfterCursor.before(p);
+            }
+            this.setCursorStart(p);
+            this.dispatch("ADD_STEP");
+            return true;
+        }
+        return false;
+    }
 }
