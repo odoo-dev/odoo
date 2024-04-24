@@ -1,10 +1,25 @@
+import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import { closestElement } from "../utils/dom_traversal";
 
 export class TextDirectionPlugin extends Plugin {
     static name = "text_direction";
-    static dependencies = ["selection", "split", "format"];
+    static dependencies = ["selection", "split", "format", "powerbox"];
+    /** @type { (p: TextDirectionPlugin) => Record<string, any> } */
+    static resources = (p) => ({
+        powerboxCommands: [
+            {
+                name: _t("Switch direction"),
+                description: _t("Switch the text's direction"),
+                category: "format",
+                fontawesome: "fa-exchange",
+                action(dispatch) {
+                    dispatch("SWITCH_DIRECTION");
+                },
+            },
+        ],
+    });
 
     setup() {
         if (this.config.direction) {
