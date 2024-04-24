@@ -35,7 +35,7 @@ import { OwlComponentPlugin } from "./others/owl_component_plugin";
 import { MoveNodePlugin } from "./main/movenode_plugin";
 import { LocalOverlayPlugin } from "./main/local_overlay_plugin";
 import { TransientNodePlugin } from "./core/transient_node_plugin";
-import { TextDirectionPlugin } from "./core/text_direction_plugin";
+import { TextDirectionPlugin } from "./main/text_direction_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
