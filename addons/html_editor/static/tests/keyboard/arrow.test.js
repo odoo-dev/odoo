@@ -498,7 +498,7 @@ test.todo("should move out of a link (ArrowLeft)", async () => {
     });
 });
 
-test.todo("should place cursor in the table below", async () => {
+test("should place cursor in the table below", async () => {
     await testEditor({
         contentBefore:
             "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>" +
@@ -510,7 +510,7 @@ test.todo("should place cursor in the table below", async () => {
     });
 });
 
-test.todo("should place cursor in the table above", async () => {
+test("should place cursor in the table above", async () => {
     await testEditor({
         contentBefore:
             "<table><tbody><tr><td><p>a</p><p>b</p></td></tr></tbody></table>" +
@@ -522,17 +522,17 @@ test.todo("should place cursor in the table above", async () => {
     });
 });
 
-test.todo("should place cursor in the paragraph below", async () => {
+test("should place cursor in the paragraph below", async () => {
     await testEditor({
         contentBefore:
             "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>" + "<p><br></p>",
-        // stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
+        stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
         contentAfter:
             "<table><tbody><tr><td><p>a</p><p>b</p></td></tr></tbody></table>" + "<p>[]<br></p>",
     });
 });
 
-test.todo("should place cursor in the paragraph above", async () => {
+test("should place cursor in the paragraph above", async () => {
     await testEditor({
         contentBefore:
             "<p><br></p>" + "<table><tbody><tr><td><p>[]a</p><p>b</p></td></tr></tbody></table>",
@@ -542,23 +542,22 @@ test.todo("should place cursor in the paragraph above", async () => {
     });
 });
 
-test.todo(
-    "should keep cursor at the same position (avoid reaching the editable root)",
-    async () => {
-        await testEditor({
-            contentBefore: "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>",
-            stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
-            contentAfter: "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>",
-        });
-        await testEditor({
-            contentBefore: "<table><tbody><tr><td><p>[]a</p><p>b</p></td></tr></tbody></table>",
-            stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowLeft"),
-            contentAfter: "<table><tbody><tr><td><p>[]a</p><p>b</p></td></tr></tbody></table>",
-        });
-    }
-);
+test("should keep cursor at the same position (avoid reaching the editable root) (1)", async () => {
+    await testEditor({
+        contentBefore: "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>",
+        stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
+        contentAfter: "<table><tbody><tr><td><p>a</p><p>b[]</p></td></tr></tbody></table>",
+    });
+});
+test("should keep cursor at the same position (avoid reaching the editable root) (2)", async () => {
+    await testEditor({
+        contentBefore: "<table><tbody><tr><td><p>[]a</p><p>b</p></td></tr></tbody></table>",
+        stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowLeft"),
+        contentAfter: "<table><tbody><tr><td><p>[]a</p><p>b</p></td></tr></tbody></table>",
+    });
+});
 
-test.todo("should place cursor after the second separator", async () => {
+test("should place cursor after the second separator", async () => {
     await testEditor({
         contentBefore:
             '<p>[]<br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p><br></p>',
@@ -568,7 +567,7 @@ test.todo("should place cursor after the second separator", async () => {
     });
 });
 
-test.todo("should place cursor before the first separator", async () => {
+test("should place cursor before the first separator", async () => {
     await testEditor({
         contentBefore:
             '<p><br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p>[]<br></p>',
