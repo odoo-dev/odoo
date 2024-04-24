@@ -176,6 +176,9 @@ export class TabulationPlugin extends Plugin {
      */
     alignTabs(root = this.editable) {
         const block = closestBlock(root);
+        if (!block) {
+            return;
+        }
         for (const tab of block.querySelectorAll("span.oe-tabs")) {
             this.adjustTabWidth(tab);
         }
