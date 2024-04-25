@@ -1,9 +1,10 @@
 import { findInSelection } from "@html_editor/utils/selection";
-import { describe, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
-import { testEditor } from "../_helpers/editor";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { undo } from "../_helpers/user_actions";
+import { getContent } from "../_helpers/selection";
 
 function addRow(position) {
     return (editor) => {
@@ -463,25 +464,37 @@ describe("column", () => {
 
 describe("tab", () => {
     test("should add a new row on press tab at the end of a table", async () => {
-        await testEditor({
-            contentBefore:
-                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
-            stepFunction: () => press("Tab"),
-            contentAfter:
-                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef</td></tr><tr style="height: 20px;"><td><p>[]<br></p></td><td><p><br></p></td><td><p><br></p></td></tr></tbody></table>',
-        });
-    });
-    test("should add a history step when adding a new row on press tab at the end of a table", async () => {
-        await testEditor({
-            contentBefore:
-                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
-            stepFunction: (editor) => {
-                press("Tab");
-                undo(editor);
-            },
-            contentAfter:
-                '<table><tbody><tr style="height: 20px;"><td style="width: 20px;">ab</td><td>cd</td><td>ef[]</td></tr></tbody></table>',
-        });
+        const contentBefore = unformat(`
+            <table><tbody>
+                <tr style="height: 20px;">
+                    <td style="width: 20px;">ab</td>
+                    <td>cd</td>
+                    <td>ef[]</td>
+                </tr>
+            </tbody></table>`);
+        const { el, editor } = await setupEditor(contentBefore);
+
+        press("Tab");
+
+        const expectedContent = unformat(`
+            <table><tbody>
+                <tr style="height: 20px;">
+                    <td style="width: 20px;">ab</td>
+                    <td>cd</td>
+                    <td>ef</td>
+                </tr>
+                <tr style="height: 20px;">
+                    <td><p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p></td>
+                    <td><p><br></p></td>
+                    <td><p><br></p></td>
+                </tr>
+            </tbody></table>`);
+
+        expect(getContent(el)).toBe(expectedContent);
+
+        // Check that it was registed as a history step.
+        undo(editor);
+        expect(getContent(el)).toBe(contentBefore);
     });
 
     test("should not select whole text of the next cell", async () => {
