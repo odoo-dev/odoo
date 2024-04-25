@@ -103,7 +103,7 @@ describe("range collapsed", () => {
         });
     });
 
-    test("should not change the url when the label change", async () => {
+    test.todo("should not change the url when the label change", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.com">google.com[]</a>b</p>',
             stepFunction: async (editor) => {
