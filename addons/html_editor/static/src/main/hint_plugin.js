@@ -21,7 +21,6 @@ export class HintPlugin extends Plugin {
 
     setup() {
         this.tempHint = null;
-        this.hintElements = new Set();
         this.makeEmptyBlockHints(this.editable);
     }
 
@@ -82,7 +81,6 @@ export class HintPlugin extends Plugin {
     makeHint(el, text) {
         el.setAttribute("placeholder", text);
         el.classList.add("o-we-hint");
-        this.hintElements.add(el);
     }
 
     removeHint(el) {
@@ -91,16 +89,11 @@ export class HintPlugin extends Plugin {
         if (this.tempHint === el) {
             this.tempHint = null;
         }
-        this.hintElements.delete(el);
     }
 
-    clearHints(root) {
-        const hintElements = root
-            ? [...this.hintElements].filter((el) => root.contains(el))
-            : this.hintElements;
-
-        for (const hint of hintElements) {
-            this.removeHint(hint);
+    clearHints(root = this.editable) {
+        for (let elem of this.selectElements(root, ".o-we-hint")) {
+            this.removeHint(elem);
         }
     }
 
@@ -110,13 +103,14 @@ export class HintPlugin extends Plugin {
      *
      * @param {Element} root - The root element to search within.
      * @param {string} selector - The CSS selector to match elements against.
-     * @returns {Element[]} - An array of elements that match the selector.
+     * @returns {Generator<Element>} - elements that match the selector.
      */
-    selectElements(root, selector) {
-        const matchedElements = [...root.querySelectorAll(selector)];
-        if (root !== this.editable && root.matches(selector)) {
-            matchedElements.unshift(root);
+    selectElements = function *(root, selector) {
+        if (root.matches(selector)) {
+            yield root;
         }
-        return matchedElements;
+        for (let elem of root.querySelectorAll(selector)) {
+            yield elem;
+        }
     }
 }
