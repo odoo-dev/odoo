@@ -1484,26 +1484,22 @@ describe("link", () => {
             });
         });
 
-        test.todo(
-            "should paste and transform an URL in a existing link if pasting valid url (collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p>a<a href="http://existing.com">[]c</a>d</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "https://www.xyz.xdc");
-                    },
-                    contentAfter:
-                        '<p>a<a href="https://www.xyz.xdcc">https://www.xyz.xdc[]c</a>d</p>',
-                });
-                await testEditor({
-                    contentBefore: '<p>a<a href="http://existing.com">b[].com</a>d</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "oom");
-                    },
-                    contentAfter: '<p>a<a href="http://boom.com">boom[].com</a>d</p>',
-                });
-            }
-        );
+        test("should paste and transform an URL in a existing link if pasting valid url (collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p>a<a href="http://existing.com">[]c</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "https://www.xyz.xdc");
+                },
+                contentAfter: '<p>a<a href="https://www.xyz.xdcc">https://www.xyz.xdc[]c</a>d</p>',
+            });
+            await testEditor({
+                contentBefore: '<p>a<a href="http://existing.com">b[].com</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "oom");
+                },
+                contentAfter: '<p>a<a href="http://boom.com">boom[].com</a>d</p>',
+            });
+        });
 
         test.todo(
             "should replace link for new content when pasting in an empty link (collapsed)",
