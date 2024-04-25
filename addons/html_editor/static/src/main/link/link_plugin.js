@@ -4,7 +4,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
-import { EMAIL_REGEX, URL_REGEX } from "./utils";
+import { EMAIL_REGEX, URL_REGEX, deduceURLfromText } from "./utils";
 import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 
 /**
@@ -172,7 +172,15 @@ export class LinkPlugin extends Plugin {
     }
 
     normalizeLink(root = this.editable) {
-        // do the sanitizing here
+        const start = root.ownerDocument.getSelection()?.anchorNode;
+        const linkEl = start && closestElement(start, "a");
+        if (linkEl && root.contains(linkEl)) {
+            const label = linkEl.innerText;
+            const url = deduceURLfromText(label, linkEl);
+            if (url) {
+                linkEl.setAttribute("href", url);
+            }
+        }
     }
 
     handleSelectionChange(selection) {
@@ -190,6 +198,7 @@ export class LinkPlugin extends Plugin {
                 this.overlay.close();
                 this.linkElement = linkEl;
             }
+
             const props = {
                 linkEl,
                 onApply: (url, label) => {
