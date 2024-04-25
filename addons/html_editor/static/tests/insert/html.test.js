@@ -182,7 +182,7 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo("should remove a fully selected table then insert a span before it", async () => {
+    test("should remove a fully selected table then insert a span before it", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>a[b</p>
@@ -200,81 +200,72 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo(
-        "should only remove the text content of cells in a partly selected table",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<table><tbody>
+    test("should only remove the text content of cells in a partly selected table", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<table><tbody>
                         <tr><td>cd</td><td class="o_selected_td">e[f</td><td>gh</td></tr>
                         <tr><td>ij</td><td class="o_selected_td">k]l</td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
-                ),
-                stepFunction: (editor) => {
-                    editor.shared.domInsert(span("TEST"));
-                    editor.dispatch("ADD_STEP");
-                },
-                contentAfter: unformat(
-                    `<table><tbody>
+            ),
+            stepFunction: (editor) => {
+                editor.shared.domInsert(span("TEST"));
+                editor.dispatch("ADD_STEP");
+            },
+            contentAfter: unformat(
+                `<table><tbody>
                         <tr><td>cd</td><td><span class="a">TEST</span>[]<br></td><td>gh</td></tr>
                         <tr><td>ij</td><td><br></td><td>mn</td></tr>
                         <tr><td>op</td><td>qr</td><td>st</td></tr>
                     </tbody></table>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
-    test.todo(
-        "should remove some text and a table (even if the table is partly selected)",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<p>a[b</p>
+    test("should remove some text and a table (even if the table is partly selected)", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<p>a[b</p>
                     <table><tbody>
                         <tr><td>cd</td><td>ef</td></tr>
                         <tr><td>g]h</td><td>ij</td></tr>
                     </tbody></table>
                     <p>kl</p>`
-                ),
-                stepFunction: (editor) => {
-                    editor.shared.domInsert(span("TEST"));
-                    editor.dispatch("ADD_STEP");
-                },
-                contentAfter: unformat(
-                    `<p>a<span class="a">TEST</span>[]</p>
+            ),
+            stepFunction: (editor) => {
+                editor.shared.domInsert(span("TEST"));
+                editor.dispatch("ADD_STEP");
+            },
+            contentAfter: unformat(
+                `<p>a<span class="a">TEST</span>[]</p>
                     <p>kl</p>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
-    test.todo(
-        "should remove a table and some text (even if the table is partly selected)",
-        async () => {
-            await testEditor({
-                contentBefore: unformat(
-                    `<p>ab</p>
+    test("should remove a table and some text (even if the table is partly selected)", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `<p>ab</p>
                     <table><tbody>
                         <tr><td>cd</td><td>ef</td></tr>
                         <tr><td>gh</td><td>i[j</td></tr>
                     </tbody></table>
                     <p>k]l</p>`
-                ),
-                stepFunction: (editor) => {
-                    editor.shared.domInsert(span("TEST"));
-                    editor.dispatch("ADD_STEP");
-                },
-                contentAfter: unformat(
-                    `<p>ab</p>
+            ),
+            stepFunction: (editor) => {
+                editor.shared.domInsert(span("TEST"));
+                editor.dispatch("ADD_STEP");
+            },
+            contentAfter: unformat(
+                `<p>ab</p>
                     <p><span class="a">TEST</span>[]l</p>`
-                ),
-            });
-        }
-    );
+            ),
+        });
+    });
 
-    test.todo("should remove some text, a table and some more text", async () => {
+    test("should remove some text, a table and some more text", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>a[b</p>
@@ -292,7 +283,7 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo("should remove a selection of several tables", async () => {
+    test("should remove a selection of several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<table><tbody>
@@ -316,7 +307,7 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo("should remove a selection including several tables", async () => {
+    test("should remove a selection including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>0[1</p>
@@ -344,7 +335,7 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo("should remove everything, including several tables", async () => {
+    test("should remove everything, including several tables", async () => {
         await testEditor({
             contentBefore: unformat(
                 `<p>[01</p>
