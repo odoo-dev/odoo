@@ -57,6 +57,13 @@ export class ToolbarPlugin extends Plugin {
         const inEditable = sel.inEditable;
         if (this.overlay.isOpen) {
             if (!inEditable || sel.isCollapsed) {
+                const selection = this.document.getSelection();
+                const preventClosing = selection?.anchorNode?.closest?.(
+                    "[data-prevent-closing-overlay]"
+                );
+                if (preventClosing?.dataset?.preventClosingOverlay === "true") {
+                    return;
+                }
                 this.overlay.close();
             } else {
                 this.overlay.open({ props }); // will update position

@@ -3,6 +3,7 @@ import { click, waitFor, queryOne, hover, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor, setupWysiwyg } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
+import { contains } from "@web/../tests/web_test_helpers";
 
 test("can set foreground color", async () => {
     const { el } = await setupEditor("<p>[test]</p>");
@@ -162,13 +163,13 @@ test("collapsed selection color is shown in the permanent toolbar", async () => 
 
 test("selected color is shown and updates when selection change", async () => {
     const { el } = await setupEditor(
-        `<p><font style="color: rgb(255, 156, 0);">test1</font> [test2]</p>`
+        `<p><font style="color: rgb(255, 156, 0);">test1</font> <font style="color: rgb(150, 255, 0);">[test2]</font></p>`
     );
     await waitFor(".o-we-toolbar");
     expect(".o_font_color_selector").toHaveCount(0);
     await animationFrame();
-    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(73, 80, 87)" });
-    setContent(el, `<p><font style="color: rgb(255, 156, 0);">[test1]</font> test2</p>`);
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(150, 255, 0)" });
+    setContent(el, `<p><font style="color: rgb(255, 156, 0);">[test1]</font> <font style="color: rgb(150, 255, 0);">test2</font></p>`);
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 156, 0)" });
 });
@@ -201,6 +202,56 @@ test("clicking on button color parent does not crash", async () => {
     click(".o_color_button[data-color='#6BADDE']");
     await animationFrame();
     expect(getContent(el)).toBe(`<p><font style="color: rgb(107, 173, 222);">[test]</font></p>`);
+});
+
+test("gradient picker correctly shows the current selected gradient", async () => {
+    await setupEditor(
+        `<p><font style="background-image: linear-gradient(2deg, rgb(255, 204, 51) 10%, rgb(226, 51, 255) 90%);" class="text-gradient">[test]</font></p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click(".btn:contains('Gradient')");
+    await animationFrame();
+    expect("button.active:contains('Linear')").toHaveCount(1);
+    expect("input[name='angle']").toHaveValue("2");
+    expect("input[name='firstColorPercentage']").toHaveValue(10);
+    expect("input[name='secondColorPercentage']").toHaveValue(90);
+});
+
+test("gradient picker does change the selector gradient color", async () => {
+    await setupEditor(
+        `<p><font style="background-image: linear-gradient(2deg, rgb(255, 204, 51) 10%, rgb(226, 51, 255) 90%);" class="text-gradient">[test]</font></p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click(".btn:contains('Gradient')");
+    await animationFrame();
+    expect("button.active:contains('Linear')").toHaveCount(1);
+    await contains("input[name='angle'").edit("10");
+    await contains("input[name='firstColorPercentage']").edit(30);
+    await contains("input[name='secondColorPercentage']").edit(50);
+    expect("font.text-gradient").toHaveStyle({
+        backgroundImage: "linear-gradient(10deg, rgb(255, 204, 51) 30%, rgb(226, 51, 255) 50%)",
+    });
+});
+
+test("clicking on the angle input does not close the dropdown", async () => {
+    await setupEditor(
+        `<p><font style="background-image: linear-gradient(2deg, rgb(255, 204, 51) 10%, rgb(226, 51, 255) 90%);" class="text-gradient">[test]</font></p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    click(".o-select-color-foreground");
+    await animationFrame();
+    click(".btn:contains('Gradient')");
+    await animationFrame();
+    expect("button.active:contains('Linear')").toHaveCount(1);
+    await contains("input[name='angle'").click();
+    expect("input[name='angle'").toHaveCount(1);
 });
 
 describe.tags("desktop")("color preview", () => {

@@ -4,6 +4,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { isCSSColor } from "@web/core/utils/colors";
 import { isColorGradient } from "@html_editor/utils/color";
+import { GradientPicker } from "./gradient_picker";
 
 // These colors are already normalized as per normalizeCSSColor in @web/legacy/js/widgets/colorpicker
 const DEFAULT_COLORS = [
@@ -30,7 +31,7 @@ const DEFAULT_GRADIENT_COLORS = [
 
 export class ColorSelector extends Component {
     static template = "html_editor.ColorSelector";
-    static components = { Dropdown, Colorpicker };
+    static components = { Dropdown, Colorpicker, GradientPicker };
     static props = {
         type: String, // either foreground or background
         dispatch: Function,
@@ -49,6 +50,7 @@ export class ColorSelector extends Component {
         this.state = useState({ activeTab: "solid" });
         this.colorWrapperEl = useRef("colorsWrapper");
         this.selectedColors = useState(this.props.getSelectedColors());
+        this.currentCustomColor = useState({ color: undefined });
     }
 
     setTab(tab) {
@@ -95,6 +97,13 @@ export class ColorSelector extends Component {
             return;
         }
         this.props.dispatch("COLOR_RESET_PREVIEW");
+    }
+
+    getCurrentGradientColor() {
+        const mode = this.props.type === "foreground" ? "color" : "background";
+        if (isColorGradient(this.selectedColors[mode])) {
+            return this.selectedColors[mode];
+        }
     }
 
     getSelectedColorStyle(mode) {
