@@ -18,6 +18,7 @@ import { MAIN_PLUGINS } from "./plugin_sets";
  * @property { Object } [inlineComponentInfo]
  * @property { Object } [resources]
  * @property { string } [direction="ltr"]
+ * @property { Function } [onChange]
  */
 
 function sortPlugins(plugins) {
@@ -172,6 +173,13 @@ export class Editor {
         for (const p of this.plugins) {
             p.handleCommand(command, payload);
         }
+    }
+
+    getContent() {
+        const el = this.editable.cloneNode(true);
+        this.dispatch("CLEAN_NODE", { root: el});
+        return el.innerHTML;
+
     }
 
     destroy(willBeRemoved) {
