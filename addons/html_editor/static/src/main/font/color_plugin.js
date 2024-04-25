@@ -48,7 +48,7 @@ export class ColorPlugin extends Plugin {
     static resources = (p) => ({
         toolbarGroup: {
             id: "color",
-            sequence: 28,
+            sequence: 25,
             buttons: [
                 {
                     id: "forecolor",
@@ -112,7 +112,15 @@ export class ColorPlugin extends Plugin {
                 this.previewableApplyColor.revert();
                 this.updateSelectedColor(this.shared.getEditableSelection());
                 break;
+            case "FORMAT_REMOVE_FORMAT":
+                this.removeAllColor();
+                break;
         }
+    }
+
+    removeAllColor() {
+        this.applyColor("", "color");
+        this.applyColor("", "backgroundColor");
     }
 
     /**
@@ -123,26 +131,6 @@ export class ColorPlugin extends Plugin {
      * @param {Element} [element]
      */
     applyColor(color, mode) {
-        // const element = false;
-        // const selectedTds = [...editor.editable.querySelectorAll('td.o_selected_td')].filter(
-        //     node => closestElement(node).isContentEditable
-        // );
-        // let coloredTds = [];
-        // if (selectedTds.length && mode === "backgroundColor") {
-        //     for (const td of selectedTds) {
-        //         colorElement(td, color, mode);
-        //     }
-        //     coloredTds = [...selectedTds];
-        // } else if (element) {
-        //     colorElement(element, color, mode);
-        //     return [element];
-        // }
-        // const selection = this.shared.getEditableSelection();
-        // let wasCollapsed = false;
-        // if (selection.getRangeAt(0).collapsed && !selectedTds.length) {
-        //     insertAndSelectZws(selection);
-        //     wasCollapsed = true;
-        // }
         const selection = this.shared.splitSelection();
         // Get the <font> nodes to color
         const selectionNodes = this.shared
@@ -251,15 +239,6 @@ export class ColorPlugin extends Plugin {
             }
         }
         this.shared.setSelection(selection, { normalize: false });
-        // if (wasCollapsed) {
-        //     const newSelection = this.shared.getEditableSelection();
-        //     const range = new Range();
-        //     range.setStart(newSelection.anchorNode, newSelection.anchorOffset);
-        //     range.collapse(true);
-        //     newSelection.removeAllRanges();
-        //     newSelection.addRange(range);
-        // }
-        // return [...fontsSet, ...colore
     }
 
     getUsedCustomColors(mode) {

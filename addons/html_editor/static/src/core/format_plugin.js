@@ -9,6 +9,16 @@ import { DIRECTIONS } from "../utils/position";
 function isFormatted(formatPlugin, format) {
     return () => formatPlugin.isSelectionFormat(format);
 }
+function hasFormat(formatPlugin) {
+    return () => {
+        for (const format of Object.keys(formatsSpecs)) {
+            if (formatsSpecs[format].removeStyle && formatPlugin.isSelectionFormat(format)) {
+                return true;
+            }
+        }
+        return false;
+    };
+}
 
 export class FormatPlugin extends Plugin {
     static name = "format";
@@ -21,40 +31,55 @@ export class FormatPlugin extends Plugin {
             { hotkey: "control+u", command: "FORMAT_UNDERLINE" },
             { hotkey: "control+5", command: "FORMAT_STRIKETHROUGH" },
         ],
-        toolbarGroup: {
-            id: "decoration",
-            sequence: 20,
-            buttons: [
-                {
-                    id: "bold",
-                    cmd: "FORMAT_BOLD",
-                    icon: "fa-bold",
-                    name: "Toggle bold",
-                    isFormatApplied: isFormatted(p, "bold"),
-                },
-                {
-                    id: "italic",
-                    cmd: "FORMAT_ITALIC",
-                    icon: "fa-italic",
-                    name: "Toggle italic",
-                    isFormatApplied: isFormatted(p, "italic"),
-                },
-                {
-                    id: "underline",
-                    cmd: "FORMAT_UNDERLINE",
-                    icon: "fa-underline",
-                    name: "Toggle underline",
-                    isFormatApplied: isFormatted(p, "underline"),
-                },
-                {
-                    id: "strikethrough",
-                    cmd: "FORMAT_STRIKETHROUGH",
-                    icon: "fa-strikethrough",
-                    name: "Toggle strikethrough",
-                    isFormatApplied: isFormatted(p, "strikeThrough"),
-                },
-            ],
-        },
+        toolbarGroup: [
+            {
+                id: "decoration",
+                sequence: 20,
+                buttons: [
+                    {
+                        id: "bold",
+                        cmd: "FORMAT_BOLD",
+                        icon: "fa-bold",
+                        name: "Toggle bold",
+                        isFormatApplied: isFormatted(p, "bold"),
+                    },
+                    {
+                        id: "italic",
+                        cmd: "FORMAT_ITALIC",
+                        icon: "fa-italic",
+                        name: "Toggle italic",
+                        isFormatApplied: isFormatted(p, "italic"),
+                    },
+                    {
+                        id: "underline",
+                        cmd: "FORMAT_UNDERLINE",
+                        icon: "fa-underline",
+                        name: "Toggle underline",
+                        isFormatApplied: isFormatted(p, "underline"),
+                    },
+                    {
+                        id: "strikethrough",
+                        cmd: "FORMAT_STRIKETHROUGH",
+                        icon: "fa-strikethrough",
+                        name: "Toggle strikethrough",
+                        isFormatApplied: isFormatted(p, "strikeThrough"),
+                    },
+                ],
+            },
+            {
+                id: "remove_format",
+                sequence: 26,
+                buttons: [
+                    {
+                        id: "remove_format",
+                        cmd: "FORMAT_REMOVE_FORMAT",
+                        icon: "fa-eraser",
+                        name: "Remove Format",
+                        isFormatApplied: hasFormat(p),
+                    },
+                ],
+            },
+        ],
     });
 
     handleCommand(command, payload) {
@@ -89,10 +114,19 @@ export class FormatPlugin extends Plugin {
     }
 
     removeFormat() {
-        this.document.execCommand("removeFormat");
+        // this.document.execCommand("removeFormat");
+        for (const format of Object.keys(formatsSpecs)) {
+            if (!formatsSpecs[format].removeStyle) {
+                continue;
+            }
+            this.formatSelection(format, { applyStyle: false });
+        }
         for (const node of this.shared.getTraversedNodes()) {
             // The only possible background image on text is the gradient.
-            closestElement(node).style.backgroundImage = "";
+            const element = closestElement(node);
+            if (element.style["background-image"] !== "initial") {
+                element.style.backgroundImage = "";
+            }
         }
     }
 
