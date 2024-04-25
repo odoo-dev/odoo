@@ -35,6 +35,8 @@ import { isMacOS } from "@web/core/browser/feature_detection";
  * @property {number} endOffset
  */
 
+/** @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection */
+
 export class DeletePlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "delete";
@@ -44,6 +46,11 @@ export class DeletePlugin extends Plugin {
         shortcuts: [
             { hotkey: "backspace", command: "DELETE_BACKWARD" },
             { hotkey: "delete", command: "DELETE_FORWARD" },
+            { hotkey: "control+backspace", command: "DELETE_BACKWARD_WORD" },
+            { hotkey: "control+delete", command: "DELETE_FORWARD_WORD" },
+            // @todo @phoenix
+            // { hotkey: "control+shift+backspace", command: "DELETE_BACKWARD_LINE" },
+            // { hotkey: "control+shift+delete", command: "DELETE_FORWARD_LINE" },
         ],
         handle_delete_backward: [
             { callback: p.deleteBackwardContentEditableFalse.bind(p) },
@@ -71,15 +78,28 @@ export class DeletePlugin extends Plugin {
 
     handleCommand(command, payload) {
         switch (command) {
-            case "DELETE_BACKWARD":
-                this.deleteBackward();
-                break;
-            case "DELETE_FORWARD":
-                this.deleteForward();
-                break;
             case "DELETE_SELECTION":
                 this.deleteSelection();
                 break;
+            case "DELETE_BACKWARD":
+                this.delete("backward", "character");
+                break;
+            case "DELETE_FORWARD":
+                this.delete("forward", "character");
+                break;
+            case "DELETE_BACKWARD_WORD":
+                this.delete("backward", "word");
+                break;
+            case "DELETE_FORWARD_WORD":
+                this.delete("forward", "word");
+                break;
+            // @todo @phoenix
+            // case "DELETE_BACKWARD_LINE":
+            //     this.delete("backward", "line");
+            //     break;
+            // case "DELETE_FORWARD_LINE":
+            //     this.delete("forward", "line");
+            //     break;
         }
     }
 
@@ -87,6 +107,9 @@ export class DeletePlugin extends Plugin {
     // commands
     // --------------------------------------------------------------------------
 
+    /**
+     * @param {EditorSelection} [selection]
+     */
     deleteSelection(selection = this.shared.getEditableSelection()) {
         // @todo @phoenix: handle non-collapsed selection around a ZWS
         // see collapseIfZWS
@@ -114,43 +137,46 @@ export class DeletePlugin extends Plugin {
         this.setCursorFromRange(range);
     }
 
-    deleteBackward() {
+    /**
+     * @param {"backward"|"forward"} direction
+     * @param {"character"|"word"} granularity
+     */
+    delete(direction, granularity) {
         const selection = this.shared.getEditableSelection();
 
-        if (selection.isCollapsed) {
-            this.deleteBackwardChar(selection);
-        } else {
+        if (!selection.isCollapsed) {
             this.deleteSelection(selection);
+        } else if (direction === "backward") {
+            this.deleteBackward(selection, granularity);
+        } else if (direction === "forward") {
+            this.deleteForward(selection, granularity);
+        } else {
+            throw new Error("Invalid direction");
         }
 
         this.dispatch("ADD_STEP");
     }
 
-    deleteForward() {
-        const selection = this.shared.getEditableSelection();
+    // --------------------------------------------------------------------------
+    // Delete backward/forward
+    // --------------------------------------------------------------------------
 
-        if (selection.isCollapsed) {
-            this.deleteForwardChar(selection);
-        } else {
-            this.deleteSelection(selection);
-        }
-
-        this.dispatch("ADD_STEP");
-    }
-
-    // Big @todo @phoenix: delete backward word (ctrl + delete)
-    deleteBackwardChar(selection) {
+    /**
+     * @param {EditorSelection} selection
+     * @param {"character"|"word"} granularity
+     */
+    deleteBackward(selection, granularity) {
         // Normalize selection
         selection = this.shared.setSelection(selection);
 
-        const { endContainer, endOffset } = selection;
-        let [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
-        if (!startContainer) {
-            [startContainer, startOffset] = [endContainer, endOffset];
-        }
-        let range = { startContainer, startOffset, endContainer, endOffset };
+        let range = this.getRangeForDeleteBackward(selection, granularity);
 
-        for (const { callback } of this.resources["handle_delete_backward"]) {
+        const resources = {
+            character: this.resources["handle_delete_backward"],
+            word: this.resources["handle_delete_backward_word"],
+            line: [],
+        };
+        for (const { callback } of resources[granularity]) {
             if (callback(range)) {
                 return;
             }
@@ -165,18 +191,22 @@ export class DeletePlugin extends Plugin {
         this.setCursorFromRange(range, { collapseToEnd: true });
     }
 
-    deleteForwardChar(selection) {
+    /**
+     * @param {EditorSelection} selection
+     * @param {"character"|"word"} granularity
+     */
+    deleteForward(selection, granularity) {
         // Normalize selection
         selection = this.shared.setSelection(selection);
 
-        const { startContainer, startOffset } = selection;
-        let [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
-        if (!endContainer) {
-            [endContainer, endOffset] = [startContainer, startOffset];
-        }
-        let range = { startContainer, startOffset, endContainer, endOffset };
+        let range = this.getRangeForDeleteForward(selection, granularity);
 
-        for (const { callback } of this.resources["handle_delete_forward"]) {
+        const resources = {
+            character: this.resources["handle_delete_forward"],
+            word: [],
+            line: [],
+        };
+        for (const { callback } of resources[granularity]) {
             if (callback(range)) {
                 return;
             }
@@ -189,6 +219,53 @@ export class DeletePlugin extends Plugin {
         ]);
         range = this.deleteRange(range);
         this.setCursorFromRange(range);
+    }
+
+    getRangeForDeleteBackward(selection, granularity) {
+        const { endContainer, endOffset } = selection;
+        if (granularity === "character") {
+            let [startContainer, startOffset] = this.findPreviousPosition(endContainer, endOffset);
+            if (!startContainer) {
+                [startContainer, startOffset] = [endContainer, endOffset];
+            }
+            return { startContainer, startOffset, endContainer, endOffset };
+        }
+
+        // @todo @phoenix: write more tests for ctrl+backspace
+        if (granularity === "word") {
+            const { startContainer, startOffset } = this.shared.extendSelection(
+                "backward",
+                granularity
+            );
+            return { startContainer, startOffset, endContainer, endOffset };
+        }
+
+        if (granularity === "line") {
+            // @todo @phoenix: implement
+        }
+        throw new Error("Invalid granularity");
+    }
+
+    getRangeForDeleteForward(selection, granularity) {
+        const { startContainer, startOffset } = selection;
+        if (granularity === "character") {
+            let [endContainer, endOffset] = this.findNextPosition(startContainer, startOffset);
+            if (!endContainer) {
+                [endContainer, endOffset] = [startContainer, startOffset];
+            }
+            return { startContainer, startOffset, endContainer, endOffset };
+        }
+
+        // @todo @phoenix: write tests for ctrl+delete (there are none?)
+        if (granularity === "word") {
+            const { endContainer, endOffset } = this.shared.extendSelection("forward", granularity);
+            return { startContainer, startOffset, endContainer, endOffset };
+        }
+
+        if (granularity === "line") {
+            // @todo @phoenix: implement
+        }
+        throw new Error("Invalid granularity");
     }
 
     // --------------------------------------------------------------------------
@@ -1014,6 +1091,12 @@ export class DeletePlugin extends Plugin {
         } else if (e.inputType === "deleteContentForward") {
             e.preventDefault();
             this.dispatch("DELETE_FORWARD");
+        } else if (e.inputType === "deleteWordBackward") {
+            e.preventDefault();
+            this.dispatch("DELETE_BACKWARD_WORD");
+        } else if (e.inputType === "deleteWordForward") {
+            e.preventDefault();
+            this.dispatch("DELETE_FORWARD_WORD");
         }
     }
     /**
