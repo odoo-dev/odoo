@@ -12,7 +12,6 @@ test("should not remove the last p with ctrl+backspace", async () => {
     });
 });
 
-// @todo @phoenix: this test passes/fails underministically
 test("should not remove the last p enclosed in a contenteditable=false with ctrl+backspace", async () => {
     await testEditor({
         contentBefore: unformat(`
@@ -56,7 +55,7 @@ test("should add a <p><br></p> element when deleting the last child of an elemen
     });
 });
 
-test("should correctly rollback a CTRL+BACKSPACE if the element should not have been removed", async () => {
+test("should not remove an unremovable element on CTRL+BACKSPACE", async () => {
     await testEditor({
         contentBefore: unformat(`
                 <div contenteditable="false"><div contenteditable="true">
@@ -71,5 +70,41 @@ test("should correctly rollback a CTRL+BACKSPACE if the element should not have 
                         []<br>
                     </blockquote>
                 </div></div>`),
+    });
+});
+
+test.todo("should not remove an unremovable element on CTRL+BACKSPACE (2)", async () => {
+    await testEditor({
+        contentBefore: unformat(`
+            <p>abc</p>
+            <p class="oe_unremovable">[]<br></p>`),
+        stepFunction: () => press(["Ctrl", "Backspace"]),
+        contentAfter: unformat(`
+            <p>abc</p>
+            <p class="oe_unremovable">[]<br></p>`),
+    });
+});
+
+test("should not merge an unbreakable element on CTRL+BACKSPACE", async () => {
+    await testEditor({
+        contentBefore: unformat(`
+            <div>abc</div>
+            <p>[]def</p>`),
+        stepFunction: () => press(["Ctrl", "Backspace"]),
+        contentAfter: unformat(`
+            <div>abc</div>
+            <p>[]def</p>`),
+    });
+});
+
+test("should not merge an unbreakable element on CTRL+BACKSPACE (2)", async () => {
+    await testEditor({
+        contentBefore: unformat(`
+            <p>abc</p>
+            <div>[]def</div>`),
+        stepFunction: () => press(["Ctrl", "Backspace"]),
+        contentAfter: unformat(`
+            <p>abc</p>
+            <div>[]def</div>`),
     });
 });
