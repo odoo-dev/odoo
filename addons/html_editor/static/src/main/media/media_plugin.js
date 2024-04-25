@@ -38,6 +38,10 @@ export class MediaPlugin extends Plugin {
         ],
     });
 
+    setup() {
+        this.elementsToRemoveContentEditable = [];
+    }
+
     handleCommand(command, payload) {
         switch (command) {
             case "NORMALIZE":
@@ -58,7 +62,10 @@ export class MediaPlugin extends Plugin {
             if (isProtected(el)) {
                 continue;
             }
-            el.setAttribute("contenteditable", "false");
+            if (!el.hasAttribute("contenteditable")) {
+                el.setAttribute("contenteditable", "false");
+                this.elementsToRemoveContentEditable.push(el);
+            }
             if (isIconElement(el)) {
                 el.textContent = "\u200B";
             }
@@ -67,11 +74,14 @@ export class MediaPlugin extends Plugin {
 
     clean() {
         for (const el of this.editable.querySelectorAll(MEDIA_SELECTOR)) {
-            el.removeAttribute("contenteditable");
+            if (this.elementsToRemoveContentEditable.includes(el)) {
+                el.removeAttribute("contenteditable");
+            }
             if (isIconElement(el)) {
                 el.textContent = "";
             }
         }
+        this.elementsToRemoveContentEditable = [];
     }
 
     onAttachmentChange() {
