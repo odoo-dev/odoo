@@ -1181,7 +1181,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test.todo("should paste a text when selection leave a span (9)", async () => {
+        test("should paste a text when selection leave a span (9)", async () => {
             await testEditor({
                 contentBefore: '<div>1ab<span class="a">c[d</span>e]f</div>',
                 stepFunction: async (editor) => {
@@ -1226,7 +1226,7 @@ describe("Complex html p+i", () => {
             });
         });
 
-        test.todo("should paste a text when selection across two element (10)", async () => {
+        test("should paste a text when selection across two element (10)", async () => {
             await testEditor({
                 contentBefore: '<div>2a<span class="a">b[c</span><p>d]e</p>f</div>',
                 stepFunction: async (editor) => {
@@ -1575,7 +1575,7 @@ describe("link", () => {
             }
         );
 
-        test.todo("should paste html content over an empty link (collapsed)", async () => {
+        test("should paste html content over an empty link (collapsed)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[]\u200B</a></p>',
                 stepFunction: async (editor) => {
@@ -1777,7 +1777,7 @@ describe("link", () => {
             });
         });
 
-        test.todo("should paste and transform URL over the existing url", async () => {
+        test("should paste and transform URL over the existing url", async () => {
             await testEditor({
                 contentBefore: '<p>ab[<a href="http://www.xyz.com">http://www.xyz.com</a>]cd</p>',
                 stepFunction: async (editor) => {
@@ -1833,20 +1833,15 @@ describe("link", () => {
             }
         );
 
-        test.todo(
-            "should paste and transform URL over the existing url (not collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore:
-                        '<p>ab[<a href="http://www.xyz.com">http://www.xyz.com</a>]cd</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "https://www.xyz.xdc ");
-                    },
-                    contentAfter:
-                        '<p>ab<a href="https://www.xyz.xdc">https://www.xyz.xdc</a> []cd</p>',
-                });
-            }
-        );
+        test("should paste and transform URL over the existing url (not collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p>ab[<a href="http://www.xyz.com">http://www.xyz.com</a>]cd</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "https://www.xyz.xdc ");
+                },
+                contentAfter: '<p>ab<a href="https://www.xyz.xdc">https://www.xyz.xdc</a> []cd</p>',
+            });
+        });
 
         test("should paste plain text content over a link if all of its contents is selected (not collapsed)", async () => {
             await testEditor({
@@ -1905,22 +1900,19 @@ describe("link", () => {
             }
         );
 
-        test.todo(
-            "should paste html content over a link if all of its contents is selected (not collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p><a href="#">[xyz]</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteHtml(
-                            editor,
-                            '<a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>'
-                        );
-                    },
-                    contentAfter:
-                        '<p><a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>[]</p>',
-                });
-            }
-        );
+        test("should paste html content over a link if all of its contents is selected (not collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[xyz]</a></p>',
+                stepFunction: async (editor) => {
+                    pasteHtml(
+                        editor,
+                        '<a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>'
+                    );
+                },
+                contentAfter:
+                    '<p><a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>[]</p>',
+            });
+        });
     });
 });
 

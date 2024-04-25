@@ -272,7 +272,10 @@ export class DomPlugin extends Plugin {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
-        this.shared.setSelection({ anchorNode: lastPosition[0], anchorOffset: lastPosition[1] });
+        this.shared.setSelection(
+            { anchorNode: lastPosition[0], anchorOffset: lastPosition[1] },
+            { normalize: false }
+        );
         return firstInsertedNodes.concat(insertedNodes).concat(lastInsertedNodes);
     }
 
