@@ -1,6 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { deleteBackward, insertLineBreak, insertText, undo } from "../_helpers/user_actions";
 import { testEditor } from "../_helpers/editor";
+import { animationFrame } from "@odoo/hoot-mock";
 
 describe("range collapsed", () => {
     test("should not change the url when a link is not edited", async () => {
@@ -19,7 +20,7 @@ describe("range collapsed", () => {
         });
     });
 
-    test.todo("should change the url when the label change", async () => {
+    test("should change the url when the label change", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.co">google.co[]</a>b</p>',
             stepFunction: async (editor) => {
@@ -57,45 +58,39 @@ describe("range collapsed", () => {
         });
     });
 
-    test.todo(
-        "should change the url when the label change, without changing the protocol",
-        async () => {
-            await testEditor({
-                contentBefore: '<p>a<a href="http://google.co">google.co[]</a>b</p>',
-                stepFunction: async (editor) => {
-                    insertText(editor, "m");
-                },
-                contentAfter: '<p>a<a href="http://google.com">google.com[]</a>b</p>',
-            });
-            await testEditor({
-                contentBefore: '<p>a<a href="https://google.co">google.co[]</a>b</p>',
-                stepFunction: async (editor) => {
-                    insertText(editor, "m");
-                },
-                contentAfter: '<p>a<a href="https://google.com">google.com[]</a>b</p>',
-            });
-        }
-    );
+    test("should change the url when the label change, without changing the protocol", async () => {
+        await testEditor({
+            contentBefore: '<p>a<a href="http://google.co">google.co[]</a>b</p>',
+            stepFunction: async (editor) => {
+                insertText(editor, "m");
+            },
+            contentAfter: '<p>a<a href="http://google.com">google.com[]</a>b</p>',
+        });
+        await testEditor({
+            contentBefore: '<p>a<a href="https://google.co">google.co[]</a>b</p>',
+            stepFunction: async (editor) => {
+                insertText(editor, "m");
+            },
+            contentAfter: '<p>a<a href="https://google.com">google.com[]</a>b</p>',
+        });
+    });
 
-    test.todo(
-        "should change the url when the label change, changing to the suitable protocol",
-        async () => {
-            await testEditor({
-                contentBefore: '<p>a<a href="http://hellomoto.com">hello[]moto.com</a></p>',
-                stepFunction: async (editor) => {
-                    insertText(editor, "@");
-                },
-                contentAfter: '<p>a<a href="mailto:hello@moto.com">hello@[]moto.com</a></p>',
-            });
-            await testEditor({
-                contentBefore: '<p>a<a href="mailto:hello@moto.com">hello@[]moto.com</a></p>',
-                stepFunction: async (editor) => {
-                    deleteBackward(editor);
-                },
-                contentAfter: '<p>a<a href="http://hellomoto.com">hello[]moto.com</a></p>',
-            });
-        }
-    );
+    test("should change the url when the label change, changing to the suitable protocol", async () => {
+        await testEditor({
+            contentBefore: '<p>a<a href="http://hellomoto.com">hello[]moto.com</a></p>',
+            stepFunction: async (editor) => {
+                insertText(editor, "@");
+            },
+            contentAfter: '<p>a<a href="mailto:hello@moto.com">hello@[]moto.com</a></p>',
+        });
+        await testEditor({
+            contentBefore: '<p>a<a href="mailto:hello@moto.com">hello@[]moto.com</a></p>',
+            stepFunction: async (editor) => {
+                deleteBackward(editor);
+            },
+            contentAfter: '<p>a<a href="http://hellomoto.com">hello[]moto.com</a></p>',
+        });
+    });
 
     test("should change the url in one step", async () => {
         await testEditor({
@@ -108,7 +103,7 @@ describe("range collapsed", () => {
         });
     });
 
-    test.todo("should not change the url when the label change", async () => {
+    test("should not change the url when the label change", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.com">google.com[]</a>b</p>',
             stepFunction: async (editor) => {
@@ -119,6 +114,7 @@ describe("range collapsed", () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.com">google.com[]</a></p>',
             stepFunction: async (editor) => {
+                await animationFrame();
                 await insertLineBreak(editor);
                 insertText(editor, "odoo.com");
             },
@@ -128,7 +124,7 @@ describe("range collapsed", () => {
 });
 
 describe("range not collapsed", () => {
-    test.todo("should change the url when the label change", async () => {
+    test("should change the url when the label change", async () => {
         await testEditor({
             contentBefore: '<p>a<a href="https://google.com">google.[com]</a>b</p>',
             stepFunction: async (editor) => {
