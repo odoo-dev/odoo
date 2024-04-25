@@ -56,7 +56,10 @@ export class DeletePlugin extends Plugin {
             { callback: p.deleteBackwardContentEditableFalse.bind(p) },
             { callback: p.deleteBackwardUnmergeable.bind(p) },
         ],
+        handle_delete_backward_word: { callback: p.deleteBackwardUnmergeable.bind(p) },
         handle_delete_forward: { callback: p.deleteForwardUnmergeable.bind(p) },
+        handle_delete_forward_word: { callback: p.deleteForwardUnmergeable.bind(p) },
+
         // @todo @phoenix: move these predicates to different plugins
         unremovables: [
             // The root editable (@todo @phoenix: I don't think this is necessary)
@@ -203,7 +206,7 @@ export class DeletePlugin extends Plugin {
 
         const resources = {
             character: this.resources["handle_delete_forward"],
-            word: [],
+            word: this.resources["handle_delete_forward_word"],
             line: [],
         };
         for (const { callback } of resources[granularity]) {
@@ -1139,18 +1142,18 @@ export class DeletePlugin extends Plugin {
     }
 
     deleteBackwardUnmergeable(range) {
-        const { startContainer, startOffset, endContainer } = range;
-        return this.deleteCharUnmergeable(endContainer, startContainer, startOffset);
+        const { startContainer, startOffset, endContainer, endOffset } = range;
+        return this.deleteCharUnmergeable(endContainer, endOffset, startContainer, startOffset);
     }
 
     // @todo @phoenix: write tests for this
     deleteForwardUnmergeable(range) {
-        const { startContainer, endContainer, endOffset } = range;
-        return this.deleteCharUnmergeable(startContainer, endContainer, endOffset);
+        const { startContainer, startOffset, endContainer, endOffset } = range;
+        return this.deleteCharUnmergeable(startContainer, startOffset, endContainer, endOffset);
     }
 
     // Trap cursor inside unmergeable element. Remove it if empty.
-    deleteCharUnmergeable(sourceContainer, destContainer, destOffset) {
+    deleteCharUnmergeable(sourceContainer, sourceOffset, destContainer, destOffset) {
         if (!destContainer) {
             return;
         }
@@ -1165,6 +1168,8 @@ export class DeletePlugin extends Plugin {
         if (isEmpty(closestUnmergeable) && !this.isUnremovable(closestUnmergeable)) {
             closestUnmergeable.remove();
             this.shared.setSelection({ anchorNode: destContainer, anchorOffset: destOffset });
+        } else {
+            this.shared.setSelection({ anchorNode: sourceContainer, anchorOffset: sourceOffset });
         }
         return true;
     }
