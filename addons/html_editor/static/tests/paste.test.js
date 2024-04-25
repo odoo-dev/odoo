@@ -1,8 +1,8 @@
 import { CLIPBOARD_WHITELISTS } from "@html_editor/core/clipboard_plugin";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { press } from "@odoo/hoot-dom";
+import { manuallyDispatchProgrammaticEvent as dispatch, press } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
-import { onRpc } from "@web/../tests/web_test_helpers";
+import { onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
@@ -2733,3 +2733,127 @@ describe("Paste HTML tables", () => {
         });
     });
 });
+
+describe("onDrop", () => {
+    test("should add text from htmlTransferItem", async () => {
+        const { el } = await setupEditor("<p>a[b]cd</p>");
+        const pElement = el.firstChild;
+        const textNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretRangeFromPoint: () => {
+                const range = document.createRange();
+                range.setStart(textNode, 3);
+                range.setEnd(textNode, 3);
+                return range;
+            },
+        });
+
+        const dropData = new DataTransfer();
+        dropData.setData("text/html", "b");
+        dispatch(pElement, "drop", { dataTransfer: dropData });
+        await tick();
+
+        expect(getContent(el)).toBe("<p>abcb[]d</p>");
+    });
+    test("should not be able to paste inside some branded node", async () => {
+        const { el } = await setupEditor(`<p data-oe-model="foo" data-oe-type="text">a[b]cd</p>`);
+        const pElement = el.firstChild;
+        const textNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretRangeFromPoint: () => {
+                const range = document.createRange();
+                range.setStart(textNode, 3);
+                range.setEnd(textNode, 3);
+                return range;
+            },
+        });
+
+        const dropData = new DataTransfer();
+        dropData.setData("text/html", "x");
+
+        dispatch(pElement, "drop", { dataTransfer: dropData });
+        await tick();
+
+        expect(getContent(el)).toBe(`<p data-oe-model="foo" data-oe-type="text">a[b]cd</p>`);
+    });
+    test("should add new images form fileTransferItems", async () => {
+        const { el } = await setupEditor(`<p>a[b]cd</p>`);
+        const pElement = el.firstChild;
+        const textNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretRangeFromPoint: () => {
+                const range = document.createRange();
+                range.setStart(textNode, 3);
+                range.setEnd(textNode, 3);
+                return range;
+            },
+        });
+
+        const base64Image =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
+        const blob = dataURItoBlob(base64Image);
+        const dropData = new DataTransfer();
+        const f = new File([blob], "image.png", { type: blob.type });
+        dropData.items.add(f);
+        dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+        expect(getContent(el)).toBe(
+            `<p>abc<img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]d</p>`
+        );
+    });
+    test("should move an image if it originated from the editor", async () => {
+        const base64Image =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
+
+        const { el } = await setupEditor(
+            `<p>a[<img class="img-fluid" data-file-name="image.png" src="${base64Image}">]bc</p>`
+        );
+        const pElement = el.firstChild;
+        const imgElement = pElement.childNodes[1];
+        const bcTextNode = pElement.childNodes[2];
+
+        patchWithCleanup(document, {
+            caretRangeFromPoint: () => {
+                const range = document.createRange();
+                range.setStart(bcTextNode, 1);
+                range.setEnd(bcTextNode, 1);
+                return range;
+            },
+        });
+
+        const dragdata = new DataTransfer();
+        dispatch(imgElement, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor-node");
+        expect(imageHTML).toBe(
+            `<img class="img-fluid" data-file-name="image.png" src="${base64Image}">`
+        );
+
+        const dropData = new DataTransfer();
+        dropData.setData(
+            "text/html",
+            `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><img src="${base64Image}">`
+        );
+        // Simulate the application/vnd.odoo.odoo-editor-node data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor-node", imageHTML);
+        dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            `<p>ab<img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]c</p>`
+        );
+    });
+});
+
+function dataURItoBlob(dataURI) {
+    const binary = atob(dataURI.split(",")[1]);
+    const array = [];
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+    for (let i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], { type: mimeString });
+}

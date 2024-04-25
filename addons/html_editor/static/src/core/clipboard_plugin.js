@@ -79,13 +79,14 @@ export const CLIPBOARD_WHITELISTS = {
 
 export class ClipboardPlugin extends Plugin {
     static name = "clipboard";
-    static dependencies = ["dom", "selection", "sanitize"];
+    static dependencies = ["dom", "selection", "sanitize", "history"];
     static shared = ["pasteText"];
 
     setup() {
         this.addDomListener(this.editable, "copy", this.onCopy);
         this.addDomListener(this.editable, "cut", this.onCut);
         this.addDomListener(this.editable, "paste", this.onPaste);
+        this.addDomListener(this.editable, "dragstart", this.onDragStart);
         this.addDomListener(this.editable, "drop", this.onDrop);
         this.resources["handle_paste_text"] = this.resources["handle_paste_text"] || [];
         this.resources["before_paste"] = this.resources["before_paste"] || [];
@@ -324,7 +325,7 @@ export class ClipboardPlugin extends Plugin {
      *
      * @private
      * @param {string} clipboardData
-     * @returns {Element}
+     * @returns {DocumentFragment}
      */
     prepareClipboardData(clipboardData) {
         const container = this.document.createElement("fake-container");
@@ -502,7 +503,11 @@ export class ClipboardPlugin extends Plugin {
      */
     onDragStart(ev) {
         if (ev.target.nodeName === "IMG") {
-            ev.dataTransfer.setData("text/plain", `oid:${ev.target.oid}`);
+            this.dragImage = ev.target instanceof HTMLElement && ev.target;
+            ev.dataTransfer.setData(
+                "application/vnd.odoo.odoo-editor-node",
+                this.dragImage.outerHTML
+            );
         }
     }
     /**
@@ -510,26 +515,19 @@ export class ClipboardPlugin extends Plugin {
      *
      * @param {DragEvent} ev
      */
-    onDrop(ev) {
+    async onDrop(ev) {
         ev.preventDefault();
         if (!isHtmlContentSupported(ev.target)) {
             return;
         }
-        const sel = this.document.getSelection();
-        let isInEditor = false;
-        let ancestor = sel.anchorNode;
-        while (ancestor && !isInEditor) {
-            if (ancestor === this.editable) {
-                isInEditor = true;
-            }
-            ancestor = ancestor.parentNode;
-        }
         const dataTransfer = (ev.originalEvent || ev).dataTransfer;
-        const imageOidMatch = (dataTransfer.getData("text") || "").match("oid:(.*)");
-        const imageOid = imageOidMatch && imageOidMatch[1];
+        const imageNodeHTML = ev.dataTransfer.getData("application/vnd.odoo.odoo-editor-node");
         const image =
-            imageOid &&
-            [...this.editable.querySelectorAll("*")].find((node) => node.oid === imageOid);
+            imageNodeHTML &&
+            this.dragImage &&
+            imageNodeHTML === this.dragImage.outerHTML &&
+            this.dragImage;
+
         const fileTransferItems = getImageFiles(dataTransfer);
         const htmlTransferItem = [...dataTransfer.items].find((item) => item.type === "text/html");
         if (image || fileTransferItems.length || htmlTransferItem) {
@@ -543,25 +541,25 @@ export class ClipboardPlugin extends Plugin {
                 const range = this.document.caretRangeFromPoint(ev.clientX, ev.clientY);
                 this.shared.setSelection({
                     anchorNode: range.startContainer,
-                    offset: range.startOffset,
+                    anchorOffset: range.startOffset,
                 });
             }
         }
         if (image) {
-            image.classList.toggle("img-fluid", true);
-            const html = image.outerHTML;
-            image.remove();
-            this.execCommand("insert", this.prepareClipboardData(html));
+            const fragment = this.document.createDocumentFragment();
+            fragment.append(image);
+            this.shared.domInsert(fragment);
+            this.dispatch("ADD_STEP");
         } else if (fileTransferItems.length) {
-            this.addImagesFiles(fileTransferItems).then((html) => {
-                this.execCommand("insert", html);
-            });
+            const html = await this.addImagesFiles(fileTransferItems);
+            this.shared.domInsert(html);
+            this.dispatch("ADD_STEP");
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString((pastedText) => {
-                this.execCommand("insert", this.prepareClipboardData(pastedText));
+                this.shared.domInsert(this.prepareClipboardData(pastedText));
+                this.dispatch("ADD_STEP");
             });
         }
-        this.historyStep();
     }
     // @phoenix @todo: move to image or image paste plugin?
     /**
@@ -575,7 +573,7 @@ export class ClipboardPlugin extends Plugin {
             const imageNode = this.document.createElement("img");
             imageNode.classList.add("img-fluid");
             // Mark images as having to be saved as attachments.
-            if (this.options.dropImageAsAttachment) {
+            if (this.config.dropImageAsAttachment) {
                 imageNode.classList.add("o_b64_image_to_save");
             }
             imageNode.dataset.fileName = imageFile.name;
@@ -628,7 +626,6 @@ function getImageUrl(file) {
 export function isHtmlContentSupported(node) {
     return !closestElement(
         node,
-        '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]',
-        true
+        '[data-oe-model]:not([data-oe-field="arch"]):not([data-oe-type="html"]),[data-oe-translation-id]'
     );
 }
