@@ -73,7 +73,7 @@ test("should not remove an unremovable element on CTRL+BACKSPACE", async () => {
     });
 });
 
-test.todo("should not remove an unremovable element on CTRL+BACKSPACE (2)", async () => {
+test("should not remove an unremovable element on CTRL+BACKSPACE (2)", async () => {
     await testEditor({
         contentBefore: unformat(`
             <p>abc</p>
