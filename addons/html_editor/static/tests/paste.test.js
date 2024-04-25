@@ -1097,7 +1097,7 @@ describe("Complex html p+i", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: "<p>12</p><p><i>ii[]</i>abcd</p>",
+                contentAfter: "<p>12</p><p><i>ii</i>[]abcd</p>",
             });
         });
 
@@ -1107,7 +1107,7 @@ describe("Complex html p+i", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: "<p>ab12</p><p><i>ii[]</i>cd</p>",
+                contentAfter: "<p>ab12</p><p><i>ii</i>[]cd</p>",
             });
         });
 
@@ -1118,7 +1118,7 @@ describe("Complex html p+i", () => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii[]</i>c</span>d</p>',
+                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii</i>[]c</span>d</p>',
             });
         });
     });
@@ -1130,7 +1130,7 @@ describe("Complex html p+i", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: "<p>a12</p><p><i>ii[]</i>d</p>",
+                contentAfter: "<p>a12</p><p><i>ii</i>[]d</p>",
             });
         });
 
@@ -1141,7 +1141,7 @@ describe("Complex html p+i", () => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii[]</i>e</span>f</p>',
+                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii</i>[]e</span>f</p>',
             });
         });
 
@@ -1152,10 +1152,10 @@ describe("Complex html p+i", () => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii[]</i>e</span>f</p>',
+                    '<p>a<span class="a">b12</span></p><p><span class="a"><i>ii</i>[]e</span>f</p>',
             });
             await testEditor({
-                contentBefore: '<p>a<span class="a">b[c</span>- -<span class="a">d]e</span>f</p>',
+                contentBefore: '<p>a<span class="a">b[c</span>x<span class="a">d]e</span>f</p>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
@@ -1170,14 +1170,14 @@ describe("Complex html p+i", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: "<div>a<p>b12</p><p><i>ii[]</i>e</p>f</div>",
+                contentAfter: "<div>a<p>b12</p><p><i>ii</i>[]e</p>f</div>",
             });
             await testEditor({
                 contentBefore: "<div>a<p>b[c</p>- -<p>d]e</p>f</div>",
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: "<div>a<p>b12</p><p><i>ii[]</i>e</p>f</div>",
+                contentAfter: "<div>a<p>b12</p><p><i>ii</i>[]e</p>f</div>",
             });
         });
 
@@ -1205,14 +1205,14 @@ describe("Complex html p+i", () => {
                     pasteHtml(editor, complexHtmlData);
                 },
                 contentAfter:
-                    '<p>1ab<span class="a">c12</span></p><p><span class="a"><i>ii[]</i></span>f</p>',
+                    '<p>1ab<span class="a">c12</span></p><p><span class="a"><i>ii</i>[]</span>f</p>',
             });
             await testEditor({
                 contentBefore: '<p>2a[b<span class="a">c]d</span>ef</p>',
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<p>2a12</p><p><i>ii[]</i><span class="a">d</span>ef</p>',
+                contentAfter: '<p>2a12</p><p><i>ii</i>[]<span class="a">d</span>ef</p>',
             });
         });
 
@@ -1222,7 +1222,7 @@ describe("Complex html p+i", () => {
                 stepFunction: async (editor) => {
                     pasteHtml(editor, complexHtmlData);
                 },
-                contentAfter: '<div>1a<p>b12</p><p><i>ii[]</i><span class="a">e</span>f</p></div>',
+                contentAfter: '<div>1a<p>b12</p><p><i>ii</i>[]<span class="a">e</span>f</p></div>',
             });
         });
 
@@ -1972,7 +1972,7 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p><a href="${url}">${url}[]</a></p>`);
+            expect(getContent(el)).toBe(`<p><a href="${url}">${url}</a>[]</p>`);
         });
 
         test("should not revert a history step when pasting an image URL as a link (1)", async () => {
@@ -1988,7 +1988,7 @@ describe("images", () => {
             press("ArrowDown");
             press("Enter");
             expect(getContent(el)).toBe(
-                `<p>*should not disappear*<a href="${url}">${url}[]</a></p>`
+                `<p>*should not disappear*<a href="${url}">${url}</a>[]</p>`
             );
         });
     });
@@ -2052,7 +2052,7 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}[]</a>cd</p>`);
+            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}</a>[]cd</p>`);
         });
 
         test("should not revert a history step when pasting an image URL as a link (2)", async () => {
@@ -2077,7 +2077,7 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}[]</a>cd</p>`);
+            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}</a>[]cd</p>`);
         });
 
         test("should restore selection after pasting image URL followed by UNDO (1)", async () => {
@@ -2168,7 +2168,7 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p><a href="${url}">${url}[]</a></p>`);
+            expect(getContent(el)).toBe(`<p><a href="${url}">${url}</a>[]</p>`);
         });
 
         test("should not revert a history step when pasting a youtube URL as a link (1)", async () => {
@@ -2183,7 +2183,7 @@ describe("youtube video", () => {
             press("ArrowDown");
             press("Enter");
             expect(getContent(el)).toBe(
-                `<p>*should not disappear*<a href="${url}">${url}[]</a></p>`
+                `<p>*should not disappear*<a href="${url}">${url}</a>[]</p>`
             );
         });
     });
@@ -2248,7 +2248,7 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}[]</a>cd</p>`);
+            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}</a>[]cd</p>`);
         });
 
         test("should not revert a history step when pasting a youtube URL as a link (2)", async () => {
@@ -2274,7 +2274,7 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}[]</a>cd</p>`);
+            expect(getContent(el)).toBe(`<p>ab<a href="${url}">${url}</a>[]cd</p>`);
         });
 
         test("should restore selection after pasting video URL followed by UNDO (1)", async () => {
