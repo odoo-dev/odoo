@@ -322,6 +322,7 @@ export class SelectionPlugin extends Plugin {
         [anchorNode, anchorOffset] = normalizeFakeBR(anchorNode, anchorOffset);
         [focusNode, focusOffset] = normalizeFakeBR(focusNode, focusOffset);
         const selection = this.document.getSelection();
+        // @todo @phoenix: protect me! (selection could be nullish)
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 
         this.activeSelection = this.makeSelection(selection, true);
@@ -645,6 +646,7 @@ export class SelectionPlugin extends Plugin {
             return editorSelection;
         }
         const selection = this.document.getSelection();
+        // @todo @phoenix: protect me! (selection could be nullish)
         selection.modify("extend", direction, granularity);
         // @todo: check if it's still inside the editable
         this.activeSelection = this.makeSelection(selection, true);
