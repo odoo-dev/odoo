@@ -190,7 +190,7 @@ export class ClipboardPlugin extends Plugin {
         const odooText = selection.toString();
         ev.clipboardData.setData("text/plain", odooText);
         ev.clipboardData.setData("text/html", odooHtml);
-        ev.clipboardData.setData("text/odoo-editor", odooHtml);
+        ev.clipboardData.setData("application/vnd.odoo.odoo-editor", odooHtml);
     }
 
     /**
@@ -235,7 +235,7 @@ export class ClipboardPlugin extends Plugin {
      * @param {DataTransfer} clipboardData
      */
     handlePasteOdooEditorHtml(clipboardData) {
-        const odooEditorHtml = clipboardData.getData("text/odoo-editor");
+        const odooEditorHtml = clipboardData.getData("application/vnd.odoo.odoo-editor");
         if (odooEditorHtml) {
             const fragment = parseHTML(this.document, odooEditorHtml);
             this.shared.sanitize(fragment, { IN_PLACE: true });

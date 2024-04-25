@@ -246,7 +246,7 @@ export function pasteHtml(editor, html) {
  * @param {string} html
  */
 export function pasteOdooEditorHtml(editor, html) {
-    return pasteData(editor, html, "text/odoo-editor");
+    return pasteData(editor, html, "application/vnd.odoo.odoo-editor");
 }
 /**
  * @param {Node} node
