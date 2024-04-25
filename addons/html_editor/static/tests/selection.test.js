@@ -96,3 +96,42 @@ describe("inEditable", () => {
         expect(editableSelection.inEditable).toBe(false);
     });
 });
+
+test.todo("setEditableSelection should work, even if getSelection returns null", async () => {
+    const { editor } = await setupEditor("<p>a[b]</p>");
+    let selection = editor.shared.getEditableSelection();
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+
+    // it happens sometimes in firefox that the selection is null
+    patchWithCleanup(document, {
+        getSelection: () => null,
+    });
+
+    selection = editor.shared.setSelection({
+        anchorNode: editor.editable.firstChild,
+        anchorOffset: 0,
+    });
+
+    // What should we expect here? The unchanged selection?
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+});
+
+test.todo("extendSelection should work, even if getSelection returns null", async () => {
+    const { editor } = await setupEditor("<p>a[b]</p>");
+    let selection = editor.shared.getEditableSelection();
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+
+    // it happens sometimes in firefox that the selection is null
+    patchWithCleanup(document, {
+        getSelection: () => null,
+    });
+
+    selection = editor.shared.extendSelection("backward", "word");
+
+    // What should we expect here? The unchanged selection?
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
+});
