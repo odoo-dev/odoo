@@ -103,6 +103,7 @@ export class FontPlugin extends Plugin {
             { callback: p.handleSplitBlockHeading.bind(p) },
         ],
         handle_delete_backward: { callback: p.handleDeleteBackward.bind(p) },
+        handle_delete_backward_word: { callback: p.handleDeleteBackward.bind(p) },
         toolbarGroup: [
             {
                 id: "font",
@@ -260,7 +261,11 @@ export class FontPlugin extends Plugin {
             return;
         }
         // Detect if cursor is at the start of the editable (collapsed range).
-        if (startContainer === endContainer && startOffset === endOffset) {
+        const rangeIsCollapsed = startContainer === endContainer && startOffset === endOffset;
+        const isUnremovable = this.resources.unremovables.some((predicate) =>
+            predicate(closestHandledElement)
+        );
+        if (rangeIsCollapsed && !isUnremovable) {
             const p = this.document.createElement("p");
             p.append(...closestHandledElement.childNodes);
             closestHandledElement.after(p);

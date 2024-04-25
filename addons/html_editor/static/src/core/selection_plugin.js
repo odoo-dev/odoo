@@ -86,6 +86,7 @@ export class SelectionPlugin extends Plugin {
         "getSelectedNodes",
         "getTraversedNodes",
         "getTraversedBlocks",
+        "extendSelection",
         // "collapseIfZWS",
     ];
 
@@ -630,5 +631,23 @@ export class SelectionPlugin extends Plugin {
             return true;
         }
         return false;
+    }
+
+    /**
+     *
+     * @param {"backward"|"forward"} direction
+     * @param {"character"|"word"|"line"} granularity
+     * @returns {EditorSelection}
+     */
+    extendSelection(direction, granularity) {
+        const editorSelection = this.getEditableSelection();
+        if (!editorSelection.inEditable) {
+            return editorSelection;
+        }
+        const selection = this.document.getSelection();
+        selection.modify("extend", direction, granularity);
+        // @todo: check if it's still inside the editable
+        this.activeSelection = this.makeSelection(selection, true);
+        return this.activeSelection;
     }
 }
