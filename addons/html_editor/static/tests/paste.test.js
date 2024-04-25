@@ -1589,61 +1589,57 @@ describe("link", () => {
             });
         });
 
-        test.todo("should paste and transform URL among text (collapsed)", async () => {
+        test("should paste and transform URL among text (collapsed)", async () => {
             const url = "https://www.odoo.com";
-            const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
-            const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-            await testEditor({
-                contentBefore: "<p>[]</p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${url} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${url}">${url}</a> def[]</p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[]</p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${imgUrl} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[]</p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${videoUrl} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`,
-            });
+            const { el, editor } = await setupEditor("<p>[]</p>");
+            pasteText(editor, `abc ${url} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>abc <a href="${url}">${url}</a> def[]</p>`);
         });
 
-        test.todo("should paste and transform multiple URLs (collapsed)", async () => {
+        test("should paste and transform image URL among text (collapsed)", async () => {
+            const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
+            const { el, editor } = await setupEditor("<p>[]</p>");
+            pasteText(editor, `abc ${imgUrl} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`);
+        });
+
+        test("should paste and transform video URL among text (collapsed)", async () => {
+            const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            const { el, editor } = await setupEditor("<p>[]</p>");
+            pasteText(editor, `abc ${videoUrl} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`);
+        });
+
+        test("should paste and transform multiple URLs (collapsed) (1)", async () => {
             const url = "https://www.odoo.com";
             const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
             const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-            await testEditor({
-                contentBefore: "<p>[]</p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[]</p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p><a href="${url}">${url}</a> abc <a href="${videoUrl}">${videoUrl}</a> def <a href="${imgUrl}">${imgUrl}</a>[]</p>`,
-            });
+            const { el, editor } = await setupEditor("<p>[]</p>");
+            pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`
+            );
+        });
+
+        test("should paste and transform multiple URLs (collapsed) (2)", async () => {
+            const url = "https://www.odoo.com";
+            const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
+            const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            const { el, editor } = await setupEditor("<p>[]</p>");
+            pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p><a href="${url}">${url}</a> abc <a href="${videoUrl}">${videoUrl}</a> def <a href="${imgUrl}">${imgUrl}</a>[]</p>`
+            );
         });
 
         test("should paste plain text inside non empty link (collapsed)", async () => {
@@ -1735,46 +1731,46 @@ describe("link", () => {
             });
         });
 
-        test.todo("should paste and transform URLs among text or multiple URLs", async () => {
+        test("should paste and transform URL among text (not collapsed)", async () => {
+            const url = "https://www.odoo.com";
+            const { el, editor } = await setupEditor("<p>[xyz]<br></p>");
+            pasteText(editor, `abc ${url} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>abc <a href="${url}">${url}</a> def[]<br></p>`);
+        });
+
+        test("should paste and transform image URL among text (not collapsed)", async () => {
+            const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
+            const { el, editor } = await setupEditor("<p>[xyz]<br></p>");
+            pasteText(editor, `abc ${imgUrl} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(`<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`);
+        });
+
+        test("should paste and transform video URL among text (not collapsed)", async () => {
+            const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            const { el, editor } = await setupEditor("<p>[xyz]<br></p>");
+            pasteText(editor, `abc ${videoUrl} def`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]<br></p>`
+            );
+        });
+
+        test("should paste and transform multiple URLs among text (not collapsed)", async () => {
             const url = "https://www.odoo.com";
             const imgUrl = "https://download.odoocdn.com/icons/website/static/description/icon.png";
             const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-            await testEditor({
-                contentBefore: "<p>[xyz]<br></p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${url} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${url}">${url}</a> def[]<br></p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[xyz]<br></p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${imgUrl} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[xyz]<br></p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `abc ${videoUrl} def`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]<br></p>`,
-            });
-            await testEditor({
-                contentBefore: "<p>[xyz]<br></p>",
-                stepFunction: async (editor) => {
-                    pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
-                    // Powerbox should not open
-                    expect(editor.powerbox.isOpen).not.toBe(true);
-                },
-                contentAfter: `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]<br></p>`,
-            });
+            const { el, editor } = await setupEditor("<p>[xyz]<br></p>");
+            pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]<br></p>`
+            );
         });
 
         test("should paste and transform URL over the existing url", async () => {
@@ -1786,52 +1782,6 @@ describe("link", () => {
                 contentAfter: '<p>ab<a href="https://www.xyz.xdc">https://www.xyz.xdc</a> []cd</p>',
             });
         });
-
-        test.todo(
-            "should paste and transform URLs among text or multiple URLs (not collapsed)",
-            async () => {
-                const url = "https://www.odoo.com";
-                const imgUrl =
-                    "https://download.odoocdn.com/icons/website/static/description/icon.png";
-                const videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-                await testEditor({
-                    contentBefore: "<p>[xyz]<br></p>",
-                    stepFunction: async (editor) => {
-                        pasteText(editor, `abc ${url} def`);
-                        // Powerbox should not open
-                        expect(editor.powerbox.isOpen).not.toBeTruthy();
-                    },
-                    contentAfter: `<p>abc <a href="${url}">${url}</a> def[]<br></p>`,
-                });
-                await testEditor({
-                    contentBefore: "<p>[xyz]<br></p>",
-                    stepFunction: async (editor) => {
-                        pasteText(editor, `abc ${imgUrl} def`);
-                        // Powerbox should not open
-                        expect(editor.powerbox.isOpen).not.toBeTruthy();
-                    },
-                    contentAfter: `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`,
-                });
-                await testEditor({
-                    contentBefore: "<p>[xyz]<br></p>",
-                    stepFunction: async (editor) => {
-                        pasteText(editor, `abc ${videoUrl} def`);
-                        // Powerbox should not open
-                        expect(editor.powerbox.isOpen).not.toBeTruthy();
-                    },
-                    contentAfter: `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]<br></p>`,
-                });
-                await testEditor({
-                    contentBefore: "<p>[xyz]<br></p>",
-                    stepFunction: async (editor) => {
-                        pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
-                        // Powerbox should not open
-                        expect(editor.powerbox.isOpen).not.toBeTruthy();
-                    },
-                    contentAfter: `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]<br></p>`,
-                });
-            }
-        );
 
         test("should paste and transform URL over the existing url (not collapsed)", async () => {
             await testEditor({
