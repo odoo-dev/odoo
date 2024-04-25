@@ -460,6 +460,7 @@ export class HistoryPlugin extends Plugin {
             mutations: [],
         });
         this.stageSelection();
+        this.config.onChange?.();
         return currentStep;
     }
     undo() {
