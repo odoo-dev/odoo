@@ -34,6 +34,7 @@
  * @property { SelectionPlugin['resetSelection'] } resetSelection
  * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
  * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
+ * @property { SelectionPlugin['extendSelection'] } extendSelection
  * @property { FormatPlugin['isSelectionFormat'] } isSelectionFormat
  * @property { LocalOverlayPlugin['makeLocalOverlay'] } makeLocalOverlay
  * @property { PowerboxPlugin['openPowerbox'] } openPowerbox
