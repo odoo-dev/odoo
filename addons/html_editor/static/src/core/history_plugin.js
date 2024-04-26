@@ -464,6 +464,9 @@ export class HistoryPlugin extends Plugin {
         return currentStep;
     }
     undo() {
+        if (this.steps.length === 1) {
+            return;
+        }
         // The last step is considered an uncommited draft so always revert it.
         const lastStep = this.currentStep;
         this.revertMutations(lastStep.mutations);

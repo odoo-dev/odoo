@@ -1,6 +1,7 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "./_helpers/editor";
-import { deleteBackward, deleteForward, insertText } from "./_helpers/user_actions";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "./_helpers/editor";
+import { deleteBackward, deleteForward, insertText, undo } from "./_helpers/user_actions";
+import { getContent } from "./_helpers/selection";
 
 function insertFontAwesome(faClass) {
     return (editor) => {
@@ -552,5 +553,16 @@ describe("Text insertion", () => {
             },
             contentAfter: "<p>abs[]cd</p>",
         });
+    });
+
+    test("undo shouldn't remove changes applied by the editor setup", async () => {
+        const { el, editor } = await setupEditor(`<p><i class="fa fa-pastafarianism"></i></p>`);
+        expect(getContent(el)).toBe(
+            `<p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i></p>`
+        );
+        undo(editor);
+        expect(getContent(el)).toBe(
+            `<p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i></p>`
+        );
     });
 });
