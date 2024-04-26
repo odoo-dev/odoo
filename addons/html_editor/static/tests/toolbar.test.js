@@ -177,7 +177,7 @@ test("toolbar works: can select font size", async () => {
     expect(".o-we-toolbar [name='font-size']").toHaveText("14");
 
     await contains(".o-we-toolbar [name='font-size'] .dropdown-toggle").click();
-    const items = ["80", "72", "64", "56", "28", "21", "18", "17", "15", "14"];
+    const items = ["80", "72", "64", "56", "28", "21", "18", "17", "15", "14", "13"];
     expect(queryAllTexts(".o_font_selector_menu .dropdown-item")).toEqual(items);
 
     await contains(".o_font_selector_menu .dropdown-item:contains('28')").click();
