@@ -752,7 +752,8 @@ export class HistoryPlugin extends Plugin {
      */
     makeSavePoint() {
         this.handleObserverRecords();
-        const currentStepMutationsUntilLength = this.currentStep.mutations.length;
+        const currentMutations = this.currentStep.mutations.slice();
+        const currentStepMutationsUntilLength = currentMutations.length;
         const savePointIndex = this.steps.length - 1;
         let applied = false;
         const selection = this.shared.getEditableSelection();
@@ -770,6 +771,7 @@ export class HistoryPlugin extends Plugin {
                 this.shared.setSelection(selection, { normalize: false });
             } else {
                 this.revertStepsUntil(savePointIndex);
+                this.applyMutations(currentMutations);
             }
         };
     }
