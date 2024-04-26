@@ -262,16 +262,18 @@ export class FontPlugin extends Plugin {
         }
         // Detect if cursor is at the start of the editable (collapsed range).
         const rangeIsCollapsed = startContainer === endContainer && startOffset === endOffset;
-        const isUnremovable = this.resources.unremovables.some((predicate) =>
-            predicate(closestHandledElement)
-        );
-        if (rangeIsCollapsed && !isUnremovable) {
-            const p = this.document.createElement("p");
-            p.append(...closestHandledElement.childNodes);
-            closestHandledElement.after(p);
-            closestHandledElement.remove();
-            this.shared.setCursorStart(p);
-            return true;
+        if (rangeIsCollapsed) {
+            const isUnremovable = this.resources.unremovables.some((predicate) =>
+                predicate(closestHandledElement)
+            );
+            if (!isUnremovable) {
+                const p = this.document.createElement("p");
+                p.append(...closestHandledElement.childNodes);
+                closestHandledElement.after(p);
+                closestHandledElement.remove();
+                this.shared.setCursorStart(p);
+                return true;
+            }
         }
     }
 }
