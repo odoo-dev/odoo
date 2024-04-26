@@ -504,3 +504,73 @@ test("should remove all the colors for the text separated by Enter when using re
         contentAfter: `<div><h1>[ab</h1><h1>cd</h1><h1>ef]</h1></div>`,
     });
 });
+test("should remove multiple format (1)", async () => {
+    await testEditor({
+        contentBefore: "<div>ab<b>[cd</b>ef<i>gh]</i>ij</div>",
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cdefgh]ij</div>",
+    });
+});
+test("should remove multiple format (2)", async () => {
+    await testEditor({
+        contentBefore: "<div>ab<b>[c<u>d</u></b>ef<i>g</i>h]ij</div>",
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cdefgh]ij</div>",
+    });
+});
+test("should remove multiple format (3)", async () => {
+    await testEditor({
+        contentBefore: "<div><p><b>a[bc</b></p><p>de<br>fg<br></p><p><i>ij</i>sd]fsf</p></div>",
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div><p><b>a</b>[bc</p><p>de<br>fg<br></p><p>ijsd]fsf</p></div>",
+    });
+});
+test("should remove multiple color (1)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="background: rgb(0, 0, 255);color: rgb(0, 255, 255);">[cd]</font>ef</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cd]ef</div>",
+    });
+});
+test("should remove multiple color (2)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="background: red" class="bg-o-color-1">[cd]</font>ef</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cd]ef</div>",
+    });
+});
+test("should remove multiple color (3)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="background: rgb(0, 0, 255);"><font class="bg-o-color-1">[cd]</font></font>ef</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cd]ef</div>",
+    });
+});
+test("should remove multiple color (4)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="color: rgb(0, 0, 255);"><font class="bg-o-color-1">[cd]</font></font>ef</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: "<div>ab[cd]ef</div>",
+    });
+});
+test("should remove multiple color (5)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">ef]</font></font>gh</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter: '<div>ab<font style="background: blue">c</font>[def]gh</div>',
+    });
+});
+test("should remove multiple color (6)", async () => {
+    await testEditor({
+        contentBefore:
+            '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">e]f</font></font>gh</div>',
+        stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
+        contentAfter:
+            '<div>ab<font style="background: blue">c</font>[de]<font class="bg-o-color-1">f</font>gh</div>',
+    });
+});
