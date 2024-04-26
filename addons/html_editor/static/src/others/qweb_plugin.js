@@ -172,10 +172,8 @@ export class QWebPlugin extends Plugin {
         }
         activeElement.removeAttribute("data-oe-t-group-active");
         node.setAttribute("data-oe-t-group-active", "true");
-        if (this.selectedNode.getAttribute("data-oe-t-group") !== groupId) {
-            this.selectedNode = node;
-            this.picker.close();
-            this.selectNode(node);
-        }
+        this.selectedNode = node;
+        this.picker.close();
+        this.selectNode(node);
     }
 }
