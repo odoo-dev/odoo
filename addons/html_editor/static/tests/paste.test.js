@@ -1,6 +1,6 @@
 import { CLIPBOARD_WHITELISTS } from "@html_editor/core/clipboard_plugin";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { dispatch, press } from "@odoo/hoot-dom";
+import { press } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { onRpc } from "@web/../tests/web_test_helpers";
 import { setupEditor, testEditor } from "./_helpers/editor";
@@ -1501,56 +1501,63 @@ describe("link", () => {
             });
         });
 
-        test.todo(
-            "should replace link for new content when pasting in an empty link (collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p><a href="#" oe-zws-empty-inline="">[]\u200B</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "abc");
-                    },
-                    contentAfter: "<p>abc[]</p>",
-                });
-                await testEditor({
-                    contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "abc");
-                    },
-                    contentAfter: "<p>xyabc[]z</p>",
-                });
-                await testEditor({
-                    contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "http://odoo.com");
-                    },
-                    contentAfter: '<p>xy<a href="http://odoo.com">http://odoo.com</a>[]z</p>',
-                });
+        test("should replace link for new content when pasting in an empty link (collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#" oe-zws-empty-inline="">[]\u200B</a></p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "abc");
+                },
+                contentAfter: "<p>abc[]</p>",
+            });
+            await testEditor({
+                contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "abc");
+                },
+                contentAfter: "<p>xyabc[]z</p>",
+            });
+        });
 
-                await testEditor({
-                    contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, imgUrl);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the first command (Embed image)
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>xy<img src="${imgUrl}">[]z</p>`,
-                });
-                await testEditor({
-                    contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, imgUrl);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>xy<a href="${imgUrl}">${imgUrl}</a>[]z</p>`,
-                });
-            }
-        );
+        test("should replace link for new content (url) when pasting in an empty link (collapsed)", async () => {
+            const { el, editor } = await setupEditor(
+                `<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>`
+            );
+            pasteText(editor, "http://odoo.com");
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(0);
+            expect(getContent(el)).toBe(
+                `<p>xy<a href="http://odoo.com">http://odoo.com</a>[]z</p>`
+            );
+        });
+
+        test("should replace link for new content (imgUrl) when pasting in an empty link (collapsed) (1)", async () => {
+            const { el, editor } = await setupEditor(
+                `<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>`
+            );
+            pasteText(editor, imgUrl);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe(`<p>xy${imgUrl}[]z</p>`);
+
+            press("Enter");
+            expect(getContent(el)).toBe(`<p>xy<img src="${imgUrl}">[]z</p>`);
+        });
+
+        test("should replace link for new content (url) when pasting in an empty link (collapsed) (2)", async () => {
+            const { el, editor } = await setupEditor(
+                `<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>`
+            );
+            pasteText(editor, imgUrl);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe(`<p>xy${imgUrl}[]z</p>`);
+
+            press("ArrowDown");
+            press("Enter");
+
+            await animationFrame();
+            expect(getContent(el)).toBe(`<p>xy<a href="${imgUrl}">${imgUrl}</a>[]z</p>`);
+        });
 
         test.todo(
             "should paste and transform plain text content over an empty link (collapsed)",
@@ -1804,34 +1811,37 @@ describe("link", () => {
                     },
                     contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
                 });
-
-                await testEditor({
-                    contentBefore:
-                        '<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, imgUrl);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the first command (Embed image)
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>ab<img src="${imgUrl}">[]cd</p>`,
-                });
-                await testEditor({
-                    contentBefore:
-                        '<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, imgUrl);
-                        // Ensure the powerbox is active
-                        expect(editor.powerbox.isOpen).toBe(true);
-                        // Pick the second command (Paste as URL)
-                        dispatch(editor.editable, "keydown", { key: "ArrowDown" });
-                        dispatch(editor.editable, "keydown", { key: "Enter" });
-                    },
-                    contentAfter: `<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`,
-                });
             }
         );
+
+        test("should paste and transform plain text content over an image link if all of its contents is selected (not collapsed) (1)", async () => {
+            const { el, editor } = await setupEditor(
+                `<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>`
+            );
+            pasteText(editor, imgUrl);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe(
+                `<p>abhttps://download.odoocdn.com/icons/website/static/description/icon.png[]cd</p>`
+            );
+            press("Enter");
+            expect(getContent(el)).toBe(`<p>ab<img src="${imgUrl}">[]cd</p>`);
+        });
+
+        test("should paste and transform plain text content over an image link if all of its contents is selected (not collapsed) (2)", async () => {
+            const { el, editor } = await setupEditor(
+                `<p>ab<a href="http://www.xyz.com">[http://www.xyz.com]</a>cd</p>`
+            );
+            pasteText(editor, imgUrl);
+            await animationFrame();
+            expect(".o-we-powerbox").toHaveCount(1);
+            expect(getContent(el)).toBe(
+                `<p>abhttps://download.odoocdn.com/icons/website/static/description/icon.png[]cd</p>`
+            );
+            press("ArrowDown");
+            press("Enter");
+            expect(getContent(el)).toBe(`<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`);
+        });
 
         test("should paste html content over a link if all of its contents is selected (not collapsed)", async () => {
             await testEditor({
