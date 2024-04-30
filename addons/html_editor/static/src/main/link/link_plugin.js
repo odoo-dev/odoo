@@ -171,10 +171,9 @@ export class LinkPlugin extends Plugin {
         this.linkElement = link;
     }
 
-    normalizeLink(root = this.editable) {
-        const start = root.ownerDocument.getSelection()?.anchorNode;
-        const linkEl = start && closestElement(start, "a");
-        if (linkEl && root.contains(linkEl)) {
+    normalizeLink(node) {
+        const linkEl = closestElement(node, "a");
+        if (linkEl && linkEl.isContentEditable) {
             const label = linkEl.innerText;
             const url = deduceURLfromText(label, linkEl);
             if (url) {
