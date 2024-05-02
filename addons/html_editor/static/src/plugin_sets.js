@@ -38,6 +38,7 @@ import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
 import { OwlComponentPlugin } from "./others/owl_component_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
+import { ChatGPTPlugin } from "./others/chatgpt_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -83,4 +84,10 @@ export const MAIN_PLUGINS = [
     InlineCodePlugin,
 ];
 
-export const EXTRA_PLUGINS = [...MAIN_PLUGINS, QWebPlugin, OwlComponentPlugin, StarPlugin];
+export const EXTRA_PLUGINS = [
+    ...MAIN_PLUGINS,
+    QWebPlugin,
+    OwlComponentPlugin,
+    StarPlugin,
+    ChatGPTPlugin,
+];
