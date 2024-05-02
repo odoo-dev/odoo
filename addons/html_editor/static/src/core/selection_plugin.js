@@ -299,7 +299,13 @@ export class SelectionPlugin extends Plugin {
      * @return { EditorSelection }
      */
     setSelection(
-        { anchorNode, anchorOffset, focusNode = anchorNode, focusOffset = anchorOffset },
+        {
+            anchorNode,
+            anchorOffset,
+            focusNode = anchorNode,
+            focusOffset = anchorOffset,
+            inEditable = true,
+        },
         { normalize = true } = {}
     ) {
         if (
@@ -323,7 +329,9 @@ export class SelectionPlugin extends Plugin {
         [focusNode, focusOffset] = normalizeFakeBR(focusNode, focusOffset);
         const selection = this.document.getSelection();
         // @todo @phoenix: protect me! (selection could be nullish)
-        selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+        if (inEditable) {
+            selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+        }
 
         this.activeSelection = this.makeSelection(selection, true);
         return this.activeSelection;

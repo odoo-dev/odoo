@@ -254,7 +254,7 @@ describe("steps whith no parent in history", () => {
                     peerInfos.c2.historyPlugin.steps[4],
                 ]);
             },
-            contentAfter: "[c3}{c3]<p><i>ac[c1}{c1]</i><b>bdef[c2}{c2]</b></p>",
+            contentAfter: "<p><i>ac[c1}{c1]</i><b>bdef[c2}{c2]</b></p>",
         });
     });
 });
