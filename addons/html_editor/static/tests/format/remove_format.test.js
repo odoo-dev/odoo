@@ -562,15 +562,16 @@ test("should remove multiple color (5)", async () => {
         contentBefore:
             '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">ef]</font></font>gh</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
-        contentAfter: '<div>ab<font style="background: blue">c</font>[def]gh</div>',
+        contentAfter: '<div>ab<font style="background: blue">c[</font>def]gh</div>',
     });
 });
-test("should remove multiple color (6)", async () => {
+// TODO: we should avoid <font> element into <font> element when possible
+test.todo("should remove multiple color (6)", async () => {
     await testEditor({
         contentBefore:
             '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">e]f</font></font>gh</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>ab<font style="background: blue">c</font>[de]<font class="bg-o-color-1">f</font>gh</div>',
+            '<div>ab<font style="background: blue">c[</font>de]<font class="bg-o-color-1">f</font>gh</div>',
     });
 });

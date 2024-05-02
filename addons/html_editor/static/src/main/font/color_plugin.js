@@ -119,8 +119,26 @@ export class ColorPlugin extends Plugin {
     }
 
     removeAllColor() {
-        this.applyColor("", "color");
-        this.applyColor("", "backgroundColor");
+        const selectedNodeHasColor = (mode) => {
+            const selectionNodes = this.shared.getSelectedNodes();
+            for (const node of selectionNodes) {
+                if (hasColor(closestElement(node), mode)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        const colorModes = ["color", "backgroundColor"];
+        let someColorWasRemoved = true;
+        while (someColorWasRemoved) {
+            someColorWasRemoved = false;
+            for (const mode of colorModes) {
+                while (selectedNodeHasColor(mode)) {
+                    this.applyColor("", mode);
+                    someColorWasRemoved = true;
+                }
+            }
+        }
     }
 
     /**
