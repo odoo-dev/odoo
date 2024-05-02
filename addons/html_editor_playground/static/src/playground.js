@@ -22,6 +22,10 @@ const testHtml = `Hello Phoenix editor!
 <p><font style="color: rgb(30, 125, 30);">this is another paragraph with color</font></p>
 <p><font style="color: rgb(125, 125, 0);">this is another paragraph with color 2</font></p>
 <p><font style="background: rgb(247, 173, 107);">this is another paragraph with background color</font></p>
+<p>
+    here is an image 
+    <img src="/web/static/img/logo.png" alt="" class="img img-fluid o_we_custom_image">
+</p>
 <div>
     <t t-if="test">
         QWeb Hello
