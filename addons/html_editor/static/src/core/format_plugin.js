@@ -121,13 +121,6 @@ export class FormatPlugin extends Plugin {
             }
             this.formatSelection(format, { applyStyle: false });
         }
-        for (const node of this.shared.getTraversedNodes()) {
-            // The only possible background image on text is the gradient.
-            const element = closestElement(node);
-            if (element.style["background-image"] !== "initial") {
-                element.style.backgroundImage = "";
-            }
-        }
     }
 
     /**
