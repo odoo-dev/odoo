@@ -295,7 +295,7 @@ describe("makeSavePoint", () => {
         const numberOfSteps = history.steps.length;
         const safePoint = history.makeSavePoint();
         safePoint();
-        expect(getContent(el)).toBe("[]<font>this is another paragraph with color 2</font><p></p>");
+        expect(getContent(el)).toBe("<font>this is another paragraph with color 2</font><p></p>");
         expect(history.steps.length).toBe(numberOfSteps);
     });
 });
