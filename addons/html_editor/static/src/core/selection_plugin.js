@@ -329,7 +329,7 @@ export class SelectionPlugin extends Plugin {
         [focusNode, focusOffset] = normalizeFakeBR(focusNode, focusOffset);
         const selection = this.document.getSelection();
         // @todo @phoenix: protect me! (selection could be nullish)
-        if (inEditable) {
+        if (selection && inEditable) {
             selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
         }
 
