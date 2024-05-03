@@ -42,6 +42,7 @@ const testHtml = `Hello Phoenix editor!
 </div>
 <p>this is a link: <a href="http://test.com">link</a></p>
 <p>this is another link: <a>link2</a></p>
+<p><span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span></p>
 <div data-embedded="card" data-title="Some Title">
     <p>Some quick example text to build on the card title and make up the bulk of the card's content.</p>
 </div>

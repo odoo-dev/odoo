@@ -1,37 +1,75 @@
-import { test } from "@odoo/hoot";
-import { dispatch } from "@odoo/hoot-dom";
-import { testEditor } from "./_helpers/editor";
+import { expect, test } from "@odoo/hoot";
+import { click, press } from "@odoo/hoot-dom";
+import { setupEditor, testEditor } from "./_helpers/editor";
 import { deleteBackward, insertText } from "./_helpers/user_actions";
+import { getContent } from "./_helpers/selection";
+import { animationFrame } from "@odoo/hoot-mock";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { StarPlugin } from "@html_editor/others/star_plugin";
 
 /**
  * Rating Star Element Tests
  */
 
-test.todo("add star elements", async () => {
-    await testEditor({
-        contentBefore: "<p>[]</p>",
-        stepFunction: async (editor) => {
-            insertText(editor, "/");
-            insertText(editor, "3star");
-            await dispatch(editor.editable, "keyup");
-            await dispatch(editor.editable, "keydown", { key: "Enter" });
-            // TODO @phoenix check if this is still needed nextTick
-            // await nextTick();
-        },
-        contentAfterEdit: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars" id="checkId-1"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
-    });
-    await testEditor({
-        contentBefore: "<p>[]</p>",
-        stepFunction: async (editor) => {
-            insertText(editor, "/");
-            insertText(editor, "5star");
-            await dispatch(editor.editable, "keyup");
-            await dispatch(editor.editable, "keydown", { key: "Enter" });
-            // TODO @phoenix check if this is still needed nextTick
-            // await nextTick();
-        },
-        contentAfterEdit: `<p>\u200B<span contenteditable="false" class="o_stars o_five_stars" id="checkId-1"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
-    });
+const Plugins = [...MAIN_PLUGINS, StarPlugin];
+
+test("add 3 star elements", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>", { config: { Plugins } });
+    insertText(editor, "/3star");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+
+    press("Enter");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
+});
+
+test("add 5 star elements", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>", { config: { Plugins } });
+    insertText(editor, "/5star");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+
+    press("Enter");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
+});
+
+test("select star rating", async () => {
+    const { el } = await setupEditor(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
+        { config: { Plugins } }
+    );
+
+    click("i.fa:first");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
+
+    click("i.fa:last");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star" contenteditable="false">\u200B</i><i class="o_stars fa fa-star" contenteditable="false">\u200B</i><i class="o_stars fa fa-star" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
+
+    click("i.fa:last");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
+});
+
+// @todo @phoenix add id=checkId
+test.todo("add 3 star elements with checkId", async () => {
+    const { el, editor } = await setupEditor("<p>[]</p>");
+    insertText(editor, "/3star");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+
+    press("Enter");
+    expect(getContent(el)).toBe(
+        `<p>\u200B<span contenteditable="false" class="o_stars" id="checkId-1"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
+    );
 });
 
 test("should delete star rating elements when delete is pressed twice", async () => {
