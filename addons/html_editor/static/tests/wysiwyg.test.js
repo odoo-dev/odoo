@@ -1,11 +1,12 @@
+import { CORE_PLUGINS } from "@html_editor/plugin_sets";
 import { useWysiwyg } from "@html_editor/wysiwyg";
 import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { getContent, setContent, setSelection } from "./_helpers/selection";
 import { setupWysiwyg } from "./_helpers/editor";
+import { getContent, setContent, setSelection } from "./_helpers/selection";
 
 describe("wysiwig hook", () => {
     test("useWysiwyg create an editor on ref", async () => {
@@ -50,6 +51,14 @@ describe("Wysiwyg Component", () => {
         expect(".o-wysiwyg").toHaveCount(1);
         expect(".odoo-editor-editable").toHaveCount(1);
         expect(".o-we-toolbar").toHaveCount(1);
+    });
+
+    test("Wysiwyg component can't display a permanent toolbar if toolbar plugin is missing", async () => {
+        expect(".o-we-toolbar").toHaveCount(0);
+        await setupWysiwyg({ toolbar: true, config: { Plugins: CORE_PLUGINS } });
+        expect(".o-wysiwyg").toHaveCount(1);
+        expect(".odoo-editor-editable").toHaveCount(1);
+        expect(".o-we-toolbar").toHaveCount(0);
     });
 
     test("wysiwyg with toolbar: buttons react to selection change", async () => {

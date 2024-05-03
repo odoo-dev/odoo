@@ -52,7 +52,14 @@ export function useWysiwyg(target, config = {}, copyCss = false) {
             } else {
                 // in firefox, iframe is not immediately available. we need to wait
                 // for it to be ready before mounting editor
-                el.addEventListener("load", attachEditor, { once: true });
+                el.addEventListener(
+                    "load",
+                    () => {
+                        attachEditor();
+                        comp.render();
+                    },
+                    { once: true }
+                );
             }
         } else {
             editor.attachTo(el);

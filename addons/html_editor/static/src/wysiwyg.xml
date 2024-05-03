@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.Wysiwyg">
         <div class="o-wysiwyg" t-att-class="props.class" t-att-style="props.style">
-            <t t-if="props.toolbar and state.showToolbar">
+            <t t-if="props.toolbar and state.showToolbar and editor.shared.getToolbarInfo">
                 <Toolbar toolbar="editor.shared.getToolbarInfo()" />
             </t>
             <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="localOverlay" />
