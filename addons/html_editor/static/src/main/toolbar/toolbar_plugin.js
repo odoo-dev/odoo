@@ -52,7 +52,7 @@ export class ToolbarPlugin extends Plugin {
         if (this.config.disableFloatingToolbar) {
             return;
         }
-        const props = { toolbar: this.getToolbarInfo() };
+        const props = { toolbar: this.getToolbarInfo(), class: "shadow rounded my-2" };
 
         const inEditable = sel.inEditable;
         if (this.overlay.isOpen) {
