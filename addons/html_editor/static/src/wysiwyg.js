@@ -44,6 +44,10 @@ export function useWysiwyg(target, config = {}, copyCss = false) {
                     if (copyCss) {
                         copyCssRules(document, el.contentDocument);
                     }
+                    const additionalClasses = el.dataset.class?.split(" ");
+                    for (const c of additionalClasses) {
+                        el.contentDocument.body.classList.add(c);
+                    }
                     editor.attachTo(el.contentDocument.body);
                 }
             };

@@ -27,8 +27,8 @@
                 <div class="d-flex">
                     <Wysiwyg
                         config="getConfig()"
-                        class="'m-2 px-4'"
-                        style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;${!config.inIframe ? 'overflow:auto;' : ''}`"
+                        class="'m-2'"
+                        style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"
                         copyCss="true"

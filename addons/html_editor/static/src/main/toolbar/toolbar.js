@@ -3,6 +3,7 @@ import { Component, useState } from "@odoo/owl";
 export class Toolbar extends Component {
     static template = "html_editor.Toolbar";
     static props = {
+        class: { type: String, optional: true },
         toolbar: {
             type: Object,
             shape: {
