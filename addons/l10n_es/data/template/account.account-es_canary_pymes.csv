@@ -20,6 +20,8 @@
 "account_pymes_canary_296","Deterioro de  valor de participaciones en el patrimonio neto a largo plazo","296","asset_fixed"
 "pgc_pyme_490","Deterioro de valor de créditos por operaciones comerciales","490","liability_current"
 "pgc_pyme_551","Cuenta corriente con socios y administradores","551","asset_current"
+"account_pymes_canary_4707","Hacienda Pública, deudora por IGIC","4707","asset_current"
+"account_pymes_canary_4757","Hacienda Pública, acreedora por IGIC","4757","asset_current"
 "account_pymes_canary_5935","Deterioro de valor de participaciones a corto plazo en otras partes vinculadas","5935","asset_current"
 "account_pymes_canary_596","Deterioro de valor de participaciones a corto plazo","596","asset_current"
 "account_pymes_canary_650","Pérdidas de créditos comerciales incobrables","650","expense"
