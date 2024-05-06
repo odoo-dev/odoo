@@ -205,6 +205,7 @@ export class ListPlugin extends Plugin {
             if (isProtected(element)) {
                 return element;
             }
+            element = this.liWithoutParentToP(element);
             element = this.mergeSimilarLists(element);
             element = this.removeParagraphInLI(element);
             return element;
@@ -322,6 +323,19 @@ export class ListPlugin extends Plugin {
     // --------------------------------------------------------------------------
     // Helpers for normalize
     // --------------------------------------------------------------------------
+
+    liWithoutParentToP(element) {
+        const isOrphan = element.nodeName === "LI" && !element.closest("ul, ol");
+
+        if (!isOrphan) {
+            return element;
+        }
+        // Transform <li> into <p> if they are not in a <ul> / <ol>.
+        const paragraph = document.createElement("p");
+        element.replaceWith(paragraph);
+        paragraph.replaceChildren(...element.childNodes);
+        return paragraph;
+    }
 
     mergeSimilarLists(element) {
         if (!element.matches("ul, ol, li.oe-nested")) {

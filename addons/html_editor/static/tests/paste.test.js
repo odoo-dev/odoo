@@ -75,7 +75,7 @@ describe("Html Paste cleaning - whitelist", () => {
         });
     });
 
-    test.todo("should not keep orphan LI", async () => {
+    test("should not keep orphan LI", async () => {
         await testEditor({
             contentBefore: "<p>123[]</p>",
             stepFunction: async (editor) => {
