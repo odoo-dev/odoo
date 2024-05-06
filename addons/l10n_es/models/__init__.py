@@ -7,3 +7,7 @@ from . import template_es_coop_full
 from . import template_es_coop_pymes
 from . import template_es_full
 from . import template_es_pymes
+from . import template_es_canary_full
+from . import template_es_canary_common
+from . import template_es_canary_pymes
+from . import template_es_canary_assoc
