@@ -1,3 +1,4 @@
+import { isUnbreakable } from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
@@ -79,7 +80,7 @@ export const CLIPBOARD_WHITELISTS = {
 
 export class ClipboardPlugin extends Plugin {
     static name = "clipboard";
-    static dependencies = ["dom", "selection", "sanitize", "history"];
+    static dependencies = ["dom", "selection", "sanitize", "history", "split"];
     static shared = ["pasteText"];
 
     setup() {
@@ -291,6 +292,7 @@ export class ClipboardPlugin extends Plugin {
      * @param {string} text
      */
     pasteText(text) {
+        let selection = this.shared.getEditableSelection();
         const textFragments = text.split(/\r?\n/);
         let textIndex = 1;
         for (const textFragment of textFragments) {
@@ -305,16 +307,16 @@ export class ClipboardPlugin extends Plugin {
             });
             this.shared.domInsert(modifiedTextFragment);
             if (textIndex < textFragments.length) {
-                // todo: to implement
                 // Break line by inserting new paragraph and
                 // remove current paragraph's bottom margin.
-                // const p = closestElement(selection.anchorNode, "p");
-                // if (isUnbreakable(closestBlock(selection.anchorNode))) {
-                //     this._applyCommand("oShiftEnter");
-                // } else {
-                //     this._applyCommand("oEnter");
-                //     p && (p.style.marginBottom = "0px");
-                // }
+                const p = closestElement(selection.anchorNode, "p");
+                if (isUnbreakable(closestBlock(selection.anchorNode))) {
+                    this.dispatch("INSERT_LINEBREAK");
+                } else {
+                    const [pBefore] = this.shared.splitBlock();
+                    p && (pBefore.style.marginBottom = "0px");
+                    selection = this.shared.getEditableSelection();
+                }
             }
             textIndex++;
         }

@@ -10,6 +10,7 @@ export class SplitPlugin extends Plugin {
     static dependencies = ["selection"];
     static name = "split";
     static shared = [
+        "splitBlock",
         "splitElementBlock",
         "splitElement",
         "splitAroundUntil",
@@ -23,7 +24,7 @@ export class SplitPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "SPLIT_BLOCK":
-                this.splitBlock();
+                this._splitBlock();
                 break;
             case "SPLIT_BLOCK_NODE":
                 this.splitBlockNode(payload);
@@ -43,13 +44,22 @@ export class SplitPlugin extends Plugin {
             selection = this.shared.getEditableSelection();
         }
 
-        this.splitBlockNode({
+        return this.splitBlockNode({
             targetNode: selection.anchorNode,
             targetOffset: selection.anchorOffset,
         });
+    }
+    _splitBlock() {
+        this.splitBlock();
         this.dispatch("ADD_STEP");
     }
 
+    /**
+     * @param {Object} param0
+     * @param {Node} param0.targetNode
+     * @param {number} param0.targetOffset
+     * @returns {[HTMLElement|undefined, HTMLElement|undefined]}
+     */
     splitBlockNode({ targetNode, targetOffset }) {
         if (targetNode.nodeType === Node.TEXT_NODE) {
             targetOffset = this.splitTextNode(targetNode, targetOffset);
@@ -59,13 +69,19 @@ export class SplitPlugin extends Plugin {
 
         for (const { callback } of this.resources["split_element_block"]) {
             if (callback({ targetNode, targetOffset, blockToSplit })) {
-                return;
+                return [undefined, undefined];
             }
         }
 
-        this.splitElementBlock({ targetNode, targetOffset, blockToSplit });
+        return this.splitElementBlock({ targetNode, targetOffset, blockToSplit });
     }
-
+    /**
+     * @param {Object} param0
+     * @param {HTMLElement} param0.targetNode
+     * @param {number} param0.targetOffset
+     * @param {HTMLElement} param0.blockToSplit
+     * @returns {[HTMLElement|undefined, HTMLElement|undefined]}
+     */
     splitElementBlock({ targetNode, targetOffset, blockToSplit }) {
         const restore = prepareUpdate(targetNode, targetOffset);
 
@@ -89,7 +105,7 @@ export class SplitPlugin extends Plugin {
 
         this.shared.setCursorStart(afterElement);
 
-        return afterElement;
+        return [beforeElement, afterElement];
     }
 
     /**
@@ -256,22 +272,21 @@ export class SplitPlugin extends Plugin {
             }
         }
 
-        const selection = direction === DIRECTIONS.RIGHT ? {
-                    anchorNode: startContainer,
-                    anchorOffset: startOffset,
-                    focusNode: endContainer,
-                    focusOffset: endOffset,
-                } : {
-                    anchorNode: endContainer,
-                    anchorOffset: endOffset,
-                    focusNode: startContainer,
-                    focusOffset: startOffset,
-                }
-                return this.shared.setSelection(
-               selection,
-                { normalize: false }
-            );
-        
+        const selection =
+            direction === DIRECTIONS.RIGHT
+                ? {
+                      anchorNode: startContainer,
+                      anchorOffset: startOffset,
+                      focusNode: endContainer,
+                      focusOffset: endOffset,
+                  }
+                : {
+                      anchorNode: endContainer,
+                      anchorOffset: endOffset,
+                      focusNode: startContainer,
+                      focusOffset: startOffset,
+                  };
+        return this.shared.setSelection(selection, { normalize: false });
     }
 
     onBeforeInput(e) {

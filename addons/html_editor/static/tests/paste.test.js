@@ -203,7 +203,7 @@ describe("Simple text", () => {
         });
         // TODO: We might want to have it consider \n as paragraph breaks
         // instead of linebreaks but that would be an opinionated choice.
-        test.todo("should paste text and understand \\n newlines", async () => {
+        test("should paste text and understand \\n newlines", async () => {
             await testEditor({
                 // @phoenix content adapted to make it valid html
                 contentBefore: "<p>[]<br></p>",
@@ -218,7 +218,7 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo("should paste text and understand \\r\\n newlines", async () => {
+        test("should paste text and understand \\r\\n newlines", async () => {
             await testEditor({
                 // @phoenix content adapted to make it valid html
                 contentBefore: "<p>[]<br></p>",
@@ -233,32 +233,25 @@ describe("Simple text", () => {
             });
         });
 
-        test.todo(
-            "should paste text and understand \\n newlines within UNBREAKABLE node",
-            async () => {
-                await testEditor({
-                    contentBefore: "<div>[]<br></div>",
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "a\nb\nc\nd");
-                    },
-                    contentAfter: "<div>a<br>b<br>c<br>d[]<br></div>",
-                });
-            }
-        );
+        test("should paste text and understand \\n newlines within UNBREAKABLE node", async () => {
+            await testEditor({
+                contentBefore: "<div>[]<br></div>",
+                stepFunction: async (editor) => {
+                    pasteText(editor, "a\nb\nc\nd");
+                },
+                contentAfter: "<div>a<br>b<br>c<br>d[]<br></div>",
+            });
+        });
 
-        test.todo(
-            "should paste text and understand \\n newlines within UNBREAKABLE node(2)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<div><span style="font-size: 9px;">a[]</span></div>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "b\nc\nd");
-                    },
-                    contentAfter:
-                        '<div><span style="font-size: 9px;">ab<br>c<br>d[]<br></span></div>',
-                });
-            }
-        );
+        test("should paste text and understand \\n newlines within UNBREAKABLE node(2)", async () => {
+            await testEditor({
+                contentBefore: '<div><span style="font-size: 9px;">a[]</span></div>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "b\nc\nd");
+                },
+                contentAfter: '<div><span style="font-size: 9px;">ab<br>c<br>d[]<br></span></div>',
+            });
+        });
     });
 
     describe("range not collapsed", () => {

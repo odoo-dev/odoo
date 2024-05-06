@@ -240,7 +240,7 @@ export class FontPlugin extends Plugin {
             headingTags.includes(element.tagName)
         );
         if (closestHeading) {
-            const newElement = this.shared.splitElementBlock(params);
+            const [, newElement] = this.shared.splitElementBlock(params);
             // @todo @phoenix: if this condition can be anticipated before the split,
             // handle the splitBlock only in such case.
             if (

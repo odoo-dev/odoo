@@ -632,7 +632,7 @@ export class ListPlugin extends Plugin {
             this.outdentLI(closestLI);
             return true;
         }
-        const newLI = this.shared.splitElementBlock({ ...params, blockToSplit: closestLI });
+        const [, newLI] = this.shared.splitElementBlock({ ...params, blockToSplit: closestLI });
         if (closestLI.classList.contains("o_checked")) {
             removeClass(newLI, "o_checked");
         }
