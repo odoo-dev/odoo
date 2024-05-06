@@ -11,7 +11,7 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'name': 'PGCE común - Islas Canarias',
             'visible': 0,
-            'parent': 'es_igic',
+            'parent': 'es_common',
         }
 
     @template('es_canary_common', 'res.company')
