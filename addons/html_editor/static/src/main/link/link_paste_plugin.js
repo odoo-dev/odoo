@@ -90,7 +90,7 @@ export class LinkPastePlugin extends Plugin {
             // Even indexes will always be plain text, and odd indexes will always be URL.
             // A url cannot be transformed inside an existing link.
             if (i % 2 && !selectionIsInsideALink) {
-                this.shared.domInsert(this.shared.createLink(splitAroundUrl[i], url));
+                this.shared.domInsert(this.shared.createLink(url, splitAroundUrl[i]));
             } else if (splitAroundUrl[i] !== "") {
                 this.shared.pasteText(splitAroundUrl[i]);
             }
