@@ -239,20 +239,18 @@ describe("prevent renderingClasses to be set from history", () => {
         expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
 
-    test.todo("should skip the mutations if no changes in state", async () => {
-        await testEditor({
-            contentBefore: `<p class="x">a</p>`,
-            stepFunction: async (editor) => {
-                const p = editor.editable.querySelector("p");
-                editor.historyPauseSteps();
-                p.className = ""; // remove class 'x'
-                p.className = "x"; // apply class 'x' again
-                editor.historyUnpauseSteps();
-                editor.historyRevertCurrentStep(); // back to the initial state
-            },
-            contentAfter: `<p class="x">a</p>`,
-            config: { Plugins: Plugins },
-        });
+    test("should skip the mutations if no changes in state", async () => {
+        const { el, editor } = await setupEditor(`<p class="y">a</p>`, { config: { Plugins } });
+
+        /** @type import("../src/core/history_plugin").HistoryPlugin") */
+        const historyPlugin = editor.plugins.find((p) => p.constructor.name === "history");
+        const p = el.querySelector("p");
+        p.className = "";
+        p.className = "y";
+        historyPlugin.handleObserverRecords();
+        historyPlugin.revertMutations(historyPlugin.currentStep.mutations);
+
+        expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
 });
 
