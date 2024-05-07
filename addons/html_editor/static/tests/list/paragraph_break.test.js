@@ -377,7 +377,6 @@ describe("Selection collapsed", () => {
         describe("Basic", () => {
             test("should add an empty list item before a checklist item (unchecked)", async () => {
                 await testEditor({
-                    removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
                     stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
@@ -386,7 +385,6 @@ describe("Selection collapsed", () => {
 
             test("should add an empty list item before a checklist item (checked)", async () => {
                 await testEditor({
-                    removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>[]abc</li></ul>',
                     stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li><br></li><li>[]abc</li></ul>',
@@ -395,7 +393,6 @@ describe("Selection collapsed", () => {
 
             test("should split a checklist item in two (unchecked)", async () => {
                 await testEditor({
-                    removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                     stepFunction: splitBlock,
                     contentAfter: '<ul class="o_checklist"><li>ab</li><li>[]cd</li></ul>',
@@ -404,7 +401,6 @@ describe("Selection collapsed", () => {
 
             test("should split a checklist item in two (checked)", async () => {
                 await testEditor({
-                    removeCheckIds: true,
                     contentBefore: '<ul class="o_checklist"><li class="o_checked">ab[]cd</li></ul>',
                     stepFunction: splitBlock,
                     contentAfter:
@@ -543,7 +539,6 @@ describe("Selection collapsed", () => {
 
                 test("should add two list items with a class at the end of a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore: '<ul class="o_checklist"><li class="a">abc[]</li></ul>',
                         stepFunction: async (editor) => {
                             splitBlock(editor);
@@ -557,7 +552,6 @@ describe("Selection collapsed", () => {
 
                 test("should create list items after one with a block in it", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="o_checklist"><li class="a"><custom-block style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
@@ -571,7 +565,6 @@ describe("Selection collapsed", () => {
                             '<li class="a"><custom-block style="display: block;">[]<br></custom-block></li></ul>',
                     });
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="o_checklist"><li><custom-block class="a" style="display: block;">abc[]</custom-block></li></ul>',
                         stepFunction: async (editor) => {
@@ -588,7 +581,6 @@ describe("Selection collapsed", () => {
 
                 test("should add two list items with a font at the end of a checklist within a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore: unformat(`
                             <ul class="o_checklist">
                                 <li>ab</li>
@@ -628,7 +620,6 @@ describe("Selection collapsed", () => {
 
                 test("should add two list items at the end of a checklist with a class", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="checklist a"><li class="o_checked">abc[]</li></ul>',
                         stepFunction: async (editor) => {
@@ -643,7 +634,6 @@ describe("Selection collapsed", () => {
 
                 test("should add two list items with a class at the end of a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="o_checklist"><li class="a o_checked">abc[]</li></ul>',
                         stepFunction: async (editor) => {
@@ -657,7 +647,6 @@ describe("Selection collapsed", () => {
                 });
                 test.skip("should add two list items with a class and a div at the end of a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="o_checklist"><li class="a o_checked"><div>abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
@@ -671,7 +660,6 @@ describe("Selection collapsed", () => {
                 });
                 test.skip("should add two list items with a div with a class at the end of a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore:
                             '<ul class="o_checklist"><li class="o_checked"><div class="a">abc[]</div></li></ul>',
                         stepFunction: async (editor) => {
@@ -686,7 +674,6 @@ describe("Selection collapsed", () => {
 
                 test("should add two list items with a font at the end of a checklist within a checklist", async () => {
                     await testEditor({
-                        removeCheckIds: true,
                         contentBefore: unformat(`
                             <ul class="o_checklist">
                                 <li class="o_checked">ab</li>

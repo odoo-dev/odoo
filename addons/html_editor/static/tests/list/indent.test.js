@@ -7,7 +7,6 @@ import { getContent } from "../_helpers/selection";
 describe("Checklist", () => {
     test("should indent a checklist", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">a[b]c</li>
@@ -23,7 +22,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>a[b]c</li>
@@ -42,7 +40,6 @@ describe("Checklist", () => {
 
     test('should indent a checklist and previous line become the "title"', async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -60,7 +57,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -78,7 +74,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -96,7 +91,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
