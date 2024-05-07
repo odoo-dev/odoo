@@ -100,7 +100,7 @@ export async function setupEditor(content, options = {}) {
  */
 
 /**
- * TODO maybe we should add "removeCheckIds" and "styleContent" or use setupEditor directly
+ * TODO maybe we should add "styleContent" or use setupEditor directly
  * @param {TestEditorConfig & TestConfig} config
  */
 export async function testEditor(config) {

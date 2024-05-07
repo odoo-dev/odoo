@@ -27,7 +27,6 @@ describe("Regular list", () => {
 describe("Checklist", () => {
     test("should outdent a checklist", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -43,7 +42,6 @@ describe("Checklist", () => {
                 </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="oe-nested">
@@ -62,7 +60,6 @@ describe("Checklist", () => {
 
     test('should outdent a checklist and previous line as "title"', async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
@@ -80,7 +77,6 @@ describe("Checklist", () => {
                     </ul>`),
         });
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <ul class="o_checklist">
                         <li>abc</li>
@@ -291,7 +287,6 @@ describe("with selection collapsed", () => {
 
     test("should outdent checklist inside a table cell", async () => {
         await testEditor({
-            removeCheckIds: true,
             contentBefore: unformat(`
                     <table>
                         <tbody>

@@ -59,26 +59,14 @@ test("select star rating", async () => {
     );
 });
 
-// @todo @phoenix add id=checkId
-test.todo("add 3 star elements with checkId", async () => {
-    const { el, editor } = await setupEditor("<p>[]</p>");
-    insertText(editor, "/3star");
-    await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(1);
-
-    press("Enter");
-    expect(getContent(el)).toBe(
-        `<p>\u200B<span contenteditable="false" class="o_stars" id="checkId-1"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`
-    );
-});
-
 test("should delete star rating elements when delete is pressed twice", async () => {
     await testEditor({
-        contentBefore: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars"><i class="fa fa-star-o" id="checkId-1" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-2" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-3" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
+        contentBefore: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
         stepFunction: async (editor) => {
             deleteBackward(editor);
             deleteBackward(editor);
         },
         contentAfter: "<p>[]<br></p>",
+        config: { Plugins },
     });
 });

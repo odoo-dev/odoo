@@ -24,7 +24,6 @@ describe("Range collapsed", () => {
 
         test("should turn a ordered list into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<ol><li>ab[]cd</li></ol>",
                 stepFunction: toggleCheckList,
                 contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
@@ -33,7 +32,6 @@ describe("Range collapsed", () => {
 
         test("should turn a unordered list into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: "<ul><li>ab[]cd</li></ul>",
                 stepFunction: toggleCheckList,
                 contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
@@ -186,7 +184,6 @@ describe("Range collapsed", () => {
 
         test("should turn an empty paragraph of multiple table cells into a checklist", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: unformat(`
                     <table class="table table-bordered">
                         <tbody>
@@ -268,7 +265,6 @@ describe("Range collapsed", () => {
 
         test("should keep all attributes when converting a Paragraph element", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
                 stepFunction: toggleCheckList,
                 contentAfter: '<ul class="o_checklist text-uppercase" dir="rtl"><li>a[]b</li></ul>',
@@ -302,7 +298,6 @@ describe("Range collapsed", () => {
 
         test("should turn a checklist item into a paragraph", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: '<p>ab</p><ul class="o_checklist"><li>cd</li><li>ef[]gh</li></ul>',
                 stepFunction: toggleCheckList,
                 contentAfter: '<p>ab</p><ul class="o_checklist"><li>cd</li></ul><p>ef[]gh</p>',
@@ -320,7 +315,6 @@ describe("Range collapsed", () => {
 
         test("should turn nested list items into paragraphs", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore: unformat(`
                         <ul class="o_checklist">
                             <li class="o_checked">a</li>
@@ -489,7 +483,6 @@ describe("Range not collapsed", () => {
 
         test("should turn a checklist item, a paragraph and another list into one list with all three as list items", async () => {
             await testEditor({
-                removeCheckIds: true,
                 contentBefore:
                     '<ul class="o_checklist"><li class="o_checked">ab</li><li>c[d</li></ul><p>ef</p><ul class="o_checklist"><li class="o_checked">g]h</li></ul>',
                 stepFunction: toggleCheckList,

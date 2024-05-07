@@ -1,11 +1,7 @@
 import { describe, test } from "@odoo/hoot";
 import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
-import {
-    toggleOrderedList,
-    toggleUnorderedList,
-    toggleCheckList,
-} from "../_helpers/user_actions";
+import { toggleOrderedList, toggleUnorderedList, toggleCheckList } from "../_helpers/user_actions";
 
 describe("Mixed", () => {
     test("should turn an ordered list into an unordered list", async () => {
