@@ -220,24 +220,23 @@ describe("prevent renderingClasses to be set from history", () => {
         });
     });
 
-    test.todo("should prevent renderingClasses to be added in historyApply", async () => {
-        await testEditor({
-            contentBefore: `<p>a</p>`,
-            stepFunction: async (editor) => {
-                const p = editor.editable.querySelector("p");
-                editor.historyApply([
-                    {
-                        attributeName: "class",
-                        id: p.oid,
-                        oldValue: null,
-                        type: "attributes",
-                        value: "x y",
-                    },
-                ]);
+    test("should prevent renderingClasses to be added in historyApply", async () => {
+        const { el, editor } = await setupEditor(`<p>a</p>`, { config: { Plugins } });
+        /** @type import("../src/core/history_plugin").HistoryPlugin") */
+        const historyPlugin = editor.plugins.find((p) => p.constructor.name === "history");
+        const p = el.querySelector("p");
+
+        historyPlugin.applyMutations([
+            {
+                attributeName: "class",
+                id: historyPlugin.nodeToIdMap.get(p),
+                oldValue: null,
+                type: "attributes",
+                value: "x y",
             },
-            contentAfter: `<p class="y">a</p>`,
-            config: { Plugins: Plugins },
-        });
+        ]);
+
+        expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
 
     test.todo("should skip the mutations if no changes in state", async () => {
