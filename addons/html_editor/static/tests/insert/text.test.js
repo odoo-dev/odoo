@@ -63,16 +63,13 @@ describe("not collapsed selection", () => {
         });
     });
 
-    test.todo(
-        "should transform the space node preceded by a styled element to &nbsp;",
-        async () => {
-            await testEditor({
-                contentBefore: `<p><strong>ab</strong> [cd]</p>`,
-                stepFunction: async (editor) => {
-                    insertText(editor, "x");
-                },
-                contentAfter: `<p><strong>ab</strong>&nbsp;x[]</p>`,
-            });
-        }
-    );
+    test("should transform the space node preceded by a styled element to &nbsp;", async () => {
+        await testEditor({
+            contentBefore: `<p><strong>ab</strong> [cd]</p>`,
+            stepFunction: async (editor) => {
+                insertText(editor, "x");
+            },
+            contentAfter: `<p><strong>ab</strong>&nbsp;x[]</p>`,
+        });
+    });
 });
