@@ -39,6 +39,7 @@ import { YoutubePlugin } from "./main/youtube_plugin";
 import { OwlComponentPlugin } from "./others/owl_component_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
 import { ChatGPTPlugin } from "./others/chatgpt/chatgpt_plugin";
+import { TableResizePlugin } from "./main/table/table_resize_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -82,6 +83,7 @@ export const MAIN_PLUGINS = [
     LocalOverlayPlugin,
     TextDirectionPlugin,
     InlineCodePlugin,
+    TableResizePlugin,
 ];
 
 export const EXTRA_PLUGINS = [
