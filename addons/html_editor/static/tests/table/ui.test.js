@@ -1,5 +1,12 @@
 import { expect, test } from "@odoo/hoot";
-import { click, hover, queryOne, waitFor, waitForNone } from "@odoo/hoot-dom";
+import {
+    click,
+    hover,
+    queryOne,
+    waitFor,
+    waitForNone,
+    manuallyDispatchProgrammaticEvent,
+} from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "../_helpers/editor";
 import { getContent } from "../_helpers/selection";
@@ -9,6 +16,30 @@ function availableCommands(menu) {
     return [...menu.querySelectorAll("span div.user-select-none")].map((n) =>
         n.getAttribute("name")
     );
+}
+
+/**
+ * Dispatch a mousemove event on the given element.
+ *
+ * @param {HTMLElement} el
+ * @param {number} x
+ * @param {number} y
+ */
+function dispatchMousemove(el, x, y) {
+    const eventInit = {
+        clientX: x,
+        clientY: y,
+        pageX: x,
+        pageY: y,
+        relatedTarget: null,
+        screenX: x,
+        screenY: y,
+    };
+
+    const moveEvent = manuallyDispatchProgrammaticEvent(el, "pointermove", eventInit);
+    if (!moveEvent.defaultPrevented) {
+        manuallyDispatchProgrammaticEvent(el, "mousemove", eventInit);
+    }
 }
 
 test("should only display the table ui menu if the table isContentEditable=true", async () => {
@@ -79,7 +110,7 @@ test("should not display the table ui menu if we leave the editor content", asyn
     expect(".o-we-table-menu").toHaveCount(0);
 });
 
-test.todo(
+test.tags("desktop")(
     "should display the resizeCursor if the table element isContentEditable=true",
     async () => {
         const { el } = await setupEditor(`
@@ -90,10 +121,14 @@ test.todo(
         expect(".o_col_resize").toHaveCount(0);
         expect(".o_row_resize").toHaveCount(0);
 
-        hover(el.querySelector("td"));
+        const td = el.querySelector("td");
+        const tdBox = td.getBoundingClientRect();
+        const x = tdBox.x + 1;
+        const y = tdBox.bottom - tdBox.height / 2;
 
-        // commented for now to speed up tests. need to uncomment this when resize is implemented
-        // await waitFor(".o_col_resize");
+        dispatchMousemove(td, x, y);
+
+        await waitFor(".o_col_resize");
         expect(".o_col_resize").toHaveCount(1);
     }
 );
