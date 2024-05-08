@@ -265,7 +265,7 @@ describe("column", () => {
             });
         });
 
-        test.todo("should add a column left of the middle column", async () => {
+        test("should add a column left of the middle column", async () => {
             await testEditor({
                 contentBefore:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
@@ -287,9 +287,9 @@ describe("column", () => {
                 contentAfter:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 38px;">ab</td>' +
-                    '<td style="width: 50px;"><p><br></p></td>' +
-                    '<td style="width: 50px;">cd</td>' +
-                    '<td style="width: 61px;">ef</td>' +
+                    '<td style="width: 49px;"><p><br></p></td>' +
+                    '<td style="width: 49px;">cd</td>' +
+                    '<td style="width: 63px;">ef</td>' +
                     "</tr>" +
                     '<tr style="height: 30px;">' +
                     "<td>ab</td>" +
@@ -341,7 +341,7 @@ describe("column", () => {
             });
         });
 
-        test.todo("should add a column right of the middle column", async () => {
+        test("should add a column right of the middle column", async () => {
             await testEditor({
                 contentBefore:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
@@ -363,9 +363,9 @@ describe("column", () => {
                 contentAfter:
                     '<table style="width: 200px;"><tbody><tr style="height: 20px;">' +
                     '<td style="width: 38px;">ab</td>' +
-                    '<td style="width: 50px;">cd</td>' +
-                    '<td style="width: 50px;"><p><br></p></td>' +
-                    '<td style="width: 61px;">ef</td>' +
+                    '<td style="width: 49px;">cd</td>' +
+                    '<td style="width: 49px;"><p><br></p></td>' +
+                    '<td style="width: 63px;">ef</td>' +
                     "</tr>" +
                     '<tr style="height: 30px;">' +
                     "<td>ab</td>" +
