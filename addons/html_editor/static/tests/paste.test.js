@@ -1552,27 +1552,26 @@ describe("link", () => {
             expect(getContent(el)).toBe(`<p>xy<a href="${imgUrl}">${imgUrl}</a>[]z</p>`);
         });
 
-        test.todo(
-            "should paste and transform plain text content over an empty link (collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p><a href="#">[]\u200B</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "abc www.odoo.com xyz");
-                    },
-                    contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
-                });
-                await testEditor({
-                    contentBefore: '<p><a href="#">[]\u200B</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "odoo.com\ngoogle.com");
-                    },
-                    contentAfter:
-                        '<p style="margin-bottom: 0px;"><a href="http://odoo.com">odoo.com</a></p>' +
-                        '<p><a href="http://google.com">google.com</a>[]<br></p>',
-                });
-            }
-        );
+        test("should paste and transform plain text content over an empty link (collapsed) (1)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[]\u200B</a></p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "abc www.odoo.com xyz");
+                },
+                contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
+            });
+        });
+        test("should paste and transform plain text content over an empty link (collapsed) (2)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[]\u200B</a></p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "odoo.com\ngoogle.com");
+                },
+                contentAfter:
+                    '<p style="margin-bottom: 0px;"><a href="http://odoo.com">odoo.com</a></p>' +
+                    '<p><a href="http://google.com">google.com</a>[]<br></p>',
+            });
+        });
 
         test("should paste html content over an empty link (collapsed)", async () => {
             await testEditor({
@@ -1787,25 +1786,22 @@ describe("link", () => {
             });
         });
 
-        test.todo(
-            "should paste and transform plain text content over a link if all of its contents is selected (not collapsed)",
-            async () => {
-                await testEditor({
-                    contentBefore: '<p><a href="#">[xyz]</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "www.odoo.com");
-                    },
-                    contentAfter: '<p><a href="http://www.odoo.com">www.odoo.com</a>[]</p>',
-                });
-                await testEditor({
-                    contentBefore: '<p><a href="#">[xyz]</a></p>',
-                    stepFunction: async (editor) => {
-                        pasteText(editor, "abc www.odoo.com xyz");
-                    },
-                    contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
-                });
-            }
-        );
+        test("should paste and transform plain text content over a link if all of its contents is selected (not collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p><a href="#">[xyz]</a></p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "www.odoo.com");
+                },
+                contentAfter: '<p><a href="http://www.odoo.com">www.odoo.com</a>[]</p>',
+            });
+            await testEditor({
+                contentBefore: '<p><a href="#">[xyz]</a></p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "abc www.odoo.com xyz");
+                },
+                contentAfter: '<p>abc <a href="http://www.odoo.com">www.odoo.com</a> xyz[]</p>',
+            });
+        });
 
         test("should paste and transform plain text content over an image link if all of its contents is selected (not collapsed) (1)", async () => {
             const { el, editor } = await setupEditor(
