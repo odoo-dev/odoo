@@ -58,6 +58,7 @@ class StockPickingBatch(models.Model):
                 but this scheduled date will not be set for all transfers in batch.""")
     is_wave = fields.Boolean('This batch is a wave')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
+    has_packages = fields.Boolean(string='Has Packages', compute='_compute_has_packages', store=True)
 
     @api.depends('picking_type_id')
     def _compute_show_lots_text(self):
@@ -113,6 +114,11 @@ class StockPickingBatch(models.Model):
     def _compute_scheduled_date(self):
         for rec in self:
             rec.scheduled_date = min(rec.picking_ids.filtered('scheduled_date').mapped('scheduled_date'), default=False)
+
+    @api.depends('picking_ids.move_line_ids.result_package_id')
+    def _compute_has_packages(self):
+        for batch in self:
+            batch.has_packages = any(batch.picking_ids.move_line_ids.mapped('result_package_id'))
 
     @api.onchange('scheduled_date')
     def onchange_scheduled_date(self):
@@ -270,6 +276,25 @@ class StockPickingBatch(models.Model):
                 'default_move_ids': self.move_ids.ids,
                 'default_move_quantity': 'move'},
         }
+
+    def action_batch_detailed_operations(self):
+        view_id = self.env.ref('stock_picking_batch.view_move_line_tree').id
+        return {
+            'name': _('Detailed Operations'),
+            'view_mode': 'tree',
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.move.line',
+            'views': [(view_id, 'tree')],
+            'domain': [('id', 'in', self.move_line_ids.ids)],
+        }
+
+    def action_see_packages(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_package_view")
+        packages = self.picking_ids.mapped('move_line_ids.result_package_id')
+        action['domain'] = [('id', 'in', packages.ids)]
+        action['context'] = {'picking_id': self.picking_ids.ids}
+        return action
 
     # -------------------------------------------------------------------------
     # Miscellaneous
