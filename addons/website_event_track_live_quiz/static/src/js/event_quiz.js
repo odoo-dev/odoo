@@ -22,9 +22,9 @@ var WebsiteEventTrackSuggestionQuiz = Quiz.include({
         var self = this;
         return this._super(...arguments).then(function (data) {
             if (data.quiz_completed) {
-                self.$('.o_quiz_js_quiz_next_track')
-                    .removeClass('btn-light')
-                    .addClass('btn-secondary');
+                const nextTrackEl = self.el.querySelector(".o_quiz_js_quiz_next_track");
+                nextTrackEl.classList.remove("btn-light");
+                nextTrackEl.classList.add("btn-secondary");
             }
 
             return Promise.resolve(data);
@@ -38,7 +38,7 @@ var WebsiteEventTrackSuggestionQuiz = Quiz.include({
     _getTrackSuggestion: function () {
         var self = this;
         return rpc('/event_track/get_track_suggestion', {
-            track_id: this.track.id,
+            track_id: parseInt(this.track.id),
         }).then(function (suggestion) {
             self.nextSuggestion = suggestion;
             return Promise.resolve();
