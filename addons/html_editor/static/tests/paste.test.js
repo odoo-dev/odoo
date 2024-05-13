@@ -35,20 +35,13 @@ describe("Html Paste cleaning - whitelist", () => {
     });
 
     test("should keep whitelisted Tags tag (2)", async () => {
-        const tagsToKeep = [
-            'a<img src="http://www.imgurl.com/img.jpg">d', // img tag
-            "a<br>b", // br tags
-        ];
-
-        for (const tagToKeep of tagsToKeep) {
-            await testEditor({
-                contentBefore: "<p>123[]</p>",
-                stepFunction: async (editor) => {
-                    pasteHtml(editor, tagToKeep);
-                },
-                contentAfter: "<p>123" + tagToKeep + "[]</p>",
-            });
-        }
+        await testEditor({
+            contentBefore: "<p>123[]</p>",
+            stepFunction: async (editor) => {
+                pasteHtml(editor, 'a<img src="http://www.imgurl.com/img.jpg">d');
+            },
+            contentAfter: '<p>123a<img src="http://www.imgurl.com/img.jpg">d[]</p>',
+        });
     });
 
     test("should keep tables Tags tag and add classes", async () => {
@@ -621,6 +614,157 @@ describe("Simple html p", () => {
                     pasteHtml(editor, simpleHtmlCharX);
                 },
                 contentAfter: "<div>3a<p>bx[]e</p>f</div>",
+            });
+        });
+    });
+});
+
+describe("Simple html elements containing <br>", () => {
+    describe("breaking <br> elements", () => {
+        test("should split h1 with <br> into seperate h1 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h1>abc<br>def<br>ghi<br>jkl</h1>");
+                },
+                contentAfter: "<p>abc</p><h1>def</h1><h1>ghi</h1><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split h2 with <br> into seperate h2 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h2>abc<br>def<br>ghi<br>jkl</h2>");
+                },
+                contentAfter: "<p>abc</p><h2>def</h2><h2>ghi</h2><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split h3 with <br> into seperate h3 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h3>abc<br>def<br>ghi<br>jkl</h3>");
+                },
+                contentAfter: "<p>abc</p><h3>def</h3><h3>ghi</h3><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split h4 with <br> into seperate h4 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h4>abc<br>def<br>ghi<br>jkl</h4>");
+                },
+                contentAfter: "<p>abc</p><h4>def</h4><h4>ghi</h4><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split h5 with <br> into seperate h5 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h5>abc<br>def<br>ghi<br>jkl</h5>");
+                },
+                contentAfter: "<p>abc</p><h5>def</h5><h5>ghi</h5><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split h6 with <br> into seperate h6 elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<h6>abc<br>def<br>ghi<br>jkl</h6>");
+                },
+                contentAfter: "<p>abc</p><h6>def</h6><h6>ghi</h6><p>jkl[]<br></p>",
+            });
+        });
+
+        test("should split p with <br> into seperate p elements", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<p>abc<br>def<br>ghi<br>jkl</p>");
+                },
+                contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl[]<br></p>",
+            });
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<p>abc<br>def<br>ghi<br>jkl</p><p>mno</p>");
+                },
+                contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl</p><p>mno[]<br></p>",
+            });
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<p>abc<br>def<br>ghi<br>jkl</p><p><br></p><p>mno</p>");
+                },
+                contentAfter: "<p>abc</p><p>def</p><p>ghi</p><p>jkl</p><p><br></p><p>mno[]<br></p>",
+            });
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<p>abc<br>def<br><br><br>ghi</p>");
+                },
+                contentAfter: "<p>abc</p><p>def</p><p><br></p><p><br></p><p>ghi[]<br></p>",
+            });
+        });
+
+        test("should split multiple elements with <br>", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(
+                        editor,
+                        "<p>abc<br>def</p><h1>ghi<br>jkl</h1><h2><br></h2><h3>mno<br>pqr</h3>"
+                    );
+                },
+                contentAfter:
+                    "<p>abc</p><p>def</p><h1>ghi</h1><h1>jkl</h1><h2><br></h2><h3>mno</h3><p>pqr[]<br></p>",
+            });
+        });
+
+        test("should split div with <br>", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<div>abc<br>def</div>");
+                },
+                contentAfter: "<p>abc</p><p>def[]<br></p>",
+            });
+        });
+    });
+
+    describe("not breaking <br> elements", () => {
+        test("should not split li with <br>", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<ul><li>abc<br>def</li></ul>");
+                },
+                contentAfter: "<ul><li>abc<br>def</li></ul><p>[]<br></p>",
+            });
+        });
+
+        test("should not split blockquote with <br>", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<blockquote>abc<br>def</blockquote>");
+                },
+                contentAfter: "<blockquote>abc<br>def</blockquote><p>[]<br></p>",
+            });
+        });
+
+        test("should not split pre with <br>", async () => {
+            await testEditor({
+                contentBefore: "<p>[]<br></p>",
+                stepFunction: async (editor) => {
+                    pasteHtml(editor, "<pre>abc<br>def</pre>");
+                },
+                contentAfter: "<pre>abc<br>def</pre><p>[]<br></p>",
             });
         });
     });
@@ -1581,7 +1725,7 @@ describe("link", () => {
                     );
                 },
                 contentAfter:
-                    '<p><a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>[]</p>',
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com</a>[]</p>',
             });
         });
 
@@ -1683,6 +1827,7 @@ describe("link", () => {
                 contentAfter: "<p>[abc]</p>",
             });
         });
+
         test("should restore selection when pasting plain text followed by UNDO (2) (not collapsed)", async () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
@@ -1693,6 +1838,7 @@ describe("link", () => {
                 contentAfter: "<p>[abc]</p>",
             });
         });
+
         test("should restore selection when pasting plain text followed by UNDO (3) (not collapsed)", async () => {
             await testEditor({
                 contentBefore: "<p>[abc]</p>",
@@ -1840,7 +1986,7 @@ describe("link", () => {
                     );
                 },
                 contentAfter:
-                    '<p><a href="www.odoo.com">odoo.com</a><br><a href="www.google.com">google.com</a>[]</p>',
+                    '<p><a href="www.odoo.com">odoo.com</a></p><p><a href="www.google.com">google.com</a>[]</p>',
             });
         });
     });
@@ -1995,6 +2141,7 @@ describe("images", () => {
             undo(editor);
             expect(getContent(el)).toBe("<p>[abc]</p>");
         });
+
         test("should restore selection after pasting image URL followed by UNDO (2)", async () => {
             const { el, editor } = await setupEditor("<p>[abc]</p>");
 
@@ -2018,6 +2165,7 @@ describe("youtube video", () => {
                 return { embed_url: request.json().params.video_url };
             });
         });
+
         test("should paste and transform a youtube URL in a p (1)", async () => {
             const { el, editor } = await setupEditor("<p>ab[]cd</p>");
             pasteText(editor, videoUrl);
@@ -2096,6 +2244,7 @@ describe("youtube video", () => {
                 return { embed_url: request.json().params.video_url };
             });
         });
+
         test("should paste and transform a youtube URL in a p (2)", async () => {
             const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>");
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
@@ -2188,6 +2337,7 @@ describe("youtube video", () => {
             undo(editor);
             expect(getContent(el)).toBe("<p>[abc]</p>");
         });
+
         test("should restore selection after pasting video URL followed by UNDO (2)", async () => {
             const { el, editor } = await setupEditor("<p>[abc]</p>");
             pasteText(editor, videoUrl);

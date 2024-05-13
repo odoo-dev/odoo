@@ -1,4 +1,4 @@
-import { isUnbreakable } from "../utils/dom_info";
+import { isUnbreakable, paragraphRelatedElements } from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { closestBlock, isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
@@ -181,9 +181,13 @@ export class ClipboardPlugin extends Plugin {
             ];
             // Wrap rangeContent with clones of their ancestors to keep the styles.
             for (const ancestor of ancestorsList) {
-                const clone = ancestor.cloneNode();
-                clone.append(...rangeContent.childNodes);
-                rangeContent.appendChild(clone);
+                // Keep the formatting by keeping inline ancestors and paragraph
+                // related ones like headings etc.
+                if (!isBlock(ancestor) || paragraphRelatedElements.includes(ancestor.nodeName)) {
+                    const clone = ancestor.cloneNode();
+                    clone.append(...rangeContent.childNodes);
+                    rangeContent.appendChild(clone);
+                }
             }
         }
         const dataHtmlElement = this.document.createElement("data");
@@ -381,6 +385,26 @@ export class ClipboardPlugin extends Plugin {
 
             if (p.childNodes.length > 0) {
                 fragment.appendChild(p);
+            }
+
+            // Split elements containing <br> into seperate elements for each line.
+            const brs = fragment.querySelectorAll("br");
+            for (const br of brs) {
+                const block = closestBlock(br);
+                if (
+                    ["P", "H1", "H2", "H3", "H4", "H5", "H6"].includes(block.nodeName) &&
+                    !block.closest("li")
+                ) {
+                    // A linebreak at the beginning of a block is an empty line.
+                    const isEmptyLine = block.firstChild.nodeName === "BR";
+                    // Split blocks around it until only the BR remains in the
+                    // block.
+                    const remainingBrContainer = this.shared.splitAroundUntil(br, block);
+                    // Remove the container unless it represented an empty line.
+                    if (!isEmptyLine) {
+                        remainingBrContainer.remove();
+                    }
+                }
             }
         }
         return fragment;

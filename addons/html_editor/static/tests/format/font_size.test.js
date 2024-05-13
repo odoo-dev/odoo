@@ -144,6 +144,22 @@ test("should add font size in selected table cells with h1 as first child", asyn
     });
 });
 
+test("should apply font size in unbreakable span with class", async () => {
+    await testEditor({
+        contentBefore: `<h1><span class="oe_unbreakable">some [text]</span></h1>`,
+        stepFunction: setFontSize("18px"),
+        contentAfter: `<h1><span class="oe_unbreakable">some <span style="font-size: 18px;">[text]</span></span></h1>`,
+    });
+});
+
+test("should apply font size in unbreakable span without class", async () => {
+    await testEditor({
+        contentBefore: `<h1><span t="unbreakable">some [text]</span></h1>`,
+        stepFunction: setFontSize("18px"),
+        contentAfter: `<h1><span t="unbreakable">some <span style="font-size: 18px;">[text]</span></span></h1>`,
+    });
+});
+
 test("should add style to a span parent of an inline", async () => {
     await testEditor({
         contentBefore: `<p>a<span style="background-color: black;">${strong(`[bc]`)}</span>d</p>`,

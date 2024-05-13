@@ -1680,9 +1680,32 @@ describe("Selection not collapsed", () => {
             contentAfter: `<p>[]<br></p>`,
         });
         await testEditor({
-            contentBefore: `<h1>[]abcd</h1>`,
+            contentBefore: `<h1><br>[]</h1>`,
             stepFunction: deleteBackward,
-            contentAfter: `<p>[]abcd</p>`,
+            contentAfter: `<p>[]<br></p>`,
+        });
+        await testEditor({
+            contentBefore: `<h4><br>[]</h4>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<p>[]<br></p>`,
+        });
+    });
+
+    test("should not delete the block and appends a paragraph if the element has textContent ", async () => {
+        await testEditor({
+            contentBefore: `<h1>[]abc</h1>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<h1>[]abc</h1>`,
+        });
+        await testEditor({
+            contentBefore: `<h1><font style="background-color: rgb(255, 0, 0);">[]abc</font></h1>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<h1><font style="background-color: rgb(255, 0, 0);">[]abc</font></h1>`,
+        });
+        await testEditor({
+            contentBefore: `<table><tbody><tr><td><h1>[]ab</h1></td><td>cd</td><td>ef</td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<table><tbody><tr><td><h1>[]ab</h1></td><td>cd</td><td>ef</td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>`,
         });
     });
 
