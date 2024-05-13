@@ -1,5 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { useState, status } from "@odoo/owl";
+import { useState } from "@odoo/owl";
 import { ChatGPTDialog } from "./chatgpt_dialog";
 
 export const DEFAULT_ALTERNATIVES_MODES = {
@@ -10,6 +10,9 @@ export const DEFAULT_ALTERNATIVES_MODES = {
     professional: _t("Professional"),
     persuasive: _t("Persuasive"),
 };
+
+let messageId = 0;
+let nextBatchId = 0;
 
 export class ChatGPTAlternativesDialog extends ChatGPTDialog {
     static template = "html_editor.ChatGPTAlternativesDialog";
@@ -62,7 +65,7 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
 
     async generateAlternatives(numberOfAlternatives = this.props.numberOfAlternatives) {
         this.state.messagesInProgress = numberOfAlternatives;
-        const batchId = new Date().getTime();
+        const batchId = nextBatchId++;
         this.state.currentBatchId = batchId;
         let wasError = false;
         let messageIndex = 0;
@@ -107,7 +110,7 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
                         isError,
                         batchId,
                         mode: this.state.alternativesMode,
-                        id: new Date().getTime(),
+                        id: messageId++,
                     });
                 }
             }).catch(() => {
@@ -116,9 +119,6 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
                     this.state.messages = [];
                 }
             });
-            if (status(this) === "destroyed") {
-                return;
-            }
             messageIndex += 1;
             this.state.messagesInProgress -= 1;
             if (wasError) {
