@@ -265,3 +265,35 @@ test("toolbar behave properly if selection has no range", async () => {
     await waitUntil(() => !document.querySelector(".o-we-toolbar"));
     expect(".o-we-toolbar").toHaveCount(0);
 });
+
+test("toolbar shows namespaced button groups when the namespaced element is selected", async () => {
+    await setupEditor(`
+        <img class="img-fluid" src="/web/static/img/logo.png">
+    `);
+    await click("img");
+    await waitFor(".o-we-toolbar");
+    expect(".btn-group[name='image_shape']").toHaveCount(1);
+});
+
+test("toolbar stop showing namespaced button groups when namespaced element is unselected", async () => {
+    const { el } = await setupEditor(`
+        <div>
+            <p>Foo</p>
+            <img class="img-fluid" src="/web/static/img/logo.png">
+        </div>
+    `);
+    await click("img");
+    await waitFor(".o-we-toolbar");
+    expect(".btn-group[name='image_shape']").toHaveCount(1);
+    setContent(
+        el,
+        `
+        <div>
+            <p>[Foo]</p>
+            <img class="img-fluid" src="/web/static/img/logo.png">
+        </div>
+    `
+    );
+    await animationFrame();
+    expect(".btn-group[name='image_shape']").toHaveCount(0);
+});
