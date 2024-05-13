@@ -279,7 +279,10 @@ export class SelectionPlugin extends Plugin {
                 this.editable.contains(selection.focusNode))
         ) {
             this.activeSelection = this.makeSelection(selection, true);
+        } else if (!this.activeSelection.anchorNode.isConnected) {
+            this.activeSelection = this.makeSelection();
         }
+        // TODO: test if invalid offset
         if (deep) {
             return this.makeDeepSelection();
         }

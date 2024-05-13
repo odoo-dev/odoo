@@ -30,6 +30,7 @@ export class ToolbarPlugin extends Plugin {
                     if (sel.isCollapsed) {
                         this.overlay.close();
                     }
+                    this.updateButtonsActiveState(this.shared.getEditableSelection());
                 }
                 break;
         }

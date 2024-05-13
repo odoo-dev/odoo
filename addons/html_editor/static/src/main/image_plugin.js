@@ -3,13 +3,58 @@ import { Plugin } from "../plugin";
 import { _t } from "@web/core/l10n/translation";
 import { isImageUrl } from "@html_editor/utils/url";
 
+function hasShape(imagePlugin, shapeName) {
+    return () => imagePlugin.isSelectionShaped(shapeName);
+}
+
 export class ImagePlugin extends Plugin {
     static name = "image";
-    static dependencies = ["history", "link", "powerbox", "dom"];
+    static dependencies = ["history", "link", "powerbox", "dom", "selection"];
     /** @type { (p: ImagePlugin) => Record<string, any> } */
     static resources(p) {
         return {
             handle_paste_url: p.handlePasteUrl.bind(p),
+
+            toolbarGroup: [
+                {
+                    id: "image_shape",
+                    sequence: 25,
+                    namespace: "IMG",
+                    buttons: [
+                        {
+                            id: "shape_rounded",
+                            cmd: "SHAPE_ROUNDED",
+                            name: "Shape: Rounded",
+                            icon: "fa-square",
+                            isFormatApplied: hasShape(p, "rounded"),
+                        },
+                        {
+                            id: "shape_circle",
+                            cmd: "SHAPE_CIRCLE",
+                            name: "Shape: Circle",
+                            icon: "fa-circle-o",
+                            isFormatApplied: hasShape(p, "rounded-circle"),
+                        },
+                        {
+                            id: "shape_shadow",
+                            cmd: "SHAPE_SHADOW",
+                            name: "Shape: Shadow",
+                            icon: "fa-sun-o",
+                            isFormatApplied: hasShape(p, "shadow"),
+                        },
+                        {
+                            id: "shape_thumbnail",
+                            cmd: "SHAPE_THUMBNAIL",
+                            name: "Shape: Thumbnail",
+                            icon: "fa-picture-o",
+                            isFormatApplied: hasShape(p, "img-thumbnail"),
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
     setup() {
         this.addDomListener(this.editable, "mouseup", (e) => {
             if (e.target.tagName === "IMG") {
@@ -24,8 +69,35 @@ export class ImagePlugin extends Plugin {
             }
         });
     }
+
+    handleCommand(command) {
+        const commandToClassNameDict = {
+            SHAPE_ROUNDED: "rounded",
+            SHAPE_SHADOW: "shadow",
+            SHAPE_CIRCLE: "rounded-circle",
+            SHAPE_THUMBNAIL: "img-thumbnail",
         };
+
+        switch (command) {
+            case "SHAPE_ROUNDED":
+            case "SHAPE_SHADOW":
+            case "SHAPE_CIRCLE":
+            case "SHAPE_THUMBNAIL": {
+                const selectedNodes = this.shared.getSelectedNodes();
+                const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
+                selectedImg.classList.toggle(commandToClassNameDict[command]);
+                this.dispatch("ADD_STEP");
+            }
+        }
     }
+
+    isSelectionShaped(shape) {
+        const selectedNodes = this.shared
+            .getTraversedNodes()
+            .filter((n) => n.tagName === "IMG" && n.classList.contains(shape));
+        return selectedNodes.length > 0;
+    }
+
     /**
      * @param {string} text
      * @param {string} url
