@@ -10,6 +10,20 @@ export class ImagePlugin extends Plugin {
     static resources(p) {
         return {
             handle_paste_url: p.handlePasteUrl.bind(p),
+    setup() {
+        this.addDomListener(this.editable, "mouseup", (e) => {
+            if (e.target.tagName === "IMG") {
+                const range = this.document.createRange();
+                range.selectNode(e.target);
+                this.shared.setSelection({
+                    anchorNode: range.startContainer,
+                    anchorOffset: range.startOffset,
+                    focusNode: range.endContainer,
+                    focusOffset: range.endOffset,
+                });
+            }
+        });
+    }
         };
     }
     /**
