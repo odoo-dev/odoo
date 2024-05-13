@@ -38,7 +38,7 @@ import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { YoutubePlugin } from "./main/youtube_plugin";
 import { OwlComponentPlugin } from "./others/owl_component_plugin";
 import { QWebPlugin } from "./others/qweb_plugin";
-import { ChatGPTPlugin } from "./others/chatgpt_plugin";
+import { ChatGPTPlugin } from "./others/chatgpt/chatgpt_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
