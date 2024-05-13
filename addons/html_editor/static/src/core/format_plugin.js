@@ -1,7 +1,7 @@
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { unwrapContents } from "../utils/dom";
-import { isVisibleTextNode, isZWS } from "../utils/dom_info";
+import { isUnbreakable, isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, formatsSpecs } from "../utils/formatting";
 import { DIRECTIONS } from "../utils/position";
@@ -203,6 +203,8 @@ export class FormatPlugin extends Plugin {
             while (
                 parentNode &&
                 !isBlock(parentNode) &&
+                !isUnbreakable(parentNode) &&
+                !isUnbreakable(currentNode) &&
                 (parentNode.classList.length === 0 ||
                     [...parentNode.classList].every((cls) => FONT_SIZE_CLASSES.includes(cls)))
             ) {

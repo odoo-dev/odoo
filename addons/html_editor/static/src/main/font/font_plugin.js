@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { isBlock } from "@html_editor/utils/blocks";
 import { fillEmpty, setTagName } from "@html_editor/utils/dom";
-import { isVisibleTextNode } from "@html_editor/utils/dom_info";
+import { isVisibleTextNode, paragraphRelatedElements } from "@html_editor/utils/dom_info";
 import {
     closestElement,
     createDOMPathGenerator,
@@ -266,7 +266,12 @@ export class FontPlugin extends Plugin {
             const isUnremovable = this.resources.unremovables.some((predicate) =>
                 predicate(closestHandledElement)
             );
-            if (!isUnremovable) {
+            if (
+                !isUnremovable &&
+                closestHandledElement.tagName !== "P" &&
+                paragraphRelatedElements.includes(closestHandledElement.tagName) &&
+                !closestHandledElement.textContent.length
+            ) {
                 const p = this.document.createElement("p");
                 p.append(...closestHandledElement.childNodes);
                 closestHandledElement.after(p);

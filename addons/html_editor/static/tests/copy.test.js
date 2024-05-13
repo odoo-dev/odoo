@@ -90,8 +90,8 @@ describe("range not collapsed", () => {
         const clipboardData = new DataTransfer();
         press("ctrl+c", { dataTransfer: clipboardData });
         expect(clipboardData.getData("text/plain")).toBe("First");
-        expect(clipboardData.getData("text/html")).toBe("<li>First</li>");
-        expect(clipboardData.getData("application/vnd.odoo.odoo-editor")).toBe("<li>First</li>");
+        expect(clipboardData.getData("text/html")).toBe("First");
+        expect(clipboardData.getData("application/vnd.odoo.odoo-editor")).toBe("First");
     });
 
     test("should copy the selection as a single list item (2)", async () => {
@@ -99,8 +99,8 @@ describe("range not collapsed", () => {
         const clipboardData = new DataTransfer();
         press("ctrl+c", { dataTransfer: clipboardData });
         expect(clipboardData.getData("text/plain")).toBe("List");
-        expect(clipboardData.getData("text/html")).toBe("<li>List</li>");
-        expect(clipboardData.getData("application/vnd.odoo.odoo-editor")).toBe("<li>List</li>");
+        expect(clipboardData.getData("text/html")).toBe("List");
+        expect(clipboardData.getData("application/vnd.odoo.odoo-editor")).toBe("List");
     });
 
     test("should copy the selection as a single list item (3)", async () => {
@@ -111,10 +111,15 @@ describe("range not collapsed", () => {
         press("ctrl+c", { dataTransfer: clipboardData });
         expect(clipboardData.getData("text/plain")).toBe("First");
         expect(clipboardData.getData("text/html")).toBe(
-            '<li><span style="font-size: 48px;"><font style="color: rgb(255, 0, 0);">First</font></span></li>'
+            '<span style="font-size: 48px;"><font style="color: rgb(255, 0, 0);">First</font></span>'
+        );
+        expect(
+            clipboardData.getData(
+                `<span style="font-size: 48px;"><font style="color: rgb(255, 0, 0);">First</font></span>`
+            )
         );
         expect(clipboardData.getData("application/vnd.odoo.odoo-editor")).toBe(
-            '<li><span style="font-size: 48px;"><font style="color: rgb(255, 0, 0);">First</font></span></li>'
+            '<span style="font-size: 48px;"><font style="color: rgb(255, 0, 0);">First</font></span>'
         );
     });
 

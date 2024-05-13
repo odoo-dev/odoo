@@ -406,6 +406,65 @@ describe("sanitize", () => {
                 '<div contenteditable="true" placeholder="Type &quot;/&quot; for commands" class="o-we-hint">[c1}{c1]<br></div>',
         });
     });
+    test("should not sanitize the content of an element recursively when sanitizing an attribute", async () => {
+        await testMultiEditor({
+            peerIds: ["c1", "c2"],
+            contentBefore: "<div class='content' data-oe-protected='true'><p>base</p></div>",
+            afterCreate: (peerInfos) => {
+                const editor1 = peerInfos.c1.editor;
+                const editor2 = peerInfos.c2.editor;
+                const content1 = editor1.editable.querySelector(".content");
+                const content2 = editor2.editable.querySelector(".content");
+                content2.append(
+                    ...parseHTML(
+                        editor2.document,
+                        "<p>mysecretcode</p><script>secretStuff?.();</script>"
+                    ).children
+                );
+                editor2.editable.append(
+                    ...parseHTML(editor2.document, "<p>sanitycheckc2</p>").children
+                );
+                addStep(editor2);
+                content1.setAttribute("onclick", "javascript:badStuff?.()");
+                content1.setAttribute("data-info", "43");
+                editor1.editable.prepend(
+                    ...parseHTML(editor1.document, "<p>sanitycheckc1</p>").children
+                );
+                addStep(editor1);
+                mergePeersSteps(peerInfos);
+                // client 1:
+                // did not receive the secret code doing secret stuff from client 2 because
+                // it was protected
+                // still has its own onclick attribute doing bad stuff, because he wrote it
+                // himself
+                expect(peerInfos.c1.editor.editable.innerHTML).toBe(
+                    unformat(`
+                        <p>sanitycheckc1</p>
+                        <div class="content" data-oe-protected="true" onclick="javascript:badStuff?.()" data-info="43">
+                            <p>base</p>
+                        </div>
+                        <p>sanitycheckc2</p>
+                    `)
+                );
+                // client 2:
+                // did not receive the onclick attribute doing bad stuff from client 1 (was
+                // sanitized)
+                // received the `data-info="43"` from client 1, and doing so did not sanitize
+                // the custom script doing secret stuff
+                expect(peerInfos.c2.editor.editable.innerHTML).toBe(
+                    unformat(`
+                        <p>sanitycheckc1</p>
+                        <div class="content" data-oe-protected="true" data-info="43">
+                            <p>base</p>
+                            <p>mysecretcode</p>
+                            <script>secretStuff?.();</script>
+                        </div>
+                        <p>sanitycheckc2</p>
+                    `)
+                );
+            },
+        });
+    });
 });
 describe("data-oe-protected", () => {
     test("should not share protected mutations and share unprotected ones", async () => {
