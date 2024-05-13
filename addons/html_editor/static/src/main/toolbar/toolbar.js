@@ -11,16 +11,37 @@ export class Toolbar extends Component {
                 getSelection: Function,
                 // TODO: more specific prop validation for buttons after its format has been defined.
                 buttonGroups: Array,
-                buttonsActiveState: Object,
+                state: {
+                    type: Object,
+                    shape: {
+                        buttonsActiveState: Object,
+                        namespace: {
+                            type: String,
+                            optional: true,
+                        },
+                    },
+                },
             },
         },
     };
 
     setup() {
-        this.buttonsActiveState = useState(this.props.toolbar.buttonsActiveState);
+        this.state = useState(this.props.toolbar.state);
     }
 
     dispatch(cmd, payload) {
         this.props.toolbar.dispatch(cmd, payload);
+    }
+
+    getFilteredButtonGroups() {
+        if (this.state.namespace) {
+            const filteredGroups = this.props.toolbar.buttonGroups.filter(
+                (group) => group.namespace === this.state.namespace
+            );
+            if (filteredGroups.length > 0) {
+                return filteredGroups;
+            }
+        }
+        return this.props.toolbar.buttonGroups.filter((group) => group.namespace === undefined);
     }
 }

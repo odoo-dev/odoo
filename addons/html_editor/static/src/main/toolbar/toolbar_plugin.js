@@ -13,10 +13,13 @@ export class ToolbarPlugin extends Plugin {
 
     setup() {
         this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
-        this.buttonsActiveState = reactive(
-            this.buttonGroups.flatMap((g) => g.buttons.map((b) => [b.id, false]))
-        );
         this.overlay = this.shared.createOverlay(Toolbar, { position: "top-start" });
+        this.state = reactive({
+            buttonsActiveState: this.buttonGroups.flatMap((g) =>
+                g.buttons.map((b) => [b.id, false])
+            ),
+            namespace: undefined,
+        });
     }
 
     handleCommand(command, payload) {
@@ -36,14 +39,24 @@ export class ToolbarPlugin extends Plugin {
         return {
             dispatch: this.dispatch,
             buttonGroups: this.buttonGroups,
-            buttonsActiveState: this.buttonsActiveState,
             getSelection: () => this.shared.getEditableSelection(),
+            state: this.state,
         };
     }
 
     handleSelectionChange(selection) {
         this.updateToolbarVisibility(selection);
         if (this.overlay.isOpen || this.config.disableFloatingToolbar) {
+            const selectedNodes = this.shared.getSelectedNodes();
+            if (
+                selectedNodes.length &&
+                selectedNodes[0].tagName &&
+                selectedNodes.every((el) => el.tagName === selectedNodes[0].tagName)
+            ) {
+                this.state.namespace = selectedNodes[0].tagName;
+            } else {
+                this.state.namespace = undefined;
+            }
             this.updateButtonsActiveState(selection);
         }
     }
@@ -77,7 +90,7 @@ export class ToolbarPlugin extends Plugin {
         if (selection.inEditable) {
             for (const buttonGroup of this.buttonGroups) {
                 for (const button of buttonGroup.buttons) {
-                    this.buttonsActiveState[button.id] = button.isFormatApplied?.(selection);
+                    this.state.buttonsActiveState[button.id] = button.isFormatApplied?.(selection);
                 }
             }
         }
