@@ -44,7 +44,7 @@ function hasColor(element, mode) {
 
 export class ColorPlugin extends Plugin {
     static name = "color";
-    static dependencies = ["selection", "split", "history"];
+    static dependencies = ["selection", "split", "history", "zws"];
     static resources = (p) => ({
         toolbarGroup: {
             id: "color",
@@ -149,18 +149,51 @@ export class ColorPlugin extends Plugin {
      * @param {Element} [element]
      */
     applyColor(color, mode) {
-        const selection = this.shared.splitSelection();
-        // Get the <font> nodes to color
-        const selectionNodes = this.shared
-            .getSelectedNodes()
-            .filter((node) => closestElement(node).isContentEditable);
-        if (isEmptyBlock(selection.endContainer)) {
-            selectionNodes.push(selection.endContainer, ...descendants(selection.endContainer));
+        const selectedTds = [...this.editable.querySelectorAll("td.o_selected_td")].filter(
+            (node) => closestElement(node).isContentEditable
+        );
+        if (selectedTds.length && mode === "backgroundColor") {
+            for (const td of selectedTds) {
+                this.colorElement(td, color, mode);
+            }
         }
+
+        let selection = this.shared.getEditableSelection();
+        let selectionNodes;
+        // Get the <font> nodes to color
+        if (selection.isCollapsed) {
+            let zws;
+            if (
+                selection.anchorNode.nodeType !== Node.TEXT_NODE &&
+                selection.anchorNode.textContent !== "\u200b"
+            ) {
+                zws = selection.anchorNode;
+            } else {
+                zws = this.shared.insertAndSelectZws();
+            }
+            selection = this.shared.setSelection(
+                {
+                    anchorNode: zws,
+                    anchorOffset: 0,
+                },
+                { normalize: false }
+            );
+            selectionNodes = [zws];
+        } else {
+            selection = this.shared.splitSelection();
+            selectionNodes = this.shared
+                .getSelectedNodes()
+                .filter((node) => closestElement(node).isContentEditable);
+            if (isEmptyBlock(selection.endContainer)) {
+                selectionNodes.push(selection.endContainer, ...descendants(selection.endContainer));
+            }
+        }
+
         const selectedNodes =
             mode === "backgroundColor"
                 ? selectionNodes.filter((node) => !closestElement(node, "table.o_selected_table"))
                 : selectionNodes;
+
         const selectedFieldNodes = new Set(
             this.shared
                 .getSelectedNodes()

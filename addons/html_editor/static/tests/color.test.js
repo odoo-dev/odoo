@@ -39,7 +39,7 @@ test("should apply a background color to a slice of text in a span in a font", a
     });
 });
 
-test.todo("should get ready to type with a different color", async () => {
+test("should get ready to type with a different color", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
@@ -47,7 +47,7 @@ test.todo("should get ready to type with a different color", async () => {
     });
 });
 
-test.todo("should get ready to type with a different background color", async () => {
+test("should get ready to type with a different background color", async () => {
     await testEditor({
         contentBefore: "<p>ab[]cd</p>",
         stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),
@@ -111,26 +111,23 @@ test("should not apply color on an uneditable element", async () => {
     });
 });
 
-test.todo(
-    "should not apply background color on an uneditable selected cell in a table",
-    async () => {
-        await testEditor({
-            contentBefore: unformat(`
+test("should not apply background color on an uneditable selected cell in a table", async () => {
+    await testEditor({
+        contentBefore: unformat(`
                 <table><tbody>
                     <tr><td>[ab</td></tr>
                     <tr><td contenteditable="false">cd]</td></tr>
                 </tbody></table>
             `),
-            stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),
-            contentAfter: unformat(`
+        stepFunction: setColor("rgb(255, 0, 0)", "backgroundColor"),
+        contentAfter: unformat(`
                 <table><tbody>
-                    <tr><td style="background-color: rgb(255, 0, 0);">[]ab</td></tr>
-                    <tr><td contenteditable="false">cd</td></tr>
+                    <tr><td style="background-color: rgb(255, 0, 0);">[ab</td></tr>
+                    <tr><td contenteditable="false">cd</td>]</tr>
                 </tbody></table>
             `),
-        });
-    }
-);
+    });
+});
 
 test("should remove font tag after removing font color", async () => {
     await testEditor({

@@ -161,8 +161,7 @@ export class FormatPlugin extends Plugin {
                     focusOffset: 1,
                 });
             } else {
-                // @todo phoenix: move it to selection plugin ?
-                zws = this.shared.insertAndSelectZws(this.shared.getEditableSelection());
+                zws = this.shared.insertAndSelectZws();
             }
         }
 
