@@ -196,13 +196,13 @@ export class ZwsPlugin extends Plugin {
     }
 
     /**
-     * Takes a selection (assumed to be collapsed) and insert a zero-width space at
+     * Use the actual selection (assumed to be collapsed) and insert a zero-width space at
      * its anchor point. Then, select that zero-width space.
      *
-     * @param {Selection} selection
      * @returns {Node} the inserted zero-width space
      */
-    insertAndSelectZws(selection) {
+    insertAndSelectZws() {
+        const selection = this.shared.getEditableSelection();
         const zws = this.insertText(selection, "\u200B");
         this.shared.splitTextNode(zws, selection.anchorOffset);
         return zws;
