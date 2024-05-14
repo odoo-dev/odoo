@@ -28,7 +28,7 @@ test("should open the Powerbox on type `/`", async () => {
 });
 
 test.tags("iframe")("in iframe: should open the Powerbox on type `/`", async () => {
-    const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
+    const { el, editor } = await setupEditor("<p>ab[]</p>", { props: { iframe: true } });
     expect("iframe").toHaveCount(1);
     expect(".o-we-powerbox").toHaveCount(0);
     expect(getContent(el)).toBe("<p>ab[]</p>");
@@ -80,7 +80,7 @@ describe("search", () => {
     });
 
     test.tags("iframe")("should filter the Powerbox contents with term, in iframe", async () => {
-        const { el, editor } = await setupEditor("<p>ab[]</p>", { inIFrame: true });
+        const { el, editor } = await setupEditor("<p>ab[]</p>", { props: { iframe: true } });
         insertText(editor, "/");
         await animationFrame();
         expect(commandNames(el).length).toBe(17);

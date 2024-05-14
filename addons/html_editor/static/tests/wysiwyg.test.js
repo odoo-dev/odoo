@@ -1,27 +1,10 @@
 import { CORE_PLUGINS } from "@html_editor/plugin_sets";
-import { useWysiwyg } from "@html_editor/wysiwyg";
 import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { Component, xml } from "@odoo/owl";
-import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { setupWysiwyg } from "./_helpers/editor";
+import { contains } from "@web/../tests/web_test_helpers";
+import { setupWysiwyg, setupEditor } from "./_helpers/editor";
 import { getContent, setContent, setSelection } from "./_helpers/selection";
-
-describe("wysiwig hook", () => {
-    test("useWysiwyg create an editor on ref", async () => {
-        class TestWysiwygHook extends Component {
-            static props = [];
-            static template = xml`<div>coucou<p t-ref="content"/></div>`;
-
-            setup() {
-                this.editor = useWysiwyg("content");
-            }
-        }
-        await mountWithCleanup(TestWysiwygHook);
-        expect(".odoo-editor-editable").toHaveCount(1);
-    });
-});
 
 describe("Wysiwyg Component", () => {
     test("Wysiwyg component can be instantiated", async () => {
@@ -83,9 +66,8 @@ describe("Wysiwyg Component", () => {
     });
 
     test("wysiwyg with toolbar: properly behave when selection leaves editable", async () => {
-        const { el } = await setupWysiwyg({
-            toolbar: true,
-            config: { content: "<p>test <strong>[some]</strong> text</p>" },
+        const { el } = await setupEditor("<p>test <strong>[some]</strong> text</p>", {
+            props: { toolbar: true },
         });
 
         await animationFrame();
@@ -104,9 +86,8 @@ describe("Wysiwyg Component", () => {
     });
 
     test("wysiwyg with toolbar: remember last active selection", async () => {
-        const { el } = await setupWysiwyg({
-            toolbar: true,
-            config: { content: "<p>test [some] text</p>" },
+        const { el } = await setupEditor("<p>test [some] text</p>", {
+            props: { toolbar: true },
         });
         await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 

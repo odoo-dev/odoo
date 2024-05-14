@@ -29,7 +29,7 @@ test("cannot reattach a destroyed editor", async () => {
 });
 
 test.tags("iframe")("can instantiate a Editor in an iframe", async () => {
-    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", { inIFrame: true });
+    const { el, editor } = await setupEditor("<p>hel[lo] world</p>", { props: { iframe: true } });
     expect("iframe").toHaveCount(1);
     expect(el.innerHTML).toBe(`<p>hello world</p>`);
     expect(getContent(el)).toBe(`<p>hel[lo] world</p>`);
@@ -99,26 +99,6 @@ test("event handlers are properly cleaned up after destruction", async () => {
     editor.destroy();
     click(document.body);
     expect(count).toBe(1);
-});
-
-test("editable node attributes are cleared (or not) after destruction", async () => {
-    const { editor, el } = await setupEditor("<p>a[]</p>");
-    expect(el.outerHTML).toBe(
-        `<div contenteditable="true" class="odoo-editor-editable"><p>a</p></div>`
-    );
-    editor.destroy();
-    expect(el.outerHTML).toBe(`<div><p>a</p></div>`);
-
-    // same workflow, but this time, we add the true flag to destroy so we check
-    // that the editor doesn't even bother to clean up in this case
-    const { editor: editor2, el: el2 } = await setupEditor("<p>a[]</p>");
-    expect(el2.outerHTML).toBe(
-        `<div contenteditable="true" class="odoo-editor-editable"><p>a</p></div>`
-    );
-    editor2.destroy(true);
-    expect(el2.outerHTML).toBe(
-        `<div contenteditable="true" class="odoo-editor-editable"><p>a</p></div>`
-    );
 });
 
 test("can give resources in config", async () => {

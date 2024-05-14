@@ -1,8 +1,9 @@
 import { expect, getFixture } from "@odoo/hoot";
-import { Component, onMounted, useRef, xml } from "@odoo/owl";
+import { Component, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { useWysiwyg, Wysiwyg } from "@html_editor/wysiwyg";
-import { getContent, getSelection, setContent } from "./selection";
+import { Wysiwyg } from "@html_editor/wysiwyg";
+import { Editor } from "@html_editor/editor";
+import { getContent, setContent, getSelection } from "./selection";
 import { queryOne } from "@odoo/hoot-dom";
 
 export const Direction = {
@@ -12,61 +13,53 @@ export const Direction = {
 
 class TestEditor extends Component {
     static template = xml`
-        <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="localOverlay" />
-        <t t-if="props.inIFrame">
-            <iframe t-ref="target"/>
+        <t t-if="props.styleContent">
+            <style t-esc="props.styleContent"></style>
         </t>
-        <t t-else="">
-            <t t-if="props.styleContent">
-                <style t-esc="props.styleContent"></style>
-            </t>
-            <div t-ref="target"/>
-        </t>`;
-    static props = ["content", "config", "inIFrame", "styleContent?", "onMounted?"];
+        <Wysiwyg t-props="wysiwygProps" />`;
+    static components = { Wysiwyg };
+    static props = ["wysiwygProps", "content", "styleContent?", "onMounted?"];
 
     setup() {
-        this.ref = useRef("target");
-        const target = this.props.inIFrame
-            ? () => this.ref.el.contentDocument.body.firstChild
-            : "target";
-        onMounted(() => {
-            let el = this.ref.el;
-            if (this.props.inIFrame) {
-                var html = `<div>${this.props.content || ""}</div><style>${
-                    this.props.styleContent
-                }</style>`;
-                this.ref.el.contentWindow.document.body.innerHTML = html;
-                el = target();
+        const props = this.props;
+        const content = props.content;
+        const wysiwygProps = (this.wysiwygProps = Object.assign({}, this.props.wysiwygProps));
+        const editor = this.wysiwygProps.editor;
+        const oldAttach = editor.attachTo;
+        editor.attachTo = function (el) {
+            if (wysiwygProps.iframe) {
+                // el is here the body
+                var html = `<div>${props.content || ""}</div><style>${props.styleContent}</style>`;
+                el.innerHTML = html;
+                el = el.firstChild;
             }
-            el.setAttribute("contenteditable", true); // so we can focus it if needed
-            if (this.props.content) {
-                const configSelection = getSelection(el, this.props.content);
+            if (!el.isContentEditable) {
+                el.setAttribute("contenteditable", true); // so we can focus it if needed
+            }
+            if (props.content) {
+                const configSelection = getSelection(el, props.content);
                 if (configSelection) {
                     el.focus();
                 }
-                if (this.props.onMounted) {
-                    this.props.onMounted?.(el);
+                if (props.onMounted) {
+                    props.onMounted(el);
                 } else {
-                    setContent(el, this.props.content);
+                    setContent(el, content);
                 }
             }
-        });
-        const overlayRef = useRef("localOverlay");
-        const config = Object.assign(this.props.config, {
-            getLocalOverlayContainer: () => overlayRef?.el,
-        });
-        this.editor = useWysiwyg(target, config, true);
+            oldAttach.call(this, el);
+        };
     }
 }
 
 /**
- * @typedef { import("@html_editor/editor").Editor } Editor
- *
  * @typedef { Object } TestConfig
  * @property { import("@html_editor/editor").EditorConfig } [config]
  * @property { string } [styleContent]
  * @property { Function } [onMounted]
- * @property { boolean } [inIFrame]
+ * @property { Object } [props]
+ * @property { boolean } [toolbar]
+ * @property { Object } [env]
  */
 
 /**
@@ -76,16 +69,24 @@ class TestEditor extends Component {
  */
 export async function setupEditor(content, options = {}) {
     const config = options.config || {};
-    const inIFrame = "inIFrame" in options ? options.inIFrame : false;
+    const editor = new Editor(config);
+    const props = options.props || {};
+    props.editor = editor;
     const styleContent = options.styleContent || "";
-    const testEditor = await mountWithCleanup(TestEditor, {
-        props: { content, config, inIFrame, styleContent, onMounted: options.onMounted },
+    await mountWithCleanup(TestEditor, {
+        props: {
+            content,
+            wysiwygProps: props,
+            styleContent,
+            onMounted: options.onMounted,
+        },
         env: options.env,
     });
 
+    // @todo: return editor, tests can destructure const { editable } = ... if they want
     return {
-        el: testEditor.editor.editable,
-        editor: testEditor.editor,
+        el: editor.editable,
+        editor,
     };
 }
 
@@ -96,7 +97,7 @@ export async function setupEditor(content, options = {}) {
  * @property { (editor: Editor) => void } [stepFunction]
  * @property { string } [contentAfter]
  * @property { string } [contentAfterEdit]
- * @property { string } [compareFunction]
+ * @property { (content: string, expected: string, phase: string) => void } [compareFunction]
  */
 
 /**
@@ -151,16 +152,22 @@ export async function testEditor(config) {
     }
 }
 /**
+ * @todo: remove this?
  *
  * @param {Object} props
  * @returns { Promise<{el: HTMLElement, wysiwyg: Wysiwyg}> } result
  */
 export async function setupWysiwyg(props = {}) {
+    const editor = new Editor(props.config || {});
+    const content = props.content;
+    delete props.content;
+    delete props.config;
+    props.editor = editor;
     const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
     const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
-    if (props.config?.content) {
+    if (content) {
         // force selection to be put properly
-        setContent(el, props.config.content);
+        setContent(el, content);
     }
     return { wysiwyg, el };
 }
@@ -168,7 +175,7 @@ export async function setupWysiwyg(props = {}) {
 export function insertTestHtml(innerHtml) {
     const container = getFixture();
     container.classList.add("odoo-editor-editable");
-    container.setAttribute("contenteditable", true);
+    container.setAttribute("contenteditable", "true");
     container.innerHTML = innerHtml;
     return container.childNodes;
 }

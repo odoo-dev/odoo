@@ -61,7 +61,7 @@ test("toolbar works: can format bold", async () => {
 });
 
 test.tags("iframe")("toolbar in an iframe works: can format bold", async () => {
-    const { el } = await setupEditor("<p>test</p>", { inIFrame: true });
+    const { el } = await setupEditor("<p>test</p>", { props: { iframe: true } });
     expect("iframe").toHaveCount(1);
     expect(getContent(el)).toBe("<p>test</p>");
 

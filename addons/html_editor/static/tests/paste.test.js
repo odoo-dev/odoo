@@ -2377,7 +2377,7 @@ describe("Odoo editor own html", () => {
 
 describe("editable in iframe", () => {
     test("should paste odoo-editor html", async () => {
-        const { el, editor } = await setupEditor("<p>[]</p>", { inIFrame: true });
+        const { el, editor } = await setupEditor("<p>[]</p>", { props: { iframe: true } });
         pasteOdooEditorHtml(editor, `<p>text<b>bold text</b>more text</p>`);
         expect(getContent(el)).toBe("<p>text<b>bold text</b>more text[]</p>");
     });
