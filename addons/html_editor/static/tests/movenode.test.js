@@ -21,8 +21,8 @@ test("should show the hook when hovering a P", async () => {
     const moveElements = [...document.querySelectorAll(".oe-sidewidget-move")];
     expect(moveElements).toHaveLength(1);
     const elementRect = moveElements[0].getBoundingClientRect();
-    expect(elementRect.top).toBe(0);
-    expect(elementRect.left).toBe(5);
+    expect(elementRect.top).toBe(4);
+    expect(elementRect.left).toBe(29);
 });
 test("should show the hook when hovering the second P", async () => {
     const { el } = await setupEditor("<p>a[]</p><p>b</p>", {
@@ -32,8 +32,8 @@ test("should show the hook when hovering the second P", async () => {
     const moveElements = [...document.querySelectorAll(".oe-sidewidget-move")];
     expect(moveElements).toHaveLength(1);
     const elementRect = moveElements[0].getBoundingClientRect();
-    expect(elementRect.top).toBe(37);
-    expect(elementRect.left).toBe(5);
+    expect(elementRect.top).toBe(41);
+    expect(elementRect.left).toBe(29);
 });
 test("should not show the hook when hovering a DIV", async () => {
     const { el } = await setupEditor("<p>a[]</p><div><br></div><p>b</p>", {

@@ -43,7 +43,7 @@ test.tags("iframe")("shortcut plugin allow registering shortcuts in iframe", asy
     }
     await setupEditor(`<p>test[]</p>`, {
         config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
-        inIFrame: true,
+        props: { iframe: true },
     });
 
     expect(count).toBe(0);

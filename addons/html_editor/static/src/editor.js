@@ -59,12 +59,11 @@ function sortPlugins(plugins) {
 export class Editor {
     /**
      * @param { EditorConfig } config
-     * @param {*} services
      */
-    constructor(config, services) {
+    constructor(config) {
         this.isDestroyed = false;
         this.config = config;
-        this.services = services;
+        this.services = null;
         this.plugins = [];
         /** @type { HTMLElement } **/
         this.editable = null;

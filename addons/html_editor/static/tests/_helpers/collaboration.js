@@ -70,7 +70,7 @@ export const setupMultiEditor = async (spec) => {
         let selection;
         const defaultPlugins = MAIN_PLUGINS;
         const base = await setupEditor(spec.contentBefore, {
-            inIFrame: true,
+            props: { iframe: true },
             onMounted: (editable) => {
                 selection = parseMultipleTextualSelection(editable, peerId);
             },

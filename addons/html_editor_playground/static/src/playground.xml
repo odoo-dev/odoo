@@ -26,7 +26,7 @@
             <div class="flex-grow-1 h-100 overflow-auto">
                 <div class="d-flex">
                     <Wysiwyg
-                        config="getConfig()"
+                        editor="getEditor()"
                         class="'m-2'"
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;`"
                         t-key="window.JSON.stringify(config)"

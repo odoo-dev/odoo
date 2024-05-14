@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor, queryOne, hover, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { setupEditor, setupWysiwyg } from "./_helpers/editor";
+import { setupEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
 
@@ -173,9 +173,8 @@ test("selected text color is not shown in the toolbar after removeFormat", async
 });
 
 test("collapsed selection color is shown in the permanent toolbar", async () => {
-    await setupWysiwyg({
-        toolbar: true,
-        config: { content: `<font style="color: rgb(255, 0, 0);">t[]est</font>` },
+    await setupEditor(`<font style="color: rgb(255, 0, 0);">t[]est</font>`, {
+        props: { toolbar: true },
     });
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });

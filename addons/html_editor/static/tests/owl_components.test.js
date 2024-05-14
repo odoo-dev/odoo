@@ -9,15 +9,13 @@ import {
     onWillUnmount,
     useRef,
     useState,
-    useSubEnv,
     xml,
 } from "@odoo/owl";
-import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { OwlComponentPlugin } from "../src/others/owl_component_plugin";
-import { useWysiwyg } from "../src/wysiwyg";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { deleteBackward, undo } from "./_helpers/user_actions";
+import { makeMockEnv } from "@web/../tests/_framework/env_test_helpers";
 
 class Counter extends Component {
     static props = [];
@@ -99,22 +97,11 @@ test("inline component get proper env", async () => {
         }
     }
 
-    class Parent extends Component {
-        static template = xml`<div t-ref="root"/>`;
-        static props = [];
-
-        setup() {
-            useSubEnv({ somevalue: 1 });
-            useWysiwyg(
-                "root",
-                Object.assign(getConfig("counter", Test), {
-                    content: `<div><span data-embedded="counter"></span></div>`,
-                })
-            );
-        }
-    }
-
-    await mountWithCleanup(Parent);
+    const rootEnv = await makeMockEnv();
+    await setupEditor(`<div><span data-embedded="counter"></span></div>`, {
+        config: getConfig("counter", Test),
+        env: Object.assign(rootEnv, { somevalue: 1 }),
+    });
     expect(env.somevalue).toBe(1);
 });
 

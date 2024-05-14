@@ -34,7 +34,7 @@ describe("move selection with tab/shift+tab", () => {
         });
         test.tags("iframe")("should move cursor to the end of next cell in an iframe", async () => {
             await testEditor({
-                inIFrame: true,
+                props: { iframe: true },
                 contentBefore: unformat(`
                     <table>
                         <tbody>

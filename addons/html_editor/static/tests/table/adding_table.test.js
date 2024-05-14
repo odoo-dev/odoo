@@ -78,7 +78,7 @@ test("can close table picker with escape", async () => {
 
 test.tags("iframe")("in iframe, can add a table using the powerbox and keyboard", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>", {
-        inIFrame: true,
+        props: { iframe: true },
     });
     expect(".o-we-powerbox").toHaveCount(0);
     expect(getContent(el)).toBe(`<p>a[]</p>`);
