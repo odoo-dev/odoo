@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { getContent } from "../_helpers/selection";
 import { em, s, span, u } from "../_helpers/tags";
-import { italic, tripleClick, underline } from "../_helpers/user_actions";
+import { insertText, italic, tripleClick, underline } from "../_helpers/user_actions";
 
 test("should make a few characters underline", async () => {
     await testEditor({
@@ -159,11 +159,11 @@ describe("with strikeThrough", () => {
                 contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
                 stepFunction: async (editor) => {
                     underline(editor);
-                    await editor.execCommand("insert", "A");
+                    insertText(editor, "A");
                     underline(editor);
-                    await editor.execCommand("insert", "B");
+                    insertText(editor, "B");
                     underline(editor);
-                    await editor.execCommand("insert", "C");
+                    insertText(editor, "C");
                 },
                 contentAfterEdit: `<p>ab${u(s(`cd`))}${s(
                     `A${u(`B`, "first")}C[]\u200B`,
@@ -273,21 +273,18 @@ describe("with italic", () => {
         });
     });
 
-    test.todo(
-        "should remove underline, write, restore underline, write, remove underline again, write (collapsed, italic)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
-                stepFunction: async (editor) => {
-                    underline(editor);
-                    await editor.execCommand("insert", "A");
-                    underline(editor);
-                    await editor.execCommand("insert", "B");
-                    underline(editor);
-                    await editor.execCommand("insert", "C");
-                },
-                contentAfter: `<p>ab${u(em(`cd`))}${em(`A${u(`B`)}C[]`)}${u(em(`ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline, write, restore underline, write, remove underline again, write (collapsed, italic)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab${u(em(`cd[]ef`))}</p>`,
+            stepFunction: async (editor) => {
+                underline(editor);
+                insertText(editor, "A");
+                underline(editor);
+                insertText(editor, "B");
+                underline(editor);
+                insertText(editor, "C");
+            },
+            contentAfter: `<p>ab${u(em(`cd`))}${em(`A${u(`B`)}C[]`)}${u(em(`ef`))}</p>`,
+        });
+    });
 });
