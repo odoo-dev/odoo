@@ -72,7 +72,7 @@ export class ImagePlugin extends Plugin {
     }
 
     setup() {
-        this.addDomListener(this.editable, "mouseup", (e) => {
+        this.addDomListener(this.editable, "pointerup", (e) => {
             if (e.target.tagName === "IMG") {
                 const range = this.document.createRange();
                 range.selectNode(e.target);
@@ -126,7 +126,7 @@ export class ImagePlugin extends Plugin {
     getImageAttribute(attributeName) {
         const selectedNodes = this.shared.getSelectedNodes();
         const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
-        return selectedImg.getAttribute(attributeName);
+        return selectedImg.getAttribute(attributeName) || undefined;
     }
 
     /**
