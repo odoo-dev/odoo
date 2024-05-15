@@ -105,7 +105,7 @@ export class ImagePlugin extends Plugin {
                 this.dispatch("ADD_STEP");
                 break;
             }
-            case "IMAGE_DESCRIPTION": {
+            case "UPDATE_IMAGE_DESCRIPTION": {
                 const selectedNodes = this.shared.getSelectedNodes();
                 const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
                 selectedImg.setAttribute("alt", payload.description);
