@@ -19,7 +19,8 @@ export class ImageDescription extends Component {
     openDescriptionDialog() {
         this.dialog.add(ImageDescriptionDialog, {
             description: this.props.getDescription(),
-            onConfirm: (description, tooltip) => this.props.dispatch("UPDATE_IMAGE_DESCRIPTION", { description, tooltip }),
+            onConfirm: (description, tooltip) =>
+                this.props.dispatch("UPDATE_IMAGE_DESCRIPTION", { description, tooltip }),
             tooltip: this.props.getTooltip(),
         });
     }
