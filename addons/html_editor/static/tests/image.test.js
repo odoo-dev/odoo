@@ -8,7 +8,7 @@ test("image can be selected", async () => {
     const { editor } = await setupEditor(`
         <img class="img-fluid" src="/web/static/img/logo.png">
     `);
-    await click("img");
+    click("img");
     await waitFor(".o-we-toolbar");
     expect(".btn-group[name='image_shape']").toHaveCount(1);
     const selectionPlugin = editor.plugins.find((p) => p.constructor.name === "selection");
@@ -19,7 +19,7 @@ test("can shape an image", async () => {
     await setupEditor(`
         <img class="img-fluid" src="/web/static/img/logo.png">
     `);
-    await click("img");
+    click("img");
     await waitFor(".o-we-toolbar");
 
     click(".o-we-toolbar .fa-square");
@@ -52,7 +52,7 @@ test("can undo a shape", async () => {
     const { editor } = await setupEditor(`
         <img class="img-fluid" src="/web/static/img/logo.png">
     `);
-    await click("img");
+    click("img");
     await waitFor(".o-we-toolbar");
 
     click(".o-we-toolbar .fa-square");
@@ -69,7 +69,7 @@ test("can edit an image description & tooltip", async () => {
     await setupEditor(`
         <img class="img-fluid" src="/web/static/img/logo.png" alt="description" title="tooltip">
     `);
-    await click("img");
+    click("img");
     await waitFor(".o-we-toolbar");
 
     click(".o-we-toolbar .btn-group[name='image_description'] button");
