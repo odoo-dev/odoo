@@ -1,7 +1,8 @@
 import { registry } from "@web/core/registry";
-import { Plugin } from "../plugin";
+import { Plugin } from "../../plugin";
 import { _t } from "@web/core/l10n/translation";
 import { isImageUrl } from "@html_editor/utils/url";
+import { ImageDescription } from "./image_description";
 
 function hasShape(imagePlugin, shapeName) {
     return () => imagePlugin.isSelectionShaped(shapeName);
@@ -16,6 +17,21 @@ export class ImagePlugin extends Plugin {
             handle_paste_url: p.handlePasteUrl.bind(p),
 
             toolbarGroup: [
+                {
+                    id: "image_description",
+                    sequence: 24,
+                    namespace: "IMG",
+                    buttons: [
+                        {
+                            id: "image_description",
+                            Component: ImageDescription,
+                            props: {
+                                getDescription: () => p.getImageAttribute("alt"),
+                                getTooltip: () => p.getImageAttribute("title"),
+                            },
+                        },
+                    ],
+                },
                 {
                     id: "image_shape",
                     sequence: 25,
@@ -70,7 +86,7 @@ export class ImagePlugin extends Plugin {
         });
     }
 
-    handleCommand(command) {
+    handleCommand(command, payload) {
         const commandToClassNameDict = {
             SHAPE_ROUNDED: "rounded",
             SHAPE_SHADOW: "shadow",
@@ -87,6 +103,15 @@ export class ImagePlugin extends Plugin {
                 const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
                 selectedImg.classList.toggle(commandToClassNameDict[command]);
                 this.dispatch("ADD_STEP");
+                break;
+            }
+            case "IMAGE_DESCRIPTION": {
+                const selectedNodes = this.shared.getSelectedNodes();
+                const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
+                selectedImg.setAttribute("alt", payload.description);
+                selectedImg.setAttribute("title", payload.tooltip);
+                this.dispatch("ADD_STEP");
+                break;
             }
         }
     }
@@ -96,6 +121,12 @@ export class ImagePlugin extends Plugin {
             .getTraversedNodes()
             .filter((n) => n.tagName === "IMG" && n.classList.contains(shape));
         return selectedNodes.length > 0;
+    }
+
+    getImageAttribute(attributeName) {
+        const selectedNodes = this.shared.getSelectedNodes();
+        const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
+        return selectedImg.getAttribute(attributeName);
     }
 
     /**

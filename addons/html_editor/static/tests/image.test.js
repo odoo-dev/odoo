@@ -2,6 +2,7 @@ import { expect, test } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
+import { contains } from "@web/../tests/web_test_helpers";
 
 test("image can be selected", async () => {
     const { editor } = await setupEditor(`
@@ -62,4 +63,25 @@ test("can undo a shape", async () => {
     await animationFrame();
     expect(".o-we-toolbar .fa-square.active").toHaveCount(0);
     expect("img.rounded").toHaveCount(0);
+});
+
+test("can edit an image description & tooltip", async () => {
+    await setupEditor(`
+        <img class="img-fluid" src="/web/static/img/logo.png" alt="description" title="tooltip">
+    `);
+    await click("img");
+    await waitFor(".o-we-toolbar");
+
+    click(".o-we-toolbar .btn-group[name='image_description'] button");
+    await animationFrame();
+
+    expect(".modal-body").toHaveCount(1);
+    expect("input[name='description']").toHaveValue("description");
+    expect("input[name='tooltip']").toHaveValue("tooltip");
+    await contains("input[name='description']").edit("description modified");
+    await contains("input[name='tooltip']").edit("tooltip modified");
+    click(".modal-footer button");
+    await animationFrame();
+    expect("img").toHaveAttribute("alt", "description modified");
+    expect("img").toHaveAttribute("title", "tooltip modified");
 });
