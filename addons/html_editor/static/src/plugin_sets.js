@@ -18,7 +18,7 @@ import { ColumnPlugin } from "./main/column_plugin";
 import { ColorPlugin } from "./main/font/color_plugin";
 import { FontPlugin } from "./main/font/font_plugin";
 import { HintPlugin } from "./main/hint_plugin";
-import { ImagePlugin } from "./main/image_plugin";
+import { ImagePlugin } from "./main/image/image_plugin";
 import { InlineCodePlugin } from "./main/inline_code";
 import { JustifyPlugin } from "./main/justify_plugin";
 import { LinkPastePlugin } from "./main/link/link_paste_plugin";
