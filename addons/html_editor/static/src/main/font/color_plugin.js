@@ -1,46 +1,18 @@
 import { Plugin } from "@html_editor/plugin";
-import { isColorGradient, rgbToHex } from "@html_editor/utils/color";
+import {
+    isColorGradient,
+    rgbToHex,
+    hasColor,
+    hasAnyNodesColor,
+    TEXT_CLASSES_REGEX,
+    BG_CLASSES_REGEX,
+} from "@html_editor/utils/color";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { isCSSColor } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
 import { reactive } from "@odoo/owl";
-
-const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
-const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
-
-/**
- * Returns true if the given element has a visible color (fore- or
- * -background depending on the given mode).
- *
- * @param {Element} element
- * @param {string} mode 'color' or 'backgroundColor'
- * @returns {boolean}
- */
-function hasColor(element, mode) {
-    const style = element.style;
-    const parent = element.parentNode;
-    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
-    if (isColorGradient(style["background-image"])) {
-        if (element.classList.contains("text-gradient")) {
-            if (mode === "color") {
-                return true;
-            }
-        } else {
-            if (mode !== "color") {
-                return true;
-            }
-        }
-    }
-    return (
-        (style[mode] &&
-            style[mode] !== "inherit" &&
-            (!parent || style[mode] !== parent.style[mode])) ||
-        (classRegex.test(element.className) &&
-            (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode]))
-    );
-}
 
 export class ColorPlugin extends Plugin {
     static name = "color";
@@ -80,8 +52,12 @@ export class ColorPlugin extends Plugin {
         );
     }
 
-    updateSelectedColor(selection) {
-        const el = closestElement(selection.startContainer);
+    updateSelectedColor() {
+        const nodes = this.shared.getTraversedNodes().filter((n) => n.nodeType === Node.TEXT_NODE);
+        if (nodes.length === 0) {
+            return;
+        }
+        const el = closestElement(nodes[0]);
         if (!el) {
             return;
         }
@@ -102,15 +78,15 @@ export class ColorPlugin extends Plugin {
         switch (command) {
             case "APPLY_COLOR":
                 this.previewableApplyColor.commit(payload.color, payload.mode);
-                this.updateSelectedColor(this.shared.getEditableSelection());
+                this.updateSelectedColor();
                 break;
             case "COLOR_PREVIEW":
                 this.previewableApplyColor.preview(payload.color, payload.mode);
-                this.updateSelectedColor(this.shared.getEditableSelection());
+                this.updateSelectedColor();
                 break;
             case "COLOR_RESET_PREVIEW":
                 this.previewableApplyColor.revert();
-                this.updateSelectedColor(this.shared.getEditableSelection());
+                this.updateSelectedColor();
                 break;
             case "FORMAT_REMOVE_FORMAT":
                 this.removeAllColor();
@@ -119,23 +95,26 @@ export class ColorPlugin extends Plugin {
     }
 
     removeAllColor() {
-        const selectedNodeHasColor = (mode) => {
-            const selectionNodes = this.shared.getSelectedNodes();
-            for (const node of selectionNodes) {
-                if (hasColor(closestElement(node), mode)) {
-                    return true;
-                }
-            }
-            return false;
-        };
         const colorModes = ["color", "backgroundColor"];
         let someColorWasRemoved = true;
         while (someColorWasRemoved) {
             someColorWasRemoved = false;
             for (const mode of colorModes) {
-                while (selectedNodeHasColor(mode)) {
+                let max = 40;
+                const hasAnySelectedNodeColor = (mode) => {
+                    const nodes = this.shared
+                        .getTraversedNodes()
+                        .filter((n) => n.nodeType === Node.TEXT_NODE);
+                    return hasAnyNodesColor(nodes, mode);
+                };
+                while (hasAnySelectedNodeColor(mode) && max > 0) {
                     this.applyColor("", mode);
                     someColorWasRemoved = true;
+                    max--;
+                }
+                if (max === 0) {
+                    someColorWasRemoved = false;
+                    throw new Error("Infinite Loop in removeAllColor().");
                 }
             }
         }
@@ -146,7 +125,6 @@ export class ColorPlugin extends Plugin {
      *
      * @param {string} color hexadecimal or bg-name/text-name class
      * @param {string} mode 'color' or 'backgroundColor'
-     * @param {Element} [element]
      */
     applyColor(color, mode) {
         const selectedTds = [...this.editable.querySelectorAll("td.o_selected_td")].filter(

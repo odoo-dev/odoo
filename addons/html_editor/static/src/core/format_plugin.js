@@ -1,5 +1,6 @@
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
+import { hasAnyNodesColor } from "@html_editor/utils/color";
 import { unwrapContents } from "../utils/dom";
 import { isUnbreakable, isVisibleTextNode, isZWS } from "../utils/dom_info";
 import { closestElement } from "../utils/dom_traversal";
@@ -16,7 +17,8 @@ function hasFormat(formatPlugin) {
                 return true;
             }
         }
-        return false;
+        const nodes = formatPlugin.shared.getTraversedNodes();
+        return hasAnyNodesColor(nodes, "color") || hasAnyNodesColor(nodes, "backgroundColor");
     };
 }
 
@@ -75,7 +77,7 @@ export class FormatPlugin extends Plugin {
                         cmd: "FORMAT_REMOVE_FORMAT",
                         icon: "fa-eraser",
                         name: "Remove Format",
-                        isFormatApplied: hasFormat(p),
+                        hasFormat: hasFormat(p),
                     },
                 ],
             },
@@ -114,9 +116,8 @@ export class FormatPlugin extends Plugin {
     }
 
     removeFormat() {
-        // this.document.execCommand("removeFormat");
         for (const format of Object.keys(formatsSpecs)) {
-            if (!formatsSpecs[format].removeStyle) {
+            if (!formatsSpecs[format].removeStyle || !this.hasSelectionFormat(format)) {
                 continue;
             }
             this.formatSelection(format, { applyStyle: false });
@@ -124,9 +125,25 @@ export class FormatPlugin extends Plugin {
     }
 
     /**
-     * Return true if the current selection on the editable appears as the given
-     * format. The selection is considered to appear as that format if every text
-     * node in it appears as that format.
+     * Return true if the current selection on the editable contain a formated
+     * node
+     *
+     * @param {Element} editable
+     * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'
+     * @returns {boolean}
+     */
+    hasSelectionFormat(format) {
+        const selectedNodes = this.shared
+            .getTraversedNodes()
+            .filter((n) => n.nodeType === Node.TEXT_NODE);
+        const isFormatted = formatsSpecs[format].isFormatted;
+        return selectedNodes.length && selectedNodes.some((n) => isFormatted(n, this.editable));
+    }
+    /**
+     * Return true if the current selection on the editable appears as the
+     * given
+     * format. The selection is considered to appear as that format if every
+     * text node in it appears as that format.
      *
      * @param {Element} editable
      * @param {String} format 'bold'|'italic'|'underline'|'strikeThrough'|'switchDirection'

@@ -151,6 +151,26 @@ test("selected text color is shown in the toolbar and update when clicking", asy
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
 });
+test("selected text color is not shown in the toolbar after removeFormat", async () => {
+    const { el } = await setupEditor(
+        `<p>
+            <font style="color: rgb(255, 0, 0);">t[es]t</font>
+        </p>`
+    );
+
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
+    click(".btn.fa-eraser");
+    await animationFrame();
+    expect(getContent(el)).toBe(`<p>
+            <font style="color: rgb(255, 0, 0);">t</font>[es]<font style="color: rgb(255, 0, 0);">t</font>
+        </p>`);
+    await animationFrame();
+    // rgb(73, 80, 87) is aparently the default body color in the Hoot unit test
+    // in community.
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(73, 80, 87)" });
+});
 
 test("collapsed selection color is shown in the permanent toolbar", async () => {
     await setupWysiwyg({
@@ -169,7 +189,10 @@ test("selected color is shown and updates when selection change", async () => {
     expect(".o_font_color_selector").toHaveCount(0);
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(150, 255, 0)" });
-    setContent(el, `<p><font style="color: rgb(255, 156, 0);">[test1]</font> <font style="color: rgb(150, 255, 0);">test2</font></p>`);
+    setContent(
+        el,
+        `<p><font style="color: rgb(255, 156, 0);">[test1]</font> <font style="color: rgb(150, 255, 0);">test2</font></p>`
+    );
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 156, 0)" });
 });
