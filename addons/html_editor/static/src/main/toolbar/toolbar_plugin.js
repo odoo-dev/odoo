@@ -18,6 +18,9 @@ export class ToolbarPlugin extends Plugin {
             buttonsActiveState: this.buttonGroups.flatMap((g) =>
                 g.buttons.map((b) => [b.id, false])
             ),
+            buttonsDisabledState: this.buttonGroups.flatMap((g) =>
+                g.buttons.map((b) => [b.id, false])
+            ),
             namespace: undefined,
         });
     }
@@ -30,7 +33,7 @@ export class ToolbarPlugin extends Plugin {
                     if (sel.isCollapsed) {
                         this.overlay.close();
                     }
-                    this.updateButtonsActiveState(this.shared.getEditableSelection());
+                    this.updateButtonsStates(this.shared.getEditableSelection());
                 }
                 break;
         }
@@ -58,7 +61,7 @@ export class ToolbarPlugin extends Plugin {
             } else {
                 this.state.namespace = undefined;
             }
-            this.updateButtonsActiveState(selection);
+            this.updateButtonsStates(selection);
         }
     }
 
@@ -87,13 +90,15 @@ export class ToolbarPlugin extends Plugin {
         }
     }
 
-    updateButtonsActiveState(selection) {
+    updateButtonsStates(selection) {
         if (selection.inEditable) {
             for (const buttonGroup of this.buttonGroups) {
                 if (buttonGroup.namespace === this.state.namespace) {
                     for (const button of buttonGroup.buttons) {
                         this.state.buttonsActiveState[button.id] =
                             button.isFormatApplied?.(selection);
+                        this.state.buttonsDisabledState[button.id] =
+                            button.hasFormat != null && !button.hasFormat?.(selection);
                     }
                 }
             }

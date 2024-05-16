@@ -473,6 +473,14 @@ export class SelectionPlugin extends Plugin {
                         );
                     }
                 } else {
+                    // ignore edges nodes if they do not have content selected
+                    if (
+                        (node === selection.endContainer && selection.endOffset === 0) ||
+                        (node === selection.startContainer &&
+                            selection.startOffset === nodeSize(selection.startContainer))
+                    ) {
+                        continue;
+                    }
                     traversedNodes.add(node);
                 }
             }

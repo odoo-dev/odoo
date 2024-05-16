@@ -1,5 +1,8 @@
-import { test } from "@odoo/hoot";
-import { testEditor } from "../_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "../_helpers/editor";
+import { getContent } from "../_helpers/selection";
+import { click, waitFor } from "@odoo/hoot-dom";
+import { animationFrame } from "@odoo/hoot-mock";
 
 test("should do nothing if no format is set", async () => {
     await testEditor({
@@ -370,7 +373,7 @@ test("should remove text color (5)", async () => {
         contentBefore: '<div>a<font style="color: rgb(255, 0, 0);">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="color: rgb(255, 0, 0);">b[</font>cd]<font style="color: rgb(255, 0, 0);">e</font>f</div>',
+            '<div>a<font style="color: rgb(255, 0, 0);">b</font>[cd]<font style="color: rgb(255, 0, 0);">e</font>f</div>',
     });
 });
 test("should remove text color (6)", async () => {
@@ -378,7 +381,7 @@ test("should remove text color (6)", async () => {
         contentBefore: '<div>a<font style="color: red">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="color: red">b[</font>cd]<font style="color: red">e</font>f</div>',
+            '<div>a<font style="color: red">b</font>[cd]<font style="color: red">e</font>f</div>',
     });
 });
 test("should remove text color (7)", async () => {
@@ -386,7 +389,7 @@ test("should remove text color (7)", async () => {
         contentBefore: '<div>a<font style="color: #ff0000">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="color: #ff0000">b[</font>cd]<font style="color: #ff0000">e</font>f</div>',
+            '<div>a<font style="color: #ff0000">b</font>[cd]<font style="color: #ff0000">e</font>f</div>',
     });
 });
 test("should remove text color (8)", async () => {
@@ -437,7 +440,7 @@ test("should remove background color (6)", async () => {
         contentBefore: '<div>a<font style="background: rgb(255, 0, 0);">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="background: rgb(255, 0, 0);">b[</font>cd]<font style="background: rgb(255, 0, 0);">e</font>f</div>',
+            '<div>a<font style="background: rgb(255, 0, 0);">b</font>[cd]<font style="background: rgb(255, 0, 0);">e</font>f</div>',
     });
 });
 test("should remove background color (7)", async () => {
@@ -445,7 +448,7 @@ test("should remove background color (7)", async () => {
         contentBefore: '<div>a<font style="background: red">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="background: red">b[</font>cd]<font style="background: red">e</font>f</div>',
+            '<div>a<font style="background: red">b</font>[cd]<font style="background: red">e</font>f</div>',
     });
 });
 test("should remove background color (8)", async () => {
@@ -453,7 +456,7 @@ test("should remove background color (8)", async () => {
         contentBefore: '<div>a<font style="background: #ff0000">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="background: #ff0000">b[</font>cd]<font style="background: #ff0000">e</font>f</div>',
+            '<div>a<font style="background: #ff0000">b</font>[cd]<font style="background: #ff0000">e</font>f</div>',
     });
 });
 test("should remove background color (9)", async () => {
@@ -461,7 +464,7 @@ test("should remove background color (9)", async () => {
         contentBefore: '<div>a<font style="background-color: #ff0000">b[cd]e</font>f</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>a<font style="background-color: #ff0000">b[</font>cd]<font style="background-color: #ff0000">e</font>f</div>',
+            '<div>a<font style="background-color: #ff0000">b</font>[cd]<font style="background-color: #ff0000">e</font>f</div>',
     });
 });
 test("should remove background color (10)", async () => {
@@ -480,16 +483,18 @@ test("should remove the background image when clear the format", async () => {
         contentAfter: "<div><p>[ab]</p></div>",
     });
 });
-test("should remove all the colors for the text separated by Shift+Enter when using removeFormat button", async () => {
+test("should remove all the colors for the text separated by Shift+Enter when using removeFormat button (1)", async () => {
     await testEditor({
         contentBefore: `<div><h1><font style="color: red">[ab</font><br><font style="color: red">cd</font><br><font style="color: red">ef]</font></h1></div>`,
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter: `<div><h1>[ab<br>cd<br>ef]</h1></div>`,
     });
+});
+test("should remove all the colors for the text separated by Shift+Enter when using removeFormat button (2)", async () => {
     await testEditor({
         contentBefore: `<div><h1><font style="color: red">[ab</font><br><font style="color: red">cd</font><br><font style="color: red">]ef</font></h1></div>`,
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
-        contentAfter: `<div><h1>[ab<br>cd]<br><font style="color: red">ef</font></h1></div>`,
+        contentAfter: `<div><h1>[ab<br>cd<br><font style="color: red">]ef</font></h1></div>`,
     });
 });
 test("should remove all the colors for the text separated by Enter when using removeFormat button", async () => {
@@ -562,7 +567,7 @@ test("should remove multiple color (5)", async () => {
         contentBefore:
             '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">ef]</font></font>gh</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
-        contentAfter: '<div>ab<font style="background: blue">c[</font>def]gh</div>',
+        contentAfter: '<div>ab<font style="background: blue">c</font>[def]gh</div>',
     });
 });
 // TODO: we should avoid <font> element into <font> element when possible
@@ -572,6 +577,77 @@ test.todo("should remove multiple color (6)", async () => {
             '<div>ab<font style="background: blue">c[d<font class="bg-o-color-1">e]f</font></font>gh</div>',
         stepFunction: (editor) => editor.dispatch("FORMAT_REMOVE_FORMAT"),
         contentAfter:
-            '<div>ab<font style="background: blue">c[</font>de]<font class="bg-o-color-1">f</font>gh</div>',
+            '<div>ab<font style="background: blue">c</font>[de]<font class="bg-o-color-1">f</font>gh</div>',
+    });
+});
+describe("Toolbar", () => {
+    async function removeFormatClick() {
+        await waitFor(".o-we-toolbar");
+        expect(".o-we-toolbar").toHaveCount(1); // toolbar open
+        expect(".btn.fa-eraser").toHaveCount(1); // remove format
+        expect(".btn.fa-eraser:not(.disabled)").toHaveCount(1); // remove format button should not be disabled
+
+        click(".btn.fa-eraser");
+        await animationFrame();
+        expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+        expect(".btn.fa-eraser.disabled").toHaveCount(1); // remove format button should be disabled
+    }
+
+    test("Should remove bold from selection", async () => {
+        const { el } = await setupEditor(`<p>this <b>is[ a ]UX</b> test.</p>`);
+        await removeFormatClick();
+        expect(getContent(el)).toBe(`<p>this <b>is</b>[ a ]<b>UX</b> test.</p>`);
+    });
+
+    test("Should remove color from selection", async () => {
+        const { el } = await setupEditor(
+            `<p>this <span style="color:red">is[ a ]UX</span> test.</p>`
+        );
+        await removeFormatClick();
+        expect(getContent(el)).toBe(
+            `<p>this <span style="color:red">is</span>[ a ]<span style="color:red">UX</span> test.</p>`
+        );
+        click(".btn.fa-eraser");
+        expect(getContent(el)).toBe(
+            `<p>this <span style="color:red">is</span>[ a ]<span style="color:red">UX</span> test.</p>`
+        );
+    });
+
+    test("Should remove background color from selection", async () => {
+        const { el } = await setupEditor(
+            `<p>this <span style="background:green">is[ a ]UX</span> test.</p>`
+        );
+        await removeFormatClick();
+        expect(getContent(el)).toBe(
+            `<p>this <span style="background:green">is</span>[ a ]<span style="background:green">UX</span> test.</p>`
+        );
+    });
+
+    test("Should remove background class color from selection", async () => {
+        const { el } = await setupEditor(
+            `<p>this <font class="text-o-color-1">is[ a ]UX</font> test.</p>`
+        );
+        await removeFormatClick();
+        expect(getContent(el)).toBe(
+            `<p>this <font class="text-o-color-1">is</font>[ a ]<font class="text-o-color-1">UX</font> test.</p>`
+        );
+    });
+
+    test("Should do nothing when no format in selection", async () => {
+        const { el } = await setupEditor(
+            `<p>this <span class="random-class">is[ a ]UX</span> test.</p>`
+        );
+        await waitFor(".o-we-toolbar");
+        expect(".o-we-toolbar").toHaveCount(1); // toolbar open
+        expect(".btn.fa-eraser").toHaveCount(1); // remove format
+        expect(".btn.fa-eraser.disabled").toHaveCount(1); // remove format button should be disabled when no format
+
+        click(".btn.fa-eraser");
+        await animationFrame();
+        expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+        expect(".btn.fa-eraser.disabled").toHaveCount(1); // remove format button should still be disabled
+        expect(getContent(el)).toBe(
+            `<p>this <span class="random-class">is[ a ]UX</span> test.</p>`
+        );
     });
 });
