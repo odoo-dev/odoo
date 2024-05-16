@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { click, waitFor } from "@odoo/hoot-dom";
+import { click, queryOne, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { contains } from "@web/../tests/web_test_helpers";
@@ -84,4 +84,34 @@ test("can edit an image description & tooltip", async () => {
     await animationFrame();
     expect("img").toHaveAttribute("alt", "description modified");
     expect("img").toHaveAttribute("title", "tooltip modified");
+});
+
+test("Can change an image size", async () => {
+    await setupEditor(`
+        <img class="img-fluid test-image" src="/web/static/img/logo.png">
+    `);
+    click("img.test-image");
+    await waitFor(".o-we-toolbar");
+    expect(queryOne("img").style.width).toBe("");
+    expect(".o-we-toolbar button[name='resize_default']").toHaveClass("active");
+
+    click(".o-we-toolbar button[name='resize_100']");
+    await animationFrame();
+    expect(queryOne("img").style.width).toBe("100%");
+    expect(".o-we-toolbar button[name='resize_100']").toHaveClass("active");
+
+    click(".o-we-toolbar button[name='resize_50']");
+    await animationFrame();
+    expect(queryOne("img").style.width).toBe("50%");
+    expect(".o-we-toolbar button[name='resize_50']").toHaveClass("active");
+
+    click(".o-we-toolbar button[name='resize_25']");
+    await animationFrame();
+    expect(queryOne("img").style.width).toBe("25%");
+    expect(".o-we-toolbar button[name='resize_25']").toHaveClass("active");
+
+    click(".o-we-toolbar button[name='resize_default']");
+    await animationFrame();
+    expect(queryOne("img").style.width).toBe("");
+    expect(".o-we-toolbar button[name='resize_default']").toHaveClass("active");
 });
