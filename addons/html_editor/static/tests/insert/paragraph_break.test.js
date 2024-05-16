@@ -330,7 +330,10 @@ describe("Selection collapsed", () => {
             });
         });
 
-        test("should insert line breaks outside the edges of an anchor", async () => {
+        // skipping these tests cause with the link isolation the cursor can be put
+        // inside/outside the link so the user can choose where to insert the line break
+        // see `anchor.nodeName === "A" && brEls.includes(anchor.firstChild)` in line_break_plugin.js
+        test.skip("should insert line breaks outside the edges of an anchor", async () => {
             const insertLinebreak = (editor) => {
                 editor.dispatch("INSERT_LINEBREAK");
             };
