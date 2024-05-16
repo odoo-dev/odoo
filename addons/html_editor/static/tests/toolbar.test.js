@@ -13,6 +13,8 @@ import { contains } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "./_helpers/editor";
 import { unformat } from "./_helpers/format";
 import { getContent, setContent, setSelection } from "./_helpers/selection";
+import { Plugin } from "../src/plugin";
+import { MAIN_PLUGINS } from "../src/plugin_sets";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
@@ -296,4 +298,74 @@ test("toolbar stop showing namespaced button groups when namespaced element is u
     );
     await animationFrame();
     expect(".btn-group[name='image_shape']").toHaveCount(0);
+});
+
+test("toolbar does not evaluate isFormatApplied when namespace does not match", async () => {
+    class TestPlugin extends Plugin {
+        static name = "TestPlugin";
+        static resources(p) {
+            return {
+                toolbarGroup: [
+                    {
+                        id: "test_group",
+                        sequence: 24,
+                        namespace: "IMG",
+                        buttons: [
+                            {
+                                id: "test_btn",
+                                cmd: "test_cmd",
+                                name: "Test Button",
+                                icon: "fa-square",
+                                isFormatApplied: () => expect.step("image format evaluated"),
+                            },
+                        ],
+                    },
+                ],
+            };
+        }
+    }
+    await setupEditor(
+        `
+        <div>
+            <p>Foo</p>
+            <img class="img-fluid" src="/web/static/img/logo.png">
+        </div>
+    `,
+        {
+            config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+        }
+    );
+    expect([]).toVerifySteps();
+    click("img");
+    await waitFor(".o-we-toolbar");
+    expect(["image format evaluated"]).toVerifySteps();
+});
+
+test("plugins can create buttons with text in toolbar", async () => {
+    class TestPlugin extends Plugin {
+        static name = "TestPlugin";
+        static resources(p) {
+            return {
+                toolbarGroup: [
+                    {
+                        id: "test_group",
+                        sequence: 24,
+                        buttons: [
+                            {
+                                id: "test_btn",
+                                cmd: "test_cmd",
+                                name: "Test Button",
+                                text: "Text button",
+                            },
+                        ],
+                    },
+                ],
+            };
+        }
+    }
+    await setupEditor(`<div> <p class="foo">[Foo]</p> </div>`, {
+        config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+    });
+    await waitFor(".o-we-toolbar");
+    expect("button[name='test_btn']").toHaveText("Text button");
 });
