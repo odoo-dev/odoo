@@ -1,3 +1,5 @@
+import { closestElement } from "@html_editor/utils/dom_traversal";
+
 export const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = [
     "primary",
     "secondary",
@@ -131,4 +133,56 @@ export function isColorCombinationName(name) {
  */
 export function isColorGradient(value) {
     return value && value.includes("-gradient(");
+}
+
+export const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
+export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
+
+/**
+ * Returns true if the given element has a visible color (fore- or
+ * -background depending on the given mode).
+ *
+ * @param {Element} element
+ * @param {string} mode 'color' or 'backgroundColor'
+ * @returns {boolean}
+ */
+export function hasColor(element, mode) {
+    const style = element.style;
+    const parent = element.parentNode;
+    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    if (isColorGradient(style["background-image"])) {
+        if (element.classList.contains("text-gradient")) {
+            if (mode === "color") {
+                return true;
+            }
+        } else {
+            if (mode !== "color") {
+                return true;
+            }
+        }
+    }
+    return (
+        (style[mode] &&
+            style[mode] !== "inherit" &&
+            (!parent || style[mode] !== parent.style[mode])) ||
+        (classRegex.test(element.className) &&
+            (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode]))
+    );
+}
+
+/**
+ * Returns true if any given nodes has a visible color (fore- or
+ * -background depending on the given mode).
+ *
+ * @param {array} nodes
+ * @param {string} mode 'color' or 'backgroundColor'
+ * @returns {boolean}
+ */
+export function hasAnyNodesColor(nodes, mode) {
+    for (const node of nodes) {
+        if (hasColor(closestElement(node), mode)) {
+            return true;
+        }
+    }
+    return false;
 }
