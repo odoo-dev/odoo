@@ -67,6 +67,45 @@ export class ImagePlugin extends Plugin {
                         },
                     ],
                 },
+                {
+                    id: "image_size",
+                    sequence: 26,
+                    namespace: "IMG",
+                    buttons: [
+                        {
+                            id: "resize_default",
+                            cmd: "RESIZE_IMAGE",
+                            cmdPayload: "",
+                            title: "Size: Default",
+                            text: "Default",
+                            isFormatApplied: () => p.hasImageSize(""),
+                        },
+                        {
+                            id: "resize_100",
+                            cmd: "RESIZE_IMAGE",
+                            cmdPayload: "100%",
+                            title: "Size: 100%",
+                            text: "100%",
+                            isFormatApplied: () => p.hasImageSize("100%"),
+                        },
+                        {
+                            id: "resize_50",
+                            cmd: "RESIZE_IMAGE",
+                            cmdPayload: "50%",
+                            title: "Size: 50%",
+                            text: "50%",
+                            isFormatApplied: () => p.hasImageSize("50%"),
+                        },
+                        {
+                            id: "resize_25",
+                            cmd: "RESIZE_IMAGE",
+                            cmdPayload: "25%",
+                            title: "Size: 25%",
+                            text: "25%",
+                            isFormatApplied: () => p.hasImageSize("25%"),
+                        },
+                    ],
+                },
             ],
         };
     }
@@ -99,21 +138,33 @@ export class ImagePlugin extends Plugin {
             case "SHAPE_SHADOW":
             case "SHAPE_CIRCLE":
             case "SHAPE_THUMBNAIL": {
-                const selectedNodes = this.shared.getSelectedNodes();
-                const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
+                const selectedImg = this.getSelectedImage();
                 selectedImg.classList.toggle(commandToClassNameDict[command]);
                 this.dispatch("ADD_STEP");
                 break;
             }
             case "UPDATE_IMAGE_DESCRIPTION": {
-                const selectedNodes = this.shared.getSelectedNodes();
-                const selectedImg = selectedNodes.find((node) => node.tagName === "IMG");
+                const selectedImg = this.getSelectedImage();
                 selectedImg.setAttribute("alt", payload.description);
                 selectedImg.setAttribute("title", payload.tooltip);
                 this.dispatch("ADD_STEP");
                 break;
             }
+            case "RESIZE_IMAGE": {
+                const selectedImg = this.getSelectedImage();
+                selectedImg.style.width = payload;
+            }
         }
+    }
+
+    getSelectedImage() {
+        const selectedNodes = this.shared.getSelectedNodes();
+        return selectedNodes.find((node) => node.tagName === "IMG");
+    }
+
+    hasImageSize(size) {
+        const selectedImg = this.getSelectedImage();
+        return selectedImg?.style?.width === size;
     }
 
     isSelectionShaped(shape) {

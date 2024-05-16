@@ -90,8 +90,11 @@ export class ToolbarPlugin extends Plugin {
     updateButtonsActiveState(selection) {
         if (selection.inEditable) {
             for (const buttonGroup of this.buttonGroups) {
-                for (const button of buttonGroup.buttons) {
-                    this.state.buttonsActiveState[button.id] = button.isFormatApplied?.(selection);
+                if (buttonGroup.namespace === this.state.namespace) {
+                    for (const button of buttonGroup.buttons) {
+                        this.state.buttonsActiveState[button.id] =
+                            button.isFormatApplied?.(selection);
+                    }
                 }
             }
         }
