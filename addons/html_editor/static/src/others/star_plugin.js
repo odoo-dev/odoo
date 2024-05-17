@@ -34,7 +34,7 @@ export class StarPlugin extends Plugin {
     });
 
     setup() {
-        this.addDomListener(this.editable, "mousedown", this.onMouseDown);
+        this.addDomListener(this.editable, "pointerdown", this.onMouseDown);
     }
 
     onMouseDown(ev) {
