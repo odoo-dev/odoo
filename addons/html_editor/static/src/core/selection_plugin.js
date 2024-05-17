@@ -444,11 +444,10 @@ export class SelectionPlugin extends Plugin {
      * Returns an array containing all the nodes traversed when walking the
      * selection.
      *
-     * @param {Boolean} deep
      * @returns {Node[]}
      */
-    getTraversedNodes({ deep = false } = {}) {
-        const selection = this.getEditableSelection({ deep });
+    getTraversedNodes() {
+        const selection = this.getEditableSelection({ deep: true });
         const selectedTableCells = this.editable.querySelectorAll(".o_selected_td");
         const document = this.editable.ownerDocument;
         const iterator = document.createNodeIterator(selection.commonAncestorContainer);

@@ -434,7 +434,7 @@ export function getDeepestPosition(node, offset) {
     while (next) {
         if (
             (isVisible(next) && (!isBlock(next) || next.isContentEditable)) ||
-            (isZWS(next) && next.isContentEditable)
+            (isZWS(next) && closestElement(next).isContentEditable)
         ) {
             // Valid node: update position then try to go deeper.
             if (next !== node) {
