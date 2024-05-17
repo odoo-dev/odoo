@@ -116,7 +116,7 @@ test("should transform url after shift+enter", async () => {
     await testEditor({
         contentBefore: "<p>a http://test.com b http://test.com[] c http://test.com d</p>",
         stepFunction: async (editor) => {
-            press("shift+enter");
+            press(["shift", "enter"]);
             editor.dispatch("INSERT_LINEBREAK");
         },
         contentAfter:
