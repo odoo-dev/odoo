@@ -157,37 +157,11 @@ class Obfuscate(Command):
                 self.cr = cr
                 self.begin()
                 if self.check_pwd(opt.pwd):
-                    fields = [
-                            ('mail_tracking_value', 'old_value_char'),
-                            ('mail_tracking_value', 'old_value_text'),
-                            ('mail_tracking_value', 'new_value_char'),
-                            ('mail_tracking_value', 'new_value_text'),
-                            ('res_partner', 'name'),
-                            ('res_partner', 'display_name'),
-                            ('res_partner', 'email'),
-                            ('res_partner', 'phone'),
-                            ('res_partner', 'mobile'),
-                            ('res_partner', 'street'),
-                            ('res_partner', 'street2'),
-                            ('res_partner', 'city'),
-                            ('res_partner', 'zip'),
-                            ('res_partner', 'vat'),
-                            ('res_partner', 'website'),
-                            ('res_country', 'name'),
-                            ('mail_message', 'subject'),
-                            ('mail_message', 'email_from'),
-                            ('mail_message', 'reply_to'),
-                            ('mail_message', 'body'),
-                            ('crm_lead', 'title'),
-                            ('crm_lead', 'name'),
-                            ('crm_lead', 'contact_name'),
-                            ('crm_lead', 'partner_name'),
-                            ('crm_lead', 'email_from'),
-                            ('crm_lead', 'phone'),
-                            ('crm_lead', 'mobile'),
-                            ('crm_lead', 'website'),
-                            ('crm_lead', 'description'),
-                        ]
+                    fields = []
+                    for model in self.registry.models.values():
+                        for field in model._fields.values():
+                            if field.obfuscate:
+                                fields.append((model._table, field.name))
 
                     if opt.fields:
                         if not opt.allfields:

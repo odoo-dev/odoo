@@ -83,9 +83,9 @@ class Message(models.Model):
         return res
 
     # content
-    subject = fields.Char('Subject')
+    subject = fields.Char('Subject', obfuscate=True)
     date = fields.Datetime('Date', default=fields.Datetime.now)
-    body = fields.Html('Contents', default='', sanitize_style=True)
+    body = fields.Html('Contents', default='', sanitize_style=True, obfuscate=True)
     description = fields.Char(
         'Short description', compute="_compute_description",
         help='Message description: either the subject, or the beginning of the body')
@@ -122,7 +122,7 @@ class Message(models.Model):
         index=True, ondelete='set null')
     is_internal = fields.Boolean('Employee Only', help='Hide to public / portal users, independently from subtype configuration.')
     # origin
-    email_from = fields.Char('From', help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.")
+    email_from = fields.Char('From', obfuscate=True, help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.")
     author_id = fields.Many2one(
         'res.partner', 'Author', index=True, ondelete='set null',
         help="Author of the message. If not set, email_from may hold an email address that did not match any partner.")
@@ -163,7 +163,7 @@ class Message(models.Model):
         'No threading for answers',
         help='If true, answers do not go in the original document discussion thread. Instead, it will check for the reply_to in tracking message-id and redirected accordingly. This has an impact on the generated message-id.')
     message_id = fields.Char('Message-Id', help='Message unique identifier', index='btree', readonly=1, copy=False)
-    reply_to = fields.Char('Reply-To', help='Reply email address. Setting the reply_to bypasses the automatic thread creation.')
+    reply_to = fields.Char('Reply-To', obfuscate=True, help='Reply email address. Setting the reply_to bypasses the automatic thread creation.')
     mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
     # keep notification layout informations to be able to generate mail again
     email_layout_xmlid = fields.Char('Layout', copy=False)  # xml id of layout

@@ -332,6 +332,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     default_export_compatible = False   # whether the field must be exported by default in an import-compatible export
     exportable = True
+    obfuscate = False                   # whether the field is obfuscated by obfuscate cli tool
 
     def __init__(self, string=Default, **kwargs):
         kwargs['string'] = string

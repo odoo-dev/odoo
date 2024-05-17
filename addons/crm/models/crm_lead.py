@@ -103,7 +103,7 @@ class Lead(models.Model):
     # Description
     name = fields.Char(
         'Opportunity', index='trigram', required=True,
-        compute='_compute_name', readonly=False, store=True)
+        compute='_compute_name', readonly=False, store=True, obfuscate=True)
     user_id = fields.Many2one(
         'res.users', string='Salesperson', default=lambda self: self.env.user,
         domain="['&', ('share', '=', False), ('company_ids', 'in', user_company_ids)]",
@@ -122,7 +122,7 @@ class Lead(models.Model):
         'res.company', string='Company', index=True,
         compute='_compute_company_id', readonly=False, store=True)
     referred = fields.Char('Referred By')
-    description = fields.Html('Notes')
+    description = fields.Html('Notes', obfuscate=True)
     active = fields.Boolean('Active', default=True, tracking=True)
     type = fields.Selection([
         ('lead', 'Lead'), ('opportunity', 'Opportunity')], required=True, tracking=15, index=True,
@@ -174,27 +174,27 @@ class Lead(models.Model):
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
     contact_name = fields.Char(
         'Contact Name', tracking=30,
-        compute='_compute_contact_name', readonly=False, store=True)
+        compute='_compute_contact_name', readonly=False, store=True, obfuscate=True)
     partner_name = fields.Char(
         'Company Name', tracking=20,
-        compute='_compute_partner_name', readonly=False, store=True,
+        compute='_compute_partner_name', readonly=False, store=True, obfuscate=True,
         help='The name of the future partner company that will be created while converting the lead into opportunity')
     function = fields.Char('Job Position', compute='_compute_function', readonly=False, store=True)
-    title = fields.Many2one('res.partner.title', string='Title', compute='_compute_title', readonly=False, store=True)
+    title = fields.Many2one('res.partner.title', string='Title', compute='_compute_title', readonly=False, store=True, obfuscate=True)
     email_from = fields.Char(
         'Email', tracking=40, index='trigram',
-        compute='_compute_email_from', inverse='_inverse_email_from', readonly=False, store=True)
+        compute='_compute_email_from', inverse='_inverse_email_from', readonly=False, store=True, obfuscate=True)
     phone = fields.Char(
         'Phone', tracking=50,
-        compute='_compute_phone', inverse='_inverse_phone', readonly=False, store=True)
-    mobile = fields.Char('Mobile', compute='_compute_mobile', readonly=False, store=True)
+        compute='_compute_phone', inverse='_inverse_phone', readonly=False, store=True, obfuscate=True)
+    mobile = fields.Char('Mobile', compute='_compute_mobile', readonly=False, store=True, obfuscate=True)
     phone_state = fields.Selection([
         ('correct', 'Correct'),
         ('incorrect', 'Incorrect')], string='Phone Quality', compute="_compute_phone_state", store=True)
     email_state = fields.Selection([
         ('correct', 'Correct'),
         ('incorrect', 'Incorrect')], string='Email Quality', compute="_compute_email_state", store=True)
-    website = fields.Char('Website', help="Website of the contact", compute="_compute_website", readonly=False, store=True)
+    website = fields.Char('Website', help="Website of the contact", compute="_compute_website", readonly=False, store=True, obfuscate=True)
     lang_id = fields.Many2one(
         'res.lang', string='Language',
         compute='_compute_lang_id', readonly=False, store=True)

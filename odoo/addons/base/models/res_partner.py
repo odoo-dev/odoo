@@ -197,8 +197,8 @@ class Partner(models.Model):
                 values['type'] = None
         return values
 
-    name = fields.Char(index=True, default_export_compatible=True)
-    display_name = fields.Char(compute='_compute_display_name', recursive=True, store=True, index=True)
+    name = fields.Char(index=True, default_export_compatible=True, obfuscate=True)
+    display_name = fields.Char(compute='_compute_display_name', recursive=True, store=True, index=True, obfuscate=True)
     translated_display_name = fields.Char(compute='_compute_translated_display_name')
     date = fields.Date(index=True)
     title = fields.Many2one('res.partner.title')
@@ -221,13 +221,13 @@ class Partner(models.Model):
         precompute=True,  # avoid queries post-create
         readonly=False, store=True,
         help='The internal user in charge of this contact.')
-    vat = fields.Char(string='Tax ID', index=True, help="The Tax Identification Number. Values here will be validated based on the country format. You can use '/' to indicate that the partner is not subject to tax.")
+    vat = fields.Char(string='Tax ID', index=True, obfuscate=True, help="The Tax Identification Number. Values here will be validated based on the country format. You can use '/' to indicate that the partner is not subject to tax.")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
     same_company_registry_partner_id = fields.Many2one('res.partner', string='Partner with same Company Registry', compute='_compute_same_vat_partner_id', store=False)
     company_registry = fields.Char(string="Company ID", compute='_compute_company_registry', store=True, readonly=False,
        help="The registry number of the company. Use it if it is different from the Tax ID. It must be unique across all partners of a same country")
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
-    website = fields.Char('Website Link')
+    website = fields.Char('Website Link', obfuscate=True)
     comment = fields.Html(string='Notes')
 
     category_id = fields.Many2many('res.partner.category', column1='partner_id',
@@ -249,21 +249,21 @@ class Partner(models.Model):
              "- Private: Private addresses are only visible by authorized users and contain sensitive data (employee home addresses, ...).\n"
              "- Other: Other address for the company (e.g. subsidiary, ...)")
     # address fields
-    street = fields.Char()
-    street2 = fields.Char()
-    zip = fields.Char(change_default=True)
-    city = fields.Char()
+    street = fields.Char(obfuscate=True)
+    street2 = fields.Char(obfuscate=True)
+    zip = fields.Char(change_default=True, obfuscate=True)
+    city = fields.Char(obfuscate=True)
     state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]")
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
     country_code = fields.Char(related='country_id.code', string="Country Code")
     partner_latitude = fields.Float(string='Geo Latitude', digits=(10, 7))
     partner_longitude = fields.Float(string='Geo Longitude', digits=(10, 7))
-    email = fields.Char()
+    email = fields.Char(obfuscate=True)
     email_formatted = fields.Char(
         'Formatted Email', compute='_compute_email_formatted',
         help='Format email address "Name <email@domain>"')
-    phone = fields.Char(unaccent=False)
-    mobile = fields.Char(unaccent=False)
+    phone = fields.Char(unaccent=False, obfuscate=True)
+    mobile = fields.Char(unaccent=False, obfuscate=True)
     is_company = fields.Boolean(string='Is a Company', default=False,
         help="Check if the contact is a company, otherwise it is a person")
     is_public = fields.Boolean(compute='_compute_is_public')
