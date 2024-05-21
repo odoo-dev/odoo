@@ -37,18 +37,14 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         var formErrors = [];
 
         // 1) Valid Form Inputs
-        Array.from(document.querySelectorAll(".form-control")).forEach(function (formControl) {
+        this.el.querySelectorAll(".form-control").forEach(function (formControlEl) {
             // Validate current input, if not select2 field.
-            var inputs = formControl.classList.contains("o_wetrack_select2_tags")
-                ? []
-                : [formControl];
-            var invalidInputs = inputs.filter(function (input) {
-                return !input.checkValidity();
-            });
+            var isInput = !formControlEl.classList.contains("o_wetrack_select2_tags");
+            var invalidInputs = isInput && !formControlEl.checkValidity();
 
-            formControl.classList.remove("o_wetrack_input_error", "is-invalid");
-            if (invalidInputs.length) {
-                formControl.classList.add("o_wetrack_input_error", "is-invalid");
+            formControlEl.classList.remove("o_wetrack_input_error", "is-invalid");
+            if (invalidInputs) {
+                formControlEl.classList.add("o_wetrack_input_error", "is-invalid");
                 formErrors.push('invalidFormInputs');
             }
         });
@@ -62,19 +58,16 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
                 document
                     .querySelector(".o_wetrack_contact_information")
                     .classList.add("o_wetrack_no_contact_mean_error");
-                document.querySelector(".o_wetrack_contact_mean").classList.add("is-invalid");
+                document.querySelectorAll(".o_wetrack_contact_mean")
+                    .forEach((el) => el.classList.add("is-invalid"));
                 formErrors.push('noContactMean');
             } else {
                 document
                     .querySelector(".o_wetrack_contact_information")
                     .classList.remove("o_wetrack_no_contact_mean_error");
-                Array.from(document
-                    .querySelectorAll(".o_wetrack_contact_mean"))
-                    .forEach(function (el) {
-                        if (!el.classList.contains('o_wetrack_input_error')) {
-                            el.classList.remove("is-invalid");
-                        }
-                    });
+                document
+                    .querySelectorAll(".o_wetrack_contact_mean:not(.o_wetrack_input_error)")
+                    .forEach((el) => el.classList.remove("is-invalid"));
             }
         }
 
@@ -96,7 +89,7 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
             .classList.toggle("d-none", !errors.length);
 
         var errorMessages = [];
-        var errorElement = document.querySelector(".o_wetrack_proposal_error_message");
+        var errorEl = document.querySelector(".o_wetrack_proposal_error_message");
 
         if (errors.includes('invalidFormInputs')) {
             errorMessages.push(_t('Please fill out the form correctly.'));
@@ -110,8 +103,8 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
             errorMessages.push(_t('You cannot access this page.'));
         }
 
-        errorElement.textContent = errorMessages.join(" ");
-        errorElement.dispatchEvent(new Event("change"));
+        errorEl.textContent = errorMessages.join(" ");
+        errorEl.dispatchEvent(new Event("change"));
     },
 
     //--------------------------------------------------------------------------
@@ -128,16 +121,18 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
      */
     _onAdvancedContactToggle: function (ev) {
         this.useAdvancedContact = !this.useAdvancedContact;
-        var contactName = document.querySelector(".o_wetrack_contact_name_input");
-        var advancedInformation = document.querySelector(".o_wetrack_contact_information");
+        var contactNameEl = this.el.querySelector(".o_wetrack_contact_name_input");
+        var advancedInformation = this.el.querySelector(".o_wetrack_contact_information");
 
         if (this.useAdvancedContact) {
             advancedInformation.classList.remove("d-none");
-            contactName.setAttribute("required", "True");
+            contactNameEl.setAttribute("required", true);
         } else {
-            document.querySelector(".o_wetrack_contact_email_input").value = "";
+            const contactEmailEl = this.el.querySelector(".o_wetrack_contact_email_input");
+            contactEmailEl.value = "";
+            contactEmailEl.dispatchEvent(new Event("change"));
             advancedInformation.classList.add("d-none");
-            contactName.removeAttribute("required");
+            contactNameEl.removeAttribute("required");
         }
     },
 
@@ -150,11 +145,11 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
      */
     _onPartnerNameInput: function (ev) {
         var partnerNameText = ev.currentTarget.value;
-        var contactNameInput = document.querySelector(".o_wetrack_contact_name_input");
-        var contactNameText = contactNameInput.value;
+        var contactNameInputEl = this.el.querySelector(".o_wetrack_contact_name_input");
+        var contactNameText = contactNameInputEl.value;
         if (partnerNameText.startsWith(contactNameText)) {
-            contactNameInput.value = partnerNameText;
-            contactNameInput.dispatchEvent(new Event("change"));
+            contactNameInputEl.value = partnerNameText;
+            contactNameInputEl.dispatchEvent(new Event("change"));
         }
     },
 
@@ -176,9 +171,9 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         ev.stopPropagation();
 
         // Prevent further clicking
-        var submitButton = this.el.querySelector(".o_wetrack_proposal_submit_button");
-        submitButton.classList.add("disabled");
-        submitButton.setAttribute("disabled", "disabled");
+        var submitButtonEl = this.el.querySelector(".o_wetrack_proposal_submit_button");
+        submitButtonEl.classList.add("disabled");
+        submitButtonEl.setAttribute("disabled", "disabled");
 
         // Submission of the form if no errors remain
         if (this._isFormValid()) {
@@ -197,7 +192,7 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
                 const offsetTop = (document.querySelector("#wrapwrap").scrollTop || 0) + this.el.offsetTop;
                 const floatingMenuHeight =
                     (document.querySelector(".o_header_standard").getBoundingClientRect().height || 0) +
-                    (document.querySelector("#oe_main_menu_navbar")?.getBoundingClientRect()?.height || 0);
+                    (document.querySelector("#oe_main_menu_navbar").getBoundingClientRect().height || 0);
                 this.el.outerHTML = renderToElement("event_track_proposal_success").outerHTML;
                 document.querySelector("#wrapwrap").style.scrollTop = offsetTop - floatingMenuHeight;
             } else if (jsonResponse.error) {
@@ -206,8 +201,8 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         }
 
         // Restore button
-        submitButton.removeAttribute("disabled");
-        submitButton.classList.remove("disabled");
+        submitButtonEl.removeAttribute("disabled");
+        submitButtonEl.classList.remove("disabled");
     },
 });
 

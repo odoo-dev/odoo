@@ -17,9 +17,9 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
      */
     start: function () {
         this._super.apply(this, arguments).then(() => {
-            const popover = this.el.closest("[data-bs-toggle='popover']");
-            if (popover) {
-                Popover.getOrCreateInstance(popover);
+            const popoverEl = this.el.closest("[data-bs-toggle='popover']");
+            if (popoverEl) {
+                Popover.getOrCreateInstance(popoverEl);
             }
 
             const agendas = Array.from(this.target.getElementsByClassName('o_we_online_agenda'));
@@ -80,7 +80,7 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
     _onEventTrackSearchInput: function (ev) {
         ev.preventDefault();
         const text = ev.currentTarget.value;
-        const tracks = document.querySelectorAll(".event_track");
+        const trackEls = document.querySelectorAll(".event_track");
 
         //check if the user is performing a search; i.e., text is not empty
         if (text) {
@@ -88,21 +88,21 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
                 //when filtering elements only check the text content
                 return element.textContent.toLowerCase().includes(text.toLowerCase());
             }
-            const filteredTracks = Array.from(tracks).filter((track, index) => filterTracks(index, track));
+            const filteredTrackEls = [...trackEls].filter((trackEl, index) => filterTracks(index, trackEl));
             document.getElementById("search_summary").classList.remove("invisible");
-            document.getElementById("search_number").textContent = filteredTracks.length;
+            document.getElementById("search_number").textContent = filteredTrackEls.length;
 
-            tracks.forEach((track) => {
-                if (filterTracks(null, track)) {
-                    track.classList.remove("invisible");
+            trackEls.forEach((trackEl) => {
+                if (filterTracks(null, trackEl)) {
+                    trackEl.classList.remove("invisible");
                 } else {
-                    track.classList.add("invisible");
+                    trackEl.classList.add("invisible");
                 }
             });
         } else {
             //if no search is being performed; hide the result count text
             document.getElementById("search_summary").classList.add("invisible");
-            tracks.forEach((track) => track.classList.remove("invisible"));
+            trackEls.forEach((trackEl) => trackEl.classList.remove("invisible"));
         }
     },
 });

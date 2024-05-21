@@ -5,6 +5,7 @@ import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { renderToElement } from "@web/core/utils/render";
+import { getElementData } from '@web/core/utils/ui';
 
 /**
  * This widget is responsible of displaying quiz questions and propositions. Submitting the quiz will fetch the
@@ -113,11 +114,11 @@ var Quiz = publicWidget.Widget.extend({
      * Decorate the answers according to state
      */
     _enableAnswers: function () {
-        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (question) {
-            question.classList.remove("completed-disabled");
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
+            questionEl.classList.remove("completed-disabled");
         });
-        this.el.querySelectorAll("input[type=radio]").forEach(function (input) {
-            input.disabled = false;
+        this.el.querySelectorAll("input[type=radio]").forEach(function (inputEl) {
+            inputEl.disabled = false;
         });
     },
 
@@ -127,7 +128,7 @@ var Quiz = publicWidget.Widget.extend({
      * @private
      */
     _getQuestionsIds: function () {
-        return Array.from(this.el.querySelectorAll(".o_quiz_js_quiz_question")).map(function (question) {
+        return [...this.el.querySelectorAll(".o_quiz_js_quiz_question")].map(function (question) {
             return question.dataset.questionId;
         });
     },
@@ -138,7 +139,7 @@ var Quiz = publicWidget.Widget.extend({
      * @private
      */
     _getQuizAnswers: function () {
-        return Array.from(this.el.querySelectorAll("input[type=radio]:checked")).map((input) => parseInt(input.value));
+        return [...this.el.querySelectorAll("input[type=radio]:checked")].map((input) => parseInt(input.value));
     },
 
     /**
@@ -149,27 +150,27 @@ var Quiz = publicWidget.Widget.extend({
      */
     _renderAnswersHighlightingAndComments: function () {
         var self = this;
-        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (question) {
-            const questionId = question.dataset.questionId;
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
+            const questionId = questionEl.dataset.questionId;
             const answer = self.quiz.answers[questionId];
-            question.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answer) {
-                answer.querySelector("i.fa").classList.add("d-none");
-                if (answer.querySelector("input[type=radio]").classList.contains("checked")) {
+            questionEl.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answerEl) {
+                answerEl.querySelector("i.fa").classList.add("d-none");
+                if (answerEl.querySelector("input[type=radio]").checked) {
                     if (answer.is_correct) {
-                        answer.querySelector("i.fa-check-circle").classList.remove("d-none");
+                        answerEl.querySelector("i.fa-check-circle").classList.remove("d-none");
                     } else {
-                        answer.querySelector("label input").checked = false;
-                        answer.querySelector("i.fa-times-circle").classList.remove("d-none");
+                        answerEl.querySelector("label input").checked = false;
+                        answerEl.querySelector("i.fa-times-circle").classList.remove("d-none");
                     }
                     if (answer.awarded_points > 0) {
-                        answer.append(renderToElement("quiz.badge", { answer: answer }));
+                        answerEl.append(renderToElement("quiz.badge", { answer: answer }));
                     }
                 } else {
-                    answer.querySelector("i.fa-circle").classList.remove("d-none");
+                    answerEl.querySelector("i.fa-circle").classList.remove("d-none");
                 }
             });
-            const list = question.querySelector(".list-group");
-            list.append(renderToElement("quiz.comment", { answer: answer }));
+            const listEl = questionEl.querySelector(".list-group");
+            listEl.append(renderToElement("quiz.comment", { answer: answer }));
         });
     },
 
@@ -178,29 +179,24 @@ var Quiz = publicWidget.Widget.extend({
         * Update validation box (karma, buttons) according to widget state
         */
     _renderValidationInfo: function () {
-        const validationElem = this.el.querySelector(".o_quiz_js_quiz_validation");
-        validationElem.childNodes.forEach((child) => child.remove());
-        validationElem.append(renderToElement("quiz.validation", { widget: this }));
+        const validationEl = this.el.querySelector(".o_quiz_js_quiz_validation");
+        validationEl.childNodes.forEach((child) => child.remove());
+        validationEl.append(renderToElement("quiz.validation", { widget: this }));
     },
 
     /**
      * Remove the answer decorators
      */
     _resetQuiz: function () {
-        Array.from(this.el.querySelectorAll(".o_quiz_js_quiz_question")).forEach(function (question) {
-            question.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answer) {
-                answer.querySelector("i.fa").classList.add("d-none");
-                answer.querySelector("i.fa-circle").classList.remove("d-none");
-                const badge = answer.querySelector("span.badge");
-                if (badge) {
-                    badge.parentNode.removeChild(badge);
-                }
-                answer.querySelector("input[type=radio]").checked = false;
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
+            questionEl.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answerEl) {
+                answerEl.querySelectorAll("i.fa").forEach(el => el.classList.add("d-none"));
+                answerEl.querySelector("i.fa-circle").classList.remove("d-none");
+                answerEl.querySelector("span.badge")?.remove();
+                answerEl.querySelector("input[type=radio]").checked = false;
             });
-            const info = question.querySelector(".o_quiz_quiz_answer_info");
-            if (info) {
-                info.parentNode.removeChild(info);
-            }
+            const infoEl = questionEl.querySelector(".o_quiz_quiz_answer_info");
+            infoEl?.remove();
         });
         this.track.completed = false;
         this._enableAnswers();
@@ -217,8 +213,8 @@ var Quiz = publicWidget.Widget.extend({
         var self = this;
 
         return rpc('/event_track/quiz/submit', {
-            event_id: parseInt(self.track.eventId),
-            track_id: parseInt(self.track.id),
+            event_id: self.track.eventId,
+            track_id: self.track.id,
             answer_ids: this._getQuizAnswers(),
         }).then(function (data) {
             if (data.error) {
@@ -263,8 +259,8 @@ var Quiz = publicWidget.Widget.extend({
      */
     _onClickReset: function () {
         rpc('/event_track/quiz/reset', {
-            event_id: parseInt(this.track.eventId),
-            track_id: parseInt(this.track.id)
+            event_id: this.track.eventId,
+            track_id: this.track.id
         }).then(this._resetQuiz.bind(this));
     },
 
@@ -286,7 +282,7 @@ publicWidget.registry.Quiz = publicWidget.Widget.extend({
         this.quizWidgets = [];
         var defs = [this._super.apply(this, arguments)];
         this.el.querySelectorAll(".o_quiz_js_quiz").forEach((el) => {
-        const data = {...el.dataset};
+        const data = getElementData(el);
         data.quizData = {
             questions: self._extractQuestionsAndAnswers(),
             sessionAnswers: data.sessionAnswers || [],

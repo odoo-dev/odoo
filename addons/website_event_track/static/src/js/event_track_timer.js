@@ -23,7 +23,7 @@ publicWidget.registry.websiteEventTrackTimer = publicWidget.Widget.extend({
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
-            const timeToLive = this.el.dataset["time-to-live"];
+            const timeToLive = this.el.dataset.timeToLive;
             let deadline = DateTime.now().plus({ seconds: timeToLive });
             let remainingMs = deadline.diff(DateTime.now()).as("milliseconds");
             if (remainingMs > 0) {

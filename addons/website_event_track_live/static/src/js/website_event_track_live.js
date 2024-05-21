@@ -58,7 +58,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     _onReplay: function () {
         this.youtubePlayer.seekTo(0);
         this.youtubePlayer.playVideo();
-        document.querySelector(".owevent_track_suggestion_loading").remove();
+        this.el.querySelector(".owevent_track_suggestion_loading").remove();
         if (this.outro) {
             delete this.outro;
         }
@@ -72,9 +72,9 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
         var self = this;
 
         const youtubeId = self.el.dataset.youtubeVideoId;
-        const youtubeElement = document.createElement("script");
-        youtubeElement.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(youtubeElement);
+        const youtubeEl = document.createElement("script");
+        youtubeEl.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(youtubeEl);
 
         window.onYouTubeIframeAPIReady = function () {
             self.youtubePlayer = new YT.Player('o_wevent_youtube_iframe_container', {

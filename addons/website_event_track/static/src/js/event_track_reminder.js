@@ -33,16 +33,16 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
         ev.stopPropagation();
         ev.preventDefault();
         var self = this;
-        const trackLink = ev.currentTarget.querySelector("i");
+        const trackLinkEl = ev.currentTarget.querySelector("i");
 
         if (this.reminderOn === undefined) {
-            this.reminderOn = trackLink.dataset.reminderOn;
+            this.reminderOn = trackLinkEl.dataset.reminderOn;
         }
 
         var reminderOnValue = !this.reminderOn;
 
         rpc('/event/track/toggle_reminder', {
-            track_id: parseInt(trackLink.dataset.trackId),
+            track_id: parseInt(trackLinkEl.dataset.trackId),
             set_reminder_on: reminderOnValue,
         }).then(function (result) {
             if (result.error && result.error === 'ignored') {
@@ -52,8 +52,6 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                 });
             } else {
                 self.reminderOn = reminderOnValue;
-                var reminderText = self.reminderOn ? _t('Favorite On') : _t('Set Favorite');
-                self.el.title = reminderText;
                 self._updateDisplay();
                 var message = self.reminderOn ? _t('Talk added to your Favorites') : _t('Talk removed from your Favorites');
                 self.notification.add(message, {
@@ -74,15 +72,15 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
     },
 
     _updateDisplay: function () {
-        const trackLink = this.el.querySelector("i");
+        const trackLinkEl = this.el.querySelector("i");
         if (this.reminderOn) {
-            trackLink.classList.add("fa-bell");
-            trackLink.classList.remove("fa-bell-o");
-            trackLink.setAttribute("title", _t("Favorite On"));
+            trackLinkEl.classList.add("fa-bell");
+            trackLinkEl.classList.remove("fa-bell-o");
+            trackLinkEl.setAttribute("title", _t("Favorite On"));
         } else {
-            trackLink.classList.add("fa-bell-o");
-            trackLink.classList.remove("fa-bell");
-            trackLink.setAttribute("title", _t("Set Favorite"));
+            trackLinkEl.classList.add("fa-bell-o");
+            trackLinkEl.classList.remove("fa-bell");
+            trackLinkEl.setAttribute("title", _t("Set Favorite"));
         }
     },
 
