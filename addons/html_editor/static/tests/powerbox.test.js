@@ -12,7 +12,7 @@ import {
 } from "./_helpers/collaboration";
 import { setupEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
-import { insertText } from "./_helpers/user_actions";
+import { insertText, redo, undo } from "./_helpers/user_actions";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
@@ -450,6 +450,21 @@ test("should discard /command insertion from history when command is executed", 
     expect(getContent(el)).toBe(
         `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
     );
+});
+
+test("should adapt the search of the powerbox when undo/redo", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]</p>");
+    insertText(editor, "/heading1");
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1"]);
+
+    undo(editor);
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
+
+    redo(editor);
+    await animationFrame();
+    expect(commandNames(el)).toEqual(["Heading 1"]);
 });
 
 test("should open the Powerbox on type `/` in DIV", async () => {
