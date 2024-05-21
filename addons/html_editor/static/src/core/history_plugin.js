@@ -94,6 +94,7 @@ export class HistoryPlugin extends Plugin {
         shortcuts: [
             { hotkey: "control+z", command: "HISTORY_UNDO" },
             { hotkey: "control+y", command: "HISTORY_REDO" },
+            { hotkey: "control+shift+z", command: "HISTORY_REDO" },
         ],
     });
 

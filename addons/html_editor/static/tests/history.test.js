@@ -4,8 +4,8 @@ import { addStep, deleteBackward, insertText, redo, undo } from "./_helpers/user
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { getContent, setSelection } from "./_helpers/selection";
-import { pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
-import { animationFrame, tick } from "@odoo/hoot-mock";
+import { pointerDown, pointerUp, press, queryOne } from "@odoo/hoot-dom";
+import { animationFrame, mockUserAgent, tick } from "@odoo/hoot-mock";
 
 describe("undo", () => {
     test("should undo a backspace", async () => {
@@ -347,5 +347,38 @@ describe("makePreviewableOperation", () => {
         expect("#first").toHaveCount(0);
         expect("#second").toHaveCount(1);
         expect(history.steps.length).toBe(numberOfSteps + 1);
+    });
+});
+
+describe("shortcut", () => {
+    test("undo/redo with shortcut", async () => {
+        const { editor, el } = await setupEditor(`<p>[]</p>`);
+
+        insertText(editor, "abc");
+        press(["ctrl", "z"]);
+        press(["cmd", "z"]);
+        expect(getContent(el)).toBe("<p>ab[]</p>");
+
+        press(["ctrl", "y"]);
+        expect(getContent(el)).toBe("<p>abc[]</p>");
+
+        press(["ctrl", "shift", "z"]);
+        expect(getContent(el)).toBe("<p>abc[]</p>");
+    });
+
+    test("undo/redo with shortcut on macOS", async () => {
+        mockUserAgent("mac");
+        const { editor, el } = await setupEditor(`<p>[]</p>`);
+
+        insertText(editor, "abc");
+        press(["cmd", "z"]);
+        press(["cmd", "z"]);
+        expect(getContent(el)).toBe("<p>a[]</p>");
+
+        press(["cmd", "y"]);
+        expect(getContent(el)).toBe("<p>ab[]</p>");
+
+        press(["cmd", "shift", "z"]);
+        expect(getContent(el)).toBe("<p>abc[]</p>");
     });
 });
