@@ -34,6 +34,8 @@ export class SearchPowerboxPlugin extends Plugin {
         switch (command) {
             case "DELETE_BACKWARD":
             case "DELETE_FORWARD":
+            case "HISTORY_UNDO":
+            case "HISTORY_REDO":
                 this.update();
                 break;
         }
