@@ -10,7 +10,7 @@ function expectContentToBe(el, html) {
     expect(getContent(el)).toBe(unformat(html));
 }
 
-test("can add a table using the powerbox and keyboard", async () => {
+test.tags("desktop")("can add a table using the powerbox and keyboard", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>");
     expect(".o-we-powerbox").toHaveCount(0);
     expectContentToBe(el, `<p>a[]</p>`);
@@ -60,7 +60,7 @@ test("can add a table using the powerbox and keyboard", async () => {
     );
 });
 
-test("can close table picker with escape", async () => {
+test.tags("desktop")("can close table picker with escape", async () => {
     const { el, editor } = await setupEditor("<p>a[]</p>");
     insertText(editor, "/");
     await waitFor(".o-we-powerbox");
@@ -76,32 +76,35 @@ test("can close table picker with escape", async () => {
     expect(".o-we-tablepicker").toHaveCount(0);
 });
 
-test.tags("iframe")("in iframe, can add a table using the powerbox and keyboard", async () => {
-    const { el, editor } = await setupEditor("<p>a[]</p>", {
-        props: { iframe: true },
-    });
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(getContent(el)).toBe(`<p>a[]</p>`);
-    expect(":iframe .o_table").toHaveCount(0);
+test.tags("iframe", "desktop")(
+    "in iframe, can add a table using the powerbox and keyboard",
+    async () => {
+        const { el, editor } = await setupEditor("<p>a[]</p>", {
+            props: { iframe: true },
+        });
+        expect(".o-we-powerbox").toHaveCount(0);
+        expect(getContent(el)).toBe(`<p>a[]</p>`);
+        expect(":iframe .o_table").toHaveCount(0);
 
-    // open powerbox
-    insertText(editor, "/");
-    await waitFor(".o-we-powerbox");
-    expect(".o-we-tablepicker").toHaveCount(0);
+        // open powerbox
+        insertText(editor, "/");
+        await waitFor(".o-we-powerbox");
+        expect(".o-we-tablepicker").toHaveCount(0);
 
-    // filter to get table command in first position
-    insertText(editor, "table");
-    await animationFrame();
+        // filter to get table command in first position
+        insertText(editor, "table");
+        await animationFrame();
 
-    // press enter to open tablepicker
-    press("Enter");
-    await waitFor(".o-we-tablepicker");
-    expect(".o-we-powerbox").toHaveCount(0);
+        // press enter to open tablepicker
+        press("Enter");
+        await waitFor(".o-we-tablepicker");
+        expect(".o-we-powerbox").toHaveCount(0);
 
-    // press enter to validate current dimension (3x3)
-    press("Enter");
-    await animationFrame();
-    expect(".o-we-powerbox").toHaveCount(0);
-    expect(".o-we-tablepicker").toHaveCount(0);
-    expect(":iframe .o_table").toHaveCount(1);
-});
+        // press enter to validate current dimension (3x3)
+        press("Enter");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(0);
+        expect(".o-we-tablepicker").toHaveCount(0);
+        expect(":iframe .o_table").toHaveCount(1);
+    }
+);

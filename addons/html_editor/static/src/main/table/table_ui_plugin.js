@@ -21,7 +21,11 @@ export class TableUIPlugin extends Plugin {
                 category: "structure",
                 fontawesome: "fa-table",
                 action(dispatch) {
-                    dispatch("OPEN_TABLE_PICKER");
+                    if (p.services.ui.isSmall) {
+                        dispatch("INSERT_TABLE", { cols: 3, rows: 3 });
+                    } else {
+                        dispatch("OPEN_TABLE_PICKER");
+                    }
                 },
             },
         ],
