@@ -1,7 +1,13 @@
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { describe, expect, test } from "@odoo/hoot";
-import { click, hover, press, queryAllTexts } from "@odoo/hoot-dom";
+import {
+    click,
+    hover,
+    manuallyDispatchProgrammaticEvent,
+    press,
+    queryAllTexts,
+} from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
     applyConcurrentActions,
@@ -564,4 +570,16 @@ test("click on a command", async () => {
 
     click(".o-we-command-name:last");
     expect(getContent(el)).toBe("<h3>ab[]</h3>");
+});
+
+test("create a new <p> with press 'Enter' then apply a powerbox command", async () => {
+    const { editor, el } = await setupEditor("<p>ab[]cd</p>");
+    // Event trigger when you press "Enter" => create a new paragraph
+    manuallyDispatchProgrammaticEvent(editor.editable, "beforeinput", {
+        inputType: "insertParagraph",
+    });
+    insertText(editor, "/head");
+    await animationFrame();
+    press("Enter");
+    expect(getContent(el)).toBe("<p>ab</p><h1>[]cd</h1>");
 });
