@@ -1688,13 +1688,24 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             ['week_type', 'dayofweek'],
             ['hour_from:min', 'hour_to:max'])
 
+        attendance_dict = {}
+        for week_type, dayofweek, hour_from, hour_to in attendances:
+            key = (week_type, dayofweek)
+            if key not in attendance_dict:
+                attendance_dict[key] = {'hour_from': hour_from, 'hour_to': hour_to}
+            else:
+                if hour_from < attendance_dict[key]['hour_from']:
+                    attendance_dict[key]['hour_from'] = hour_from
+                if hour_to > attendance_dict[key]['hour_to']:
+                    attendance_dict[key]['hour_to'] = hour_to
+
         # Must be sorted by dayofweek ASC and day_period DESC
         attendances = sorted([DummyAttendance(hour_from, hour_to, dayofweek, None, week_type) for week_type, dayofweek, hour_from, hour_to in attendances], key=lambda att: att.dayofweek)
 
         # If we can't find any attendances on the exact days of the request,
         # we default to the widest possible range that exists in the schedule.
-        default_start = min((attendance.hour_from for attendance in attendances), default=0)
-        default_end = max((attendance.hour_to for attendance in attendances), default=0)
+        default_start = min((attendance.hour_from for attendance in attendance_dict.values()), default=0)
+        default_end = max((attendance.hour_to for attendance in attendance_dict.values()), default=0)
 
         start_week_type = 0
         end_week_type = 0
@@ -1702,9 +1713,9 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             start_week_type = self.env['resource.calendar.attendance'].get_week_type(request_date_from)
             end_week_type = self.env['resource.calendar.attendance'].get_week_type(request_date_to)
 
-        hour_from = next((att.hour_from for att in attendances if int(att.dayofweek) == request_date_from.weekday() and (int(att.week_type) == start_week_type)),
+        hour_from = next((att.hour_from for att in attendance_dict.values() if int(att.dayofweek) == request_date_from.weekday() and (int(att.week_type) == start_week_type)),
                          default_start)
-        hour_to = next((att.hour_to for att in attendances if int(att.dayofweek) == request_date_to.weekday() and (int(att.week_type) == end_week_type)),
+        hour_to = next((att.hour_to for att in attendance_dict.values() if int(att.dayofweek) == request_date_to.weekday() and (int(att.week_type) == end_week_type)),
                        default_end)
 
         return (hour_from, hour_to)
