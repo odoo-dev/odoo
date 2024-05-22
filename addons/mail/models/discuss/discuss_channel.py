@@ -633,6 +633,26 @@ class Channel(models.Model):
         self._set_last_seen_message(message)
         return super()._message_post_after_hook(message, msg_vals)
 
+    def _process_attachments_for_post(self, attachments, attachment_ids, message_values):
+        return_values = super()._process_attachments_for_post(attachments, attachment_ids, message_values)
+
+        if attachments:
+            voice_metadata_vals = []
+            for attachment, m2m_command in zip(attachments, return_values.get('attachment_ids', [])):
+                if len(attachment) == 3:
+                    _, _, info = attachment
+                    voice = info and info.get('voice')
+                    if voice:
+                        # Extract attachment_id from the (4, attachment_id) M2M command
+                        attachment_id = m2m_command[1] if m2m_command[0] == 4 else None
+                        if attachment_id:
+                            voice_metadata_vals.append({
+                                'attachment_id': attachment_id,
+                            })
+            if voice_metadata_vals:
+                self.env['discuss.voice.metadata'].create(voice_metadata_vals)
+        return return_values
+
     def _check_can_update_message_content(self, message):
         """ We don't call super in this override as we want to ignore the
         mail.thread behavior completely """
