@@ -292,7 +292,7 @@ export class SplitPlugin extends Plugin {
     onBeforeInput(e) {
         if (e.inputType === "insertParagraph") {
             e.preventDefault();
-            this.splitBlock();
+            this._splitBlock();
         }
     }
 }
