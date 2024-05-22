@@ -1,6 +1,6 @@
 import { test } from "@odoo/hoot";
 import { testEditor } from "../_helpers/editor";
-import { insertText } from "../_helpers/user_actions";
+import { deleteBackward, insertText } from "../_helpers/user_actions";
 
 test("should parse correctly a span inside a Link", async () => {
     await testEditor({
@@ -103,6 +103,57 @@ test("should add a character in the link after a br tag", async () => {
             insertText(editor, "c");
         },
         contentAfter: '<p>a<a href="exist">b<br>c[]</a>d</p>',
+    });
+});
+
+test.todo("should remove an empty link on save", async () => {
+    await testEditor({
+        contentBefore: '<p>a<a href="exist">b[]</a>c</p>',
+        contentBeforeEdit:
+            '<p>a\ufeff<a href="exist" class="o_link_in_selection">\ufeffb[]\ufeff</a>\ufeffc</p>',
+        stepFunction: deleteBackward,
+        contentAfterEdit:
+            '<p>a\ufeff<a href="exist" class="o_link_in_selection">\ufeff[]\ufeff</a>\ufeffc</p>',
+        contentAfter: "<p>a[]c</p>",
+    });
+    await testEditor({
+        contentBefore: '<p>a<a href="exist"></a>b</p>',
+        contentBeforeEdit: '<p>a\ufeff<a href="exist">\ufeff</a>\ufeffb</p>',
+        contentAfterEdit: '<p>a\ufeff<a href="exist">\ufeff</a>\ufeffb</p>',
+        contentAfter: "<p>ab</p>",
+    });
+});
+
+test("should not remove a link containing an image on save", async () => {
+    await testEditor({
+        contentBefore: '<p>a<a href="exist"><img></a>b</p>',
+        contentBeforeEdit: '<p>a<a href="exist"><img></a>b</p>',
+        contentAfterEdit: '<p>a<a href="exist"><img></a>b</p>',
+        contentAfter: '<p>a<a href="exist"><img></a>b</p>',
+    });
+});
+
+test("should not remove a document link on save", async () => {
+    await testEditor({
+        contentBefore:
+            '<p>a<a href="exist" class="o_image" title="file.js.map" data-mimetype="text/plain"></a>b</p>',
+        contentBeforeEdit:
+            '<p>a<a href="exist" class="o_image" title="file.js.map" data-mimetype="text/plain" contenteditable="false"></a>b</p>',
+        contentAfterEdit:
+            '<p>a<a href="exist" class="o_image" title="file.js.map" data-mimetype="text/plain" contenteditable="false"></a>b</p>',
+        contentAfter:
+            '<p>a<a href="exist" class="o_image" title="file.js.map" data-mimetype="text/plain"></a>b</p>',
+    });
+});
+
+test.todo("should not remove a link containing a pictogram on save", async () => {
+    await testEditor({
+        contentBefore: '<p>a<a href="exist"><span class="fa fa-star"></span></a>b</p>',
+        contentBeforeEdit:
+            '<p>a\ufeff<a href="exist">\ufeff<span class="fa fa-star" contenteditable="false">\u200b</span>\ufeff</a>\ufeffb</p>',
+        contentAfterEdit:
+            '<p>a\ufeff<a href="exist">\ufeff<span class="fa fa-star" contenteditable="false">\u200b</span>\ufeff</a>\ufeffb</p>',
+        contentAfter: '<p>a<a href="exist"><span class="fa fa-star"></span></a>b</p>',
     });
 });
 

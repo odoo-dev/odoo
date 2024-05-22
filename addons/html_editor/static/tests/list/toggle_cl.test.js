@@ -121,7 +121,7 @@ describe("Range collapsed", () => {
                             </ul>
                         </li>
                     </ul>`), */
-                contentAfter: unformat(`
+                contentAfterEdit: unformat(`
                     <ul class="o_checklist">
                         <li class="o_checked">abc</li>
                         <li class="oe-nested">

@@ -114,7 +114,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ol><li><p>[]<br></p></li></ol>",
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><br>[]</p>",
                 });
             });
 
@@ -123,7 +123,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ol><li><p><b>[]<br></b></p></li></ol>",
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><b>[]<br></b></p>",
                 });
             });
         });
@@ -289,7 +289,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ul><li><p>[]<br></p></li></ul>",
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><br>[]</p>",
                 });
             });
 
@@ -298,7 +298,7 @@ describe("Selection collapsed", () => {
                 await testEditor({
                     contentBefore: "<ul><li><p><b>[]<br></b></p></li></ul>",
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><b>[]<br></b></p>",
                 });
             });
         });
@@ -508,7 +508,7 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p>[]<br></p></li></ul>',
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><br>[]</p>",
                 });
             });
 
@@ -518,7 +518,7 @@ describe("Selection collapsed", () => {
                     contentBefore:
                         '<ul class="o_checklist"><li class="o_checked"><p><b>[]<br></b></p></li></ul>',
                     stepFunction: splitBlock,
-                    contentAfter: "<p>[]<br></p>",
+                    contentAfter: "<p><b>[]<br></b></p>",
                 });
             });
         });

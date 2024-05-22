@@ -333,31 +333,82 @@ describe("Selection collapsed", () => {
         // skipping these tests cause with the link isolation the cursor can be put
         // inside/outside the link so the user can choose where to insert the line break
         // see `anchor.nodeName === "A" && brEls.includes(anchor.firstChild)` in line_break_plugin.js
-        test.skip("should insert line breaks outside the edges of an anchor", async () => {
-            const insertLinebreak = (editor) => {
-                editor.dispatch("INSERT_LINEBREAK");
-            };
+        test.todo(
+            "should insert line breaks outside the edges of an anchor in unbreakable",
+            async () => {
+                const insertLinebreak = (editor) => {
+                    editor.dispatch("INSERT_LINEBREAK");
+                };
+                await testEditor({
+                    contentBefore: "<div>ab<a>[]cd</a></div>",
+                    stepFunction: insertLinebreak,
+                    contentAfter: "<div>ab<br><a>[]cd</a></div>",
+                });
+                await testEditor({
+                    contentBefore: "<div><a>a[]b</a></div>",
+                    stepFunction: insertLinebreak,
+                    contentAfter: "<div><a>a<br>[]b</a></div>",
+                });
+                await testEditor({
+                    contentBefore: "<div><a>ab[]</a></div>",
+                    stepFunction: insertLinebreak,
+                    contentAfter: "<div><a>ab</a><br><br>[]</div>",
+                });
+                await testEditor({
+                    contentBefore: "<div><a>ab[]</a>cd</div>",
+                    stepFunction: insertLinebreak,
+                    contentAfter: "<div><a>ab</a><br>[]cd</div>",
+                });
+            }
+        );
+
+        test.todo(
+            "should insert a paragraph break outside the starting edge of an anchor",
+            async () => {
+                await testEditor({
+                    contentBefore: "<p><a>[]ab</a></p>",
+                    stepFunction: (editor) => editor.document.execCommand("insertParagraph"),
+                    contentAfterEdit:
+                        '<p><br></p><p>\ufeff<a class="o_link_in_selection">[]\ufeffab\ufeff</a>\ufeff</p>',
+                    contentAfter: "<p><br></p><p><a>[]ab</a></p>",
+                });
+                await testEditor({
+                    contentBefore: "<p>ab<a>[]cd</a></p>",
+                    stepFunction: (editor) => editor.document.execCommand("insertParagraph"),
+                    contentAfterEdit:
+                        '<p>ab</p><p>\ufeff<a class="o_link_in_selection">[]\ufeffcd\ufeff</a>\ufeff</p>',
+                    contentAfter: "<p>ab</p><p><a>[]cd</a></p>",
+                });
+            }
+        );
+        test.todo("should insert a paragraph break in the middle of an anchor", async () => {
             await testEditor({
-                contentBefore: "<div>ab<a>[]cd</a></div>",
-                stepFunction: insertLinebreak,
-                contentAfter: "<div>ab<br><a>[]cd</a></div>",
-            });
-            await testEditor({
-                contentBefore: "<div><a>a[]b</a></div>",
-                stepFunction: insertLinebreak,
-                contentAfter: "<div><a>a<br>[]b</a></div>",
-            });
-            await testEditor({
-                contentBefore: "<div><a>ab[]</a></div>",
-                stepFunction: insertLinebreak,
-                contentAfter: "<div><a>ab</a><br>[]<br></div>",
-            });
-            await testEditor({
-                contentBefore: "<div><a>ab[]</a>cd</div>",
-                stepFunction: insertLinebreak,
-                contentAfter: "<div><a>ab</a><br>[]cd</div>",
+                contentBefore: "<p><a>a[]b</a></p>",
+                stepFunction: (editor) => editor.document.execCommand("insertParagraph"),
+                contentAfterEdit:
+                    '<p>\ufeff<a class="">\ufeffa\ufeff</a>\ufeff</p><p>\ufeff<a class="o_link_in_selection">\ufeff[]b\ufeff</a>\ufeff</p>',
+                contentAfter: "<p><a>a</a></p><p><a>[]b</a></p>",
             });
         });
+        test.todo(
+            "should insert a paragraph break outside the ending edge of an anchor",
+            async () => {
+                await testEditor({
+                    contentBefore: "<p><a>ab[]</a></p>",
+                    stepFunction: (editor) => editor.document.execCommand("insertParagraph"),
+                    contentAfterEdit:
+                        '<p>\ufeff<a class="">\ufeffab\ufeff</a>\ufeff</p><p placeholder="Type &quot;/&quot; for commands" class="oe-hint oe-command-temporary-hint">[]<br></p>',
+                    contentAfter: "<p><a>ab</a></p><p>[]<br></p>",
+                });
+                await testEditor({
+                    contentBefore: "<p><a>ab[]</a>cd</p>",
+                    stepFunction: (editor) => editor.document.execCommand("insertParagraph"),
+                    contentAfterEdit:
+                        '<p>\ufeff<a class="">\ufeffab\ufeff</a>\ufeff</p><p>[]cd</p>',
+                    contentAfter: "<p><a>ab</a></p><p>[]cd</p>",
+                });
+            }
+        );
     });
 
     describe("With attributes", () => {

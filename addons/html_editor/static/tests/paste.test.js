@@ -1670,8 +1670,9 @@ describe("link", () => {
         });
 
         test("should replace link for new content (imgUrl) when pasting in an empty link (collapsed) (1)", async () => {
-            const { el, editor } = await setupEditor(
-                `<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>`
+            const { el, editor } = await setupEditor(`<p>xy<a href="#">[]</a>z</p>`);
+            expect(getContent(el)).toBe(
+                `<p>xy\ufeff<a href="#" class="o_link_in_selection">[]\ufeff</a>\ufeffz</p>`
             );
             pasteText(editor, imgUrl);
             await animationFrame();

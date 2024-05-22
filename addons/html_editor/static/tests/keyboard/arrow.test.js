@@ -29,14 +29,16 @@ test("should move past a zws (collapsed - ArrowLeft)", async () => {
         stepFunction: async (editor) => {
             press("ArrowLeft");
         },
-        contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
+        // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
         contentBefore: '<p>ab<span class="a">\u200B</span>[]cd</p>',
         stepFunction: async (editor) => {
             press("ArrowLeft");
         },
-        contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
+        // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
         contentBefore:
@@ -151,8 +153,8 @@ test("should select a zws (3)", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowRight"]);
         },
-        contentAfter: '<p>ab[<span class="a">\u200B]</span>cd</p>',
-        // Final state: '<p>ab[<span class="a">\u200B</span>c]d</p>'
+        contentAfter: '<p>ab<span class="a">[\u200B]</span>cd</p>', // Normalized by the browser
+        // Final state: '<p>ab<span class="a">[\u200B</span>c]d</p>'
     });
     await testEditor({
         contentBefore: '<p>ab<span class="a">[]\u200B</span>cd</p>',
@@ -262,7 +264,7 @@ test("should select a zws backwards (ArrowRight - 2)", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowRight"]);
         },
-        contentAfter: '<p>ab<span class="a">\u200B]</span>c[d</p>',
+        contentAfter: '<p>ab<span class="a">\u200B</span>]c[d</p>', // Normalized by the browser
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
     });
     await testEditor({
@@ -270,7 +272,7 @@ test("should select a zws backwards (ArrowRight - 2)", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowRight"]);
         },
-        contentAfter: '<p>ab<span class="a">\u200B]</span>c[d</p>',
+        contentAfter: '<p>ab<span class="a">\u200B</span>]c[d</p>', // Normalized by the browser
         // Final state: '<p>ab<span class="a">\u200B</span>c[]d</p>'
     });
 });
@@ -281,23 +283,23 @@ test("should deselect a zws", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
-        // Final state: '<p>a]b<span class="a">[\u200B</span>cd</p>'
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
+        // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
         contentBefore: '<p>ab<span class="a">[\u200B</span>]cd</p>',
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
-        // Final state: '<p>a]b<span class="a">[\u200B</span>cd</p>'
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
+        // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
         contentBefore: '<p>ab[<span class="a">\u200B]</span>cd</p>',
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>ab[<span class="a">]\u200B</span>cd</p>',
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
         // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
@@ -305,7 +307,7 @@ test("should deselect a zws", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>ab[<span class="a">]\u200B</span>cd</p>',
+        contentAfter: '<p>ab[]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
         // Final state: '<p>a]b[<span class="a">\u200B</span>cd</p>'
     });
 });
@@ -316,7 +318,7 @@ test("should deselect a zws (2)", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>a[b<span class="a">]\u200B</span>cd</p>',
+        contentAfter: '<p>a[b]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
         // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
     });
     await testEditor({
@@ -324,7 +326,7 @@ test("should deselect a zws (2)", async () => {
         stepFunction: async (editor) => {
             press(["Shift", "ArrowLeft"]);
         },
-        contentAfter: '<p>a[b<span class="a">]\u200B</span>cd</p>',
+        contentAfter: '<p>a[b]<span class="a">\u200B</span>cd</p>', // Normalized by the browser
         // Final state: '<p>a[]b<span class="a">\u200B</span>cd</p>'
     });
 });
@@ -334,12 +336,13 @@ test.todo("should move into a link (ArrowRight)", async () => {
         contentBefore: '<p>ab[]<a href="#">cd</a>ef</p>',
         contentBeforeEdit:
             "<p>ab[]" +
+            "\ufeff" + // before zwnbsp
             '<a href="#">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd" + // content
-            // end zws is only there if the selection is in the link
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
@@ -360,12 +363,13 @@ test.todo("should move into a link (ArrowRight)", async () => {
         },
         contentAfterEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="o_link_in_selection">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "[]cd" + // content
-            '<span data-o-link-zws="end">\u200B</span>' + // end zws
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         contentAfter: '<p>ab<a href="#">[]cd</a>ef</p>',
     });
@@ -376,12 +380,13 @@ test.todo("should move into a link (ArrowLeft)", async () => {
         contentBefore: '<p>ab<a href="#">cd</a>[]ef</p>',
         contentBeforeEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd" + // content
-            // end zws is only there if the selection is in the link
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "[]ef</p>",
         stepFunction: async (editor) => {
             press("ArrowLeft");
@@ -401,12 +406,13 @@ test.todo("should move into a link (ArrowLeft)", async () => {
         },
         contentAfterEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="o_link_in_selection">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd[]" + // content
-            '<span data-o-link-zws="end">\u200B</span>' + // end zws
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         contentAfter: '<p>ab<a href="#">cd[]</a>ef</p>',
     });
@@ -417,39 +423,27 @@ test.todo("should move out of a link (ArrowRight)", async () => {
         contentBefore: '<p>ab<a href="#">cd[]</a>ef</p>',
         contentBeforeEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="o_link_in_selection">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd[]" + // content
-            '<span data-o-link-zws="end">\u200B</span>' + // end zws
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
-
             press("ArrowRight");
-            // Set the selection to mimick that which keydown would
-            // have set, were it not blocked when triggered
-            // programmatically.
-            const endZws = editor.editable.querySelector('a > span[data-o-link-zws="end"]');
-            setSelection(
-                {
-                    anchorNode: endZws,
-                    anchorOffset: 1,
-                    focusNode: endZws,
-                    focusOffset: 1,
-                },
-                editor.document
-            );
         },
         contentAfterEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd" + // content
-            // end zws is only there if the selection is in the link
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "[]ef</p>",
         contentAfter: '<p>ab<a href="#">cd</a>[]ef</p>',
     });
@@ -460,12 +454,13 @@ test.todo("should move out of a link (ArrowLeft)", async () => {
         contentBefore: '<p>ab<a href="#">[]cd</a>ef</p>',
         contentBeforeEdit:
             "<p>ab" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="o_link_in_selection">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "[]cd" + // content
-            '<span data-o-link-zws="end">\u200B</span>' + // end zws
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
@@ -487,12 +482,13 @@ test.todo("should move out of a link (ArrowLeft)", async () => {
         },
         contentAfterEdit:
             "<p>ab[]" +
+            "\ufeff" + // before zwnbsp
             '<a href="#" class="">' +
-            '<span data-o-link-zws="start" contenteditable="false">\u200B</span>' + // start zws
+            "\ufeff" + // start zwnbsp
             "cd" + // content
-            // end zws is only there if the selection is in the link
+            "\ufeff" + // end zwnbsp
             "</a>" +
-            '<span data-o-link-zws="after" contenteditable="false">\u200B</span>' + // after zws
+            "\ufeff" + // after zwnbsp
             "ef</p>",
         contentAfter: '<p>ab[]<a href="#">cd</a>ef</p>',
     });

@@ -121,7 +121,7 @@ describe("range collapsed", () => {
                 await insertLineBreak(editor);
                 insertText(editor, "odoo.com");
             },
-            contentAfter: '<p>a<a href="https://google.com">google.com<br>odoo.com[]</a>b</p>',
+            contentAfter: '<p>a<a href="https://google.com">google.com</a><br>odoo.com[]</p>',
         });
     });
 });
