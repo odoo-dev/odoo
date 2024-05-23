@@ -9,6 +9,7 @@ class Card extends Component {
             </div>
           </div>
         </div>`;
+    static props = { title: String, content: String };
 
     setup() {
         this.contentRef = useRef("content");

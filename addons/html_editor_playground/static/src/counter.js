@@ -5,6 +5,9 @@ export class Counter extends Component {
         <span t-on-click.stop="increment" class="badge text-bg-secondary p-2">
             Counter: <t t-esc="state.value"/>
         </span>`;
+    static props = {
+        elem: Object,
+    };
 
     state = useState({ value: parseInt(this.props.elem.dataset.count) });
 
