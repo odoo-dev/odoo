@@ -98,15 +98,15 @@ export class Playground extends Component {
         });
     }
 
-    getEditor() {
-        return new Editor({
+    getConfig() {
+        return {
             content: testHtml,
             Plugins: PluginSets[this.config.pluginSet],
             classList: this.classList,
             resources: {
                 inlineComponents: [counter, card],
             },
-        });
+        };
     }
 
     get classList() {
