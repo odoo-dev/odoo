@@ -38,17 +38,13 @@ export class MediaPlugin extends Plugin {
         ],
     });
 
-    setup() {
-        this.elementsToRemoveContentEditable = [];
-    }
-
     handleCommand(command, payload) {
         switch (command) {
             case "NORMALIZE":
                 this.normalizeMedia(payload.node);
                 break;
             case "CLEAN":
-                this.clean();
+                this.clean(payload.root);
                 break;
         }
     }
@@ -62,26 +58,23 @@ export class MediaPlugin extends Plugin {
             if (isProtected(el)) {
                 continue;
             }
-            if (!el.hasAttribute("contenteditable")) {
-                el.setAttribute("contenteditable", "false");
-                this.elementsToRemoveContentEditable.push(el);
-            }
+            el.setAttribute(
+                "contenteditable",
+                el.hasAttribute("contenteditable") ? el.getAttribute("contenteditable") : "false"
+            );
             if (isIconElement(el)) {
                 el.textContent = "\u200B";
             }
         }
     }
 
-    clean() {
-        for (const el of this.editable.querySelectorAll(MEDIA_SELECTOR)) {
-            if (this.elementsToRemoveContentEditable.includes(el)) {
-                el.removeAttribute("contenteditable");
-            }
+    clean(root) {
+        for (const el of root.querySelectorAll(MEDIA_SELECTOR)) {
+            el.removeAttribute("contenteditable");
             if (isIconElement(el)) {
                 el.textContent = "";
             }
         }
-        this.elementsToRemoveContentEditable = [];
     }
 
     onAttachmentChange() {

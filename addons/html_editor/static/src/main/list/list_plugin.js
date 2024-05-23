@@ -410,7 +410,7 @@ export class ListPlugin extends Plugin {
             return this.removeEmptyPinLI(element);
         }
         // Wrap contents in a span if P has classes.
-        this.dispatch("CLEAN_NODE", { root: element });
+        this.dispatch("CLEAN", { root: element });
         if (element.classList.length) {
             return this.convertPinLItoSpan(element);
         }
