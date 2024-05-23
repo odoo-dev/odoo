@@ -562,8 +562,7 @@ test("should place cursor after the second separator", async () => {
         contentBefore:
             '<p>[]<br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p><br></p>',
         stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowRight"),
-        contentAfter:
-            '<p><br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p>[]<br></p>',
+        contentAfter: "<p><br></p><hr>" + "<hr><p>[]<br></p>",
     });
 });
 
@@ -572,7 +571,6 @@ test("should place cursor before the first separator", async () => {
         contentBefore:
             '<p><br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p>[]<br></p>',
         stepFunction: async (editor) => simulateArrowKeyPress(editor, "ArrowLeft"),
-        contentAfter:
-            '<p>[]<br></p><hr contenteditable="false">' + '<hr contenteditable="false"><p><br></p>',
+        contentAfter: "<p>[]<br></p><hr>" + "<hr><p><br></p>",
     });
 });

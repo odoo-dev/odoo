@@ -36,13 +36,13 @@ export class ZwsPlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "CLEAN":
-                this.clean();
+                this.clean(payload.root);
                 break;
         }
     }
 
-    clean() {
-        for (const el of this.editable.querySelectorAll("[data-oe-zws-empty-inline]")) {
+    clean(root) {
+        for (const el of root.querySelectorAll("[data-oe-zws-empty-inline]")) {
             this.cleanElement(el);
         }
     }
