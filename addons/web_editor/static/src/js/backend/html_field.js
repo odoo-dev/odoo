@@ -760,7 +760,7 @@ export const htmlField = {
     },
 };
 
-registry.category("fields").add("html", htmlField, { force: true });
+// registry.category("fields").add("html", htmlField, { force: true });
 
 // Ensure all links are opened in a new tab.
 const retargetLinks = (container) => {
