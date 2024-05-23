@@ -35,11 +35,8 @@ export class HintPlugin extends Plugin {
                 this.updateHints(payload.root);
                 break;
             }
-            case "CLEAN_NODE":
-                this.clearHints(payload.root);
-                break;
             case "CLEAN":
-                this.clearHints();
+                this.clearHints(payload.root);
                 break;
         }
     }
@@ -92,7 +89,7 @@ export class HintPlugin extends Plugin {
     }
 
     clearHints(root = this.editable) {
-        for (let elem of this.selectElements(root, ".o-we-hint")) {
+        for (const elem of this.selectElements(root, ".o-we-hint")) {
             this.removeHint(elem);
         }
     }
@@ -105,12 +102,12 @@ export class HintPlugin extends Plugin {
      * @param {string} selector - The CSS selector to match elements against.
      * @returns {Generator<Element>} - elements that match the selector.
      */
-    selectElements = function *(root, selector) {
+    selectElements = function* (root, selector) {
         if (root.matches(selector)) {
             yield root;
         }
-        for (let elem of root.querySelectorAll(selector)) {
+        for (const elem of root.querySelectorAll(selector)) {
             yield elem;
         }
-    }
+    };
 }

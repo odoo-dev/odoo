@@ -17,7 +17,7 @@ export class TransientNodePlugin extends Plugin {
     handleCommand(command, payload) {
         switch (command) {
             case "CLEAN":
-                this.clearTransients(payload.node);
+                this.clearTransients(payload.root);
                 break;
         }
     }

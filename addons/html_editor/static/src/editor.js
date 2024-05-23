@@ -178,7 +178,8 @@ export class Editor {
 
     getContent() {
         const el = this.editable.cloneNode(true);
-        this.dispatch("CLEAN_NODE", { root: el });
+        this.dispatch("CLEAN", { root: el });
+        this.dispatch("MERGE_ADJACENT_NODE", { node: el });
         return el.innerHTML;
     }
 

@@ -66,7 +66,7 @@ export class TablePlugin extends Plugin {
                 this.deleteTable(payload);
                 break;
             case "CLEAN":
-                this.deselectTable();
+                this.deselectTable(payload.root);
                 break;
         }
     }
@@ -485,9 +485,9 @@ export class TablePlugin extends Plugin {
      *
      * @returns {boolean} true if a table was deselected
      */
-    deselectTable() {
+    deselectTable(root = this.editable) {
         let didDeselectTable = false;
-        for (const table of this.editable.querySelectorAll(".o_selected_table")) {
+        for (const table of root.querySelectorAll(".o_selected_table")) {
             removeClass(table, "o_selected_table");
             for (const td of table.querySelectorAll(".o_selected_td")) {
                 removeClass(td, "o_selected_td");
