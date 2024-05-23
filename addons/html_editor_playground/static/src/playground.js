@@ -90,12 +90,30 @@ export class Playground extends Component {
     setup() {
         this.state = useState({
             showWysiwyg: false,
+            showContent: false,
+            content: "",
         });
+        this.editor = null;
         this.config = useState({
             showToolbar: false,
             inIframe: false,
             pluginSet: "base",
         });
+    }
+
+    setEditor(editor) {
+        this.editor = editor;
+    }
+
+    updateContent() {
+        if (this.state.showContent && this.editor) {
+            this.state.content = this.editor.getContent();
+        }
+    }
+
+    toggleShowContent() {
+        this.state.showContent = !this.state.showContent;
+        this.updateContent();
     }
 
     getConfig() {
@@ -106,6 +124,7 @@ export class Playground extends Component {
             resources: {
                 inlineComponents: [counter, card],
             },
+            onChange: this.updateContent.bind(this),
         };
     }
 
