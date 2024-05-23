@@ -60,10 +60,10 @@ export class Editor {
     /**
      * @param { EditorConfig } config
      */
-    constructor(config) {
+    constructor(config, services) {
         this.isDestroyed = false;
         this.config = config;
-        this.services = null;
+        this.services = services;
         this.plugins = [];
         /** @type { HTMLElement } **/
         this.editable = null;

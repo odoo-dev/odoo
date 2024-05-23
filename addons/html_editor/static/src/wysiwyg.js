@@ -23,12 +23,17 @@ export class Wysiwyg extends Component {
     static template = "html_editor.Wysiwyg";
     static components = { Toolbar };
     static props = {
-        editor: Editor,
+        config: { type: Object, optional: true },
         class: { type: String, optional: true },
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
         copyCss: { type: Boolean, optional: true },
+        onLoad: { type: Function, optional: true },
+    };
+
+    static defaultProps = {
+        onLoad: () => {},
     };
 
     setup() {
@@ -38,12 +43,14 @@ export class Wysiwyg extends Component {
         const overlayRef = useRef("localOverlay");
         const contentRef = useRef("content");
         this.editor = this.props.editor;
-        Object.assign(this.editor.config, {
+        const config = {
+            ...this.props.config,
             inlineComponentInfo: { app: this.__owl__.app, env: this.env },
             getLocalOverlayContainer: () => overlayRef?.el,
             disableFloatingToolbar: this.props.toolbar,
-        });
-        this.editor.services = this.env.services;
+        };
+        this.editor = new Editor(config, this.env.services);
+        this.props.onLoad(this.editor);
 
         onMounted(() => {
             // now that component is mounted, editor is attached to el, and
