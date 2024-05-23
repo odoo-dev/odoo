@@ -1,10 +1,9 @@
+import { Wysiwyg } from "@html_editor/wysiwyg";
 import { expect, getFixture } from "@odoo/hoot";
+import { queryOne } from "@odoo/hoot-dom";
 import { Component, xml } from "@odoo/owl";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { Wysiwyg } from "@html_editor/wysiwyg";
-import { Editor } from "@html_editor/editor";
-import { getContent, setContent, getSelection } from "./selection";
-import { queryOne } from "@odoo/hoot-dom";
+import { getContent, getSelection, setContent } from "./selection";
 
 export const Direction = {
     BACKWARD: "BACKWARD",
@@ -23,31 +22,35 @@ class TestEditor extends Component {
     setup() {
         const props = this.props;
         const content = props.content;
-        const wysiwygProps = (this.wysiwygProps = Object.assign({}, this.props.wysiwygProps));
-        const editor = this.wysiwygProps.editor;
-        const oldAttach = editor.attachTo;
-        editor.attachTo = function (el) {
-            if (wysiwygProps.iframe) {
-                // el is here the body
-                var html = `<div>${props.content || ""}</div><style>${props.styleContent}</style>`;
-                el.innerHTML = html;
-                el = el.firstChild;
-            }
-            if (!el.isContentEditable) {
-                el.setAttribute("contenteditable", true); // so we can focus it if needed
-            }
-            if (props.content) {
-                const configSelection = getSelection(el, props.content);
-                if (configSelection) {
-                    el.focus();
+        this.wysiwygProps = Object.assign({}, this.props.wysiwygProps);
+        const iframe = this.props.wysiwygProps.iframe;
+        const oldOnLoad = this.wysiwygProps.onLoad;
+        this.wysiwygProps.onLoad = function (editor) {
+            const oldAttach = editor.attachTo;
+            editor.attachTo = function (el) {
+                // @todo @phoenix move it to setupMultiEditor
+                if (iframe) {
+                    // el is here the body
+                    const content = props.content || "";
+                    var html = `<div>${content}</div><style>${props.styleContent}</style>`;
+                    el.innerHTML = html;
+                    el = el.firstChild;
                 }
-                if (props.onMounted) {
-                    props.onMounted(el);
-                } else {
-                    setContent(el, content);
+                if (props.content) {
+                    el.setAttribute("contenteditable", true); // so we can focus it if needed
+                    const configSelection = getSelection(el, props.content);
+                    if (configSelection) {
+                        el.focus();
+                    }
+                    if (props.onMounted) {
+                        props.onMounted(el);
+                    } else {
+                        setContent(el, content);
+                    }
                 }
-            }
-            oldAttach.call(this, el);
+                oldAttach.call(this, el);
+            };
+            oldOnLoad.call(this, editor);
         };
     }
 }
@@ -68,15 +71,17 @@ class TestEditor extends Component {
  * @returns { Promise<{el: HTMLElement; editor: Editor; }> }
  */
 export async function setupEditor(content, options = {}) {
-    const config = options.config || {};
-    const editor = new Editor(config);
-    const props = options.props || {};
-    props.editor = editor;
+    const wysiwygProps = Object.assign({}, options.props);
+    wysiwygProps.config = options.config || {};
+    let editor;
+    wysiwygProps.onLoad = (wysiwygEditor) => {
+        editor = wysiwygEditor;
+    };
     const styleContent = options.styleContent || "";
     await mountWithCleanup(TestEditor, {
         props: {
             content,
-            wysiwygProps: props,
+            wysiwygProps,
             styleContent,
             onMounted: options.onMounted,
         },
@@ -112,7 +117,6 @@ export async function testEditor(config) {
         contentAfter,
         contentAfterEdit,
         compareFunction,
-        inIFrame,
     } = config;
     if (!compareFunction) {
         compareFunction = (content, expected, phase) => {
@@ -129,7 +133,7 @@ export async function testEditor(config) {
     // (like an autofocus feature), it would be the role of the autofocus
     // feature to trigger the HISTORY_STAGE_SELECTION.
     editor.dispatch("HISTORY_STAGE_SELECTION");
-    if (inIFrame) {
+    if (config.props?.iframe) {
         expect("iframe").toHaveCount(1);
     }
 
@@ -158,11 +162,8 @@ export async function testEditor(config) {
  * @returns { Promise<{el: HTMLElement, wysiwyg: Wysiwyg}> } result
  */
 export async function setupWysiwyg(props = {}) {
-    const editor = new Editor(props.config || {});
     const content = props.content;
     delete props.content;
-    delete props.config;
-    props.editor = editor;
     const wysiwyg = await mountWithCleanup(Wysiwyg, { props });
     const el = /** @type {HTMLElement} **/ (queryOne(".odoo-editor-editable"));
     if (content) {
