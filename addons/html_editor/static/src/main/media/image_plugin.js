@@ -3,6 +3,7 @@ import { Plugin } from "../../plugin";
 import { _t } from "@web/core/l10n/translation";
 import { isImageUrl } from "@html_editor/utils/url";
 import { ImageDescription } from "./image_description";
+import { ImagePadding } from "./image_padding";
 
 function hasShape(imagePlugin, shapeName) {
     return () => imagePlugin.isSelectionShaped(shapeName);
@@ -64,6 +65,18 @@ export class ImagePlugin extends Plugin {
                             name: "Shape: Thumbnail",
                             icon: "fa-picture-o",
                             isFormatApplied: hasShape(p, "img-thumbnail"),
+                        },
+                    ],
+                },
+                {
+                    id: "image_padding",
+                    sequence: 26,
+                    namespace: "IMG",
+                    buttons: [
+                        {
+                            id: "image_padding",
+                            name: "Image padding",
+                            Component: ImagePadding,
                         },
                     ],
                 },
@@ -153,6 +166,19 @@ export class ImagePlugin extends Plugin {
             case "RESIZE_IMAGE": {
                 const selectedImg = this.getSelectedImage();
                 selectedImg.style.width = payload;
+                this.dispatch("ADD_STEP");
+                break;
+            }
+            case "SET_IMAGE_PADDING": {
+                const selectedImg = this.getSelectedImage();
+                for (const classString of selectedImg.classList) {
+                    if (classString.match(/^p-[0-9]$/)) {
+                        selectedImg.classList.remove(classString);
+                    }
+                }
+                selectedImg.classList.add(`p-${payload.padding}`);
+                this.dispatch("ADD_STEP");
+                break;
             }
         }
     }

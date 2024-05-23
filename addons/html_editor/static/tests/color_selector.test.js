@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { click, waitFor, queryOne, hover, press } from "@odoo/hoot-dom";
+import { click, waitFor, queryOne, hover, press, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
@@ -192,7 +192,7 @@ test("selected color is shown and updates when selection change", async () => {
         el,
         `<p><font style="color: rgb(255, 156, 0);">[test1]</font> <font style="color: rgb(150, 255, 0);">test2</font></p>`
     );
-    await animationFrame();
+    await waitUntil(() => queryOne("i.fa-font").style.borderBottomColor === "rgb(255, 156, 0)");
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 156, 0)" });
 });
 

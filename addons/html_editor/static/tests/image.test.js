@@ -134,3 +134,78 @@ test("Can change an image size", async () => {
     expect(queryOne("img").style.width).toBe("");
     expect(".o-we-toolbar button[name='resize_default']").toHaveClass("active");
 });
+
+test("Can undo the image sizing", async () => {
+    const { editor } = await setupEditor(`
+        <img class="img-fluid test-image" src="/web/static/img/logo.png">
+    `);
+    click("img.test-image");
+    await waitFor(".o-we-toolbar");
+
+    click(".o-we-toolbar button[name='resize_100']");
+    await animationFrame();
+    expect(queryOne("img").style.width).toBe("100%");
+    expect(".o-we-toolbar button[name='resize_100']").toHaveClass("active");
+
+    editor.dispatch("HISTORY_UNDO");
+    expect(queryOne("img").style.width).toBe("");
+});
+
+test("Can change the padding of an image", async () => {
+    await setupEditor(`
+        <img class="img-fluid test-image" src="/web/static/img/logo.png">
+    `);
+    click("img.test-image");
+    await waitFor(".o-we-toolbar");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('Small')");
+    await animationFrame();
+    expect("img").toHaveClass("p-1");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('Medium')");
+    await animationFrame();
+    expect("img").not.toHaveClass("p-1");
+    expect("img").toHaveClass("p-2");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('Large')");
+    await animationFrame();
+    expect("img").not.toHaveClass("p-2");
+    expect("img").toHaveClass("p-3");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('XL')");
+    await animationFrame();
+    expect("img").not.toHaveClass("p-3");
+    expect("img").toHaveClass("p-5");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('None')");
+    await animationFrame();
+    expect("img").not.toHaveClass("p-5");
+});
+
+test("Can undo the image padding", async () => {
+    const { editor } = await setupEditor(`
+        <img class="img-fluid test-image" src="/web/static/img/logo.png">
+    `);
+    click("img.test-image");
+    await waitFor(".o-we-toolbar");
+
+    click(".o-we-toolbar div[name='image_padding'] button");
+    await animationFrame();
+    click(".o_popover div:contains('Small')");
+    await animationFrame();
+    expect("img").toHaveClass("p-1");
+
+    editor.dispatch("HISTORY_UNDO");
+    await animationFrame();
+    expect("img").not.toHaveClass("p-1");
+});
