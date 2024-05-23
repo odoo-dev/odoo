@@ -1,7 +1,6 @@
 import { Component, onWillStart, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
-import { Editor } from "@html_editor/editor";
 import { loadBundle } from "@web/core/assets";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
 import { counter } from "./counter";
@@ -63,6 +62,7 @@ class WysiwygLoader extends Component {
         <CurrentWysiwyg options="this.wysiwygOptions" startWysiwyg="startWysiwyg" />
     `;
     static components = { CurrentWysiwyg: null };
+    static props = {};
 
     setup() {
         this.wysiwygOptions = {

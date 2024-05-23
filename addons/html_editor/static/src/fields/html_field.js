@@ -4,9 +4,11 @@ import { Component } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useBus } from "@web/core/utils/hooks";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 export class HtmlField extends Component {
     static template = "html_editor.HtmlField";
+    static props = { ...standardFieldProps };
     static components = {
         Wysiwyg,
     };
