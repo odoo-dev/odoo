@@ -3,7 +3,6 @@ import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { setSelection, setContent } from "../_helpers/selection";
 import { insertText } from "../_helpers/user_actions";
-import { animationFrame } from "@odoo/hoot-mock";
 import { waitFor, waitForNone } from "@odoo/hoot-dom";
 
 test("should ignore protected elements children mutations (true)", async () => {
