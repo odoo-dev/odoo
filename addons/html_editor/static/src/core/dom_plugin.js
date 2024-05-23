@@ -45,31 +45,36 @@ export class DomPlugin extends Plugin {
                 this.insertSeparator();
                 break;
             case "CLEAN": {
-                for (const node of [this.editable, ...descendants(this.editable)]) {
+                for (const node of [payload.root, ...descendants(payload.root)]) {
                     if (node.classList && !node.classList.length) {
                         node.removeAttribute("class");
                     }
                     if (node.style && !node.style.length) {
                         node.removeAttribute("style");
                     }
-                    for (const node of this.contentEditableToRemove) {
-                        node.removeAttribute("contenteditable");
-                    }
+                }
+                for (const el of payload.root.querySelectorAll("hr[contenteditable]")) {
+                    el.removeAttribute("contenteditable");
                 }
                 break;
             }
             case "NORMALIZE": {
                 if (payload.node.tagName === "HR") {
-                    if (!payload.node.hasAttribute("contenteditable")) {
-                        payload.node.setAttribute("contenteditable", "false");
-                        this.contentEditableToRemove.add(payload.node);
-                    }
+                    const node = payload.node;
+                    node.setAttribute(
+                        "contenteditable",
+                        node.hasAttribute("contenteditable")
+                            ? node.getAttribute("contenteditable")
+                            : "false"
+                    );
                 } else {
                     for (const separator of payload.node.querySelectorAll("hr")) {
-                        if (!separator.hasAttribute("contenteditable")) {
-                            separator.setAttribute("contenteditable", "false");
-                            this.contentEditableToRemove.add(separator);
-                        }
+                        separator.setAttribute(
+                            "contenteditable",
+                            separator.hasAttribute("contenteditable")
+                                ? separator.getAttribute("contenteditable")
+                                : "false"
+                        );
                     }
                 }
 
@@ -280,7 +285,7 @@ export class DomPlugin extends Plugin {
     }
 
     copyAttributes(source, target) {
-        this.dispatch("CLEAN_NODE", { node: source });
+        this.dispatch("CLEAN", { root: source });
         for (const attr of source.attributes) {
             if (attr.name === "class") {
                 target.classList.add(...source.classList);

@@ -118,7 +118,7 @@ export class SplitPlugin extends Plugin {
      * @returns {[HTMLElement, HTMLElement]}
      */
     splitElement(element, offset) {
-        this.dispatch("CLEAN_NODE", { node: element });
+        this.dispatch("CLEAN", { root: element });
         // const before = /** @type {HTMLElement} **/ (element.cloneNode());
         /** @type {HTMLElement} **/
         const before = element.cloneNode();

@@ -70,11 +70,11 @@ test("with an empty selector and a <br>", async () => {
 test("no arrow key press or mouse click should keep selection near a contenteditable='false'", async () => {
     await testEditor({
         contentBefore: '[]<hr contenteditable="false">',
-        contentAfter: '[]<hr contenteditable="false">',
+        contentAfter: "[]<hr>",
     });
     await testEditor({
         contentBefore: '<hr contenteditable="false">[]',
-        contentAfter: '<hr contenteditable="false">[]',
+        contentAfter: "<hr>[]",
     });
 });
 

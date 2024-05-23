@@ -31,7 +31,7 @@ test("should insert a paragraph at end of editable and place cursor in it (hr)",
             const hr = editor.editable.querySelector("hr");
             await simulateMouseClick(hr);
         },
-        contentAfter: '<hr contenteditable="false"><p>[]<br></p>',
+        contentAfter: "<hr><p>[]<br></p>",
     });
 });
 
@@ -53,7 +53,7 @@ test("should insert a paragraph at beginning of editable and place cursor in it 
             const hr = editor.editable.querySelector("hr");
             await simulateMouseClick(hr, true);
         },
-        contentAfter: '<p>[]<br></p><hr contenteditable="false">',
+        contentAfter: "<p>[]<br></p><hr>",
     });
 });
 test("should insert a paragraph at beginning of editable and place cursor in it (2)", async () => {
@@ -74,7 +74,7 @@ test("should insert a paragraph between the two non-P blocks and place cursor in
             const firstHR = editor.editable.querySelector("hr");
             await simulateMouseClick(firstHR);
         },
-        contentAfter: '<hr contenteditable="false"><p>[]<br></p><hr contenteditable="false">',
+        contentAfter: "<hr><p>[]<br></p><hr>",
     });
 });
 test("should insert a paragraph between the two non-P blocks and place cursor in it (2)", async () => {

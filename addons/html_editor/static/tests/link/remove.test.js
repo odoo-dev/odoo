@@ -14,21 +14,21 @@ describe("range collapsed, remove by popover unlink button", () => {
             contentBefore:
                 '<p>a<a href="exist"><span class="fa fa-music" contenteditable="false">\u200B</span>bcd[]</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>a<span class="fa fa-music" contenteditable="false"></span>bcd[]e</p>',
+            contentAfter: '<p>a<span class="fa fa-music"></span>bcd[]e</p>',
         });
         // With fontawesome at the middle of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">bc<span class="fa fa-music" contenteditable="false">\u200B</span>d[]</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>abc<span class="fa fa-music" contenteditable="false"></span>d[]e</p>',
+            contentAfter: '<p>abc<span class="fa fa-music"></span>d[]e</p>',
         });
         // With fontawesome at the end of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">bcd[]<span class="fa fa-music" contenteditable="false">\u200B</span></a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>abcd[]<span class="fa fa-music" contenteditable="false"></span>e</p>',
+            contentAfter: '<p>abcd[]<span class="fa fa-music"></span>e</p>',
         });
     });
 
@@ -43,21 +43,21 @@ describe("range collapsed, remove by popover unlink button", () => {
             contentBefore:
                 '<p>a<a href="exist"><span class="fa fa-music" contenteditable="false">\u200B</span>b[]cd</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>a<span class="fa fa-music" contenteditable="false"></span>b[]cde</p>',
+            contentAfter: '<p>a<span class="fa fa-music"></span>b[]cde</p>',
         });
         // With fontawesome at the middle of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">b[]c<span class="fa fa-music" contenteditable="false">\u200B</span>d</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>ab[]c<span class="fa fa-music" contenteditable="false"></span>de</p>',
+            contentAfter: '<p>ab[]c<span class="fa fa-music"></span>de</p>',
         });
         // With fontawesome at the end of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">b[]cd<span class="fa fa-music" contenteditable="false">\u200B</span></a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>ab[]cd<span class="fa fa-music" contenteditable="false"></span>e</p>',
+            contentAfter: '<p>ab[]cd<span class="fa fa-music"></span>e</p>',
         });
     });
 
@@ -72,21 +72,21 @@ describe("range collapsed, remove by popover unlink button", () => {
             contentBefore:
                 '<p>a<a href="exist"><span class="fa fa-music" contenteditable="false">\u200B</span>[]bcd</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>a<span class="fa fa-music" contenteditable="false"></span>[]bcde</p>',
+            contentAfter: '<p>a<span class="fa fa-music"></span>[]bcde</p>',
         });
         // With fontawesome at the middle of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">[]bc<span class="fa fa-music" contenteditable="false">\u200B</span>d</a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>a[]bc<span class="fa fa-music" contenteditable="false"></span>de</p>',
+            contentAfter: '<p>a[]bc<span class="fa fa-music"></span>de</p>',
         });
         // With fontawesome at the end of the link.
         await testEditor({
             contentBefore:
                 '<p>a<a href="exist">[]bcd<span class="fa fa-music" contenteditable="false">\u200B</span></a>e</p>',
             stepFunction: unlinkFromPopover,
-            contentAfter: '<p>a[]bcd<span class="fa fa-music" contenteditable="false"></span>e</p>',
+            contentAfter: '<p>a[]bcd<span class="fa fa-music"></span>e</p>',
         });
     });
 
@@ -103,7 +103,7 @@ describe("range collapsed, remove by popover unlink button", () => {
                 '<p><a href="exist">a</a>b<a href="exist"><span class="fa fa-music" contenteditable="false">\u200B</span>c[]d</a>e<a href="exist">f</a></p>',
             stepFunction: unlinkFromPopover,
             contentAfter:
-                '<p><a href="exist">a</a>b<span class="fa fa-music" contenteditable="false"></span>c[]de<a href="exist">f</a></p>',
+                '<p><a href="exist">a</a>b<span class="fa fa-music"></span>c[]de<a href="exist">f</a></p>',
         });
         // With fontawesome at the middle of the link.
         await testEditor({
@@ -111,7 +111,7 @@ describe("range collapsed, remove by popover unlink button", () => {
                 '<p><a href="exist">a</a>b<a href="exist">c<span class="fa fa-music" contenteditable="false">\u200B</span>d[]e</a>f<a href="exist">g</a></p>',
             stepFunction: unlinkFromPopover,
             contentAfter:
-                '<p><a href="exist">a</a>bc<span class="fa fa-music" contenteditable="false"></span>d[]ef<a href="exist">g</a></p>',
+                '<p><a href="exist">a</a>bc<span class="fa fa-music"></span>d[]ef<a href="exist">g</a></p>',
         });
         // With fontawesome at the end of the link.
         await testEditor({
@@ -119,7 +119,7 @@ describe("range collapsed, remove by popover unlink button", () => {
                 '<p><a href="exist">a</a>b<a href="exist">c[]d<span class="fa fa-music" contenteditable="false">\u200B</span></a>e<a href="exist">f</a></p>',
             stepFunction: unlinkFromPopover,
             contentAfter:
-                '<p><a href="exist">a</a>bc[]d<span class="fa fa-music" contenteditable="false"></span>e<a href="exist">f</a></p>',
+                '<p><a href="exist">a</a>bc[]d<span class="fa fa-music"></span>e<a href="exist">f</a></p>',
         });
     });
 });

@@ -58,7 +58,7 @@ export class TabulationPlugin extends Plugin {
                 break;
             }
             case "CLEAN":
-                for (const tab of this.editable.querySelectorAll("span.oe-tabs")) {
+                for (const tab of payload.root.querySelectorAll("span.oe-tabs")) {
                     tab.removeAttribute("contenteditable");
                 }
         }
