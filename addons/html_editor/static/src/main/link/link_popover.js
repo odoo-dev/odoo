@@ -1,5 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, useState, onMounted, useRef } from "@odoo/owl";
+import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { deduceURLfromText } from "./utils";
@@ -18,20 +18,18 @@ export class LinkPopover extends Component {
             editing: this.props.linkEl.href ? false : true,
             url: this.props.linkEl.href || "",
             label: this.props.linkEl.textContent || "",
+            previewImg: false,
+            showFullUrl: false,
+            faIcon: "fa-globe",
+            urlTitle: "",
+            imgSrc: "",
         });
         this.notificationService = useService("notification");
-
-        this.urlLink = useRef("urlLink");
-        this.previewFaviconFa = useRef("previewFaviconFa");
-        this.previewFaviconImg = useRef("previewFaviconImg");
-        this.fullUrl = useRef("fullUrl");
 
         this.keepLastPromise = new KeepLast();
 
         onMounted(() => {
             if (!this.state.editing) {
-                this.urlLink.el.href = this.state.url;
-                this.fullUrl.el.href = this.state.url;
                 this.loadAsyncLinkPreview();
             }
         });
@@ -92,29 +90,16 @@ export class LinkPopover extends Component {
         }
     }
     resetPreview() {
-        this.previewFaviconFa.el.classList.remove(
-            "d-none",
-            "fa-question-circle-o",
-            "fa-envelope-o",
-            "fa-phone"
-        );
-        this.previewFaviconFa.el.classList.add("fa-globe");
-        this.previewFaviconImg.el.classList.add("d-none");
-
-        this.urlLink.el.textContent = this.state.url || _t("No URL specified");
-        this.urlLink.el.href = this.state.url || null;
-
-        this.fullUrl.el.textContent = this.state.url || _t("No URL specified");
-        this.fullUrl.el.href = this.state.url || null;
-        this.fullUrl.el.classList.add("d-none");
-        this.fullUrl.el.classList.remove("o_we_webkit_box");
+        this.state.faIcon = "fa-globe";
+        this.state.previewImg = false;
+        this.state.urlTitle = this.state.url || _t("No URL specified");
+        this.state.showFullUrl = false;
     }
     async loadAsyncLinkPreview() {
         let url;
         if (this.state.url === "") {
             this.resetPreview("");
-            this.previewFaviconFa.el.classList.remove("fa-globe");
-            this.previewFaviconFa.el.classList.add("fa-question-circle-o");
+            this.state.faIcon = "fa-question-circle-o";
             return;
         }
 
@@ -134,22 +119,21 @@ export class LinkPopover extends Component {
             const faMap = { "mailto:": "fa-envelope-o", "tel:": "fa-phone" };
             const icon = faMap[protocol];
             if (icon) {
-                this.previewFaviconFa.el.classList.toggle("fa-globe");
-                this.previewFaviconFa.el.classList.toggle(icon);
+                this.state.faIcon = icon;
             }
         } else if (window.location.hostname !== url.hostname) {
             // Preview pages from current website only. External website will
             // most of the time raise a CORS error. To avoid that error, we
             // would need to fetch the page through the server (s2s), involving
             // enduser fetching problematic pages such as illicit content.
-            this.previewFaviconImg.el.src = `https://www.google.com/s2/favicons?sz=16&domain=${encodeURIComponent(
+            this.state.imgSrc = `https://www.google.com/s2/favicons?sz=16&domain=${encodeURIComponent(
                 url
             )}`;
-            this.previewFaviconImg.el.classList.remove("d-none");
-            this.previewFaviconFa.el.classList.add("d-none");
+            this.state.previewImg = true;
         } else {
             await this.keepLastPromise
-                .add($.get(this.state.href))
+                .add(fetch(this.state.href))
+                .then((response) => response.text())
                 .then((content) => {
                     const parser = new window.DOMParser();
                     const doc = parser.parseFromString(content, "text/html");
@@ -161,17 +145,15 @@ export class LinkPopover extends Component {
 
                     // Set
                     if (favicon) {
-                        this.previewFaviconImg.el.src = favicon.href;
-                        this.previewFaviconImg.el.classList.remove("d-none");
-                        this.previewFaviconFa.el.classList.add("d-none");
+                        this.state.imgSrc = favicon.href;
+                        this.state.previewImg = true;
                     }
                     if (ogTitle || title) {
-                        this.urlLink.el.textContent = ogTitle
+                        this.state.urlTitle = ogTitle
                             ? ogTitle.getAttribute("content")
                             : title.text.trim();
                     }
-                    this.fullUrl.el.classList.remove("d-none");
-                    this.fullUrl.el.classList.add("o_we_webkit_box");
+                    this.state.showFullUrl = true;
                 })
                 .catch((error) => {
                     // HTML error codes should not prevent to edit the links, so we
