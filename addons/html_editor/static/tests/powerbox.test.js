@@ -548,6 +548,11 @@ test("press 'arrowright' should close PowerBox", async () => {
 
 test.tags("desktop")("select command with 'mouseenter'", async () => {
     const { editor, el } = await setupEditor("<p>ab[]</p>");
+
+    // Hoot don't trigger a mousemove event at the start of an hover, if we don't hover
+    // another element before. So we need to do a first hover to set a previous element.
+    hover(".odoo-editor-editable");
+
     insertText(editor, "/head");
     await animationFrame();
     expect(commandNames(el)).toEqual(["Heading 1", "Heading 2", "Heading 3"]);
