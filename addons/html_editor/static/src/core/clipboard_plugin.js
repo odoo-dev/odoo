@@ -105,26 +105,24 @@ export class ClipboardPlugin extends Plugin {
      */
     onCopy(ev) {
         ev.preventDefault();
-        // @todo @phoenix maybe use the new Selection class
-        this.shared.setSelection(this.shared.getEditableSelection());
-        const selection = this.document.getSelection();
-        const range = selection.getRangeAt(0);
-        let rangeContent = range.cloneContents();
-        if (!rangeContent.hasChildNodes()) {
+        const selection = this.shared.getEditableSelection();
+
+        let clonedContents = selection.cloneContents();
+        if (!clonedContents.hasChildNodes()) {
             return;
         }
         // Repair the copied range.
-        if (rangeContent.firstChild.nodeName === "LI") {
-            const list = range.commonAncestorContainer.cloneNode();
-            list.replaceChildren(...rangeContent.childNodes);
-            rangeContent = list;
+        if (clonedContents.firstChild.nodeName === "LI") {
+            const list = selection.commonAncestorContainer.cloneNode();
+            list.replaceChildren(...clonedContents.childNodes);
+            clonedContents = list;
         }
         if (
-            rangeContent.firstChild.nodeName === "TR" ||
-            rangeContent.firstChild.nodeName === "TD"
+            clonedContents.firstChild.nodeName === "TR" ||
+            clonedContents.firstChild.nodeName === "TD"
         ) {
             // We enter this case only if selection is within single table.
-            const table = closestElement(range.commonAncestorContainer, "table");
+            const table = closestElement(selection.commonAncestorContainer, "table");
             const tableClone = table.cloneNode(true);
             // A table is considered fully selected if it is nested inside a
             // cell that is itself selected, or if all its own cells are
@@ -154,24 +152,23 @@ export class ClipboardPlugin extends Plugin {
             }
             // If it is fully selected, clone the whole table rather than
             // just its rows.
-            rangeContent = tableClone;
+            clonedContents = tableClone;
         }
-        const table = closestElement(range.startContainer, "table");
-        if (rangeContent.firstChild.nodeName === "TABLE" && table) {
+        const table = closestElement(selection.startContainer, "table");
+        if (clonedContents.firstChild.nodeName === "TABLE" && table) {
             // Make sure the full leading table is copied.
-            rangeContent.firstChild.after(table.cloneNode(true));
-            rangeContent.firstChild.remove();
+            clonedContents.firstChild.after(table.cloneNode(true));
+            clonedContents.firstChild.remove();
         }
-        if (rangeContent.lastChild.nodeName === "TABLE") {
+        if (clonedContents.lastChild.nodeName === "TABLE") {
             // Make sure the full trailing table is copied.
-            rangeContent.lastChild.before(
-                closestElement(range.endContainer, "table").cloneNode(true)
+            clonedContents.lastChild.before(
+                closestElement(selection.endContainer, "table").cloneNode(true)
             );
-            rangeContent.lastChild.remove();
+            clonedContents.lastChild.remove();
         }
-
-        const commonAncestorElement = closestElement(range.commonAncestorContainer);
-        if (commonAncestorElement && !isBlock(rangeContent.firstChild)) {
+        const commonAncestorElement = closestElement(selection.commonAncestorContainer);
+        if (commonAncestorElement && !isBlock(clonedContents.firstChild)) {
             // Get the list of ancestor elements starting from the provided
             // commonAncestorElement up to the block-level element.
             const blockEl = closestBlock(commonAncestorElement);
@@ -185,15 +182,15 @@ export class ClipboardPlugin extends Plugin {
                 // related ones like headings etc.
                 if (!isBlock(ancestor) || paragraphRelatedElements.includes(ancestor.nodeName)) {
                     const clone = ancestor.cloneNode();
-                    clone.append(...rangeContent.childNodes);
-                    rangeContent.appendChild(clone);
+                    clone.append(...clonedContents.childNodes);
+                    clonedContents.appendChild(clone);
                 }
             }
         }
         const dataHtmlElement = this.document.createElement("data");
-        dataHtmlElement.append(rangeContent);
+        dataHtmlElement.append(clonedContents);
         const odooHtml = dataHtmlElement.innerHTML;
-        const odooText = selection.toString();
+        const odooText = selection.textContent;
         ev.clipboardData.setData("text/plain", odooText);
         ev.clipboardData.setData("text/html", odooHtml);
         ev.clipboardData.setData("application/vnd.odoo.odoo-editor", odooHtml);
@@ -203,8 +200,8 @@ export class ClipboardPlugin extends Plugin {
      * Handle safe pasting of html or plain text into the editor.
      */
     onPaste(ev) {
-        const selection = this.document.getSelection();
-        if (!selection) {
+        let selection = this.shared.getEditableSelection();
+        if (!selection.anchorNode.isConnected) {
             return;
         }
         // @phoenix @todo: handle protected content
@@ -217,6 +214,8 @@ export class ClipboardPlugin extends Plugin {
         this.dispatch("HISTORY_STAGE_SELECTION");
 
         this.resources["before_paste"].forEach((handler) => handler(selection));
+        // refresh selection after potential changes from `before_paste` handlers
+        selection = this.shared.getEditableSelection();
 
         this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
             this.handlePasteOdooEditorHtml(ev.clipboardData) ||
@@ -286,17 +285,17 @@ export class ClipboardPlugin extends Plugin {
      */
     handlePasteText(selection, clipboardData) {
         const text = clipboardData.getData("text/plain");
-        if (this.resources["handle_paste_text"].some((handler) => handler(text, selection))) {
+        if (this.resources["handle_paste_text"].some((handler) => handler(selection, text))) {
             return;
         } else {
-            this.pasteText(text);
+            this.pasteText(selection, text);
         }
     }
     /**
+     * @param {EditorSelection} selection
      * @param {string} text
      */
-    pasteText(text) {
-        let selection = this.shared.getEditableSelection();
+    pasteText(selection, text) {
         const textFragments = text.split(/\r?\n/);
         let textIndex = 1;
         for (const textFragment of textFragments) {
@@ -318,7 +317,9 @@ export class ClipboardPlugin extends Plugin {
                     this.dispatch("INSERT_LINEBREAK");
                 } else {
                     const [pBefore] = this.shared.splitBlock();
-                    p && (pBefore.style.marginBottom = "0px");
+                    if (p) {
+                        pBefore.style.marginBottom = "0px";
+                    }
                     selection = this.shared.getEditableSelection();
                 }
             }
