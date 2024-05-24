@@ -68,8 +68,10 @@ export class Wysiwyg extends Component {
                             copyCssRules(document, el.contentDocument);
                         }
                         const additionalClasses = el.dataset.class?.split(" ");
-                        for (const c of additionalClasses) {
-                            el.contentDocument.body.classList.add(c);
+                        if (additionalClasses) {
+                            for (const c of additionalClasses) {
+                                el.contentDocument.body.classList.add(c);
+                            }
                         }
                         this.editor.attachTo(el.contentDocument.body);
                     }
