@@ -24,6 +24,11 @@ export class Powerbox extends Component {
             }
         });
 
+        this.mouseSelectionActive = false;
+        useExternalListener(this.props.document, "mousemove", () => {
+            this.mouseSelectionActive = true;
+        });
+
         useExternalListener(this.props.document, "mousedown", (ev) => {
             this.props.close();
         });
@@ -39,5 +44,15 @@ export class Powerbox extends Component {
 
     get showCategories() {
         return this.props.state.showCategories;
+    }
+
+    onScroll() {
+        this.mouseSelectionActive = false;
+    }
+
+    onMouseEnter(index) {
+        if (this.mouseSelectionActive) {
+            this.props.activateCommand(index);
+        }
     }
 }
