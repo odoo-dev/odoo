@@ -1646,6 +1646,8 @@ describe("link", () => {
                 },
                 contentAfter: "<p>abc[]</p>",
             });
+        });
+        test("should replace link for new content when pasting in an empty link (collapsed)(2)", async () => {
             await testEditor({
                 contentBefore: '<p>xy<a href="#" oe-zws-empty-inline="">\u200B[]</a>z</p>',
                 stepFunction: async (editor) => {
