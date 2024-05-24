@@ -195,6 +195,7 @@ export class Editor {
             for (const p of this.plugins) {
                 p.destroy();
             }
+            this.shared = {};
             this.editable = null;
         }
         this.isDestroyed = true;
