@@ -17,10 +17,11 @@ export class LinkPastePlugin extends Plugin {
         this.resources["handle_paste_url"] = this.resources["handle_paste_url"] || [];
     }
 
-    // -------------------------------------------------------------------------
-    // Commands
-    // -------------------------------------------------------------------------
-    handlePasteText(text, selection) {
+    /**
+     * @param {EditorSelection} selection
+     * @param {string} text
+     */
+    handlePasteText(selection, text) {
         let splitAroundUrl;
         // todo: add placeholder plugin that prevent any other plugin
         // Avoid transforming dynamic placeholder pattern to url.
@@ -36,17 +37,17 @@ export class LinkPastePlugin extends Plugin {
         }
         if (splitAroundUrl.length === 3 && !splitAroundUrl[0] && !splitAroundUrl[2]) {
             // Pasted content is a single URL.
-            this.handlePasteTextUrl(text, selection);
+            this.handlePasteTextUrl(selection, text);
         } else {
-            this.handlePasteTextMultiUrl(splitAroundUrl, selection);
+            this.handlePasteTextMultiUrl(selection, splitAroundUrl);
         }
         return true;
     }
     /**
-     * @param {string} text
      * @param {EditorSelection} selection
+     * @param {string} text
      */
-    handlePasteTextUrl(text, selection) {
+    handlePasteTextUrl(selection, text) {
         const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
         const url = /^https?:\/\//i.test(text) ? text : "http://" + text;
         if (selectionIsInsideALink) {
@@ -78,10 +79,10 @@ export class LinkPastePlugin extends Plugin {
         }
     }
     /**
-     * @param {string[]} splitAroundUrl
      * @param {EditorSelection} selection
+     * @param {string[]} splitAroundUrl
      */
-    handlePasteTextMultiUrl(splitAroundUrl, selection) {
+    handlePasteTextMultiUrl(selection, splitAroundUrl) {
         const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
         for (let i = 0; i < splitAroundUrl.length; i++) {
             const url = /^https?:\/\//gi.test(splitAroundUrl[i])
@@ -92,7 +93,7 @@ export class LinkPastePlugin extends Plugin {
             if (i % 2 && !selectionIsInsideALink) {
                 this.shared.domInsert(this.shared.createLink(url, splitAroundUrl[i]));
             } else if (splitAroundUrl[i] !== "") {
-                this.shared.pasteText(splitAroundUrl[i]);
+                this.shared.pasteText(selection, splitAroundUrl[i]);
             }
         }
     }
@@ -105,7 +106,7 @@ export class LinkPastePlugin extends Plugin {
         const link = closestElement(selection.anchorNode, "a");
         if (
             link &&
-            selection.toString().replace(/\u200B/g, "") === link.innerText.replace(/\u200B/g, "")
+            selection.textContent.replace(/\u200B/g, "") === link.innerText.replace(/\u200B/g, "")
         ) {
             const start = leftPos(link);
             link.remove();

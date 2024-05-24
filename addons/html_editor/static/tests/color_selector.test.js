@@ -2,7 +2,7 @@ import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor, queryOne, hover, press, waitUntil } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
-import { getContent, setContent } from "./_helpers/selection";
+import { getContent, setSelection } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
 
 test("can set foreground color", async () => {
@@ -188,10 +188,12 @@ test("selected color is shown and updates when selection change", async () => {
     expect(".o_font_color_selector").toHaveCount(0);
     await animationFrame();
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(150, 255, 0)" });
-    setContent(
-        el,
-        `<p><font style="color: rgb(255, 156, 0);">[test1]</font> <font style="color: rgb(150, 255, 0);">test2</font></p>`
-    );
+    setSelection({
+        anchorNode: el.firstChild,
+        anchorOffset: 0,
+        focusNode: el.firstChild,
+        focusOffset: 1,
+    });
     await waitUntil(() => queryOne("i.fa-font").style.borderBottomColor === "rgb(255, 156, 0)");
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 156, 0)" });
 });
