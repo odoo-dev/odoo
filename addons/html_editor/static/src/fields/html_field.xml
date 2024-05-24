@@ -4,10 +4,6 @@
         <Wysiwyg
             config="getConfig()"
             onLoad.bind="onLoad"
-            class="'m-2'"
-            style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;`"
-            iframe="false"
-            copyCss="true"
-            toolbar="false" />
+            t-key="props.record.resId"/>
     </t>
 </templates>
