@@ -19,6 +19,7 @@ import {
 import { setupEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
 import { insertText, redo, undo } from "./_helpers/user_actions";
+import { waitFor } from "../../../web/static/lib/hoot-dom/hoot-dom";
 
 function commandNames() {
     return queryAllTexts(".o-we-command-name");
@@ -333,7 +334,7 @@ test.tags("desktop")("should insert a 3x3 table on type `/table`", async () => {
     expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
 
     insertText(editor, "/table");
-    await animationFrame();
+    await waitFor(".o-we-powerbox ");
 
     press("Enter");
     await animationFrame();
@@ -348,7 +349,7 @@ test.tags("desktop")("should insert a 3x3 table on type `/table`", async () => {
 test.tags("mobile")("should insert a 3x3 table on type `/table` in mobile view", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
     insertText(editor, "/table");
-    await animationFrame();
+    await waitFor(".o-we-powerbox ");
     press("Enter");
     await tick();
     expect(getContent(el)).toBe(

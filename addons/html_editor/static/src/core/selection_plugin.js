@@ -174,6 +174,7 @@ export class SelectionPlugin extends Plugin {
                 commonAncestorContainer: this.editable,
                 isCollapsed: true,
                 direction: DIRECTIONS.RIGHT,
+                textContent: "",
                 inEditable,
             };
         } else {
@@ -215,45 +216,13 @@ export class SelectionPlugin extends Plugin {
                 commonAncestorContainer: range.commonAncestorContainer,
                 isCollapsed: range.collapsed,
                 direction,
+                textContent: range.collapsed ? "" : selection.toString(),
                 inEditable,
             };
         }
 
         Object.freeze(activeSelection);
         return activeSelection;
-    }
-
-    makeDeepSelection() {
-        let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed, direction } =
-            this.activeSelection;
-        [anchorNode, anchorOffset] = getDeepestPosition(anchorNode, anchorOffset);
-        [focusNode, focusOffset] = isCollapsed
-            ? [anchorNode, anchorOffset]
-            : getDeepestPosition(focusNode, focusOffset);
-        let startContainer, startOffset, endContainer, endOffset;
-        if (direction) {
-            [startContainer, startOffset] = [anchorNode, anchorOffset];
-            [endContainer, endOffset] = [focusNode, focusOffset];
-        } else {
-            [startContainer, startOffset] = [focusNode, focusOffset];
-            [endContainer, endOffset] = [anchorNode, anchorOffset];
-        }
-
-        const range = new Range();
-        range.setStart(startContainer, startOffset);
-        range.setEnd(endContainer, endOffset);
-        return Object.freeze({
-            ...this.activeSelection,
-            anchorNode,
-            anchorOffset,
-            focusNode,
-            focusOffset,
-            startContainer,
-            startOffset,
-            endContainer,
-            endOffset,
-            commonAncestorContainer: range.commonAncestorContainer,
-        });
     }
 
     /**
@@ -282,11 +251,41 @@ export class SelectionPlugin extends Plugin {
         } else if (!this.activeSelection.anchorNode.isConnected) {
             this.activeSelection = this.makeSelection();
         }
-        // TODO: test if invalid offset
+        let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed, direction } =
+            this.activeSelection;
+
+        // Transform the selection to return the depest possible node.
         if (deep) {
-            return this.makeDeepSelection();
+            [anchorNode, anchorOffset] = getDeepestPosition(anchorNode, anchorOffset);
+            [focusNode, focusOffset] = isCollapsed
+                ? [anchorNode, anchorOffset]
+                : getDeepestPosition(focusNode, focusOffset);
         }
-        return this.activeSelection;
+        let startContainer, startOffset, endContainer, endOffset;
+        if (direction) {
+            [startContainer, startOffset] = [anchorNode, anchorOffset];
+            [endContainer, endOffset] = [focusNode, focusOffset];
+        } else {
+            [startContainer, startOffset] = [focusNode, focusOffset];
+            [endContainer, endOffset] = [anchorNode, anchorOffset];
+        }
+
+        const range = new Range();
+        range.setStart(startContainer, startOffset);
+        range.setEnd(endContainer, endOffset);
+        return Object.freeze({
+            ...this.activeSelection,
+            anchorNode,
+            anchorOffset,
+            focusNode,
+            focusOffset,
+            startContainer,
+            startOffset,
+            endContainer,
+            endOffset,
+            commonAncestorContainer: range.commonAncestorContainer,
+            cloneContents: () => range.cloneContents(),
+        });
     }
 
     /**
