@@ -25,6 +25,7 @@
                     <Wysiwyg
                         config="getConfig()"
                         class="'m-2'"
+                        contentClass="'py-1 ps-4'"
                         style="`width:600px;border:1px solid lightgrey; min-height: 500px;max-height:500px;`"
                         t-key="window.JSON.stringify(config)"
                         iframe="config.inIframe"

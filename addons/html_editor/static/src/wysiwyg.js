@@ -25,6 +25,7 @@ export class Wysiwyg extends Component {
     static props = {
         config: { type: Object, optional: true },
         class: { type: String, optional: true },
+        contentClass: { type: String, optional: true }, // on editable element
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
