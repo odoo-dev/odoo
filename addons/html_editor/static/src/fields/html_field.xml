@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.HtmlField">
         <Wysiwyg
             config="getConfig()"
             onLoad.bind="onLoad"
+            contentClass="'note-editable p-1'"
             t-key="props.record.resId"/>
     </t>
 </templates>
