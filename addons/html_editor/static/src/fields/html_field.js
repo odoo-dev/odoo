@@ -19,10 +19,15 @@ export class HtmlField extends Component {
         useBus(model.bus, "NEED_LOCAL_CHANGES", ({ detail }) =>
             detail.proms.push(this.commitChanges({ shouldInline: true }))
         );
+        this.isDirty = false;
     }
 
     async commitChanges() {
-        await this.props.record.update({ [this.props.name]: this.editor.getContent() });
+        if (this.isDirty) {
+            await this.props.record.update({ [this.props.name]: this.editor.getContent() });
+            this.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
+            this.isDirty = false;
+        }
     }
 
     onLoad(editor) {
@@ -30,6 +35,7 @@ export class HtmlField extends Component {
     }
 
     onChange() {
+        this.isDirty = true;
         this.props.record.model.bus.trigger("FIELD_IS_DIRTY", true);
     }
 
