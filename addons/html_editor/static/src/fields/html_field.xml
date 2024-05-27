@@ -4,6 +4,7 @@
             config="this.getConfig()"
             onLoad.bind="onLoad"
             contentClass="'note-editable p-1'"
-            t-key="props.record.resId"/>
+            onBlur.bind="onBlur"
+            t-key="wysiwygKey"/>
     </t>
 </templates>

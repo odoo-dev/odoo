@@ -31,10 +31,12 @@ export class Wysiwyg extends Component {
         iframe: { type: Boolean, optional: true },
         copyCss: { type: Boolean, optional: true },
         onLoad: { type: Function, optional: true },
+        onBlur: { type: Function, optional: true },
     };
 
     static defaultProps = {
         onLoad: () => {},
+        onBlur: () => {},
     };
 
     setup() {

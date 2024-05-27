@@ -1,6 +1,6 @@
 import { HtmlField } from "@html_editor/fields/html_field";
 import { beforeEach, expect, test } from "@odoo/hoot";
-import { queryOne } from "@odoo/hoot-dom";
+import { click, press, queryOne } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
     contains,
@@ -55,8 +55,8 @@ test("edit and save a html field", async () => {
     expect(".odoo-editor-editable p").toHaveText("first");
     expect(`.o_form_button_save`).not.toBeVisible();
 
-    const paragrah = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode: paragrah, anchorOffset: 0 });
+    const anchorNode = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode, anchorOffset: 0 });
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -108,8 +108,8 @@ test("edit and switch page", async () => {
     expect(".odoo-editor-editable p").toHaveText("first");
     expect(`.o_form_button_save`).not.toBeVisible();
 
-    const paragrah = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode: paragrah, anchorOffset: 0 });
+    const anchorNode = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode, anchorOffset: 0 });
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -124,6 +124,72 @@ test("edit and switch page", async () => {
     await contains(`.o_pager_previous`).click();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
     expect(`.o_form_button_save`).not.toBeVisible();
+});
+
+test("discard changes in html field in form", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect(".odoo-editor-editable p").toHaveText("first");
+    expect(`.o_form_button_save`).not.toBeVisible();
+
+    // move the hoot focus in the editor
+    click(".odoo-editor-editable");
+    const anchorNode = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "test");
+    await animationFrame();
+    expect(".odoo-editor-editable p").toHaveText("testfirst");
+    expect(`.o_form_button_cancel`).toBeVisible();
+
+    await contains(`.o_form_button_cancel`).click();
+    await animationFrame();
+    expect(".odoo-editor-editable p").toHaveText("first");
+    expect(`.o_form_button_cancel`).not.toBeVisible();
+});
+
+test("undo after discard html field changes in form", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    expect(".odoo-editor-editable p").toHaveText("first");
+    expect(`.o_form_button_save`).not.toBeVisible();
+
+    // move the hoot focus in the editor
+    click(".odoo-editor-editable");
+    const anchorNode = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "test");
+    await animationFrame();
+    expect(".odoo-editor-editable p").toHaveText("testfirst");
+    expect(`.o_form_button_cancel`).toBeVisible();
+
+    press(["ctrl", "z"]);
+    expect(".odoo-editor-editable p").toHaveText("tesfirst");
+    expect(`.o_form_button_cancel`).toBeVisible();
+
+    await contains(`.o_form_button_cancel`).click();
+    await animationFrame();
+    expect(".odoo-editor-editable p").toHaveText("first");
+    expect(`.o_form_button_cancel`).not.toBeVisible();
+
+    press(["ctrl", "z"]);
+    expect(".odoo-editor-editable p").toHaveText("first");
+    expect(`.o_form_button_cancel`).not.toBeVisible();
 });
 
 test.todo(
