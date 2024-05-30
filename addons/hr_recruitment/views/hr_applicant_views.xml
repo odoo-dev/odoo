@@ -138,6 +138,8 @@
                         <field name="user_id" widget="many2one_avatar_user"/>
                         <field name="date_closed" invisible="not date_closed" />
                         <field name="priority" widget="priority"/>
+                        <field name="utm_reference" string="Reference" options="{'hide_model': True}"
+                            invisible="not utm_reference" readonly="True"/>
                         <field name="source_id"/>
                         <field name="medium_id"/>
                         <field name="availability" placeholder="Directly Available"/>
