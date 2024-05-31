@@ -3,6 +3,7 @@ import { press } from "@odoo/hoot-dom";
 import { testEditor } from "../_helpers/editor";
 import { setSelection } from "../_helpers/selection";
 import { simulateArrowKeyPress } from "../_helpers/user_actions";
+import { tick } from "@odoo/hoot-mock";
 
 test("should move past a zws (collapsed - ArrowRight)", async () => {
     await testEditor({
@@ -331,7 +332,7 @@ test("should deselect a zws (2)", async () => {
     });
 });
 
-test.todo("should move into a link (ArrowRight)", async () => {
+test("should move into a link (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab[]<a href="#">cd</a>ef</p>',
         contentBeforeEdit:
@@ -360,6 +361,7 @@ test.todo("should move into a link (ArrowRight)", async () => {
                 },
                 editor.document
             );
+            await tick();
         },
         contentAfterEdit:
             "<p>ab" +
@@ -375,7 +377,7 @@ test.todo("should move into a link (ArrowRight)", async () => {
     });
 });
 
-test.todo("should move into a link (ArrowLeft)", async () => {
+test("should move into a link (ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<a href="#">cd</a>[]ef</p>',
         contentBeforeEdit:
@@ -403,6 +405,7 @@ test.todo("should move into a link (ArrowLeft)", async () => {
                 },
                 editor.document
             );
+            await tick();
         },
         contentAfterEdit:
             "<p>ab" +
@@ -418,7 +421,7 @@ test.todo("should move into a link (ArrowLeft)", async () => {
     });
 });
 
-test.todo("should move out of a link (ArrowRight)", async () => {
+test("should move out of a link (ArrowRight)", async () => {
     await testEditor({
         contentBefore: '<p>ab<a href="#">cd[]</a>ef</p>',
         contentBeforeEdit:
@@ -434,11 +437,12 @@ test.todo("should move out of a link (ArrowRight)", async () => {
         stepFunction: async (editor) => {
             // TODO @phoenix: should use simulateArrowKeyPress
             press("ArrowRight");
+            await tick();
         },
         contentAfterEdit:
             "<p>ab" +
             "\ufeff" + // before zwnbsp
-            '<a href="#" class="">' +
+            '<a href="#">' +
             "\ufeff" + // start zwnbsp
             "cd" + // content
             "\ufeff" + // end zwnbsp
@@ -449,7 +453,7 @@ test.todo("should move out of a link (ArrowRight)", async () => {
     });
 });
 
-test.todo("should move out of a link (ArrowLeft)", async () => {
+test("should move out of a link (ArrowLeft)", async () => {
     await testEditor({
         contentBefore: '<p>ab<a href="#">[]cd</a>ef</p>',
         contentBeforeEdit:
@@ -479,11 +483,12 @@ test.todo("should move out of a link (ArrowLeft)", async () => {
                 },
                 editor.document
             );
+            await tick();
         },
         contentAfterEdit:
             "<p>ab[]" +
             "\ufeff" + // before zwnbsp
-            '<a href="#" class="">' +
+            '<a href="#">' +
             "\ufeff" + // start zwnbsp
             "cd" + // content
             "\ufeff" + // end zwnbsp
