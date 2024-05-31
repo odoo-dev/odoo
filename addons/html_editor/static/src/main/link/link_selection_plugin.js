@@ -88,6 +88,7 @@ export class LinkSelectionPlugin extends Plugin {
         for (const node of descendants(root)) {
             if (node.nodeType === Node.TEXT_NODE && node.textContent.includes("\uFEFF")) {
                 // @todo: isn't rightPos needed as well?
+                // @todo: this does not preserve the cursor position
                 const restore = prepareUpdate(...leftPos(node));
                 node.textContent = node.textContent.replaceAll("\uFEFF", "");
                 restore(); // Make sure to make <br>s visible if needed.
@@ -193,4 +194,8 @@ function depthFirstPreOrderTraversal(root, callback) {
 TODO:
 - handle insertion of a link eligible for ZWNBSP (age's commit ajusts selection
     in the insert command)
+- deletePlugin: account for ZWNBSP in (at least):
+    - shouldSkip
+    - isVisibleChar
+    -Obs: consider changing implementation of findPreviousPosition to use selection.modify instead?
 */
