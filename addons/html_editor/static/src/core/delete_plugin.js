@@ -243,7 +243,11 @@ export class DeletePlugin extends Plugin {
                 break;
             case "word":
                 // @todo @phoenix: write more tests for ctrl+delete
-                ({ startContainer, startOffset } = this.shared.extendSelection("backward", "word"));
+                ({ startContainer, startOffset } = this.shared.modifySelection(
+                    "extend",
+                    "backward",
+                    "word"
+                ));
                 break;
             case "line":
                 [startContainer, startOffset] = this.findPreviousLineBoundary(
@@ -271,7 +275,11 @@ export class DeletePlugin extends Plugin {
                 break;
             case "word":
                 // @todo @phoenix: write more tests for ctrl+delete
-                ({ endContainer, endOffset } = this.shared.extendSelection("forward", "word"));
+                ({ endContainer, endOffset } = this.shared.modifySelection(
+                    "extend",
+                    "forward",
+                    "word"
+                ));
                 break;
             case "line":
                 [endContainer, endOffset] = this.findNextLineBoundary(startContainer, startOffset);

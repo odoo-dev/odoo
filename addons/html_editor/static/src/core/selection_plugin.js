@@ -86,7 +86,7 @@ export class SelectionPlugin extends Plugin {
         "getSelectedNodes",
         "getTraversedNodes",
         "getTraversedBlocks",
-        "extendSelection",
+        "modifySelection",
         // "collapseIfZWS",
     ];
 
@@ -652,19 +652,19 @@ export class SelectionPlugin extends Plugin {
     }
 
     /**
-     *
+     * @param {"move"|"extend"} alter
      * @param {"backward"|"forward"} direction
      * @param {"character"|"word"|"line"} granularity
      * @returns {EditorSelection}
      */
-    extendSelection(direction, granularity) {
+    modifySelection(alter, direction, granularity) {
         const editorSelection = this.getEditableSelection();
         if (!editorSelection.inEditable) {
             return editorSelection;
         }
         const selection = this.document.getSelection();
         // @todo @phoenix: protect me! (selection could be nullish)
-        selection.modify("extend", direction, granularity);
+        selection.modify(alter, direction, granularity);
         // @todo: check if it's still inside the editable
         this.activeSelection = this.makeSelection(selection, true);
         return this.activeSelection;

@@ -117,7 +117,7 @@ test("setEditableSelection should work, even if getSelection returns null", asyn
     expect(selection.endOffset).toBe(0);
 });
 
-test.todo("extendSelection should work, even if getSelection returns null", async () => {
+test.todo("modifySelection should work, even if getSelection returns null", async () => {
     const { editor } = await setupEditor("<p>a[b]</p>");
     let selection = editor.shared.getEditableSelection();
     expect(selection.startOffset).toBe(1);
@@ -128,7 +128,7 @@ test.todo("extendSelection should work, even if getSelection returns null", asyn
         getSelection: () => null,
     });
 
-    selection = editor.shared.extendSelection("backward", "word");
+    selection = editor.shared.modifySelection("extend", "backward", "word");
 
     // What should we expect here? The unchanged selection?
     expect(selection.startOffset).toBe(1);
