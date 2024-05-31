@@ -18,7 +18,8 @@ class ChatbotScriptStep(models.Model):
         return {
             'description': description + discuss_channel._get_channel_history(),
             'name': _("%s's New Lead", self.chatbot_script_id.title),
-            'source_id': self.chatbot_script_id.source_id.id,
+            'source_id': self.env.ref("im_livechat.utm_source_chatbot").id,
+            'utm_reference': f'{self.chatbot_script_id._name},{self.chatbot_script_id.id}',
             'team_id': self.crm_team_id.id,
             'type': 'lead' if self.crm_team_id.use_leads else 'opportunity',
             'user_id': False,

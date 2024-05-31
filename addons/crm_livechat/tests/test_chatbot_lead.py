@@ -19,6 +19,11 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self.assertEqual(created_lead.team_id, self.sale_team)
         self.assertEqual(created_lead.type, 'opportunity')
 
+        #UTMs
+        self.assertEqual(created_lead.utm_reference, self.chatbot_script)
+        self.assertEqual(created_lead.source_id, self.env.ref("im_livechat.utm_source_chatbot"))
+        self.assertFalse(bool(created_lead.campaign_id))
+
     @users('user_portal')
     def test_chatbot_lead_portal_user(self):
         self.step_create_lead.write({'crm_team_id': self.sale_team_with_lead})
@@ -31,6 +36,11 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
 
         self.assertEqual(created_lead.team_id, self.sale_team_with_lead)
         self.assertEqual(created_lead.type, 'lead')
+
+        #UTMs
+        self.assertEqual(created_lead.utm_reference, self.chatbot_script)
+        self.assertEqual(created_lead.source_id, self.env.ref("im_livechat.utm_source_chatbot"))
+        self.assertFalse(bool(created_lead.campaign_id))
 
     def _chatbot_create_lead(self, user):
         data = self.make_jsonrpc_request("/im_livechat/get_session", {
