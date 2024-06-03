@@ -130,13 +130,15 @@ export class Playground extends Component {
                 inlineComponents: [counter, card],
             },
             onChange: this.updateContent.bind(this),
-            busService: this.busService,
-            collaborationChannel: {
-                collaborationModelName: 'res.users',
-                collaborationFieldName: 'help',
-                collaborationResId: 1,
-            },
-            peerId: this.generateId(),
+            collaboration: {
+                busService: this.busService,
+                collaborationChannel: {
+                    collaborationModelName: 'res.users',
+                    collaborationFieldName: 'help',
+                    collaborationResId: 1,
+                },
+                peerId: this.generateId(),
+            }
         };
     }
     generateId() {

@@ -87,14 +87,12 @@ export class CollaborationOdooPlugin extends Plugin {
         this.serverLastStepId =
             this.config.content && this.getLastHistoryStepId(this.config.content);
 
-        this.setupCollaboration(this.config.collaborationChannel);
+        this.setupCollaboration(this.config.collaboration.collaborationChannel);
 
-        if (
-            this.config.collaborativeTrigger === "start" ||
-            typeof this.config.collaborativeTrigger === "undefined"
-        ) {
+        const collaborativeTrigger = this.config.collaboration.collaborativeTrigger;
+        if (collaborativeTrigger === "start" || typeof collaborativeTrigger === "undefined") {
             this.joinPeerToPeer();
-        } else if (this.config.collaborativeTrigger === "focus") {
+        } else if (collaborativeTrigger === "focus") {
             // Wait until editor is focused to join the peer to peer network.
             this.editable.addEventListener("focus", this.joinPeerToPeer);
         }
@@ -123,7 +121,7 @@ export class CollaborationOdooPlugin extends Plugin {
         const selection = this.shared.getEditableSelection();
         return {
             selection: this.shared.serializeSelection(selection),
-            peerId: this.config.peerId,
+            peerId: this.config.collaboration.peerId,
         };
     }
     setupCollaboration(collaborationChannel) {
@@ -157,12 +155,13 @@ export class CollaborationOdooPlugin extends Plugin {
                 }
             }
         };
-        this.config.busService.subscribe("editor_collaboration", collaborationBusListener);
-        this.config.busService.addChannel(this.collaborationChannelName);
+        const { busService } = this.config.collaboration;
+        busService.subscribe("editor_collaboration", collaborationBusListener);
+        busService.addChannel(this.collaborationChannelName);
         this.collaborationStopBus = () => {
             // Wysiwyg.activeCollaborationChannelNames.delete(this.collaborationChannelName);
-            this.config.busService.unsubscribe("editor_collaboration", collaborationBusListener);
-            this.config.busService.deleteChannel(this.collaborationChannelName);
+            busService.unsubscribe("editor_collaboration", collaborationBusListener);
+            busService.deleteChannel(this.collaborationChannelName);
         };
 
         this.startCollaborationTime = new Date().getTime();
@@ -225,7 +224,7 @@ export class CollaborationOdooPlugin extends Plugin {
 
     getNewPtp() {
         const rpcMutex = new Mutex();
-        const { collaborationChannel } = this.config;
+        const { collaborationChannel } = this.config.collaboration;
         const modelName = collaborationChannel.collaborationModelName;
         const fieldName = collaborationChannel.collaborationFieldName;
         const resId = collaborationChannel.collaborationResId;
@@ -236,7 +235,7 @@ export class CollaborationOdooPlugin extends Plugin {
 
         return new PeerToPeer({
             peerConnectionConfig: { iceServers: this.iceServers },
-            currentPeerId: this.config.peerId,
+            currentPeerId: this.config.collaboration.peerId,
             broadcastAll: (rpcData) => {
                 return rpcMutex.exec(async () => {
                     return rpc("/web_editor/bus_broadcast", {
@@ -304,7 +303,7 @@ export class CollaborationOdooPlugin extends Plugin {
 
                         if (!this.historySyncAtLeastOnce) {
                             const localPeer = {
-                                id: this.config.peerId,
+                                id: this.config.collaboration.peerId,
                                 startTime: this.startCollaborationTime,
                             };
                             const remotePeer = {

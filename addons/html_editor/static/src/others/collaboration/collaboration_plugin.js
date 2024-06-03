@@ -50,7 +50,7 @@ export class CollaborationPlugin extends Plugin {
     peerId = null;
 
     setup() {
-        this.peerId = this.config.peerId;
+        this.peerId = this.config.collaboration.peerId;
         if (!this.peerId) {
             throw new Error("The collaboration plugin requires a peerId");
         }

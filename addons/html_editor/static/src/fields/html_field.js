@@ -141,13 +141,15 @@ export class HtmlField extends Component {
             ],
             classList: this.classList,
             onChange: this.onChange.bind(this),
-            busService: this.busService,
-            collaborationChannel: this.props.isCollaborative && {
-                collaborationModelName: this.props.record.resModel,
-                collaborationFieldName: this.props.name,
-                collaborationResId: parseInt(this.props.record.resId),
+            collaboration: this.props.isCollaborative && {
+                busService: this.busService,
+                collaborationChannel: {
+                    collaborationModelName: this.props.record.resModel,
+                    collaborationFieldName: this.props.name,
+                    collaborationResId: parseInt(this.props.record.resId),
+                },
+                peerId: this.generateId(),
             },
-            peerId: this.generateId(),
             recordInfo: { resModel, resId },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
         };
