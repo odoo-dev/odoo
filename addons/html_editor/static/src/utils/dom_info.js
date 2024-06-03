@@ -136,7 +136,9 @@ export function isInPre(node) {
     );
 }
 
-export const whitespace = `[^\\S\\u00A0\\u0009]`; // for formatting (no "real" content) (TODO: 0009 shouldn't be included)
+export const ZERO_WIDTH_CHARS = ["\u200b", "\ufeff"];
+
+export const whitespace = `[^\\S\\u00A0\\u0009\\ufeff]`; // for formatting (no "real" content) (TODO: 0009 shouldn't be included)
 const whitespaceRegex = new RegExp(`^${whitespace}*$`);
 export function isWhitespace(value) {
     const str = typeof value === "string" ? value : value.nodeValue;
@@ -155,8 +157,8 @@ export function isVisibleTextNode(testedNode) {
     ) {
         return true;
     }
-    if (testedNode.textContent === "\u200B") {
-        return false;
+    if (ZERO_WIDTH_CHARS.includes(testedNode.textContent)) {
+        return false; // a ZW(NB)SP is always invisible, regardless of context.
     }
     // The following assumes node is made entirely of whitespace and is not
     // preceded of followed by a block.
