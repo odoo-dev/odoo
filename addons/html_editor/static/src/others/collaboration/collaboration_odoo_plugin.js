@@ -52,16 +52,7 @@ export class CollaborationOdooPlugin extends Plugin {
             );
         }, 50),
     });
-    handleCommand(commandName, payload) {
-        switch (commandName) {
-            case "HISTORY_MISSING_PARENT_STEP":
-                this.onHistoryMissingParentStep(payload);
-                break;
-            case "STEP_ADDED":
-                this.ptp?.notifyAllPeers("oe_history_step", payload.step, { transport: "rtc" });
-                break;
-        }
-    }
+
     setup() {
         this.isDocumentStale = false;
 
@@ -108,6 +99,17 @@ export class CollaborationOdooPlugin extends Plugin {
         // todo: to implement
         // clearInterval(this.collaborationInterval);
         super.destroy();
+    }
+
+    handleCommand(commandName, payload) {
+        switch (commandName) {
+            case "HISTORY_MISSING_PARENT_STEP":
+                this.onHistoryMissingParentStep(payload);
+                break;
+            case "STEP_ADDED":
+                this.ptp?.notifyAllPeers("oe_history_step", payload.step, { transport: "rtc" });
+                break;
+        }
     }
 
     stopPeerToPeer() {
