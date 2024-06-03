@@ -11,10 +11,10 @@ const ALLOWED_ELEMENTS =
 
 export class MoveNodePlugin extends Plugin {
     static name = "movenode";
-    static dependencies = ["selection", "local-overlay"];
+    static dependencies = ["selection", "position", "local-overlay"];
     /** @type { (p: MoveNodePlugin) => Record<string, any> } */
     static resources = (p) => ({
-        refreshOverlay: () => {
+        layoutGeomentryChange: () => {
             if (p.currentMovableElement) {
                 p.setMovableElement(p.currentMovableElement);
             }

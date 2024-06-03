@@ -44,6 +44,7 @@ import { CollaborationPlugin } from "./others/collaboration/collaboration_plugin
 import { CollaborationOdooPlugin } from "./others/collaboration/collaboration_odoo_plugin";
 import { CollaborationSelectionPlugin } from "./others/collaboration/collaboration_selection_plugin";
 import { CollaborationSelectionAvatarPlugin } from "./others/collaboration/collaboration_selection_avatar_plugin";
+import { PositionPlugin } from "./main/position_plugin";
 
 export const CORE_PLUGINS = [
     ClipboardPlugin,
@@ -85,6 +86,7 @@ export const MAIN_PLUGINS = [
     LinkPastePlugin,
     MoveNodePlugin,
     LocalOverlayPlugin,
+    PositionPlugin,
     TextDirectionPlugin,
     InlineCodePlugin,
     TableResizePlugin,

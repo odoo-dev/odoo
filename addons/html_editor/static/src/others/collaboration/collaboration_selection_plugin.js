@@ -6,12 +6,18 @@ import { _t } from "@web/core/l10n/translation";
 
 export class CollaborationSelectionPlugin extends Plugin {
     static name = "collaboration_selection";
-    static dependencies = ["history", "collaboration", "collaboration_odoo", "local-overlay"];
+    static dependencies = [
+        "history",
+        "position",
+        "collaboration",
+        "collaboration_odoo",
+        "local-overlay",
+    ];
     /** @type { (p: CollaborationSelectionPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handleCollaborationNotification: p.handleCollaborationNotification.bind(p),
         getCollaborationPeerMetadata: () => ({ selectionColor: p.selectionColor }),
-        refreshOverlay: p.refreshSelection.bind(p),
+        layoutGeomentryChange: p.refreshSelection.bind(p),
         collaborativeSelectionUpdate: p.updateSelection.bind(p),
     });
     selectionInfos = new Map();

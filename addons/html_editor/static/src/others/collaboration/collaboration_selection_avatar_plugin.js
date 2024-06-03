@@ -20,13 +20,13 @@ export const AVATAR_SIZE = 25;
 
 export class CollaborationSelectionAvatarPlugin extends Plugin {
     static name = "collaboration_selection_avatar";
-    static dependencies = ["history", "local-overlay", "collaboration_odoo"];
+    static dependencies = ["history", "position", "local-overlay", "collaboration_odoo"];
     /** @type { (p: CollaborationSelectionAvatarPlugin) => Record<string, any> } */
     static resources = (p) => ({
         handleCollaborationNotification: p.handleCollaborationNotification.bind(p),
         getCollaborationPeerMetadata: () => ({ avatarUrl: p.avatarUrl }),
         onExternalHistorySteps: p.refreshSelection.bind(p),
-        refreshOverlay: p.refreshSelection.bind(p),
+        layoutGeomentryChange: p.refreshSelection.bind(p),
         setMovableElement: p.disableAvatarForElement.bind(p),
         unsetMovableElement: p.enableAvatars.bind(p),
         collaborativeSelectionUpdate: p.updateSelection.bind(p),
