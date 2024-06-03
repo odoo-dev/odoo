@@ -42,6 +42,13 @@ export class LineBreakPlugin extends Plugin {
             targetOffset = this.shared.splitTextNode(targetNode, targetOffset);
             targetNode = targetNode.parentElement;
         }
+
+        for (const { callback } of this.resources.handle_insert_line_break || []) {
+            if (callback({ targetNode, targetOffset })) {
+                return;
+            }
+        }
+
         this.insertLineBreakElement({ targetNode, targetOffset });
     }
 

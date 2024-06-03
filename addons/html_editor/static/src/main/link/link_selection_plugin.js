@@ -3,7 +3,8 @@ import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { removeClass } from "@html_editor/utils/dom";
 import { isBlock } from "@html_editor/utils/blocks";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
-import { leftPos } from "@html_editor/utils/position";
+import { leftPos, rightPos } from "@html_editor/utils/position";
+import { isVisible } from "@html_editor/utils/dom_info";
 
 /*
     This plugin solves selection issues around links (allowing the cursor at the
@@ -29,10 +30,13 @@ import { leftPos } from "@html_editor/utils/position";
  */
 export class LinkSelectionPlugin extends Plugin {
     static name = "link_selection";
-    static dependencies = ["selection"];
+    static dependencies = ["selection", "split", "line_break"];
+    /** @type { (p: LinkSelectionPlugin) => Record<string, any> } */
     static resources = (p) => ({
         history_rendering_classes: ["o_link_in_selection"],
         onSelectionChange: p.handleSelectionChange.bind(p),
+        split_element_block: { callback: p.handleSplitBlock.bind(p) },
+        handle_insert_line_break: { callback: p.handleInsertLineBreak.bind(p) },
     });
 
     handleCommand(command, payload) {
@@ -174,6 +178,38 @@ export class LinkSelectionPlugin extends Plugin {
             }
         }
     }
+
+    /**
+     * Special behavior for links: do not break the link at its edges, but
+     * rather before/after it.
+     */
+    handleSplitBlock(params) {
+        return this.handleEnterAtEdgeOfLink(params, this.shared.splitElementBlock);
+    }
+
+    /**
+     * Special behavior for links: do not add a line break at its edges, but
+     * rather outside it.
+     */
+    handleInsertLineBreak(params) {
+        return this.handleEnterAtEdgeOfLink(params, this.shared.insertLineBreakElement);
+    }
+
+    handleEnterAtEdgeOfLink(params, splitOrLineBreakCallback) {
+        // @todo: handle target Node being a descendent of a link (iterate over
+        // leaves inside the link, rather than childNodes)
+        let { targetNode, targetOffset } = params;
+        if (targetNode.tagName !== "A") {
+            return;
+        }
+        const edge = isAtEdgeofLink(targetNode, targetOffset);
+        if (!edge) {
+            return;
+        }
+        [targetNode, targetOffset] = edge === "start" ? leftPos(targetNode) : rightPos(targetNode);
+        splitOrLineBreakCallback({ ...params, targetNode, targetOffset });
+        return true;
+    }
 }
 
 // @todo move this elsewhere, consider unifying with list's applyToTree
@@ -188,6 +224,21 @@ function depthFirstPreOrderTraversal(root, callback) {
     for (const child of childNodes) {
         depthFirstPreOrderTraversal(child, callback);
     }
+}
+
+function isAtEdgeofLink(link, offset) {
+    const childNodes = [...link.childNodes];
+    let firstVisibleIndex = childNodes.findIndex(isVisible);
+    firstVisibleIndex = firstVisibleIndex === -1 ? 0 : firstVisibleIndex;
+    if (offset <= firstVisibleIndex) {
+        return "start";
+    }
+    let lastVisibleIndex = childNodes.reverse().findIndex(isVisible);
+    lastVisibleIndex = lastVisibleIndex === -1 ? 0 : childNodes.length - lastVisibleIndex;
+    if (offset >= lastVisibleIndex) {
+        return "end";
+    }
+    return false;
 }
 
 /*
