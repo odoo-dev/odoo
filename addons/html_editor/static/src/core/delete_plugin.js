@@ -6,8 +6,8 @@ import {
     isNotEditableNode,
     isSelfClosingElement,
     isShrunkBlock,
+    isTangible,
     isUnbreakable,
-    isVisible,
     isVisibleTextNode,
     isWhitespace,
     isZWS,
@@ -458,7 +458,8 @@ export class DeletePlugin extends Plugin {
         for (const node of nodes) {
             // @todo: mind Icons?
             // Probably need to get deepest position's element
-            if (!isBlock(node) && !isVisible(node)) {
+            // @todo: update fillEmpty
+            if (!isBlock(node) && !isTangible(node)) {
                 node.appendChild(this.document.createTextNode("\u200B"));
                 node.setAttribute("data-oe-zws-empty-inline", "");
             }

@@ -106,7 +106,7 @@ test("should add a character in the link after a br tag", async () => {
     });
 });
 
-test.todo("should remove an empty link on save", async () => {
+test("should remove an empty link on save", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist">b[]</a>c</p>',
         contentBeforeEdit:
@@ -146,7 +146,7 @@ test("should not remove a document link on save", async () => {
     });
 });
 
-test.todo("should not remove a link containing a pictogram on save", async () => {
+test("should not remove a link containing a pictogram on save", async () => {
     await testEditor({
         contentBefore: '<p>a<a href="exist"><span class="fa fa-star"></span></a>b</p>',
         contentBeforeEdit:

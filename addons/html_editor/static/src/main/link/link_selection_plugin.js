@@ -83,6 +83,7 @@ export class LinkSelectionPlugin extends Plugin {
     }
 
     clean(root) {
+        // @todo: maybe the querySelectorAll calls should include the root.
         for (const link of root.querySelectorAll(".o_link_in_selection")) {
             removeClass(link, "o_link_in_selection");
         }
@@ -96,6 +97,14 @@ export class LinkSelectionPlugin extends Plugin {
                 const restore = prepareUpdate(...leftPos(node));
                 node.textContent = node.textContent.replaceAll("\uFEFF", "");
                 restore(); // Make sure to make <br>s visible if needed.
+            }
+        }
+
+        // Remove empty links
+        // @todo: check for unremovables
+        for (const link of root.querySelectorAll("a")) {
+            if (![...link.childNodes].some(isVisible) && !link.classList.length) {
+                link.remove();
             }
         }
     }
