@@ -34,7 +34,7 @@ export class LinkSelectionPlugin extends Plugin {
     /** @type { (p: LinkSelectionPlugin) => Record<string, any> } */
     static resources = (p) => ({
         history_rendering_classes: ["o_link_in_selection"],
-        onSelectionChange: p.handleSelectionChange.bind(p),
+        onSelectionChange: p.resetLinkInSelection.bind(p),
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
         handle_insert_line_break: { callback: p.handleInsertLineBreak.bind(p) },
     });
@@ -52,7 +52,7 @@ export class LinkSelectionPlugin extends Plugin {
 
     // Apply the o_link_in_selection class if the selection is in a single
     // link, remove it otherwise.
-    handleSelectionChange(selection) {
+    resetLinkInSelection(selection = this.shared.getEditableSelection()) {
         const { anchorNode, focusNode } = selection;
         const [anchorLink, focusLink] = [anchorNode, focusNode].map((node) =>
             closestElement(node, "a:not(.btn)")
@@ -139,6 +139,7 @@ export class LinkSelectionPlugin extends Plugin {
     normalize(root) {
         // @todo review the need for "root" parameter
         depthFirstPreOrderTraversal(root, (node) => this.updateZWNBSPs(node, root));
+        this.resetLinkInSelection();
     }
 
     // @todo: ZWNBSPs are not removed in the case it is in the middle of link
