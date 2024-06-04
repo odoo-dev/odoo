@@ -3,7 +3,7 @@ import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { removeClass } from "@html_editor/utils/dom";
 import { isBlock } from "@html_editor/utils/blocks";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
-import { leftPos, rightPos } from "@html_editor/utils/position";
+import { childNodeIndex, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
 import { isVisible } from "@html_editor/utils/dom_info";
 
 /*
@@ -122,18 +122,50 @@ export class LinkSelectionPlugin extends Plugin {
             // never in a nav.
             return;
         }
+        const cursors = this.shared.preserveSelection();
         if (!link.textContent.startsWith("\uFEFF")) {
+            // @todo: why not just cursors.shiftOffset(link, 1) ?
+            cursors.update((cursor) => {
+                if (cursor.node === link && cursor.offset > 0) {
+                    cursor.offset += 1;
+                }
+            });
             link.prepend(this.document.createTextNode("\uFEFF"));
         }
         if (!link.textContent.endsWith("\uFEFF")) {
+            // @todo: this changes the cursor, to preserve it we should simply
+            // do nothing here.
+            cursors.update((cursor) => {
+                if (cursor.node === link && cursor.offset === nodeSize(link)) {
+                    cursor.offset += 1;
+                }
+            });
             link.append(this.document.createTextNode("\uFEFF"));
         }
+        const linkIndex = childNodeIndex(link);
         if (!(link.previousSibling && link.previousSibling.textContent.endsWith("\uFEFF"))) {
-            link.before(this.document.createTextNode("\uFEFF"));
+            const nbzwsp = this.document.createTextNode("\uFEFF");
+            // @todo: why not cursors.update(callbacksForCursorUpdate.before(link, nbzwsp)) ?
+            // if offset === linkIndex, the cursor will be set to the new nbzwsp
+            // instead of preserved pointing to the link
+            cursors.update((cursor) => {
+                if (cursor.node === link.parentElement && cursor.offset > linkIndex) {
+                    cursor.offset += 1;
+                }
+            });
+            link.before(nbzwsp);
         }
         if (!(link.nextSibling && link.nextSibling.textContent.startsWith("\uFEFF"))) {
-            link.after(this.document.createTextNode("\uFEFF"));
+            const nbzwsp = this.document.createTextNode("\uFEFF");
+            // @todo why not cursors.update(callbacksForCursorUpdate.after(link, nbzwsp)) ?
+            cursors.update((cursor) => {
+                if (cursor.node === link.parentElement && cursor.offset > linkIndex + 1) {
+                    cursor.offset += 1;
+                }
+            });
+            link.after(nbzwsp);
         }
+        cursors.restore();
     }
 
     normalize(root) {
