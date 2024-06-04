@@ -253,6 +253,18 @@ export function hasVisibleContent(node) {
     return [...(node?.childNodes || [])].some((n) => isVisible(n));
 }
 
+export function isZwnbsp(node) {
+    return node.nodeType === Node.TEXT_NODE && node.textContent === "\ufeff";
+}
+
+export function isTangible(node) {
+    return isVisible(node) || isZwnbsp(node) || hasTangibleContent(node);
+}
+
+export function hasTangibleContent(node) {
+    return [...(node?.childNodes || [])].some((n) => isTangible(n));
+}
+
 export const isNotEditableNode = (node) =>
     node.getAttribute &&
     node.getAttribute("contenteditable") &&
