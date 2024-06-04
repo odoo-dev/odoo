@@ -44,7 +44,6 @@ class MassMailing(models.Model):
     _inherit = ['mail.thread',
                 'mail.activity.mixin',
                 'mail.render.mixin',
-                'utm.source.mixin'
     ]
     _order = 'calendar_date DESC'
     _rec_name = "subject"
@@ -125,9 +124,14 @@ class MassMailing(models.Model):
     campaign_id = fields.Many2one('utm.campaign', string='UTM Campaign', index=True, ondelete='set null')
     medium_id = fields.Many2one(
         'utm.medium', string='Medium',
-        compute='_compute_medium_id', readonly=False, store=True,
+        compute='_compute_utm_values', readonly=False, store=True,
         ondelete='restrict',
         help="UTM Medium: delivery method (email, sms, ...)")
+    source_id = fields.Many2one(
+        'utm.source', string='Source',
+        compute='_compute_utm_values', readonly=False, store=True,
+        ondelete='restrict',
+        help="UTM Source: source tracking (mass_mailing, newsletter, mass_sms, ...)")
     state = fields.Selection(
         [('draft', 'Draft'), ('in_queue', 'In Queue'),
          ('sending', 'Sending'), ('done', 'Sent')],
@@ -388,10 +392,13 @@ class MassMailing(models.Model):
                 mailing.warning_message = False
 
     @api.depends('mailing_type')
-    def _compute_medium_id(self):
+    def _compute_utm_values(self):
         for mailing in self:
-            if mailing.mailing_type == 'mail' and not mailing.medium_id:
-                mailing.medium_id = self.env['utm.mixin']._utm_ref('utm.utm_medium_email').id
+            if mailing.mailing_type == 'mail':
+                if not mailing.medium_id:
+                    mailing.medium_id = self.env['utm.mixin']._utm_ref('utm.utm_medium_email').id
+                if not mailing.source_id:
+                    mailing.source_id = self.env['utm.mixin']._utm_ref('utm.utm_source_mailing').id
 
     @api.depends('mailing_model_id')
     def _compute_reply_to_mode(self):
@@ -944,7 +951,10 @@ class MassMailing(models.Model):
 
     def _get_link_tracker_values(self):
         self.ensure_one()
-        vals = {'mass_mailing_id': self.id}
+        vals = {
+            'mass_mailing_id': self.id,
+            'utm_reference': f'{self._name},{self.id}',
+        }
 
         if self.campaign_id:
             vals['campaign_id'] = self.campaign_id.id
@@ -1124,7 +1134,10 @@ class MassMailing(models.Model):
         for mass_mailing in self:
             html = mass_mailing.body_html if mass_mailing.body_html else ''
 
-            vals = {'mass_mailing_id': mass_mailing.id}
+            vals = {
+                'mass_mailing_id': mass_mailing.id,
+                'utm_reference': f'{mass_mailing._name},{mass_mailing.id}',
+            }
 
             if mass_mailing.campaign_id:
                 vals['campaign_id'] = mass_mailing.campaign_id.id

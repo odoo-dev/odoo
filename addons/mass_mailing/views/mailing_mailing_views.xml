@@ -6,7 +6,7 @@
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                <search string="Mailings">
-                    <field name="name" string="Mailing" filter_domain="['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"/>
+                    <field name="subject" string="Mailing"/>
                     <field name="campaign_id" string="Campaign" groups="mass_mailing.group_mass_mailing_campaign"/>
                     <filter string="My Mailings" name="assigned_to_me"
                             domain="[('user_id', '=', uid)]"
@@ -379,14 +379,12 @@
                                             string="Source"
                                             class="o_text_overflow"
                                             groups="base.group_no_one"
-                                            readonly="1"
                                             required="False"/>
                                         <field name="user_id" widget="many2one_avatar_user"
                                             domain="[('share', '=', False)]"/>
                                     </group>
                                     <group string="Advanced" groups="base.group_no_one">
                                         <field name="mail_server_available" invisible="1"/>
-                                        <field name="name" string="Name" required="False" readonly="state in ('sending', 'done')"/>
                                         <field name="mail_server_id" invisible="not mail_server_available" readonly="state in ('sending', 'done')"/>
                                         <field name="keep_archives" readonly="state in ('sending', 'done')"/>
                                     </group>

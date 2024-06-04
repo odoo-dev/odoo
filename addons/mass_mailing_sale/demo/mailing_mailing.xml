@@ -2,7 +2,6 @@
 <odoo>
     <data noupdate="0">
     <record id="mass_mail_sale_order_0" model="mailing.mailing">
-        <field name="name">Sale Promotion 1</field>
         <field name="subject">Our last promotions, just for you!</field>
         <field name="state">draft</field>
         <field name="user_id" ref="base.user_admin"/>
