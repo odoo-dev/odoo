@@ -246,6 +246,7 @@ export function isVisible(node) {
         !!node &&
         ((node.nodeType === Node.TEXT_NODE && isVisibleTextNode(node)) ||
             isSelfClosingElement(node) ||
+            isIconElement(node) ||
             hasVisibleContent(node))
     );
 }
