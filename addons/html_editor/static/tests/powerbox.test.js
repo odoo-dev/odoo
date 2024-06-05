@@ -433,7 +433,7 @@ test("should restore state before /command insertion when command is executed (2
     expect(commandNames(el)).toEqual(["No-op"]);
     press("Enter");
     expect(getContent(el)).toBe(
-        '<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>'
+        '<p class="o-we-hint" placeholder="Type "/" for commands">[]<br></p>'
     );
 });
 
@@ -464,7 +464,7 @@ test("should discard /command insertion from history when command is executed", 
     expect(getContent(el)).toBe("<p>a[]</p>");
     editor.dispatch("HISTORY_UNDO");
     expect(getContent(el)).toBe(
-        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+        `<p class="o-we-hint" placeholder="Type "/" for commands">[]<br></p>`
     );
 });
 

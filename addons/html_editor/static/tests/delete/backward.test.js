@@ -3,7 +3,7 @@ import { testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { deleteBackward, insertText } from "../_helpers/user_actions";
+import { deleteBackward, insertText, undo } from "../_helpers/user_actions";
 
 /**
  * content of the "deleteBackward" sub suite in editor.test.js
@@ -100,7 +100,7 @@ describe("Selection collapsed", () => {
                 stepFunction: deleteBackward,
                 contentAfterEdit:
                     '<div><p>ab</p><br><i data-oe-zws-empty-inline="">[]\u200B</i></div>',
-                contentAfter: "<div><p>ab</p><br>[]</div>",
+                contentAfter: "<div><p>ab</p><br><br>[]</div>",
             });
             await testEditor({
                 contentBefore: '<div><p>uv</p><br><span class="style">w[]</span></div>',
@@ -115,9 +115,33 @@ describe("Selection collapsed", () => {
                     deleteBackward(editor);
                     insertText(editor, "x");
                 },
-                contentAfterEdit:
-                    '<div><p>cd</p><br><span class="a" data-oe-zws-empty-inline="">x[]\u200B</span></div>',
+                contentAfterEdit: '<div><p>cd</p><br><span class="a">x[]</span></div>',
                 contentAfter: '<div><p>cd</p><br><span class="a">x[]</span></div>',
+            });
+        });
+        test("should keep inline block and then undo (1)", async () => {
+            await testEditor({
+                contentBefore: "<div>ab<b>c[]</b>de</div>",
+                stepFunction: async (editor) => {
+                    deleteBackward(editor);
+                    insertText(editor, "x");
+                    undo(editor);
+                },
+                contentAfterEdit: '<div>ab<b data-oe-zws-empty-inline="">[]\u200B</b>de</div>',
+                contentAfter: "<div>ab[]de</div>",
+            });
+        });
+        test("should keep inline block and then undo (2)", async () => {
+            await testEditor({
+                contentBefore: "<div>ab<b>c[]</b>de</div>",
+                stepFunction: async (editor) => {
+                    deleteBackward(editor);
+                    insertText(editor, "x");
+                    undo(editor);
+                    undo(editor);
+                },
+                contentAfterEdit: "<div>ab<b>c[]</b>de</div>",
+                contentAfter: "<div>ab<b>c[]</b>de</div>",
             });
         });
 
@@ -138,10 +162,18 @@ describe("Selection collapsed", () => {
                 contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
-                    insertText(editor, "i");
                 },
                 contentAfterEdit:
-                    '<p>uv<i style="color:red" data-oe-zws-empty-inline="">i[]\u200B</i>xy</p>',
+                    '<p>uv<i style="color:red" data-oe-zws-empty-inline="">[]\u200B</i>xy</p>',
+                contentAfter: "<p>uv[]xy</p>",
+            });
+            await testEditor({
+                contentBefore: '<p>uv<i style="color:red">w[]</i>xy</p>',
+                stepFunction: async (editor) => {
+                    deleteBackward(editor);
+                    insertText(editor, "i");
+                },
+                contentAfterEdit: '<p>uv<i style="color:red">i[]</i>xy</p>',
                 contentAfter: '<p>uv<i style="color:red">i[]</i>xy</p>',
             });
             await testEditor({
@@ -161,8 +193,7 @@ describe("Selection collapsed", () => {
                     deleteBackward(editor);
                     insertText(editor, "x");
                 },
-                contentAfterEdit:
-                    '<p>ab<span class="style" data-oe-zws-empty-inline="">x[]\u200B</span>ef</p>',
+                contentAfterEdit: '<p>ab<span class="style">x[]</span>ef</p>',
                 contentAfter: '<p>ab<span class="style">x[]</span>ef</p>',
             });
         });
@@ -1223,9 +1254,17 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 insertText(editor, "x");
             },
-            contentAfterEdit:
-                '<div><p>ab <span class="style" data-oe-zws-empty-inline="">x[]\u200B</span> d</p></div>',
+            contentAfterEdit: '<div><p>ab <span class="style">x[]</span> d</p></div>',
             contentAfter: '<div><p>ab <span class="style">x[]</span> d</p></div>',
+        });
+        await testEditor({
+            contentBefore: "<div><p>ab <span>[c]</span> d</p></div>",
+            stepFunction: async (editor) => {
+                deleteBackward(editor);
+            },
+            contentAfterEdit:
+                '<div><p>ab <span data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
+            contentAfter: "<div><p>ab []&nbsp;d</p></div>",
         });
         await testEditor({
             contentBefore: '<div><p>ab<span class="style">[c]</span>d</p></div>',
@@ -1233,8 +1272,7 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 insertText(editor, "x");
             },
-            contentAfterEdit:
-                '<div><p>ab<span class="style" data-oe-zws-empty-inline="">x[]\u200B</span>d</p></div>',
+            contentAfterEdit: '<div><p>ab<span class="style">x[]</span>d</p></div>',
             contentAfter: '<div><p>ab<span class="style">x[]</span>d</p></div>',
         });
         await testEditor({
@@ -1243,8 +1281,7 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 insertText(editor, "x");
             },
-            contentAfterEdit:
-                '<div><p>ab <span class="style" data-oe-zws-empty-inline="">x[]\u200B</span> f</p></div>',
+            contentAfterEdit: '<div><p>ab <span class="style">x[]</span> f</p></div>',
             contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
         });
     });

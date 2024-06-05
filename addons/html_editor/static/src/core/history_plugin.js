@@ -884,7 +884,8 @@ export class HistoryPlugin extends Plugin {
                 return;
             }
         }
-        if (attributeValue) {
+        // if attributeValue is falsy but not null, we still need to apply it
+        if (attributeValue !== null) {
             node.setAttribute(attributeName, attributeValue);
         } else {
             node.removeAttribute(attributeName);

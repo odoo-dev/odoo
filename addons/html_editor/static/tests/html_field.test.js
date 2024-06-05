@@ -2,7 +2,7 @@ import { HtmlField } from "@html_editor/fields/html_field";
 import { MediaDialog } from "@html_editor/main/media/media_dialog";
 import { parseHTML } from "@html_editor/utils/html";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { click, press, queryAll, queryAllTexts, queryOne } from "@odoo/hoot-dom";
+import { click, press, queryAll, queryAllTexts, queryOne, waitUntil } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockSendBeacon } from "@odoo/hoot-mock";
 import {
     contains,
@@ -720,7 +720,7 @@ test("link preview in Link Popover", async () => {
     // Move selection outside to discard
     anchorNode = queryOne(".test_target");
     setSelection({ anchorNode, anchorOffset: 0 });
-    await animationFrame();
+    await waitUntil(() => !document.querySelector(".o-we-linkpopover"), { timeout: 500 });
     expect(".o-we-linkpopover").toHaveCount(0);
     expect(".test_target a").toHaveText("This website");
 

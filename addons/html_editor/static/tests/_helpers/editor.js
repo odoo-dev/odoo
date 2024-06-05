@@ -148,7 +148,7 @@ export async function testEditor(config) {
 
     if (contentBeforeEdit) {
         // we should do something before (sanitize)
-        compareFunction(getContent(el), contentBeforeEdit, "contentBeforeEdit");
+        compareFunction(getContent(el), contentBeforeEdit, "Editor content, before edit");
     }
 
     if (stepFunction) {
@@ -156,14 +156,14 @@ export async function testEditor(config) {
     }
 
     if (contentAfterEdit) {
-        compareFunction(getContent(el), contentAfterEdit, "contentAfterEdit");
+        compareFunction(getContent(el), contentAfterEdit, "Editor content, after edit");
     }
     if (contentAfter) {
         const content = editor.getContent();
         editor.dispatch("CLEAN", { root: el });
         editor.dispatch("MERGE_ADJACENT_NODE", { node: el });
-        compareFunction(getContent(el), contentAfter, "contentAfter");
-        compareFunction(content, el.innerHTML, "contentAfter 2");
+        compareFunction(getContent(el), contentAfter, "Editor content, after clean");
+        compareFunction(content, el.innerHTML, "Value from editor.getContent()");
     }
 }
 /**

@@ -152,26 +152,20 @@ describe("with strikeThrough", () => {
         });
     });
 
-    test.todo(
-        "should remove underline, write, restore underline, write, remove underline again, write (collapsed, strikeThrough)",
-        async () => {
-            await testEditor({
-                contentBefore: `<p>ab${u(s(`cd[]ef`))}</p>`,
-                stepFunction: async (editor) => {
-                    underline(editor);
-                    insertText(editor, "A");
-                    underline(editor);
-                    insertText(editor, "B");
-                    underline(editor);
-                    insertText(editor, "C");
-                },
-                contentAfterEdit: `<p>ab${u(s(`cd`))}${s(
-                    `A${u(`B`, "first")}C[]\u200B`,
-                    "first"
-                )}${u(s(`ef`))}</p>`,
-            });
-        }
-    );
+    test("should remove underline, write, restore underline, write, remove underline again, write (collapsed, strikeThrough)", async () => {
+        await testEditor({
+            contentBefore: `<p>ab<u><s>cd[]ef</s></u></p>`,
+            stepFunction: async (editor) => {
+                underline(editor);
+                insertText(editor, "A");
+                underline(editor);
+                insertText(editor, "B");
+                underline(editor);
+                insertText(editor, "C");
+            },
+            contentAfterEdit: `<p>ab<u><s>cd</s></u><s>A<u>B</u></s><s>C[]</s><u><s>ef</s></u></p>`,
+        });
+    });
 
     test("should remove only underline decoration on a span", async () => {
         await testEditor({

@@ -4,7 +4,7 @@ import { closestBlock } from "../utils/blocks";
 import { nextLeaf, previousLeaf } from "../utils/dom_info";
 import { prepareUpdate } from "../utils/dom_state";
 import { closestElement, descendants } from "../utils/dom_traversal";
-import { boundariesOut, nodeSize } from "../utils/position";
+import { boundariesOut, leftPos, nodeSize, rightPos } from "../utils/position";
 
 const allWhitespaceRegex = /^[\s\u200b]*$/;
 
@@ -38,9 +38,28 @@ export class ZwsPlugin extends Plugin {
             case "CLEAN":
                 this.clean(payload.root);
                 break;
+            case "NORMALIZE":
+                this.normalize(payload.node);
+                break;
         }
     }
 
+    normalize(element) {
+        if (!element) {
+            return;
+        }
+        let elementToClean = [...element.querySelectorAll("[data-oe-zws-empty-inline]")];
+
+        if (element.getAttribute("data-oe-zws-empty-inline") !== null) {
+            elementToClean.push(element);
+        }
+        elementToClean = elementToClean.filter((el) => {
+            return !allWhitespaceRegex.test(el.textContent);
+        });
+        for (const el of elementToClean) {
+            this.cleanElement(el);
+        }
+    }
     clean(root) {
         for (const el of root.querySelectorAll("[data-oe-zws-empty-inline]")) {
             this.cleanElement(el);
@@ -65,7 +84,9 @@ export class ZwsPlugin extends Plugin {
             // ensure the cursor can be placed in it).
             return;
         }
+        const restore = prepareUpdate(...leftPos(element), ...rightPos(element));
         element.remove();
+        restore();
     }
 
     cleanZWS(element) {
@@ -196,8 +217,9 @@ export class ZwsPlugin extends Plugin {
     }
 
     /**
-     * Use the actual selection (assumed to be collapsed) and insert a zero-width space at
-     * its anchor point. Then, select that zero-width space.
+     * Use the actual selection (assumed to be collapsed) and insert a
+     * zero-width space at its anchor point. Then, select that zero-width
+     * space.
      *
      * @returns {Node} the inserted zero-width space
      */
