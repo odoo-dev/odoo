@@ -3,7 +3,7 @@ import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useBus } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { HtmlViewer } from "./html_viewer";
@@ -47,6 +47,7 @@ export class HtmlField extends Component {
             detail.proms.push(this.commitChanges())
         );
         this.busService = this.env.services.bus_service;
+        this.ormService = useService("orm");
 
         this.isDirty = false;
         this.state = useState({
@@ -146,6 +147,7 @@ export class HtmlField extends Component {
             onChange: this.onChange.bind(this),
             collaboration: this.props.isCollaborative && {
                 busService: this.busService,
+                ormService: this.ormService,
                 collaborationChannel: {
                     collaborationModelName: this.props.record.resModel,
                     collaborationFieldName: this.props.name,

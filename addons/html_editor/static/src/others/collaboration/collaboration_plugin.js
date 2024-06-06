@@ -24,6 +24,7 @@ export class CollaborationPlugin extends Plugin {
         //
         "onExternalHistorySteps",
         "historyGetMissingSteps",
+        "setInitialBranchStepId",
         "getBranchIds",
         "getSnapshotSteps",
         "resetFromSteps",
@@ -91,7 +92,7 @@ export class CollaborationPlugin extends Plugin {
      */
     getBranchIds() {
         const steps = this.shared.getHistorySteps();
-        return this.branchStepIds.concat(steps.map((s) => s.id));
+        return [this.initialBranchStepId].concat(this.branchStepIds).concat(steps.map((s) => s.id));
     }
     /**
      * Safely set an attribute on a node.
@@ -270,6 +271,9 @@ export class CollaborationPlugin extends Plugin {
         snapshotSteps.reverse();
 
         return { steps: snapshotSteps, historyIds: this.getBranchIds() };
+    }
+    setInitialBranchStepId(stepId) {
+        this.initialBranchStepId = stepId;
     }
     resetFromSteps(steps, branchStepIds) {
         this.shared.resetSelection();

@@ -5,6 +5,7 @@ import { loadBundle } from "@web/core/assets";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
 import { counter } from "./counter";
 import { card } from "./card";
+import { useService } from "@web/core/utils/hooks";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
@@ -100,6 +101,7 @@ export class Playground extends Component {
             pluginSet: "base",
         });
         this.busService = this.env.services.bus_service;
+        this.ormService = useService("orm");
     }
 
     setEditor(editor) {
@@ -132,6 +134,7 @@ export class Playground extends Component {
             onChange: this.updateContent.bind(this),
             collaboration: {
                 busService: this.busService,
+                ormService: this.ormService,
                 collaborationChannel: {
                     collaborationModelName: 'res.users',
                     collaborationFieldName: 'help',

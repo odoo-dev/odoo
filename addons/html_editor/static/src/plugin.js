@@ -60,6 +60,7 @@
  * @property { OverlayPlugin['createOverlay'] } createOverlay
  * @property { CollaborationPlugin['onExternalHistorySteps'] } onExternalHistorySteps
  * @property { CollaborationPlugin['historyGetMissingSteps'] } historyGetMissingSteps
+ * @property { CollaborationPlugin['setInitialBranchStepId'] } setInitialBranchStepId
  * @property { CollaborationPlugin['getBranchIds'] } getBranchIds
  * @property { CollaborationPlugin['getSnapshotSteps'] } getSnapshotSteps
  * @property { CollaborationPlugin['resetFromSteps'] } resetFromSteps

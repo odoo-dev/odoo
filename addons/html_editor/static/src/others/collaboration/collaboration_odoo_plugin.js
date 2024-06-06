@@ -77,10 +77,14 @@ export class CollaborationOdooPlugin extends Plugin {
         // stale.
         this.serverLastStepId =
             this.config.content && this.getLastHistoryStepId(this.config.content);
+        if (this.serverLastStepId) {
+            this.shared.setInitialBranchStepId(this.serverLastStepId);
+        }
 
         this.setupCollaboration(this.config.collaboration.collaborationChannel);
 
         const collaborativeTrigger = this.config.collaboration.collaborativeTrigger;
+        this.joinPeerToPeer = this.joinPeerToPeer.bind(this);
         if (collaborativeTrigger === "start" || typeof collaborativeTrigger === "undefined") {
             this.joinPeerToPeer();
         } else if (collaborativeTrigger === "focus") {
@@ -108,6 +112,9 @@ export class CollaborationOdooPlugin extends Plugin {
                 break;
             case "STEP_ADDED":
                 this.ptp?.notifyAllPeers("oe_history_step", payload.step, { transport: "rtc" });
+                break;
+            case "CLEAN":
+                this.attachHistoryIds(payload.root);
                 break;
         }
     }
@@ -249,16 +256,7 @@ export class CollaborationOdooPlugin extends Plugin {
                 });
             },
             onRequest: {
-                get_peer_metadata: () => {
-                    const metadatas = {
-                        startTime: this.startCollaborationTime,
-                        peerName: () => user.name,
-                    };
-                    for (const cb of this.resources.getCollaborationPeerMetadata || []) {
-                        Object.assign(metadatas, cb());
-                    }
-                    return metadatas;
-                },
+                get_peer_metadata: this.getMetadata.bind(this),
                 get_missing_steps: (params) =>
                     this.shared.historyGetMissingSteps(params.requestPayload),
                 get_history_from_snapshot: () => this.getHistorySnapshot(),
@@ -338,7 +336,6 @@ export class CollaborationOdooPlugin extends Plugin {
                         break;
                     }
                     case "oe_history_step":
-                        console.log(`this.historySyncFinished:`, this.historySyncFinished);
                         if (this.historySyncFinished) {
                             this.shared.onExternalHistorySteps([notificationPayload]);
                         } else {
@@ -380,7 +377,16 @@ export class CollaborationOdooPlugin extends Plugin {
             }
         });
     }
-
+    getMetadata() {
+        const metadatas = {
+            startTime: this.startCollaborationTime,
+            peerName: user.name,
+        };
+        for (const cb of this.resources.getCollaborationPeerMetadata || []) {
+            Object.assign(metadatas, cb());
+        }
+        return metadatas;
+    }
     /**
      * Update the server document last step id and recover from a stale document
      * if this peer does not have that step in its history.
@@ -573,13 +579,13 @@ export class CollaborationOdooPlugin extends Plugin {
      */
     async resetFromServerAndResyncWithPeers() {
         let collaborationResetId = this.lastCollaborationResetId;
-        // todo: implement this.getCurrentRecord
         const record = await this.getCurrentRecord();
         if (collaborationResetId !== this.lastCollaborationResetId) {
             return;
         }
 
-        const content = record[this.options.collaborationChannel.collaborationFieldName];
+        const content =
+            record[this.config.collaboration.collaborationChannel.collaborationFieldName];
         const lastHistoryId = content && this.getLastHistoryStepId(content);
         // If a change was made in the document while retrieving it, the
         // lastHistoryId will be different if the odoo bus did not have time to
@@ -708,6 +714,7 @@ export class CollaborationOdooPlugin extends Plugin {
         if (!applied) {
             return;
         }
+        this.shared.setCursorStart(this.editable.firstChild);
         this.historySyncFinished = true;
         // In case there are steps received in the meantime, process them.
         if (this.historyStepsBuffer.length) {
@@ -753,9 +760,31 @@ export class CollaborationOdooPlugin extends Plugin {
             Array.isArray(missingSteps) ? missingSteps.concat(step) : missingSteps
         );
     }
+    async getCurrentRecord() {
+        const [record] = await this.options.collaboration.ormService.read(
+            this.options.collaboration.collaborationChannel.collaborationModelName,
+            [this.options.collaboration.collaborationChannel.collaborationResId],
+            [this.config.collaboration.collaborationChannel.collaborationFieldName]
+        );
+        return record;
+    }
+    attachHistoryIds(editable) {
+        // clean existig 'data-last-history-steps' attributes
+        editable
+            .querySelectorAll("[data-last-history-steps]")
+            .forEach((el) => el.removeAttribute("data-last-history-steps"));
+
+        const historyIds = this.shared.getBranchIds().join(",");
+        const firstChild = editable.children[0];
+        if (firstChild) {
+            firstChild.setAttribute("data-last-history-steps", historyIds);
+        }
+    }
 }
 
-// Check wether peerA is before peerB.
+/**
+ * Check wether peerA is before peerB.
+ */
 function isPeerFirst(peerA, peerB) {
     if (peerA.startTime === peerB.startTime) {
         return peerA.id.localeCompare(peerB.id) === -1;
@@ -765,4 +794,11 @@ function isPeerFirst(peerA, peerB) {
     } else {
         return peerA.startTime < peerB.startTime;
     }
+}
+
+/**
+ * @param {string} value
+ */
+export function stripHistoryIds(value) {
+    return (value && value.replace(/\sdata-last-history-steps="[^"]*?"/, "")) || value;
 }
