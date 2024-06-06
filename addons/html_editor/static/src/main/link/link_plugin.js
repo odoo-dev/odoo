@@ -113,7 +113,7 @@ export class LinkPlugin extends Plugin {
                 this.toggleLinkTools(payload.options);
                 break;
             case "NORMALIZE":
-                this.normalizeLink(payload.node);
+                this.normalizeLink();
                 break;
             case "REMOVE_LINK_FROM_SELECTION":
                 this.removeLinkFromSelection();
@@ -189,8 +189,9 @@ export class LinkPlugin extends Plugin {
         this.linkElement = link;
     }
 
-    normalizeLink(node) {
-        const linkEl = closestElement(node, "a");
+    normalizeLink() {
+        const { anchorNode } = this.shared.getEditableSelection();
+        const linkEl = closestElement(anchorNode, "a");
         if (linkEl && linkEl.isContentEditable) {
             const label = linkEl.innerText;
             const url = deduceURLfromText(label, linkEl);
