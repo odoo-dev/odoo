@@ -4,9 +4,9 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
-import { EMAIL_REGEX, URL_REGEX, deduceURLfromText } from "./utils";
 import { DIRECTIONS, leftPos, nodeSize } from "@html_editor/utils/position";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
+import { EMAIL_REGEX, URL_REGEX, cleanZWChars, deduceURLfromText } from "./utils";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -220,7 +220,7 @@ export class LinkPlugin extends Plugin {
                 linkEl,
                 onApply: (url, label, classes) => {
                     this.linkElement.href = url;
-                    if (this.linkElement.innerText === label) {
+                    if (cleanZWChars(this.linkElement.innerText) === label) {
                         this.overlay.close();
                         this.shared.setSelection(this.shared.getEditableSelection());
                     } else {
@@ -282,7 +282,7 @@ export class LinkPlugin extends Plugin {
     }
 
     removeCurrentLinkIfEmtpy() {
-        if (this.linkElement && this.linkElement.innerText === "") {
+        if (this.linkElement && cleanZWChars(this.linkElement.innerText) === "") {
             this.linkElement.remove();
         }
     }

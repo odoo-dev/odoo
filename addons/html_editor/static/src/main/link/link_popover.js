@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
-import { deduceURLfromText } from "./utils";
+import { cleanZWChars, deduceURLfromText } from "./utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 
 export class LinkPopover extends Component {
@@ -41,7 +41,7 @@ export class LinkPopover extends Component {
         this.state = useState({
             editing: this.props.linkEl.href ? false : true,
             url: this.props.linkEl.href || "",
-            label: this.props.linkEl.textContent || "",
+            label: cleanZWChars(this.props.linkEl.textContent),
             previewImg: false,
             showFullUrl: false,
             faIcon: "fa-globe",
@@ -87,7 +87,7 @@ export class LinkPopover extends Component {
     onClickEdit() {
         this.state.editing = true;
         this.state.url = this.props.linkEl.href;
-        this.state.label = this.props.linkEl.textContent;
+        this.state.label = cleanZWChars(this.props.linkEl.textContent);
     }
     async onClickCopy(ev) {
         ev.preventDefault();

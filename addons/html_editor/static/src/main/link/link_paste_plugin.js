@@ -1,5 +1,5 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { URL_REGEX } from "./utils";
+import { URL_REGEX, cleanZWChars } from "./utils";
 import { isImageUrl } from "@html_editor/utils/url";
 import { Plugin } from "@html_editor/plugin";
 import { leftPos } from "@html_editor/utils/position";
@@ -101,10 +101,7 @@ export class LinkPastePlugin extends Plugin {
     removeFullySelectedLink(selection) {
         // Replace entire link if its label is fully selected.
         const link = closestElement(selection.anchorNode, "a");
-        if (
-            link &&
-            selection.textContent.replace(/\u200B/g, "") === link.innerText.replace(/\u200B/g, "")
-        ) {
+        if (link && cleanZWChars(selection.textContent) === cleanZWChars(link.innerText)) {
             const start = leftPos(link);
             link.remove();
             // @doto @phoenix do we still want normalize:false?

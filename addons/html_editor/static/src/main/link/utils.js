@@ -33,14 +33,8 @@ export const URL_REGEX = new RegExp(`((?:(?:${httpCapturedRegex}${urlRegexBase})
 export const EMAIL_REGEX = /^(mailto:)?[\w-.]+@(?:[\w-]+\.)+[\w-]{2,4}$/i;
 export const PHONE_REGEX = /^(tel:(?:\/\/)?)?\+?[\d\s.\-()/]{3,25}$/;
 
-/**
- * Returns the label of a link element.
- *
- * @param {HTMLElement} linkEl
- * @returns {string}
- */
-export function getLinkLabel(linkEl) {
-    return linkEl.innerText.trim().replaceAll("\u200B", "");
+export function cleanZWChars(text) {
+    return text.replace(/\u200B|\uFEFF/g, "");
 }
 
 /**
@@ -54,7 +48,7 @@ export function getLinkLabel(linkEl) {
  * @returns {String|null}
  */
 export function deduceURLfromText(text, link) {
-    const label = text.replace(/\u200b/g, "").trim();
+    const label = cleanZWChars(text).trim();
     // Check first for e-mail.
     let match = label.match(EMAIL_REGEX);
     if (match) {
