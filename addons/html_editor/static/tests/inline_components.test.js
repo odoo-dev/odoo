@@ -16,6 +16,7 @@ import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { deleteBackward, undo } from "./_helpers/user_actions";
 import { makeMockEnv } from "@web/../tests/_framework/env_test_helpers";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 class Counter extends Component {
     static props = [];
@@ -134,6 +135,29 @@ test("inline component are destroyed when deleted", async () => {
     deleteBackward(editor);
     expect(steps).toEqual(["mounted", "willunmount"]);
     expect(getContent(el)).toBe(`<div>a[]</div>`);
+});
+
+test("inline component plugin does not try to destroy the same app twice", async () => {
+    patchWithCleanup(InlineComponentPlugin.prototype, {
+        destroyComponent() {
+            expect.step("destroy from plugin");
+            super.destroyComponent(...arguments);
+        },
+    });
+    class Test extends Counter {
+        setup() {
+            onWillDestroy(() => {
+                expect.step("willdestroy");
+            });
+        }
+    }
+    const { editor } = await setupEditor(`<div>a<span data-embedded="counter"></span>[]</div>`, {
+        config: getConfig("counter", Test),
+    });
+    deleteBackward(editor);
+    expect(["destroy from plugin", "willdestroy"]).toVerifySteps();
+    editor.destroy();
+    expect([]).toVerifySteps();
 });
 
 test("select content of a component shouldn't open the toolbar", async () => {

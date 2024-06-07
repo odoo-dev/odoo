@@ -84,12 +84,13 @@ export class InlineComponentPlugin extends Plugin {
         host.removeAttribute("contenteditable");
         delete host.dataset.oeHasRemovableHandler;
         app.destroy();
+        this.components.delete(arguments[0]);
         this.nodeMap.delete(host);
     }
 
     destroy() {
         super.destroy();
-        for (const comp of this.components) {
+        for (const comp of [...this.components]) {
             this.destroyComponent(comp);
         }
     }
