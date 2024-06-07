@@ -6,6 +6,7 @@ import { waitUntil, waitFor, click, queryOne, press, select } from "@odoo/hoot-d
 import { browser } from "@web/core/browser/browser";
 import { insertText } from "../_helpers/user_actions";
 import { contains } from "@web/../tests/web_test_helpers";
+import { cleanLinkArtifacts } from "../_helpers/format";
 
 describe("should open a popover", () => {
     test("should open a popover when the selection is inside a link and close outside of a link", async () => {
@@ -62,7 +63,9 @@ describe("popover should switch UI depending on editing state", () => {
         click(".o_we_href_input_link");
         click(".o_we_apply_link");
         await waitFor(".o_we_edit_link");
-        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="http://test.com/">li[]nk</a></p>'
+        );
     });
     test("after clicking on apply button, the popover should be with the non editing mode, e.g. with three buttons", async () => {
         await setupEditor("<p>this is a <a>li[]nk</a></p>");
@@ -88,7 +91,9 @@ describe("popover should edit,copy,remove the link", () => {
         }
         await waitFor(".o_we_apply_link");
         click(".o_we_apply_link");
-        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="http://test.com/">li[]nk</a></p>'
+        );
     });
     test("after clicking on remove button, the link element should be unwrapped", async () => {
         const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
@@ -108,7 +113,9 @@ describe("popover should edit,copy,remove the link", () => {
             press(char);
         }
         click(".o_we_apply_link");
-        expect(getContent(el)).toBe('<p>this is a <a href="http://test.com/">linknew[]</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="http://test.com/">linknew[]</a></p>'
+        );
     });
     test("when the label is empty, it should be set as the URL", async () => {
         const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
@@ -122,7 +129,7 @@ describe("popover should edit,copy,remove the link", () => {
             press("Backspace");
         }
         click(".o_we_apply_link");
-        expect(getContent(el)).toBe(
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
             '<p>this is a <a href="http://test.com/">http://test.com/[]</a></p>'
         );
     });
@@ -137,7 +144,9 @@ describe("popover should edit,copy,remove the link", () => {
         expect(browser.navigator.clipboard.readTextSync()).toBe("http://test.com/");
     });
     test("when edit a link's label and URL to '', the link should be removed", async () => {
-        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        const { editor, el } = await setupEditor(
+            '<p>this is a <a href="http://test.com/">li[]nk</a></p>'
+        );
         await waitFor(".o-we-linkpopover");
         click(".o_we_edit_link");
         await animationFrame();
@@ -154,6 +163,9 @@ describe("popover should edit,copy,remove the link", () => {
         }
         click(".o_we_apply_link");
         await animationFrame();
+        // ZWNBSPs make space at the end of the paragraph to be visible
+        expect(getContent(el)).toBe("<p>this is a \ufeff[]\ufeff</p>");
+        editor.dispatch("CLEAN", { root: el });
         expect(getContent(el)).toBe("<p>this is a&nbsp;[]</p>");
     });
 });
@@ -177,7 +189,9 @@ describe("Incorrect URL should be corrected", () => {
         }
         click(".o_we_apply_link");
         await animationFrame();
-        expect(getContent(el)).toBe('<p>this is a <a href="http://newtest.com">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="http://newtest.com">li[]nk</a></p>'
+        );
     });
     test("when a link's URL is an email, the link's URL should start with mailto:", async () => {
         const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
@@ -190,7 +204,9 @@ describe("Incorrect URL should be corrected", () => {
         }
         click(".o_we_apply_link");
         await animationFrame();
-        expect(getContent(el)).toBe('<p>this is a <a href="mailto:test@test.com">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="mailto:test@test.com">li[]nk</a></p>'
+        );
     });
     test("when a link's URL is an phonenumber, the link's URL should start with tel://:", async () => {
         const { el } = await setupEditor("<p>this is a <a>li[]nk</a></p>");
@@ -203,7 +219,9 @@ describe("Incorrect URL should be corrected", () => {
         }
         click(".o_we_apply_link");
         await animationFrame();
-        expect(getContent(el)).toBe('<p>this is a <a href="tel://+1234567890">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="tel://+1234567890">li[]nk</a></p>'
+        );
     });
 });
 
@@ -215,7 +233,7 @@ describe("Link creation by powerbox", () => {
         expect(".active .o-we-command-name").toHaveText("Link");
 
         click(".o-we-command-name:first");
-        expect(getContent(el)).toBe("<p>ab<a>[]</a></p>");
+        expect(cleanLinkArtifacts(getContent(el))).toBe("<p>ab<a>[]</a></p>");
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
@@ -229,7 +247,7 @@ describe("Link creation by powerbox", () => {
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
-        expect(getContent(el)).toBe("<p>ab<a>[]</a></p>");
+        expect(cleanLinkArtifacts(getContent(el))).toBe("<p>ab<a>[]</a></p>");
 
         const pNode = queryOne("p");
         setSelection({
@@ -239,7 +257,7 @@ describe("Link creation by powerbox", () => {
             focusOffset: 0,
         });
         await animationFrame();
-        expect(getContent(el)).toBe("<p>[]ab</p>");
+        expect(cleanLinkArtifacts(getContent(el))).toBe("<p>[]ab</p>");
     });
     test("when create a new link by powerbox and only input the URL, the link should be created with corrected URL", async () => {
         const { editor, el } = await setupEditor("<p>ab[]</p>");
@@ -255,7 +273,9 @@ describe("Link creation by powerbox", () => {
         }
         await waitFor(".o_we_apply_link");
         click(".o_we_apply_link");
-        expect(getContent(el)).toBe('<p>ab<a href="http://test.com">test.com[]</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>ab<a href="http://test.com">test.com[]</a></p>'
+        );
     });
 });
 
@@ -325,7 +345,7 @@ describe("Link formatting in the popover", () => {
         expect(linkPreviewEl).toHaveClass(["btn", "btn-secondary", "flat"]);
 
         click(".o_we_apply_link");
-        expect(getContent(el)).toBe(
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
             '<p><a href="http://test.com/" class="btn btn-secondary flat">link2[]</a></p>'
         );
     });

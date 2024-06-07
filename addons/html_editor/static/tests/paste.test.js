@@ -6,6 +6,7 @@ import { onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
+import { cleanLinkArtifacts } from "./_helpers/format";
 
 function isInline(node) {
     return ["I", "B", "U", "S", "EM", "STRONG", "IMG", "BR", "A", "FONT"].includes(node);
@@ -1664,7 +1665,7 @@ describe("link", () => {
             pasteText(editor, "http://odoo.com");
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>xy<a href="http://odoo.com">http://odoo.com</a>[]z</p>`
             );
         });
@@ -1696,7 +1697,9 @@ describe("link", () => {
             press("Enter");
 
             await animationFrame();
-            expect(getContent(el)).toBe(`<p>xy<a href="${imgUrl}">${imgUrl}</a>[]z</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>xy<a href="${imgUrl}">${imgUrl}</a>[]z</p>`
+            );
         });
 
         test("should paste and transform plain text content over an empty link (collapsed)", async () => {
@@ -1737,7 +1740,9 @@ describe("link", () => {
             pasteText(editor, `abc ${url} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(`<p>abc <a href="${url}">${url}</a> def[]</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>abc <a href="${url}">${url}</a> def[]</p>`
+            );
         });
 
         test("should paste and transform image URL among text (collapsed)", async () => {
@@ -1745,7 +1750,9 @@ describe("link", () => {
             pasteText(editor, `abc ${imgUrl} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(`<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]</p>`
+            );
         });
 
         test("should paste and transform video URL among text (collapsed)", async () => {
@@ -1753,7 +1760,9 @@ describe("link", () => {
             pasteText(editor, `abc ${videoUrl} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(`<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]</p>`
+            );
         });
 
         test("should paste and transform multiple URLs (collapsed) (1)", async () => {
@@ -1761,7 +1770,7 @@ describe("link", () => {
             pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
         });
@@ -1771,7 +1780,7 @@ describe("link", () => {
             pasteText(editor, `${url} abc ${videoUrl} def ${imgUrl}`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> abc <a href="${videoUrl}">${videoUrl}</a> def <a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
         });
@@ -1872,7 +1881,9 @@ describe("link", () => {
             pasteText(editor, `abc ${url} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(`<p>abc <a href="${url}">${url}</a> def[]<br></p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>abc <a href="${url}">${url}</a> def[]<br></p>`
+            );
         });
 
         test("should paste and transform image URL among text (not collapsed)", async () => {
@@ -1880,7 +1891,9 @@ describe("link", () => {
             pasteText(editor, `abc ${imgUrl} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(`<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>abc <a href="${imgUrl}">${imgUrl}</a> def[]<br></p>`
+            );
         });
 
         test("should paste and transform video URL among text (not collapsed)", async () => {
@@ -1888,7 +1901,7 @@ describe("link", () => {
             pasteText(editor, `abc ${videoUrl} def`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>abc <a href="${videoUrl}">${videoUrl}</a> def[]<br></p>`
             );
         });
@@ -1898,7 +1911,7 @@ describe("link", () => {
             pasteText(editor, `${url} ${videoUrl} ${imgUrl}`);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]<br></p>`
             );
         });
@@ -1976,7 +1989,9 @@ describe("link", () => {
             );
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`
+            );
         });
 
         test("should paste html content over a link if all of its contents is selected (not collapsed)", async () => {
@@ -2025,7 +2040,7 @@ describe("images", () => {
             pasteText(editor, imgUrl);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>a<a href="http://existing.com">b<img src="${imgUrl}">[]c</a>d</p>`
             );
         });
@@ -2039,7 +2054,9 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p><a href="${imgUrl}">${imgUrl}</a>[]</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p><a href="${imgUrl}">${imgUrl}</a>[]</p>`
+            );
         });
 
         test("should not revert a history step when pasting an image URL as a link (1)", async () => {
@@ -2053,7 +2070,7 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>*should not disappear*<a href="${imgUrl}">${imgUrl}</a>[]</p>`
             );
         });
@@ -2067,7 +2084,7 @@ describe("images", () => {
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(1);
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<img src="${imgUrl}">[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(`<p>ab<img src="${imgUrl}">[]cd</p>`);
         });
 
         test("should paste and transform an image URL in a span", async () => {
@@ -2092,7 +2109,7 @@ describe("images", () => {
             pasteText(editor, imgUrl);
             await animationFrame();
             expect(".o-we-powerbox").toHaveCount(0);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>a<a href="http://existing.com">b<img src="${imgUrl}">[]c</a>d</p>`
             );
         });
@@ -2106,7 +2123,9 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`
+            );
         });
 
         test("should not revert a history step when pasting an image URL as a link (2)", async () => {
@@ -2130,7 +2149,9 @@ describe("images", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>ab<a href="${imgUrl}">${imgUrl}</a>[]cd</p>`
+            );
         });
 
         test("should restore selection after pasting image URL followed by UNDO (1)", async () => {
@@ -2207,7 +2228,7 @@ describe("youtube video", () => {
                 (plugin) => plugin.constructor.name === "powerbox"
             );
             expect(powerbox.overlay.isOpen).not.toBe(true);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 '<p>a<a href="http://existing.com">bhttps://youtu.be/dQw4w9WgXcQ[]c</a>d</p>'
             );
         });
@@ -2221,7 +2242,7 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p><a href="${url}">${url}</a>[]</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(`<p><a href="${url}">${url}</a>[]</p>`);
         });
 
         test("should not revert a history step when pasting a youtube URL as a link (1)", async () => {
@@ -2235,7 +2256,7 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>*should not disappear*<a href="${url}">${url}</a>[]</p>`
             );
         });
@@ -2288,7 +2309,7 @@ describe("youtube video", () => {
                 (plugin) => plugin.constructor.name === "powerbox"
             );
             expect(powerbox.overlay.isOpen).not.toBe(true);
-            expect(getContent(el)).toBe(
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p>a<a href="http://existing.com">b${videoUrl}[]c</a>d</p>`
             );
         });
@@ -2301,7 +2322,9 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${videoUrl}">${videoUrl}</a>[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>ab<a href="${videoUrl}">${videoUrl}</a>[]cd</p>`
+            );
         });
 
         test("should not revert a history step when pasting a youtube URL as a link (2)", async () => {
@@ -2326,7 +2349,9 @@ describe("youtube video", () => {
             // Pick the second command (Paste as URL)
             press("ArrowDown");
             press("Enter");
-            expect(getContent(el)).toBe(`<p>ab<a href="${videoUrl}">${videoUrl}</a>[]cd</p>`);
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p>ab<a href="${videoUrl}">${videoUrl}</a>[]cd</p>`
+            );
         });
 
         test("should restore selection after pasting video URL followed by UNDO (1)", async () => {
