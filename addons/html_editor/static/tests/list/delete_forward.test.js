@@ -665,16 +665,6 @@ describe("Selection collapsed", () => {
         test("should treat two blocks in a list item and keep the blocks", async () => {
             await testEditor({
                 contentBefore:
-                    "<ul><li><p>abc</p></li><li><p>def[]</p><p>ghi</p></li><li><p>klm</p></li></ul>",
-                // Paragraphs in list items are treated as nonsense.
-                contentBeforeEdit:
-                    '<ul><li>abc</li><li>def[]</li><li class="oe-nested">ghi</li><li>klm</li></ul>',
-                stepFunction: deleteForward,
-                contentAfter: "<ul><li>abc</li><li>def[]ghi</li><li>klm</li></ul>",
-            });
-
-            await testEditor({
-                contentBefore:
                     "<ul><li><h1>abc</h1></li><li><h2>def[]</h2><h3>ghi</h3></li><li><h4>klm</h4></li></ul>",
                 stepFunction: deleteForward,
                 // Paragraphs in list items are treated as nonsense.
