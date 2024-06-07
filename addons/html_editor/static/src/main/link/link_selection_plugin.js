@@ -82,6 +82,21 @@ export class LinkSelectionPlugin extends Plugin {
         );
     }
 
+    // @todo: unify this and ZWSPlugin's cleanZWS into a single utility
+    removeZWNBSPs(textNode, cursors) {
+        const indexesToRemove = [...textNode.textContent.matchAll(/\uFEFF/g)].map(
+            (match) => match.index
+        );
+        for (const index of indexesToRemove.toReversed()) {
+            textNode.deleteData(index, 1);
+        }
+        cursors.update((cursor) => {
+            if (cursor.node === textNode) {
+                cursor.offset -= indexesToRemove.filter((i) => i < cursor.offset).length;
+            }
+        });
+    }
+
     clean(root) {
         // @todo: maybe the querySelectorAll calls should include the root.
         for (const link of root.querySelectorAll(".o_link_in_selection")) {
@@ -90,18 +105,25 @@ export class LinkSelectionPlugin extends Plugin {
 
         // Remove all FEFF within a `prepareUpdate` to make sure to make <br>
         // nodes visible if needed.
+        const cursors = this.shared.preserveSelection();
+        let shouldRestoreCursors = false;
         for (const node of descendants(root)) {
             if (node.nodeType === Node.TEXT_NODE && node.textContent.includes("\uFEFF")) {
                 // @todo: isn't rightPos needed as well?
                 // @todo: this does not preserve the cursor position
                 const restore = prepareUpdate(...leftPos(node));
-                node.textContent = node.textContent.replaceAll("\uFEFF", "");
+                this.removeZWNBSPs(node, cursors);
+                shouldRestoreCursors = true;
                 restore(); // Make sure to make <br>s visible if needed.
             }
+        }
+        if (shouldRestoreCursors) {
+            cursors.restore();
         }
 
         // Remove empty links
         // @todo: check for unremovables
+        // @todo: preserve cursor and spaces
         for (const link of root.querySelectorAll("a")) {
             if (![...link.childNodes].some(isVisible) && !link.classList.length) {
                 link.remove();
