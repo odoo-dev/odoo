@@ -5,7 +5,8 @@ import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/se
 import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
 import { EMAIL_REGEX, URL_REGEX, deduceURLfromText } from "./utils";
-import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
+import { DIRECTIONS, leftPos, nodeSize } from "@html_editor/utils/position";
+import { prepareUpdate } from "@html_editor/utils/dom_state";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -206,7 +207,9 @@ export class LinkPlugin extends Plugin {
                         this.overlay.close();
                         this.shared.setSelection(this.shared.getEditableSelection());
                     } else {
+                        const restore = prepareUpdate(...leftPos(this.linkElement));
                         this.linkElement.innerText = label;
+                        restore();
                         this.overlay.close();
                         this.shared.setCursorEnd(this.linkElement);
                     }

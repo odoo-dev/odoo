@@ -153,7 +153,7 @@ describe("popover should edit,copy,remove the link", () => {
         }
         click(".o_we_apply_link");
         await animationFrame();
-        expect(getContent(el)).toBe("<p>this is a []</p>");
+        expect(getContent(el)).toBe("<p>this is a&nbsp;[]</p>");
     });
 });
 
