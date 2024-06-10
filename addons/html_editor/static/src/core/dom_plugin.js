@@ -280,7 +280,7 @@ export class DomPlugin extends Plugin {
         }
         currentNode = lastChildNode || currentNode;
         let lastPosition = rightPos(currentNode);
-        if (this.isEditionBoundary(lastPosition[0])) {
+        if (!this.config.allowInlineAtRoot && this.isEditionBoundary(lastPosition[0])) {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
