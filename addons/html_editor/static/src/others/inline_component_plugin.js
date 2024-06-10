@@ -5,8 +5,8 @@ import { App } from "@odoo/owl";
  * This plugin is responsible with providing the API to manipulate/insert
  * sub components in an editor.
  */
-export class OwlComponentPlugin extends Plugin {
-    static name = "owl_components";
+export class InlineComponentPlugin extends Plugin {
+    static name = "inline_components";
     static resources = (p) => ({
         handle_before_remove: p.handleBeforeRemove.bind(p),
     });
@@ -29,8 +29,8 @@ export class OwlComponentPlugin extends Plugin {
         }
     }
 
-    handleBeforeRemove(elem) {
-        const info = this.nodeMap.get(elem);
+    handleBeforeRemove(host) {
+        const info = this.nodeMap.get(host);
         if (info) {
             this.destroyComponent(info);
         }
@@ -53,12 +53,12 @@ export class OwlComponentPlugin extends Plugin {
         }
     }
 
-    mountComponent(elem, { Component, getProps }) {
-        const props = getProps ? getProps(elem) : {};
-        elem.setAttribute("contenteditable", "false");
-        elem.dataset.oeProtected = true;
-        elem.dataset.oeTransientContent = true;
-        elem.dataset.oeHasRemovableHandler = true;
+    mountComponent(host, { Component, getProps }) {
+        const props = getProps ? getProps(host) : {};
+        host.setAttribute("contenteditable", "false");
+        host.dataset.oeProtected = true;
+        host.dataset.oeTransientContent = true;
+        host.dataset.oeHasRemovableHandler = true;
         const { dev, translateFn, getRawTemplate } = this.app;
         const app = new App(Component, {
             test: dev,
@@ -70,21 +70,21 @@ export class OwlComponentPlugin extends Plugin {
         // copy templates so they don't have to be recompiled
         app.rawTemplates = this.app.rawTemplates;
         app.templates = this.app.templates;
-        app.mount(elem);
+        app.mount(host);
         const info = {
             app,
-            elem,
+            host,
         };
         this.components.add(info);
-        this.nodeMap.set(elem, info);
-        elem.replaceChildren();
+        this.nodeMap.set(host, info);
+        host.replaceChildren();
     }
 
-    destroyComponent({ app, elem }) {
-        elem.removeAttribute("contenteditable");
-        delete elem.dataset.oeHasRemovableHandler;
+    destroyComponent({ app, host }) {
+        host.removeAttribute("contenteditable");
+        delete host.dataset.oeHasRemovableHandler;
         app.destroy();
-        this.nodeMap.delete(elem);
+        this.nodeMap.delete(host);
     }
 
     destroy() {

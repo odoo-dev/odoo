@@ -11,7 +11,7 @@ import {
     useState,
     xml,
 } from "@odoo/owl";
-import { OwlComponentPlugin } from "../src/others/owl_component_plugin";
+import { InlineComponentPlugin } from "../src/others/inline_component_plugin";
 import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { deleteBackward, undo } from "./_helpers/user_actions";
@@ -40,7 +40,7 @@ function getConfig(name, Comp, getProps) {
     }
 
     return {
-        Plugins: [...MAIN_PLUGINS, OwlComponentPlugin],
+        Plugins: [...MAIN_PLUGINS, InlineComponentPlugin],
         resources: {
             inlineComponents: [embedding],
         },
@@ -244,8 +244,8 @@ test("inline component can compute props from element", async () => {
     const { el } = await setupEditor(
         `<div><span data-embedded="counter" data-count="10"></span></div>`,
         {
-            config: getConfig("counter", Test, (elem) => ({
-                initialCount: parseInt(elem.dataset.count),
+            config: getConfig("counter", Test, (host) => ({
+                initialCount: parseInt(host.dataset.count),
             })),
         }
     );
@@ -257,20 +257,20 @@ test("inline component can compute props from element", async () => {
 
 test("inline component can set attributes on element", async () => {
     class Test extends Counter {
-        static props = ["elem"];
+        static props = ["host"];
         setup() {
-            const initialCount = parseInt(this.props.elem.dataset.count);
+            const initialCount = parseInt(this.props.host.dataset.count);
             this.state.value = initialCount;
         }
         increment() {
             super.increment();
-            this.props.elem.dataset.count = this.state.value;
+            this.props.host.dataset.count = this.state.value;
         }
     }
     const { el } = await setupEditor(
         `<div><span data-embedded="counter" data-count="10"></span></div>`,
         {
-            config: getConfig("counter", Test, (elem) => ({ elem })),
+            config: getConfig("counter", Test, (host) => ({ host })),
         }
     );
 
