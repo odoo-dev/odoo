@@ -29,22 +29,20 @@ describe("collapsed selection", () => {
     });
 
     test("should insert html after an empty paragraph", async () => {
-        await testEditor(
-            {
-                // This scenario is only possible with the allowInlineAtRoot option.
-                contentBefore: "<p><br></p>[]",
-                stepFunction: async (editor) => {
-                    editor.shared.domInsert(
-                        parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
-                    );
-                    editor.dispatch("ADD_STEP");
-                },
-                contentAfterEdit:
-                    '<p><br></p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]',
-                contentAfter: '<p><br></p><i class="fa fa-pastafarianism"></i>[]',
+        await testEditor({
+            // This scenario is only possible with the allowInlineAtRoot option.
+            contentBefore: "<p><br></p>[]",
+            stepFunction: async (editor) => {
+                editor.shared.domInsert(
+                    parseHTML(editor.document, '<i class="fa fa-pastafarianism"></i>')
+                );
+                editor.dispatch("ADD_STEP");
             },
-            { allowInlineAtRoot: true }
-        );
+            contentAfterEdit:
+                '<p><br></p><i class="fa fa-pastafarianism" contenteditable="false">\u200b</i>[]',
+            contentAfter: '<p><br></p><i class="fa fa-pastafarianism"></i>[]',
+            config: { allowInlineAtRoot: true },
+        });
     });
 
     test("should insert html between two letters", async () => {
