@@ -720,7 +720,7 @@ test("link preview in Link Popover", async () => {
     });
     // Move selection outside to discard
     anchorNode = queryOne(".test_target");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelection({ anchorNode, anchorOffset: 0, focusNode: anchorNode, focusOffset: 0 });
     await animationFrame();
     expect(".o-we-linkpopover").toHaveCount(0);
     expect(".test_target a").toHaveText("This website");
