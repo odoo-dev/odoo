@@ -8,7 +8,7 @@ import {
     BG_CLASSES_REGEX,
 } from "@html_editor/utils/color";
 import { fillEmpty } from "@html_editor/utils/dom";
-import { isEmptyBlock, isWhitespace } from "@html_editor/utils/dom_info";
+import { isEmptyBlock, isWhitespace, isZwnbsp } from "@html_editor/utils/dom_info";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { isCSSColor } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
@@ -197,7 +197,7 @@ export class ColorPlugin extends Plugin {
                         font = [];
                     }
                 } else if (
-                    (node.nodeType === Node.TEXT_NODE && !isWhitespace(node)) ||
+                    (node.nodeType === Node.TEXT_NODE && !isWhitespace(node) && !isZwnbsp(node)) ||
                     (node.nodeName === "BR" && isEmptyBlock(node.parentNode)) ||
                     (node.nodeType === Node.ELEMENT_NODE &&
                         ["inline", "inline-block"].includes(getComputedStyle(node).display) &&
