@@ -44,24 +44,27 @@ export class ListPlugin extends Plugin {
             buttons: [
                 {
                     id: "bulleted_list",
-                    cmd: "TOGGLE_LIST",
-                    cmdPayload: { mode: "UL" },
+                    action(dispatch) {
+                        dispatch("TOGGLE_LIST", { mode: "UL" });
+                    },
                     icon: "fa-list-ul",
                     name: "Bulleted list",
                     isFormatApplied: isListActive("UL"),
                 },
                 {
                     id: "numbered_list",
-                    cmd: "TOGGLE_LIST",
-                    cmdPayload: { mode: "OL" },
+                    action(dispatch) {
+                        dispatch("TOGGLE_LIST", { mode: "OL" });
+                    },
                     icon: "fa-list-ol",
                     name: "Numbered list",
                     isFormatApplied: isListActive("OL"),
                 },
                 {
                     id: "checklist",
-                    cmd: "TOGGLE_LIST",
-                    cmdPayload: { mode: "CL" },
+                    action(dispatch) {
+                        dispatch("TOGGLE_LIST", { mode: "CL" });
+                    },
                     icon: "fa-check-square-o",
                     name: "Checklist",
                     isFormatApplied: isListActive("CL"),

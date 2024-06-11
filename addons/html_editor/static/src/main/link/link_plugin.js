@@ -41,7 +41,9 @@ export class LinkPlugin extends Plugin {
             buttons: [
                 {
                     id: "link",
-                    cmd: "CREATE_LINK_ON_SELECTION",
+                    action(dispatch) {
+                        dispatch("CREATE_LINK_ON_SELECTION");
+                    },
                     icon: "fa-link",
                     name: "link",
                     label: _t("Link"),
@@ -49,7 +51,9 @@ export class LinkPlugin extends Plugin {
                 },
                 {
                     id: "unlink",
-                    cmd: "REMOVE_LINK_FROM_SELECTION",
+                    action(dispatch) {
+                        dispatch("REMOVE_LINK_FROM_SELECTION");
+                    },
                     icon: "fa-unlink",
                     name: "unlink",
                     label: _t("Remove Link"),

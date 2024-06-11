@@ -27,7 +27,9 @@ export class ImagePlugin extends Plugin {
                     buttons: [
                         {
                             id: "image_preview",
-                            cmd: "PREVIEW_IMAGE",
+                            action(dispatch) {
+                                dispatch("PREVIEW_IMAGE");
+                            },
                             icon: "fa-search-plus",
                             name: _t("Preview image"),
                         },
@@ -55,28 +57,36 @@ export class ImagePlugin extends Plugin {
                     buttons: [
                         {
                             id: "shape_rounded",
-                            cmd: "SHAPE_ROUNDED",
+                            action(dispatch) {
+                                dispatch("SHAPE_ROUNDED");
+                            },
                             name: _t("Shape: Rounded"),
                             icon: "fa-square",
                             isFormatApplied: hasShape(p, "rounded"),
                         },
                         {
                             id: "shape_circle",
-                            cmd: "SHAPE_CIRCLE",
+                            action(dispatch) {
+                                dispatch("SHAPE_CIRCLE");
+                            },
                             name: _t("Shape: Circle"),
                             icon: "fa-circle-o",
                             isFormatApplied: hasShape(p, "rounded-circle"),
                         },
                         {
                             id: "shape_shadow",
-                            cmd: "SHAPE_SHADOW",
+                            action(dispatch) {
+                                dispatch("SHAPE_SHADOW");
+                            },
                             name: _t("Shape: Shadow"),
                             icon: "fa-sun-o",
                             isFormatApplied: hasShape(p, "shadow"),
                         },
                         {
                             id: "shape_thumbnail",
-                            cmd: "SHAPE_THUMBNAIL",
+                            action(dispatch) {
+                                dispatch("SHAPE_THUMBNAIL");
+                            },
                             name: _t("Shape: Thumbnail"),
                             icon: "fa-picture-o",
                             isFormatApplied: hasShape(p, "img-thumbnail"),
@@ -102,32 +112,36 @@ export class ImagePlugin extends Plugin {
                     buttons: [
                         {
                             id: "resize_default",
-                            cmd: "RESIZE_IMAGE",
-                            cmdPayload: "",
+                            action(dispatch) {
+                                dispatch("RESIZE_IMAGE", "");
+                            },
                             name: _t("Resize Default"),
                             text: _t("Default"),
                             isFormatApplied: () => p.hasImageSize(""),
                         },
                         {
                             id: "resize_100",
-                            cmd: "RESIZE_IMAGE",
-                            cmdPayload: "100%",
+                            action(dispatch) {
+                                dispatch("RESIZE_IMAGE", "100%");
+                            },
                             name: _t("Resize Full"),
                             text: "100%",
                             isFormatApplied: () => p.hasImageSize("100%"),
                         },
                         {
                             id: "resize_50",
-                            cmd: "RESIZE_IMAGE",
-                            cmdPayload: "50%",
+                            action(dispatch) {
+                                dispatch("RESIZE_IMAGE", "50%");
+                            },
                             name: _t("Resize Half"),
                             text: "50%",
                             isFormatApplied: () => p.hasImageSize("50%"),
                         },
                         {
                             id: "resize_25",
-                            cmd: "RESIZE_IMAGE",
-                            cmdPayload: "25%",
+                            action(dispatch) {
+                                dispatch("RESIZE_IMAGE", "25%");
+                            },
                             name: _t("Resize Quarter"),
                             text: "25%",
                             isFormatApplied: () => p.hasImageSize("25%"),
@@ -141,7 +155,9 @@ export class ImagePlugin extends Plugin {
                     buttons: [
                         {
                             id: "image_transform",
-                            cmd: "TRANSFORM_IMAGE",
+                            action(dispatch) {
+                                dispatch("TRANSFORM_IMAGE");
+                            },
                             name: _t("Transform the picture (click twice to reset transformation)"),
                             icon: "fa-object-ungroup",
                             isFormatApplied: () => p.currentImageTransformation.imageEl,
@@ -155,7 +171,9 @@ export class ImagePlugin extends Plugin {
                     buttons: [
                         {
                             id: "image_delete",
-                            cmd: "DELETE_IMAGE",
+                            action(dispatch) {
+                                dispatch("DELETE_IMAGE");
+                            },
                             name: _t("Remove (DELETE)"),
                             icon: "fa-trash text-danger",
                         },

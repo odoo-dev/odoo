@@ -14,7 +14,9 @@ export class ChatGPTPlugin extends Plugin {
             buttons: [
                 {
                     id: "chatgpt",
-                    cmd: "OPEN_CHATGPT_DIALOG",
+                    action(dispatch) {
+                        dispatch("OPEN_CHATGPT_DIALOG");
+                    },
                     icon: "fa-magic",
                     name: "chatgpt",
                     label: _t("Generate or transform content with AI."),

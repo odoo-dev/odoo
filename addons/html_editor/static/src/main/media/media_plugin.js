@@ -52,7 +52,9 @@ export class MediaPlugin extends Plugin {
                 buttons: [
                     {
                         id: "replace_image",
-                        cmd: "REPLACE_IMAGE",
+                        action(dispatch) {
+                            dispatch("REPLACE_IMAGE");
+                        },
                         name: "Replace media",
                         text: "Replace",
                     },

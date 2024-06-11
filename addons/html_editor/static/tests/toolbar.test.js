@@ -323,7 +323,9 @@ test("toolbar does not evaluate isFormatApplied when namespace does not match", 
                         buttons: [
                             {
                                 id: "test_btn",
-                                cmd: "test_cmd",
+                                action(dispatch) {
+                                    dispatch("test_cmd");
+                                },
                                 name: "Test Button",
                                 icon: "fa-square",
                                 isFormatApplied: () => expect.step("image format evaluated"),
@@ -363,7 +365,9 @@ test("plugins can create buttons with text in toolbar", async () => {
                         buttons: [
                             {
                                 id: "test_btn",
-                                cmd: "test_cmd",
+                                action(dispatch) {
+                                    dispatch("test_cmd");
+                                },
                                 name: "Test Button",
                                 text: "Text button",
                             },
