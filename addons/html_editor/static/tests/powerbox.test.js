@@ -44,6 +44,13 @@ test.tags("iframe")("in iframe: should open the Powerbox on type `/`", async () 
     expect(".o-we-powerbox").toHaveCount(1);
 });
 
+test("should correctly hint in iframes", async () => {
+    const { el } = await setupEditor("<p>[]<br></p>", { props: { iframe: true } });
+    expect(getContent(el)).toBe(
+        `<p placeholder="Type "/" for commands" class="o-we-hint">[]<br></p>`
+    );
+});
+
 test("should open the Powerbox on type `/`, but in an empty paragraph", async () => {
     const { el, editor } = await setupEditor("<p>[]<br></p>");
     expect(".o-we-powerbox").toHaveCount(0);

@@ -25,7 +25,7 @@ import { Powerbox } from "./powerbox";
 
 function target(selection) {
     const node = selection.anchorNode;
-    const el = node instanceof Element ? node : node.parentElement;
+    const el = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
     return (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el) && el;
 }
 
