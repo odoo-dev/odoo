@@ -887,6 +887,34 @@ test("html field with option height", async () => {
     expect(`[name="txt"] .odoo-editor-editable`).toHaveStyle("height: 100px");
 });
 
+test("enable/disable codeview with editor toolbar", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'codeview': true}"/>
+            </form>`,
+    });
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p> first </p>");
+    expect("[name='txt'] textarea").toHaveCount(0);
+
+    // Switch to code view
+    const node = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
+    await waitFor(".o-we-toolbar");
+    await contains(".o-we-toolbar button[name='codeview']").click();
+    expect("[name='txt'] .odoo-editor-editable").toHaveCount(0);
+    expect("[name='txt'] textarea").toHaveValue("<p>first</p>");
+
+    // Switch to editor
+    await contains(".o_codeview_btn").click();
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p> first </p>");
+    expect("[name='txt'] textarea").toHaveCount(0);
+});
+
 describe("sandbox", () => {
     const recordWithComplexHTML = {
         id: 1,

@@ -31,6 +31,7 @@ export class HtmlField extends Component {
         isCollaborative: { type: Boolean, optional: true },
         cssReadonlyAssetId: { type: String, optional: true },
         sandboxedPreview: { type: Boolean, optional: true },
+        codeview: { type: Boolean, optional: true },
         editorConfig: { type: Object, optional: true },
     };
     static components = {
@@ -157,6 +158,23 @@ export class HtmlField extends Component {
             },
             recordInfo: { resModel, resId },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
+            resources: {
+                toolbarGroup: [
+                    {
+                        id: "codeview",
+                        sequence: 100,
+                        buttons: [
+                            {
+                                id: "codeview",
+                                icon: "fa-code",
+                                action: () => {
+                                    this.toggleCodeView();
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
             ...this.props.editorConfig,
         };
         return config;
@@ -190,6 +208,7 @@ export const htmlField = {
             isCollaborative: options.collaborative,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,
+            codeview: Boolean(odoo.debug && options.codeview),
         };
     },
 };
