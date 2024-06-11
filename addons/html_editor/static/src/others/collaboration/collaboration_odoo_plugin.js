@@ -54,13 +54,12 @@ export class CollaborationOdooPlugin extends Plugin {
     });
     handleCommand(commandName, payload) {
         switch (commandName) {
-            case "HISTORY_STEP_ADDED":
-                this.ptp?.notifyAllPeers("oe_history_step", payload, { transport: "rtc" });
-                break;
-            case "HISTORY_MISSING_PARENT_STEP": {
+            case "HISTORY_MISSING_PARENT_STEP":
                 this.onHistoryMissingParentStep(payload);
                 break;
-            }
+            case "STEP_ADDED":
+                this.ptp?.notifyAllPeers("oe_history_step", payload.step, { transport: "rtc" });
+                break;
         }
     }
     setup() {

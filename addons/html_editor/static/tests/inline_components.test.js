@@ -1,4 +1,5 @@
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { parseHTML } from "@html_editor/utils/html";
 import { expect, test } from "@odoo/hoot";
 import { click, queryFirst } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
@@ -53,12 +54,33 @@ test("can mount a inline component", async () => {
         config: getConfig("counter", Counter),
     });
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+        `<div><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span></div>`
     );
     click(".counter");
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span></div>`
+        `<div><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 1</span></span></div>`
+    );
+});
+
+test("can mount a inline component from a step", async () => {
+    const { el, editor } = await setupEditor(`<div>a[]b</div>`, {
+        config: getConfig("counter", Counter),
+    });
+    expect(getContent(el)).toBe(`<div>a[]b</div>`);
+    editor.shared.domInsert(parseHTML(editor.document, `<span data-embedded="counter"></span>`));
+    editor.dispatch("ADD_STEP");
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"></span>[]b</div>`
+    );
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span>[]b</div>`
+    );
+    click(".counter");
+    await animationFrame();
+    expect(getContent(el)).toBe(
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 1</span></span>[]b</div>`
     );
 });
 
@@ -128,7 +150,7 @@ test("inline component are destroyed when deleted", async () => {
     );
 
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span>[]</div>`
     );
     expect(steps).toEqual(["mounted"]);
 
@@ -167,7 +189,7 @@ test("select content of a component shouldn't open the toolbar", async () => {
     await animationFrame();
     expect(".o-we-toolbar").toHaveCount(1);
     expect(getContent(el)).toBe(
-        `<div><p>[a]</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+        `<div><p>[a]</p><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span></div>`
     );
 
     const node = queryFirst(".counter", {}).firstChild;
@@ -175,7 +197,7 @@ test("select content of a component shouldn't open the toolbar", async () => {
     await tick();
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div><p>a</p><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">C[ou]nter: 0</span></span></div>`
+        `<div><p>a</p><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">C[ou]nter: 0</span></span></div>`
     );
     expect(".o-we-toolbar").toHaveCount(0);
 });
@@ -205,7 +227,7 @@ test("components delete can be undone", async () => {
     editor.dispatch("HISTORY_STAGE_SELECTION");
 
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span>[]</div>`
     );
     expect(steps).toEqual(["mounted"]);
 
@@ -217,17 +239,17 @@ test("components delete can be undone", async () => {
     steps = [];
     undo(editor);
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"></span>[]</div>`
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"></span>[]</div>`
     );
     await animationFrame();
     expect(steps).toEqual(["mounted"]);
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span>[]</div>`
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span>[]</div>`
     );
     click(".counter");
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div>a<span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 1</span></span>[]</div>`
+        `<div>a<span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 1</span></span>[]</div>`
     );
 });
 
@@ -236,7 +258,7 @@ test("element with data-embedded content is removed when component is mounting",
         config: getConfig("counter", Counter),
     });
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 0</span></span></div>`
+        `<div><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 0</span></span></div>`
     );
 });
 
@@ -253,7 +275,7 @@ test("inline component get proper props", async () => {
     });
 
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+        `<div><span data-embedded="counter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 10</span></span></div>`
     );
 });
 
@@ -275,7 +297,7 @@ test("inline component can compute props from element", async () => {
     );
 
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" data-count="10" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+        `<div><span data-embedded="counter" data-count="10" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 10</span></span></div>`
     );
 });
 
@@ -299,12 +321,12 @@ test("inline component can set attributes on element", async () => {
     );
 
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" data-count="10" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 10</span></span></div>`
+        `<div><span data-embedded="counter" data-count="10" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 10</span></span></div>`
     );
 
     click(".counter");
     await animationFrame();
     expect(getContent(el)).toBe(
-        `<div><span data-embedded="counter" data-count="11" contenteditable="false" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true"><span class="counter">Counter: 11</span></span></div>`
+        `<div><span data-embedded="counter" data-count="11" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 11</span></span></div>`
     );
 });

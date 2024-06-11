@@ -31,7 +31,7 @@ export class CollaborationPlugin extends Plugin {
     handleCommand(commandName, payload) {
         switch (commandName) {
             case "STEP_ADDED": {
-                this.onStepAdded(payload);
+                this.onStepAdded(payload.step);
                 break;
             }
             case "HISTORY_CLEAN": {

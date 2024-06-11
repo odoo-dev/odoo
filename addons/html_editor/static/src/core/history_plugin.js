@@ -459,13 +459,13 @@ export class HistoryPlugin extends Plugin {
         if (!currentStep.mutations.length) {
             return false;
         }
-        this.dispatch("NORMALIZE", { node: this.getMutationsRoot(currentStep.mutations) });
+        const stepCommonAncestor = this.getMutationsRoot(currentStep.mutations);
+        this.dispatch("NORMALIZE", { node: stepCommonAncestor });
         this.handleObserverRecords();
 
         currentStep.previousStepId = this.steps.at(-1)?.id;
 
         this.steps.push(currentStep);
-        this.dispatch("STEP_ADDED", currentStep);
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();
         this.currentStep = this.processHistoryStep({
@@ -481,8 +481,11 @@ export class HistoryPlugin extends Plugin {
             this.stepsStates.set(currentStep.id, stepState);
         }
         this.stageSelection();
+        this.dispatch("STEP_ADDED", {
+            step: currentStep,
+            stepCommonAncestor,
+        });
         this.config.onChange?.();
-        this.dispatch("HISTORY_STEP_ADDED", currentStep);
         return currentStep;
     }
     canUndo() {

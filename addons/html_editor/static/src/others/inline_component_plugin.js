@@ -7,6 +7,7 @@ import { App } from "@odoo/owl";
  */
 export class InlineComponentPlugin extends Plugin {
     static name = "inline_components";
+    static dependencies = ["history"];
     static resources = (p) => ({
         handle_before_remove: p.handleBeforeRemove.bind(p),
     });
@@ -22,8 +23,8 @@ export class InlineComponentPlugin extends Plugin {
 
     handleCommand(command, payload) {
         switch (command) {
-            case "CONTENT_UPDATED": {
-                this.mountComponents(payload.root);
+            case "STEP_ADDED": {
+                this.mountComponents(payload.stepCommonAncestor);
                 break;
             }
         }
@@ -55,10 +56,7 @@ export class InlineComponentPlugin extends Plugin {
 
     mountComponent(host, { Component, getProps }) {
         const props = getProps ? getProps(host) : {};
-        host.setAttribute("contenteditable", "false");
-        host.dataset.oeProtected = true;
-        host.dataset.oeTransientContent = true;
-        host.dataset.oeHasRemovableHandler = true;
+        this.setupAttributes(host);
         const { dev, translateFn, getRawTemplate } = this.app;
         const app = new App(Component, {
             test: dev,
@@ -81,8 +79,7 @@ export class InlineComponentPlugin extends Plugin {
     }
 
     destroyComponent({ app, host }) {
-        host.removeAttribute("contenteditable");
-        delete host.dataset.oeHasRemovableHandler;
+        this.cleanupAttributes(host);
         app.destroy();
         this.components.delete(arguments[0]);
         this.nodeMap.delete(host);
@@ -93,5 +90,23 @@ export class InlineComponentPlugin extends Plugin {
         for (const comp of [...this.components]) {
             this.destroyComponent(comp);
         }
+    }
+
+    setupAttributes(host) {
+        this.shared.disableObserver();
+        // Technical mutations that should not be part of a step, every client
+        // will independently set these values.
+        host.dataset.oeProtected = true;
+        host.dataset.oeTransientContent = true;
+        host.dataset.oeHasRemovableHandler = true;
+        host.setAttribute("contenteditable", "false");
+        this.shared.enableObserver();
+    }
+
+    cleanupAttributes(host) {
+        this.shared.disableObserver();
+        delete host.dataset.oeHasRemovableHandler;
+        host.removeAttribute("contenteditable");
+        this.shared.enableObserver();
     }
 }
