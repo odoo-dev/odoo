@@ -9,7 +9,7 @@ const MEDIA_SELECTOR = `${ICON_SELECTOR} , .o_image, .media_iframe_video`;
 
 export class MediaPlugin extends Plugin {
     static name = "media";
-    static dependencies = ["selection", "history"];
+    static dependencies = ["selection", "history", "dom"];
     static shared = ["savePendingImages"];
     /** @type { (p: MediaPlugin) => Record<string, any> } */
     static resources = (p) => ({
@@ -80,10 +80,6 @@ export class MediaPlugin extends Plugin {
         }
     }
 
-    onAttachmentChange() {
-        // todo @phoenix to implement
-    }
-
     onSaveMediaDialog(element, { node, restoreSelection }) {
         restoreSelection();
         if (!element) {
@@ -104,9 +100,7 @@ export class MediaPlugin extends Plugin {
                 node.replaceWith(element);
             }
         } else {
-            const selection = this.shared.getEditableSelection();
-            selection.anchorNode.prepend(element);
-            this.shared.setCursorEnd(selection.anchorNode);
+            this.shared.domInsert(element);
         }
         this.dispatch("ADD_STEP");
     }
@@ -129,7 +123,7 @@ export class MediaPlugin extends Plugin {
                 this.onSaveMediaDialog(element, { node: params.node, restoreSelection });
             },
             close: restoreSelection,
-            onAttachmentChange: this.onAttachmentChange.bind(this),
+            onAttachmentChange: this.config.onAttachmentChange || (() => {}),
             ...this.config.mediaModalParams, // todo @phoenix to implement
             ...params,
         });
