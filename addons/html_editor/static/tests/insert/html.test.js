@@ -1,8 +1,9 @@
 import { parseHTML } from "@html_editor/utils/html";
-import { describe, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { tick } from "@odoo/hoot-mock";
-import { testEditor } from "../_helpers/editor";
+import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
+import { getContent } from "../_helpers/selection";
 
 function span(text) {
     const span = document.createElement("span");
@@ -149,6 +150,27 @@ describe("collapsed selection", () => {
             },
             contentAfter: "<p>content</p><div>abc</div><p>def[]</p>",
         });
+    });
+
+    test("should not unwrap table nodes in unbreakable paragraph, stops at boundary", async () => {
+        const { editor } = await setupEditor(
+            `<div><div class="test-boundary oe-unbreakable"><p class="oe_unbreakable">cont[]ent</p></div></div>`,
+            {
+                config: {
+                    resources: {
+                        is_edition_boundary: (node) =>
+                            node.nodeType === 1 && node.classList.contains("test-boundary"),
+                    },
+                },
+            }
+        );
+
+        editor.shared.domInsert(
+            parseHTML(editor.document, "<table><tbody><tr><td/></tr></tbody></table>")
+        );
+        expect(getContent(editor.editable)).toBe(
+            `<div><div class="test-boundary oe-unbreakable"><p class="oe_unbreakable">content</p><table><tbody><tr><td></td></tr></tbody></table>[]</div></div>`
+        );
     });
 });
 

@@ -236,14 +236,21 @@ export class DomPlugin extends Plugin {
                 // Split blocks at the edges if inserting new blocks (preventing
                 // <p><p>text</p></p> or <li><li>text</li></li> scenarios).
                 while (
-                    currentNode.parentElement !== this.editable &&
+                    !this.isEditionBoundary(currentNode.parentElement) &&
                     (!allowsParagraphRelatedElements(currentNode.parentElement) ||
                         currentNode.parentElement.nodeName === "LI")
                 ) {
                     if (isUnbreakable(currentNode.parentElement)) {
-                        makeContentsInline(container);
-                        nodeToInsert = container.childNodes[0];
-                        break;
+                        // If we have to insert a table, we cannot afford to unwrap it
+                        // we need to search for a more suitable spot to put the table in
+                        if (nodeToInsert.nodeName === "TABLE") {
+                            currentNode = currentNode.parentElement;
+                            continue;
+                        } else {
+                            makeContentsInline(container);
+                            nodeToInsert = container.childNodes[0];
+                            break;
+                        }
                     }
                     let offset = childNodeIndex(currentNode);
                     if (!insertBefore) {
@@ -273,7 +280,7 @@ export class DomPlugin extends Plugin {
         }
         currentNode = lastChildNode || currentNode;
         let lastPosition = rightPos(currentNode);
-        if (lastPosition[0] === this.editable) {
+        if (this.isEditionBoundary(lastPosition[0])) {
             // Correct the position if it happens to be in the editable root.
             lastPosition = getDeepestPosition(...lastPosition);
         }
@@ -282,6 +289,18 @@ export class DomPlugin extends Plugin {
             { normalize: false }
         );
         return firstInsertedNodes.concat(insertedNodes).concat(lastInsertedNodes);
+    }
+
+    isEditionBoundary(node) {
+        if (node === this.editable) {
+            return true;
+        }
+        for (const callback of this.resources?.["is_edition_boundary"] || []) {
+            const res = callback(node);
+            if (res !== undefined) {
+                return res;
+            }
+        }
     }
 
     copyAttributes(source, target) {
