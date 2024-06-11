@@ -204,6 +204,11 @@ export class Editor {
 
     destroy(willBeRemoved) {
         if (this.editable) {
+            let plugin;
+            while ((plugin = this.plugins.pop())) {
+                plugin.destroy();
+            }
+            this.shared = {};
             if (!willBeRemoved) {
                 // we only remove class/attributes when necessary. If we know that the editable
                 // element will be removed, no need to make changes that may require the browser
@@ -211,11 +216,6 @@ export class Editor {
                 this.editable.removeAttribute("contenteditable");
                 removeClass(this.editable, "odoo-editor-editable");
             }
-            let plugin;
-            while ((plugin = this.plugins.pop())) {
-                plugin.destroy();
-            }
-            this.shared = {};
             this.editable = null;
         }
         this.isDestroyed = true;

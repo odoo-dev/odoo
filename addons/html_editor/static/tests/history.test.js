@@ -7,6 +7,7 @@ import { getContent, setSelection } from "./_helpers/selection";
 import { pointerDown, pointerUp, press, queryOne } from "@odoo/hoot-dom";
 import { animationFrame, mockUserAgent, tick } from "@odoo/hoot-mock";
 import { Editor } from "@html_editor/editor";
+import { parseHTML } from "@html_editor/utils/html";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe("undo", () => {
@@ -436,5 +437,46 @@ describe("shortcut", () => {
             "CONTENT_UPDATED",
             "onchange",
         ]).toVerifySteps();
+    });
+});
+
+describe("destroy", () => {
+    test("Mutations are not observed after history plugin is destroyed", async () => {
+        // Observer is disconnected during cleanup.
+        class TestPlugin extends Plugin {
+            // Added history dependency so that this plugin is loaded after and unloaded before.
+            static dependencies = ["history", "dom"];
+            static name = "test";
+            static resources(p) {
+                return { is_mutation_record_savable: p.isMutationRecordSavable.bind(p) };
+            }
+            isMutationRecordSavable(record) {
+                if (
+                    record.type === "childList" &&
+                    record.addedNodes.length === 1 &&
+                    record.addedNodes.item(0).nodeType === Node.ELEMENT_NODE &&
+                    record.addedNodes.item(0).matches(".test")
+                ) {
+                    expect.step("dispatch");
+                    this.dispatch("DISPATCH");
+                    return false;
+                }
+                return true;
+            }
+            destroy() {
+                this.shared.domInsert(
+                    parseHTML(this.document, `<div class="test">destroyed</div>`)
+                );
+            }
+        }
+        const Plugins = [...MAIN_PLUGINS, TestPlugin];
+        const { editor } = await setupEditor(`<div>a[]b</div>`, { config: { Plugins } });
+        // Ensure dispatch when plugins are alive.
+        editor.shared.domInsert(parseHTML(editor.document, `<div class="test">destroyed</div>`));
+        await animationFrame();
+        expect(["dispatch"]).toVerifySteps();
+        editor.destroy();
+        await animationFrame();
+        expect([]).toVerifySteps();
     });
 });

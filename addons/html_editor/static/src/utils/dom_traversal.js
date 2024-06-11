@@ -30,7 +30,13 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  * Returns the closest HTMLElement of the provided Node. If the predicate is a
  * string, returns the closest HTMLElement that match the predicate selector. If
  * the predicate is a function, returns the closest element that matches the
- * predicate. Any returned element will be contained within the editable.
+ * predicate. Any returned element will be contained within the editable, or is
+ * disconnected from any Document.
+ *
+ * Rationale: this helper is used to manipulate editor nodes, and should never
+ * match any node outside of that scope. Disconnected nodes are assumed to be
+ * from the editor, since they are likely removed nodes evaluated in the context
+ * of the MutationObserver handler @see ProtectedNodePlugin
  *
  * @param {Node} node
  * @param {string | Function} [predicate='*']
@@ -38,6 +44,7 @@ export function findNode(domPath, findCallback = () => true, stopCallback = () =
  */
 export function closestElement(node, predicate = "*") {
     let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    const editable = element?.closest(".odoo-editor-editable");
     if (typeof predicate === "function") {
         while (element && !predicate(element)) {
             element = element.parentElement;
@@ -45,8 +52,10 @@ export function closestElement(node, predicate = "*") {
     } else {
         element = element?.closest(predicate);
     }
-
-    return element?.closest(".odoo-editor-editable") && element;
+    if ((editable && editable.contains(element)) || !node.isConnected) {
+        return element;
+    }
+    return null;
 }
 
 /**

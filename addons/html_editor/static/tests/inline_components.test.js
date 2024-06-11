@@ -1,12 +1,14 @@
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { parseHTML } from "@html_editor/utils/html";
-import { expect, test } from "@odoo/hoot";
+import { describe, expect, test } from "@odoo/hoot";
 import { click, queryFirst } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
+    App,
     Component,
     onMounted,
     onWillDestroy,
+    onWillStart,
     onWillUnmount,
     useRef,
     useState,
@@ -14,10 +16,12 @@ import {
 } from "@odoo/owl";
 import { InlineComponentPlugin } from "../src/others/inline_component_plugin";
 import { setupEditor } from "./_helpers/editor";
+import { unformat } from "./_helpers/format";
 import { getContent, setSelection } from "./_helpers/selection";
 import { deleteBackward, undo } from "./_helpers/user_actions";
 import { makeMockEnv } from "@web/../tests/_framework/env_test_helpers";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { Deferred } from "@web/core/utils/concurrency";
 
 class Counter extends Component {
     static props = [];
@@ -329,4 +333,85 @@ test("inline component can set attributes on element", async () => {
     expect(getContent(el)).toBe(
         `<div><span data-embedded="counter" data-count="11" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false"><span class="counter">Counter: 11</span></span></div>`
     );
+});
+
+describe("Inline component Owl lifecycle editor integration", () => {
+    test("Host child nodes are removed synchronously with the insertion of owl rendered nodes during mount", async () => {
+        const asyncControl = new Deferred();
+        asyncControl.then(() => {
+            expect.step("minimal asynchronous time");
+        });
+        patchWithCleanup(App.prototype, {
+            mount(elem) {
+                const result = super.mount(...arguments);
+                if (elem.dataset.embedded === "labeledCounter") {
+                    const fiber = Array.from(this.scheduler.tasks)[0];
+                    const fiberComplete = fiber.complete;
+                    fiber.complete = function () {
+                        expect.step("html prop suppression");
+                        asyncControl.resolve();
+                        fiberComplete.call(this);
+                    };
+                }
+                return result;
+            },
+        });
+        const delayedWillStart = new Deferred();
+        class LabeledCounter extends Counter {
+            static template = xml`
+                <span t-ref="root" class="counter" t-on-click="increment">
+                    <span t-ref="label"/>:<t t-esc="state.value"/>
+                </span>
+            `;
+            static props = {
+                label: HTMLElement,
+            };
+            labelRef = useRef("label");
+            setup() {
+                onWillStart(async () => {
+                    expect.step("willstart");
+                    await delayedWillStart;
+                });
+                onMounted(() => {
+                    this.props.label.dataset.oeProtected = "false";
+                    this.props.label.setAttribute("contenteditable", "true");
+                    this.labelRef.el.append(this.props.label);
+                    expect.step("html prop insertion");
+                });
+            }
+        }
+        const { el } = await setupEditor(
+            `<div><span data-embedded="labeledCounter">
+                <span data-prop-name="label">Counter</span>
+            </span>[]a</div>`,
+            {
+                config: getConfig("labeledCounter", LabeledCounter, (host) => ({
+                    label: host.querySelector("[data-prop-name='label']"),
+                })),
+            }
+        );
+        expect(["willstart"]).toVerifySteps();
+        delayedWillStart.resolve();
+        await animationFrame();
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div>
+                    <span data-embedded="labeledCounter" data-oe-protected="true" data-oe-transient-content="true" data-oe-has-removable-handler="true" contenteditable="false">
+                        <span class="counter">
+                            <span>
+                                <span data-prop-name="label" data-oe-protected="false" contenteditable="true">Counter</span>
+                            </span>
+                            :0
+                        </span>
+                    </span>
+                    []a
+                </div>
+            `)
+        );
+        expect([
+            "html prop suppression",
+            "html prop insertion",
+            "minimal asynchronous time",
+        ]).toVerifySteps();
+    });
 });

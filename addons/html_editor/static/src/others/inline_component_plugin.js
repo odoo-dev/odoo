@@ -65,17 +65,25 @@ export class InlineComponentPlugin extends Plugin {
             getTemplate: getRawTemplate,
             props,
         });
-        // copy templates so they don't have to be recompiled
+        // copy templates so they don't have to be recompiled.
         app.rawTemplates = this.app.rawTemplates;
         app.templates = this.app.templates;
         app.mount(host);
+        // Patch mount fiber to hook into the exact call stack where app is
+        // mounted (but before). This will remove host children synchronously
+        // just before adding the app rendered html.
+        const fiber = Array.from(app.scheduler.tasks)[0];
+        const fiberComplete = fiber.complete;
+        fiber.complete = function () {
+            host.replaceChildren();
+            fiberComplete.call(this);
+        };
         const info = {
             app,
             host,
         };
         this.components.add(info);
         this.nodeMap.set(host, info);
-        host.replaceChildren();
     }
 
     destroyComponent({ app, host }) {

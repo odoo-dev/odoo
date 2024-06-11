@@ -1,5 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 import { expect, test } from "@odoo/hoot";
 import { setupEditor } from "./_helpers/editor";
 import { insertText } from "./_helpers/user_actions";
@@ -49,4 +50,20 @@ test("plugin destruction is reverse of instantiation order", async () => {
     expect(["setup: first", "setup: second"]).toVerifySteps();
     editor.destroy();
     expect(["destroy: second", "destroy: first"]).toVerifySteps();
+});
+
+test("Remove odoo-editor-editable class after every plugin is destroyed", async () => {
+    class TestPlugin extends Plugin {
+        static name = "test";
+        destroy() {
+            const p = this.editable.querySelector("p");
+            if (closestElement(p, "div")) {
+                expect.step("operation");
+            }
+        }
+    }
+    const Plugins = [...MAIN_PLUGINS, TestPlugin];
+    const { editor } = await setupEditor(`<div><p>a</p></div>`, { config: { Plugins } });
+    editor.destroy();
+    expect(["operation"]).toVerifySteps();
 });
