@@ -40,28 +40,36 @@ export class FormatPlugin extends Plugin {
                 buttons: [
                     {
                         id: "bold",
-                        cmd: "FORMAT_BOLD",
+                        action(dispatch) {
+                            dispatch("FORMAT_BOLD");
+                        },
                         icon: "fa-bold",
                         name: "Toggle bold",
                         isFormatApplied: isFormatted(p, "bold"),
                     },
                     {
                         id: "italic",
-                        cmd: "FORMAT_ITALIC",
+                        action(dispatch) {
+                            dispatch("FORMAT_ITALIC");
+                        },
                         icon: "fa-italic",
                         name: "Toggle italic",
                         isFormatApplied: isFormatted(p, "italic"),
                     },
                     {
                         id: "underline",
-                        cmd: "FORMAT_UNDERLINE",
+                        action(dispatch) {
+                            dispatch("FORMAT_UNDERLINE");
+                        },
                         icon: "fa-underline",
                         name: "Toggle underline",
                         isFormatApplied: isFormatted(p, "underline"),
                     },
                     {
                         id: "strikethrough",
-                        cmd: "FORMAT_STRIKETHROUGH",
+                        action(dispatch) {
+                            dispatch("FORMAT_STRIKETHROUGH");
+                        },
                         icon: "fa-strikethrough",
                         name: "Toggle strikethrough",
                         isFormatApplied: isFormatted(p, "strikeThrough"),
@@ -74,7 +82,9 @@ export class FormatPlugin extends Plugin {
                 buttons: [
                     {
                         id: "remove_format",
-                        cmd: "FORMAT_REMOVE_FORMAT",
+                        action(dispatch) {
+                            dispatch("FORMAT_REMOVE_FORMAT");
+                        },
                         icon: "fa-eraser",
                         name: "Remove Format",
                         hasFormat: hasFormat(p),

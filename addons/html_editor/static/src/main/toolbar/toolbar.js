@@ -30,10 +30,6 @@ export class Toolbar extends Component {
         this.state = useState(this.props.toolbar.state);
     }
 
-    dispatch(cmd, payload) {
-        this.props.toolbar.dispatch(cmd, payload);
-    }
-
     getFilteredButtonGroups() {
         if (this.state.namespace) {
             const filteredGroups = this.props.toolbar.buttonGroups.filter(
