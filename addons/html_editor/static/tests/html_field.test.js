@@ -905,6 +905,7 @@ describe("sandbox", () => {
         iframe = queryOne(
             '.o_field_html[name="txt"] iframe[sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"]'
         );
+        await animationFrame();
         expect(iframe.contentDocument.body).toHaveText("Hi");
         expect(
             iframe.contentDocument.head.querySelector("style").textContent.trim().replace(/\s/g, "")
