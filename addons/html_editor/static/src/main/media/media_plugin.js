@@ -39,6 +39,19 @@ export class MediaPlugin extends Plugin {
                 },
             },
         ],
+        toolbarGroup: {
+            id: "replace_image",
+            sequence: 29,
+            namespace: "IMG",
+            buttons: [
+                {
+                    id: "replace_image",
+                    cmd: "REPLACE_IMAGE",
+                    name: "Replace media",
+                    text: "Replace",
+                },
+            ],
+        },
     });
 
     handleCommand(command, payload) {
@@ -49,6 +62,15 @@ export class MediaPlugin extends Plugin {
             case "CLEAN":
                 this.clean(payload.root);
                 break;
+            case "REPLACE_IMAGE": {
+                const selectedNodes = this.shared.getSelectedNodes();
+                const node = selectedNodes.find((node) => node.tagName === "IMG");
+                if (node) {
+                    this.openMediaDialog({ node });
+                    this.dispatch("ADD_STEP");
+                }
+                break;
+            }
         }
     }
 
@@ -110,7 +132,7 @@ export class MediaPlugin extends Plugin {
         const restoreSelection = () => {
             this.shared.setSelection(selection);
         };
-        const { resModel, resId, field, type } = this.config.recordInfo;
+        const { resModel, resId, field, type } = this.config.recordInfo || {};
         this.services.dialog.add(MediaDialog, {
             resModel,
             resId,

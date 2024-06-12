@@ -148,5 +148,4 @@ export class Playground extends Component {
         return this.config.pluginSet === "extras" ? ["odoo-editor-qweb"] : [];
     }
 }
-
 registry.category("actions").add("html_editor.playground", Playground);
