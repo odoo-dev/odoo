@@ -1,6 +1,8 @@
 
 import { Interaction } from "@web/public/interaction";
+import { isEmail } from "@web/core/utils/strings";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 
 import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFromTextarea";
 
@@ -20,6 +22,12 @@ export class ProfileEditor extends Interaction {
         },
         ".o_forum_profile_bio_form": { "t-att-class": () => ({ "d-none": !this.isEditingBio }) },
         ".o_forum_profile_bio": { "t-att-class": () => ({ "d-none": this.isEditingBio, }) },
+        "form.o_wprofile_editor_form #user_email": {
+            "t-on-change": () => this.validateInputs(),
+        },
+        'form.o_wprofile_editor_form button[type="submit"]': {
+            "t-on-click": (ev) => this.onSubmit(ev),
+        },
     };
 
     setup() {
@@ -28,6 +36,7 @@ export class ProfileEditor extends Interaction {
         this.textareaEl = this.el.querySelector("textarea.o_wysiwyg_loader");
 
         this.options = {
+            allowCommandImage: user.isInternalUser,
             recordInfo: {
                 context: this.services.website_page.context,
                 res_model: "res.users",
@@ -72,6 +81,26 @@ export class ProfileEditor extends Interaction {
         reader.readAsDataURL(this.fileUploadEl.files[0]);
         this.addListener(reader, "load", (ev) => this.avatarImgEl.src = ev.target.result);
         this.el.querySelector("#forum_clear_image")?.remove();
+    }
+
+    onSubmit(ev) {
+        if (!this.validateInputs()) {
+            ev.preventDefault();
+        }
+    }
+
+    validateInputs() {
+        let isValid = true;
+        const email = this.el.querySelector("#user_email").value;
+        const userEmailErrorEl = this.el.querySelector("#user_email_error");
+        if (!isEmail(email)) {
+            isValid = false;
+            userEmailErrorEl.classList.remove("d-none");
+        } else {
+            userEmailErrorEl.classList.add("d-none");
+        }
+        this.el.querySelector("button.o_wprofile_submit_btn").disabled = !isValid;
+        return isValid;
     }
 }
 

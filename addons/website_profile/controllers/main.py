@@ -75,7 +75,7 @@ class WebsiteProfile(http.Controller):
             'user': user,
             'main_object': user,
             'is_profile_page': True,
-            'edit_button_url_param': '',
+            'countries': request.env['res.country'].search([]),
         }
 
     @http.route([
@@ -94,7 +94,7 @@ class WebsiteProfile(http.Controller):
             field_name=field, width=int(width), height=int(height), crop=crop
         ).get_response()
 
-    @http.route('/profile/user/<int:user_id>', type='http', auth='public', website=True, readonly=True)
+    @http.route('/profile/user/<int:user_id>', type='http', auth='public', methods=['GET'], website=True, readonly=True)
     def view_user_profile(self, user_id, **post):
         user_sudo, denial_reason = self._check_user_profile_access(user_id)
         if denial_reason:
@@ -106,22 +106,6 @@ class WebsiteProfile(http.Controller):
 
     # Edit Profile
     # ---------------------------------------------------
-    @http.route('/profile/edit', type='http', auth="user", website=True)
-    def view_user_profile_edition(self, **kwargs):
-        user_id = int(kwargs.get('user_id', 0))
-        countries = request.env['res.country'].search([])
-        if user_id and request.env.user.id != user_id and request.env.user._is_admin():
-            user = request.env['res.users'].browse(user_id)
-            values = self._prepare_user_values(searches=kwargs, user=user, is_public_user=False)
-        else:
-            values = self._prepare_user_values(searches=kwargs)
-        values.update({
-            'email_required': kwargs.get('email_required'),
-            'countries': countries,
-            'url_param': kwargs.get('url_param'),
-        })
-        return request.render("website_profile.user_profile_edit_main", values)
-
     def _profile_edition_preprocess_values(self, user, **kwargs):
         values = {
             'name': kwargs.get('name'),
@@ -142,9 +126,8 @@ class WebsiteProfile(http.Controller):
             values['website_published'] = kwargs.get('website_published') == 'True'
         return values
 
-    @http.route('/profile/user/save', type='http', auth="user", methods=['POST'], website=True)
-    def save_edited_profile(self, **kwargs):
-        user_id = int(kwargs.get('user_id', 0))
+    @http.route('/profile/user/<int:user_id>', type='http', auth="user", methods=['POST'], website=True)
+    def save_edited_profile(self, user_id, **kwargs):
         if user_id and request.env.user.id != user_id and request.env.user._is_admin():
             user = request.env['res.users'].browse(user_id)
         else:
@@ -152,10 +135,7 @@ class WebsiteProfile(http.Controller):
         values = self._profile_edition_preprocess_values(user, **kwargs)
         whitelisted_values = {key: values[key] for key in user.SELF_WRITEABLE_FIELDS if key in values}
         user.write(whitelisted_values)
-        if kwargs.get('url_param'):
-            return request.redirect("/profile/user/%d?%s" % (user.id, kwargs['url_param']))
-        else:
-            return request.redirect("/profile/user/%d" % user.id)
+        return self.view_user_profile(user_id, **dict(request.httprequest.args))
 
     # Ranks and Badges
     # ---------------------------------------------------
