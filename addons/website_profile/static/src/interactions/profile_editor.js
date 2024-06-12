@@ -10,6 +10,9 @@ export class ProfileEditor extends Interaction {
         ".o_forum_file_upload": { "t-on-change": this.onFileChange },
         ".o_forum_profile_pic_edit": { "t-on-click.prevent": this.onEditProfilePicClick },
         ".o_forum_profile_pic_clear": { "t-on-click": this.onClearProfilePicClick },
+        ".o_wprofile_cover_file_upload": { "t-on-change": this.onCoverFileChange },
+        ".o_wprofile_cover_edit": { "t-on-click.prevent": this.onEditCoverProfilePicClick },
+        ".o_wprofile_cover_clear": { "t-on-click": this.onClearCoverProfilePicClick },
         ".o_forum_profile_bio_edit": {
             "t-on-click.prevent": () => this.isEditingBio = true,
             "t-att-class": () => ({ "d-none": this.isEditingBio }),
@@ -44,6 +47,8 @@ export class ProfileEditor extends Interaction {
 
         this.fileUploadEl = this.el.querySelector(".o_forum_file_upload");
         this.avatarImgEl = this.el.querySelector(".o_wforum_avatar_img");
+        this.coverFileUploadEl = this.el.querySelector(".o_wprofile_cover_file_upload");
+        this.coverImgEl = this.el.querySelector(".o_wprofile_cover_img");
     }
 
     async willStart() {
@@ -54,6 +59,10 @@ export class ProfileEditor extends Interaction {
         this.fileUploadEl.click();
     }
 
+    onEditCoverProfilePicClick() {
+        this.coverFileUploadEl.click();
+    }
+
     onClearProfilePicClick() {
         this.fileUploadEl.value = null;
         this.avatarImgEl.src = "/web/static/img/placeholder.png";
@@ -61,6 +70,18 @@ export class ProfileEditor extends Interaction {
         inputElement.setAttribute("name", "clear_image");
         inputElement.setAttribute("id", "forum_clear_image");
         inputElement.setAttribute("type", "hidden");
+        inputElement.setAttribute("value", "True");
+        this.insert(inputElement);
+    }
+
+    onClearCoverProfilePicClick() {
+        this.coverFileUploadEl.value = null;
+        this.coverImgEl.src = "/web/static/img/placeholder.png";
+        const inputElement = document.createElement("input");
+        inputElement.setAttribute("name", "clear_image_cover");
+        inputElement.setAttribute("id", "o_wprofile_clear_image_cover");
+        inputElement.setAttribute("type", "hidden");
+        inputElement.setAttribute("value", "True");
         this.insert(inputElement);
     }
 
@@ -72,6 +93,16 @@ export class ProfileEditor extends Interaction {
         reader.readAsDataURL(this.fileUploadEl.files[0]);
         this.addListener(reader, "load", (ev) => this.avatarImgEl.src = ev.target.result);
         this.el.querySelector("#forum_clear_image")?.remove();
+    }
+
+    onCoverFileChange() {
+        if (!this.coverFileUploadEl.files.length) {
+            return;
+        }
+        const reader = new window.FileReader();
+        reader.readAsDataURL(this.coverFileUploadEl.files[0]);
+        this.addListener(reader, "load", (ev) => this.coverImgEl.src = ev.target.result);
+        this.el.querySelector("#o_wprofile_clear_image_cover")?.remove();
     }
 }
 
