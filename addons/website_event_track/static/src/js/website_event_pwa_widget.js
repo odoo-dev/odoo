@@ -164,10 +164,12 @@
             this.installBanner = new PWAInstallBanner(this);
             this.installBanner.appendTo(this.$el).then(function () {
                 // If Livechat available, It should be placed above the PWA banner.
-                const height = self.el.querySelector(".o_pwa_install_banner").getBoundingClientRect().height;
-                const livecharEl = document.querySelector(".o-livechat-LivechatButton");
-                if (livecharEl) {
-                    livecharEl.style.bottom = height;
+                const height = self.el
+                    .querySelector(".o_pwa_install_banner")
+                    .getBoundingClientRect().offsetHeight;
+                const livechatEl = document.querySelector(".o-livechat-LivechatButton");
+                if (livechatEl) {
+                    livechatEl.style.bottom = height;
                 }
             });
         },

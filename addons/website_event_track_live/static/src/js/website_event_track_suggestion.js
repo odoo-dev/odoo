@@ -63,7 +63,7 @@ var WebsiteEventTrackSuggestion = PublicWidget.extend({
     //--------------------------------------------------------------------------
 
     _updateTimer: function () {
-        var secondsLeft = parseInt(
+        const secondsLeft = parseInt(
             this.el.querySelector(".owevent_track_suggestion_timer_text").textContent
         );
 

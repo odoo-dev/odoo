@@ -24,7 +24,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
 
     _onPlayerReady: function () {
-        document.querySelector(".o_wevent_event_track_live_loading").remove();
+        this.el.querySelector(".o_wevent_event_track_live_loading").remove();
     },
 
     _onPlayerStateChange: function (event) {
@@ -42,9 +42,8 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     },
 
     _onVideoEnded: function () {
-        const trackSuggestionEL = new DOMParser()
-            .parseFromString("<div class='owevent_track_suggestion_loading position-absolute w-100'></div>", "text/html")
-            .body.firstChild;
+        const trackSuggestionEL = document.createElement("div");
+        trackSuggestionEL.className = "owevent_track_suggestion_loading position-absolute w-100";
         this.el.append(trackSuggestionEL);
         var self = this;
         rpc('/event_track/get_track_suggestion', {
@@ -71,7 +70,7 @@ publicWidget.registry.websiteEventTrackLive = publicWidget.Widget.extend({
     _setupYoutubePlayer: function () {
         var self = this;
 
-        const youtubeId = self.el.dataset.youtubeVideoId;
+        const youtubeId = this.el.dataset.youtubeVideoId;
         const youtubeEl = document.createElement("script");
         youtubeEl.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(youtubeEl);

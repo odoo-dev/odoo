@@ -39,8 +39,8 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         // 1) Valid Form Inputs
         this.el.querySelectorAll(".form-control").forEach(function (formControlEl) {
             // Validate current input, if not select2 field.
-            var isInput = !formControlEl.classList.contains("o_wetrack_select2_tags");
-            var invalidInputs = isInput && !formControlEl.checkValidity();
+            const isInput = !formControlEl.classList.contains("o_wetrack_select2_tags");
+            const invalidInputs = isInput && !formControlEl.checkValidity();
 
             formControlEl.classList.remove("o_wetrack_input_error", "is-invalid");
             if (invalidInputs) {
@@ -58,7 +58,8 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
                 document
                     .querySelector(".o_wetrack_contact_information")
                     .classList.add("o_wetrack_no_contact_mean_error");
-                document.querySelectorAll(".o_wetrack_contact_mean")
+                document
+                    .querySelectorAll(".o_wetrack_contact_mean")
                     .forEach((el) => el.classList.add("is-invalid"));
                 formErrors.push('noContactMean');
             } else {
@@ -84,12 +85,12 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
      * @param {Array} errors - Names of errors still present in form.
      */
     _updateErrorDisplay: function (errors) {
-        document
+        this.el
             .querySelector(".o_wetrack_proposal_error_section")
             .classList.toggle("d-none", !errors.length);
 
         var errorMessages = [];
-        var errorEl = document.querySelector(".o_wetrack_proposal_error_message");
+        const errorEl = document.querySelector(".o_wetrack_proposal_error_message");
 
         if (errors.includes('invalidFormInputs')) {
             errorMessages.push(_t('Please fill out the form correctly.'));
@@ -121,8 +122,8 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
      */
     _onAdvancedContactToggle: function (ev) {
         this.useAdvancedContact = !this.useAdvancedContact;
-        var contactNameEl = this.el.querySelector(".o_wetrack_contact_name_input");
-        var advancedInformation = this.el.querySelector(".o_wetrack_contact_information");
+        const contactNameEl = this.el.querySelector(".o_wetrack_contact_name_input");
+        const advancedInformation = this.el.querySelector(".o_wetrack_contact_information");
 
         if (this.useAdvancedContact) {
             advancedInformation.classList.remove("d-none");
@@ -130,7 +131,7 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         } else {
             const contactEmailEl = this.el.querySelector(".o_wetrack_contact_email_input");
             contactEmailEl.value = "";
-            contactEmailEl.dispatchEvent(new Event("change"));
+            contactEmailEl.dispatchEvent(new Event("change", { bubble: true }));
             advancedInformation.classList.add("d-none");
             contactNameEl.removeAttribute("required");
         }
@@ -144,9 +145,9 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
      * @param {Event} ev
      */
     _onPartnerNameInput: function (ev) {
-        var partnerNameText = ev.currentTarget.value;
-        var contactNameInputEl = this.el.querySelector(".o_wetrack_contact_name_input");
-        var contactNameText = contactNameInputEl.value;
+        const partnerNameText = ev.currentTarget.value;
+        const contactNameInputEl = this.el.querySelector(".o_wetrack_contact_name_input");
+        const contactNameText = contactNameInputEl.value;
         if (partnerNameText.startsWith(contactNameText)) {
             contactNameInputEl.value = partnerNameText;
             contactNameInputEl.dispatchEvent(new Event("change"));
@@ -171,7 +172,7 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
         ev.stopPropagation();
 
         // Prevent further clicking
-        var submitButtonEl = this.el.querySelector(".o_wetrack_proposal_submit_button");
+        const submitButtonEl = this.el.querySelector(".o_wetrack_proposal_submit_button");
         submitButtonEl.classList.add("disabled");
         submitButtonEl.setAttribute("disabled", "disabled");
 
@@ -189,7 +190,9 @@ publicWidget.registry.websiteEventTrackProposalForm = publicWidget.Widget.extend
 
             const jsonResponse = await response.json();
             if (jsonResponse.success) {
-                const offsetTop = (document.querySelector("#wrapwrap").scrollTop || 0) + this.el.offsetTop;
+                const offsetTop =
+                    (document.querySelector("#wrapwrap").scrollTop || 0) +
+                    this.el.getBoundingClientRect().top;
                 const floatingMenuHeight =
                     (document.querySelector(".o_header_standard").getBoundingClientRect().height || 0) +
                     (document.querySelector("#oe_main_menu_navbar").getBoundingClientRect().height || 0);

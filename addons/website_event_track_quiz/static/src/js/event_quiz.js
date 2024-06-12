@@ -101,10 +101,10 @@ var Quiz = publicWidget.Widget.extend({
      * Decorate the answers according to state
      */
     _disableAnswers: function () {
-        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (question) {
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach((question) => {
             question.classList.add("completed-disabled");
         });
-        this.el.querySelectorAll("input[type=radio]").forEach(function (input) {
+        this.el.querySelectorAll("input[type=radio]").forEach((input) => {
             input.disabled = true;
         });
     },
@@ -114,10 +114,10 @@ var Quiz = publicWidget.Widget.extend({
      * Decorate the answers according to state
      */
     _enableAnswers: function () {
-        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach((questionEl) => {
             questionEl.classList.remove("completed-disabled");
         });
-        this.el.querySelectorAll("input[type=radio]").forEach(function (inputEl) {
+        this.el.querySelectorAll("input[type=radio]").forEach((inputEl) => {
             inputEl.disabled = false;
         });
     },
@@ -129,7 +129,7 @@ var Quiz = publicWidget.Widget.extend({
      */
     _getQuestionsIds: function () {
         return [...this.el.querySelectorAll(".o_quiz_js_quiz_question")].map(function (question) {
-            return question.dataset.questionId;
+            return parseInt(question.dataset.questionId);
         });
     },
 
@@ -149,10 +149,9 @@ var Quiz = publicWidget.Widget.extend({
      * @private
      */
     _renderAnswersHighlightingAndComments: function () {
-        var self = this;
-        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
-            const questionId = questionEl.dataset.questionId;
-            const answer = self.quiz.answers[questionId];
+        this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach((questionEl) => {
+            const questionId = parseInt(questionEl.dataset.questionId);
+            const answer = this.quiz.answers[questionId];
             questionEl.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answerEl) {
                 answerEl.querySelector("i.fa").classList.add("d-none");
                 if (answerEl.querySelector("input[type=radio]").checked) {
@@ -180,7 +179,7 @@ var Quiz = publicWidget.Widget.extend({
         */
     _renderValidationInfo: function () {
         const validationEl = this.el.querySelector(".o_quiz_js_quiz_validation");
-        validationEl.childNodes.forEach((child) => child.remove());
+        validationEl.replaceChild();
         validationEl.append(renderToElement("quiz.validation", { widget: this }));
     },
 
@@ -190,13 +189,18 @@ var Quiz = publicWidget.Widget.extend({
     _resetQuiz: function () {
         this.el.querySelectorAll(".o_quiz_js_quiz_question").forEach(function (questionEl) {
             questionEl.querySelectorAll("a.o_quiz_quiz_answer").forEach(function (answerEl) {
-                answerEl.querySelectorAll("i.fa").forEach(el => el.classList.add("d-none"));
-                answerEl.querySelector("i.fa-circle").classList.remove("d-none");
-                answerEl.querySelector("span.badge")?.remove();
-                answerEl.querySelector("input[type=radio]").checked = false;
+                answerEl.querySelectorAll("i.fa").forEach((el) => el.classList.add("d-none"));
+                answerEl
+                    .querySelectorAll("i.fa-circle")
+                    .forEach((el) => el.classList.remove("d-none"));
+                answerEl.querySelectorAll("span.badge").forEach((el) => el.remove());
+                answerEl
+                    .querySelectorAll("input[type=radio]")
+                    .forEach((el) => (el.checked = false));
             });
-            const infoEl = questionEl.querySelector(".o_quiz_quiz_answer_info");
-            infoEl?.remove();
+            questionEl
+                .querySelectorAll(".o_quiz_quiz_answer_info")
+                .forEach((infoEl) => infoEl.remove());
         });
         this.track.completed = false;
         this._enableAnswers();
@@ -282,17 +286,17 @@ publicWidget.registry.Quiz = publicWidget.Widget.extend({
         this.quizWidgets = [];
         var defs = [this._super.apply(this, arguments)];
         this.el.querySelectorAll(".o_quiz_js_quiz").forEach((el) => {
-        const data = getElementData(el);
-        data.quizData = {
-            questions: self._extractQuestionsAndAnswers(),
-            sessionAnswers: data.sessionAnswers || [],
-            quizKarmaMax: data.quizKarmaMax,
-            quizKarmaWon: data.quizKarmaWon,
-            quizKarmaGain: data.quizKarmaGain,
-            quizPointsGained: data.quizPointsGained,
-            quizAttemptsCount: data.quizAttemptsCount,
-        };
-        defs.push(new Quiz(self, data, data.quizData).attachTo(this));
+            const data = getElementData(el);
+            data.quizData = {
+                questions: self._extractQuestionsAndAnswers(),
+                sessionAnswers: data.sessionAnswers || [],
+                quizKarmaMax: data.quizKarmaMax,
+                quizKarmaWon: data.quizKarmaWon,
+                quizKarmaGain: data.quizKarmaGain,
+                quizPointsGained: data.quizPointsGained,
+                quizAttemptsCount: data.quizAttemptsCount,
+            };
+            defs.push(new Quiz(self, data, data.quizData).attachTo(el));
         });
         return Promise.all(defs);
     },
@@ -314,12 +318,12 @@ publicWidget.registry.Quiz = publicWidget.Widget.extend({
             var answers = [];
             question.querySelectorAll(".o_quiz_quiz_answer").forEach(function (answer) {
                 answers.push({
-                    id: answer.dataset.answerId,
+                    id: parseInt(answer.dataset.answerId),
                     text: answer.dataset.text,
                 });
             });
             questions.push({
-                id: question.dataset.questionId,
+                id: parseInt(question.dataset.questionId),
                 title: question.dataset.title,
                 answer_ids: answers,
             });

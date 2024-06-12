@@ -5,6 +5,7 @@ import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { Component } from "@odoo/owl";
+import { getElementData } from "@web/core/utils/ui";
 
 publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
     selector: '.o_wetrack_js_reminder',
@@ -35,14 +36,15 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
         var self = this;
         const trackLinkEl = ev.currentTarget.querySelector("i");
 
+        const data = getElementData(trackLinkEl);
         if (this.reminderOn === undefined) {
-            this.reminderOn = trackLinkEl.dataset.reminderOn;
+            this.reminderOn = data.reminderOn;
         }
 
         var reminderOnValue = !this.reminderOn;
 
         rpc('/event/track/toggle_reminder', {
-            track_id: parseInt(trackLinkEl.dataset.trackId),
+            track_id: data.trackId,
             set_reminder_on: reminderOnValue,
         }).then(function (result) {
             if (result.error && result.error === 'ignored') {

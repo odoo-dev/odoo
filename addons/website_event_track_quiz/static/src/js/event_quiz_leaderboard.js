@@ -11,10 +11,10 @@ publicWidget.registry.EventLeaderboard = publicWidget.Widget.extend({
     start: function () {
         var self = this;
         return this._super(...arguments).then(function () {
-            var scrollToEl = self.el.querySelector(".o_wevent_quiz_scroll_to");
+            const scrollToEl = self.el.querySelector(".o_wevent_quiz_scroll_to");
             if (scrollToEl) {
-                var offset = document.querySelector(".o_header_standard").getBoundingClientRect().height;
-                var appMenuEl = document.querySelector(".o_main_navbar");
+                let offset = document.querySelector(".o_header_standard").offsetHeight;
+                const appMenuEl = document.querySelector(".o_main_navbar");
                 if (appMenuEl) {
                     offset += appMenuEl.offsetHeight;
                 }

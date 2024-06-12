@@ -3,6 +3,7 @@
 import { formatDuration } from "@web/core/l10n/dates";
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
+import { getElementData } from "@web/core/utils/ui";
 const { DateTime } = luxon;
 
 /*
@@ -23,7 +24,7 @@ publicWidget.registry.websiteEventTrackTimer = publicWidget.Widget.extend({
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
-            const timeToLive = this.el.dataset.timeToLive;
+            const timeToLive = getElementData(this.el).timeToLive;
             let deadline = DateTime.now().plus({ seconds: timeToLive });
             let remainingMs = deadline.diff(DateTime.now()).as("milliseconds");
             if (remainingMs > 0) {

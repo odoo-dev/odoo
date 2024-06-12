@@ -17,7 +17,7 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
      */
     start: function () {
         this._super.apply(this, arguments).then(() => {
-            const popoverEl = this.el.closest("[data-bs-toggle='popover']");
+            const popoverEl = this.el.querySelector("[data-bs-toggle='popover']");
             if (popoverEl) {
                 Popover.getOrCreateInstance(popoverEl);
             }
@@ -88,16 +88,16 @@ publicWidget.registry.websiteEventTrack = publicWidget.Widget.extend({
                 //when filtering elements only check the text content
                 return element.textContent.toLowerCase().includes(text.toLowerCase());
             }
-            const filteredTrackEls = [...trackEls].filter((trackEl, index) => filterTracks(index, trackEl));
+            const filteredTrackEls = [...trackEls].filter((trackEl, index) =>
+                filterTracks(index, trackEl)
+            );
             document.getElementById("search_summary").classList.remove("invisible");
             document.getElementById("search_number").textContent = filteredTrackEls.length;
 
             trackEls.forEach((trackEl) => {
-                if (filterTracks(null, trackEl)) {
-                    trackEl.classList.remove("invisible");
-                } else {
-                    trackEl.classList.add("invisible");
-                }
+                filterTracks(null, trackEl)
+                    ? trackEl.classList.remove("invisible")
+                    : trackEl.classList.add("invisible");
             });
         } else {
             //if no search is being performed; hide the result count text
