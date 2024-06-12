@@ -682,7 +682,7 @@ test("link preview in Link Popover", async () => {
     Partner._records = [
         {
             id: 1,
-            txt: "<p class='test_target'><a href='/test'>This website</a></p>",
+            txt: "<p class='test_target'>abc<a href='/test'>This website</a></p>",
         },
     ];
     await mountView({
@@ -699,7 +699,7 @@ test("link preview in Link Popover", async () => {
 
     // Open the popover option to edit the link
     let anchorNode = queryOne(".test_target a");
-    setSelection({ anchorNode, anchorOffset: 0, focusNode: anchorNode, focusOffset: 0 });
+    setSelection({ anchorNode, anchorOffset: 0 });
     await animationFrame();
     // Click on the edit link icon
     await contains("a.o_we_edit_link").click();
@@ -726,7 +726,7 @@ test("link preview in Link Popover", async () => {
 
     anchorNode = queryOne(".test_target a");
     // Select link label to open the floating toolbar.
-    setSelection({ anchorNode, anchorOffset: 0, focusNode: anchorNode, focusOffset: 0 });
+    setSelection({ anchorNode, anchorOffset: 0 });
     await animationFrame();
     // Click on the edit link icon
     await contains("a.o_we_edit_link").click();
@@ -745,7 +745,7 @@ test("link preview in Link Popover", async () => {
 
     // Click "Save".
     await contains(".o-we-linkpopover .o_we_apply_link").click();
-    expect(".test_target").toHaveText("New label", {
+    expect(".test_target").toHaveText("abcNew label", {
         message: "The link's label should be updated",
     });
 });
