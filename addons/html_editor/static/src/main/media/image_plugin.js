@@ -148,6 +148,19 @@ export class ImagePlugin extends Plugin {
                         },
                     ],
                 },
+                {
+                    id: "image_delete",
+                    sequence: 30,
+                    namespace: "IMG",
+                    buttons: [
+                        {
+                            id: "image_delete",
+                            cmd: "DELETE_IMAGE",
+                            name: _t("Remove (DELETE)"),
+                            icon: "fa-trash text-danger",
+                        },
+                    ],
+                },
             ],
         };
     }
@@ -187,12 +200,18 @@ export class ImagePlugin extends Plugin {
             case "SHAPE_CIRCLE":
             case "SHAPE_THUMBNAIL": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 selectedImg.classList.toggle(commandToClassNameDict[command]);
                 this.dispatch("ADD_STEP");
                 break;
             }
             case "UPDATE_IMAGE_DESCRIPTION": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 selectedImg.setAttribute("alt", payload.description);
                 selectedImg.setAttribute("title", payload.tooltip);
                 this.dispatch("ADD_STEP");
@@ -200,12 +219,18 @@ export class ImagePlugin extends Plugin {
             }
             case "RESIZE_IMAGE": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 selectedImg.style.width = payload;
                 this.dispatch("ADD_STEP");
                 break;
             }
             case "SET_IMAGE_PADDING": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 for (const classString of selectedImg.classList) {
                     if (classString.match(/^p-[0-9]$/)) {
                         selectedImg.classList.remove(classString);
@@ -217,6 +242,9 @@ export class ImagePlugin extends Plugin {
             }
             case "PREVIEW_IMAGE": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 const fileModel = {
                     isImage: true,
                     isViewable: true,
@@ -230,6 +258,9 @@ export class ImagePlugin extends Plugin {
             }
             case "TRANSFORM_IMAGE": {
                 const selectedImg = this.getSelectedImage();
+                if (!selectedImg) {
+                    return;
+                }
                 const $selectedImg = $(selectedImg);
                 $selectedImg.transfo({ document: this.document });
                 this.currentImageTransformation = {
@@ -250,6 +281,14 @@ export class ImagePlugin extends Plugin {
                     this.dispatch("ADD_STEP");
                 }
                 break;
+            }
+            case "DELETE_IMAGE": {
+                const selectedImg = this.getSelectedImage();
+                if (selectedImg) {
+                    selectedImg.remove();
+                    this.currentImageTransformation.clean?.();
+                    this.dispatch("ADD_STEP");
+                }
             }
         }
     }

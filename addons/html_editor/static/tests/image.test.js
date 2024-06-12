@@ -278,3 +278,14 @@ test("Image transformation dissapear when selection change", async () => {
         transfoContainer.remove();
     }
 });
+
+test("Can delete an image", async () => {
+    await setupEditor(`<p> <img class="img-fluid" src="/web/static/img/logo.png"> </p>`);
+    expect("img[src='/web/static/img/logo.png']").toHaveCount(1);
+    click("img");
+    await waitFor(".o-we-toolbar");
+    expect("button[name='image_delete']").toHaveCount(1);
+    click("button[name='image_delete']");
+    await animationFrame();
+    expect("img[src='/web/static/img/logo.png']").toHaveCount(0);
+});
