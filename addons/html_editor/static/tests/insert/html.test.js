@@ -152,24 +152,51 @@ describe("collapsed selection", () => {
         });
     });
 
-    test("should not unwrap table nodes in unbreakable paragraph, stops at boundary", async () => {
+    test("never unwrap tables in breakable paragrap", async () => {
+        // P elements' content can only be "phrasing" content
+        // Adding a table within p is not possible
+        // We have split the p and insert the table unwrapped in between
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+        const { editor } = await setupEditor(`<p>cont[]ent</p>`, {});
+        editor.shared.domInsert(
+            parseHTML(editor.document, "<table><tbody><tr><td/></tr></tbody></table>")
+        );
+        expect(getContent(editor.editable)).toBe(
+            `<p>cont</p><table><tbody><tr><td></td></tr></tbody></table><p>[]ent</p>`
+        );
+    });
+
+    test("should not unwrap table in unbreakable paragraph find a suitable spot to insert table element", async () => {
+        // P elements' content can only be "phrasing" content
+        // Adding a table within an unbreakable p is not possible
+        // We have to find a better spot to insert the table
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+        const { editor } = await setupEditor(`<p class="oe_unbreakable">cont[]ent</p>`, {});
+        editor.shared.domInsert(
+            parseHTML(editor.document, "<table><tbody><tr><td/></tr></tbody></table>")
+        );
+        expect(getContent(editor.editable)).toBe(
+            `<p class="oe_unbreakable">content</p><table><tbody><tr><td></td></tr></tbody></table>[]`
+        );
+    });
+
+    test("stops at boundary when inserting unfit content", async () => {
+        // P elements' content can only be "phrasing" content
+        // This test forces to stop at the <p contenteditable="true" />
+        // This test is a bit odd and whitebox but this is because multiple
+        // parameters of the use case are interacting
         const { editor } = await setupEditor(
-            `<div><div class="test-boundary oe-unbreakable"><p class="oe_unbreakable">cont[]ent</p></div></div>`,
-            {
-                config: {
-                    resources: {
-                        is_edition_boundary: (node) =>
-                            node.nodeType === 1 && node.classList.contains("test-boundary"),
-                    },
-                },
-            }
+            `<div><p class="oe-unbreakable" contenteditable="true"><b class="oe_unbreakable">cont[]ent</b></p></div>`,
+            {}
         );
 
         editor.shared.domInsert(
             parseHTML(editor.document, "<table><tbody><tr><td/></tr></tbody></table>")
         );
         expect(getContent(editor.editable)).toBe(
-            `<div><div class="test-boundary oe-unbreakable"><p class="oe_unbreakable">content</p><table><tbody><tr><td></td></tr></tbody></table>[]</div></div>`
+            `<div><p class="oe-unbreakable" contenteditable="true"><b class="oe_unbreakable">content[]</b><table><tbody><tr><td></td></tr></tbody></table></p></div>`
         );
     });
 });

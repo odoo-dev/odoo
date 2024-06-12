@@ -295,12 +295,7 @@ export class DomPlugin extends Plugin {
         if (node === this.editable) {
             return true;
         }
-        for (const callback of this.resources?.["is_edition_boundary"] || []) {
-            const res = callback(node);
-            if (res !== undefined) {
-                return res;
-            }
-        }
+        return node.hasAttribute("contenteditable");
     }
 
     copyAttributes(source, target) {
