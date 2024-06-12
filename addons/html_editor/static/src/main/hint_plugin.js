@@ -9,20 +9,37 @@ function isMutationRecordSavable(record) {
     return true;
 }
 
+function target(selection, editable) {
+    const el = editable.firstChild;
+    if (!selection.inEditable && el && el.tagName === "P" && isEmpty(el)) {
+        return el;
+    }
+}
+
 export class HintPlugin extends Plugin {
     static name = "hint";
     static dependencies = ["history", "selection"];
     /** @type { (p: HintPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        history_rendering_classes: ["o-we-hint"],
-        is_mutation_record_savable: isMutationRecordSavable,
-        onSelectionChange: p.updateTempHint.bind(p),
-        onExternalHistorySteps: p.updateHints.bind(p),
-    });
+    static resources = (p) => {
+        const resources = {
+            history_rendering_classes: ["o-we-hint"],
+            is_mutation_record_savable: isMutationRecordSavable,
+            onSelectionChange: p.updateTempHint.bind(p),
+            onExternalHistorySteps: p.updateHints.bind(p),
+        };
+        if (p.config.placeholder) {
+            resources.temp_hints = {
+                text: p.config.placeholder,
+                target,
+            };
+        }
+
+        return resources;
+    };
 
     setup() {
         this.tempHint = null;
-        this.makeEmptyBlockHints(this.editable);
+        this.updateHints(this.editable);
     }
 
     destroy() {
@@ -68,7 +85,7 @@ export class HintPlugin extends Plugin {
 
         if (selection.isCollapsed) {
             for (const hint of this.resources["temp_hints"]) {
-                const target = hint.target(selection);
+                const target = hint.target(selection, this.editable);
                 // Do not replace an existing empty block hint by a temp hint.
                 if (target && !target.classList.contains("o-we-hint")) {
                     this.makeHint(target, hint.text);

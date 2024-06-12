@@ -105,6 +105,15 @@ export function setSelection({
     selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
 }
 
+export function moveSelectionOutsideEditor() {
+    setSelection({
+        anchorNode: document.body,
+        anchorOffset: 0,
+        focusNode: document.body,
+        focusOffset: 0,
+    });
+}
+
 export function getSelection(el, content) {
     if (content.indexOf("[") === -1 || content.indexOf("]") === -1) {
         return;

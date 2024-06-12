@@ -3,8 +3,8 @@ import { describe, expect, test } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setupWysiwyg, setupEditor } from "./_helpers/editor";
-import { getContent, setContent, setSelection } from "./_helpers/selection";
+import { setupEditor, setupWysiwyg } from "./_helpers/editor";
+import { getContent, moveSelectionOutsideEditor, setContent } from "./_helpers/selection";
 
 describe("Wysiwyg Component", () => {
     test("Wysiwyg component can be instantiated", async () => {
@@ -74,12 +74,7 @@ describe("Wysiwyg Component", () => {
         expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
 
         click(document.body);
-        setSelection({
-            anchorNode: document.body,
-            anchorOffset: 0,
-            focusNode: document.body,
-            focusOffset: 0,
-        });
+        moveSelectionOutsideEditor();
         await animationFrame();
         expect(getContent(el)).toBe("<p>test <strong>some</strong> text</p>");
         expect(".o-we-toolbar .btn[name='bold']").toHaveClass("active");
@@ -92,12 +87,7 @@ describe("Wysiwyg Component", () => {
         await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");
 
         click(document.body);
-        setSelection({
-            anchorNode: document.body,
-            anchorOffset: 0,
-            focusNode: document.body,
-            focusOffset: 0,
-        });
+        moveSelectionOutsideEditor();
         await animationFrame();
         expect(getContent(el)).toBe("<p>test some text</p>");
         await waitFor(".o-we-toolbar .btn[name='bold']:not(.active)");

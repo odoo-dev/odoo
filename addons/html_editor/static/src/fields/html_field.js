@@ -31,6 +31,7 @@ export class HtmlField extends Component {
         isCollaborative: { type: Boolean, optional: true },
         cssReadonlyAssetId: { type: String, optional: true },
         sandboxedPreview: { type: Boolean, optional: true },
+        editorConfig: { type: Object, optional: true },
     };
     static components = {
         Wysiwyg,
@@ -121,7 +122,9 @@ export class HtmlField extends Component {
     }
 
     onBlur() {
-        return this.updateValue();
+        if (this.isDirty) {
+            return this.updateValue();
+        }
     }
 
     async toggleCodeView() {
@@ -150,6 +153,7 @@ export class HtmlField extends Component {
             peerId: this.generateId(),
             recordInfo: { resModel, resId },
             dropImageAsAttachment: true, // @todo @phoenix always true ?
+            ...this.props.editorConfig,
         };
         return config;
     }
@@ -165,7 +169,12 @@ export const htmlField = {
     displayName: _t("Html"),
     supportedTypes: ["html"],
     extractProps({ attrs, options }, dynamicInfo) {
+        const editorConfig = {};
+        if (attrs.placeholder) {
+            editorConfig.placeholder = attrs.placeholder;
+        }
         return {
+            editorConfig,
             isCollaborative: options.collaborative,
             sandboxedPreview: Boolean(options.sandboxedPreview),
             cssReadonlyAssetId: options.cssReadonly,

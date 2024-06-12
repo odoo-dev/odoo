@@ -1,6 +1,7 @@
-import { removeClass } from "./utils/dom";
-import { initElementForEdition } from "./utils/sanitize";
 import { MAIN_PLUGINS } from "./plugin_sets";
+import { removeClass } from "./utils/dom";
+import { isEmpty } from "./utils/dom_info";
+import { initElementForEdition } from "./utils/sanitize";
 
 /**
  * @typedef { import("./plugin").SharedMethods } SharedMethods
@@ -88,6 +89,9 @@ export class Editor {
         this.document = editable.ownerDocument;
         if (this.config.content) {
             editable.innerHTML = this.config.content;
+            if (isEmpty(editable)) {
+                editable.innerHTML = "<p><br></p>";
+            }
         }
         this.preparePlugins();
         // apply preprocessing, if necessary

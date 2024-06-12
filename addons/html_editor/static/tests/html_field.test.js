@@ -3,7 +3,7 @@ import { MediaDialog } from "@html_editor/main/media/media_dialog";
 import { parseHTML } from "@html_editor/utils/html";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { click, press, queryAll, queryAllTexts, queryOne, waitUntil } from "@odoo/hoot-dom";
-import { Deferred, animationFrame, mockSendBeacon } from "@odoo/hoot-mock";
+import { Deferred, animationFrame, mockSendBeacon, tick } from "@odoo/hoot-mock";
 import {
     contains,
     defineModels,
@@ -16,7 +16,7 @@ import {
 import { assets } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { FormController } from "@web/views/form/form_controller";
-import { setSelection } from "./_helpers/selection";
+import { moveSelectionOutsideEditor, setSelection } from "./_helpers/selection";
 import { insertText, pasteText } from "./_helpers/user_actions";
 
 class Partner extends models.Model {
@@ -748,6 +748,44 @@ test("link preview in Link Popover", async () => {
     expect(".test_target").toHaveText("abcNew label", {
         message: "The link's label should be updated",
     });
+});
+
+test("html field with a placeholder", async () => {
+    Partner._records = [
+        {
+            id: 1,
+            txt: false,
+        },
+    ];
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" placeholder="test"/>
+            </form>`,
+    });
+
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        '<p placeholder="test" class="o-we-hint"><br></p>',
+        { type: "html" }
+    );
+
+    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    await tick();
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        '<p placeholder="Type &quot;/&quot; for commands" class="o-we-hint"><br></p>',
+        { type: "html" }
+    );
+
+    moveSelectionOutsideEditor();
+    await tick();
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
+        '<p placeholder="test" class="o-we-hint"><br></p>',
+        { type: "html" }
+    );
 });
 
 describe("sandbox", () => {

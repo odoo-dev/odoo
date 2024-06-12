@@ -26,7 +26,9 @@ import { Powerbox } from "./powerbox";
 function target(selection) {
     const node = selection.anchorNode;
     const el = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
-    return (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el) && el;
+    if (selection.inEditable && (el.tagName === "DIV" || el.tagName === "P") && isEmpty(el)) {
+        return el;
+    }
 }
 
 export class PowerboxPlugin extends Plugin {

@@ -1,14 +1,45 @@
 import { expect, test } from "@odoo/hoot";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 import { setupEditor } from "./_helpers/editor";
-import { getContent, setSelection } from "./_helpers/selection";
 import { unformat } from "./_helpers/format";
-import { animationFrame } from "@odoo/hoot-mock";
+import {
+    getContent,
+    moveSelectionOutsideEditor,
+    setContent,
+    setSelection,
+} from "./_helpers/selection";
 
 test("hints are removed when editor is destroyed", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
     expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
     editor.destroy();
     expect(getContent(el)).toBe("<p>[]</p>");
+});
+
+test("powerbox hint is display when the selection is in the editor", async () => {
+    const { el } = await setupEditor("<p></p>", {});
+    expect(getContent(el)).toBe(`<p></p>`);
+
+    setContent(el, "<p>[]</p>");
+    await tick();
+    expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
+
+    moveSelectionOutsideEditor();
+    await tick();
+    expect(getContent(el)).toBe(`<p></p>`);
+});
+
+test("placeholder is display when the selection is outside of the editor", async () => {
+    const { el } = await setupEditor("<p></p>", { config: { placeholder: "test" } });
+    expect(getContent(el)).toBe(`<p placeholder="test" class="o-we-hint"></p>`);
+
+    setContent(el, "<p>[]</p>");
+    await tick();
+    expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);
+
+    moveSelectionOutsideEditor();
+    await tick();
+    expect(getContent(el)).toBe(`<p placeholder="test" class="o-we-hint"></p>`);
 });
 
 test("should not lose track of temporary hints on split block", async () => {

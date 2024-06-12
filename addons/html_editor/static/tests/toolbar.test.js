@@ -10,11 +10,11 @@ import {
 } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setupEditor } from "./_helpers/editor";
-import { unformat } from "./_helpers/format";
-import { getContent, setContent, setSelection } from "./_helpers/selection";
 import { Plugin } from "../src/plugin";
 import { MAIN_PLUGINS } from "../src/plugin_sets";
+import { setupEditor } from "./_helpers/editor";
+import { unformat } from "./_helpers/format";
+import { getContent, moveSelectionOutsideEditor, setContent } from "./_helpers/selection";
 
 test("toolbar is only visible when selection is not collapsed", async () => {
     const { el } = await setupEditor("<p>test</p>");
@@ -36,12 +36,7 @@ test("toolbar closes when selection leaves editor", async () => {
     await waitFor(".o-we-toolbar");
 
     click(document.body);
-    setSelection({
-        anchorNode: document.body,
-        anchorOffset: 0,
-        focusNode: document.body,
-        focusOffset: 0,
-    });
+    moveSelectionOutsideEditor();
     await waitForNone(".o-we-toolbar");
     expect(".o-we-toolbar").toHaveCount(0);
 });

@@ -2121,7 +2121,7 @@ describe("images", () => {
                 focusNode: p.childNodes[1],
                 focusOffset: 5,
             };
-            setSelection(selection, editor.document);
+            setSelection(selection);
             // paste url
             pasteText(editor, imgUrl);
             await animationFrame();
@@ -2315,8 +2315,8 @@ describe("youtube video", () => {
                 focusNode: p.childNodes[1],
                 focusOffset: 5,
             };
-            setSelection(selection, editor.document);
-            setSelection(selection, editor.document);
+            setSelection(selection);
+            setSelection(selection);
 
             // paste url
             pasteText(editor, videoUrl);
