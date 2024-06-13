@@ -17,7 +17,7 @@ export class CollaborationSelectionPlugin extends Plugin {
     static resources = (p) => ({
         handleCollaborationNotification: p.handleCollaborationNotification.bind(p),
         getCollaborationPeerMetadata: () => ({ selectionColor: p.selectionColor }),
-        layoutGeomentryChange: p.refreshSelection.bind(p),
+        layoutGeometryChange: p.refreshSelection.bind(p),
         collaborativeSelectionUpdate: p.updateSelection.bind(p),
     });
     selectionInfos = new Map();

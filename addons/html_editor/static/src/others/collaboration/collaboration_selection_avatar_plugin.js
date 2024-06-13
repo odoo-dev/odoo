@@ -26,7 +26,7 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
         handleCollaborationNotification: p.handleCollaborationNotification.bind(p),
         getCollaborationPeerMetadata: () => ({ avatarUrl: p.avatarUrl }),
         onExternalHistorySteps: p.refreshSelection.bind(p),
-        layoutGeomentryChange: p.refreshSelection.bind(p),
+        layoutGeometryChange: p.refreshSelection.bind(p),
         setMovableElement: p.disableAvatarForElement.bind(p),
         unsetMovableElement: p.enableAvatars.bind(p),
         collaborativeSelectionUpdate: p.updateSelection.bind(p),
