@@ -745,7 +745,7 @@ test("link preview in Link Popover", async () => {
 
     // Click "Save".
     await contains(".o-we-linkpopover .o_we_apply_link").click();
-    expect(".test_target").toHaveText("abcNew label", {
+    expect(".test_target a").toHaveText("New label", {
         message: "The link's label should be updated",
     });
 });
