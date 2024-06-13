@@ -14,7 +14,10 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import { defineMailModels } from "../mail_test_helpers";
+import { defineMailModels, mailModels } from "../mail_test_helpers";
+
+// Need this hack to use the arch in mountView(...)
+mailModels.MailComposeMessage._views = {};
 
 defineMailModels([]);
 
@@ -53,7 +56,7 @@ test("media dialog: upload", async function () {
         expect(createVals.attachment_ids[0][0]).toBe(4); // link command
         expect(createVals.attachment_ids[0][1]).toBe(newAttachmentId); // on attachment id "5"
     });
-    onRpc("/web_editor/attachment/add_data", () => {
+    onRpc("/html_editor/attachment/add_data", () => {
         const attachment = {
             name: "test.jpg",
             description: false,
