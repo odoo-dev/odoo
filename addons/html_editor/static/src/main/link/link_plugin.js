@@ -204,6 +204,15 @@ export class LinkPlugin extends Plugin {
     handleSelectionChange(selection) {
         if (!selection.isCollapsed) {
             this.overlay.close();
+        } else if (!selection.inEditable) {
+            const selection = this.document.getSelection();
+            const preventClosing = selection?.anchorNode?.closest?.(
+                "[data-prevent-closing-overlay]"
+            );
+            if (preventClosing?.dataset?.preventClosingOverlay === "true") {
+                return;
+            }
+            this.overlay.close();
         } else {
             const linkEl = closestElement(selection.anchorNode, "A");
             if (!linkEl) {
@@ -244,7 +253,7 @@ export class LinkPlugin extends Plugin {
                     this.overlay.close();
                     this.dispatch("ADD_STEP");
                 },
-                onCopy: () => {
+                closeOverlay: () => {
                     this.overlay.close();
                 },
             };

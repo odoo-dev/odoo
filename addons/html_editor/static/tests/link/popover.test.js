@@ -238,7 +238,9 @@ describe("Link creation by powerbox/toolbar", () => {
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
-        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcd[]</a>ef</p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>a<a href="http://test.com/">bcd[]</a>ef</p>'
+        );
     });
     test("when selection includes a link and click the link icon in toolbar, the link should be extended", async () => {
         const { el } = await setupEditor('<p>a[b<a href="http://test.com/">cd</a>e]f</p>');
@@ -249,7 +251,9 @@ describe("Link creation by powerbox/toolbar", () => {
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
-        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcde[]</a>f</p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>a<a href="http://test.com/">bcde[]</a>f</p>'
+        );
     });
     test("when selection includes another block and the link extending stays inside of the block", async () => {
         const { el } = await setupEditor('<p>a[b<a href="http://test.com/">cd</a>ef</p><p>gh]</p>');
@@ -260,7 +264,9 @@ describe("Link creation by powerbox/toolbar", () => {
         await animationFrame();
         await waitFor(".o-we-linkpopover");
         expect(".o-we-linkpopover").toHaveCount(1);
-        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcdef[]</a></p><p>gh</p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>a<a href="http://test.com/">bcdef[]</a></p><p>gh</p>'
+        );
     });
 });
 

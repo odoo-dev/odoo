@@ -1,5 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, useState, onMounted } from "@odoo/owl";
+import { Component, useState, onMounted, useExternalListener, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { cleanZWChars, deduceURLfromText } from "./utils";
@@ -11,7 +11,7 @@ export class LinkPopover extends Component {
         linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         onApply: Function,
         onRemove: Function,
-        onCopy: Function,
+        closeOverlay: Function,
     };
     colorsData = [
         { type: "", label: _t("Link"), btnPreview: "link" },
@@ -58,11 +58,14 @@ export class LinkPopover extends Component {
 
         this.keepLastPromise = new KeepLast();
 
+        this.div_editing = useRef("div_editing");
+
         onMounted(() => {
             if (!this.state.editing) {
                 this.loadAsyncLinkPreview();
             }
         });
+        useExternalListener(document, "mousedown", this.onClickAway, { capture: true });
     }
     initButtonStyle(className) {
         const styleArray = [
@@ -95,10 +98,15 @@ export class LinkPopover extends Component {
         this.notificationService.add(_t("Link copied to clipboard."), {
             type: "success",
         });
-        this.props.onCopy();
+        this.props.closeOverlay();
     }
     onClickRemove() {
         this.props.onRemove();
+    }
+    onClickAway(ev) {
+        if (this.div_editing?.el && !this.div_editing?.el.contains(ev.target)) {
+            this.props.closeOverlay();
+        }
     }
 
     /**
