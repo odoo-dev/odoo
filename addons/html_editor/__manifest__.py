@@ -31,6 +31,9 @@
         'web.assets_unit_tests': [
             'html_editor/static/tests/**/*',
         ],
+        'web_editor.assets_media_dialog': [
+            'html_editor/static/src/main/media/upload_progress_toast/**/*',
+        ],
 
 
     },
