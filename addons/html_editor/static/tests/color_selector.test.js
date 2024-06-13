@@ -167,9 +167,8 @@ test("selected text color is not shown in the toolbar after removeFormat", async
             <font style="color: rgb(255, 0, 0);">t</font>[es]<font style="color: rgb(255, 0, 0);">t</font>
         </p>`);
     await animationFrame();
-    // rgb(73, 80, 87) is aparently the default body color in the Hoot unit test
-    // in community.
-    expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(73, 80, 87)" });
+    const defaultBodyColor = window.getComputedStyle(document.body)["color"];
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: defaultBodyColor });
 });
 
 test("collapsed selection color is shown in the permanent toolbar", async () => {
