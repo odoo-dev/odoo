@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="html_editor.linkPopover">
-        <div class="o-we-linkpopover d-flex bg-white overflow-auto">
+        <div class="o-we-linkpopover d-flex bg-white overflow-auto shadow">
             <div t-if="state.editing" class="m-1 container-fluid d-flex vertical-center">
                 <div class="col m-1">
                     <div class="input-group">
