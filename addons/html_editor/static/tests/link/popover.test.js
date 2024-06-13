@@ -183,7 +183,7 @@ describe("Incorrect URL should be corrected", () => {
     });
 });
 
-describe("Link creation by powerbox", () => {
+describe("Link creation by powerbox/toolbar", () => {
     test("click on link command in powerbox should create a link element and open the linkpopover", async () => {
         const { editor, el } = await setupEditor("<p>ab[]</p>");
         insertText(editor, "/link");
@@ -228,6 +228,39 @@ describe("Link creation by powerbox", () => {
         expect(cleanLinkArtifacts(getContent(el))).toBe(
             '<p>ab<a href="http://test.com">test.com[]</a></p>'
         );
+    });
+    test("when selection includes partially a link and click the link icon in toolbar, the link should be extended", async () => {
+        const { el } = await setupEditor('<p>a[b<a href="http://test.com/">c]d</a>ef</p>');
+        await waitFor(".o-we-toolbar");
+        await animationFrame();
+
+        click(".o-we-toolbar .fa-link");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcd[]</a>ef</p>');
+    });
+    test("when selection includes a link and click the link icon in toolbar, the link should be extended", async () => {
+        const { el } = await setupEditor('<p>a[b<a href="http://test.com/">cd</a>e]f</p>');
+        await waitFor(".o-we-toolbar");
+        await animationFrame();
+
+        click(".o-we-toolbar .fa-link");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcde[]</a>f</p>');
+    });
+    test("when selection includes another block and the link extending stays inside of the block", async () => {
+        const { el } = await setupEditor('<p>a[b<a href="http://test.com/">cd</a>ef</p><p>gh]</p>');
+        await waitFor(".o-we-toolbar");
+        await animationFrame();
+
+        click(".o-we-toolbar .fa-link");
+        await animationFrame();
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        expect(getContent(el)).toBe('<p>a<a href="http://test.com/">bcdef[]</a></p><p>gh</p>');
     });
 });
 

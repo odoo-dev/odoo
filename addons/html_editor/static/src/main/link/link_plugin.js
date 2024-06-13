@@ -262,6 +262,25 @@ export class LinkPlugin extends Plugin {
         const selection = this.shared.getEditableSelection();
         const linkElement = findInSelection(selection, "a");
         if (linkElement) {
+            if (
+                !linkElement.contains(selection.anchorNode) ||
+                !linkElement.contains(selection.focusNode)
+            ) {
+                this.shared.splitSelection();
+                const selectedNodes = this.shared.getSelectedNodes();
+                let before = linkElement.previousSibling;
+                while (before !== null && selectedNodes.includes(before)) {
+                    linkElement.insertBefore(before, linkElement.firstChild);
+                    before = linkElement.previousSibling;
+                }
+                let after = linkElement.nextSibling;
+                while (after !== null && selectedNodes.includes(after)) {
+                    linkElement.appendChild(after);
+                    after = linkElement.nextSibling;
+                }
+                this.shared.setCursorEnd(linkElement);
+                this.dispatch("ADD_STEP");
+            }
             return linkElement;
         } else {
             // create a new link element
