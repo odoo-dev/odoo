@@ -714,8 +714,7 @@ export class CollaborationOdooPlugin extends Plugin {
             this.shared.onExternalHistorySteps(this.historyStepsBuffer);
             this.historyStepsBuffer = [];
         }
-        // todo: implement it (for knowledge)
-        // this.options.onHistoryResetFromSteps();
+        this.editable.dispatchEvent(new CustomEvent("onHistoryResetFromPeer"));
         this.resetCollaborativeSelection(fromPeerId);
     }
 
