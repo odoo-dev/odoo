@@ -133,8 +133,15 @@ export class LinkPlugin extends Plugin {
      * @param {string} label
      */
     insertLink(url, label) {
-        const link = this.createLink(url, label);
-        this.shared.domInsert(link);
+        const selection = this.shared.getEditableSelection();
+        let link = closestElement(selection.anchorNode, "a");
+        if (link) {
+            link.setAttribute("href", url);
+            link.innerText = label;
+        } else {
+            link = this.createLink(url, label);
+            this.shared.domInsert(link);
+        }
         this.dispatch("ADD_STEP");
         const linkParent = link.parentElement;
         const linkOffset = Array.from(linkParent.childNodes).indexOf(link);

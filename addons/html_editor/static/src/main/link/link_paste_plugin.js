@@ -51,7 +51,7 @@ export class LinkPastePlugin extends Plugin {
         const selectionIsInsideALink = !!closestElement(selection.anchorNode, "a");
         const url = /^https?:\/\//i.test(text) ? text : "http://" + text;
         if (selectionIsInsideALink) {
-            this.handlePasteTextUrlInsideLink(text, url, selectionIsInsideALink);
+            this.handlePasteTextUrlInsideLink(text, url);
             return;
         }
         const isHandled = this.resources["handle_paste_url"].some((handler) => handler(text, url));
@@ -63,19 +63,16 @@ export class LinkPastePlugin extends Plugin {
     /**
      * @param {string} text
      * @param {string} url
-     * @param {boolean} selectionIsInsideALink
      */
-    handlePasteTextUrlInsideLink(text, url, selectionIsInsideALink) {
+    handlePasteTextUrlInsideLink(text, url) {
         // A url cannot be transformed inside an existing link.
         // An image can be embedded inside an existing link, a video cannot.
-        if (selectionIsInsideALink) {
-            if (isImageUrl(url)) {
-                const img = this.document.createElement("IMG");
-                img.setAttribute("src", url);
-                this.shared.domInsert(img);
-            } else {
-                this.shared.domInsert(text);
-            }
+        if (isImageUrl(url)) {
+            const img = this.document.createElement("IMG");
+            img.setAttribute("src", url);
+            this.shared.domInsert(img);
+        } else {
+            this.shared.domInsert(text);
         }
     }
     /**
