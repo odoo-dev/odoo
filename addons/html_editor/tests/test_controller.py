@@ -1,11 +1,9 @@
 
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
 
 import odoo.tests
-from odoo.addons.http_routing.models.ir_http import slug
 from odoo.tests.common import HttpCase, new_test_user
 from odoo.tools.json import scriptsafe as json_safe
 

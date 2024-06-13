@@ -6,8 +6,8 @@ from datetime import datetime
 
 from odoo import _, http, tools
 from odoo.addons.html_editor.tools import get_video_url_data
-from odoo.exceptions import AccessError, MissingError, UserError
-from odoo.http import Response, request
+from odoo.exceptions import UserError
+from odoo.http import request
 from odoo.tools.mimetypes import guess_mimetype
 
 from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
@@ -96,7 +96,7 @@ class HTML_Editor(http.Controller):
 
         return attachment
 
-    @http.route(['/web_editor/video_url/data','/html_editor/video_url/data'], type='json', auth='user', website=True)
+    @http.route(['/web_editor/video_url/data', '/html_editor/video_url/data'], type='json', auth='user', website=True)
     def video_url_data(self, video_url, autoplay=False, loop=False,
                        hide_controls=False, hide_fullscreen=False, hide_yt_logo=False,
                        hide_dm_logo=False, hide_dm_share=False):
@@ -107,7 +107,7 @@ class HTML_Editor(http.Controller):
             hide_dm_share=hide_dm_share
         )
 
-    @http.route(['/web_editor/attachment/add_data','/html_editor/attachment/add_data'], type='json', auth='user', methods=['POST'], website=True)
+    @http.route(['/web_editor/attachment/add_data', '/html_editor/attachment/add_data'], type='json', auth='user', methods=['POST'], website=True)
     def add_data(self, name, data, is_image, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
         data = b64decode(data)
         if is_image:
@@ -134,7 +134,7 @@ class HTML_Editor(http.Controller):
         attachment = self._attachment_create(name=name, data=data, res_id=res_id, res_model=res_model)
         return attachment._get_media_info()
 
-    @http.route(['/web_editor/attachment/add_url', '/html_editor/attachment/add_url'] , type='json', auth='user', methods=['POST'], website=True)
+    @http.route(['/web_editor/attachment/add_url', '/html_editor/attachment/add_url'], type='json', auth='user', methods=['POST'], website=True)
     def add_url(self, url, res_id=False, res_model='ir.ui.view', **kwargs):
         self._clean_context()
         attachment = self._attachment_create(url=url, res_id=res_id, res_model=res_model)
