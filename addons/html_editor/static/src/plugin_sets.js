@@ -12,7 +12,6 @@ import { SelectionPlugin } from "./core/selection_plugin";
 import { ShortCutPlugin } from "./core/shortcut_plugin";
 import { SplitPlugin } from "./core/split_plugin";
 import { TransientNodePlugin } from "./core/transient_node_plugin";
-import { UnbreakablePlugin } from "./core/unbreakable_plugin";
 import { ZwsPlugin } from "./core/zws_plugin";
 import { ColumnPlugin } from "./main/column_plugin";
 import { ColorPlugin } from "./main/font/color_plugin";
@@ -61,7 +60,6 @@ export const CORE_PLUGINS = [
     SanitizePlugin,
     SelectionPlugin,
     SplitPlugin,
-    UnbreakablePlugin,
     ZwsPlugin,
 ];
 

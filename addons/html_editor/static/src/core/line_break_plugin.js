@@ -19,6 +19,9 @@ export class LineBreakPlugin extends Plugin {
             case "INSERT_LINEBREAK_NODE":
                 this.insertLineBreakNode(payload);
                 break;
+            case "INSERT_LINEBREAK_ELEMENT":
+                this.insertLineBreakElement(payload);
+                break;
         }
     }
 
@@ -43,7 +46,7 @@ export class LineBreakPlugin extends Plugin {
             targetNode = targetNode.parentElement;
         }
 
-        for (const { callback } of this.resources.handle_insert_line_break || []) {
+        for (const { callback } of this.resources.handle_insert_line_break_element || []) {
             if (callback({ targetNode, targetOffset })) {
                 return;
             }

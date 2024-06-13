@@ -36,7 +36,7 @@ export class LinkSelectionPlugin extends Plugin {
         history_rendering_classes: ["o_link_in_selection"],
         onSelectionChange: p.resetLinkInSelection.bind(p),
         split_element_block: { callback: p.handleSplitBlock.bind(p) },
-        handle_insert_line_break: { callback: p.handleInsertLineBreak.bind(p) },
+        handle_insert_line_break_element: { callback: p.handleInsertLineBreak.bind(p) },
     });
 
     handleCommand(command, payload) {

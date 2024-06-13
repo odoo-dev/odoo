@@ -1,7 +1,7 @@
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { fillEmpty } from "../utils/dom";
-import { isVisible } from "../utils/dom_info";
+import { isUnbreakable, isVisible } from "../utils/dom_info";
 import { prepareUpdate } from "../utils/dom_state";
 import { closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { DIRECTIONS, childNodeIndex } from "../utils/position";
@@ -17,6 +17,10 @@ export class SplitPlugin extends Plugin {
         "splitTextNode",
         "splitSelection",
     ];
+    static resources = () => ({
+        // @todo: get rules from separate plugins, get rid of isUnbreakable
+        unsplittable: (block) => isUnbreakable(block),
+    });
 
     setup() {
         this.addDomListener(this.editable, "beforeinput", this.onBeforeInput.bind(this));
@@ -83,6 +87,11 @@ export class SplitPlugin extends Plugin {
      * @returns {[HTMLElement|undefined, HTMLElement|undefined]}
      */
     splitElementBlock({ targetNode, targetOffset, blockToSplit }) {
+        // If the block is unsplittable, insert a line break instead.
+        if (this.isUnsplittable(blockToSplit)) {
+            this.dispatch("INSERT_LINEBREAK_ELEMENT", { targetNode, targetOffset });
+            return [undefined, undefined];
+        }
         const restore = prepareUpdate(targetNode, targetOffset);
 
         const [beforeElement, afterElement] = this.splitElementUntil(
@@ -106,6 +115,13 @@ export class SplitPlugin extends Plugin {
         this.shared.setCursorStart(afterElement);
 
         return [beforeElement, afterElement];
+    }
+
+    // @todo: t-if, t-else etc are not blocks, but they are unsplittable.
+    // The check must be done from the targetNode up to the block for unsplittables
+    // There are apparently no tests for this.
+    isUnsplittable(block) {
+        return this.resources.unsplittable.some((callback) => callback(block));
     }
 
     /**
