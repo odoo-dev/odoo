@@ -109,8 +109,8 @@ describe('Editor', () => {
                 await testEditor(BasicEditor, {
                     contentBefore: 'abc',
                     contentAfter: 'abc',
-                    config: { allowInlineAtRoot: true, }
-                });
+                }, { allowInlineAtRoot: true, }
+                );
             });
         });
         describe('sanitize spans/fonts away', () => {
