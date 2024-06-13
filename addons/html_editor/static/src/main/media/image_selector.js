@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { useEffect, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";

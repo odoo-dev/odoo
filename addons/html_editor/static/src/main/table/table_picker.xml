@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="html_editor.TablePicker">
         <div class="o-we-tablepicker bg-white p-1 my-1" t-on-click="insertTable" t-on-mousedown.stop="">

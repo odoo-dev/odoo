@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 /**
  * @param { Document } document
  * @param { string } html

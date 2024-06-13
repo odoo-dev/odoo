@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { SearchMedia } from "./search_media";
 import { fonts } from "@html_editor/utils/fonts";
