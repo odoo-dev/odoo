@@ -57,6 +57,8 @@ export class LinkSelectionPlugin extends Plugin {
      * @param {EditorSelection} [selection]
      */
     resetLinkInSelection(selection = this.shared.getEditableSelection()) {
+        this.clearLinkInSelectionClass(this.editable);
+
         const { anchorNode, focusNode } = selection;
         const [anchorLink, focusLink] = [anchorNode, focusNode].map((node) =>
             closestElement(node, "a:not(.btn)")
@@ -65,12 +67,6 @@ export class LinkSelectionPlugin extends Plugin {
 
         if (singleLinkInSelection && this.isLinkEligibleForZwnbsp(singleLinkInSelection)) {
             singleLinkInSelection.classList.add("o_link_in_selection");
-        }
-
-        for (const link of this.editable.querySelectorAll(".o_link_in_selection")) {
-            if (link !== singleLinkInSelection) {
-                removeClass(link, "o_link_in_selection");
-            }
         }
     }
 
@@ -101,31 +97,33 @@ export class LinkSelectionPlugin extends Plugin {
         });
     }
 
-    clean(root) {
+    clearLinkInSelectionClass(root) {
         // @todo: maybe the querySelectorAll calls should include the root.
         for (const link of root.querySelectorAll(".o_link_in_selection")) {
             removeClass(link, "o_link_in_selection");
         }
+    }
 
-        // Remove all FEFF within a `prepareUpdate` to make sure to make <br>
-        // nodes visible if needed.
+    clearFEFFs(root) {
         const cursors = this.shared.preserveSelection();
         let shouldRestoreCursors = false;
         for (const node of descendants(root)) {
             if (node.nodeType === Node.TEXT_NODE && node.textContent.includes("\uFEFF")) {
                 // @todo: isn't rightPos needed as well?
-                // @todo: this does not preserve the cursor position
+                // Remove all FEFF within a `prepareUpdate` to make sure to make <br>
+                // nodes visible if needed.
                 const restore = prepareUpdate(...leftPos(node));
                 this.removeZWNBSPs(node, cursors);
                 shouldRestoreCursors = true;
-                restore(); // Make sure to make <br>s visible if needed.
+                restore();
             }
         }
         if (shouldRestoreCursors) {
             cursors.restore();
         }
+    }
 
-        // Remove empty links
+    removeEmptyLinks(root) {
         // @todo: check for unremovables
         // @todo: preserve cursor and spaces
         for (const link of root.querySelectorAll("a")) {
@@ -133,6 +131,12 @@ export class LinkSelectionPlugin extends Plugin {
                 link.remove();
             }
         }
+    }
+
+    clean(root) {
+        this.clearLinkInSelectionClass(root);
+        this.clearFEFFs(root);
+        this.removeEmptyLinks(root);
     }
 
     /**
