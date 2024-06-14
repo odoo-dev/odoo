@@ -104,10 +104,6 @@ export class ZwsPlugin extends Plugin {
     // @todo: move me to another plugin (arrow keys plugin ?)
     // Consider always preventing default and handle arrows left and right
     // movements with selection.modify.
-    /**
-     * @param {"previous"|"next"} side
-     * @param {boolean} hasShift
-     */
     moveSelection(ev) {
         const side = ev.key === "ArrowLeft" ? "previous" : "next";
 

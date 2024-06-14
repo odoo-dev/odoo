@@ -50,8 +50,12 @@ export class LinkSelectionPlugin extends Plugin {
         }
     }
 
-    // Apply the o_link_in_selection class if the selection is in a single
-    // link, remove it otherwise.
+    /**
+     * Apply the o_link_in_selection class if the selection is in a single link,
+     * remove it otherwise.
+     *
+     * @param {EditorSelection} [selection]
+     */
     resetLinkInSelection(selection = this.shared.getEditableSelection()) {
         const { anchorNode, focusNode } = selection;
         const [anchorLink, focusLink] = [anchorNode, focusNode].map((node) =>
@@ -246,6 +250,11 @@ export class LinkSelectionPlugin extends Plugin {
     /**
      * Special behavior for links: do not break the link at its edges, but
      * rather before/after it.
+     *
+     * @param {Object} params
+     * @param {Element} params.targetNode
+     * @param {number} params.targetOffset
+     * @param {Element} params.blockToSplit
      */
     handleSplitBlock(params) {
         return this.handleEnterAtEdgeOfLink(params, this.shared.splitElementBlock);
@@ -254,11 +263,22 @@ export class LinkSelectionPlugin extends Plugin {
     /**
      * Special behavior for links: do not add a line break at its edges, but
      * rather outside it.
+     *
+     * @param {Object} params
+     * @param {Element} params.targetNode
+     * @param {number} params.targetOffset
      */
     handleInsertLineBreak(params) {
         return this.handleEnterAtEdgeOfLink(params, this.shared.insertLineBreakElement);
     }
 
+    /**
+     * @param {Object} params
+     * @param {Element} params.targetNode
+     * @param {number} params.targetOffset
+     * @param {Element} [params.blockToSplit]
+     * @param {Function} splitOrLineBreakCallback
+     */
     handleEnterAtEdgeOfLink(params, splitOrLineBreakCallback) {
         // @todo: handle target Node being a descendent of a link (iterate over
         // leaves inside the link, rather than childNodes)
@@ -290,6 +310,11 @@ function depthFirstPreOrderTraversal(root, callback) {
     }
 }
 
+/**
+ * @param { HTMLAnchorElement } link
+ * @param {number} offset
+ * @returns {"start"|"end"|false}
+ */
 function isAtEdgeofLink(link, offset) {
     const childNodes = [...link.childNodes];
     let firstVisibleIndex = childNodes.findIndex(isVisible);
