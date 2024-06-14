@@ -82,7 +82,7 @@ export class LinkPlugin extends Plugin {
     setup() {
         this.overlay = this.shared.createOverlay(LinkPopover, { position: "bottom-start" });
         this.addDomListener(this.editable, "click", (ev) => {
-            if (ev.target.tagName === "A") {
+            if (ev.target.tagName === "A" && ev.target.isContentEditable) {
                 ev.preventDefault();
                 this.toggleLinkTools({ link: ev.target });
             }
