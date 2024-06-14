@@ -1,7 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { removeClass } from "@html_editor/utils/dom";
-import { isBlock } from "@html_editor/utils/blocks";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
 import { childNodeIndex, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
 import { isVisible } from "@html_editor/utils/dom_info";
@@ -61,7 +60,7 @@ export class LinkSelectionPlugin extends Plugin {
 
         const { anchorNode, focusNode } = selection;
         const [anchorLink, focusLink] = [anchorNode, focusNode].map((node) =>
-            closestElement(node, "a:not(.btn)")
+            closestElement(node, "a")
         );
         const singleLinkInSelection = anchorLink === focusLink && anchorLink;
 
@@ -74,11 +73,7 @@ export class LinkSelectionPlugin extends Plugin {
         return (
             link.isContentEditable &&
             this.editable.contains(link) &&
-            !(
-                [link, ...link.querySelectorAll("*")].some(
-                    (el) => el.nodeName === "IMG" || isBlock(el)
-                ) || link.matches("nav a, a.nav-link")
-            )
+            !this.resources.blacklistLinkZwnbsp?.some((callback) => callback(link))
         );
     }
 
