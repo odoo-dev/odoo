@@ -92,6 +92,16 @@ export class LinkPlugin extends Plugin {
                 this.handleAutomaticLinkInsertion();
             }
         });
+        this.services.command.add(
+            "togglelink",
+            () => {
+                this.toggleLinkTools();
+            },
+            {
+                hotkey: "control+k",
+                isAvailable: () => this.shared.getEditableSelection().inEditable,
+            }
+        );
     }
 
     handleCommand(command, payload) {
@@ -248,10 +258,13 @@ export class LinkPlugin extends Plugin {
         } else {
             // create a new link element
             const link = this.document.createElement("a");
-            if (selection.isCollapsed) {
-                // todo: handle this case
-            } else {
+            if (!selection.isCollapsed) {
                 const content = this.shared.extractContent(selection);
+                if (!this.shared.getEditableSelection().inEditable) {
+                    const anchorNode = selection.anchorNode;
+                    const anchorOffset = selection.anchorOffset;
+                    this.shared.setSelection({ anchorNode, anchorOffset });
+                }
                 link.append(content);
             }
             this.shared.domInsert(link);

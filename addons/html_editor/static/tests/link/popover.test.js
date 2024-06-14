@@ -5,6 +5,7 @@ import { setupEditor } from "../_helpers/editor";
 import { waitUntil, waitFor, click, queryOne, press, select } from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
 import { insertText } from "../_helpers/user_actions";
+import { contains } from "@web/../tests/web_test_helpers";
 
 describe("should open a popover", () => {
     test("should open a popover when the selection is inside a link and close outside of a link", async () => {
@@ -348,5 +349,24 @@ describe("Link formatting in the popover", () => {
         await animationFrame();
         const linkPreviewEl = queryOne("#link-preview");
         expect(linkPreviewEl).toHaveText("newtest.com");
+    });
+});
+
+describe("shortcut", () => {
+    test("create a link with shortcut", async () => {
+        const { el } = await setupEditor(`<p>[]</p>`);
+
+        press(["ctrl", "k"]);
+        await animationFrame();
+        click(".o_command_name:first");
+        await contains(".o-we-linkpopover input.o_we_href_input_link").edit("test.com");
+        expect(getContent(el)).toBe('<p><a href="http://test.com">test.com[]</a></p>');
+    });
+    test("Press enter to apply when create a link", async () => {
+        const { el } = await setupEditor(`<p><a>li[]nk</a></p>`);
+
+        await contains(".o-we-linkpopover input.o_we_href_input_link").fill("test.com");
+        press("Enter");
+        expect(getContent(el)).toBe('<p><a href="http://test.com">li[]nk</a></p>');
     });
 });
