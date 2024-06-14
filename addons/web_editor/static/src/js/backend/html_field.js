@@ -758,6 +758,7 @@ export const htmlField = {
             hasReadonlyModifiers: dynamicInfo.readonly,
         };
     },
+    additionalClasses: ["o_field_html"],
 };
 
 registry.category("fields").add("html_legacy", htmlField, { force: true });

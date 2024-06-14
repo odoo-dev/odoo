@@ -23,7 +23,7 @@ registry.category("web_tour.tours").add('forum_question', {
         content: "Insert tags related to your question.",
         extra_trigger: '.note-editable:not(:has(br))',
         trigger: '.select2-choices',
-        run: "editor Tag",
+        run: "edit Tag",
     }, {
         content: "Click to post your question.",
         extra_trigger: "#wrap:not(:has(input[id=s2id_autogen2]:value('')))",

@@ -27,7 +27,7 @@
         content: _t("Insert tags related to your question."),
         position: "top",
         run: function (actions) {
-            actions.editor("Test", "input[id=s2id_autogen2]");
+            actions.edit("Test", "input[id=s2id_autogen2]");
         },
     }, {
         trigger: "button:contains(/^Post/)",
