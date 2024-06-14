@@ -103,7 +103,7 @@ test("should zwnbsp-pad simple text link", async () => {
             // insert the zwnbsp again
             editor.dispatch("NORMALIZE", { node: editor.editable });
         },
-        contentAfterEdit: '<p>a[]\ufeff<a href="#/">\ufeffbc\ufeff</a>\ufeffd</p>',
+        contentAfterEdit: '<p>a\ufeff[]<a href="#/">\ufeffbc\ufeff</a>\ufeffd</p>',
     });
     await testEditor({
         contentBefore: '<p>a<a href="#/">[]bc</a>d</p>',
@@ -119,7 +119,7 @@ test("should zwnbsp-pad simple text link", async () => {
             editor.dispatch("NORMALIZE", { node: editor.editable });
         },
         contentAfterEdit:
-            '<p>a\ufeff<a href="#/" class="o_link_in_selection">[]\ufeffbc\ufeff</a>\ufeffd</p>',
+            '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeff[]bc\ufeff</a>\ufeffd</p>',
     });
     await testEditor({
         contentBefore: '<p>a<a href="#/">b[]</a>d</p>',
@@ -155,7 +155,7 @@ test("should zwnbsp-pad simple text link", async () => {
             editor.dispatch("NORMALIZE", { node: editor.editable });
         },
         contentAfterEdit:
-            '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeffbc\ufeff[]</a>\ufeffd</p>',
+            '<p>a\ufeff<a href="#/" class="o_link_in_selection">\ufeffbc[]\ufeff</a>\ufeffd</p>',
     });
     await testEditor({
         contentBefore: '<p>a<a href="#/">bc</a>[]d</p>',

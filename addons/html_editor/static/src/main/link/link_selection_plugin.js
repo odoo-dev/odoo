@@ -2,8 +2,9 @@ import { Plugin } from "@html_editor/plugin";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 import { removeClass } from "@html_editor/utils/dom";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
-import { childNodeIndex, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
+import { leftPos, rightPos } from "@html_editor/utils/position";
 import { isVisible } from "@html_editor/utils/dom_info";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 /*
     This plugin solves selection issues around links (allowing the cursor at the
@@ -149,45 +150,22 @@ export class LinkSelectionPlugin extends Plugin {
         }
         const cursors = this.shared.preserveSelection();
         if (!link.textContent.startsWith("\uFEFF")) {
-            // @todo: why not just cursors.shiftOffset(link, 1) ?
-            cursors.update((cursor) => {
-                if (cursor.node === link && cursor.offset > 0) {
-                    cursor.offset += 1;
-                }
-            });
+            cursors.shiftOffset(link, 1);
             link.prepend(this.document.createTextNode("\uFEFF"));
         }
         if (!link.textContent.endsWith("\uFEFF")) {
             // @todo: this changes the cursor, to preserve it we should simply
             // do nothing here.
-            cursors.update((cursor) => {
-                if (cursor.node === link && cursor.offset === nodeSize(link)) {
-                    cursor.offset += 1;
-                }
-            });
             link.append(this.document.createTextNode("\uFEFF"));
         }
-        const linkIndex = childNodeIndex(link);
         if (!(link.previousSibling && link.previousSibling.textContent.endsWith("\uFEFF"))) {
             const nbzwsp = this.document.createTextNode("\uFEFF");
-            // @todo: why not cursors.update(callbacksForCursorUpdate.before(link, nbzwsp)) ?
-            // if offset === linkIndex, the cursor will be set to the new nbzwsp
-            // instead of preserved pointing to the link
-            cursors.update((cursor) => {
-                if (cursor.node === link.parentElement && cursor.offset > linkIndex) {
-                    cursor.offset += 1;
-                }
-            });
+            cursors.update(callbacksForCursorUpdate.before(link, nbzwsp));
             link.before(nbzwsp);
         }
         if (!(link.nextSibling && link.nextSibling.textContent.startsWith("\uFEFF"))) {
             const nbzwsp = this.document.createTextNode("\uFEFF");
-            // @todo why not cursors.update(callbacksForCursorUpdate.after(link, nbzwsp)) ?
-            cursors.update((cursor) => {
-                if (cursor.node === link.parentElement && cursor.offset > linkIndex + 1) {
-                    cursor.offset += 1;
-                }
-            });
+            cursors.update(callbacksForCursorUpdate.after(link, nbzwsp));
             link.after(nbzwsp);
         }
         cursors.restore();
