@@ -66,7 +66,7 @@ const fontItems = [
     { name: _t("Quote"), tagName: "blockquote" },
 ];
 
-const fontSizeItems = [
+export const fontSizeItems = [
     {
         variableName: "display-1-font-size",
         className: "display-1-fs",
