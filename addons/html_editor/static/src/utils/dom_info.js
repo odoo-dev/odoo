@@ -246,6 +246,7 @@ export function isVisible(node) {
         !!node &&
         ((node.nodeType === Node.TEXT_NODE && isVisibleTextNode(node)) ||
             isSelfClosingElement(node) ||
+            // @todo: handle it in resources?
             isIconElement(node) ||
             hasVisibleContent(node))
     );

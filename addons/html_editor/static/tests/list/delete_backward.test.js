@@ -2232,6 +2232,9 @@ describe("Selection not collapsed", () => {
                 contentBefore:
                     '<ul class="o_checklist"><li>ab</li><li class="o_checked"><a href="#">[cd</a></li><li>ef]</li><li>gh</li></ul>',
                 stepFunction: deleteBackward,
+                // @todo:
+                // contentAfterEdit:
+                // '<ul class="o_checklist"><li>ab</li><li placeholder="List" class="oe-hint">[]<br></li><li>gh</li></ul>',
                 contentAfter: '<ul class="o_checklist"><li>ab</li><li>[]<br></li><li>gh</li></ul>',
             });
         });
