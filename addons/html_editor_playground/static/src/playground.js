@@ -130,7 +130,7 @@ export class Playground extends Component {
             Plugins: PluginSets[this.config.pluginSet],
             classList: this.classList,
             resources: {
-                inlineComponents: [counter, card],
+                embeddedComponents: [counter, card],
             },
             onChange: this.updateContent.bind(this),
             collaboration: {
