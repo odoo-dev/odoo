@@ -91,6 +91,12 @@ beforeEach(() => {
     });
 });
 
+function setSelectionInHtmlField(selector = "p", fieldName = "txt") {
+    const anchorNode = queryOne(`[name='${fieldName}'] .odoo-editor-editable ${selector}`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    return anchorNode;
+}
+
 test("html field in readonly", async () => {
     await mountView({
         type: "form",
@@ -208,8 +214,7 @@ test("edit and save a html field", async () => {
     expect(".odoo-editor-editable p").toHaveText("first");
     expect(`.o_form_button_save`).not.toBeVisible();
 
-    const anchorNode = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -287,8 +292,7 @@ test("edit and switch page", async () => {
     expect(".odoo-editor-editable p").toHaveText("first");
     expect(`.o_form_button_save`).not.toBeVisible();
 
-    const anchorNode = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -321,8 +325,7 @@ test("discard changes in html field in form", async () => {
 
     // move the hoot focus in the editor
     click(".odoo-editor-editable");
-    const anchorNode = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -350,8 +353,7 @@ test("undo after discard html field changes in form", async () => {
 
     // move the hoot focus in the editor
     click(".odoo-editor-editable");
-    const anchorNode = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "test");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -399,8 +401,7 @@ test("A new MediaDialog after switching record in a Form view should have the co
     await contains(`.o_pager_next`).click();
     expect(".odoo-editor-editable p:contains(second)").toHaveCount(1);
 
-    const paragrah = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode: paragrah, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "/Image");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(1);
@@ -436,8 +437,7 @@ test("Embed video by pasting video URL", async () => {
             </form>`,
     });
 
-    const anchorNode = queryOne(".odoo-editor-editable p");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    const anchorNode = setSelectionInHtmlField();
 
     // Paste a video URL.
     pasteText(htmlEditor, "https://www.youtube.com/watch?v=qxb74CMR748");
@@ -567,8 +567,7 @@ test("Ensure that urgentSave works even with modified image to save", async () =
 
     // Simulate an urgent save without any image in the content.
     sendBeaconDef = new Deferred();
-    const anchorNode = queryOne("[name='txt'] .test_target");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField(".test_target");
     insertText(htmlEditor, "a");
     htmlEditor.dispatch("ADD_STEP");
     await formController.beforeUnload();
@@ -641,8 +640,7 @@ test("Pasted/dropped images are converted to attachments on save", async () => {
                     <field name="txt" widget="html"/>
                 </form>`,
     });
-    const anchorNode = queryOne("[name='txt'] .test_target");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField(".test_target");
 
     // Paste image.
     pasteFile(
@@ -706,8 +704,7 @@ test("link preview in Link Popover", async () => {
     expect(".test_target a").toHaveText("This website");
 
     // Open the popover option to edit the link
-    let anchorNode = queryOne(".test_target a");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField(".test_target a");
     await animationFrame();
     // Click on the edit link icon
     await contains("a.o_we_edit_link").click();
@@ -726,15 +723,13 @@ test("link preview in Link Popover", async () => {
         message: "Link label in preview should match label input field",
     });
     // Move selection outside to discard
-    anchorNode = queryOne(".test_target");
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField(".test_target");
     await waitUntil(() => !document.querySelector(".o-we-linkpopover"), { timeout: 500 });
     expect(".o-we-linkpopover").toHaveCount(0);
     expect(".test_target a").toHaveText("This website");
 
-    anchorNode = queryOne(".test_target a");
     // Select link label to open the floating toolbar.
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField(".test_target a");
     await animationFrame();
     // Click on the edit link icon
     await contains("a.o_we_edit_link").click();
@@ -780,8 +775,7 @@ test("html field with a placeholder", async () => {
         { type: "html" }
     );
 
-    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     await tick();
     expect(`[name="txt"] .odoo-editor-editable`).toHaveInnerHTML(
         '<p placeholder="Type &quot;/&quot; for commands" class="o-we-hint"><br></p>',
@@ -806,8 +800,7 @@ test("'Video' command is available in html field with noVideo = false", async ()
                 <field name="txt" widget="html" options="{'noVideos': False}"/>
             </form>`,
     });
-    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "/video");
     await waitFor(".o-we-powerbox");
     expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
@@ -823,8 +816,7 @@ test("No 'Video' command in an html_field without noVideo (default = true) ", as
                 <field name="txt" widget="html"/>
             </form>`,
     });
-    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "/video");
     await animationFrame();
     expect(".o-we-powerbox").toHaveCount(0);
@@ -841,8 +833,7 @@ test("MediaDialog contains 'Videos' tab in html field with noVideo = false", asy
                 <field name="txt" widget="html" options="{'noVideos': False}"/>
             </form>`,
     });
-    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "/image");
     await waitFor(".o-we-powerbox");
     expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
@@ -868,8 +859,7 @@ test("MediaDialog don't contains 'Videos' tab in html field without noVideo (def
             </form>`,
     });
 
-    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    setSelectionInHtmlField();
     insertText(htmlEditor, "/image");
     await waitFor(".o-we-powerbox");
     expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
