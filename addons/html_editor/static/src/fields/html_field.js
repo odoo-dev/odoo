@@ -173,7 +173,12 @@ export const htmlField = {
     displayName: _t("Html"),
     supportedTypes: ["html"],
     extractProps({ attrs, options }, dynamicInfo) {
-        const editorConfig = {};
+        const editorConfig = {
+            mediaModalParams: {
+                noVideos: "noVideos" in options ? options.noVideos : true,
+                useMediaLibrary: true,
+            },
+        };
         if (attrs.placeholder) {
             editorConfig.placeholder = attrs.placeholder;
         }

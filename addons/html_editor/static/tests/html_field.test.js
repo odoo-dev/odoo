@@ -2,7 +2,15 @@ import { HtmlField } from "@html_editor/fields/html_field";
 import { MediaDialog } from "@html_editor/main/media/media_dialog";
 import { parseHTML } from "@html_editor/utils/html";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { click, press, queryAll, queryAllTexts, queryOne, waitUntil } from "@odoo/hoot-dom";
+import {
+    click,
+    press,
+    queryAll,
+    queryAllTexts,
+    queryOne,
+    waitFor,
+    waitUntil,
+} from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockSendBeacon, tick } from "@odoo/hoot-mock";
 import {
     contains,
@@ -786,6 +794,93 @@ test("html field with a placeholder", async () => {
         '<p placeholder="test" class="o-we-hint"><br></p>',
         { type: "html" }
     );
+});
+
+test("'Video' command is available in html field with noVideo = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'noVideos': False}"/>
+            </form>`,
+    });
+    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "/video");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
+});
+
+test("No 'Video' command in an html_field without noVideo (default = true) ", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "/video");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+    expect(queryAllTexts(".o-we-command-name")).toEqual([]);
+});
+
+test("MediaDialog contains 'Videos' tab in html field with noVideo = false", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'noVideos': False}"/>
+            </form>`,
+    });
+    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "/image");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+
+    press("Enter");
+    await animationFrame();
+    expect(queryAllTexts(".o_select_media_dialog .nav-tabs .nav-item")).toEqual([
+        "Images",
+        "Documents",
+        "Icons",
+        "Videos",
+    ]);
+});
+
+test("MediaDialog don't contains 'Videos' tab in html field without noVideo (default = true) ", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+            <field name="txt" widget="html"/>
+            </form>`,
+    });
+
+    const anchorNode = queryOne(`[name="txt"] .odoo-editor-editable p`);
+    setSelection({ anchorNode, anchorOffset: 0 });
+    insertText(htmlEditor, "/image");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+
+    press("Enter");
+    await animationFrame();
+    expect(queryAllTexts(".o_select_media_dialog .nav-tabs .nav-item")).toEqual([
+        "Images",
+        "Documents",
+        "Icons",
+    ]);
 });
 
 describe("sandbox", () => {

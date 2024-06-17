@@ -12,10 +12,11 @@ export class MediaPlugin extends Plugin {
     static dependencies = ["selection", "history", "dom"];
     static shared = ["savePendingImages"];
     /** @type { (p: MediaPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        powerboxCategory: { id: "media", name: _t("Media"), sequence: 20 },
-        powerboxCommands: [
-            {
+    static resources = (p) => {
+        const powerboxCommands = [];
+        const mediaModalParams = p.config.mediaModalParams || {};
+        if (!mediaModalParams.noImages) {
+            powerboxCommands.push({
                 name: _t("Image"),
                 description: _t("Insert an image"),
                 category: "media",
@@ -23,8 +24,10 @@ export class MediaPlugin extends Plugin {
                 action() {
                     p.openMediaDialog();
                 },
-            },
-            {
+            });
+        }
+        if (!mediaModalParams.noVideos) {
+            powerboxCommands.push({
                 name: _t("Video"),
                 description: _t("Insert a video"),
                 category: "media",
@@ -37,22 +40,27 @@ export class MediaPlugin extends Plugin {
                         noDocuments: true,
                     });
                 },
+            });
+        }
+        const resources = {
+            powerboxCategory: { id: "media", name: _t("Media"), sequence: 20 },
+            powerboxCommands,
+            toolbarGroup: {
+                id: "replace_image",
+                sequence: 29,
+                namespace: "IMG",
+                buttons: [
+                    {
+                        id: "replace_image",
+                        cmd: "REPLACE_IMAGE",
+                        name: "Replace media",
+                        text: "Replace",
+                    },
+                ],
             },
-        ],
-        toolbarGroup: {
-            id: "replace_image",
-            sequence: 29,
-            namespace: "IMG",
-            buttons: [
-                {
-                    id: "replace_image",
-                    cmd: "REPLACE_IMAGE",
-                    name: "Replace media",
-                    text: "Replace",
-                },
-            ],
-        },
-    });
+        };
+        return resources;
+    };
 
     handleCommand(command, payload) {
         switch (command) {
@@ -139,14 +147,14 @@ export class MediaPlugin extends Plugin {
             useMediaLibrary: !!(
                 field &&
                 ((resModel === "ir.ui.view" && field === "arch") || type === "html")
-            ),
+            ), // @todo @phoenix: should be removed and moved to config.mediaModalParams
             media: params.node,
             save: (element) => {
                 this.onSaveMediaDialog(element, { node: params.node, restoreSelection });
             },
             close: restoreSelection,
             onAttachmentChange: this.config.onAttachmentChange || (() => {}),
-            ...this.config.mediaModalParams, // todo @phoenix to implement
+            ...this.config.mediaModalParams,
             ...params,
         });
     }
