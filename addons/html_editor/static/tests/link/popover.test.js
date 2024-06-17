@@ -380,13 +380,17 @@ describe("shortcut", () => {
         await animationFrame();
         click(".o_command_name:first");
         await contains(".o-we-linkpopover input.o_we_href_input_link").edit("test.com");
-        expect(getContent(el)).toBe('<p><a href="http://test.com">test.com[]</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="http://test.com">test.com[]</a></p>'
+        );
     });
     test("Press enter to apply when create a link", async () => {
         const { el } = await setupEditor(`<p><a>li[]nk</a></p>`);
 
         await contains(".o-we-linkpopover input.o_we_href_input_link").fill("test.com");
         press("Enter");
-        expect(getContent(el)).toBe('<p><a href="http://test.com">li[]nk</a></p>');
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="http://test.com">li[]nk</a></p>'
+        );
     });
 });
