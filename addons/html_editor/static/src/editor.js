@@ -110,6 +110,9 @@ export class Editor {
         if (this.config.classList) {
             editable.classList.add(...this.config.classList);
         }
+        if (this.config.height) {
+            editable.style.height = this.config.height;
+        }
         this.startPlugins();
     }
 

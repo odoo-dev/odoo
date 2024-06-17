@@ -182,6 +182,9 @@ export const htmlField = {
         if (attrs.placeholder) {
             editorConfig.placeholder = attrs.placeholder;
         }
+        if (options.height) {
+            editorConfig.height = `${options.height}px`;
+        }
         return {
             editorConfig,
             isCollaborative: options.collaborative,

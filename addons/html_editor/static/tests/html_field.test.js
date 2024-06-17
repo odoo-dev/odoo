@@ -855,7 +855,7 @@ test("MediaDialog don't contains 'Videos' tab in html field without noVideo (def
         resModel: "partner",
         arch: `
             <form>
-            <field name="txt" widget="html"/>
+                <field name="txt" widget="html"/>
             </form>`,
     });
 
@@ -871,6 +871,20 @@ test("MediaDialog don't contains 'Videos' tab in html field without noVideo (def
         "Documents",
         "Icons",
     ]);
+});
+
+test("html field with option height", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'height': 100}"/>
+            </form>`,
+    });
+
+    expect(`[name="txt"] .odoo-editor-editable`).toHaveStyle("height: 100px");
 });
 
 describe("sandbox", () => {
