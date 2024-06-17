@@ -42,6 +42,11 @@ test("placeholder is display when the selection is outside of the editor", async
     expect(getContent(el)).toBe(`<p placeholder="test" class="o-we-hint"></p>`);
 });
 
+test("placeholder must not be visible if there is content in the editor", async () => {
+    const { el } = await setupEditor("<p></p><p>Hello</p>", { config: { placeholder: "test" } });
+    expect(getContent(el)).toBe(`<p></p><p>Hello</p>`);
+});
+
 test("should not lose track of temporary hints on split block", async () => {
     const { el, editor } = await setupEditor("<p>[]</p>", {});
     expect(getContent(el)).toBe(`<p placeholder="Type "/" for commands" class="o-we-hint">[]</p>`);

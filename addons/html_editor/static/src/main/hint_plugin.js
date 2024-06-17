@@ -11,7 +11,7 @@ function isMutationRecordSavable(record) {
 
 function target(selection, editable) {
     const el = editable.firstChild;
-    if (!selection.inEditable && el && el.tagName === "P" && isEmpty(el)) {
+    if (!selection.inEditable && el && el.tagName === "P" && editable.textContent === "") {
         return el;
     }
 }
