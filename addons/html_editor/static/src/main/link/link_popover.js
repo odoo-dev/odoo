@@ -11,7 +11,8 @@ export class LinkPopover extends Component {
         linkEl: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         onApply: Function,
         onRemove: Function,
-        closeOverlay: Function,
+        onCopy: Function,
+        onClose: Function,
     };
     colorsData = [
         { type: "", label: _t("Link"), btnPreview: "link" },
@@ -58,7 +59,7 @@ export class LinkPopover extends Component {
 
         this.keepLastPromise = new KeepLast();
 
-        this.div_editing = useRef("div_editing");
+        this.editingWrapper = useRef("editing-wrapper");
 
         onMounted(() => {
             if (!this.state.editing) {
@@ -98,14 +99,14 @@ export class LinkPopover extends Component {
         this.notificationService.add(_t("Link copied to clipboard."), {
             type: "success",
         });
-        this.props.closeOverlay();
+        this.props.onCopy();
     }
     onClickRemove() {
         this.props.onRemove();
     }
     onClickAway(ev) {
-        if (this.div_editing?.el && !this.div_editing?.el.contains(ev.target)) {
-            this.props.closeOverlay();
+        if (this.editingWrapper?.el && !this.editingWrapper?.el.contains(ev.target)) {
+            this.props.onClose();
         }
     }
 

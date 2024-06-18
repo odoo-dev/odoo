@@ -2,7 +2,7 @@
 
     <t t-name="html_editor.linkPopover">
         <div class="o-we-linkpopover d-flex bg-white overflow-auto shadow">
-            <div t-if="state.editing" class="m-1 container-fluid d-flex vertical-center" t-ref="div_editing">
+            <div t-if="state.editing" class="m-1 container-fluid d-flex vertical-center" t-ref="editing-wrapper">
                 <div class="col m-1" data-prevent-closing-overlay="true">
                     <div class="input-group">
                         <input class="o_we_label_link m-1" t-model="state.label" placeholder="Type your link label"/>

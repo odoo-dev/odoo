@@ -206,10 +206,10 @@ export class LinkPlugin extends Plugin {
             this.overlay.close();
         } else if (!selection.inEditable) {
             const selection = this.document.getSelection();
-            const preventClosing = selection?.anchorNode?.closest?.(
-                "[data-prevent-closing-overlay]"
-            );
-            if (preventClosing?.dataset?.preventClosingOverlay === "true") {
+            // note that data-prevent-closing-overlay also used in color picker but link popover
+            // and color picker don't open at the same time so it's ok to query like this
+            const popoverEl = document.querySelector("[data-prevent-closing-overlay=true]");
+            if (popoverEl?.contains(selection.anchorNode)) {
                 return;
             }
             this.overlay.close();
@@ -253,7 +253,10 @@ export class LinkPlugin extends Plugin {
                     this.overlay.close();
                     this.dispatch("ADD_STEP");
                 },
-                closeOverlay: () => {
+                onCopy: () => {
+                    this.overlay.close();
+                },
+                onClose: () => {
                     this.overlay.close();
                 },
             };
