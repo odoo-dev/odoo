@@ -793,7 +793,7 @@ export class HistoryPlugin extends Plugin {
         const currentStepMutationsUntilLength = currentMutations.length;
         const savePointIndex = this.steps.length - 1;
         let applied = false;
-        const selection = this.shared.getEditableSelection();
+        const selectionToRestore = this.shared.preserveSelection();
         return () => {
             if (applied) {
                 return;
@@ -805,7 +805,7 @@ export class HistoryPlugin extends Plugin {
                 );
                 this.revertMutations(mutationsToRevert);
                 this.observer.takeRecords();
-                this.shared.setSelection(selection, { normalize: false });
+                selectionToRestore.restore();
             } else {
                 this.revertStepsUntil(savePointIndex);
                 this.applyMutations(currentMutations);

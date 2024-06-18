@@ -352,7 +352,7 @@ export class SelectionPlugin extends Plugin {
      * Stores the current selection and returns an object with methods to:
      * - update the cursors (anchor and focus) node and offset after DOM
      * manipulations that migh affect them. Such methods are chainable.
-     * - restore the updated selection.
+     * - restore the updated selection (if it was in the editable).
      * @returns {Cursors}
      */
     preserveSelection() {

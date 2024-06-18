@@ -154,7 +154,7 @@ export class CollaborationPlugin extends Plugin {
             this.editable.contains(selection.anchorNode) &&
             (selection.anchorNode === selection.focusNode ||
                 this.editable.contains(selection.focusNode));
-        if (isStillInEditable) {
+        if (selection.inEditable && isStillInEditable) {
             this.shared.setSelection(selection);
         }
 
