@@ -65,11 +65,6 @@ export class CollaborationOdooPlugin extends Plugin {
         // reset and can be compared against to cancel the processing of late
         // responses from previous resets.
         this.lastCollaborationResetId = 0;
-        // This ID correspond to the peer that initiated the document and set
-        // the initial oid for all nodes in the tree. It is not the same as
-        // document that had a step id at some point. If a step comes from a
-        // different history, we should not apply it.
-        this.historyShareId = Math.floor(Math.random() * Math.pow(2, 52)).toString();
 
         // The ID is the latest step ID that the server knows through
         // `data-last-history-steps`. We cannot save to the server if we do not
@@ -77,9 +72,6 @@ export class CollaborationOdooPlugin extends Plugin {
         // stale.
         this.serverLastStepId =
             this.config.content && this.getLastHistoryStepId(this.config.content);
-        if (this.serverLastStepId) {
-            this.shared.setInitialBranchStepId(this.serverLastStepId);
-        }
 
         this.setupCollaboration(this.config.collaboration.collaborationChannel);
 
@@ -93,11 +85,11 @@ export class CollaborationOdooPlugin extends Plugin {
         }
     }
     destroy() {
+        this.collaborationStopBus && this.collaborationStopBus();
         // If peer to peer is initializing, wait for properly closing it.
         if (this.peerToPeerLoading) {
             this.peerToPeerLoading.then(() => {
                 this.stopPeerToPeer();
-                this.collaborationStopBus && this.collaborationStopBus();
             });
         }
         // todo: to implement
@@ -115,6 +107,9 @@ export class CollaborationOdooPlugin extends Plugin {
                 break;
             case "CLEAN":
                 this.attachHistoryIds(payload.root);
+                break;
+            case "HISTORY_RESET":
+                this.onReset(payload.content);
                 break;
         }
     }
@@ -598,7 +593,7 @@ export class CollaborationOdooPlugin extends Plugin {
         }
 
         this.isDocumentStale = false;
-        this.resetValue(content);
+        this.shared.resetContent(content);
 
         // After resetting from the server, try to resynchronise with a peer as
         // if it was the first time connecting to a peer in order to retrieve a
@@ -618,6 +613,18 @@ export class CollaborationOdooPlugin extends Plugin {
             })
         );
         return true;
+    }
+    onReset(content) {
+        // This ID correspond to the peer that initiated the document and set
+        // the initial oid for all nodes in the tree. It is not the same as
+        // document that had a step id at some point. If a step comes from a
+        // different history, we should not apply it.
+        this.historyShareId = Math.floor(Math.random() * Math.pow(2, 52)).toString();
+
+        const lastStepId = content && this.getLastHistoryStepId(content);
+        if (lastStepId) {
+            this.shared.setInitialBranchStepId(lastStepId);
+        }
     }
 
     /**
@@ -639,7 +646,7 @@ export class CollaborationOdooPlugin extends Plugin {
         if (missingSteps === -1 || !missingSteps.length) {
             return false;
         }
-        this.ptp && this.odooEditor.onExternalHistorySteps(missingSteps);
+        this.shared.onExternalHistorySteps(missingSteps);
         return true;
     }
     applySnapshot(snapshot) {
@@ -698,7 +705,6 @@ export class CollaborationOdooPlugin extends Plugin {
             undefined,
             { transport: "rtc" }
         );
-        console.log(`snapshot:`, snapshot);
         if (snapshot === REQUEST_ERROR) {
             return REQUEST_ERROR;
         }
@@ -740,7 +746,6 @@ export class CollaborationOdooPlugin extends Plugin {
         }
     }
     async onHistoryMissingParentStep({ step, fromStepId }) {
-        console.warn("onHistoryMissingParentStep");
         if (!this.ptp) {
             return;
         }

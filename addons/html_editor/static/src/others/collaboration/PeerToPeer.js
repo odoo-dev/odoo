@@ -307,7 +307,6 @@ export class PeerToPeer {
         if (this._stopped) {
             return;
         }
-        // console.warn(`handleNotification:`, notification);
         const isInternalNotification =
             typeof notification.fromPeerId === "undefined" &&
             typeof notification.toPeerId === "undefined";

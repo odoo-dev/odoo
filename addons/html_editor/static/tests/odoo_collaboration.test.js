@@ -56,7 +56,7 @@ class PeerTest {
         for (const peer of this.connections) {
             peer.connections.delete(this);
         }
-        this.wysiwyg.destroy();
+        this.editor.destroy();
     }
     async focus() {
         return this.plugins["collaboration_odoo"].joinPeerToPeer();
@@ -66,8 +66,8 @@ class PeerTest {
         peer.connections.add(this);
         const ptpFrom = this.ptp;
         const ptpTo = peer.ptp;
-        ptpFrom.peersInfos[peer.peerId] = {};
-        ptpTo.peersInfos[this.peerId] = {};
+        ptpFrom.peersInfos[peer.peerId] ||= {};
+        ptpTo.peersInfos[this.peerId] ||= {};
 
         // Simulate the rtc_data_channel_open on both peers.
         await this.ptp.notifySelf("rtc_data_channel_open", {
@@ -77,20 +77,10 @@ class PeerTest {
             connectionPeerId: this.peerId,
         });
     }
-    async removeDataChannel(peer) {
-        this.connections.delete(peer);
-        peer.connections.delete(this);
-        const ptpFrom = this.ptp;
-        const ptpTo = peer.ptp;
-        delete ptpFrom.peersInfos[peer.peerId];
-        delete ptpTo.peersInfos[this.peerId];
-        this.onlineMutex = new Mutex();
-        this.onlineResolver = undefined;
-    }
     getValue() {
         return stripHistoryIds(getContent(this.editor.editable));
     }
-    writeToServer() {
+    async writeToServer() {
         this.pool.lastRecordSaved = this.editor.getContent();
         const lastId = this.plugins.collaboration_odoo.getLastHistoryStepId(
             this.pool.lastRecordSaved
@@ -99,8 +89,7 @@ class PeerTest {
             if (peer === this) {
                 continue;
             }
-            peer.onlineMutex.exec(() => {
-                console.log(`peer.peerId:`, peer.peerId);
+            peer.onlineMutex.exec(async () => {
                 return peer.plugins.collaboration_odoo.onServerLastIdUpdate(String(lastId));
             });
         }
@@ -229,7 +218,10 @@ class Wysiwygs extends Component {
                             });
                         },
                         async _channelNotify(peerId, transportPayload) {
-                            if (!peers[peerId].isOnline) {
+                            if (
+                                !peers[peerId].isOnline ||
+                                !peers[transportPayload.fromPeerId].isOnline
+                            ) {
                                 return;
                             }
                             peers[peerId].ptp.handleNotification(structuredClone(transportPayload));
@@ -274,10 +266,10 @@ class Wysiwygs extends Component {
             el.replaceChildren(editable);
 
             oldAttach(editable);
-            const configSelection = getSelection(editable, initialValue);
-            if (configSelection) {
-                editable.focus();
-            }
+            // const configSelection = getSelection(editable, initialValue);
+            // if (configSelection) {
+            //     editable.focus();
+            // }
             setSelection(getSelection(editable, initialValue));
         };
     }
@@ -321,7 +313,7 @@ beforeEach(() => {
 });
 
 describe("Focus", () => {
-    test("Focused peer should not receive step if no data channel is open", async (assert) => {
+    test("Focused peer should not receive step if no data channel is open", async () => {
         const pool = await createPeers(["p1", "p2", "p3"]);
         const peers = pool.peers;
 
@@ -340,7 +332,7 @@ describe("Focus", () => {
             message: "p3 should not have the document changed",
         });
     });
-    test("Focused peer should receive step while unfocused should not (if the datachannel is open before the step)", async (assert) => {
+    test("Focused peer should receive step while unfocused should not (if the datachannel is open before the step)", async () => {
         const pool = await createPeers(["p1", "p2", "p3"]);
         const peers = pool.peers;
 
@@ -352,17 +344,17 @@ describe("Focus", () => {
         insertEditorText(peers.p1.editor, "b");
         await animationFrame();
 
-        expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+        expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
             message: "p1 should have the same document as p2",
         });
-        expect(await peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
+        expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
             message: "p2 should have the same document as p1",
         });
-        expect(await peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+        expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
             message: "p3 should not have the document changed",
         });
     });
-    test("Focused peer should receive step while unfocused should not (if the datachannel is open after the step)", async (assert) => {
+    test("Focused peer should receive step while unfocused should not (if the datachannel is open after the step)", async () => {
         const pool = await createPeers(["p1", "p2", "p3"]);
         const peers = pool.peers;
 
@@ -373,20 +365,20 @@ describe("Focus", () => {
 
         await peers.p1.openDataChannel(peers.p2);
 
-        expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+        expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
             message: "p1 should have the same document as p2",
         });
-        expect(await peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
+        expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
             message: "p2 should have the same document as p1",
         });
-        expect(await peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+        expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
             message: "p3 should not have the document changed because it has not focused",
         });
     });
 });
 describe("Stale detection & recovery", () => {
     describe("detect stale while unfocused", () => {
-        test.todo("should do nothing until focus", async (assert) => {
+        test("should do nothing until focus", async () => {
             const pool = await createPeers(["p1", "p2", "p3"]);
             const peers = pool.peers;
 
@@ -401,21 +393,21 @@ describe("Stale detection & recovery", () => {
             expect(peers.p1.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                 message: "p1 should not have a stale document",
             });
-            expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+            expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                 message: "p1 should have the same document as p2",
             });
 
             expect(peers.p2.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                 message: "p2 should not have a stale document",
             });
-            expect(await peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
+            expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                 message: "p2 should have the same document as p1",
             });
 
             expect(peers.p3.plugins.collaboration_odoo.isDocumentStale).toBe(true, {
                 message: "p3 should have a stale document",
             });
-            expect(await peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+            expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
                 message: "p3 should not have the same document as p1",
             });
 
@@ -427,23 +419,23 @@ describe("Stale detection & recovery", () => {
             expect(peers.p3.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                 message: "p3 should not have a stale document",
             });
-            expect(await peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
+            expect(peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
                 message: "p3 should have the same document as p1",
             });
 
             insertEditorText(peers.p1.editor, "c");
 
-            expect(await peers.p1.getValue()).toBe(`<p>abc[]</p>`, {
+            expect(peers.p1.getValue()).toBe(`<p>abc[]</p>`, {
                 message: "p1 should have the same document as p3",
             });
-            expect(await peers.p3.getValue()).toBe(`<p>[]abc</p>`, {
+            expect(peers.p3.getValue()).toBe(`<p>[]abc</p>`, {
                 message: "p3 should have the same document as p1",
             });
         });
     });
     describe("detect stale while focused", () => {
         describe("recover from missing steps", () => {
-            test.todo("should recover from missing steps", async (assert) => {
+            test("should recover from missing steps", async () => {
                 const pool = await createPeers(["p1", "p2", "p3"]);
                 const peers = pool.peers;
 
@@ -454,83 +446,89 @@ describe("Stale detection & recovery", () => {
                 await peers.p1.openDataChannel(peers.p3);
                 await peers.p2.openDataChannel(peers.p3);
 
-                const p3Spies = makeSpies(peers.p3.wysiwyg, [
-                    "_recoverFromStaleDocument",
-                    "_resetFromServerAndResyncWithPeers",
-                    "_processMissingSteps",
-                    "_applySnapshot",
+                const p3Spies = makeSpies(peers.p3.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
                 ]);
 
-                expect(peers.p1.wysiwyg._historyShareId).toBe(peers.p2.wysiwyg._historyShareId, {
-                    message: "p1 and p2 should have the same _historyShareId",
-                });
-                expect(peers.p1.wysiwyg._historyShareId).toBe(peers.p3.wysiwyg._historyShareId, {
-                    message: "p1 and p3 should have the same _historyShareId",
-                });
+                expect(peers.p1.plugins.collaboration_odoo.historyShareId).toBe(
+                    peers.p2.plugins.collaboration_odoo.historyShareId,
+                    {
+                        message: "p1 and p2 should have the same historyShareId",
+                    }
+                );
+                expect(peers.p1.plugins.collaboration_odoo.historyShareId).toBe(
+                    peers.p3.plugins.collaboration_odoo.historyShareId,
+                    {
+                        message: "p1 and p3 should have the same historyShareId",
+                    }
+                );
 
-                expect(await peers.p1.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p1.getValue()).toBe(`<p>a[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(await peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should have the same document as p1",
                 });
 
-                await peers.p3.setOffline();
+                peers.p3.setOffline();
 
                 insertEditorText(peers.p1.editor, "b");
 
-                expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(await peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
                 await peers.p1.writeToServer();
-                expect(peers.p1.wysiwyg._isDocumentStale).toBe(false, {
+                expect(peers.p1.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                     message: "p1 should not have a stale document",
                 });
-                expect(peers.p2.wysiwyg._isDocumentStale).toBe(false, {
+                expect(peers.p2.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                     message: "p2 should not have a stale document",
                 });
-                expect(peers.p3.wysiwyg._isDocumentStale).toBe(false, {
+                expect(peers.p3.plugins.collaboration_odoo.isDocumentStale).toBe(false, {
                     message: "p3 should not have a stale document",
                 });
 
                 await peers.p3.setOnline();
 
-                expect(p3Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                    message: "p3 _recoverFromStaleDocument should have been called once",
+                expect(p3Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p3 recoverFromStaleDocument should have been called once",
                 });
-                expect(p3Spies._processMissingSteps.callCount).toBe(1, {
-                    message: "p3 _processMissingSteps should have been called once",
+                expect(p3Spies.processMissingSteps.callCount).toBe(1, {
+                    message: "p3 processMissingSteps should have been called once",
                 });
-                expect(p3Spies._applySnapshot.callCount).toBe(0, {
-                    message: "p3 _applySnapshot should not have been called",
+                expect(p3Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p3 applySnapshot should not have been called",
                 });
-                expect(p3Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                    message: "p3 _resetFromServerAndResyncWithPeers should not have been called",
+                expect(p3Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p3 resetFromServerAndResyncWithPeers should not have been called",
                 });
 
-                expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(await peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(await peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p3 should have the same document as p1",
                 });
             });
         });
         describe("recover from snapshot", () => {
-            test.todo("should wait for all peer to recover from snapshot", async (assert) => {
+            test("should wait for all peer to recover from snapshot", async () => {
                 const pool = await createPeers(["p1", "p2", "p3"]);
                 const peers = pool.peers;
 
@@ -544,549 +542,514 @@ describe("Stale detection & recovery", () => {
                 peers.p2.setOffline();
                 peers.p3.setOffline();
 
-                const p2Spies = makeSpies(peers.p2.wysiwyg, [
-                    "_recoverFromStaleDocument",
-                    "_resetFromServerAndResyncWithPeers",
-                    "_processMissingSteps",
-                    "_applySnapshot",
+                const p2Spies = makeSpies(peers.p2.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
                 ]);
-                const p3Spies = makeSpies(peers.p3.wysiwyg, [
-                    "_recoverFromStaleDocument",
-                    "_resetFromServerAndResyncWithPeers",
-                    "_processMissingSteps",
-                    "_applySnapshot",
-                    "_onRecoveryPeerTimeout",
+                const p3Spies = makeSpies(peers.p3.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
                 ]);
 
                 insertEditorText(peers.p1.editor, "b");
 
                 await peers.p1.writeToServer();
 
-                assert(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(await peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
-                expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
                 peers.p1.destroyEditor();
 
-                expect(p2Spies._recoverFromStaleDocument.callCount).toBe(0, {
-                    message: "p2 _recoverFromStaleDocument should not have been called",
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(0, {
+                    message: "p2 recoverFromStaleDocument should not have been called",
                 });
-                expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                    message: "p2 _resetFromServerAndResyncWithPeers should not have been called",
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p2 resetFromServerAndResyncWithPeers should not have been called",
                 });
-                expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                    message: "p2 _processMissingSteps should not have been called",
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
                 });
-                expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                    message: "p2 _applySnapshot should not have been called",
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
                 });
 
                 await peers.p2.setOnline();
-                expect(await peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
+                expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
-                expect(p2Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                    message: "p2 _recoverFromStaleDocument should have been called once",
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p2 recoverFromStaleDocument should have been called once",
                 });
-                expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(1, {
-                    message: "p2 _resetFromServerAndResyncWithPeers should have been called once",
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(1, {
+                    message: "p2 resetFromServerAndResyncWithPeers should have been called once",
                 });
-                expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                    message: "p2 _processMissingSteps should not have been called",
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
                 });
-                expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                    message: "p2 _applySnapshot should not have been called",
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
                 });
 
                 await peers.p3.setOnline();
-                expect(await peers.p3.getValue()).toBe(`[]<p>ab</p>`, {
+                expect(peers.p3.getValue()).toBe(`[]<p>ab</p>`, {
                     message: "p3 should have the same document as p1",
                 });
-                expect(p3Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                    message: "p3 _recoverFromStaleDocument should have been called once",
+                expect(p3Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p3 recoverFromStaleDocument should have been called once",
                 });
-                expect(p3Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                    message: "p3 _resetFromServerAndResyncWithPeers should not have been called",
+                expect(p3Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p3 resetFromServerAndResyncWithPeers should not have been called",
                 });
-                expect(p3Spies._processMissingSteps.callCount).toBe(1, {
-                    message: "p3 _processMissingSteps should have been called once",
+                expect(p3Spies.processMissingSteps.callCount).toBe(1, {
+                    message: "p3 processMissingSteps should have been called once",
                 });
-                expect(p3Spies._applySnapshot.callCount).toBe(1, {
-                    message: "p3 _applySnapshot should have been called once",
+                expect(p3Spies.applySnapshot.callCount).toBe(1, {
+                    message: "p3 applySnapshot should have been called once",
                 });
-                expect(p3Spies._onRecoveryPeerTimeout.callCount).toBe(0, {
-                    message: "p3 _onRecoveryPeerTimeout should not have been called",
+                expect(p3Spies.onRecoveryPeerTimeout.callCount).toBe(0, {
+                    message: "p3 onRecoveryPeerTimeout should not have been called",
                 });
             });
-            test.todo(
-                "should recover from snapshot after PTP_MAX_RECOVERY_TIME if some peer do not respond",
-                async (assert) => {
-                    const pool = await createPeers(["p1", "p2", "p3"]);
-                    const peers = pool.peers;
+            test("should recover from snapshot after PTP_MAX_RECOVERY_TIME if some peer do not respond", async () => {
+                const pool = await createPeers(["p1", "p2", "p3"]);
+                const peers = pool.peers;
 
-                    await peers.p1.focus();
-                    await peers.p2.focus();
-                    await peers.p3.focus();
+                await peers.p1.focus();
+                await peers.p2.focus();
+                await peers.p3.focus();
 
-                    await peers.p1.openDataChannel(peers.p2);
-                    await peers.p1.openDataChannel(peers.p3);
-                    await peers.p2.openDataChannel(peers.p3);
-                    peers.p2.setOffline();
-                    peers.p3.setOffline();
+                await peers.p1.openDataChannel(peers.p2);
+                await peers.p1.openDataChannel(peers.p3);
+                await peers.p2.openDataChannel(peers.p3);
+                peers.p2.setOffline();
+                peers.p3.setOffline();
 
-                    const p2Spies = makeSpies(peers.p2.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                    ]);
-                    const p3Spies = makeSpies(peers.p3.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                        "_onRecoveryPeerTimeout",
-                    ]);
+                const p2Spies = makeSpies(peers.p2.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                ]);
+                const p3Spies = makeSpies(peers.p3.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
+                ]);
 
-                    insertEditorText(peers.p1.editor, "b");
-                    await peers.p1.writeToServer();
-                    peers.p1.setOffline();
+                insertEditorText(peers.p1.editor, "b");
+                await peers.p1.writeToServer();
+                peers.p1.setOffline();
 
-                    assert(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
-                        message: "p1 have inserted char b",
-                    });
-                    expect(await peers.p2.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p2 should not have the same document as p1",
-                    });
-                    expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p3 should not have the same document as p1",
-                    });
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                    message: "p1 have inserted char b",
+                });
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p2 should not have the same document as p1",
+                });
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p3 should not have the same document as p1",
+                });
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(0, {
-                        message: "p2 _recoverFromStaleDocument should not have been called",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should not have been called",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(0, {
+                    message: "p2 recoverFromStaleDocument should not have been called",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p2 resetFromServerAndResyncWithPeers should not have been called",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
 
-                    await peers.p2.setOnline();
-                    expect(await peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
-                        message: "p2 should have the same document as p1",
-                    });
-                    expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p3 should not have the same document as p1",
-                    });
+                await peers.p2.setOnline();
+                expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
+                    message: "p2 should have the same document as p1",
+                });
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p3 should not have the same document as p1",
+                });
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                        message: "p2 _recoverFromStaleDocument should have been called once",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(1, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should have been called once",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p2 recoverFromStaleDocument should have been called once",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(1, {
+                    message: "p2 resetFromServerAndResyncWithPeers should have been called once",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
 
-                    await peers.p3.setOnline();
-                    expect(await peers.p3.getValue()).toBe(`[]<p>ab</p>`, {
-                        message: "p3 should have the same document as p1",
-                    });
-                    expect(p3Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                        message: "p3 _recoverFromStaleDocument should have been called once",
-                    });
-                    expect(p3Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                        message:
-                            "p3 _resetFromServerAndResyncWithPeers should have been called once",
-                    });
-                    expect(p3Spies._processMissingSteps.callCount).toBe(1, {
-                        message: "p3 _processMissingSteps should have been called once",
-                    });
-                    expect(p3Spies._applySnapshot.callCount).toBe(1, {
-                        message: "p3 _applySnapshot should have been called once",
-                    });
-                    expect(p3Spies._onRecoveryPeerTimeout.callCount).toBe(1, {
-                        message: "p3 _onRecoveryPeerTimeout should have been called once",
-                    });
-                }
-            );
+                await peers.p3.setOnline();
+                expect(peers.p3.getValue()).toBe(`[]<p>ab</p>`, {
+                    message: "p3 should have the same document as p1",
+                });
+                expect(p3Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p3 recoverFromStaleDocument should have been called once",
+                });
+                expect(p3Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p3 resetFromServerAndResyncWithPeers should have been called once",
+                });
+                expect(p3Spies.processMissingSteps.callCount).toBe(1, {
+                    message: "p3 processMissingSteps should have been called once",
+                });
+                expect(p3Spies.applySnapshot.callCount).toBe(1, {
+                    message: "p3 applySnapshot should have been called once",
+                });
+                expect(p3Spies.onRecoveryPeerTimeout.callCount).toBe(1, {
+                    message: "p3 onRecoveryPeerTimeout should have been called once",
+                });
+            });
         });
         describe("recover from server", () => {
-            test.todo(
-                "should recover from server if no snapshot have been processed",
-                async (assert) => {
-                    const pool = await createPeers(["p1", "p2", "p3"]);
-                    const peers = pool.peers;
+            test("should recover from server if no snapshot have been processed", async () => {
+                const pool = await createPeers(["p1", "p2", "p3"]);
+                const peers = pool.peers;
 
-                    await peers.p1.focus();
-                    await peers.p2.focus();
-                    await peers.p3.focus();
+                await peers.p1.focus();
+                await peers.p2.focus();
+                await peers.p3.focus();
 
-                    await peers.p1.openDataChannel(peers.p2);
-                    await peers.p1.openDataChannel(peers.p3);
-                    await peers.p2.openDataChannel(peers.p3);
-                    peers.p2.setOffline();
-                    peers.p3.setOffline();
+                await peers.p1.openDataChannel(peers.p2);
+                await peers.p1.openDataChannel(peers.p3);
+                await peers.p2.openDataChannel(peers.p3);
+                peers.p2.setOffline();
+                peers.p3.setOffline();
 
-                    const p2Spies = makeSpies(peers.p2.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                        "_onRecoveryPeerTimeout",
-                        "_resetFromPeer",
-                    ]);
+                const p2Spies = makeSpies(peers.p2.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
+                    "resetFromPeer",
+                ]);
 
-                    const p3Spies = makeSpies(peers.p3.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                        "_onRecoveryPeerTimeout",
-                        "_resetFromPeer",
-                    ]);
+                const p3Spies = makeSpies(peers.p3.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
+                    "resetFromPeer",
+                ]);
 
-                    insertEditorText(peers.p1.editor, "b");
-                    await peers.p1.writeToServer();
+                insertEditorText(peers.p1.editor, "b");
+                await peers.p1.writeToServer();
 
-                    expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
-                        message: "p1 have inserted char b",
-                    });
-                    expect(await peers.p2.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p2 should not have the same document as p1",
-                    });
-                    expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p3 should not have the same document as p1",
-                    });
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                    message: "p1 have inserted char b",
+                });
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p2 should not have the same document as p1",
+                });
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p3 should not have the same document as p1",
+                });
 
-                    peers.p1.destroyEditor();
+                peers.p1.destroyEditor();
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(0, {
-                        message: "p2 _recoverFromStaleDocument should not have been called",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should not have been called",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
-                    expect(p2Spies._onRecoveryPeerTimeout.callCount).toBe(0, {
-                        message: "p2 _onRecoveryPeerTimeout should not have been called",
-                    });
-                    expect(p2Spies._resetFromPeer.callCount).toBe(0, {
-                        message: "p2 _resetFromPeer should not have been called",
-                    });
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(0, {
+                    message: "p2 recoverFromStaleDocument should not have been called",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p2 resetFromServerAndResyncWithPeers should not have been called",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
+                expect(p2Spies.onRecoveryPeerTimeout.callCount).toBe(0, {
+                    message: "p2 onRecoveryPeerTimeout should not have been called",
+                });
+                expect(p2Spies.resetFromPeer.callCount).toBe(0, {
+                    message: "p2 resetFromPeer should not have been called",
+                });
 
-                    // Because we do not wait for the end of the
-                    // p2.setOnline promise, p3 will not be able to reset
-                    // from p2 wich allow us to test that p3 reset from the
-                    // server as a fallback.
-                    peers.p2.setOnline();
-                    await peers.p3.setOnline();
+                // Because we do not wait for the end of the
+                // p2.setOnline promise, p3 will not be able to reset
+                // from p2 wich allow us to test that p3 reset from the
+                // server as a fallback.
+                peers.p2.setOnline();
+                await peers.p3.setOnline();
 
-                    expect(await peers.p3.getValue()).toBe(`[]<p>ab</p>`, {
-                        message: "p3 should have the same document as p1",
-                    });
+                expect(peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
+                    message: "p3 should have the same document as p1",
+                });
 
-                    expect(p3Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                        message: "p3 _recoverFromStaleDocument should have been called once",
-                    });
-                    expect(p3Spies._resetFromServerAndResyncWithPeers.callCount).toBe(1, {
-                        message:
-                            "p3 _resetFromServerAndResyncWithPeers should have been called once",
-                    });
-                    expect(p3Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p3 _processMissingSteps should not have been called",
-                    });
-                    expect(p3Spies._applySnapshot.callCount).toBe(1, {
-                        message: "p3 _applySnapshot should have been called once",
-                    });
-                    expect(p3Spies._onRecoveryPeerTimeout.callCount).toBe(0, {
-                        message: "p3 _onRecoveryPeerTimeout should not have been called",
-                    });
-                    expect(p3Spies._resetFromPeer.callCount).toBe(1, {
-                        message: "p3 _resetFromPeer should have been called once",
-                    });
-                }
-            );
-            test.todo(
-                "should recover from server if there is no peer connected",
-                async (assert) => {
-                    const pool = await createPeers(["p1", "p2"]);
-                    const peers = pool.peers;
+                expect(p3Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p3 recoverFromStaleDocument should have been called once",
+                });
+                expect(p3Spies.resetFromServerAndResyncWithPeers.callCount).toBe(1, {
+                    message: "p3 resetFromServerAndResyncWithPeers should have been called once",
+                });
+                expect(p3Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p3 processMissingSteps should not have been called",
+                });
+                expect(p3Spies.applySnapshot.callCount).toBe(1, {
+                    message: "p3 applySnapshot should have been called once",
+                });
+                expect(p3Spies.onRecoveryPeerTimeout.callCount).toBe(0, {
+                    message: "p3 onRecoveryPeerTimeout should not have been called",
+                });
+                expect(p3Spies.resetFromPeer.callCount).toBe(1, {
+                    message: "p3 resetFromPeer should have been called once",
+                });
+            });
+            test("should recover from server if there is no peer connected", async () => {
+                const pool = await createPeers(["p1", "p2"]);
+                const peers = pool.peers;
 
-                    await peers.p1.startEditor();
-                    await peers.p2.startEditor();
+                await peers.p1.focus();
+                await peers.p2.focus();
 
-                    await peers.p1.focus();
-                    await peers.p2.focus();
+                await peers.p1.openDataChannel(peers.p2);
+                peers.p2.setOffline();
 
-                    await peers.p1.openDataChannel(peers.p2);
-                    peers.p2.setOffline();
+                const p2Spies = makeSpies(peers.p2.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
+                    "resetFromPeer",
+                ]);
 
-                    const p2Spies = makeSpies(peers.p2.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                        "_onRecoveryPeerTimeout",
-                        "_resetFromPeer",
-                    ]);
+                insertEditorText(peers.p1.editor, "b");
+                await peers.p1.writeToServer();
 
-                    insertEditorText(peers.p1.editor, "b");
-                    await peers.p1.writeToServer();
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                    message: "p1 have inserted char b",
+                });
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p2 should not have the same document as p1",
+                });
 
-                    expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
-                        message: "p1 have inserted char b",
-                    });
-                    expect(await peers.p2.getValue()).toBe(`[]<p>a</p>`, {
-                        message: "p2 should not have the same document as p1",
-                    });
+                peers.p1.destroyEditor();
 
-                    peers.p1.destroyEditor();
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(0, {
+                    message: "p2 recoverFromStaleDocument should not have been called",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p2 resetFromServerAndResyncWithPeers should not have been called",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
+                expect(p2Spies.resetFromPeer.callCount).toBe(0, {
+                    message: "p2 resetFromPeer should not have been called",
+                });
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(0, {
-                        message: "p2 _recoverFromStaleDocument should not have been called",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should not have been called",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
-                    expect(p2Spies._resetFromPeer.callCount).toBe(0, {
-                        message: "p2 _resetFromPeer should not have been called",
-                    });
+                await peers.p2.setOnline();
+                expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
+                    message: "p2 should have the same document as p1",
+                });
 
-                    await peers.p2.setOnline();
-                    expect(await peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
-                        message: "p2 should have the same document as p1",
-                    });
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p2 recoverFromStaleDocument should have been called once",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(1, {
+                    message: "p2 resetFromServerAndResyncWithPeers should have been called once",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
+                expect(p2Spies.onRecoveryPeerTimeout.callCount).toBe(0, {
+                    message: "p2 onRecoveryPeerTimeout should not have been called",
+                });
+                expect(p2Spies.resetFromPeer.callCount).toBe(0, {
+                    message: "p2 resetFromPeer should not have been called",
+                });
+            });
+            test("should recover from server if there is no response after PTP_MAX_RECOVERY_TIME", async () => {
+                const pool = await createPeers(["p1", "p2", "p3"]);
+                const peers = pool.peers;
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                        message: "p2 _recoverFromStaleDocument should have been called once",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(1, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should have been called once",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
-                    expect(p2Spies._onRecoveryPeerTimeout.callCount).toBe(0, {
-                        message: "p2 _onRecoveryPeerTimeout should not have been called",
-                    });
-                    expect(p2Spies._resetFromPeer.callCount).toBe(0, {
-                        message: "p2 _resetFromPeer should not have been called",
-                    });
-                }
-            );
-            test.todo(
-                "should recover from server if there is no response after PTP_MAX_RECOVERY_TIME",
-                async (assert) => {
-                    const pool = await createPeers(["p1", "p2", "p3"]);
-                    const peers = pool.peers;
+                await peers.p1.focus();
+                await peers.p2.focus();
 
-                    await peers.p1.startEditor();
-                    await peers.p2.startEditor();
-                    await peers.p3.startEditor();
+                await peers.p1.openDataChannel(peers.p2);
+                await peers.p1.openDataChannel(peers.p3);
+                await peers.p2.openDataChannel(peers.p3);
+                peers.p2.setOffline();
+                peers.p3.setOffline();
 
-                    await peers.p1.focus();
-                    await peers.p2.focus();
+                const p2Spies = makeSpies(peers.p2.plugins.collaboration_odoo, [
+                    "recoverFromStaleDocument",
+                    "resetFromServerAndResyncWithPeers",
+                    "processMissingSteps",
+                    "applySnapshot",
+                    "onRecoveryPeerTimeout",
+                    "resetFromPeer",
+                ]);
 
-                    await peers.p1.openDataChannel(peers.p2);
-                    await peers.p1.openDataChannel(peers.p3);
-                    await peers.p2.openDataChannel(peers.p3);
-                    peers.p2.setOffline();
-                    peers.p3.setOffline();
+                insertEditorText(peers.p1.editor, "b");
+                await peers.p1.writeToServer();
+                peers.p1.setOffline();
 
-                    const p2Spies = makeSpies(peers.p2.wysiwyg, [
-                        "_recoverFromStaleDocument",
-                        "_resetFromServerAndResyncWithPeers",
-                        "_processMissingSteps",
-                        "_applySnapshot",
-                        "_onRecoveryPeerTimeout",
-                        "_resetFromPeer",
-                    ]);
+                expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
+                    message: "p1 have inserted char b",
+                });
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p2 should not have the same document as p1",
+                });
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p3 should not have the same document as p1",
+                });
 
-                    insertEditorText(peers.p1.editor, "b");
-                    await peers.p1.writeToServer();
-                    peers.p1.setOffline();
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(0, {
+                    message: "p2 recoverFromStaleDocument should not have been called",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(0, {
+                    message: "p2 resetFromServerAndResyncWithPeers should not have been called",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
+                expect(p2Spies.resetFromPeer.callCount).toBe(0, {
+                    message: "p2 resetFromPeer should not have been called",
+                });
 
-                    expect(await peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
-                        message: "p1 have inserted char b",
-                    });
-                    expect(await peers.p2.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p2 should not have the same document as p1",
-                    });
-                    expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p3 should not have the same document as p1",
-                    });
+                await peers.p2.setOnline();
+                expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
+                    message: "p2 should have the same document as p1",
+                });
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
+                    message: "p3 should not have the same document as p1",
+                });
 
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(0, {
-                        message: "p2 _recoverFromStaleDocument should not have been called",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(0, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should not have been called",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
-                    expect(p2Spies._resetFromPeer.callCount).toBe(0, {
-                        message: "p2 _resetFromPeer should not have been called",
-                    });
-
-                    await peers.p2.setOnline();
-                    expect(await peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
-                        message: "p2 should have the same document as p1",
-                    });
-                    expect(await peers.p3.getValue()).toBe(`<p>[]a</p>`, {
-                        message: "p3 should not have the same document as p1",
-                    });
-
-                    expect(p2Spies._recoverFromStaleDocument.callCount).toBe(1, {
-                        message: "p2 _recoverFromStaleDocument should have been called once",
-                    });
-                    expect(p2Spies._resetFromServerAndResyncWithPeers.callCount).toBe(1, {
-                        message:
-                            "p2 _resetFromServerAndResyncWithPeers should have been called once",
-                    });
-                    expect(p2Spies._processMissingSteps.callCount).toBe(0, {
-                        message: "p2 _processMissingSteps should not have been called",
-                    });
-                    expect(p2Spies._applySnapshot.callCount).toBe(0, {
-                        message: "p2 _applySnapshot should not have been called",
-                    });
-                    expect(p2Spies._onRecoveryPeerTimeout.callCount).toBe(1, {
-                        message: "p2 _onRecoveryPeerTimeout should have been called once",
-                    });
-                    // p1 and p3 are considered offline but not
-                    // disconnected. It means that p2 will try to recover
-                    // from p1 and p3 even if they are currently
-                    // unavailable. This test is usefull to check that the
-                    // code path to _resetFromPeer is properly taken.
-                    expect(p2Spies._resetFromPeer.callCount).toBe(2, {
-                        message: "p2 _resetFromPeer should have been called twice",
-                    });
-                }
-            );
+                expect(p2Spies.recoverFromStaleDocument.callCount).toBe(1, {
+                    message: "p2 recoverFromStaleDocument should have been called once",
+                });
+                expect(p2Spies.resetFromServerAndResyncWithPeers.callCount).toBe(1, {
+                    message: "p2 resetFromServerAndResyncWithPeers should have been called once",
+                });
+                expect(p2Spies.processMissingSteps.callCount).toBe(0, {
+                    message: "p2 processMissingSteps should not have been called",
+                });
+                expect(p2Spies.applySnapshot.callCount).toBe(0, {
+                    message: "p2 applySnapshot should not have been called",
+                });
+                expect(p2Spies.onRecoveryPeerTimeout.callCount).toBe(1, {
+                    message: "p2 onRecoveryPeerTimeout should have been called once",
+                });
+                // p1 and p3 are considered offline but not
+                // disconnected. It means that p2 will try to recover
+                // from p1 and p3 even if they are currently
+                // unavailable. This test is usefull to check that the
+                // code path to resetFromPeer is properly taken.
+                expect(p2Spies.resetFromPeer.callCount).toBe(2, {
+                    message: "p2 resetFromPeer should have been called twice",
+                });
+            });
         });
     });
 });
 describe("Disconnect & reconnect", () => {
-    test.todo(
-        "should sync history when disconnecting and reconnecting to internet",
-        async (assert) => {
-            const pool = await createPeers(["p1", "p2"]);
-            const peers = pool.peers;
+    test.todo("should sync history when disconnecting and reconnecting to internet", async () => {
+        const pool = await createPeers(["p1", "p2"]);
+        const peers = pool.peers;
 
-            await peers.p1.startEditor();
-            await peers.p2.startEditor();
+        await peers.p1.focus();
+        await peers.p2.focus();
+        await peers.p1.openDataChannel(peers.p2);
 
-            await peers.p1.focus();
-            await peers.p2.focus();
-            await peers.p1.openDataChannel(peers.p2);
+        insertEditorText(peers.p1.editor, "b");
 
-            insertEditorText(peers.p1.editor, "b");
+        peers.p1.setOffline();
 
-            await peers.p1.setOffline();
-            peers.p1.removeDataChannel(peers.p2);
+        const setSelection = (peer) => {
+            const selection = peer.document.getSelection();
+            const pElement = peer.editor.editable.querySelector("p");
+            const range = new Range();
+            range.setStart(pElement, 1);
+            range.setEnd(pElement, 1);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        };
+        const addP = (peer, content) => {
+            const p = document.createElement("p");
+            p.textContent = content;
+            peer.editor.editable.append(p);
+            peer.editor.dispatch("ADD_STEP");
+        };
 
-            const setSelection = (peer) => {
-                const selection = peer.document.getSelection();
-                const pElement = peer.wysiwyg.odooEditor.editable.querySelector("p");
-                const range = new Range();
-                range.setStart(pElement, 1);
-                range.setEnd(pElement, 1);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            };
-            const addP = (peer, content) => {
-                const p = document.createElement("p");
-                p.textContent = content;
-                peer.wysiwyg.odooEditor.editable.append(p);
-                peer.wysiwyg.odooEditor.historyStep();
-            };
+        setSelection(peers.p1);
+        insertEditorText(peers.p1.editor, "c");
 
-            setSelection(peers.p1);
-            insertEditorText(peers.p1.editor, "c");
+        addP(peers.p1, "d");
 
-            addP(peers.p1, "d");
+        setSelection(peers.p2);
+        insertEditorText(peers.p2.editor, "e");
+        addP(peers.p2, "f");
 
-            setSelection(peers.p2);
-            insertEditorText(peers.p2.editor, "e");
-            addP(peers.p2, "f");
+        peers.p1.setOnline();
+        peers.p2.setOnline();
 
-            peers.p1.setOnline();
-            peers.p2.setOnline();
-
-            // todo: p1PromiseForMissingStep and p2PromiseForMissingStep
-            // should be removed when the fix of undetected missing step
-            // will be merged. (task-3208277)
-            const p1PromiseForMissingStep = new Promise((resolve) => {
-                patch(peers.p2.wysiwyg, {
-                    async _processMissingSteps() {
-                        // Wait for the p2PromiseForMissingStep to resolve
-                        // to avoid undetected missing step.
-                        await p2PromiseForMissingStep;
-                        super._processMissingSteps(...arguments);
-                        resolve();
-                    },
-                });
+        // todo: p1PromiseForMissingStep and p2PromiseForMissingStep
+        // should be removed when the fix of undetected missing step
+        // will be merged. (task-3208277)
+        const p1PromiseForMissingStep = new Promise((resolve) => {
+            patch(peers.p2.plugins.collaboration_odoo, {
+                async processMissingSteps() {
+                    // Wait for the p2PromiseForMissingStep to resolve
+                    // to avoid undetected missing step.
+                    await p2PromiseForMissingStep;
+                    super.processMissingSteps(...arguments);
+                    resolve();
+                },
             });
-            const p2PromiseForMissingStep = new Promise((resolve) => {
-                patch(peers.p1.wysiwyg, {
-                    async _processMissingSteps() {
-                        super._processMissingSteps(...arguments);
-                        resolve();
-                    },
-                });
+        });
+        const p2PromiseForMissingStep = new Promise((resolve) => {
+            patch(peers.p1.plugins.collaboration_odoo, {
+                async processMissingSteps() {
+                    super.processMissingSteps(...arguments);
+                    resolve();
+                },
             });
+        });
 
-            await peers.p1.openDataChannel(peers.p2);
-            await p1PromiseForMissingStep;
+        await peers.p1.openDataChannel(peers.p2);
+        await p1PromiseForMissingStep;
 
-            expect(await peers.p1.getValue()).toBe(`<p>ac[]eb</p><p>d</p><p>f</p>`, {
-                message: "p1 should have the value merged with p2",
-            });
-            expect(await peers.p2.getValue()).toBe(`<p>ace[]b</p><p>d</p><p>f</p>`, {
-                message: "p2 should have the value merged with p1",
-            });
-        }
-    );
+        expect(peers.p1.getValue()).toBe(`<p>ac[]eb</p><p>d</p><p>f</p>`, {
+            message: "p1 should have the value merged with p2",
+        });
+        expect(peers.p2.getValue()).toBe(`<p>ace[]b</p><p>d</p><p>f</p>`, {
+            message: "p2 should have the value merged with p1",
+        });
+    });
 });
