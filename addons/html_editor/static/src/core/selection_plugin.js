@@ -656,9 +656,17 @@ export class SelectionPlugin extends Plugin {
             return editorSelection;
         }
         const selection = this.document.getSelection();
-        // @todo @phoenix: protect me! (selection could be nullish)
+        if (!selection) {
+            return editorSelection;
+        }
         selection.modify(alter, direction, granularity);
-        // @todo: check if it's still inside the editable
+        const { anchorNode, focusNode } = selection;
+        if (
+            !this.editable.contains(anchorNode) ||
+            !(anchorNode === focusNode || this.editable.contains(focusNode))
+        ) {
+            throw new Error("Selection is not in editor");
+        }
         this.activeSelection = this.makeSelection(selection, true);
         return this.activeSelection;
     }
