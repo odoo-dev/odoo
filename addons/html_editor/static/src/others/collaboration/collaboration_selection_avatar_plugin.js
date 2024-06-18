@@ -42,13 +42,11 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
             browser.location.origin
         }/web/image?model=res.users&field=avatar_128&id=${encodeURIComponent(user.userId)}`;
     }
-    handleCollaborationNotification({ fromPeerId, notificationName }) {
+    handleCollaborationNotification({ notificationName, notificationPayload }) {
         switch (notificationName) {
             case "ptp_remove":
-            case "ptp_disconnect":
-                this.selectionInfos.delete(fromPeerId);
+                this.selectionInfos.delete(notificationPayload);
                 this.refreshSelection();
-                break;
         }
     }
 

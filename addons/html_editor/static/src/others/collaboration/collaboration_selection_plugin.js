@@ -26,11 +26,11 @@ export class CollaborationSelectionPlugin extends Plugin {
         this.selectionOverlay = this.shared.makeLocalOverlay("oe-selections-container");
         this.selectionColor = `hsl(${(Math.random() * 360).toFixed(0)}, 75%, 50%)`;
     }
-    handleCollaborationNotification({ fromPeerId, notificationName, notificationPayload }) {
+    handleCollaborationNotification({ notificationName, notificationPayload }) {
         switch (notificationName) {
             case "ptp_remove":
-            case "ptp_disconnect":
-                this.multiselectionRemove(fromPeerId);
+                this.multiselectionRemove(notificationPayload);
+                this.selectionInfos.delete(notificationPayload);
                 break;
         }
     }

@@ -129,6 +129,8 @@ export class CollaborationPlugin extends Plugin {
         let stepIndex = 0;
         const steps = this.shared.getHistorySteps();
         for (const newStep of newSteps) {
+            // todo: add a test that no 2 HISTORY_MISSING_PARENT_STEP are
+            // called for the same stack.
             const insertIndex = this.getInsertStepIndex(steps, newStep);
             if (typeof insertIndex === "undefined") {
                 continue;
