@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 import { setContent, getContent, setSelection } from "../_helpers/selection";
 import { setupEditor } from "../_helpers/editor";
 import { waitUntil, waitFor, click, queryOne, press, select } from "@odoo/hoot-dom";
@@ -65,6 +65,21 @@ describe("popover should switch UI depending on editing state", () => {
         await waitFor(".o_we_edit_link");
         expect(cleanLinkArtifacts(getContent(el))).toBe(
             '<p>this is a <a href="http://test.com/">li[]nk</a></p>'
+        );
+    });
+    test("after editing the URL and clicking on apply button, the selection should be restored", async () => {
+        const { el } = await setupEditor('<p>this is a <a href="http://test.com/">li[]nk</a></p>');
+        await waitFor(".o-we-linkpopover");
+        click(".o_we_edit_link");
+        await waitFor(".o_we_href_input_link");
+        // This changes the selection to outside the editor.
+        click(".o_we_href_input_link");
+        await tick();
+        press("a");
+        click(".o_we_apply_link");
+        await waitFor(".o_we_edit_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p>this is a <a href="http://test.com/a">li[]nk</a></p>'
         );
     });
     test("after clicking on apply button, the popover should be with the non editing mode, e.g. with three buttons", async () => {

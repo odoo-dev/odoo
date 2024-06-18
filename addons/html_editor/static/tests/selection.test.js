@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, tick } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { Plugin } from "../src/plugin";
 import { MAIN_PLUGINS } from "../src/plugin_sets";
@@ -97,7 +97,7 @@ describe("inEditable", () => {
     });
 });
 
-test("setEditableSelection should work, even if getSelection returns null", async () => {
+test("setEditableSelection should not crash if getSelection returns null", async () => {
     const { editor } = await setupEditor("<p>a[b]</p>");
     let selection = editor.shared.getEditableSelection();
     expect(selection.startOffset).toBe(1);
@@ -113,8 +113,9 @@ test("setEditableSelection should work, even if getSelection returns null", asyn
         anchorOffset: 0,
     });
 
-    expect(selection.startOffset).toBe(0);
-    expect(selection.endOffset).toBe(0);
+    // Selection could not be set, so it remains unchanged.
+    expect(selection.startOffset).toBe(1);
+    expect(selection.endOffset).toBe(2);
 });
 
 test.todo("modifySelection should work, even if getSelection returns null", async () => {
@@ -133,4 +134,12 @@ test.todo("modifySelection should work, even if getSelection returns null", asyn
     // What should we expect here? The unchanged selection?
     expect(selection.startOffset).toBe(1);
     expect(selection.endOffset).toBe(2);
+});
+
+test("setSelection should not set the selection outside the editable", async () => {
+    const { editor, el } = await setupEditor("<p>a[b]</p>");
+    editor.document.getSelection().setPosition(document.body);
+    await tick();
+    const selection = editor.shared.setSelection(editor.shared.getEditableSelection());
+    expect(el.contains(selection.anchorNode)).toBe(true);
 });
