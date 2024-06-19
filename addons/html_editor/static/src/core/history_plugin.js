@@ -387,6 +387,14 @@ export class HistoryPlugin extends Plugin {
                         value: record.target.getAttribute(record.attributeName),
                         oldValue: record.oldValue,
                     });
+                    for (const cb of this.resources["on_change_attribute"] || []) {
+                        cb({
+                            target: record.target,
+                            attributeName: record.attributeName,
+                            oldValue: record.oldValue,
+                            value: record.target.getAttribute(record.attributeName),
+                        });
+                    }
                     break;
                 }
                 case "childList": {
@@ -528,7 +536,13 @@ export class HistoryPlugin extends Plugin {
         if (pos > 0) {
             // Consider the position consumed.
             this.stepsStates.set(this.steps[pos].id, "consumed");
+            for (const cb of this.resources["before_history_revert"] || []) {
+                cb();
+            }
             this.revertMutations(this.steps[pos].mutations);
+            for (const cb of this.resources["after_history_revert"] || []) {
+                cb();
+            }
             this.setSerializedSelection(this.steps[pos].selection);
             this.addStep({ stepState: "undo" });
             // Consider the last position of the history as an undo.
@@ -548,7 +562,13 @@ export class HistoryPlugin extends Plugin {
         const pos = this.getNextRedoIndex();
         if (pos > 0) {
             this.stepsStates.set(this.steps[pos].id, "consumed");
+            for (const cb of this.resources["before_history_revert"] || []) {
+                cb();
+            }
             this.revertMutations(this.steps[pos].mutations);
+            for (const cb of this.resources["after_history_revert"] || []) {
+                cb();
+            }
             this.setSerializedSelection(this.steps[pos].selection);
             this.addStep({ stepState: "redo" });
         }
@@ -678,10 +698,16 @@ export class HistoryPlugin extends Plugin {
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        const value = this.getAttributeValue(
-                            mutation.attributeName,
-                            mutation.value
-                        );
+                        let value = this.getAttributeValue(mutation.attributeName, mutation.value);
+                        for (const cb of this.resources["on_change_attribute"] || []) {
+                            value =
+                                cb({
+                                    target: node,
+                                    attributeName: mutation.attributeName,
+                                    oldValue: mutation.oldValue,
+                                    value,
+                                }) || value;
+                        }
                         this.setAttribute(node, mutation.attributeName, value);
                     }
                     break;
@@ -732,10 +758,20 @@ export class HistoryPlugin extends Plugin {
                 case "attributes": {
                     const node = this.idToNodeMap.get(mutation.id);
                     if (node) {
-                        const value = this.getAttributeValue(
+                        let value = this.getAttributeValue(
                             mutation.attributeName,
                             mutation.oldValue
                         );
+                        for (const cb of this.resources["on_change_attribute"] || []) {
+                            value =
+                                cb({
+                                    target: node,
+                                    attributeName: mutation.attributeName,
+                                    oldValue: mutation.value,
+                                    value,
+                                    reverse: true,
+                                }) || value;
+                        }
                         this.setAttribute(node, mutation.attributeName, value);
                     }
                     break;
@@ -871,6 +907,9 @@ export class HistoryPlugin extends Plugin {
         if (stepIndex === this.steps.length - 1) {
             return;
         }
+        for (const cb of this.resources["before_history_revert"] || []) {
+            cb();
+        }
         // Revert all mutations until stepIndex, and consume all reversible
         // steps in the process (typically current user steps).
         for (let i = this.steps.length - 1; i > stepIndex; i--) {
@@ -887,6 +926,9 @@ export class HistoryPlugin extends Plugin {
             if (!this.isReversibleStep(i)) {
                 this.applyMutations(currentStep.mutations);
             }
+        }
+        for (const cb of this.resources["after_history_revert"] || []) {
+            cb();
         }
         // TODO ABD TODO @phoenix: review selections, this selection could be obsolete
         // depending on the non-reversible steps that were applied.
