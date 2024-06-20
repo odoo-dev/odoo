@@ -177,6 +177,14 @@ export class HtmlField extends Component {
             },
             ...this.props.editorConfig,
         };
+
+        const { sanitize_tags, sanitize } = this.props.record.fields[this.props.name];
+        if (
+            !("disableVideo" in config) &&
+            (sanitize_tags || (sanitize_tags === undefined && sanitize))
+        ) {
+            config.disableVideo = true; // Tag-sanitized fields remove videos.
+        }
         return config;
     }
 
@@ -193,7 +201,6 @@ export const htmlField = {
     extractProps({ attrs, options }, dynamicInfo) {
         const editorConfig = {
             mediaModalParams: {
-                noVideos: "noVideos" in options ? options.noVideos : true,
                 useMediaLibrary: true,
             },
         };
@@ -202,6 +209,12 @@ export const htmlField = {
         }
         if (options.height) {
             editorConfig.height = `${options.height}px`;
+        }
+        if ("disableImage" in options) {
+            editorConfig.disableImage = Boolean(options.disableImage);
+        }
+        if ("disableVideo" in options) {
+            editorConfig.disableVideo = Boolean(options.disableVideo);
         }
         return {
             editorConfig,

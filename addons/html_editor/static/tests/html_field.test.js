@@ -433,7 +433,7 @@ test("Embed video by pasting video URL", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'allowCommandVideo': true}"/>
+                <field name="txt" widget="html"/>
             </form>`,
     });
 
@@ -790,14 +790,14 @@ test("html field with a placeholder", async () => {
     );
 });
 
-test("'Video' command is available in html field with noVideo = false", async () => {
+test("'Video' command is available by default", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'noVideos': False}"/>
+                <field name="txt" widget="html"/>
             </form>`,
     });
     setSelectionInHtmlField();
@@ -806,11 +806,36 @@ test("'Video' command is available in html field with noVideo = false", async ()
     expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
 });
 
-test("No 'Video' command in an html_field without noVideo (default = true) ", async () => {
+test("'Video' command is not available when 'disableVideo' = true", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'disableVideo': True}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "/video");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+    expect(queryAllTexts(".o-we-command-name")).toEqual([]);
+});
+
+test("'Video' command is not available by default when sanitize_tags = true", async () => {
+    class SanitizePartner extends models.Model {
+        _name = "sanitize.partner";
+
+        txt = fields.Html({ sanitize_tags: true });
+        _records = [{ id: 1, txt: "<p>first sanitize tags</p>" }];
+    }
+
+    defineModels([SanitizePartner]);
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "sanitize.partner",
         arch: `
             <form>
                 <field name="txt" widget="html"/>
@@ -823,14 +848,64 @@ test("No 'Video' command in an html_field without noVideo (default = true) ", as
     expect(queryAllTexts(".o-we-command-name")).toEqual([]);
 });
 
-test("MediaDialog contains 'Videos' tab in html field with noVideo = false", async () => {
+test("'Video' command is not available by default when sanitize = true", async () => {
+    class SanitizePartner extends models.Model {
+        _name = "sanitize.partner";
+
+        txt = fields.Html({ sanitize: true });
+        _records = [{ id: 1, txt: "<p>first sanitize</p>" }];
+    }
+
+    defineModels([SanitizePartner]);
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "sanitize.partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "/video");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+    expect(queryAllTexts(".o-we-command-name")).toEqual([]);
+});
+
+test("'Video' command is available when sanitize_tags = true and 'disableVideo' = false", async () => {
+    class SanitizePartner extends models.Model {
+        _name = "sanitize.partner";
+
+        txt = fields.Html({ sanitize_tags: true });
+        _records = [{ id: 1, txt: "<p>first sanitize tags</p>" }];
+    }
+
+    defineModels([SanitizePartner]);
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "sanitize.partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'disableVideo': False}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "/video");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(1);
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Video"]);
+});
+
+test("MediaDialog contains 'Videos' tab by default in html field", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'noVideos': False}"/>
+                <field name="txt" widget="html"/>
             </form>`,
     });
     setSelectionInHtmlField();
@@ -848,14 +923,14 @@ test("MediaDialog contains 'Videos' tab in html field with noVideo = false", asy
     ]);
 });
 
-test("MediaDialog don't contains 'Videos' tab in html field without noVideo (default = true) ", async () => {
+test("MediaDialog don't contains 'Videos' tab in html field when 'disableVideo' = true", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html"/>
+            <field name="txt" widget="html" options="{'disableVideo': True}"/>
             </form>`,
     });
 
@@ -873,18 +948,37 @@ test("MediaDialog don't contains 'Videos' tab in html field without noVideo (def
     ]);
 });
 
-test("html field with option height", async () => {
+test("'Image' command is available by default", async () => {
     await mountView({
         type: "form",
         resId: 1,
         resModel: "partner",
         arch: `
             <form>
-                <field name="txt" widget="html" options="{'height': 100}"/>
+                <field name="txt" widget="html"/>
             </form>`,
     });
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "/image");
+    await waitFor(".o-we-powerbox");
+    expect(queryAllTexts(".o-we-command-name")).toEqual(["Image"]);
+});
 
-    expect(`[name="txt"] .odoo-editor-editable`).toHaveStyle("height: 100px");
+test("'Image' command is not available when 'disableImage' = true", async () => {
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'disableImage': True}"/>
+            </form>`,
+    });
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "/image");
+    await animationFrame();
+    expect(".o-we-powerbox").toHaveCount(0);
+    expect(queryAllTexts(".o-we-command-name")).toEqual([]);
 });
 
 test("enable/disable codeview with editor toolbar", async () => {

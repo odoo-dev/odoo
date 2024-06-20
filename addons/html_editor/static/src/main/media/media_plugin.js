@@ -14,8 +14,7 @@ export class MediaPlugin extends Plugin {
     /** @type { (p: MediaPlugin) => Record<string, any> } */
     static resources = (p) => {
         const powerboxCommands = [];
-        const mediaModalParams = p.config.mediaModalParams || {};
-        if (!mediaModalParams.noImages) {
+        if (!p.config.disableImage) {
             powerboxCommands.push({
                 name: _t("Image"),
                 description: _t("Insert an image"),
@@ -26,7 +25,7 @@ export class MediaPlugin extends Plugin {
                 },
             });
         }
-        if (!mediaModalParams.noVideos) {
+        if (!p.config.disableVideo) {
             powerboxCommands.push({
                 name: _t("Video"),
                 description: _t("Insert a video"),
@@ -156,6 +155,8 @@ export class MediaPlugin extends Plugin {
             },
             close: restoreSelection,
             onAttachmentChange: this.config.onAttachmentChange || (() => {}),
+            noVideos: !!this.config.disableVideo,
+            noImages: !!this.config.disableImage,
             ...this.config.mediaModalParams,
             ...params,
         });
