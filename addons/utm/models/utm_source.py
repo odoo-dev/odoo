@@ -3,6 +3,7 @@
 
 
 from odoo import _, api, fields, models, tools
+from odoo.exceptions import UserError
 
 
 class UtmSource(models.Model):
@@ -94,3 +95,21 @@ class UtmSourceMixin(models.AbstractModel):
         for source, vals in zip(self, vals_list):
             vals['name'] = self.env['utm.mixin']._get_unique_names("utm.source", [default_name or source.name])[0]
         return vals_list
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_utm_source_record(self):
+        utm_source_xml_ids = [
+            key
+            for key, (_label, model)
+            in self['utm.mixin'].SELF_REQUIRED_UTM_REF
+            if model == 'utm.source'
+        ]
+
+        for xml_id in utm_source_xml_ids:
+            utm_source = self.env.ref(xml_id, raise_if_not_found=False)
+            if utm_source and utm_source in self:
+                raise UserError(_(
+                    "Oops, you can't delete the Source '%s'.\n"
+                    "Doing so would be like tearing down a load-bearing wall \u2014 not the best idea.",
+                    utm_source.name
+                ))
