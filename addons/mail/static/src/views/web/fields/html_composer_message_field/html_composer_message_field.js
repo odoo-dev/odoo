@@ -1,6 +1,7 @@
 import { htmlField, HtmlField } from "@html_editor/fields/html_field";
 import { registry } from "@web/core/registry";
 
+// @todo @phoenix should extends HtmlMailField
 export class HtmlComposerMessageField extends HtmlField {
     getConfig() {
         const config = super.getConfig(...arguments);
