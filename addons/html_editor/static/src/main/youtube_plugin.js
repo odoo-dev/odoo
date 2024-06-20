@@ -21,11 +21,9 @@ export class YoutubePlugin extends Plugin {
      * @param {string} url
      */
     handlePasteUrl(text, url) {
-        // @phoenix @todo: in odoo editor, we used this.config.allowCommandVideo
         // to know if this logic should be executed or not. Do we still want an
         // option of do we want to add a plugin whenever we want the feature?
-        // const youtubeUrl = this.config.allowCommandVideo && YOUTUBE_URL_GET_VIDEO_ID.exec(url);
-        const youtubeUrl = YOUTUBE_URL_GET_VIDEO_ID.exec(url);
+        const youtubeUrl = !this.config.disableVideo && YOUTUBE_URL_GET_VIDEO_ID.exec(url);
         if (youtubeUrl) {
             const restoreSavepoint = this.shared.makeSavePoint();
             // Open powerbox with commands to embed media or paste as link.
