@@ -252,6 +252,79 @@ test("onchange update html field in edition", async () => {
     expect(".odoo-editor-editable p").toHaveText("hello");
 });
 
+test("edit html field and blur multiple time should apply 1 onchange", async () => {
+    const def = new Deferred();
+    Partner._onChanges = {
+        txt() {},
+    };
+    onRpc("partner", "onchange", async ({ args }) => {
+        expect.step(`onchange: ${args[1].txt}`);
+        await def;
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="name"/>
+                <field name="txt" widget="html" options="{'codeview': true}"/>
+            </form>`,
+    });
+
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "Hello ");
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
+
+    await contains("[name='name'] input").click();
+    expect(["onchange: <p>Hello first</p>"]).toVerifySteps();
+
+    await contains("[name='txt'] .odoo-editor-editable").focus();
+    await contains("[name='name'] input").click();
+    def.resolve();
+    await animationFrame();
+    expect([]).toVerifySteps();
+});
+
+test("edit an html field during an onchange", async () => {
+    const def = new Deferred();
+    Partner._onChanges = {
+        txt(record) {
+            record.txt = "<p>New Value</p>";
+        },
+    };
+    onRpc("partner", "onchange", async ({ args }) => {
+        expect.step(`onchange: ${args[1].txt}`);
+        await def;
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'codeview': true}"/>
+            </form>`,
+    });
+
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "Hello ");
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
+
+    await contains(".o_form_view").click();
+    expect(["onchange: <p>Hello first</p>"]).toVerifySteps();
+
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "Yop ");
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Yop Hello first </p>");
+
+    def.resolve();
+    await animationFrame();
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Yop Hello first </p>");
+});
+
 test("click on next/previous page", async () => {
     await mountView({
         type: "form",
@@ -1007,6 +1080,41 @@ test("enable/disable codeview with editor toolbar", async () => {
     await contains(".o_codeview_btn").click();
     expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p> first </p>");
     expect("[name='txt'] textarea").toHaveCount(0);
+});
+
+test("edit and enable/disable codeview with editor toolbar", async () => {
+    onRpc("partner", "web_save", ({ args }) => {
+        expect(args[1].txt).toBe("<div></div>");
+        expect.step("web_save");
+    });
+    await mountView({
+        type: "form",
+        resId: 1,
+        resIds: [1, 2],
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html" options="{'codeview': true}"/>
+            </form>`,
+    });
+
+    setSelectionInHtmlField();
+    insertText(htmlEditor, "Hello ");
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
+
+    // Switch to code view
+    const node = queryOne(".odoo-editor-editable p");
+    setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
+    await waitFor(".o-we-toolbar");
+    await contains(".o-we-toolbar button[name='codeview']").click();
+    expect("[name='txt'] textarea").toHaveValue("<p>Hello first</p>");
+
+    await contains("[name='txt'] textarea").edit("<p>Yop</p>");
+    expect("[name='txt'] textarea").toHaveValue("<p>Yop</p>");
+
+    // Switch to editor
+    await contains(".o_codeview_btn").click();
+    expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p> Yop </p>");
 });
 
 describe("sandbox", () => {

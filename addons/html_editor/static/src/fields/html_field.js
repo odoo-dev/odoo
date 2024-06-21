@@ -86,30 +86,29 @@ export class HtmlField extends Component {
         // @todo @phoenix maybe remove containsComplexHTML and alway use sandboxedPreview options
         return this.props.sandboxedPreview || this.state.containsComplexHTML;
     }
-
-    async updateValue() {
-        this.lastValue = this.state.showCodeView
-            ? this.codeViewRef.el.value
-            : this.editor.getContent();
-        await this.props.record.update({ [this.props.name]: this.lastValue });
-        this.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
+    async updateValue(value) {
+        this.lastValue = value;
         this.isDirty = false;
+        await this.props.record.update({ [this.props.name]: this.lastValue }).catch(() => {
+            this.isDirty = true;
+        });
+        this.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
     }
 
     async commitChanges({ urgent } = {}) {
         if (this.isDirty) {
             if (this.state.showCodeView) {
-                await this.updateValue();
+                await this.updateValue(this.codeViewRef.el.value);
                 return;
             }
 
             const savePendingImagesPromise = this.editor.shared.savePendingImages();
             if (urgent) {
-                await this.updateValue();
+                await this.updateValue(this.editor.getContent());
             }
             const isDirty = await savePendingImagesPromise;
             if (isDirty || !urgent) {
-                await this.updateValue();
+                await this.updateValue(this.editor.getContent());
             }
         }
     }
@@ -124,15 +123,11 @@ export class HtmlField extends Component {
     }
 
     onBlur() {
-        if (this.isDirty) {
-            return this.updateValue();
-        }
+        return this.commitChanges();
     }
 
     async toggleCodeView() {
-        if (this.state.showCodeView) {
-            await this.updateValue();
-        }
+        await this.commitChanges();
         this.state.showCodeView = !this.state.showCodeView;
     }
 
