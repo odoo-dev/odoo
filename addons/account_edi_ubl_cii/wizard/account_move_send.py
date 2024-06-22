@@ -235,9 +235,15 @@ class AccountMoveSend(models.TransientModel):
         if doc_type_code_vals['value']:
             doc_type_code_attrs = " ".join(f'{name}="{value}"' for name, value in doc_type_code_vals['attrs'].items())
             doc_type_node = f"<cbc:DocumentTypeCode {doc_type_code_attrs}>{doc_type_code_vals['value']}</cbc:DocumentTypeCode>"
+
+        if invoice.move_type == 'out_invoice':
+            doc_type = 'Invoice'
+        else:
+            doc_type = 'CreditNote'
+        
         to_inject = f'''
             <cac:AdditionalDocumentReference
-                xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                xmlns="urn:oasis:names:specification:ubl:schema:xsd:{doc_type}-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
                 <cbc:ID>{escape(filename)}</cbc:ID>
