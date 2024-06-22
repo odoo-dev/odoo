@@ -55,6 +55,8 @@ class L10nRoEdiDocument(models.Model):
             :return: dict of {'error': <str>|<bytes>} or {'content': <response.content>} from E-Factura
         """
         url = f"https://api.anaf.ro/test/FCTEL/rest/{endpoint}"
+        if not company.l10n_ro_edi_test_env:
+            url = f"https://api.anaf.ro/prod/FCTEL/rest/{endpoint}"
         headers = {'Content-Type': 'application/xml',
                    'Authorization': f'Bearer {company.l10n_ro_edi_access_token}'}
 
