@@ -147,6 +147,7 @@ class Wysiwygs extends Component {
         this.loadedPromise = new Promise((resolve) => {
             this.loadedResolver = resolve;
         });
+        this.lastStepId = 0;
     }
     getConfig({ peerId }) {
         const busService = {
@@ -249,6 +250,12 @@ class Wysiwygs extends Component {
                         id: 1,
                         fake_field: pool.lastRecordSaved,
                     };
+                },
+            });
+            patch(plugins["history"], {
+                generateId: () => {
+                    this.lastStepId++;
+                    return this.lastStepId.toString();
                 },
             });
 
@@ -979,7 +986,7 @@ describe("Stale detection & recovery", () => {
     });
 });
 describe("Disconnect & reconnect", () => {
-    test.todo("should sync history when disconnecting and reconnecting to internet", async () => {
+    test("should sync history when disconnecting and reconnecting to internet", async () => {
         const pool = await createPeers(["p1", "p2"]);
         const peers = pool.peers;
 
@@ -995,8 +1002,8 @@ describe("Disconnect & reconnect", () => {
             const selection = peer.document.getSelection();
             const pElement = peer.editor.editable.querySelector("p");
             const range = new Range();
-            range.setStart(pElement, 1);
-            range.setEnd(pElement, 1);
+            range.setStart(pElement.firstChild, 1);
+            range.setEnd(pElement.firstChild, 1);
             selection.removeAllRanges();
             selection.addRange(range);
         };
@@ -1045,10 +1052,10 @@ describe("Disconnect & reconnect", () => {
         await peers.p1.openDataChannel(peers.p2);
         await p1PromiseForMissingStep;
 
-        expect(peers.p1.getValue()).toBe(`<p>ac[]eb</p><p>d</p><p>f</p>`, {
+        expect(peers.p1.getValue()).toBe(`<p>ac[]b</p><p>f</p><p>d</p>`, {
             message: "p1 should have the value merged with p2",
         });
-        expect(peers.p2.getValue()).toBe(`<p>ace[]b</p><p>d</p><p>f</p>`, {
+        expect(peers.p2.getValue()).toBe(`<p>ac[]b</p><p>f</p><p>d</p>`, {
             message: "p2 should have the value merged with p1",
         });
     });
