@@ -27,7 +27,6 @@ export class SelectMenu extends Component {
         searchPlaceholder: _t("Search..."),
         choices: [],
         groups: [],
-        addHiddenInput: false,
     };
 
     static props = {
@@ -77,16 +76,10 @@ export class SelectMenu extends Component {
         onInput: { type: Function, optional: true },
         onSelect: { type: Function, optional: true },
         slots: { type: Object, optional: true },
-        name: { type: String, optional: true },
-        addHiddenInput: { type: Boolean, optional: true },
+        element: { type: HTMLElement, optional: true },
         choiceFetchFunction: { type: Function, optional: true },
         disabled: { type: Boolean, optional: true },
     };
-
-    // TODO: MSH: We should have props named element, that element should get hidden
-    // and we will display SelectMenu, whatever value we set using onSelect we will set
-    // those value in that hidden input/select element which passed using props
-    // we will remove props addHiddenInput and instead we will use element props.
 
     static SCROLL_SETTINGS = {
         defaultCount: 500,
@@ -100,8 +93,11 @@ export class SelectMenu extends Component {
             displayedOptions: [],
             searchValue: "",
         });
+        if (this.props.element) {
+            this.props.element.style.display = "none";
+        }
+        this.buttonRef = useRef("buttonRef");
         this.inputRef = useRef("inputRef");
-        this.hiddenInputref = useRef("hiddenInputRef");
         this.selectedIds = [];
         this.menuRef = useChildRef();
         this.debouncedOnInput = useDebounced(
@@ -117,6 +113,16 @@ export class SelectMenu extends Component {
                 this.selectedChoice = this.getSelectedChoice(nextProps);
             }
         });
+        useEffect(
+            () => {
+                if (this.props.disabled) {
+                    this.buttonRef.el.setAttribute("disabled", "disabled");
+                } else {
+                    this.buttonRef.el.removeAttribute("disabled");
+                }
+            },
+            () => [this.props.disabled]
+        );
         useEffect(
             () => {
                 if (this.isOpen) {
@@ -239,7 +245,7 @@ export class SelectMenu extends Component {
                 this.removeIds(values);
             } else {
                 this.props.onSelect([...this.props.value, value]);
-                this.addSelectedIds(value);
+                this.addSelectedIds([...this.props.value, value]);
             }
         } else if (!this.selectedChoice || this.selectedChoice.value !== value) {
             this.props.onSelect(value);
@@ -248,25 +254,28 @@ export class SelectMenu extends Component {
     }
 
     addSelectedIds(value) {
-        if (this.props.addHiddenInput) {
-            this.props.choices.forEach((choice) => {
-                if (value === choice.value && !this.selectedIds.includes(choice.id)) {
-                    this.selectedIds.push(choice.id || choice.value);
-                }
-            });
-            this.hiddenInputref.el.setAttribute("value", this.selectedIds);
+        if (this.props.element) {
+            if (this.props.multiSelect) {
+                this.props.element.value = value.join(",");
+            } else {
+                this.props.element.value = value;
+            }
+            const changeEvent = new Event("change", { bubbles: true });
+            this.props.element.dispatchEvent(changeEvent);
         }
     }
 
     removeIds(values) {
-        if (this.props.addHiddenInput) {
+        if (this.props.element) {
             this.selectedIds = this.selectedIds.filter((id) => {
                 return this.props.choices.some((choice) => {
                     return choice.id === id && values.includes(choice.value);
                 });
             });
 
-            this.hiddenInputref.el.setAttribute("value", this.selectedIds.join(","));
+            this.props.element.value = this.selectedIds.join(",");
+            const changeEvent = new Event("change", { bubbles: true });
+            this.props.element.dispatchEvent(changeEvent);
         }
     }
 
