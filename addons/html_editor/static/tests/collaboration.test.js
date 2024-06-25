@@ -252,12 +252,9 @@ describe("steps whith no parent in history", () => {
                 peerInfos.c1.collaborationPlugin.onExternalHistorySteps([
                     peerInfos.c2.historyPlugin.steps[2],
                 ]);
+                // The step 1 will be retreived through `HISTORY_MISSING_PARENT_STEP`
                 peerInfos.c3.collaborationPlugin.onExternalHistorySteps([
                     peerInfos.c2.historyPlugin.steps[2],
-                ]);
-                // receive step 1 after step 2
-                peerInfos.c3.collaborationPlugin.onExternalHistorySteps([
-                    peerInfos.c1.historyPlugin.steps[1],
                 ]);
                 validateSameHistory(peerInfos);
             },
