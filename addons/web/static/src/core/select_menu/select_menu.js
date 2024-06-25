@@ -80,7 +80,13 @@ export class SelectMenu extends Component {
         name: { type: String, optional: true },
         addHiddenInput: { type: Boolean, optional: true },
         choiceFetchFunction: { type: Function, optional: true },
+        disabled: { type: Boolean, optional: true },
     };
+
+    // TODO: MSH: We should have props named element, that element should get hidden
+    // and we will display SelectMenu, whatever value we set using onSelect we will set
+    // those value in that hidden input/select element which passed using props
+    // we will remove props addHiddenInput and instead we will use element props.
 
     static SCROLL_SETTINGS = {
         defaultCount: 500,
