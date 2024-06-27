@@ -6,6 +6,7 @@ import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_s
 import { counter } from "./counter";
 import { card } from "./card";
 import { useService } from "@web/core/utils/hooks";
+import { localization } from "@web/core/l10n/localization";
 
 const testHtml = `Hello Phoenix editor!
 <p>this is a paragraph</p>
@@ -141,7 +142,8 @@ export class Playground extends Component {
                     collaborationResId: 1,
                 },
                 peerId: this.generateId(),
-            }
+            },
+            direction: localization.direction,
         };
     }
     generateId() {

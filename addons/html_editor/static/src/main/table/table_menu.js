@@ -33,31 +33,31 @@ export class TableMenu extends Component {
     }
 
     colItems() {
-        const beforeLabel = this.props.direction === "ltr" ? "left" : "right";
-        const afterLabel = this.props.direction === "ltr" ? "right" : "left";
+        const beforeLabel = this.props.direction === "ltr" ? _t("left") : _t("right");
+        const afterLabel = this.props.direction === "ltr" ? _t("right") : _t("left");
         return [
             !this.isFirst && {
                 name: "move_left",
                 icon: "fa-chevron-left disabled",
-                text: _t(`Move ${beforeLabel}`),
+                text: _t("Move %s", beforeLabel),
                 action: this.moveColumn.bind(this, "left"),
             },
             !this.isLast && {
                 name: "move_right",
                 icon: "fa-chevron-right",
-                text: _t(`Move ${afterLabel}`),
+                text: _t("Move %s", afterLabel),
                 action: this.moveColumn.bind(this, "right"),
             },
             {
                 name: "insert_left",
                 icon: "fa-plus",
-                text: _t(`Insert ${beforeLabel}`),
+                text: _t("Insert %s", beforeLabel),
                 action: this.insertColumn.bind(this, "before"),
             },
             {
                 name: "insert_right",
                 icon: "fa-plus",
-                text: _t(`Insert ${afterLabel}`),
+                text: _t("Insert %s", afterLabel),
                 action: this.insertColumn.bind(this, "after"),
             },
             {
