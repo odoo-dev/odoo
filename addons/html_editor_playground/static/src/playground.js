@@ -2,7 +2,9 @@ import { Component, onWillStart, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { loadBundle } from "@web/core/assets";
+import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS, CORE_PLUGINS, EXTRA_PLUGINS } from "@html_editor/plugin_sets";
+import { parseHTML } from "@html_editor/utils/html";
 import { counter } from "./counter";
 import { card } from "./card";
 import { useService } from "@web/core/utils/hooks";
@@ -52,6 +54,54 @@ const testHtml = `Hello Phoenix editor!
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 </p>
 `;
+
+class PlayGroundEmbeddedComponentPlugin extends Plugin {
+    static dependencies = ["dom", "selection"];
+    static resources = (p) => ({
+        powerboxCommands: [
+            {
+                category: "playground",
+                name: "card",
+                description: "it's a card",
+                fontawesome: "fa-id-card",
+                action: () => {
+                    p.addCard();
+                },
+            },
+            {
+                category: "playground",
+                name: "counter",
+                description: "it's a counter",
+                fontawesome: "fa-calendar",
+                action: () => {
+                    p.addCounter();
+                },
+            },
+        ],
+        powerboxCategory: { id: "playground", name: "Playground", sequence: 777 },
+    });
+
+    addCounter() {
+        this.shared.domInsert(
+            parseHTML(this.document, `<span data-embedded="counter" data-count="1"/>`)
+        );
+        this.dispatch("ADD_STEP");
+    }
+
+    addCard() {
+        this.shared.domInsert(
+            parseHTML(
+                this.document,
+                `<div data-embedded="card" data-title="Some Title">
+                    <p>Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>`
+            )
+        );
+        this.dispatch("ADD_STEP");
+    }
+}
+
+EXTRA_PLUGINS.push(PlayGroundEmbeddedComponentPlugin);
 
 const PluginSets = {
     core: CORE_PLUGINS,
