@@ -99,21 +99,6 @@ export class Navbar extends Component {
         this.hardwareProxy.openCashbox(_t("Cash in / out"));
         this.dialog.add(CashMovePopup);
     }
-    async onClickBackButton() {
-        if (this.pos.mainScreen.component === TicketScreen) {
-            if (this.pos.ticket_screen_mobile_pane == "left") {
-                this.pos.closeScreen();
-            } else {
-                this.pos.ticket_screen_mobile_pane = "left";
-            }
-        } else if (
-            this.pos.mobile_pane == "left" ||
-            this.pos.mainScreen.component === PaymentScreen
-        ) {
-            this.pos.mobile_pane = "right";
-            this.pos.showScreen("ProductScreen");
-        }
-    }
 
     get orderCount() {
         return this.pos.get_open_orders().length;
