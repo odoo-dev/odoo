@@ -19,6 +19,10 @@
                                 </div>
                             </div>
                             <t t-if="!line.payment_status or !['done', 'reversed', 'waitingCard', 'waitingCapture'].includes(line.payment_status)">
+                                <button t-if="ui.isSmall" class="btn btn-link mx-2 px-3"
+                                aria-label="Edit" title="Edit" t-on-click="() => this.selectLine(line)">
+                                    <i class="fa fa-2x fa-edit" />
+                                </button>
                                 <button class="delete-button btn btn-link mx-2 px-3"
                                     t-on-click="() => this.props.deleteLine(line.uuid)"
                                     aria-label="Delete" title="Delete">

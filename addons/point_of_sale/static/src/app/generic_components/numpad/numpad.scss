@@ -1,3 +1,29 @@
 .max-width-325px {
   max-width: 325px;
 }
+
+.numpad {
+  grid-template-columns: repeat(4, 1fr);
+
+  .numpad-button:nth-child(4n) {
+    margin-left: map-get($spacers, 2);
+  }
+}
+
+.numpad-button {
+  @include media-breakpoint-down(xl) {
+    padding: 0;
+  }
+
+  &:nth-child(4n) {
+    margin-left: map-get($spacers, 2);
+  }
+}
+
+.numpad-light {
+  grid-template-columns: repeat(3, 1fr);
+  
+  .numpad-button:nth-child(4n) {
+    margin-left: 0;
+  }
+}

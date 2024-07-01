@@ -407,7 +407,7 @@ export class PosStore extends Reactive {
     get productListViewMode() {
         const viewMode = this.productListView && this.ui.isSmall ? this.productListView : "grid";
         if (viewMode === "grid") {
-            return "d-grid gap-1";
+            return "d-grid gap-2";
         } else {
             return "";
         }
