@@ -31,14 +31,15 @@ export class ListContainer extends Component {
         slots: { type: Object },
     };
     static template = xml`
-            <div t-ref="container" class="d-flex overflow-hidden" style="gap: 0.5rem;">
+            <div t-ref="container" class="d-flex gap-1 overflow-x-auto">
                 <t t-if="!ui.isSmall" t-foreach="props.items" t-as="item" t-key="item_index">
                     <t t-slot="default" item="item"/>
                 </t>
             </div>
-            <button t-if="(isLarger() or ui.isSmall) and props.items.length" t-on-click="toggle"
-                class="btn btn-secondary ms-2"
-                t-attf-class="fa {{popover.isOpen ? 'fa-caret-up' : 'fa-caret-down'}}"/>
+            <button t-if="ui.isSmall and props.items.length" t-on-click="toggle"
+                class="btn btn-secondary btn-lg">
+                <i t-attf-class="fa fa-fw {{popover.isOpen ? 'fa-caret-up' : 'fa-caret-down'}}"/>
+            </button>
     `;
     setup() {
         this.isLarger = useIsChildLarger("container");

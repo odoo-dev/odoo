@@ -1,3 +1,13 @@
+.left-content {
+  width: $left-pane-width;
+  min-width: $left-pane-width;
+
+  @include media-breakpoint-down(xl) {
+      width: $left-pane-width-tablet;
+      min-width: $left-pane-width-tablet;
+  }
+}
+
 .payment-summary {
   padding-inline: 150px;
 }
@@ -20,7 +30,15 @@
 }
 
 @for $size from 1 through length($o-colors) {
-  .btn.o_colorlist_item_color_transparent_#{$size}:hover {
-    filter: brightness(90%);
+  .btn.o_colorlist_item_color_transparent_#{$size - 1} {
+    border: none;
+    
+    &:hover {
+      filter: brightness(98%);
+    }
+
+    &:active {
+      border: $border-width solid nth($o-colors, $size);
+    }
   }
 }
