@@ -71,6 +71,8 @@ export class FloorScreen extends Component {
             selectedTableIds: [],
             isColorPicker: false,
             potentialLink: null,
+            isFloorColorPicker: false,
+            isTableColorPicker: false,
         });
         this.floorMapRef = useRef("floor-map-ref");
         this.floorScrollBox = useRef("floor-map-scroll");
@@ -609,29 +611,28 @@ export class FloorScreen extends Component {
             this.state.selectedTableIds = [newTable.id];
         }
     }
-    async duplicateTableOrFloor() {
-        if (this.selectedTables.length == 0) {
-            const floor = this.activeFloor;
-            const tables = this.activeFloor.table_ids;
-            const newFloorName = floor.name + " (copy)";
-            const copyFloor = await this.pos.data.create("restaurant.floor", [
-                {
-                    name: newFloorName,
-                    background_color: "#ACADAD",
-                    pos_config_ids: [this.pos.config.id],
-                },
-            ]);
+    async duplicateFloor() {
+        const floor = this.activeFloor;
+        const tables = this.activeFloor.table_ids;
+        const newFloorName = floor.name + " (copy)";
+        const copyFloor = await this.pos.data.create("restaurant.floor", [
+            {
+                name: newFloorName,
+                background_color: "#ACADAD",
+                pos_config_ids: [this.pos.config.id],
+            },
+        ]);
 
-            this.selectFloor(copyFloor[0]);
-            this.pos.isEditMode = true;
+        this.selectFloor(copyFloor[0]);
+        this.pos.isEditMode = true;
 
-            for (const table of tables) {
-                const tableSerialized = table.serialize({ orm: true });
-                tableSerialized.floor_id = copyFloor[0].id;
-                await this.createTableFromRaw(tableSerialized);
-            }
-            return;
+        for (const table of tables) {
+            const tableSerialized = table.serialize({ orm: true });
+            tableSerialized.floor_id = copyFloor[0].id;
+            await this.createTableFromRaw(tableSerialized);
         }
+    }
+    async duplicateTable() {
         const selectedTables = this.selectedTables;
         this.state.selectedTableIds = [];
 
@@ -642,36 +643,40 @@ export class FloorScreen extends Component {
             }
         }
     }
-    async rename() {
+    async renameFloor() {
+        this.dialog.add(
+            TextInputPopup,
+            {
+                startingValue: this.activeFloor.name,
+                title: _t("Floor Name ?"),
+                getPayload: (newName) => {
+                    if (newName !== this.activeFloor.name) {
+                        this.activeFloor.name = newName;
+                        this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
+                            name: newName,
+                        });
+                    }
+                },
+            }
+        );
+    }
+    async renameTable() {
         if (this.selectedTables.length > 1) {
             return;
         }
         this.dialog.add(
             TextInputPopup,
-            this.selectedTables.length === 1
-                ? {
-                      startingValue: this.selectedTables[0].name,
-                      title: _t("Table Name ?"),
-                      getPayload: (newName) => {
-                          if (newName !== this.selectedTables[0].name) {
-                              this.pos.data.write("restaurant.table", [this.selectedTables[0].id], {
-                                  name: newName,
-                              });
-                          }
-                      },
-                  }
-                : {
-                      startingValue: this.activeFloor.name,
-                      title: _t("Floor Name ?"),
-                      getPayload: (newName) => {
-                          if (newName !== this.activeFloor.name) {
-                              this.activeFloor.name = newName;
-                              this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
-                                  name: newName,
-                              });
-                          }
-                      },
-                  }
+            {
+                startingValue: this.selectedTables[0].name,
+                title: _t("Table Name ?"),
+                getPayload: (newName) => {
+                    if (newName !== this.selectedTables[0].name) {
+                        this.pos.data.write("restaurant.table", [this.selectedTables[0].id], {
+                            name: newName,
+                        });
+                    }
+                },
+            }
         );
     }
     async changeSeatsNum() {
@@ -698,18 +703,33 @@ export class FloorScreen extends Component {
             this.pos.data.write("restaurant.table", [table.id], { shape: form });
         }
     }
+
     setColor(color) {
+        if (this.state.isFloorColorPicker) {
+            this.setFloorColor(color);
+        } else if (this.state.isTableColorPicker) {
+            this.setTableColor(color);
+        }
+        this.state.isColorPicker = true;
+    }
+
+    setFloorColor(color) {
+        this.activeFloor.background_color = color;
+        this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
+            background_color: color,
+            floor_background_image: false,
+        });
+        this.state.isFloorColorPicker = false;
+        this.state.isColorPicker = false;
+    }
+
+    setTableColor(color) {
         if (this.selectedTables.length > 0) {
             for (const table of this.selectedTables) {
                 this.pos.data.write("restaurant.table", [table.id], { color: color });
             }
-        } else {
-            this.activeFloor.background_color = color;
-            this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
-                background_color: color,
-                floor_background_image: false,
-            });
         }
+        this.state.isTableColorPicker = false;
         this.state.isColorPicker = false;
     }
     _getColors() {
@@ -737,56 +757,55 @@ export class FloorScreen extends Component {
     getLighterShade(color) {
         return this.formatColor([...this._getColors()[color], 0.75]);
     }
-    async deleteFloorOrTable() {
-        if (this.selectedTables.length == 0) {
-            const confirmed = await ask(this.dialog, {
-                title: `Removing floor ${this.activeFloor.name}`,
-                body: sprintf(
-                    _t("Removing a floor cannot be undone. Do you still want to remove %s?"),
-                    this.activeFloor.name
+    async deleteFloor() {
+        const confirmed = await ask(this.dialog, {
+            title: `Removing floor ${this.activeFloor.name}`,
+            body: sprintf(
+                _t("Removing a floor cannot be undone. Do you still want to remove %s?"),
+                this.activeFloor.name
+            ),
+        });
+        if (!confirmed) {
+            return;
+        }
+        const activeFloor = this.activeFloor;
+        try {
+            await this.pos.data.call("restaurant.floor", "deactivate_floor", [
+                activeFloor.id,
+                this.pos.session.id,
+            ]);
+        } catch {
+            this.dialog.add(AlertDialog, {
+                title: _t("Delete Error"),
+                body: _t(
+                    "You cannot delete a floor with orders still in draft for this floor."
                 ),
             });
-            if (!confirmed) {
-                return;
-            }
-            const activeFloor = this.activeFloor;
-            try {
-                await this.pos.data.call("restaurant.floor", "deactivate_floor", [
-                    activeFloor.id,
-                    this.pos.session.id,
-                ]);
-            } catch {
-                this.dialog.add(AlertDialog, {
-                    title: _t("Delete Error"),
-                    body: _t(
-                        "You cannot delete a floor with orders still in draft for this floor."
-                    ),
-                });
-                return;
-            }
-
-            const orderList = [...this.pos.get_open_orders()];
-            for (const order of orderList) {
-                if (activeFloor.table_ids.includes(order.tableId)) {
-                    this.pos.removeOrder(order, false);
-                }
-            }
-
-            for (const table_id of activeFloor.table_ids) {
-                table_id.delete();
-            }
-
-            activeFloor.delete();
-
-            if (this.pos.models["restaurant.floor"].length > 0) {
-                this.selectFloor(this.pos.models["restaurant.floor"].getAll()[0]);
-            } else {
-                this.pos.isEditMode = false;
-                this.pos.floorPlanStyle = "default";
-            }
             return;
         }
 
+        const orderList = [...this.pos.get_open_orders()];
+        for (const order of orderList) {
+            if (activeFloor.table_ids.includes(order.tableId)) {
+                this.pos.removeOrder(order, false);
+            }
+        }
+
+        for (const table_id of activeFloor.table_ids) {
+            table_id.delete();
+        }
+
+        activeFloor.delete();
+
+        if (this.pos.models["restaurant.floor"].length > 0) {
+            this.selectFloor(this.pos.models["restaurant.floor"].getAll()[0]);
+        } else {
+            this.pos.isEditMode = false;
+            this.pos.floorPlanStyle = "default";
+        }
+        return;
+    }
+    async deleteTable() {
         const confirmed = await ask(this.dialog, {
             title: _t("Are you sure?"),
             body: _t("Removing a table cannot be undone"),
@@ -905,6 +924,15 @@ export class FloorScreen extends Component {
         }
 
         return table.uiState.orderCount + orderCount.size || 0;
+    }
+    toggleColorPicker(target) {
+        if (target === 'floor') {
+            this.state.isFloorColorPicker = !this.state.isFloorColorPicker;
+            this.state.isTableColorPicker = false;
+        } else if (target === 'table') {
+            this.state.isTableColorPicker = !this.state.isTableColorPicker;
+            this.state.isFloorColorPicker = false;
+        }
     }
 }
 
