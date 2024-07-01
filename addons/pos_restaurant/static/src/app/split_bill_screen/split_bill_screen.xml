@@ -5,8 +5,8 @@
         <div class="splitbill-screen screen h-100 bg-100">
             <div class="contents d-flex flex-column flex-nowrap h-100 my-0 mx-auto">
                 <div class="top-content d-flex align-items-center p-2 border-bottom text-center">
-                    <button class="button back back-button btn btn-lg btn-outline-primary" t-on-click="back">
-                        <i class="fa fa-angle-double-left me-2"></i>
+                    <button class="button back back-button btn btn-lg btn-secondary lh-lg" t-on-click="back">
+                        <i class="oi oi-chevron-left me-2"></i>
                         <span>Back</span>
                     </button>
                     <div class="top-content-center flex-grow-1">
@@ -15,12 +15,12 @@
                 </div>
 
                 <div class="main d-flex flex-nowrap flex-grow-1 overflow-hidden">
-                    <div class="flex-grow-1 mw-50 m-3 bg-view border rounded w-50 overflow-auto">
+                    <div class="flex-grow-1 mw-50 m-2 bg-view border rounded w-50 overflow-auto">
                         <OrderWidget lines="orderlines" t-slot-scope="scope">
                             <t t-set="line" t-value="scope.line" />
                             <Orderline line="getLineData(line)"
                                 t-on-click="() => this.onClickLine(line)"
-                                class="{'selected text-bg-primary': qtyTracker[line.uuid] and qtyTracker[line.uuid] !== 0}" />
+                                class="{'selected active': qtyTracker[line.uuid] and qtyTracker[line.uuid] !== 0}" />
                         </OrderWidget>
                     </div>
                     <div class="controls border-start flex-column flex-nowrap flex-grow-1 flex-shrink-1 flex-basis-0">
@@ -30,7 +30,7 @@
                             </span>
                         </div>
                         <div class="pay-button m-3">
-                            <div class="button btn btn-lg btn-secondary py-3 w-100" t-on-click="createSplittedOrder">
+                            <div class="button btn btn-lg btn-secondary py-5 w-100" t-on-click="createSplittedOrder">
                                 <i class="oi oi-chevron-right me-2" />
                                 <span>Split Order</span>
                             </div>
