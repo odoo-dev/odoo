@@ -1,3 +1,13 @@
+.left-content {
+  width: $left-pane-width;
+  min-width: $left-pane-width;
+
+  @include media-breakpoint-down(xl) {
+      width: $left-pane-width-tablet;
+      min-width: $left-pane-width-tablet;
+  }
+}
+
 .payment-summary {
   padding-inline: 150px;
 }

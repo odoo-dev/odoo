@@ -15,7 +15,7 @@
                         callback.bind="handleInputChange"
                         autofocus="true"
                         placeholder="inputPlaceholder"/>
-                    <div class="button icon btn btn-secondary" t-on-click="openDetailsPopup">
+                    <div class="button icon btn btn-secondary btn-lg lh-lg" t-on-click="openDetailsPopup">
                         <i class="fa fa-money fa-2x" role="img" title="Open the money details popup"/>
                     </div>
                 </div>

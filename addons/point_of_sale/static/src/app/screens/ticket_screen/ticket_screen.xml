@@ -4,7 +4,7 @@
     <t t-name="point_of_sale.TicketScreen">
         <div class="ticket-screen screen h-100 bg-100">
             <div class="screen-full-width d-flex w-100 h-100">
-                <div t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'left'" class="rightpane pane-border d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-300 overflow-y-auto">
+                <div t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'left'" class="rightpane pane-border d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-200 overflow-y-auto">
                     <div class="controls d-flex align-items-center justify-content-between mt-1 mt-lg-0 p-2 bg-400">
                         <t t-if="!ui.isSmall">
                             <div class="buttons d-flex gap-2">
@@ -119,19 +119,19 @@
                     </div>
                     <div class="switchpane d-flex w-100" t-if="ui.isSmall">
                         <t t-set="_selectedSyncedOrder" t-value="getSelectedOrder()" />
-                        <button class="btn-switchpane load-order-button primary btn btn-primary rounded-0 w-50 fw-bolder py-3" t-if="!isOrderSynced" t-on-click="() => this._setOrder(_selectedSyncedOrder)">
+                        <button class="btn-switchpane load-order-button primary btn btn-primary btn-lg w-50 py-3" t-if="!isOrderSynced" t-on-click="() => this._setOrder(_selectedSyncedOrder)">
                             <span class="fs-1 d-block">Load Order</span>
                         </button>
-                        <button class="btn-switchpane flex-fill btn rounded-0 fw-bolder secondary review-button" t-att-class="{'btn-primary': isOrderSynced, 'btn-secondary': !isOrderSynced}" t-on-click="switchPane">
+                        <button class="btn-switchpane flex-fill btn btn-lg secondary review-button" t-att-class="{'btn-primary': isOrderSynced, 'btn-secondary': !isOrderSynced}" t-on-click="switchPane">
                             <span class="fs-1 d-block">Review</span>
                         </button>
                     </div>
                 </div>
-                <div class="leftpane d-flex flex-column flex-grow-1 w-100 h-100 h-lg-100 bg-200" t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'right'">
+                <div class="leftpane d-flex flex-column flex-grow-1 gap-2 w-100 h-100 h-lg-100 bg-200 p-2" t-if="!ui.isSmall || pos.ticket_screen_mobile_pane === 'right'">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedOrder()" />
                     <t t-set="_selectedOrderlineId" t-value="getSelectedOrderlineId()" />
                     <t t-if="_selectedSyncedOrder?.get_orderlines()?.length" > 
-                        <div t-if="isOrderSynced" t-att-class="{ 'highlight text-danger': !getHasItemsToRefund() }" class="py-2 px-3 border-bottom" >
+                        <div t-if="isOrderSynced" t-att-class="{ 'highlight text-danger': !getHasItemsToRefund() }" class="py-2 px-3 rounded-3 bg-100 text-center">
                             Select the product(s) to refund and set the quantity
                         </div>
                         <OrderWidget lines="_selectedSyncedOrder.lines" t-slot-scope="scope"
@@ -162,26 +162,26 @@
                                 </li>
                             </Orderline>
                         </OrderWidget>
-                        <div class="pads border-top">
+                        <div class="pads">
                             <t t-if="isOrderSynced">
-                                <div class="control-buttons d-flex flex-wrap border-bottom overflow-hidden bg-300">
+                                <div class="control-buttons d-flex gap-2 pb-2">
                                     <InvoiceButton
                                         onInvoiceOrder.bind="onInvoiceOrder"
                                         order="_selectedSyncedOrder" />
                                     <ReprintReceiptButton order="_selectedSyncedOrder" />
                                 </div>
-                                <div class="subpads d-flex">
+                                <div class="subpads d-flex flex-column">
+                                    <Numpad buttons="getNumpadButtons()" class="'numpad mb-2'"/>
                                     <ActionpadWidget
                                         partner="getSelectedOrder()?.get_partner()"
                                         actionName="constructor.numpadActionName"
                                         actionType="'refund'"
                                         actionToTrigger.bind="onDoRefund"
                                         isActionButtonHighlighted="getHasItemsToRefund()" />
-                                    <Numpad buttons="getNumpadButtons()" class="'max-width-325px'"/>
                                 </div>
                             </t>
                             <div t-else="" class="pads border-top" >
-                                <button class="button validation load-order-button w-100 btn btn-lg btn-primary rounded-0 fw-bolder py-3" t-on-click="() => this._setOrder(_selectedSyncedOrder)">
+                                <button class="button validation load-order-button w-100 btn btn-lg btn-primary py-3" t-on-click="() => this._setOrder(_selectedSyncedOrder)">
                                     <span class="fs-1 d-block">Load Order</span>
                                 </button>
                             </div>

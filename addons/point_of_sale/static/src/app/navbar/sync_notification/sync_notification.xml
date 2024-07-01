@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="point_of_sale.SyncNotification">
-        <div class="oe_status btn btn-light rounded-0" t-on-click="onClick">
+        <div class="oe_status btn btn-secondary btn-lg lh-lg" t-on-click="onClick">
             <span t-if="sync.pending > 0" class="js_msg">
                 <t t-esc="sync.pending" />
                 <span> </span>

@@ -115,7 +115,7 @@ export class ProductScreen extends Component {
     getNumpadButtons() {
         return getButtons(DEFAULT_LAST_ROW, [
             { value: "quantity", text: _t("Qty") },
-            { value: "discount", text: _t("% Disc"), disabled: !this.pos.config.manual_discount },
+            { value: "discount", text: _t("% "), disabled: !this.pos.config.manual_discount },
             {
                 value: "price",
                 text: _t("Price"),
@@ -124,7 +124,7 @@ export class ProductScreen extends Component {
             BACKSPACE,
         ]).map((button) => ({
             ...button,
-            class: this.pos.numpadMode === button.value ? "active border-primary" : "",
+            class: this.pos.numpadMode === button.value ? "active" : "",
         }));
     }
     onNumpadClick(buttonValue) {
