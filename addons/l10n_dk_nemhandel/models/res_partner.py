@@ -28,7 +28,8 @@ class ResPartner(models.Model):
     l10n_dk_nemhandel_verification_label = fields.Selection(
         selection=[
             ('not_verified', 'Not verified yet'),
-            ('not_valid', 'Not valid'),
+            ('not_valid', 'Not valid'),  # does not exist on Peppol at all
+            ('not_valid_format', 'Cannot receive this format'),  # registered on Peppol but cannot receive the selected document type
             ('valid', 'Valid'),
         ],
         string='Nemhandel endpoint validity label TODO',
@@ -41,7 +42,7 @@ class ResPartner(models.Model):
         help="TODO",
         tracking=True,
         selection=[
-            ('EAN/GLN', "EAN/GLN"),
+            ('EAN/GLN', "GLN"),
             ('CVR', "CVR"),
             ('IBAN', "IBAN"),
             ('SE', "SE"),

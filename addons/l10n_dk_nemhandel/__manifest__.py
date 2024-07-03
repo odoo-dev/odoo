@@ -5,7 +5,6 @@
         - Send and receive documents via Nemhandel network in OIOUBL 2.1 format
     """,
     'category': 'Accounting/Localizations/EDI',
-    'countries': ['dk'],
     'version': '1.0',
     'depends': [
         'account_edi_proxy_client',

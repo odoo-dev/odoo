@@ -45,8 +45,8 @@ class AccountEdiProxyClientUser(models.Model):
         urls = super()._get_proxy_urls()
         # TODO
         urls['l10n_dk_nemhandel'] = {
-            'prod': 'https://nemhandel.api.odoo.com',
-            'test': 'https://nemhandel.test.odoo.com',
+            'prod': 'http://127.0.0.1:8079/',
+            'test': 'http://127.0.0.1:8079/',
             'demo': 'demo',
         }
         return urls

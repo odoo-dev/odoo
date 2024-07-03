@@ -1,4 +1,4 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+import requests
 
 from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import UserError, ValidationError
@@ -117,6 +117,70 @@ class ResConfigSettings(models.TransientModel):
         company = self.company_id
         edi_proxy_client = self.env['account_edi_proxy_client.user']
         edi_identification = edi_proxy_client._get_proxy_identification(company, 'l10n_dk_nemhandel')
+
+        c = ('/home/odoo/Documents/l10n_dk/temp.pem', '/home/odoo/Documents/l10n_dk/private.pem')
+        headers = {'Accept': 'application/json'}
+        a = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/list/keytypes', cert=c, headers=headers).json()
+
+        participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
+
+        b = [hey.get('OwnerService').get('ProfilingId') for hey in participant_json.get('ParticipantBindings', [{}])]
+
+
+        agreement_response = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business/agreement', cert=c, headers=headers, json={})
+
+        # DocumentTypeID: 5 Invoice 5 CreditNote
+        # For profiles, id 3 = "Simple invoicing without prior order. Customer can receive Invoice, Credit note and Reminder. Supplier can receive Receipt (negative only)."
+        # roles: 1 Customer, 2 Supplier
+        # payload_json_profiling = {
+        #     'Id': 0,  # 0 => creation. Else, we update
+        #     'OwnerBusinessKey': self.l10n_dk_nemhandel_identifier_value,
+        #     'NetworkTypeId': "1",
+        #     'Name': "First Profile Test",
+        #     'ProfileRoles': [
+        #         {
+        #             'Id': "0",
+        #             'DocumentStandardId': "2",
+        #             'ProfileId': "3",
+        #             'RoleId': "1"
+        #         },
+        #
+        #     ]
+        #
+        # }
+        # create_profiling = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling', cert=c, headers=headers, json=payload_json_profiling)
+        # profiling = create_profiling.headers.get('Location')
+        profiling_id = '150819'  # create_profiling.headers.get('Location').split('/')[-1]
+
+        # profiles_json = requests.get(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling/{b[1]}', cert=c, headers=headers).json()
+        # base_url = "https://www.test.odoo.com/"
+        # payload_json_service = {
+        #     'Id': 0,  # 0 => creation. Else, we update
+        #     'OwnerBusinessKey': self.l10n_dk_nemhandel_identifier_value,
+        #     'NetworkTypeId': '1',
+        #     'EndpointReference': base_url + "/api/nemhandel/1/as4",
+        #
+        # }
+        #
+        # create_service = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling', cert=c, headers=headers, json=payload_json_service)
+
+
+
+        #
+        #
+        #
+        # raise UserError("meuh")
+        # payload_json = {
+        #     "ID": 0,
+        #     "OwnerBusinessKey": self.l10n_dk_nemhandel_identifier_value,
+        #     "Key": self.l10n_dk_nemhandel_identifier_value,
+        #     "KeyType": self.l10n_dk_nemhandel_identifier_type,
+        #     "UnitName": "Testeuh",
+        #     "UnitCVR": self.l10n_dk_nemhandel_identifier_value,
+        # }
+        # add_participant = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant', cert=c, headers=headers, json=payload_json)
+        #
+        # raise UserError("meuh")
 
         edi_user = edi_proxy_client.sudo()._register_proxy_user(company, 'l10n_dk_nemhandel', self.l10n_dk_nemhandel_edi_mode)
         self.l10n_dk_nemhandel_proxy_state = 'not_verified'
