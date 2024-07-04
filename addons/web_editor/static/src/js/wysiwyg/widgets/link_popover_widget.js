@@ -274,6 +274,11 @@ const LinkPopoverWidget = Widget.extend({
      */
     _onEditLinkClick(ev) {
         ev.preventDefault();
+        // to disable this function for classes with "text-muted" class.
+        if (ev.currentTarget.classList.contains("text-muted")) {
+            ev.stopImmediatePropagation();
+            return;
+        }
         this.options.wysiwyg.toggleLinkTools({
             forceOpen: true,
             link: this.$target[0],
@@ -289,6 +294,11 @@ const LinkPopoverWidget = Widget.extend({
      */
     _onRemoveLinkClick(ev) {
         ev.preventDefault();
+        // to disable this function for classes with "text-muted" class.
+        if (ev.currentTarget.classList.contains("text-muted")) {
+            ev.stopImmediatePropagation();
+            return;
+        }
         this.options.wysiwyg.removeLink();
         ev.stopImmediatePropagation();
         this.popover.hide();
