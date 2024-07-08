@@ -180,12 +180,15 @@ export class Store extends BaseStore {
         return tab === "chat" ? ["chat", "group"] : [tab];
     }
 
-    handleClickOnLink(ev, thread) {
+    async handleClickOnLink(ev, thread) {
         const model = ev.target.dataset.oeModel;
         const id = Number(ev.target.dataset.oeId);
         if (ev.target.closest(".o_channel_redirect") && model && id) {
             ev.preventDefault();
             const thread = this.Thread.insert({ model, id });
+            if (!thread.is_pinned) {
+                await this.env.services["mail.thread"].fetchChannel(id);
+            }
             this.env.services["mail.thread"].open(thread);
             return true;
         } else if (ev.target.closest(".o_mail_redirect") && id) {

@@ -134,6 +134,6 @@ export class Activity extends Component {
      * @param {MouseEvent} ev
      */
     async onClick(ev) {
-        this.storeService.handleClickOnLink(ev, this.thread);
+        await this.storeService.handleClickOnLink(ev, this.thread);
     }
 }

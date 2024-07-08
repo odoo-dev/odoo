@@ -396,7 +396,7 @@ export class Message extends Component {
      * @param {MouseEvent} ev
      */
     async onClick(ev) {
-        if (this.store.handleClickOnLink(ev, this.props.thread)) {
+        if (await this.store.handleClickOnLink(ev, this.props.thread)) {
             return;
         }
         if (
