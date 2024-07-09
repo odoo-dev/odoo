@@ -252,6 +252,23 @@ describe("getTraversedNodes", () => {
             },
         });
     });
+
+    test("selection within table cells", async () => {
+        await testEditor({
+            contentBefore:
+                "<table><tbody><tr>" + "<td>abcd[e</td>" + "<td>f]g</td>" + "</tr></tbody></table>",
+            stepFunction: (editor) => {
+                const editable = editor.editable;
+                const tr = editable.firstChild.firstChild.firstChild;
+                const td1 = tr.firstChild;
+                const abcde = td1.firstChild;
+                const td2 = td1.nextSibling;
+                const fg = td2.firstChild;
+                const result = editor.shared.getTraversedNodes(editable);
+                expect(result).toEqual([td1, abcde, td2, fg]);
+            },
+        });
+    });
 });
 
 describe("ensureFocus", () => {
