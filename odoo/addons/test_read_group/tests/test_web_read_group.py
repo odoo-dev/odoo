@@ -927,13 +927,13 @@ class TestWebReadGroup(common.TransactionCase):
         """Test grouping by date part number (ex. month_number gives 1 for January)"""
         Model = self.env['test_read_group.fill_temporal']
         Model.create({})  # Falsy date
-        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 13:55:12'})  #  W4, M1, Q1
-        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 15:55:13'})  #  W4, M1, Q1
-        Model.create({'date': '2022-01-30', 'datetime': '2022-01-30 13:54:14'})  #  W4, M1, Q1
-        Model.create({'date': '2022-01-31', 'datetime': '2022-01-31 15:55:14'})  #  W5, M1, Q1
-        Model.create({'date': '2022-02-01', 'datetime': '2022-02-01 14:54:13'})  #  W5, M2, Q1
+        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 13:55:12'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-29', 'datetime': '2022-01-29 15:55:13'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-30', 'datetime': '2022-01-30 13:54:14'})  # W4, M1, Q1
+        Model.create({'date': '2022-01-31', 'datetime': '2022-01-31 15:55:14'})  # W5, M1, Q1
+        Model.create({'date': '2022-02-01', 'datetime': '2022-02-01 14:54:13'})  # W5, M2, Q1
         Model.create({'date': '2022-05-29', 'datetime': '2022-05-29 14:55:13'})  # W21, M5, Q2
-        Model.create({'date': '2023-01-29', 'datetime': '2023-01-29 15:55:13'})  #  W4, M1, Q1
+        Model.create({'date': '2023-01-29', 'datetime': '2023-01-29 15:55:13'})  # W4, M1, Q1
 
         result = Model.web_read_group([], ['datetime:second_number'], ['__count'])
         self.assertEqual(
