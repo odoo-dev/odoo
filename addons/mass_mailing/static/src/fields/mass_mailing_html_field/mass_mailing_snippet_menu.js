@@ -192,20 +192,19 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
      * @private
      */
     _onCodeViewBtnClick(ev) {
-        const $codeview = this.options.wysiwyg.$iframe.contents().find("textarea.o_codeview");
-        this.options.wysiwyg.odooEditor.observerUnactive();
-        $codeview.toggleClass("d-none");
-        this.options.wysiwyg.getEditable().toggleClass("d-none");
-        this.options.wysiwyg.odooEditor.observerActive();
-
-        if ($codeview.hasClass("d-none")) {
-            this.options.wysiwyg.setValue(this.options.getCodeViewValue($codeview[0]));
-            this.options.wysiwyg.odooEditor.sanitize();
-            this.options.wysiwyg.odooEditor.historyStep(true);
-        } else {
-            $codeview.val(this.options.wysiwyg.getValue());
-        }
-        this.activateSnippet(false);
+        // const $codeview = this.options.wysiwyg.$iframe.contents().find("textarea.o_codeview");
+        // this.options.wysiwyg.odooEditor.observerUnactive();
+        // $codeview.toggleClass("d-none");
+        // this.options.wysiwyg.getEditable().toggleClass("d-none");
+        // this.options.wysiwyg.odooEditor.observerActive();
+        // if ($codeview.hasClass("d-none")) {
+        //     this.options.wysiwyg.setValue(this.options.getCodeViewValue($codeview[0]));
+        //     this.options.wysiwyg.odooEditor.sanitize();
+        //     this.options.wysiwyg.odooEditor.historyStep(true);
+        // } else {
+        //     $codeview.val(this.options.wysiwyg.getValue());
+        // }
+        // this.activateSnippet(false);
     }
     /**
      * @private

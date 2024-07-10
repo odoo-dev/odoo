@@ -19,6 +19,7 @@ commandProviderRegistry.add("link dialog", {
             const wysiwyg = [...Wysiwyg.activeWysiwygs].find((wysiwyg) => {
                 return wysiwyg.isSelectionInEditable();
             });
+            // todo: adapt to phoenix editor
             const selection = wysiwyg && wysiwyg.odooEditor && wysiwyg.odooEditor.document.getSelection();
             const range = selection && selection.rangeCount && selection.getRangeAt(0);
             if (range) {

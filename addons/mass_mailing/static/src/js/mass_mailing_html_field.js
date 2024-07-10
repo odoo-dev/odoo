@@ -146,6 +146,7 @@ export class MassMailingHtmlField extends HtmlField {
             // Replace the body to only contain the target as we do not care for
             // other elements (e.g. sidebar, toolbar, ...)
             const clonedBody = clonedHtmlNode.querySelector('body');
+            // todo: we do not use iframetarget anymore, the editable is in the body
             const clonedIframeTarget = clonedHtmlNode.querySelector('#iframe_target');
             clonedBody.replaceChildren(clonedIframeTarget);
             clonedHtmlNode.querySelectorAll('script').forEach(script => script.remove()); // Remove scripts.
@@ -301,21 +302,21 @@ export class MassMailingHtmlField extends HtmlField {
             modelName: this.props.record.data.mailing_model_id[1] || '',
         }));
 
-        // Check if editable area is empty.
-        const $layout = this.wysiwyg.$iframeBody.find(".o_layout");
-        let $mailWrapper = $layout.children(".o_mail_wrapper");
-        let $mailWrapperContent = $mailWrapper.find('.o_mail_wrapper_td');
-        if (!$mailWrapperContent.length) {
-            $mailWrapperContent = $mailWrapper;
-        }
-        let value;
-        if ($mailWrapperContent.length > 0) {
-            value = $mailWrapperContent.html();
-        } else if ($layout.length) {
-            value = $layout.html();
-        } else {
-            value = this.wysiwyg.getValue();
-        }
+        // // Check if editable area is empty.
+        // const $layout = this.wysiwyg.$iframeBody.find(".o_layout");
+        // let $mailWrapper = $layout.children(".o_mail_wrapper");
+        // let $mailWrapperContent = $mailWrapper.find('.o_mail_wrapper_td');
+        // if (!$mailWrapperContent.length) {
+        //     $mailWrapperContent = $mailWrapper;
+        // }
+        // let value;
+        // if ($mailWrapperContent.length > 0) {
+        //     value = $mailWrapperContent.html();
+        // } else if ($layout.length) {
+        //     value = $layout.html();
+        // } else {
+        //     value = this.wysiwyg.getValue();
+        // }
         let blankEditable = "<p><br></p>";
         $themeSelectorNew.on('click', '.dropdown-item', async (e) => {
             e.preventDefault();
@@ -377,6 +378,7 @@ export class MassMailingHtmlField extends HtmlField {
         });
 
         // Clear any previous theme class before adding new one.
+        // todo: ensure we remove the classes from the body in case we add them ?
         this.wysiwyg.$iframeBody.closest('body').removeClass(this._themeClassNames);
         this.fieldConfig.selectedTheme = this._getSelectedTheme(themesParams);
         if (this.fieldConfig.selectedTheme) {
@@ -640,4 +642,4 @@ export const massMailingHtmlField = {
     fieldDependencies: [{ name: 'body_html', type: 'html', readonly: 'false' }],
 };
 
-registry.category("fields").add("mass_mailing_html", massMailingHtmlField);
+// registry.category("fields").add("mass_mailing_html", massMailingHtmlField);

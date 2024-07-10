@@ -682,6 +682,7 @@ export async function toInline($editable, options) {
     $editable.removeClass('odoo-editor-editable');
     const editable = $editable.get(0);
     const iframe = options.$iframe && options.$iframe.get(0);
+    // todo: adapt this code
     const wysiwyg = $editable.data('wysiwyg') || options.wysiwyg;
     const doc = editable.ownerDocument;
     let cssRules = wysiwyg && wysiwyg._rulesCache;

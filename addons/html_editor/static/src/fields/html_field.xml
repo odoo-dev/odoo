@@ -16,6 +16,7 @@
                     onLoad.bind="onEditorLoad"
                     contentClass="'note-editable'"
                     onBlur.bind="onBlur"
+                    t-props="this.wysiwygProps"
                     t-key="wysiwygKey"/>
             </t>
             <t t-if="isTranslatable">

@@ -1016,6 +1016,8 @@ var SnippetEditor = Widget.extend({
             // resizing the grid and the dropzone.
             self.dragState.dragHelperEl.remove();
             self.dragState.backgroundGridEl.remove();
+
+            // todo: use makeSavePoint
             self.options.wysiwyg.odooEditor.observerActive('dragAndDropMoveSnippet');
             gridUtils._resizeGrid(rowEl);
             self.options.wysiwyg.odooEditor.observerUnactive('dragAndDropMoveSnippet');
@@ -1058,7 +1060,7 @@ var SnippetEditor = Widget.extend({
     _onDragAndDropStart({ helper, addStyle }) {
         this.options.wysiwyg.odooEditor.observerUnactive('dragAndDropMoveSnippet');
         this.trigger_up('drag_and_drop_start');
-        this.options.wysiwyg.odooEditor.automaticStepUnactive();
+        // this.options.wysiwyg.odooEditor.automaticStepUnactive();
         var self = this;
         this.dragState = {};
         const rowEl = this.$target[0].parentNode;
@@ -1943,7 +1945,7 @@ class SnippetsMenu extends Component {
             // TODO: Remove this and instead, use a callback once the editor is
             // ready, or make the parent component independent of SnippetsMenu
             // being mounted.
-            this.props.mountedProm.resolve();
+            // this.props.mountedProm.resolve();
             this.el.classList.add("o_loaded");
             this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !this.folded);
         });
@@ -2053,11 +2055,13 @@ class SnippetsMenu extends Component {
 
         const toolbarEl = this._toolbarWrapperEl.firstChild;
         toolbarEl.classList.remove('oe-floating');
-        this.options.wysiwyg.toolbarEl.classList.add('d-none');
-        this.options.wysiwyg.setupToolbar(toolbarEl);
-        this._addToolbar();
+        // if (this.options.wysiwyg.toolbarEl) {
+        //     this.options.wysiwyg.toolbarEl.classList.add('d-none');
+        //     this.options.wysiwyg.setupToolbar(toolbarEl);
+        // }
+        // this._addToolbar();
         this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this);
-        $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+        // $(this.options.wysiwyg.odooEditor.document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
         // Prepare snippets editor environment
         this.$snippetEditorArea = $('<div/>', {
@@ -4102,6 +4106,7 @@ class SnippetsMenu extends Component {
         if (!$target.closest('we-button, we-toggler, we-select, .o_we_color_preview').length) {
             this._closeWidgets();
         }
+        // todo: we do not use #iframe_target anymore
         if (!$target.closest('body > *').length || $target.is('#iframe_target')) {
             return;
         }
@@ -4687,6 +4692,7 @@ class SnippetsMenu extends Component {
             return;
         }
         this.state.showToolbar = !(!range ||
+            // todo: adapt iframe-editor-wrapper as we removed the class
             !$currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper').length ||
             closestElement(selection.anchorNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') ||
             closestElement(selection.focusNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') ||
