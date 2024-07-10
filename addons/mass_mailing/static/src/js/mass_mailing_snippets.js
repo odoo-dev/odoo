@@ -95,6 +95,7 @@ options.registry.DesignTab = options.Class.extend({
     init() {
         this._super(...arguments);
         // Set the target on the whole editable so apply-to looks within it.
+        // todo: when is this supposed to be loaded?
         this.setTarget(this.options.wysiwyg.getEditable());
     },
     /**
@@ -236,6 +237,7 @@ options.registry.DesignTab = options.Class.extend({
             cssTexts.push(rule.cssText);
         }
         this.styleElement.textContent = cssTexts.join('\n');
+        // todo: anasyse this function
         // Flush the rules cache for convert_inline, to make sure they are
         // recomputed to account for the change.
         this.options.wysiwyg._rulesCache = undefined;

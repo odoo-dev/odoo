@@ -1,0 +1,22 @@
+<templates xml:space="preserve">
+    <t t-name="mass_mailing.MassMailingHtmlField" t-inherit="html_editor.HtmlField">
+        <xpath expr="//Wysiwyg" position="replace">
+            <t t-if="state.showMassMailingTemplateSelector">
+                <MassMailingTemplateSelector
+                    filterTemplates="this.props.filterTemplates"
+                    mailingModelId="this.props.record.data.mailing_model_id[0]"
+                    mailingModelName="this.props.record.data.mailing_model_id[1] || ''"
+                    onSelectMassMailingTemplate.bind="this.onSelectMassMailingTemplate"/>
+            </t>
+            <t t-else="">
+                <div class="w-100">$0</div>
+                <div class="" t-if="this.state.iframeDocument">
+                    <t t-component="this.MassMailingSnippetsMenu" t-props="this.snippetMenuProps"/>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//div[@class='h-100']" position="attributes">
+            <attribute name="class">h-100 d-flex</attribute>
+        </xpath>
+    </t>
+</templates>

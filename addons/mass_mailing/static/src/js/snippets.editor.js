@@ -93,16 +93,16 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
         // When we select something and move our cursor too far from the editable area, we get the
         // entire editable area as the target, which causes the tab to shift from OPTIONS to BLOCK.
         // To prevent unnecessary tab shifting, we provide a selection for this specific case.
-        if (srcElement.classList.contains('o_mail_wrapper') || srcElement.querySelector('.o_mail_wrapper')) {
-            const selection = this.options.wysiwyg.odooEditor.document.getSelection();
-            if (selection.anchorNode) {
-                const parent = selection.anchorNode.parentElement;
-                if (parent) {
-                    srcElement = parent;
-                }
-                this._activateSnippet($(srcElement));
-            }
-        }
+        // if (srcElement.classList.contains('o_mail_wrapper') || srcElement.querySelector('.o_mail_wrapper')) {
+        //     const selection = this.options.wysiwyg.odooEditor.document.getSelection();
+        //     if (selection.anchorNode) {
+        //         const parent = selection.anchorNode.parentElement;
+        //         if (parent) {
+        //             srcElement = parent;
+        //         }
+        //         this._activateSnippet($(srcElement));
+        //     }
+        // }
     }
     /**
      * @override
@@ -188,20 +188,20 @@ export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
      * @private
      */
     _onCodeViewBtnClick(ev) {
-        const $codeview = this.options.wysiwyg.$iframe.contents().find("textarea.o_codeview");
-        this.options.wysiwyg.odooEditor.observerUnactive();
-        $codeview.toggleClass("d-none");
-        this.options.wysiwyg.getEditable().toggleClass("d-none");
-        this.options.wysiwyg.odooEditor.observerActive();
+        // const $codeview = this.options.wysiwyg.$iframe.contents().find("textarea.o_codeview");
+        // this.options.wysiwyg.odooEditor.observerUnactive();
+        // $codeview.toggleClass("d-none");
+        // this.options.wysiwyg.getEditable().toggleClass("d-none");
+        // this.options.wysiwyg.odooEditor.observerActive();
 
-        if ($codeview.hasClass("d-none")) {
-            this.options.wysiwyg.setValue(this.options.getCodeViewValue($codeview[0]));
-            this.options.wysiwyg.odooEditor.sanitize();
-            this.options.wysiwyg.odooEditor.historyStep(true);
-        } else {
-            $codeview.val(this.options.wysiwyg.getValue());
-        }
-        this.activateSnippet(false);
+        // if ($codeview.hasClass("d-none")) {
+        //     this.options.wysiwyg.setValue(this.options.getCodeViewValue($codeview[0]));
+        //     this.options.wysiwyg.odooEditor.sanitize();
+        //     this.options.wysiwyg.odooEditor.historyStep(true);
+        // } else {
+        //     $codeview.val(this.options.wysiwyg.getValue());
+        // }
+        // this.activateSnippet(false);
     }
     /**
      * @private
