@@ -132,6 +132,7 @@
             'mass_mailing/static/src/xml/mass_mailing.xml',
             'mass_mailing/static/src/xml/mass_mailing_mobile_preview.xml',
             'mass_mailing/static/src/js/tours/**/*',
+            'mass_mailing/static/src/fields/**/*',
         ],
         'mass_mailing.assets_mail_themes': [
             'mass_mailing/static/src/scss/themes/**/*',

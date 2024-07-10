@@ -29,6 +29,7 @@ export class Wysiwyg extends Component {
         style: { type: String, optional: true },
         toolbar: { type: Boolean, optional: true },
         iframe: { type: Boolean, optional: true },
+        onIframeLoaded: { type: Function, optional: true },
         copyCss: { type: Boolean, optional: true },
         onLoad: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
@@ -76,7 +77,11 @@ export class Wysiwyg extends Component {
                                 el.contentDocument.body.classList.add(c);
                             }
                         }
-                        this.editor.attachTo(el.contentDocument.body);
+                        if (this.props.onIframeLoaded) {
+                            this.props.onIframeLoaded(el.contentDocument, this.editor);
+                        } else {
+                            this.editor.attachTo(el.contentDocument.body);
+                        }
                     }
                 };
                 if (el.contentDocument.readyState === "complete") {
