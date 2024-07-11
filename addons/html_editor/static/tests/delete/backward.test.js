@@ -1789,6 +1789,24 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    test("should do nothing with selection before table and start of middle cell", async () => {
+        await testEditor({
+            contentBefore: unformat(
+                `[<table><tbody>
+                    <tr><td><br></td><td><br></td></tr>
+                    <tr><td><br></td><td>]<br></td></tr>
+                </tbody></table>`
+            ),
+            stepFunction: deleteBackward,
+            contentAfter: unformat(
+                `<table><tbody>
+                    <tr><td>[]<br></td><td><br></td></tr>
+                    <tr><td><br></td><td><br></td></tr>
+                </tbody></table>`
+            ),
+        });
+    });
+
     test("should empty an inline unremovable but remain in it", async () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
