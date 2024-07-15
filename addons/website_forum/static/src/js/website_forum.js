@@ -8,10 +8,12 @@ import { loadWysiwygFromTextarea } from "@web_editor/js/frontend/loadWysiwygFrom
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { session } from "@web/session";
 import { rpc } from "@web/core/network/rpc";
-import { escape } from "@web/core/utils/strings";
+import { get } from "@web/core/network/http_service";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { scrollTo, closestScrollableY } from "@web/core/utils/scrolling";
+import { attachComponent } from "@web/legacy/utils";
+import { SelectMenu } from "@web/core/select_menu/select_menu";
 import { getAdjacentNextSiblings } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 import { slideUp } from "@web/core/utils/slide";
 
@@ -39,16 +41,19 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     init() {
         this._super(...arguments);
         this.orm = this.bindService("orm");
+        this.http = this.bindService("http");
         this.notification = this.bindService("notification");
     },
 
     /**
      * @override
      */
-    start: function () {
+    async start() {
         var self = this;
+        const _super = this._super.bind(this);
 
         this.lastsearch = [];
+        this.choice = [];
 
         // float-start class messes up the post layout OPW 769721
         document
@@ -72,67 +77,53 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             });
         });
 
-        // TODO-shsa : select2 is a jquery plugin, we should use native javascript instead
-        $('input.js_select2').select2({
-            tags: true,
-            tokenSeparators: [',', ' ', '_'],
-            maximumInputLength: 35,
-            minimumInputLength: 2,
-            maximumSelectionSize: 5,
-            lastsearch: [],
-            createSearchChoice: function (term) {
-                if (self.lastsearch.filter(s => s.text.localeCompare(term) === 0).length === 0) {
-                    //check Karma
-                    if (parseInt($('#karma').val()) >= parseInt($('#karma_edit_retag').val())) {
-                        return {
-                            id: '_' + $.trim(term),
-                            text: $.trim(term) + ' *',
-                            isNew: true,
-                        };
-                    }
-                }
-            },
-            createSearchChoicePosition: "bottom",
-            formatResult: function (term) {
-                if (term.isNew) {
-                    return '<span class="badge bg-primary">New</span> ' + escape(term.text);
-                } else {
-                    return escape(term.text);
-                }
-            },
-            ajax: {
-                url: '/forum/get_tags',
-                dataType: 'json',
-                data: function (term) {
-                    return {
-                        query: term,
-                        limit: 50,
-                        forum_id: $('#wrapwrap').data('forum_id'),
-                    };
+        const element = document.querySelector("input.js_select_menu");
+        if (element) {
+            // Take default tags from the input value
+            const defaultChoices = [];
+            JSON.parse(element.getAttribute("data-init-value"))?.forEach((x) => {
+                defaultChoices.push({ id: x.id, label: x.name, value: x.id, isNew: false });
+            });
+            let defaulValue = defaultChoices.map((choice) => choice.id);
+            defaulValue = defaulValue.join(",");
+
+            const tagsSelectMenu = await attachComponent(this, element.parentNode, SelectMenu, {
+                searchPlaceholder: _t("Please enter 2 or more characters"),
+                placeholder: _t("Tags"),
+                element: element,
+                multiSelect: true,
+                choices: defaultChoices || [],
+                onSelect: (value) => {
+                    tagsSelectMenu?.update({
+                        value: value,
+                    });
                 },
-                results: function (data) {
-                    var ret = [];
-                    data.forEach((x) => {
-                        ret.push({
-                            id: x.id,
-                            text: x.name,
-                            isNew: false,
+                choiceFetchFunction: (searchString) => {
+                    const forumID = $("#wrapwrap").data("forum_id");
+                    return new Promise((resolve, reject) => {
+                        get(
+                            `/forum/get_tags?query=${searchString}&limit=${50}&forum_id=${forumID}`
+                        ).then((result) => {
+                            result.forEach((choice) => {
+                                choice.value = choice.name;
+                                choice.label = choice.name;
+                            });
+                            result = this.choice.length ? result.concat(this.choice) : result;
+                            resolve(result);
                         });
                     });
-                    self.lastsearch = ret;
-                    return {results: ret};
-                }
-            },
-            // Take default tags from the input value
-            initSelection: function (element, callback) {
-                var data = [];
-                element.data("init-value").forEach((x) => {
-                    data.push({id: x.id, text: x.name, isNew: false});
-                });
-                element.val('');
-                callback(data);
-            },
-        });
+                },
+                onCreate: (choice) => {
+                    const karma = document.querySelector("#karma").value;
+                    const editKarma = document.querySelector("#karma_edit_retag").value;
+                    if(parseInt(karma) >= parseInt(editKarma)) {
+                        return choice || [];
+                    }
+                    return false;
+                },
+                value: defaulValue || "",
+            });
+        }
 
         document.querySelectorAll("textarea.o_wysiwyg_loader").forEach((textarea) => {
             const editorKarma = textarea.dataset.karma || 0; // default value for backward compatibility
@@ -198,7 +189,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     .fromSQL(post.dataset.lastActivity, {zone: 'utc'})
                     .toRelative();
             });
-        return this._super.apply(this, arguments);
+        return _super.apply(...arguments);
     },
 
     /**
