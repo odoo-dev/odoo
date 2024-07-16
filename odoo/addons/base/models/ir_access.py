@@ -161,6 +161,16 @@ class IrAccess(models.Model):
             'company_id': self.env.company.id,
         }
 
+    @ormcache('model_name', 'operation')
+    def _get_access_groups(self, model_name, operation='read'):
+        """ Return the group expression object that represents the users who
+        can perform ``operation`` on model ``model_name``.
+        """
+        assert operation in OPERATIONS, "Invalid access operation"
+        accesses = self._get_access_records(model_name, operation)
+        group_definitions = self.env['res.groups']._get_group_definitions()
+        return group_definitions.from_ids(accesses.group_id.ids)
+
     def _make_access_error(self, records, operation: str) -> AccessError:
         """ Return the exception to be raised in case of access error.
         Use an empty ``records`` if the current user has no permission at all to
