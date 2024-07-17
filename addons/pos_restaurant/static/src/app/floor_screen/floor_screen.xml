@@ -2,17 +2,65 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_restaurant.FloorScreen">
         <div class="floor-screen screen h-100 position-relative d-flex flex-column flex-nowrap m-0 bg-100 text-start overflow-hidden">
-            <t t-set="editButtonClass" t-value="'btn btn-light btn-lg d-flex align-items-center gap-2 lh-lg'" />
-            <div class="floor-selector d-flex gap-2 p-2 border-bottom bg-view">
-                <t t-foreach="pos.models['restaurant.floor'].getAll()" t-as="floor" t-key="floor.id">
-                    <button class="button button-floor btn btn-light btn-lg px-3 lh-lg" t-attf-class="{{ floor.id === state.selectedFloorId ? 'active' : '' }}" t-on-click="() => this.selectFloor(floor)">
-                        <t t-esc="floor.name" />
-                        <t t-set="changeCount" t-value="this.getFloorChangeCount(floor)"/>
-                        <span t-if="changeCount > 0" class="badge rounded-pill text-bg-danger ms-2 py-1 smaller fw-bolder" t-esc="changeCount"/>
+            <t t-set="editButtonClass" t-value="'btn btn-light btn-lg d-flex align-items-center gap-2 lh-lg border'" />
+            <div class="d-flex flex-row justify-content-between border-bottom border-top bg-light">
+                <!-- Left Side Div -->
+                <div class="floor-selector d-flex gap-2 p-2 align-items-center">
+                    <t t-foreach="pos.models['restaurant.floor'].getAll()" t-as="floor" t-key="floor.id">
+                        <button class="button button-floor btn btn-light border btn-lg px-3 lh-lg" t-attf-class="{{ floor.id === state.selectedFloorId ? 'active' : '' }}" t-on-click="() => this.selectFloor(floor)">
+                            <t t-esc="floor.name" />
+                            <t t-set="changeCount" t-value="this.getFloorChangeCount(floor)"/>
+                            <span t-if="changeCount > 0" class="badge rounded-pill text-bg-danger ms-2 py-1 smaller fw-bolder" t-esc="changeCount"/>
+                        </button>
+                    </t>
+                    <div class="border" style="height: 2rem;" t-if="pos.isEditMode or pos.config.floor_ids?.length === 0"/>
+                    <button class="btn btn-light border px-3 lh-lg btn-lg" t-if="pos.isEditMode or pos.config.floor_ids?.length === 0" >
+                        <i class="fa fa-plus" role="img" aria-label="Add" title="Add" t-on-click="addFloor"/>
                     </button>
-                </t>
-                <button class="btn btn-secondary px-3 py-2 ms-auto" t-if="pos.isEditMode or pos.config.floor_ids?.length === 0" t-on-click="addFloor">
-                    <i class="fa fa-plus me-2" role="img" aria-label="Add" title="Add"/>Add Floor</button>
+                </div>
+                <!-- Right Side Div -->
+                <div t-if="pos.isEditMode" class="edit-buttons d-flex gap-2 p-2 overflow-x-auto">
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="createTable">
+                        Add Table
+                    </button>
+
+                    <Dropdown menuClass="'pos-dropdown-menu px-1'">
+                        <button t-attf-class="{{editButtonClass}} " t-att-class="{active: state.isFloorColorPicker}" t-on-click="() => this.toggleColorPicker('floor')">
+                            Background
+                        </button>
+                        <t t-set-slot="content">
+                            <div class="d-grid gap-1 py-2 px-1" style="grid-template-columns: repeat(3, 1fr);">
+                                <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
+                                    <DropdownItem closingMode="'none'" onSelected="() => this.setColor(this.getLighterShade(color[0]))">
+                                        <button
+                                            class="p-4 border-1 rounded"
+                                            t-attf-style="background-color: {{this.getLighterShade(color[0])}}"
+                                        />
+                                    </DropdownItem>
+                                </t>
+                                <DropdownItem closingMode="'none'">
+                                    <button class="floor-picture border-1 rounded position-relative text-center overflow-hidden d-flex flex-column align-items-center justify-content-center">
+                                        <i class="fa fa-camera" role="img" aria-label="Picture" title="Picture"></i>
+                                        File
+                                        <input type="file" class="image-uploader" t-on-change="uploadImage" />
+                                    </button>
+                                </DropdownItem>
+                            </div>
+                        </t>
+                    </Dropdown>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="renameFloor">
+                        Rename
+                    </button>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="duplicateFloor">
+                        Clone
+                    </button>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="deleteFloor">
+                        Delete
+                    </button>
+                    <button t-attf-class="btn btn-primary" t-on-click.stop="closeEditMode">
+                        Save
+                    </button>
+                </div>
             </div>
             <div t-if="pos.orderToTransferUuid" class="d-flex align-items-center justify-content-between px-3 border-bottom bg-view overflow-x-auto w-100">
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-att-class="{active: !pos.isTableToMerge}" t-on-click="() => this.pos.isTableToMerge = false">
@@ -25,50 +73,35 @@
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-on-click.stop="stopOrderTransfer">
                     <i class="fa fa-times" role="img" aria-label="Close" title="Close" />Discard</button>
             </div>
-            <div t-if="pos.isEditMode" class="edit-buttons d-flex gap-2 p-2 border-bottom bg-view overflow-x-auto w-100 bg-200">
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="createTable">
-                    <i class="fa fa-plus" role="img" aria-label="Add" title="Add" />Table</button>
-                <button t-attf-class="{{editButtonClass}}" t-att-disabled="selectedTables.length == 0" t-on-click.stop="changeSeatsNum">
+            <div t-if="pos.isEditMode and selectedTables.length != 0" class="edit-buttons d-flex gap-2 p-2 border-bottom bg-view overflow-x-auto w-100 bg-200">
+                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum">
                     <i class="fa fa-user" role="img" aria-label="Seats" title="Seats" />Seats</button>
-                <button t-attf-class="{{editButtonClass}}" t-if="selectedTables.some((t) => t.shape === 'square')" t-att-disabled="selectedTables.length == 0" t-on-click.stop="() => this.changeShape('round')">
+                <button t-attf-class="{{editButtonClass}}" t-if="selectedTables.some((t) => t.shape === 'square')" t-on-click.stop="() => this.changeShape('round')">
                     <i class="fa fa-circle-o" role="img" aria-label="MakeRound" title="Round Shape" />Shape</button>
-                <button t-attf-class="{{editButtonClass}}" t-else="" t-att-disabled="selectedTables.length == 0" t-on-click.stop="() => this.changeShape('square')">
+                <button t-attf-class="{{editButtonClass}}" t-else="" t-on-click.stop="() => this.changeShape('square')">
                     <i class="fa fa-square-o" role="img" aria-label="MakeSquare" title="Square Shape" />Shape</button>
-                <t t-set="noSelectedTable" t-value="selectedTables.length === 0" />
                 <Dropdown menuClass="'pos-dropdown-menu px-1'">
-                    <button t-attf-class="{{editButtonClass}}" t-att-class="{active: state.isColorPicker}" t-on-click="() => this.state.isColorPicker = !this.state.isColorPicker">
-                        <i class="fa fa-paint-brush" role="img" aria-label="Tint" title="Tint" />
-                        Fill
-                    </button>
+                    <button t-attf-class="{{editButtonClass}}" t-att-class="{active: state.isTableColorPicker}" t-on-click="() => this.toggleColorPicker('table')">
+                        <i class="fa fa-paint-brush" role="img" aria-label="Tint" title="Tint" />Fill</button>
                     <t t-set-slot="content">
                         <div class="floor-dropdown-fill d-grid gap-1 py-2 px-1">
                             <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
-                                <DropdownItem closingMode="'none'" onSelected="() => this.setColor(noSelectedTable ? this.getLighterShade(color[0]) : color[1])">
+                                <DropdownItem closingMode="'none'" onSelected="() => this.setColor(color[1])">
                                     <button
                                         class="p-4 border-1 rounded"
-                                        t-attf-style="background-color: {{noSelectedTable ? getLighterShade(color[0]) : color[1]}}"
+                                        t-attf-style="background-color: {{color[1]}}"
                                     />
                                 </DropdownItem>
                             </t>
-                            <DropdownItem closingMode="'none'" t-if="noSelectedTable">
-                                <button class="floor-picture border-1 rounded position-relative text-center overflow-hidden d-flex flex-column align-items-center justify-content-center">
-                                    <i class="fa fa-camera" role="img" aria-label="Picture" title="Picture"></i>
-                                    File
-                                    <input type="file" class="image-uploader" t-on-change="uploadImage" />
-                                </button>
-                            </DropdownItem>
                         </div>
                     </t>
                 </Dropdown>
                 <button t-attf-class="{{editButtonClass}}" t-att-disabled="selectedTables.length > 1" t-on-click.stop="rename">
                     <i class="fa fa-pencil-square-o" role="img" aria-label="Rename" title="Rename" />Rename</button>
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="duplicateTableOrFloor">
+                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="duplicateTable">
                     <i class="fa fa-clone" role="img" aria-label="Copy" title="Copy" />Copy</button>
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="deleteFloorOrTable">
+                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="deleteTable">
                     <i class="fa fa-trash" role="img" aria-label="Delete" title="Delete" />Delete</button>
-                <button t-attf-class="ms-auto btn btn-primary" t-on-click.stop="closeEditMode">
-                    Save
-                </button>
             </div>
             <div t-ref="floor-map-scroll" class="overflow-scroll flex-grow-1 flex-shrink-1 flex-basis-0 w-auto" t-attf-style="background: {{activeFloor?.background_color}}"> 
                 <div t-on-click="onClickFloorMap" t-on-touchstart="_onPinchStart" t-on-touchmove="_onPinchMove" t-on-touchend="_onPinchEnd"
