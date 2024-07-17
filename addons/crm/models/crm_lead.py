@@ -245,6 +245,13 @@ class Lead(models.Model):
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
     ]
 
+    def _message_auto_subscribe_notify(self, partner_ids, template):
+        # if template == "mail.message_user_assigned":
+            # TODO: merge the leads in the same email
+        print('partner_ids', partner_ids)
+        print('template', template)
+        return super()._message_auto_subscribe_notify(partner_ids, template)
+
     @api.depends('company_id')
     def _compute_user_company_ids(self):
         all_companies = self.env['res.company'].search([])
