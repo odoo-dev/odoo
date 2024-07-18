@@ -127,7 +127,7 @@ class ResConfigSettings(models.TransientModel):
         b = [hey.get('OwnerService').get('ProfilingId') for hey in participant_json.get('ParticipantBindings', [{}])]
 
 
-        agreement_response = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business/agreement', cert=c, headers=headers, json={})
+        # agreement_response = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business/agreement', cert=c, headers=headers, json={})
 
         # DocumentTypeID: 5 Invoice 5 CreditNote
         # For profiles, id 3 = "Simple invoicing without prior order. Customer can receive Invoice, Credit note and Reminder. Supplier can receive Receipt (negative only)."

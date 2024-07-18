@@ -26,5 +26,6 @@
             'l10n_dk_nemhandel/static/src/components/**/*',
         ],
     },
+    'auto_install': True,
     'license': 'LGPL-3',
 }
