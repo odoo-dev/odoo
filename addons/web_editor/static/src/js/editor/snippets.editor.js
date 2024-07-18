@@ -1840,9 +1840,9 @@ class SnippetsMenu extends Component {
 
     static props = {
         bus: { type: EventBus },
-        mountedProm: { type: Promise },
         options: { type: Object },
         trigger_up: { type: Function },
+        mountedProm: { type: Promise, optional: true },
         folded: { type: Boolean, optional: true },
         onSnippetDropped: { type: Function, optional: true },
         readyToCleanForSave: { type: Function, optional: true },
@@ -1945,7 +1945,7 @@ class SnippetsMenu extends Component {
             // TODO: Remove this and instead, use a callback once the editor is
             // ready, or make the parent component independent of SnippetsMenu
             // being mounted.
-            // this.props.mountedProm.resolve();
+            this.props.mountedProm?.resolve();
             this.el.classList.add("o_loaded");
             this.el.ownerDocument.body.classList.toggle('editor_has_snippets', !this.folded);
         });
