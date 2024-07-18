@@ -1,0 +1,13 @@
+.btn-light-purple.active {
+    background-color: mix(#714B67, $light, 10%);
+    border-color: #714B67;
+}
+
+.table-free-order-label {
+    background-color: mix(#714B67, $light, 10%);
+    border: 1px solid #714B67;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    height: 100%;
+}

@@ -6,6 +6,15 @@
     width: 45%;
 }
 
+@media (max-width: 992px) {
+    .pos-leftheader {
+        width: 55%;
+    }
+    .pos-rightheader {
+        width: 45%;
+    }
+}
+
 .pos-centerheader {
     width: 10%;
 }

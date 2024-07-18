@@ -12,23 +12,32 @@
             </DropdownItem>
         </xpath>
         <xpath expr="//div[hasclass('pos-leftheader')]" position="inside">
-            <div t-if="pos.config.module_pos_restaurant" class="d-flex gap-1 overflow-hidden position-relative">
-                <span t-if="showTableIcon"
-                    t-esc="getTable().getName()"
-                    t-attf-style="background-color: {{getTable().color}};border-radius: 0.25rem;"
-                    class="table-name d-flex align-items-center px-3 py-1 align-self-center text-white fw-bolder"
-                    t-on-click="() => this.switchTable()"/>
-                <button t-else="" class="btn btn-secondary btn-lg" t-on-click="() => this.switchTable()">Go to...</button>
+            <div t-if="pos.config.module_pos_restaurant" class="d-flex align-items-stretch flex-grow-1 gap-1 overflow-hidden position-relative">
+                <button class="back-button btn btn-light btn-light-purple btn-lg lh-lg" t-attf-class="{{ isFloorScreenActive() ? 'active' : '' }}" t-on-click="onClickPlanButton">
+                    Plan
+                </button>
+                <button t-if="showSwitchTableButton" class="btn btn-light btn-lg lh-lg" t-on-click="() => this.switchTable()">Table</button>   
+
+                <div id="table-free-order-container">
+                    <div t-if="showTableNumber" t-esc="getTable().getName()"
+                        class="table-free-order-label d-flex align-items-center cursor-pointer"
+                        t-on-click="() => this.switchTable()"
+                    />   
+
+                    <div t-if="pos.get_order() and !pos.get_order()?.table_id" class="table-free-order-label d-flex align-items-center">
+                        <t t-if="!ui.isSmall" t-esc="pos.get_order().getFloatingOrderName()"/>
+                    </div>        
+                </div>
                 <t t-if="!pos.orderToTransferUuid">
-                    <ListContainer t-if="!pos.selectedOrderUuid and !pos.selectedTable" items="getFloatingOrders()" t-slot-scope="scope">
-                        <t t-set="order" t-value="scope.item"/>
-                        <button t-esc="order.getFloatingOrderName()" class="btn btn-secondary btn-lg tab text-nowrap" t-on-click="() => this.selectFloatingOrder(order)"/>
-                    </ListContainer>
-                    <button t-if="!pos.selectedOrderUuid" class="btn btn-light btn-lg lh-lg" t-on-click="newFloatingOrder">
-                        <i class="fa fa-fw fa-plus-circle" aria-hidden="true"/>
-                    </button>
-                    <button t-if="pos.get_order() and !pos.get_order()?.table_id" class="btn btn-secondary ms-2" t-on-click="() => this.editOrderNote(this.pos.get_order())">
-                        <i class="fa fa-pencil-square-o me-1" aria-hidden="true" /><t t-if="!ui.isSmall" t-esc="pos.get_order().getFloatingOrderName()"/>
+                    <div t-if="!pos.selectedOrderUuid and !pos.selectedTable" class="d-flex overflow-x-auto">
+                        <div t-if="!ui.isSmall" class="me-1 my-1 border-end border-dark-subtle"/>
+                        <ListContainer items="getFloatingOrders()" t-slot-scope="scope">
+                            <t t-set="order" t-value="scope.item"/>
+                            <button t-esc="order.getFloatingOrderName()" class="btn btn-light tab text-nowrap border-light-subtle" t-on-click="() => this.selectFloatingOrder(order)"/>
+                        </ListContainer>
+                    </div>
+                    <button t-if="!pos.selectedOrderUuid" class="btn btn-light btn-lg border-transparent lh-lg" style="padding: 0.3125rem 0.625rem;" t-on-click="newFloatingOrder">
+                        <i class="fa fa-fw fa-lg fa-plus-circle" aria-hidden="true"/>
                     </button>
                 </t>
                 <div class="d-flex align-items-center" t-else="">
