@@ -201,8 +201,6 @@ export class MassMailingHtmlField extends HtmlField {
                 );
             },
             trigger_up: (ev) => this._trigger_up(ev),
-            // todo: to implement: mountedProm: new Deferred(),
-            mountedProm: new Deferred(),
         };
     }
     async onSelectMassMailingTemplate(templateInfos, templateHTML) {
