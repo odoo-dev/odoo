@@ -129,6 +129,37 @@ class IrAccess(models.Model):
             domain = expression.AND([domain, *restrictions])
         return domain
 
+    @ormcache('self.env.uid', 'model_name', 'operation', 'tuple(self._get_access_context())')
+    def _get_restriction_domain(self, model_name: str, operation: str) -> list:
+        """ Return the domain that combines the restrictions to perform
+        ``operation`` on the records of ``model_name``.
+        """
+        assert operation in OPERATIONS, "Invalid access operation"
+
+        domain = [
+            ('model_id', '=', self.env['ir.model']._get_id(model_name)),
+            ('group_id', '=', False),
+            (f'for_{operation}', '=', True),
+            ('active', '=', True),
+        ]
+        accesses = self.sudo().search_fetch(domain, ['group_id', 'domain'], order='id')
+
+        # collect restrictions
+        restrictions = []
+        eval_context = self._eval_context()
+        for access in accesses:
+            domain = safe_eval(access.domain, eval_context) if access.domain else []
+            restrictions.append(domain)
+
+        # add access for parent models as restrictions
+        for parent_model_name, parent_field_name in self.env[model_name]._inherits.items():
+            domain = self._get_access_domain(parent_model_name, operation)
+            if domain is None:
+                return [expression.FALSE_LEAF]
+            restrictions.append([(parent_field_name, 'any', domain)])
+
+        return expression.AND(restrictions)
+
     def _get_access_records(self, model_name: str, operation: str):
         """ Returns all the accesses matching the given model for the operation
         for the current user.
