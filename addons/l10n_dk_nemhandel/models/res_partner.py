@@ -42,7 +42,7 @@ class ResPartner(models.Model):
         help="TODO",
         tracking=True,
         selection=[
-            ('EAN/GLN', "GLN"),
+            ('GLN', "EAN/GLN"),
             ('CVR', "CVR"),
             ('IBAN', "IBAN"),
             ('SE', "SE"),

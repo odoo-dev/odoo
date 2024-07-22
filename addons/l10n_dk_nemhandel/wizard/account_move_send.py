@@ -170,7 +170,7 @@ class AccountMoveSend(models.TransientModel):
 
         try:
             response = edi_user._make_request(
-                f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/send_document",
+                f"{edi_user._get_server_url()}/api/nemhandel/1/send_document",
                 params=params,
             )
         except AccountEdiProxyError as e:

@@ -193,14 +193,8 @@ class ResConfigSettings(models.TransientModel):
             self.env.cr.commit()
 
         company_details = {
-            'l10n_dk_nemhandel_company_name': company.display_name,
-            'l10n_dk_nemhandel_company_vat': company.vat,
-            'l10n_dk_nemhandel_company_street': company.street,
-            'l10n_dk_nemhandel_company_city': company.city,
-            'l10n_dk_nemhandel_company_zip': company.zip,
-            'l10n_dk_nemhandel_country_code': company.country_id.code,
-            'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
-            'l10n_dk_nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
+            'nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
+            'nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
         }
 
         params = {
@@ -208,13 +202,13 @@ class ResConfigSettings(models.TransientModel):
         }
 
         self._call_l10n_dk_nemhandel_proxy(
-            endpoint='/api/l10n_dk_nemhandel/1/activate_participant',
+            endpoint='/api/nemhandel/1/activate_participant',
             params=params,
             edi_user=edi_user,
         )
 
     @handle_demo
-    def button_l10n_dk_nemhandel_update_user_data(self):
+    def button_update_l10n_dk_nemhandel_user_data(self):
         """
         Action for the user to be able to update their contact details any time
         Calls /update_user on the iap server
@@ -226,17 +220,17 @@ class ResConfigSettings(models.TransientModel):
 
         params = {
             'update_data': {
-                'l10n_dk_nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
-                'l10n_dk_nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
+                'nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
+                'nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
             }
         }
 
         self._call_l10n_dk_nemhandel_proxy(
-            endpoint='/api/l10n_dk_nemhandel/1/update_user',
+            endpoint='/api/nemhandel/1/update_user',
             params=params,
         )
 
-    def button_l10n_dk_nemhandel_send_verification_code(self):
+    def button_send_l10n_dk_nemhandel_verification_code(self):
         """
         Request user verification via SMS
         Calls the /send_verification_code to send the 6-digit verification code
@@ -247,12 +241,12 @@ class ResConfigSettings(models.TransientModel):
         self.button_update_l10n_dk_nemhandel_user_data()
 
         self._call_l10n_dk_nemhandel_proxy(
-            endpoint='/api/l10n_dk_nemhandel/1/send_verification_code',
+            endpoint='/api/nemhandel/1/send_verification_code',
             params={'message': _("Your confirmation code is")},
         )
         self.l10n_dk_nemhandel_proxy_state = 'sent_verification'
 
-    def button_l10n_dk_nemhandel_check_verification_code(self):
+    def button_check_l10n_dk_nemhandel_verification_code(self):
         """
         Calls /verify_phone_number to compare user's input and the
         code generated on the IAP server
@@ -263,7 +257,7 @@ class ResConfigSettings(models.TransientModel):
             raise ValidationError(_("The verification code should contain six digits."))
 
         self._call_l10n_dk_nemhandel_proxy(
-            endpoint='/api/l10n_dk_nemhandel/1/verify_phone_number',
+            endpoint='/api/nemhandel/1/verify_phone_number',
             params={'verification_code': self.l10n_dk_nemhandel_verification_code},
         )
         self.l10n_dk_nemhandel_proxy_state = 'pending'
@@ -290,7 +284,7 @@ class ResConfigSettings(models.TransientModel):
                 "Can't cancel registration with this status: %s", self.l10n_dk_nemhandel_proxy_state
             ))
 
-        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/l10n_dk_nemhandel/1/cancel_l10n_dk_nemhandel_registration')
+        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/nemhandel/1/cancel_nemhandel_registration')
         self.l10n_dk_nemhandel_proxy_state = 'not_registered'
         self.l10n_dk_nemhandel_edi_user.unlink()
 

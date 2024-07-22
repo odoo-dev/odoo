@@ -66,7 +66,7 @@ def _mock_make_request(func, self, *args, **kwargs):
         'activate_participant': lambda _user, _args, _kwargs: {},
         'get_all_documents': _mock_get_all_documents,
         'get_document': _mock_get_document,
-        'participant_status': lambda _user, _args, _kwargs: {'l10n_dk_nemhandel_state': 'active'},
+        'participant_status': lambda _user, _args, _kwargs: {'nemhandel_state': 'active'},
         'send_document': _mock_send_document,
     }[endpoint](self, args, kwargs)
 

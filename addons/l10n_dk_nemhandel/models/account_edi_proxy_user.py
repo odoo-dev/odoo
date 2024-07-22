@@ -33,7 +33,7 @@ class AccountEdiProxyClientUser(models.Model):
                 and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'l10n_dk_nemhandel')
             ):
                 self.company_id.write({
-                    'account_peppol_proxy_state': 'not_registered',
+                    'l10n_dk_nemhandel_proxy_state': 'not_registered',
                 })
                 # commit the above changes before raising below
                 if not tools.config['test_enable'] and not modules.module.current_test:
@@ -45,8 +45,8 @@ class AccountEdiProxyClientUser(models.Model):
         urls = super()._get_proxy_urls()
         # TODO
         urls['l10n_dk_nemhandel'] = {
-            'prod': 'http://127.0.0.1:8079/',
-            'test': 'http://127.0.0.1:8079/',
+            'prod': 'http://127.0.0.1:8079',
+            'test': 'http://127.0.0.1:8079',
             'demo': 'demo',
         }
         return urls
@@ -72,7 +72,7 @@ class AccountEdiProxyClientUser(models.Model):
             if not company.l10n_dk_nemhandel_identifier_type or not company.l10n_dk_nemhandel_identifier_value:
                 raise UserError(
                     _("Please fill in the Identifier Type and Value."))
-            return f'{company.l10n_dk_nemhandel_identifier_type}:{company.l10n_dk_nemhandel_identifier_value}'
+            return f'{company.l10n_dk_nemhandel_identifier_type}/{company.l10n_dk_nemhandel_identifier_value}'
         return super()._get_proxy_identification(company, proxy_type)
 
     def _l10n_dk_nemhandel_get_new_documents(self):
@@ -88,7 +88,7 @@ class AccountEdiProxyClientUser(models.Model):
             try:
                 # request all messages that haven't been acknowledged
                 messages = edi_user._make_request(
-                    url=f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/get_all_documents",
+                    url=f"{edi_user._get_server_url()}/api/nemhandel/1/get_all_documents",
                     params=params,
                 )
             except AccountEdiProxyError as e:
@@ -106,7 +106,7 @@ class AccountEdiProxyClientUser(models.Model):
             company = edi_user.company_id
             # retrieve attachments for filtered messages
             all_messages = edi_user._make_request(
-                f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/get_document",
+                f"{edi_user._get_server_url()}/api/nemhandel/1/get_document",
                 {'message_uuids': message_uuids},
             )
 
@@ -171,7 +171,7 @@ class AccountEdiProxyClientUser(models.Model):
                 self.env.cr.commit()
             if proxy_acks:
                 edi_user._make_request(
-                    f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/ack",
+                    f"{edi_user._get_server_url()}/api/nemhandel/1/ack",
                     {'message_uuids': proxy_acks},
                 )
 
@@ -186,7 +186,7 @@ class AccountEdiProxyClientUser(models.Model):
 
             message_uuids = {move.l10n_dk_nemhandel_message_uuid: move for move in edi_user_moves}
             messages_to_process = edi_user._make_request(
-                f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/get_document",
+                f"{edi_user._get_server_url()}/api/nemhandel/1/get_document",
                 {'message_uuids': list(message_uuids.keys())},
             )
 
@@ -210,7 +210,7 @@ class AccountEdiProxyClientUser(models.Model):
 
             if message_uuids:
                 edi_user._make_request(
-                    f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/ack",
+                    f"{edi_user._get_server_url()}/api/nemhandel/1/ack",
                     {'message_uuids': list(message_uuids.keys())},
                 )
 
@@ -222,10 +222,10 @@ class AccountEdiProxyClientUser(models.Model):
         for edi_user in self:
             try:
                 proxy_user = edi_user._make_request(
-                    f"{edi_user._get_server_url()}/api/l10n_dk_nemhandel/1/participant_status")
+                    f"{edi_user._get_server_url()}/api/nemhandel/1/participant_status")
             except AccountEdiProxyError as e:
                 _logger.error('Error while updating Nemhandel participant status: %s', e)
                 continue
 
-            if proxy_user['l10n_dk_nemhandel_state'] in {'active', 'rejected', 'canceled'}:
-                edi_user.company_id.l10n_dk_nemhandel_proxy_state = proxy_user['l10n_dk_nemhandel_state']
+            if proxy_user['nemhandel_state'] in {'active', 'rejected', 'canceled'}:
+                edi_user.company_id.l10n_dk_nemhandel_proxy_state = proxy_user['nemhandel_state']
