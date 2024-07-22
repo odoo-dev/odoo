@@ -1,0 +1,6 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.ExcalidrawBehaviorBlueprint">
+        <div class="pb-4 d-flex justify-content-center"
+            t-att-data-embedded-props="behaviorProps" data-embedded="draw"/>
+    </t>
+</templates>

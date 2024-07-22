@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="html_editor.ExcalidrawEmbedded" t-inherit="html_editor.ReadonlyExcalidrawEmbedded" t-inherit-mode="primary">
+        <xpath expr="//div[@t-if='state.hasError']" position="inside">
+            <button t-on-click="openUpdateSource" class="btn btn-link">
+                Click here to update the source
+            </button>
+        </xpath>
+    </t>
+</templates>
