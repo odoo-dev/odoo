@@ -4,7 +4,10 @@ import {
     DYNAMIC_PLACEHOLDER_PLUGINS,
     EMBEDDED_COMPONENT_PLUGINS,
 } from "@html_editor/plugin_sets";
-import { MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
+import {
+    MAIN_EMBEDDINGS,
+    READONLY_MAIN_EMBEDDINGS,
+} from "@html_editor/others/embedded_components/embedding_sets";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 import { Component, status, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -72,9 +75,7 @@ export class HtmlField extends Component {
         this.state = useState({
             key: 0,
             showCodeView: false,
-            containsComplexHTML: computeContainsComplexHTML(
-                this.props.record.data[this.props.name]
-            ),
+            containsComplexHTML: computeContainsComplexHTML(this.value),
         });
         this.lastValue = this.props.record.data[this.props.name].toString();
         useRecordObserver((record) => {
@@ -184,7 +185,7 @@ export class HtmlField extends Component {
 
     getConfig() {
         const config = {
-            content: this.props.record.data[this.props.name],
+            content: this.value,
             Plugins: [
                 ...MAIN_PLUGINS,
                 ...(this.props.isCollaborative ? COLLABORATION_PLUGINS : []),
@@ -244,6 +245,18 @@ export class HtmlField extends Component {
                     },
                 },
             };
+        }
+        return config;
+    }
+
+    getReadonlyConfig() {
+        const config = {
+            value: this.value,
+            cssAssetId: this.props.cssReadonlyAssetId,
+            hasFullHtml: this.sandboxedPreview,
+        };
+        if (this.props.embeddedComponents) {
+            config.embeddedComponents = READONLY_MAIN_EMBEDDINGS;
         }
         return config;
     }
