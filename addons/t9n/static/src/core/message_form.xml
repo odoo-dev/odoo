@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<templates>
+    <t t-name="t9n.MessageForm">
+        <div class="card mx-0 border-light">
+            <div class="card-header">
+                <t t-esc="message.body"/>
+            </div>
+            <div class="card-body">
+                <div class="card-text">
+                    <p t-if="message.translator_comments">
+                        <span>
+                            <strong>
+                                <em>TRANSLATOR COMMENT </em>
+                            </strong>
+                        </span>
+                        <span>
+                            <t t-esc="message.translator_comments"/>
+                        </span>
+                    </p>
+                    <p t-if="message.extracted_comments">
+                        <span>
+                            <strong>
+                                <em>RESOURCE COMMENT </em>
+                            </strong>
+                        </span>
+                        <span>
+                            <t t-esc="message.extracted_comments"/>
+                        </span>
+                    </p>
+                    <p t-if="message.context">
+                        <span>
+                            <strong>
+                                <em>CONTEXT </em>
+                            </strong>
+                        </span>
+                        <span>
+
+                            <li class="list-group-item">Cras justo odio</li>
+                        </span>
+                    </p>
+                    <p t-if="message.references">
+                        <span>
+                            <strong>
+                                <em>REFERENCES </em>
+                            </strong>
+                        </span>
+                        <span>
+                            <t t-esc="message.references"/>
+                        </span>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" rows="3" placeholder="Write your translation" t-model="state.suggestedTranslationText" ></textarea>
+                </div>
+                <div class="d-flex justify-content-end my-3">
+                    <button class="btn btn-outline-primary mx-1" t-on-click="onClickClear">Clear</button>
+                    <button class="btn btn-outline-primary mx-1" t-on-click="onClickCopy">Copy</button>
+                    <button class="btn btn-primary mx-1" t-on-click="onClickSuggest">Suggest</button>
+                </div>
+            </div>
+        </div>
+        <ul class="list-group">
+            <t t-foreach="translations" t-as="translation" t-key="translation.id">
+                <li class="list-group-item">
+                    <t t-esc="translation.body"/>
+                </li>
+            </t>
+        </ul>
+    </t>
+</templates>

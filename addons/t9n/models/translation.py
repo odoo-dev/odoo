@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class Translation(models.Model):
@@ -18,3 +18,17 @@ class Translation(models.Model):
         string="Language",
         help="The language to which the translation translates the original message.",
     )
+
+    @api.model
+    def create_and_format(self, **kwargs):
+        return self.create(kwargs)._format()
+
+    def _format(self):
+        return [{
+            "id": translation.id,
+            "body": translation.body,
+            "source_id": {
+                "id": translation.source_id.id,
+            },
+            "lang_id": translation.lang_id._format()[0],
+        } for translation in self]

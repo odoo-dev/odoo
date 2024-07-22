@@ -92,3 +92,34 @@ class Resource(models.Model):
             + [Command.update(id, vals) for id, vals in to_update]
         )
         return super().write(vals)
+
+    @api.model
+    def get_resources(self, ids):
+        return self.browse(ids)._format()
+
+    def _format(self):
+        return [
+            {
+                "id": resource.id,
+                "file_name": resource.file_name,
+                "message_ids": [
+                    {
+                        "id": msg.id,
+                        "body": msg.body,
+                        "translation_ids": [
+                            {
+                                "id": translation.id,
+                                "body": translation.body,
+                                "lang_id": translation.lang_id.id,
+                            }
+                            for translation in msg.translation_ids
+                        ],
+                    }
+                    for msg in resource.message_ids
+                ],
+                "project_id": {
+                    "id": resource.project_id.id,
+                },
+            }
+            for resource in self
+        ]

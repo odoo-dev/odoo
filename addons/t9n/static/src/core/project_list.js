@@ -7,7 +7,6 @@ export class ProjectList extends Component {
     static template = "t9n.ProjectList";
 
     setup() {
-        this.action = useService("action");
         this.state = useState({
             filters: {
                 searchText: "",
@@ -17,16 +16,21 @@ export class ProjectList extends Component {
                 order: "asc",
             },
         });
-        this.store = useState(useService("t9n.store"));
-        this.store.fetchProjects();
+        this.store = useState(useService("mail.store"));
+        this.fetchProjects();
+    }
+
+    async fetchProjects() {
+        const projects = await this.env.services.orm.call("t9n.project", "get_projects");
+        this.store["t9n.project"].insert(projects);
     }
 
     get projects() {
         const searchTerms = this.state.filters.searchText.trim().toUpperCase();
+        const allProjects = Object.values(this.store["t9n.project"].records);
         const projects = searchTerms
-            ? this.store.projects.filter((p) => p.name.toUpperCase().includes(searchTerms))
-            : [...this.store.projects];
-
+            ? allProjects.filter((p) => p.name.toUpperCase().includes(searchTerms))
+            : allProjects;
         projects.sort((p1, p2) => {
             let p1Col = p1[this.state.sorting.column];
             let p2Col = p2[this.state.sorting.column];
@@ -56,13 +60,8 @@ export class ProjectList extends Component {
         }
     }
 
-    onClickProject(id) {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_id: id,
-            res_model: "t9n.project",
-            views: [[false, "form"]],
-            target: "new",
-        });
+    onClickProject(project) {
+        this.store.t9n.activeProject = project;
+        this.store.t9n.activeView = "LanguageList";
     }
 }

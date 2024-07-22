@@ -3,7 +3,7 @@
     "version": "1.0",
     "category": "TODO: find the appropriate category",
     "description": "TODO: write a description of the module",
-    "depends": ["base", "web"],
+    "depends": ["base", "mail", "web"],
     "application": True,
     "assets": {
         "web.assets_backend": [

@@ -18,15 +18,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="this.projects" t-as="project" t-key="project.id">
+                    <t t-foreach="projects" t-as="project" t-key="project.id">
                         <tr>
                             <td>
-                                <button class="btn btn-link " t-on-click="() => this.onClickProject(project.id)">
+                                <button class="btn btn-link " t-on-click="() => this.onClickProject(project)">
                                     <t t-esc="project.name"/>
                                 </button>
                             </td>
-                            <td t-esc="project.srcLang"/>
-                            <td t-esc="project.formattedTargetLanguages"/>
+                            <td t-esc="project.src_lang_id.name"/>
+                            <td t-esc="project.targetLanguages"/>
                             <td t-esc="project.resourceCount"/>
                         </tr>
                     </t>

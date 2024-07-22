@@ -2,7 +2,10 @@
 <templates>
 
     <t t-name="t9n.App">
-        <ProjectList/>
+        <ProjectList t-if="activeView === 'ProjectList'"/>
+        <LanguageList t-elif="activeView === 'LanguageList'" languages="store.t9n.activeProject.target_lang_ids"/>
+        <ResourceList t-elif="activeView === 'ResourceList'" resources="store.t9n.activeProject.resource_ids"/>
+        <TranslationEditor t-elif="activeView === 'TranslationEditor'"/>
     </t>
 
 </templates>

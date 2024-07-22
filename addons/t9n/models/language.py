@@ -20,3 +20,12 @@ class Language(models.Model):
     _sql_constraints = [
         ("language_code_unique", "unique(code)", "The language code must be unique.")
     ]
+
+    def _format(self):
+        return [{
+            "id": language.id,
+            "name": language.name,
+            "code": language.code,
+            "native_name": language.native_name,
+            "direction": language.direction,
+        } for language in self]

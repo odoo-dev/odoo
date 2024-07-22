@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<templates>
+
+    <t t-name="t9n.TranslationEditor">
+        <div class="d-flex vh-100">
+            <div class="overflow-auto">
+                <div class="list-group">
+                    <t t-foreach="messages" t-as="message" t-key="message.id">
+                        <a href="#" class="list-group-item list-group-item-action" t-att-class="{ active: message.eq(store.t9n.activeMessage) }" t-on-click="() => this.onClickMessage(message)">
+                            <t t-esc="message.body"/>
+                        </a>
+                    </t>
+                </div>
+            </div>
+            <div>
+                <MessageForm t-if="store.t9n.activeMessage"/>
+            </div>
+        </div>
+
+    </t>
+
+</templates>

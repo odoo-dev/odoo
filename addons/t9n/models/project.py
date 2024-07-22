@@ -35,20 +35,22 @@ class Project(models.Model):
 
     @api.model
     def get_projects(self):
-        projects_records = self.search([])
-        return [{
+        return self.search([])._format()
+
+    def _format(self):
+        return [
+            {
                 "id": record.id,
                 "name": record.name,
-                "src_lang": {
-                    "id": record.src_lang_id.id,
-                    "name": record.src_lang_id.name if record.src_lang_id.name else "",
-                },
-                "resources": [{
-                    "id": resource.id,
-                    "file_name": resource.file_name,
-                } for resource in record.resource_ids],
-                "target_langs": [{
-                        "id": lang.id,
-                        "name": lang.name,
-                    } for lang in record.target_lang_ids],
-            } for record in projects_records]
+                "src_lang_id": record.src_lang_id._format()[0],
+                "resource_ids": [
+                    {
+                        "id": resource.id,
+                        "file_name": resource.file_name,
+                    }
+                    for resource in record.resource_ids
+                ],
+                "target_lang_ids": record.target_lang_ids._format(),
+            }
+            for record in self
+        ]
