@@ -622,7 +622,7 @@ class StockQuant(models.Model):
 
     def _run_least_packages_removal_strategy_astar(self, domain, qty):
         # Fetch the available packages and contents
-        query = self._where_calc(domain)
+        query = self.sudo()._search(domain)
         query_str, params = query.select('package_id', 'SUM(quantity - reserved_quantity) AS available_qty')
         query_str += ' GROUP BY package_id HAVING SUM(quantity - reserved_quantity) > 0 ORDER BY available_qty DESC'
         self._cr.execute(query_str, params)

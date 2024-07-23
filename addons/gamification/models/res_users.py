@@ -149,7 +149,7 @@ class Users(models.Model):
         if not self:
             return []
 
-        where_query = self.env['res.users']._where_calc(user_domain)
+        where_query = self.env['res.users'].sudo()._search(user_domain)
 
         sql = SQL("""
 SELECT final.user_id, final.karma_gain_total, final.karma_position
@@ -197,7 +197,7 @@ WHERE final.user_id IN %s""",
         if not self:
             return {}
 
-        where_query = self.env['res.users']._where_calc(user_domain)
+        where_query = self.env['res.users'].sudo()._search(user_domain)
 
         # we search on every user in the DB to get the real positioning (not the one inside the subset)
         # then, we filter to get only the subset.

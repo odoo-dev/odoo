@@ -5,8 +5,10 @@ import ast
 import re
 from collections import defaultdict
 
+import odoo.osv
 from odoo import models, fields, api, _, osv, Command
 from odoo.exceptions import ValidationError, UserError
+
 
 FIGURE_TYPE_SELECTION_VALUES = [
     ('monetary', "Monetary"),
@@ -571,13 +573,13 @@ class AccountReportExpression(models.Model):
 
     @api.constrains('formula')
     def _check_domain_formula(self):
-        for expression in self.filtered(lambda expr: expr.engine == 'domain'):
+        for expr in self.filtered(lambda expr: expr.engine == 'domain'):
             try:
-                domain = ast.literal_eval(expression.formula)
-                self.env['account.move.line']._where_calc(domain)
+                domain = ast.literal_eval(expr.formula)
+                odoo.osv.expression.expression(domain, self.env['account.move.line'])
             except:
                 raise UserError(_("Invalid domain for expression '%(label)s' of line '%(line)s': %(formula)s",
-                                label=expression.label, line=expression.report_line_name, formula=expression.formula))
+                                label=expr.label, line=expr.report_line_name, formula=expr.formula))
 
     @api.depends('engine')
     def _compute_auditable(self):

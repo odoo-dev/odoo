@@ -314,8 +314,7 @@ class ProjectProject(models.Model):
                 project_domain,
                 billable_project_domain,
             ])
-        project_query = self.env['project.project']._where_calc(project_domain)
-        self._apply_ir_rules(project_query, 'read')
+        project_query = self.env['project.project']._search(project_domain)
         project_sql = project_query.select('id', 'sale_line_id')
 
         Task = self.env['project.task']
@@ -325,8 +324,7 @@ class ProjectProject(models.Model):
                 domain_per_model[Task._name],
                 task_domain,
             ])
-        task_query = Task._where_calc(task_domain)
-        Task._apply_ir_rules(task_query, 'read')
+        task_query = Task._search(task_domain)
         task_sql = task_query.select(f'{Task._table}.project_id AS id', f'{Task._table}.sale_line_id')
 
         ProjectMilestone = self.env['project.milestone']
@@ -337,8 +335,7 @@ class ProjectProject(models.Model):
                 milestone_domain,
                 billable_project_domain,
             ])
-        milestone_query = ProjectMilestone._where_calc(milestone_domain)
-        ProjectMilestone._apply_ir_rules(milestone_query)
+        milestone_query = ProjectMilestone._search(milestone_domain)
         milestone_sql = milestone_query.select(
             f'{ProjectMilestone._table}.project_id AS id',
             f'{ProjectMilestone._table}.sale_line_id',
@@ -350,7 +347,7 @@ class ProjectProject(models.Model):
             ('order_id', 'any', [('analytic_account_id', 'in', self.analytic_account_id.ids)]),
             ('display_type', '=', False),
         ]
-        sale_order_line_query = SaleOrderLine._where_calc(sale_order_line_domain)
+        sale_order_line_query = SaleOrderLine.sudo()._search(sale_order_line_domain)
         sale_order_line_sql = sale_order_line_query.select(
             f'{SaleOrderLine._table}.project_id AS id',
             f'{SaleOrderLine._table}.id AS sale_line_id',

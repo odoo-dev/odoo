@@ -361,7 +361,7 @@ class ResPartner(models.Model):
             self.debit = False
             self.credit = False
             return
-        query = self.env['account.move.line']._where_calc([
+        query = self.env['account.move.line'].sudo()._search([
             ('parent_state', '=', 'posted'),
             ('company_id', 'child_of', self.env.company.root_id.id)
         ])

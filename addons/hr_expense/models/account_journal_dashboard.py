@@ -18,7 +18,7 @@ class AccountJournal(models.Model):
         ]
 
     def _get_expense_to_pay_query(self):
-        return self.env['hr.expense.sheet']._where_calc(self._prepare_expense_sheet_data_domain())
+        return self.env['hr.expense.sheet'].sudo()._search(self._prepare_expense_sheet_data_domain())
 
     def _fill_sale_purchase_dashboard_data(self, dashboard_data):
         super()._fill_sale_purchase_dashboard_data(dashboard_data)

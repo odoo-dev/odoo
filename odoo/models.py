@@ -1964,11 +1964,9 @@ class BaseModel(metaclass=MetaModel):
             if not field.store:
                 raise ValueError(f"Group by non-stored many2many field: {groupby_spec!r}")
             # special case for many2many fields: prepare a query on the comodel
-            # in order to reuse the mechanism _apply_ir_rules, then inject the
-            # query as an extra condition of the left join
+            # and inject the query as an extra condition of the left join
             comodel = self.env[field.comodel_name]
-            coquery = comodel._where_calc([], active_test=False)
-            comodel._apply_ir_rules(coquery)
+            coquery = comodel.with_context(active_test=False)._search([])
             # LEFT JOIN {field.relation} AS rel_alias ON
             #     alias.id = rel_alias.{field.column1}
             #     AND rel_alias.{field.column2} IN ({coquery})
@@ -4286,7 +4284,11 @@ class BaseModel(metaclass=MetaModel):
             return self
 
         query = Query(self.env, self._table, self._table_sql)
-        self._apply_ir_rules(query, operation)
+        Rule = self.env['ir.rule']
+        security_domain = Rule._compute_domain(self._name, operation)
+        if security_domain:
+            expression.expression(security_domain, self.sudo(), self._table, query)
+
         if not query.where_clause:
             return self
 
@@ -5249,29 +5251,6 @@ class BaseModel(metaclass=MetaModel):
 
         return original_self.concat(*(data['record'] for data in data_list))
 
-    @api.model
-    def _where_calc(self, domain, active_test=True):
-        """Computes the WHERE clause needed to implement an OpenERP domain.
-
-        :param list domain: the domain to compute
-        :param bool active_test: whether the default filtering of records with
-            ``active`` field set to ``False`` should be applied.
-        :return: the query expressing the given domain as provided in domain
-        :rtype: Query
-        """
-        # if the object has an active field ('active', 'x_active'), filter out all
-        # inactive records unless they were explicitly asked for
-        if self._active_name and active_test and self._context.get('active_test', True):
-            # the item[0] trick below works for domain items and '&'/'|'/'!'
-            # operators too
-            if not any(item[0] == self._active_name for item in domain):
-                domain = [(self._active_name, '=', 1)] + domain
-
-        if domain:
-            return expression.expression(domain, self).query
-        else:
-            return Query(self.env, self._table, self._table_sql)
-
     def _check_qorder(self, word):
         if not regex_order.match(word):
             raise UserError(_(
@@ -5281,22 +5260,6 @@ class BaseModel(metaclass=MetaModel):
                 word,
             ))
         return True
-
-    @api.model
-    def _apply_ir_rules(self, query, mode='read'):
-        """Add what's missing in ``query`` to implement all appropriate ir.rules
-          (using the ``model_name``'s rules or the current model's rules if ``model_name`` is None)
-
-        :param query: the current query object
-        """
-        if self.env.su:
-            return
-
-        # apply main rules on the object
-        Rule = self.env['ir.rule']
-        domain = Rule._compute_domain(self._name, mode)
-        if domain:
-            expression.expression(domain, self.sudo(), self._table, query)
 
     def _order_to_sql(self, order: str, query: Query, alias: (str | None) = None,
                       reverse: bool = False) -> SQL:
@@ -5508,9 +5471,26 @@ class BaseModel(metaclass=MetaModel):
             # optimization: no need to query, as no record satisfies the domain
             return self.browse()._as_query()
 
-        query = self._where_calc(domain)
-        self._apply_ir_rules(query, 'read')
+        if self._active_name and self._context.get('active_test', True):
+            # add active flag when needed
+            # the item[0] trick below works for domain items and '&'/'|'/'!'
+            # operators too
+            if not any(item[0] == self._active_name for item in domain):
+                domain = [(self._active_name, '=', 1)] + domain
 
+        # build the query
+        if domain:
+            query = expression.expression(domain, self).query
+        else:
+            query = Query(self.env, self._table, self._table_sql)
+
+        # apply security domain
+        if not self.env.su:
+            security_domain = self.env['ir.rule']._compute_domain(self._name, 'read')
+            if domain:
+                expression.expression(security_domain, self.sudo(), self._table, query)
+
+        # add order and limits
         if order:
             query.order = self._order_to_sql(order, query)
         query.limit = limit

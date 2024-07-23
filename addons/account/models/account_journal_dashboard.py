@@ -677,7 +677,7 @@ class account_journal(models.Model):
             dashboard_data[journal.id]['onboarding'] = onboarding_data[journal.company_id].get(journal_onboarding_map.get(journal.type))
 
     def _get_draft_sales_purchases_query(self):
-        return self.env['account.move']._where_calc([
+        return self.env['account.move'].sudo()._search([
             *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('state', '=', 'draft'),
@@ -686,8 +686,8 @@ class account_journal(models.Model):
 
     def _get_open_sale_purchase_query(self, journal_type):
         assert journal_type in ('sale', 'purchase')
-        return self.env['account.move.line']._where_calc([
-            ('move_id', 'in', self.env['account.move']._where_calc([
+        return self.env['account.move.line'].sudo()._search([
+            ('move_id', 'in', self.env['account.move'].sudo()._search([
                 *self.env['account.move.line']._check_company_domain(self.env.companies),
                 ('journal_id', 'in', self.ids),
                 ('payment_state', 'in', ('not_paid', 'partial')),

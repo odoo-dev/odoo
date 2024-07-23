@@ -1111,7 +1111,7 @@ class expression(object):
             elif operator in ('any', 'not any') and field.store and field.type == 'one2many' and field.auto_join:
                 # use a subquery bypassing access rules and business logic
                 domain = right + field.get_domain_list(model)
-                query = comodel._where_calc(domain)
+                query = comodel.sudo()._search(domain)
                 sql = query.subselect(
                     comodel._field_to_sql(comodel._table, field.inverse_name, query),
                 )
@@ -1217,7 +1217,7 @@ class expression(object):
                         # rewrite condition to match records with/without lines
                         sub_op = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
                         comodel_domain = [(inverse_field.name, '!=', False)]
-                        query = comodel._where_calc(comodel_domain)
+                        query = comodel.sudo()._search(comodel_domain)
                         sql_inverse = comodel._field_to_sql(query.table, inverse_field.name, query)
                         sql = query.subselect(sql_inverse)
                         push(('id', sub_op, sql), model, alias)

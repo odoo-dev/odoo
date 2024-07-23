@@ -729,7 +729,7 @@ class PosConfig(models.Model):
         }).id
 
     def get_limited_products_loading(self, fields):
-        query = self.env['product.product']._where_calc(
+        query = self.env['product.product'].sudo()._search(
             self._get_available_product_domain()
         )
         sql = SQL(
