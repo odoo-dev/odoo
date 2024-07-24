@@ -27,3 +27,17 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+.numpad-qty {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0!important;
+}
+
+.numpad-price {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 0.5rem !important;
+    border-bottom-right-radius: 0.5rem !important;
+}

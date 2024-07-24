@@ -131,8 +131,11 @@ export class ProductScreen extends Component {
         ]).map((button) => ({
             ...button,
             class: `
-                ${colorClassMap[button.value] || ""} 
+                ${colorClassMap[button.value] || ""}
                 ${this.pos.numpadMode === button.value ? "active" : ""}
+                ${button.value === "quantity" ? "numpad-qty mb-0" : ""}
+                ${button.value === "price" ? "numpad-price mt-0" : ""}
+                ${button.value === "discount" ? "my-0 border-top border-bottom" : ""}
             `,
         }));
     }
