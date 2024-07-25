@@ -69,10 +69,7 @@ export class FloorScreen extends Component {
             floorHeight: "100%",
             floorWidth: "100%",
             selectedTableIds: [],
-            isColorPicker: false,
             potentialLink: null,
-            isFloorColorPicker: false,
-            isTableColorPicker: false,
         });
         this.floorMapRef = useRef("floor-map-ref");
         this.floorScrollBox = useRef("floor-map-scroll");
@@ -322,7 +319,6 @@ export class FloorScreen extends Component {
             });
         }
         this.state.selectedTableIds = [];
-        this.state.isColorPicker = false;
     }
     _computePinchHypo(ev, callbackFunction) {
         const touches = ev.touches;
@@ -644,40 +640,34 @@ export class FloorScreen extends Component {
         }
     }
     async renameFloor() {
-        this.dialog.add(
-            TextInputPopup,
-            {
-                startingValue: this.activeFloor.name,
-                title: _t("Floor Name ?"),
-                getPayload: (newName) => {
-                    if (newName !== this.activeFloor.name) {
-                        this.activeFloor.name = newName;
-                        this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
-                            name: newName,
-                        });
-                    }
-                },
-            }
-        );
+        this.dialog.add(TextInputPopup, {
+            startingValue: this.activeFloor.name,
+            title: _t("Floor Name ?"),
+            getPayload: (newName) => {
+                if (newName !== this.activeFloor.name) {
+                    this.activeFloor.name = newName;
+                    this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
+                        name: newName,
+                    });
+                }
+            },
+        });
     }
     async renameTable() {
         if (this.selectedTables.length > 1) {
             return;
         }
-        this.dialog.add(
-            TextInputPopup,
-            {
-                startingValue: this.selectedTables[0].name,
-                title: _t("Table Name ?"),
-                getPayload: (newName) => {
-                    if (newName !== this.selectedTables[0].name) {
-                        this.pos.data.write("restaurant.table", [this.selectedTables[0].id], {
-                            name: newName,
-                        });
-                    }
-                },
-            }
-        );
+        this.dialog.add(TextInputPopup, {
+            startingValue: this.selectedTables[0].name,
+            title: _t("Table Name ?"),
+            getPayload: (newName) => {
+                if (newName !== this.selectedTables[0].name) {
+                    this.pos.data.write("restaurant.table", [this.selectedTables[0].id], {
+                        name: newName,
+                    });
+                }
+            },
+        });
     }
     async changeSeatsNum() {
         const selectedTables = this.selectedTables;
@@ -704,23 +694,12 @@ export class FloorScreen extends Component {
         }
     }
 
-    setColor(color) {
-        if (this.state.isFloorColorPicker) {
-            this.setFloorColor(color);
-        } else if (this.state.isTableColorPicker) {
-            this.setTableColor(color);
-        }
-        this.state.isColorPicker = true;
-    }
-
     setFloorColor(color) {
         this.activeFloor.background_color = color;
         this.pos.data.write("restaurant.floor", [this.activeFloor.id], {
             background_color: color,
             floor_background_image: false,
         });
-        this.state.isFloorColorPicker = false;
-        this.state.isColorPicker = false;
     }
 
     setTableColor(color) {
@@ -729,8 +708,6 @@ export class FloorScreen extends Component {
                 this.pos.data.write("restaurant.table", [table.id], { color: color });
             }
         }
-        this.state.isTableColorPicker = false;
-        this.state.isColorPicker = false;
     }
     _getColors() {
         return {
@@ -777,9 +754,7 @@ export class FloorScreen extends Component {
         } catch {
             this.dialog.add(AlertDialog, {
                 title: _t("Delete Error"),
-                body: _t(
-                    "You cannot delete a floor with orders still in draft for this floor."
-                ),
+                body: _t("You cannot delete a floor with orders still in draft for this floor."),
             });
             return;
         }
@@ -899,7 +874,6 @@ export class FloorScreen extends Component {
                     body: _t("Encountered error when loading image. Please try again."),
                 });
             }
-            this.state.isColorPicker = false;
         }
     }
     getOrderCount(table) {
@@ -924,15 +898,6 @@ export class FloorScreen extends Component {
         }
 
         return table.uiState.orderCount + orderCount.size || 0;
-    }
-    toggleColorPicker(target) {
-        if (target === 'floor') {
-            this.state.isFloorColorPicker = !this.state.isFloorColorPicker;
-            this.state.isTableColorPicker = false;
-        } else if (target === 'table') {
-            this.state.isTableColorPicker = !this.state.isTableColorPicker;
-            this.state.isFloorColorPicker = false;
-        }
     }
 }
 

@@ -3,6 +3,7 @@
     <t t-name="pos_restaurant.FloorScreen">
         <div class="floor-screen screen h-100 position-relative d-flex flex-column flex-nowrap m-0 p-2 bg-300 text-start overflow-hidden">
             <t t-set="editButtonClass" t-value="'btn btn-outline-secondary btn-lg d-flex align-items-center gap-2 lh-lg'" />
+            <t t-set="hasSelectedTable" t-value="selectedTables.length > 0" />
             <div class="d-flex flex-row justify-content-between border-bottom border-top bg-light" t-attf-class=" {{ pos.isEditMode and selectedTables.length != 0 ? 'rounded-top' : 'rounded-3'}} ">
                 <!-- Left Side Div -->
                 <div class="floor-selector d-flex gap-2 p-2 align-items-center">
@@ -26,13 +27,13 @@
                     </button>
 
                     <Dropdown menuClass="'pos-dropdown-menu px-1'">
-                        <button t-attf-class="{{editButtonClass}} " t-att-class="{active: state.isFloorColorPicker}" t-on-click="() => this.toggleColorPicker('floor')">
+                        <button t-attf-class="{{editButtonClass}}">
                             <i class="fa fa-paint-brush fa-fw" role="img" aria-label="Change Floor Background" title="Change Floor Background"/>
                         </button>
                         <t t-set-slot="content">
                             <div class="d-grid gap-1 py-2 px-1" style="grid-template-columns: repeat(3, 1fr);">
                                 <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
-                                    <DropdownItem closingMode="'none'" onSelected="() => this.setColor(this.getLighterShade(color[0]))">
+                                    <DropdownItem closingMode="'none'" onSelected="() => this.setFloorColor(this.getLighterShade(color[0]))">
                                         <button
                                             class="p-4 border-1 rounded"
                                             t-attf-style="background-color: {{this.getLighterShade(color[0])}}"
@@ -82,12 +83,12 @@
                 <button t-attf-class="{{editButtonClass}}" t-else="" t-on-click.stop="() => this.changeShape('square')">
                     <i class="fa fa-square-o" role="img" aria-label="MakeSquare" title="Square Shape" />Shape</button>
                 <Dropdown menuClass="'pos-dropdown-menu px-1'">
-                    <button t-attf-class="{{editButtonClass}}" t-att-class="{active: state.isTableColorPicker}" t-on-click="() => this.toggleColorPicker('table')">
+                    <button t-attf-class="{{editButtonClass}}">
                         <i class="fa fa-paint-brush" role="img" aria-label="Tint" title="Tint" />Fill</button>
                     <t t-set-slot="content">
                         <div class="floor-dropdown-fill d-grid gap-1 py-2 px-1">
                             <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
-                                <DropdownItem closingMode="'none'" onSelected="() => this.setColor(color[1])">
+                                <DropdownItem closingMode="'none'" onSelected="() => this.setTableColor(color[1])">
                                     <button
                                         class="p-4 border-1 rounded"
                                         t-attf-style="background-color: {{color[1]}}"
@@ -97,7 +98,7 @@
                         </div>
                     </t>
                 </Dropdown>
-                <button t-attf-class="{{editButtonClass}}" t-att-disabled="selectedTables.length > 1" t-on-click.stop="rename">
+                <button t-attf-class="{{editButtonClass}}" t-att-disabled="selectedTables.length > 1" t-on-click.stop="() => this.renameTable()">
                     <i class="fa fa-pencil-square-o" role="img" aria-label="Rename" title="Rename" />Rename</button>
                 <button t-attf-class="{{editButtonClass}}" t-on-click.stop="duplicateTable">
                     <i class="fa fa-clone" role="img" aria-label="Copy" title="Copy" />Copy</button>
