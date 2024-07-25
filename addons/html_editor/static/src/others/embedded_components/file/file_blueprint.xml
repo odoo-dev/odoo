@@ -1,0 +1,5 @@
+<templates>
+    <t t-name="html_editor.EmbeddedFileBlueprint">
+        <div class="o_embedded_file_host" t-att-data-embedded-props="behaviorProps" data-embedded="file"/>
+    </t>
+</templates>

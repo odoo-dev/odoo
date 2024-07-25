@@ -1,3 +1,4 @@
+import { isProtected } from "@html_editor/utils/dom_info";
 import { Plugin } from "../plugin";
 
 export class InputPlugin extends Plugin {
@@ -13,12 +14,18 @@ export class InputPlugin extends Plugin {
 
     onBeforeInput(ev) {
         this.dispatch("HISTORY_STAGE_SELECTION");
+        if (isProtected(ev.target)) {
+            return;
+        }
         for (const { handler } of this.resources.onBeforeInput || []) {
             handler(ev);
         }
     }
 
     onInput(ev) {
+        if (isProtected(ev.target)) {
+            return;
+        }
         this.dispatch("ADD_STEP");
         for (const { handler } of this.resources.onInput || []) {
             handler(ev);

@@ -1,0 +1,19 @@
+[data-embedded="file"] {
+    margin-bottom: 5px;
+    border-radius: 5px;
+    background-color: $o-gray-100;
+    outline: 1px solid $o-gray-300;
+    outline-offset: -1px;
+    display: flex;
+    padding: 5px;
+
+    [data-embedded-editable] {
+        background-color: white;
+    }
+
+    .o_embedded_file_name_container {
+        &:hover i {
+            visibility: visible !important;
+        }
+    }
+}
