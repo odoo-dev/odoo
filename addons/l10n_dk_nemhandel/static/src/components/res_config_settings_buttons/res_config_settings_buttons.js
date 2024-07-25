@@ -91,11 +91,11 @@ class NemhandelSettingsButtons extends Component {
 
     deregister() {
         if (this.ediMode === 'demo') {
-            this._callConfigMethod("button_deregister_l10n_dk_nemhandel_participant");
+            this._callConfigMethod("button_l10n_dk_nemhandel_deregister_participant");
         } else {
             this.showConfirmation(
                 "This will delete your Nemhandel registration.",
-                "button_deregister_l10n_dk_nemhandel_participant"
+                "button_l10n_dk_nemhandel_deregister_participant"
             )
         }
     }

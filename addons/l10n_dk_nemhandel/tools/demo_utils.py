@@ -117,9 +117,9 @@ def _mock_update_user_data(func, self, *args, **kwargs):
 _demo_behaviour = {
     '_make_request': _mock_make_request,
     'button_l10n_dk_nemhandel_check_partner_endpoint': _mock_button_verify_partner_endpoint,
-    'button_create_l10n_dk_nemhandel_proxy_user': _mock_user_creation,
-    'button_deregister_l10n_dk_nemhandel_participant': _mock_deregister_participant,
-    'button_update_l10n_dk_nemhandel_user_data': _mock_update_user_data,
+    'button_l10n_dk_nemhandel_create_proxy_user': _mock_user_creation,
+    'button_l10n_dk_nemhandel_deregister_participant': _mock_deregister_participant,
+    'button_l10n_dk_nemhandel_update_user_data': _mock_update_user_data,
 }
 
 # -------------------------------------------------------------------------

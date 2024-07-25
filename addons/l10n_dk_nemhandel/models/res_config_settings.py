@@ -122,60 +122,81 @@ class ResConfigSettings(models.TransientModel):
 
         c = ('/home/odoo/Documents/l10n_dk/temp.pem', '/home/odoo/Documents/l10n_dk/private.pem')
         headers = {'Accept': 'application/json'}
-        a = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/list/keytypes', cert=c, headers=headers).json()
+        a = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/list', cert=c, headers=headers).json()
         #
-        participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
+        if a and a.get('Participants'):
+            p_id = a['Participants'][0].get('Id')
+
+            g = requests.delete(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/{p_id}', cert=c, headers=headers)
+            print(g.text)
+        # participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
         #
         # b = [hey.get('OwnerService').get('ProfilingId') for hey in participant_json.get('ParticipantBindings', [{}])]
-
-
-        agreement_response = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business/agreement', cert=c, headers=headers, json={})
+        # sec = requests.get(
+        #     'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business', cert=c,
+        #     headers=headers)
+        # business = requests.put(
+        #     'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business',
+        #     cert=c,
+        #     headers=headers,
+        #     json={
+        #         'Id': 0,
+        #         'Name': "Odoo nemhandel",
+        #         'ContactName': 'Odoo Support Nemhandel',
+        #         'ContactEmail': 'gawa@odoo.com',
+        #         'Key': OWNERBUSINESSKEY,
+        #         'ApprovedUsersOnly': 'true'
+        #     }
+        # )
+        # agreement_response = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business/agreement', cert=c, headers=headers, json={})
 
         # DocumentTypeID: 5 Invoice 5 CreditNote
         # For profiles, id 3 = "Simple invoicing without prior order. Customer can receive Invoice, Credit note and Reminder. Supplier can receive Receipt (negative only)."
         # roles: 1 Customer, 2 Supplier
-        payload_json_profiling = {
-            'Id': 0,  # 0 => creation. Else, we update
-            'OwnerBusinessKey': str(OWNERBUSINESSKEY),
-            'NetworkTypeId': "1",
-            'Name': "First Profile Test",
-            'ProfileRoles': [
-                {
-                    'Id': "0",
-                    'DocumentStandardId': "2",
-                    'ProfileId': "3",
-                    'RoleId': "1"
-                },
+        # payload_json_profiling = {
+        #     'Id': 0,  # 0 => creation. Else, we update
+        #     'OwnerBusinessKey': str(OWNERBUSINESSKEY),
+        #     'NetworkTypeId': "1",
+        #     'Name': "First Profile Test",
+        #     'ProfileRoles': [
+        #         {
+        #             'Id': "0",
+        #             'DocumentStandardId': "2",
+        #             'ProfileId': "3",
+        #             'RoleId': "1"
+        #         },
+        #         {
+        #             'Id': "0",
+        #             'DocumentStandardId': "2",
+        #             'ProfileId': "30",
+        #             'RoleId': "1"
+        #         }
+        #     ]
+        #
+        # }
+        # create_profiling = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling', cert=c, headers=headers, json=payload_json_profiling)
+        # profiling = create_profiling.headers.get('Location')
 
-            ]
-
-        }
-        create_profiling = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling', cert=c, headers=headers, json=payload_json_profiling)
-        profiling = create_profiling.headers.get('Location')
-
-        meuh = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling/list', cert=c, headers=headers)
-        profiling_id = '150819'  # create_profiling.headers.get('Location').split('/')[-1]
+        # meuh = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling/list', cert=c, headers=headers)
+        profiling_id = '150889'  # create_profiling.headers.get('Location').split('/')[-1]
 
         # profiles_json = requests.get(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/profiling/{b[1]}', cert=c, headers=headers).json()
-        base_url = "https://www.test.odoo.com/"
-        payload_json_service = {
-            'Id': 0,  # 0 => creation. Else, we update
-            'OwnerBusinessKey': OWNERBUSINESSKEY,
-            'NetworkTypeId': '1',
-            'EndpointReference': base_url + "/api/nemhandel/1/as4",
-            'Certificate': "C = BE, ST = BW, L = Ramilles, O = Odoo SA, CN = test.nemhandel.odoo.com, emailAddress = gawa@odoo.com",
-            'ProfilingId': profiling_id,
-            'IsTest': self.l10n_dk_nemhandel_edi_mode != 'prod',
-            'ContactName': 'Nemhandel Odoo test',
-            'ContactEmail': 'timov20942@modotso.com',
-
-        }
-
-        create_service = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/service', cert=c, headers=headers, json=payload_json_service)
-
-        ah = 'meuh'
-        op = create_service.json()
-        dqf = ''
+        # base_url = "http://www.test.api.odoo.com/"
+        # payload_json_service = {
+        #     'Id': 0,  # 0 => creation. Else, we update
+        #     'OwnerBusinessKey': OWNERBUSINESSKEY,
+        #     'NetworkTypeId': '1',
+        #     'EndpointReference': base_url + "api/nemhandel/1/as4/receive",
+        #     'Certificate': "C = BE, ST = BW, L = Ramilles, O = Odoo SA, CN = test.nemhandel.odoo.com, emailAddress = gawa@odoo.com",
+        #     'ProfilingId': profiling_id,
+        #     'IsTest': "true",
+        #     'ContactName': 'Nemhandel Odoo test',
+        #     'ContactEmail': 'timov20942@modotso.com',
+        #
+        # }
+        #
+        # create_service = requests.put('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/service', cert=c, headers=headers, json=payload_json_service)
+        service_id = '142697'
 
 
 
@@ -204,10 +225,15 @@ class ResConfigSettings(models.TransientModel):
         # it is important to keep these two in sync, so commit before activating.
         if not tools.config['test_enable'] and not modules.module.current_test:
             self.env.cr.commit()
+        vat = company.vat
+        if vat[:2].isalpha():
+            vat = vat[2:]
 
         company_details = {
             'nemhandel_phone_number': self.l10n_dk_nemhandel_phone_number,
             'nemhandel_contact_email': self.l10n_dk_nemhandel_contact_email,
+            'nemhandel_company_cvr': vat,
+            'nemhandel_company_name': company.name,
         }
 
         params = {
@@ -273,10 +299,10 @@ class ResConfigSettings(models.TransientModel):
             endpoint='/api/nemhandel/1/verify_phone_number',
             params={'verification_code': self.l10n_dk_nemhandel_verification_code},
         )
-        self.l10n_dk_nemhandel_proxy_state = 'pending'
+        self.l10n_dk_nemhandel_proxy_state = 'active'
         self.l10n_dk_nemhandel_verification_code = False
         # in case they have already been activated on the IAP side
-        self.env.ref('l10n_dk_nemhandel.ir_cron_l10n_dk_nemhandel_get_participant_status')._trigger()
+        # self.env.ref('l10n_dk_nemhandel.ir_cron_l10n_dk_nemhandel_get_participant_status')._trigger()
 
     def button_l10n_dk_nemhandel_cancel_registration(self):
         """
@@ -302,7 +328,7 @@ class ResConfigSettings(models.TransientModel):
         self.l10n_dk_nemhandel_edi_user.unlink()
 
     @handle_demo
-    def button_l10n_dk_nemhandel_participant(self):
+    def button_l10n_dk_nemhandel_deregister_participant(self):
         """
         Deregister the edi user from Nemhandel network
         """
@@ -320,6 +346,6 @@ class ResConfigSettings(models.TransientModel):
         if not tools.config['test_enable'] and not modules.module.current_test:
             self.env.cr.commit()
 
-        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/peppol/1/cancel_l10n_dk_nemhandel_registration')
+        self._call_l10n_dk_nemhandel_proxy(endpoint='/api/nemhandel/1/cancel_nemhandel_registration')
         self.l10n_dk_nemhandel_proxy_state = 'not_registered'
         self.l10n_dk_nemhandel_edi_user.unlink()

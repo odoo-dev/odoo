@@ -43,9 +43,9 @@ class ResPartner(models.Model):
         tracking=True,
         selection=[
             ('GLN', "EAN/GLN"),
-            ('CVR', "CVR"),
+            ('DK:CVR', "CVR"),
             ('IBAN', "IBAN"),
-            ('SE', "SE"),
+            ('DK:SE', "SE"),
         ],
     )
     l10n_dk_nemhandel_identifier_value = fields.Char(

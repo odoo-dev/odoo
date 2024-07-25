@@ -16,7 +16,7 @@
                     <button type="button"
                             class="btn btn-secondary me-1"
                             t-on-click="deregister"
-                            t-if="proxyState === 'active' and migrationPrepared === false">
+                            t-if="proxyState === 'active'">
                             <t t-out="deregisterUserButtonLabel"/>
                     </button>
                 </div>
