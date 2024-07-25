@@ -899,6 +899,34 @@ export class FloorScreen extends Component {
 
         return table.uiState.orderCount + orderCount.size || 0;
     }
+    setColor(hasSelectedTable, color) {
+        if (hasSelectedTable) {
+            return this.setTableColor(color);
+        } else {
+            return this.setFloorColor(color);
+        }
+    }
+    rename(hasSelectedTable) {
+        if (hasSelectedTable) {
+            return this.renameTable();
+        } else {
+            return this.renameFloor();
+        }
+    }
+    duplicate(hasSelectedTable) {
+        if (hasSelectedTable) {
+            return this.duplicateTable();
+        } else {
+            return this.duplicateFloor();
+        }
+    }
+    delete(hasSelectedTable) {
+        if (hasSelectedTable) {
+            return this.deleteTable();
+        } else {
+            return this.deleteFloor();
+        }
+    }
 }
 
 registry.category("pos_screens").add("FloorScreen", FloorScreen);

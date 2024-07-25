@@ -25,7 +25,14 @@
                         <i class="fa fa-plus-circle" role="img" aria-label="Delete" title="Delete"/>
                         Add Table
                     </button>
-
+                    <t t-if="hasSelectedTable">
+                        <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum">
+                            <i class="fa fa-user" role="img" aria-label="Seats" title="Seats" />Seats</button>
+                        <button t-attf-class="{{editButtonClass}}" t-if="selectedTables.some((t) => t.shape === 'square')" t-on-click.stop="() => this.changeShape('round')">
+                            <i class="fa fa-circle-o" role="img" aria-label="MakeRound" title="Round Shape" />Shape</button>
+                        <button t-attf-class="{{editButtonClass}}" t-else="" t-on-click.stop="() => this.changeShape('square')">
+                            <i class="fa fa-square-o" role="img" aria-label="MakeSquare" title="Square Shape" />Shape</button>
+                    </t>
                     <Dropdown menuClass="'pos-dropdown-menu px-1'">
                         <button t-attf-class="{{editButtonClass}}">
                             <i class="fa fa-paint-brush fa-fw" role="img" aria-label="Change Floor Background" title="Change Floor Background"/>
@@ -33,10 +40,11 @@
                         <t t-set-slot="content">
                             <div class="d-grid gap-1 py-2 px-1" style="grid-template-columns: repeat(3, 1fr);">
                                 <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
-                                    <DropdownItem closingMode="'none'" onSelected="() => this.setFloorColor(this.getLighterShade(color[0]))">
+                                    <t t-set="adaptColor" t-value="!hasSelectedTable ? this.getLighterShade(color[0]) : color[0]" />
+                                    <DropdownItem closingMode="'none'" onSelected="() => this.setColor(hasSelectedTable, adaptColor)">
                                         <button
                                             class="p-4 border-1 rounded"
-                                            t-attf-style="background-color: {{this.getLighterShade(color[0])}}"
+                                            t-attf-style="background-color: {{adaptColor}}"
                                         />
                                     </DropdownItem>
                                 </t>
@@ -50,14 +58,14 @@
                             </div>
                         </t>
                     </Dropdown>
-                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="renameFloor">
-                        <i class="fa fa-pencil-square-o fa-fw" role="img" aria-label="Rename Floor" title="Rename Floor"/>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="() => this.rename(hasSelectedTable)">
+                        <i class="fa fa-pencil-square-o fa-fw" role="img" aria-label="Rename" title="Rename"/>
                     </button>
-                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="duplicateFloor">
-                        <i class="fa fa-copy fa-fw" role="img" aria-label="Clone Floor" title="Clone Floor"/>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="() => this.duplicate(hasSelectedTable)">
+                        <i class="fa fa-copy fa-fw" role="img" aria-label="Clone" title="Clone"/>
                     </button>
-                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="deleteFloor">
-                        <i class="fa fa-trash fa-fw" role="img" aria-label="Delete Floor" title="Delete Floor"/>
+                    <button t-attf-class="{{editButtonClass}} " t-on-click.stop="() => this.delete(hasSelectedTable)">
+                        <i class="fa fa-trash fa-fw" role="img" aria-label="Delete" title="Delete"/>
                     </button>
                     <button t-attf-class="btn btn-primary ms-2" t-on-click.stop="closeEditMode">
                         Save
@@ -74,36 +82,6 @@
                     <i class="fa fa-link" role="img" aria-label="Merge" title="Merge" />Merge</button>
                 <button t-attf-class="ms-auto {{editButtonClass}}" t-on-click.stop="stopOrderTransfer">
                     <i class="fa fa-times" role="img" aria-label="Close" title="Close" />Discard</button>
-            </div>
-            <div t-if="pos.isEditMode and selectedTables.length != 0" class="edit-buttons d-flex gap-2 p-2 border-bottom bg-view overflow-x-auto w-100 rounded-bottom">
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum">
-                    <i class="fa fa-user" role="img" aria-label="Seats" title="Seats" />Seats</button>
-                <button t-attf-class="{{editButtonClass}}" t-if="selectedTables.some((t) => t.shape === 'square')" t-on-click.stop="() => this.changeShape('round')">
-                    <i class="fa fa-circle-o" role="img" aria-label="MakeRound" title="Round Shape" />Shape</button>
-                <button t-attf-class="{{editButtonClass}}" t-else="" t-on-click.stop="() => this.changeShape('square')">
-                    <i class="fa fa-square-o" role="img" aria-label="MakeSquare" title="Square Shape" />Shape</button>
-                <Dropdown menuClass="'pos-dropdown-menu px-1'">
-                    <button t-attf-class="{{editButtonClass}}">
-                        <i class="fa fa-paint-brush" role="img" aria-label="Tint" title="Tint" />Fill</button>
-                    <t t-set-slot="content">
-                        <div class="floor-dropdown-fill d-grid gap-1 py-2 px-1">
-                            <t t-foreach="Object.entries(getColors())" t-as="color" t-key="color[0]">
-                                <DropdownItem closingMode="'none'" onSelected="() => this.setTableColor(color[1])">
-                                    <button
-                                        class="p-4 border-1 rounded"
-                                        t-attf-style="background-color: {{color[1]}}"
-                                    />
-                                </DropdownItem>
-                            </t>
-                        </div>
-                    </t>
-                </Dropdown>
-                <button t-attf-class="{{editButtonClass}}" t-att-disabled="selectedTables.length > 1" t-on-click.stop="() => this.renameTable()">
-                    <i class="fa fa-pencil-square-o" role="img" aria-label="Rename" title="Rename" />Rename</button>
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="duplicateTable">
-                    <i class="fa fa-clone" role="img" aria-label="Copy" title="Copy" />Copy</button>
-                <button t-attf-class="{{editButtonClass}}" t-on-click.stop="deleteTable">
-                    <i class="fa fa-trash" role="img" aria-label="Delete" title="Delete" />Delete</button>
             </div>
             <div t-ref="floor-map-scroll" class="overflow-scroll flex-grow-1 flex-shrink-1 flex-basis-0 w-auto rounded-3 mt-2" t-attf-style="background: {{activeFloor?.background_color}}"> 
                 <div t-on-click="onClickFloorMap" t-on-touchstart="_onPinchStart" t-on-touchmove="_onPinchMove" t-on-touchend="_onPinchEnd"
