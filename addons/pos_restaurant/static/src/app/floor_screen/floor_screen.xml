@@ -4,6 +4,7 @@
         <div class="floor-screen screen h-100 position-relative d-flex flex-column flex-nowrap m-0 p-2 bg-300 text-start overflow-hidden">
             <t t-set="editButtonClass" t-value="'btn btn-outline-secondary btn-lg d-flex align-items-center gap-2 lh-lg'" />
             <t t-set="hasSelectedTable" t-value="selectedTables.length > 0" />
+            <t t-set="firstSelectedTable" t-value="selectedTables.length ? selectedTables[0] : null" />
             <div class="d-flex flex-row justify-content-between border-bottom border-top bg-light" t-attf-class=" {{ pos.isEditMode and selectedTables.length != 0 ? 'rounded-top' : 'rounded-3'}} ">
                 <!-- Left Side Div -->
                 <div class="floor-selector d-flex gap-2 p-2 align-items-center">
@@ -21,21 +22,26 @@
                 </div>
                 <!-- Right Side Div -->
                 <div t-if="pos.isEditMode" class="edit-buttons d-flex gap-2 p-2 overflow-x-auto">
-                    <button t-attf-class="{{editButtonClass}} me-2" t-on-click.stop="createTable">
-                        <i class="fa fa-plus-circle fa-fw" role="img" aria-label="Delete" title="Delete"/>
-                        Add Table
-                    </button>
-                    <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum" t-att-disabled="!hasSelectedTable">
-                        <i class="fa fa-user fa-fw" role="img" aria-label="Seats" title="Seats" />
-                    </button>
-                    <t t-if="selectedTables.some((t) => t.shape === 'square')">
-                        <button t-attf-class="{{editButtonClass}}" t-on-click.stop="() => this.changeShape('round')" t-att-disabled="!hasSelectedTable">
-                            <i class="fa fa-circle-o fa-fw" role="img" aria-label="Make Round" title="Round Shape" />
+                    <t t-if="hasSelectedTable">
+                        <span>Table <t t-esc="firstSelectedTable.name" /></span>
+                        <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum" t-att-disabled="!hasSelectedTable">
+                            <i class="fa fa-user fa-fw" role="img" aria-label="Seats" title="Seats" />
                         </button>
+                        <t t-if="selectedTables.some((t) => t.shape === 'square')">
+                            <button t-attf-class="{{editButtonClass}}" t-on-click.stop="() => this.changeShape('round')" t-att-disabled="!hasSelectedTable">
+                                <i class="fa fa-circle-o fa-fw" role="img" aria-label="Make Round" title="Round Shape" />
+                            </button>
+                        </t>
+                        <t t-else="">
+                            <button t-attf-class="{{editButtonClass}}" t-on-click.stop="() => this.changeShape('square')" t-att-disabled="!hasSelectedTable">
+                                <i class="fa fa-square-o fa-fw" role="img" aria-label="Make Square" title="Square Shape" />
+                            </button>
+                        </t>
                     </t>
                     <t t-else="">
-                        <button t-attf-class="{{editButtonClass}}" t-on-click.stop="() => this.changeShape('square')" t-att-disabled="!hasSelectedTable">
-                            <i class="fa fa-square-o fa-fw" role="img" aria-label="Make Square" title="Square Shape" />
+                        <button t-attf-class="{{editButtonClass}}" t-on-click.stop="createTable">
+                            <i class="fa fa-plus-circle fa-fw" role="img" aria-label="Delete" title="Delete"/>
+                            Add Table
                         </button>
                     </t>
                     <Dropdown menuClass="'pos-dropdown-menu px-1'">
