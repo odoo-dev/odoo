@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import io
+import requests
 import zipfile
 
 from odoo import http, _
@@ -62,3 +63,15 @@ class AccountDocumentDownloadController(http.Controller):
             zip_content = _build_zip_from_data(docs_data)
             headers = _get_headers(_('invoices') + '.zip', 'zip', zip_content)
             return request.make_response(zip_content, headers)
+
+    @http.route('/account/get_file_from_url', type='json', auth='public')
+    def get_file_from_url(self, url):
+        response = requests.get(url, timeout=10)
+        content_disposition = response.headers.get('Content-Disposition', '').split('; ')
+        if response.status_code == 200 and content_disposition[0] == 'attachment':
+            file_name = len(content_disposition) > 1 and content_disposition[1].replace('filename=', '')
+            return {
+                'content': response.content,
+                'content_type': response.headers.get('Content-Type'),
+                'file_name': file_name or "document",
+            }
