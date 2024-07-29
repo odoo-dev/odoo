@@ -1,7 +1,7 @@
-import { Component, onWillStart, status, useState } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
-import { utils as uiUtils } from "@web/core/ui/ui_service";
 import { initializeDesignTabCss } from "@mass_mailing/js/mass_mailing_design_constants";
+import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
+import { utils as uiUtils } from "@web/core/ui/ui_service";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} TemplateInfos
@@ -27,33 +27,26 @@ export class MassMailingTemplateSelector extends Component {
             themes: [],
         });
         this.orm = useService("orm");
-
+        let allTemplates;
         onWillStart(async () => {
-            const templatesParams = await this.getTemplatesParams();
-            // todo: ask web team if doing this check is always necessary?
-            if (status(this) === "destroyed") {
-                return;
-            }
-            const themeParams = await this.getThemeParams();
-
-            if (!themeParams?.length) {
-                return;
-            }
-
-            this.state.templates = templatesParams;
-            this.state.themes = themeParams;
+            [allTemplates, this.state.themes] = await Promise.all([
+                this.loadTemplates(),
+                this.loadTheme(),
+            ]);
         });
-        // todo: implement this: useRecordObserver
-        // useRecordObserver((record) => {
-        //     if (record.data.mailing_model_id && this.wysiwyg) {
-        //         this._hideIrrelevantTemplates(record);
-        //     }
-        // });
+
+        useEffect(
+            (mailingModelId) => {
+                this.state.templates = allTemplates.filter(
+                    (template) => template.modelId === mailingModelId
+                );
+            },
+            () => [this.props.mailingModelId]
+        );
     }
 
-    async getTemplatesParams() {
+    async loadTemplates() {
         // Filter the fetched templates based on the current model
-        // todo: implement this.props.filterTemplates
         const args = this.props.filterTemplates
             ? [[["mailing_model_id", "=", this.props.mailingModelId]]]
             : [];
@@ -64,30 +57,24 @@ export class MassMailingTemplateSelector extends Component {
             "action_fetch_favorites",
             args
         );
-        if (status(this) === "destroyed") {
-            return;
-        }
-        return favoritesTemplates.map((templates) => {
+        return favoritesTemplates.map((template) => {
             return {
-                id: templates.id,
-                modelId: templates.mailing_model_id[0],
-                modelName: templates.mailing_model_id[1],
-                name: `template_${templates.id}`,
+                id: template.id,
+                modelId: template.mailing_model_id[0],
+                modelName: template.mailing_model_id[1],
+                name: `template_${template.id}`,
                 nowrap: true,
-                subject: templates.subject,
-                template: templates.body_arch,
-                userId: templates.user_id[0],
-                userName: templates.user_id[1],
+                subject: template.subject,
+                template: template.body_arch,
+                userId: template.user_id[0],
+                userName: template.user_id[1],
             };
         });
     }
-    async getThemeParams() {
+    async loadTheme() {
         const themesHTML = await this.orm.call("ir.ui.view", "render_public_asset", [
             "mass_mailing.email_designer_themes",
         ]);
-        if (status(this) === "destroyed") {
-            return;
-        }
         const themesEls = new DOMParser().parseFromString(themesHTML, "text/html").body.children;
 
         // Initialize theme parameters.
