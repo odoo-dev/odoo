@@ -207,8 +207,6 @@ export class MassMailingHtmlField extends HtmlField {
         await this.updateValue(templateHTML);
         this.state.showMassMailingTemplateSelector = false;
 
-        // $editable.filter(":empty").attr("contenteditable", false);
-
         // todo: to implement addClass(themeParams.className);
         // this.wysiwyg.$iframeBody
         //     .closest("body")
@@ -284,8 +282,14 @@ export class MassMailingHtmlField extends HtmlField {
 
                 // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
                 const subEditable = this.editor.editable.querySelector(".o_editable");
-                if (subEditable?.getAttribute("data-editor-message") === null) {
-                    subEditable.setAttribute("data-editor-message", "DRAG BUILDING BLOCKS HERE");
+                if (subEditable) {
+                    if (subEditable.getAttribute("data-editor-message") === null) {
+                        subEditable.setAttribute(
+                            "data-editor-message",
+                            "DRAG BUILDING BLOCKS HERE"
+                        );
+                    }
+                    subEditable.setAttribute("contenteditable", false);
                 }
             },
             // copyCss: true,
