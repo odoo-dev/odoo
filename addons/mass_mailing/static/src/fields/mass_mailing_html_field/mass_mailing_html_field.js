@@ -207,12 +207,6 @@ export class MassMailingHtmlField extends HtmlField {
         await this.updateValue(templateHTML);
         this.state.showMassMailingTemplateSelector = false;
 
-        // todo: to implement addClass(themeParams.className);
-        // this.wysiwyg.$iframeBody
-        //     .closest("body")
-        //     .removeClass(this._themeClassNames)
-        //     .addClass(themeParams.className);
-
         // todo: to implement: this.fieldConfig.selectedTheme = templateInfos;
         // this.fieldConfig.selectedTheme = templateInfos;
 
