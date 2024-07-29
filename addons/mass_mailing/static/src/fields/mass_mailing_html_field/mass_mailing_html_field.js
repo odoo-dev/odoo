@@ -260,6 +260,8 @@ export class MassMailingHtmlField extends HtmlField {
             iframe: true,
             onIframeLoaded: async (doc, editor) => {
                 this.state.iframeDocument = doc;
+                doc.body.classList.add("editor_enable");
+                doc.body.classList.add("o_mass_mailing_iframe");
                 const iframeBundle = await this.iframeBundle;
                 const massMailingBundle = await this.massMailingBundle;
                 function addStyle(href) {
