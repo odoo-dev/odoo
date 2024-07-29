@@ -13,6 +13,46 @@ import { useService } from "@web/core/utils/hooks";
  * @property {[function]} get_image_info
  */
 
+/**
+ * Swap the previous theme's default images with the new ones.
+ * (Redefine the `src` attribute of all images in a $container, depending on the theme parameters.)
+ *
+ * @private
+ * @param {Object} themeParams
+ * @param {JQuery} $container
+ */
+export function switchImages(themeParams, $container) {
+    if (!themeParams) {
+        return;
+    }
+    for (const img of $container.find("img")) {
+        const $img = $(img);
+        const src = $img.attr("src");
+        $img.removeAttr("loading");
+
+        let m = src.match(/^\/web\/image\/\w+\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
+        if (!m) {
+            m = src.match(
+                /^\/\w+\/static\/src\/img\/(?:theme_[a-z]+\/)?s_default_image_(.+)\.[a-z]+$/
+            );
+        }
+        if (!m) {
+            return;
+        }
+
+        if (themeParams.get_image_info) {
+            const file = m[1];
+            const imgInfo = themeParams.get_image_info(file);
+
+            const src = imgInfo.format
+                ? `/${imgInfo.module}/static/src/img/theme_${themeParams.name}/s_default_image_${file}.${imgInfo.format}`
+                : `/web/image/${imgInfo.module}.s_default_image_theme_${themeParams.name}_${file}`;
+
+            $img.attr("src", src);
+        }
+    }
+}
+
 export class MassMailingTemplateSelector extends Component {
     static template = "mass_mailing.MassMailingTemplateSelector";
     static props = {
@@ -157,49 +197,9 @@ export class MassMailingTemplateSelector extends Component {
 
         const $contents = templateInfos.template;
         $newWrapperContent.append($contents);
-        this.switchImages(templateInfos, $newWrapperContent);
+        switchImages(templateInfos, $newWrapperContent);
         initializeDesignTabCss($newLayout);
 
         return $newLayout[0].outerHTML;
-    }
-
-    /**
-     * Swap the previous theme's default images with the new ones.
-     * (Redefine the `src` attribute of all images in a $container, depending on the theme parameters.)
-     *
-     * @private
-     * @param {TemplateInfos} templateInfos
-     * @param {JQuery} $container
-     */
-    switchImages(templateInfos, $container) {
-        if (!templateInfos) {
-            return;
-        }
-        for (const img of $container.find("img")) {
-            const $img = $(img);
-            const src = $img.attr("src");
-            $img.removeAttr("loading");
-
-            let m = src.match(/^\/web\/image\/\w+\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
-            if (!m) {
-                m = src.match(
-                    /^\/\w+\/static\/src\/img\/(?:theme_[a-z]+\/)?s_default_image_(.+)\.[a-z]+$/
-                );
-            }
-            if (!m) {
-                return;
-            }
-
-            if (templateInfos.get_image_info) {
-                const file = m[1];
-                const imgInfo = templateInfos.get_image_info(file);
-
-                const src = imgInfo.format
-                    ? `/${imgInfo.module}/static/src/img/theme_${templateInfos.name}/s_default_image_${file}.${imgInfo.format}`
-                    : `/web/image/${imgInfo.module}.s_default_image_theme_${templateInfos.name}_${file}`;
-
-                $img.attr("src", src);
-            }
-        }
     }
 }
