@@ -12,7 +12,7 @@
                     <i class="fa fa-star text-warning me-2"/>
                     <span class="text-truncate" t-esc="template.subject"/>
                     <div class="ms-auto">
-                        <i class="o_mail_template_remove_favorite fa fa-trash ps-2 me-1" t-att-data-id="template.id" title="Remove from Templates"/>
+                        <i class="o_mail_template_remove_favorite fa fa-trash ps-2 me-1" title="Remove from Templates" t-on-click.prevent.stop="() => this.deleteTemplate(template.id)"/>
                         <img t-if="template.userId" t-attf-src="/web/image/res.users/#{template.userId}/avatar_128" t-att-title="template.userName"/>
                     </div>
                 </div>
