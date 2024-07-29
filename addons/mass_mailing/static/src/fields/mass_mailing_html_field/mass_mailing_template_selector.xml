@@ -4,9 +4,8 @@
             Click on the ⭐ next to the subject to save this mailing as a <span t-esc="this.props.mailingModelName"/> template
         </div>
         <div class="o_mailing_template_preview_wrapper d-inline-block w-100">
-            <div t-foreach="this.state.templates" t-as="template" t-key="template_index"
+            <div t-foreach="this.state.templates" t-as="template" t-key="template.id"
                 class="o_mail_template_preview d-inline-block dropdown-item"
-                t-att-id="template.name" t-att-model-id="template.modelId"
                 t-on-click.stop.prevent="() => this.selectTemplate(template)">
                 <div class="d-inline-flex flex-row align-items-center text-white border px-2 py-2 w-100">
                     <i class="fa fa-star text-warning me-2"/>
@@ -19,8 +18,8 @@
             </div>
         </div>
         <div class="d-inline-block w-100">
-            <a t-foreach="this.state.themes" t-as="theme" t-key="theme_index"
-                t-att-id="theme.name" role="menuitem" href="#" class="dropdown-item px-4"
+            <a t-foreach="this.state.themes" t-as="theme" t-key="theme.name"
+                role="menuitem" href="#" class="dropdown-item px-4"
                 t-on-click.stop.prevent="() => this.selectTemplate(theme)">
                 <div class="o_thumb small mb-2"  t-attf-style="background-image: url(#{theme.img}_small.png)"/>
                 <div class="o_thumb large mb-2" t-attf-style="background-image: url(#{theme.img}_large.png)"/>
