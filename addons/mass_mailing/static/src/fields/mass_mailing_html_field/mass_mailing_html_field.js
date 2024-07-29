@@ -4,53 +4,13 @@ import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { Deferred, Mutex } from "@web/core/utils/concurrency";
 import weUtils from "@web_editor/js/common/utils";
-import { MassMailingTemplateSelector } from "./mass_mailing_template_selector";
+import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 
-const legacyEventToNewEvent = {
-    historyStep: "ADD_STEP",
-    historyUndo: "HISTORY_UNDO",
-    historyRedo: "HISTORY_REDO",
-};
-
-/**
- * Swap the previous theme's default images with the new ones.
- * (Redefine the `src` attribute of all images in a $container, depending on the theme parameters.)
- *
- * @private
- * @param {Object} themeParams
- * @param {JQuery} $container
- */
-function switchImages(themeParams, $container) {
-    if (!themeParams) {
-        return;
-    }
-    for (const img of $container.find("img")) {
-        const $img = $(img);
-        const src = $img.attr("src");
-        $img.removeAttr("loading");
-
-        let m = src.match(/^\/web\/image\/\w+\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
-        if (!m) {
-            m = src.match(
-                /^\/\w+\/static\/src\/img\/(?:theme_[a-z]+\/)?s_default_image_(.+)\.[a-z]+$/
-            );
-        }
-        if (!m) {
-            return;
-        }
-
-        if (themeParams.get_image_info) {
-            const file = m[1];
-            const imgInfo = themeParams.get_image_info(file);
-
-            const src = imgInfo.format
-                ? `/${imgInfo.module}/static/src/img/theme_${themeParams.name}/s_default_image_${file}.${imgInfo.format}`
-                : `/web/image/${imgInfo.module}.s_default_image_theme_${themeParams.name}_${file}`;
-
-            $img.attr("src", src);
-        }
-    }
-}
+// const legacyEventToNewEvent = {
+//     historyStep: "ADD_STEP",
+//     historyUndo: "HISTORY_UNDO",
+//     historyRedo: "HISTORY_REDO",
+// };
 export class MassMailingHtmlField extends HtmlField {
     static template = "mass_mailing.MassMailingHtmlField";
     static components = { ...HtmlField.components, LazyComponent, MassMailingTemplateSelector };
@@ -125,7 +85,7 @@ export class MassMailingHtmlField extends HtmlField {
                     },
 
                     addEventListener: (legacyEvent) => {
-                        const event = legacyEventToNewEvent[legacyEvent];
+                        // const event = legacyEventToNewEvent[legacyEvent];
                         // if (!event) {
                         //     throw new Error(`Missing event to map ${legacyEvent}`);
                         // }
