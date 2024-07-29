@@ -118,7 +118,6 @@ class ResConfigSettings(models.TransientModel):
 
         company = self.company_id
         edi_proxy_client = self.env['account_edi_proxy_client.user']
-        edi_identification = edi_proxy_client._get_proxy_identification(company, 'l10n_dk_nemhandel')
 
         c = ('/home/odoo/Documents/l10n_dk/temp.pem', '/home/odoo/Documents/l10n_dk/private.pem')
         headers = {'Accept': 'application/json'}
@@ -129,8 +128,8 @@ class ResConfigSettings(models.TransientModel):
 
             g = requests.delete(f'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/{p_id}', cert=c, headers=headers)
             print(g.text)
-        # participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
-        #
+        participant_json = requests.get('https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/participant/GLN/5798009811578', cert=c, headers=headers).json()
+        print("hey")
         # b = [hey.get('OwnerService').get('ProfilingId') for hey in participant_json.get('ParticipantBindings', [{}])]
         # sec = requests.get(
         #     'https://registrationservice-demo.nemhandel.dk/nemhandel-pors/rest/business', cert=c,
