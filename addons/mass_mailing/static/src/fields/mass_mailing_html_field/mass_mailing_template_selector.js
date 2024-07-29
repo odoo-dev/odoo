@@ -67,9 +67,9 @@ export class MassMailingTemplateSelector extends Component {
             themes: [],
         });
         this.orm = useService("orm");
-        let allTemplates;
+        this.action = useService("action");
         onWillStart(async () => {
-            [allTemplates, this.state.themes] = await Promise.all([
+            [this.allTemplates, this.state.themes] = await Promise.all([
                 this.loadTemplates(),
                 this.loadTheme(),
             ]);
@@ -77,7 +77,7 @@ export class MassMailingTemplateSelector extends Component {
 
         useEffect(
             (mailingModelId) => {
-                this.state.templates = allTemplates.filter(
+                this.state.templates = this.allTemplates.filter(
                     (template) => template.modelId === mailingModelId
                 );
             },
@@ -201,5 +201,16 @@ export class MassMailingTemplateSelector extends Component {
         initializeDesignTabCss($newLayout);
 
         return $newLayout[0].outerHTML;
+    }
+
+    async deleteTemplate(templateId) {
+        const action = await this.orm.call("mailing.mailing", "action_remove_favorite", [
+            templateId,
+        ]);
+        this.action.doAction(action);
+        this.allTemplates = this.allTemplates.filter((template) => template.id !== templateId);
+        this.state.templates = this.state.templates.filter(
+            (template) => template.id !== templateId
+        );
     }
 }
