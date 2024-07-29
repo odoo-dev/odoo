@@ -284,7 +284,6 @@ export class MassMailingHtmlField extends HtmlField {
                 doc.body.append(editable);
                 editor.attachTo(editable);
 
-                // todo: make it work
                 // todo: should this be in its own plugin? DRAG BUILDING BLOCKS HERE
                 const subEditable = this.editor.editable.querySelector(".o_editable");
                 if (subEditable?.getAttribute("data-editor-message") === null) {
