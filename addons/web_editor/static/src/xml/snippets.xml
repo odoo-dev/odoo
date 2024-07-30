@@ -139,8 +139,8 @@
         <div id="oe_snippets" t-ref="snippets-menu" t-on-mousedown="_onMouseDown">
             <div class="o_we_website_top_actions">
                 <div class="o_we_external_history_buttons d-flex">
-                    <button type="button" t-on-click="_onUndo" class="btn btn-secondary fa fa-undo" t-att-disabled="!state.canUndo"/>
-                    <button type="button" t-on-click="_onRedo" class="btn btn-secondary fa fa-repeat" t-att-disabled="!state.canRedo"/>
+                    <button type="button" t-on-click="_onUndo" class="btn btn-secondary fa fa-undo" t-att-disabled="!this.canUndo"/>
+                    <button type="button" t-on-click="_onRedo" class="btn btn-secondary fa fa-repeat" t-att-disabled="!this.canRedo"/>
                 </div>
                 <form class="ms-auto d-flex">
                     <button type="button" t-on-click="_onDiscardClick" class="btn btn-secondary" data-action="cancel" title="Tip: Esc to preview" accesskey="j">Discard</button>
