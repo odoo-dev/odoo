@@ -2,7 +2,7 @@ import { htmlField, HtmlField } from "@html_editor/fields/html_field";
 import { EventBus, onWillStart, reactive, useState, useSubEnv } from "@odoo/owl";
 import { getBundle, LazyComponent, loadBundle } from "@web/core/assets";
 import { registry } from "@web/core/registry";
-import { Deferred, Mutex } from "@web/core/utils/concurrency";
+import { Mutex } from "@web/core/utils/concurrency";
 import weUtils from "@web_editor/js/common/utils";
 import { MassMailingTemplateSelector, switchImages } from "./mass_mailing_template_selector";
 
@@ -29,6 +29,10 @@ export class MassMailingHtmlField extends HtmlField {
         this.fieldConfig = reactive({
             selectedTheme: null,
             $scrollable: null,
+        });
+        this.historyState = reactive({
+            canUndo: false,
+            canRedo: false,
         });
 
         useSubEnv({
@@ -78,6 +82,13 @@ export class MassMailingHtmlField extends HtmlField {
                 },
                 state: {
                     toolbarProps: {},
+                },
+                historyState: this.historyState,
+                undo: () => {
+                    editor.dispatch("HISTORY_UNDO");
+                },
+                redo: () => {
+                    editor.dispatch("HISTORY_REDO");
                 },
                 odooEditor: {
                     get document() {
@@ -248,6 +259,17 @@ export class MassMailingHtmlField extends HtmlField {
             },
             // copyCss: true,
         };
+    }
+
+    getConfig() {
+        const config = super.getConfig(...arguments);
+        config.onChange = () => {
+            Object.assign(this.wysiwygState, {
+                canUndo: this.editor.shared.canUndo(),
+                canRedo: this.editor.shared.canRedo(),
+            });
+        };
+        return config;
     }
 }
 
