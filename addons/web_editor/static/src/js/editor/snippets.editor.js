@@ -4691,16 +4691,14 @@ class SnippetsMenu extends Component {
         ) {
             return;
         }
-        this.state.showToolbar = !(!range ||
-            // todo: adapt iframe-editor-wrapper as we removed the class
-            !$currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper').length ||
-            closestElement(selection.anchorNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') ||
-            closestElement(selection.focusNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') ||
-            (e && $(e.target).closest('.fa, img').length ||
-            this.options.wysiwyg.lastMediaClicked && $(this.options.wysiwyg.lastMediaClicked).is('.fa, img')) ||
-            (this.options.wysiwyg.lastElement && !this.options.wysiwyg.lastElement.isContentEditable)
-        );
-        const isInsideTD = !!(
+        this.state.showToolbar = Boolean(range &&
+            $currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper').length &&
+            !closestElement(selection.anchorNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') &&
+            !closestElement(selection.focusNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-source-sha])') &&
+            !(e && $(e.target).closest('.fa, img').length) &&
+            !(this.options.wysiwyg.lastMediaClicked && $(this.options.wysiwyg.lastMediaClicked).is('.fa, img')) &&
+            !(this.options.wysiwyg.lastElement && !this.options.wysiwyg.lastElement.isContentEditable));
+        const isInsideTD = Boolean(
             range &&
             $(range.startContainer).closest('.o_editable td').length &&
             $(range.endContainer).closest('.o_editable td').length
