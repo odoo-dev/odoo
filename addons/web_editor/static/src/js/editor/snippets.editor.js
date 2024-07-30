@@ -1878,6 +1878,8 @@ class SnippetsMenu extends Component {
             canRedo: false,
         });
 
+        this.historyState = useState(this.props.options.wysiwyg.historyState);
+
         this.snippets = useState(new Map());
 
         this.snippetsMenuRef = useRef("snippets-menu");
@@ -2007,6 +2009,15 @@ class SnippetsMenu extends Component {
     get hasSnippetGroups() {
         return Array.from(this.snippets.values()).some(snippet => snippet.snippetGroup);
     }
+
+    get canUndo() {
+        return this.state.canUndo || this.historyState.canUndo;
+    }
+
+    get canRedo() {
+        return this.state.canRedo || this.historyState.canRedo;
+    }
+
     _createTooltip($el, title, selector = false) {
         return new Tooltip($el, {
             title: title,
