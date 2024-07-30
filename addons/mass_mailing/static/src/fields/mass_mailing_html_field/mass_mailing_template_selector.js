@@ -63,25 +63,26 @@ export class MassMailingTemplateSelector extends Component {
     };
     setup() {
         this.state = useState({
+            allTemplates: [],
             templates: [],
             themes: [],
         });
         this.orm = useService("orm");
         this.action = useService("action");
         onWillStart(async () => {
-            [this.allTemplates, this.state.themes] = await Promise.all([
+            [this.state.allTemplates, this.state.themes] = await Promise.all([
                 this.loadTemplates(),
                 this.loadTheme(),
             ]);
         });
 
         useEffect(
-            (mailingModelId) => {
-                this.state.templates = this.allTemplates.filter(
+            (allTemplates, mailingModelId) => {
+                this.state.templates = allTemplates.filter(
                     (template) => template.modelId === mailingModelId
                 );
             },
-            () => [this.props.mailingModelId]
+            () => [this.state.allTemplates, this.props.mailingModelId]
         );
     }
 
@@ -208,8 +209,7 @@ export class MassMailingTemplateSelector extends Component {
             templateId,
         ]);
         this.action.doAction(action);
-        this.allTemplates = this.allTemplates.filter((template) => template.id !== templateId);
-        this.state.templates = this.state.templates.filter(
+        this.state.allTemplates = this.state.allTemplates.filter(
             (template) => template.id !== templateId
         );
     }
