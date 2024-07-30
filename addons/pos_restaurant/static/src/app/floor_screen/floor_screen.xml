@@ -28,7 +28,7 @@
                     </button>
                     <div class="d-flex gap-1 p-1 rounded-3 bg-200">
                         <t t-if="hasSelectedTable">
-                            <span class="mx-2 align-self-center text-action text-uppercase smaller fw-bolder">Table <t t-esc="firstSelectedTable.name" /></span>
+                            <span class="mx-2 align-self-center text-action text-uppercase smaller fw-bolder">Table <t t-esc="firstSelectedTable.table_number" /></span>
                             <button t-attf-class="{{editButtonClass}}" t-on-click.stop="changeSeatsNum" t-att-disabled="!hasSelectedTable">
                                 <i class="fa fa-user fa-fw" role="img" aria-label="Seats" title="Seats" />
                             </button>
