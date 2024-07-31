@@ -4,12 +4,21 @@ import { _t } from "@web/core/l10n/translation";
 import snippetsEditor from "@web_editor/js/editor/snippets.editor";
 import { MassMailingMobilePreviewDialog } from "../../js/mass_mailing_mobile_preview";
 import { markup, useEffect, useState } from "@odoo/owl";
+import { Toolbar } from "@html_editor/main/toolbar/toolbar";
 
 export class MassMailingSnippetsMenu extends snippetsEditor.SnippetsMenu {
     static tabs = Object.assign({}, snippetsEditor.SnippetsMenu.tabs, {
         DESIGN: "design",
     });
     static optionsTabStructure = [["design-options", _t("Design Options")]];
+    static props = {
+        ...snippetsEditor.SnippetsMenu.props,
+        toolbarInfos: { type: Object, optional: true },
+    };
+    static components = {
+        ...snippetsEditor.SnippetsMenu.components,
+        Toolbar,
+    };
 
     static template = "mass_mailing.SnippetsMenu";
 

@@ -39,7 +39,7 @@ export class FormatPlugin extends Plugin {
         ],
         toolbarGroup: [
             {
-                id: "decoration",
+                id: "style",
                 sequence: 20,
                 buttons: [
                     {

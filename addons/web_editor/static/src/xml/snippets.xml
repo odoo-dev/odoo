@@ -223,11 +223,11 @@
                         <div id="removeFormat" data-call="removeFormat" title="Remove format" class="btn fa fa-eraser fa-fw"></div>
                     </we-title>
                     <div class="o_we_toolbar_wrapper" t-ref="toolbar-wrapper" style="display: contents;">
-                        <Toolbar t-props="options.wysiwyg.state.toolbarProps">
+                        <LegacyToolbar t-props="options.wysiwyg.state.toolbarProps">
                             <t t-if="options.wysiwyg.state.linkToolProps">
                                 <LinkTools t-props="options.wysiwyg.state.linkToolProps"/>
                             </t>
-                        </Toolbar>
+                        </LegacyToolbar>
                     </div>
                 </we-customizeblock-options>
                 <t t-call="web_editor.toolbar.table-options"/>

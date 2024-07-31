@@ -15,15 +15,9 @@ export class ToolbarPlugin extends Plugin {
         this.buttonGroups = this.resources.toolbarGroup.sort((a, b) => a.sequence - b.sequence);
         this.overlay = this.shared.createOverlay(Toolbar, { position: "top-start" });
         this.state = reactive({
-            buttonsActiveState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsDisabledState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, false])
-            ),
-            buttonsAvailableState: this.buttonGroups.flatMap((g) =>
-                g.buttons.map((b) => [b.id, true])
-            ),
+            buttonsActiveState: {},
+            buttonsDisabledState: {},
+            buttonsAvailableState: {},
             namespace: undefined,
         });
         this.updateSelection = null;
